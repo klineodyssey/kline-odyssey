@@ -29,7 +29,8 @@ import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
 import {create11520CombatFx} from './combat-fx-runtime.mjs';
 import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D} from './xyz-map-navigation-runtime.mjs';
 import {warpC,resolveCMode} from '../controls/nonlinear-controls.mjs';
-import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs';
+import {fetchPublicMarketObservations,PUBLIC_MARKET_QUOTE_SOURCE,publicMarketQuoteSetStatus,
+  publicMarketFailureObservations} from './public-market-quotes.mjs';
 import {createJourneyTutorial} from './world-runtime.mjs';
 import {trainingMonsterSnapshot} from './world-runtime.mjs';
 import {createTrainingMemory} from './market-life-runtime.mjs';
@@ -96,7 +97,7 @@ S.kaios=playerStore.snapshot().kaios;
 setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elapsedMs:10000})},10000);
 function playerProgressSnapshot(){const p=playerLife.activePlayer();return {playerId:p.playerId,xp:p.xp,level:p.level,engineXp:p.engineXp,engineLevel:p.engineLevel,nextLevelXp:p.level>=10?null:25*p.level*p.level,nextEngineXp:p.engineLevel>=10?null:20*p.engineLevel*p.engineLevel}}
 const observeWorldFeedback=createWorldFeedbackObserver(emit11520WorldFeedback);
-let quotePending=false,publicQuoteAttempted=false,publicObservations={};
+let quotePending=false,publicQuoteAttempted=false,publicObservations=publicMarketQuoteSetStatus(null,{symbols:MARKETS}).rows;
 let progressCache=playerLife.gameplayProfile(),progressKey='',musicHoldUntil=0,lastCombatAt=0,explorationMeters=0,lastExplorationPosition={...S.xyz};
 function showJourneyRecovery(){
   if($('#journeyRecover')){$('#sheet').classList.add('open');return}
@@ -173,13 +174,14 @@ async function quotes(){
   if(quotePending)return;quotePending=true;
   try{
     publicObservations=await fetchPublicMarketObservations({symbols:MARKETS});
+    const admission=execution.updatePublicMarketQuality?.(publicObservations,{now:Date.now()})||publicMarketQuoteSetStatus(publicObservations,{symbols:MARKETS});
     const rows=Object.values(publicObservations),next=Object.fromEntries(rows.map(r=>[r.market,r.price]));
-    if(rows.every(r=>!r.stale)){
+    if(admission.allowsPriceTransitions&&rows.every(r=>!r.stale)){
       updateKMarketReference(world,next,Math.min(...rows.map(r=>r.updatedAt)));Object.assign(S.quotes,next);
       if(!isTestnet())for(const r of rows){const result=execution.observe({market:r.market,price:r.price,observedAt:r.updatedAt,sequence:r.sequence,source:r.source,now:Date.now()});if(result.ok)recordSimulationEvents(result.events)}
     }else world.kSpace.quoteFailed=true;
     syncSimulationPositions();if(pending&&!isTestnet())paintOrderPreview();
-  }catch{world.kSpace.quoteFailed=true}
+  }catch{const now=Date.now();publicObservations=publicMarketFailureObservations({symbols:MARKETS,now});execution.updatePublicMarketQuality?.(publicObservations,{now});world.kSpace.quoteFailed=true}
   finally{quotePending=false;publicQuoteAttempted=true;if(pending&&!isTestnet())paintOrderPreview();renderAxes()}
 }
 function syncMarketKLabels(){
@@ -199,7 +201,11 @@ function syncMarketKLabels(){
   const mode=resolveCMode(combatSelection().c),simulationLocal=execution.mode==='SIMULATION'&&Object.values(execution.snapshot().observations).some(q=>q.source==='K11520_DETERMINISTIC_SIMULATION'),label=mode.mode==='MONSTER_MODE'?'取經 / MONSTER':mode.canTrade?'FREE TRADE · 0 FEE':'HIGH C LOCKED';
   $('#feed').textContent=`${label} · ${market.status==='LIVE'?'參考價 / SIM':'MARKET DATA STALE'}${simulationLocal?' · SIM LOCAL':''}`;
   $('#feed').title='V1 · |C| 0.001–1 · SIMULATION ONLY · >1C production locked · 免費 REST 參考行情，非低延遲結算 Oracle';
-  globalThis.__K11520_FREE_ORACLE__=Object.fromEntries(Object.entries(publicObservations).map(([m,o])=>[m,publicObservationStatus(o)]));
+  const selectedMarket=market.markets.find(row=>row.axis===S.axis)||market.markets[0],feedState=publicMarketQuoteSetStatus(publicObservations,{symbols:MARKETS}),selectedFeed=feedState.rows[selectedMarket?.symbol];
+  const feedSource=selectedFeed?.source===PUBLIC_MARKET_QUOTE_SOURCE.id?'BINANCE FREE':'UNAVAILABLE',feedTime=Number.isSafeInteger(selectedFeed?.updatedAt)?`${new Date(selectedFeed.updatedAt).toISOString().slice(11,19)}Z`:'--',feedFailure=selectedFeed?.failure?'YES':'NO';
+  $('#feed').textContent=`FREE ${feedState.quality} | ${selectedMarket?.symbol||'NO MARKET'} | SRC ${feedSource} | TIME ${feedTime} | STALE ${selectedFeed?.stale?'YES':'NO'} | FAIL ${feedFailure}${simulationLocal?' | SIM LOCAL':''}`;
+  $('#feed').title=MARKETS.map(symbol=>{const row=feedState.rows[symbol];return `${symbol} SOURCE=${row.source||'UNAVAILABLE'} TIME=${Number.isSafeInteger(row.updatedAt)?new Date(row.updatedAt).toISOString():'UNAVAILABLE'} STATUS=${row.quality} FAILURE=${row.failure||'NONE'}`}).join(' | ')+` | DIVERGENCE=${feedState.divergenceStatus} | SIMULATION ONLY | NO SETTLEMENT AUTHORITY`;
+  globalThis.__K11520_FREE_ORACLE__=feedState.rows;
   globalThis.__K11520_MARKET_K__=market;
 }
 function controlState(){return globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__||null}
@@ -414,7 +420,7 @@ globalThis.__K11520_EXECUTION__=Object.freeze({snapshot:()=>execution.snapshot()
 function tickSimulation(){
   if(execution.mode!=='SIMULATION'||playerLifeSwitching)return;
   if(!publicQuoteAttempted&&!Object.values(execution.snapshot().observations).some(q=>q.source==='K11520_DETERMINISTIC_SIMULATION'))return;
-  const result=execution.tick();if(!result.ok){toast(result.reason);return}
+  const result=execution.tick();if(!result.ok){if(result.priceTransitions!==false)toast(result.reason);renderAxes();return}
   recordSimulationEvents(result.events);syncSimulationPositions();refreshSimulationSheet();renderAxes();
   if(pending)void paintOrderPreview({background:true});
 }

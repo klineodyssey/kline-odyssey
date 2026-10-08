@@ -24,14 +24,42 @@ export const PUBLIC_MARKET_QUOTE_SOURCE=Object.freeze({
 });
 
 export const FREE_ORACLE_MAX_AGE_MS=15000;
+export const PUBLIC_MARKET_SYMBOLS=Object.freeze(['BTCUSDT','ETHUSDT','BNBUSDT']);
+export const PUBLIC_QUOTE_QUALITY=Object.freeze({UNKNOWN:'UNKNOWN',FRESH:'FRESH',STALE:'STALE',FAILED:'FAILED'});
 // Public REST references are simulation/world inputs, not authenticated USD
 // settlement reports. Never manufacture provider time from receipt time.
 export function publicObservationStatus(observation,now=Date.now()){
   const age=observation?now-observation.updatedAt:null;
-  const stale=!observation||!Number.isFinite(age)||age<0||age>FREE_ORACLE_MAX_AGE_MS;
+  const unknown=!observation||observation?.quality===PUBLIC_QUOTE_QUALITY.UNKNOWN,failed=Boolean(observation?.failure);
+  const invalid=!unknown&&!failed&&(observation?.source!==PUBLIC_MARKET_QUOTE_SOURCE.id
+    ||!Number.isFinite(Number(observation?.price))||Number(observation?.price)<=0
+    ||!Number.isSafeInteger(Number(observation?.updatedAt))||Number(observation?.updatedAt)<=0
+    ||!Number.isSafeInteger(Number(observation?.sequence))||Number(observation?.sequence)<0);
+  const stale=unknown||failed||invalid||!Number.isFinite(age)||age<0||age>FREE_ORACLE_MAX_AGE_MS;
+  const quality=unknown?PUBLIC_QUOTE_QUALITY.UNKNOWN:(failed||invalid)?PUBLIC_QUOTE_QUALITY.FAILED:stale?PUBLIC_QUOTE_QUALITY.STALE:PUBLIC_QUOTE_QUALITY.FRESH;
   return {...observation,age,stale,staleThreshold:FREE_ORACLE_MAX_AGE_MS,
-    sourceStatus:stale?'MARKET DATA STALE':'REFERENCE_FRESH',fallbackStatus:'NONE_FAIL_CLOSED',
-    settlementAuthority:false,quoteCurrency:'USDT',subSecond:false};
+    quality,allowsPriceTransitions:quality===PUBLIC_QUOTE_QUALITY.FRESH,
+    sourceStatus:quality===PUBLIC_QUOTE_QUALITY.FRESH?'REFERENCE_FRESH':quality==='FAILED'?'MARKET_DATA_FAILED':quality==='UNKNOWN'?'MARKET_DATA_UNKNOWN':'MARKET_DATA_STALE',
+    failure:failed?String(observation.failure):invalid?'INVALID_PROVIDER_OBSERVATION':null,fallbackStatus:'NONE_FAIL_CLOSED',
+    divergenceStatus:'NOT_VERIFIED_SINGLE_SOURCE',settlementAuthority:false,quoteCurrency:'USDT',subSecond:false};
+}
+
+export function publicMarketQuoteSetStatus(observations,{symbols=PUBLIC_MARKET_SYMBOLS,now=Date.now()}={}){
+  const expected=normalizeSymbols(symbols),rows=Object.fromEntries(expected.map(market=>[market,publicObservationStatus(observations?.[market],now)]));
+  const qualities=Object.values(rows).map(row=>row.quality);
+  const quality=qualities.includes(PUBLIC_QUOTE_QUALITY.FAILED)?PUBLIC_QUOTE_QUALITY.FAILED:
+    qualities.includes(PUBLIC_QUOTE_QUALITY.UNKNOWN)?PUBLIC_QUOTE_QUALITY.UNKNOWN:
+    qualities.includes(PUBLIC_QUOTE_QUALITY.STALE)?PUBLIC_QUOTE_QUALITY.STALE:PUBLIC_QUOTE_QUALITY.FRESH;
+  return Object.freeze({quality,allowsPriceTransitions:quality===PUBLIC_QUOTE_QUALITY.FRESH,
+    requiredSymbols:Object.freeze(expected),rows:Object.freeze(rows),
+    divergenceStatus:'NOT_VERIFIED_SINGLE_SOURCE',settlementAuthority:false});
+}
+
+export function publicMarketFailureObservations({symbols=PUBLIC_MARKET_SYMBOLS,now=Date.now(),failure='PUBLIC_REFERENCE_UNAVAILABLE'}={}){
+  const receivedAt=Number(now),code=String(failure||'PUBLIC_REFERENCE_UNAVAILABLE');
+  return Object.freeze(Object.fromEntries(normalizeSymbols(symbols).map(market=>[market,publicObservationStatus({
+    market,price:null,updatedAt:null,sequence:null,receivedAt,source:PUBLIC_MARKET_QUOTE_SOURCE.id,failure:code
+  },receivedAt)])));
 }
 export async function fetchPublicMarketObservations({symbols,fetchImpl=globalThis.fetch,now=Date.now,timeoutMs=8000}={}){
   const expected=normalizeSymbols(symbols),controller=new AbortController();

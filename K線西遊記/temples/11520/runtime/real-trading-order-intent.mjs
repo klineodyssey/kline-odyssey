@@ -14,7 +14,8 @@ SOURCE_OF_TRUTH: TRUE
 PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fixed axis/market bindings.
 */
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
-import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
+import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE,PUBLIC_MARKET_SYMBOLS,
+  PUBLIC_MARKET_QUOTE_SOURCE,publicMarketQuoteSetStatus} from './public-market-quotes.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
   observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot} from './kgen-margin-runtime.mjs';
@@ -87,12 +88,25 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   if(!ledger||typeof ledger!=='object')throw new Error('EXISTING_LEDGER_REQUIRED');
   const run=(fn,mutating=false)=>{try{if(mutating)options.beforeMutation?.();const result=fn();if(result.ok&&mutating)options.afterMutation?.();return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){return executionFailure(error)}};
   const fallback=options.simulationFallback===true;
+  let publicMarketQuality=publicMarketQuoteSetStatus(null,{symbols:PUBLIC_MARKET_SYMBOLS});
+  const updatePublicMarketQuality=(observations,{now=Date.now()}={})=>{
+    publicMarketQuality=publicMarketQuoteSetStatus(observations,{symbols:PUBLIC_MARKET_SYMBOLS,now});
+    return publicMarketQuality;
+  };
+  const currentPublicMarketQuality=now=>publicMarketQuoteSetStatus(publicMarketQuality.rows,{symbols:PUBLIC_MARKET_SYMBOLS,now});
+  const priceTransitionBlock=now=>{
+    if(!fallback)return null;
+    const state=currentPublicMarketQuality(now);
+    if(state.allowsPriceTransitions)return null;
+    return {ok:false,code:'ORACLE_STALE',reason:`PUBLIC_QUOTE_${state.quality}`,quoteQuality:state.quality,
+      priceTransitions:false,events:[],executionMode:'SIMULATION'};
+  };
   const quote=(market,{now=Date.now(),book=simulationSnapshot(ledger)}={})=>{
     const previous=book.observations[market],pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING'),open=book.positions.filter(p=>p.market===market&&p.status==='OPEN'),active=pending.length>0||open.length>0;
     const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE);
     if((!previous&&active)||(pinned&&previous?.source!==SIMULATION_PRICE_SOURCE))throw new Error('SIMULATION_RECOVERY_REQUIRED');
     if(previous&&(!Number.isFinite(previous.price)||previous.price<=0||!Number.isSafeInteger(previous.at)||previous.at<0))throw new Error(active?'SIMULATION_RECOVERY_REQUIRED':'INVALID_SIMULATION_SOURCE');
-    if(fallback&&(previous?.source===SIMULATION_PRICE_SOURCE||!previous||now-previous.at>15000)){
+    if(fallback&&previous?.source===SIMULATION_PRICE_SOURCE){
       try{return deterministicSimulationObservation({market,previous,now})}catch(error){if(active)throw new Error('SIMULATION_RECOVERY_REQUIRED');throw error}
     }
     return previous;
@@ -102,7 +116,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     if(!selected||selected.source!==SIMULATION_PRICE_SOURCE||selected.at===book.observations[market]?.at)return {ok:true,events:[]};
     return observeSimulationPrice(target,{...selected,observedAt:selected.at,now,productV1:options.productV1===true});
   };
-  const preview=(input,{now=Date.now()}={})=>run(()=>{
+  const preview=(input,{now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
     if(options.productV1)requireV1TradingC(input.c);
     const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
     if(!selected||now<selected.at||now-selected.at>15000)throw new Error('STALE_PRICE');
@@ -115,30 +129,34 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       currentPrice:selected.price,priceObservedAt:selected.at,priceSource:selected.source||'SIMULATION_OBSERVATION',simulationOnly:true,executionMode:'SIMULATION'};
   });
   return Object.freeze({name:'SIMULATION_ADAPTER',mode:'SIMULATION',enabled:true,preview,quote,
-    submit:(input,{now=Date.now()}={})=>run(()=>{
+    updatePublicMarketQuality,publicMarketStatus:({now=Date.now()}={})=>currentPublicMarketQuality(now),
+    submit:(input,{now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
       const checked=preview(input,{now});if(!checked.ok)return checked;
       const draft=structuredClone(ledger),observation=applyQuote(draft,checked.market,now);if(!observation.ok)return observation;
       const result=placeSimulationOrder(draft,checked.intent);
       if(result.ok)Object.assign(ledger,draft);
       return result.ok?{...result,status:'PENDING_TRIGGER'}:result;
     },true),
-    observe:(observation)=>run(()=>{
+    observe:(observation)=>priceTransitionBlock(observation?.now??Date.now())||run(()=>{
       // Once local fallback is selected, public recovery cannot jump a pending
       // order/open position to another source, including after wallet reload.
       if(fallback){
+        const expected=currentPublicMarketQuality(observation?.now??Date.now()).rows[observation.market];
+        if(observation.source!==PUBLIC_MARKET_QUOTE_SOURCE.id||expected?.source!==observation.source||
+          expected?.updatedAt!==observation.observedAt||expected?.sequence!==observation.sequence||expected?.price!==observation.price)return {ok:false,reason:'PUBLIC_QUOTE_ADMISSION_MISMATCH'};
         const book=simulationSnapshot(ledger);quote(observation.market,{now:observation.now??Date.now(),book});
         if(book.observations[observation.market]?.source===SIMULATION_PRICE_SOURCE)return {ok:true,ignored:true,events:[]};
       }
       if(observation.source===SIMULATION_PRICE_SOURCE)return {ok:false,reason:'SIMULATION_SOURCE_REQUIRES_LOCAL_CLOCK'};
       return observeSimulationPrice(ledger,{...observation,productV1:options.productV1===true});
     },true),
-    tick:({now=Date.now()}={})=>run(()=>{
+    tick:({now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
       if(!fallback)return {ok:true,events:[]};
       const draft=structuredClone(ledger),events=[];
       for(const market of ['BTCUSDT','ETHUSDT','BNBUSDT']){const r=applyQuote(draft,market,now);if(!r.ok)return r;events.push(...r.events)}
       Object.assign(ledger,draft);return {ok:true,events};
     },true),
-    close:(positionId,{now=Date.now()}={})=>run(()=>{
+    close:(positionId,{now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
       const draft=structuredClone(ledger),position=simulationSnapshot(draft).positions.find(p=>p.positionId===positionId);
       if(position?.status==='OPEN'){const advanced=applyQuote(draft,position.market,now);if(!advanced.ok)return advanced;
         const settled=advanced.events.find(r=>r.positionId===positionId&&r.kind==='SETTLEMENT');if(settled){Object.assign(ledger,draft);return {ok:true,receipt:settled};}}
