@@ -1,15 +1,15 @@
 /* KGEN_META
 VERSION: 2.9.0
-REVISION: 2026-10-06.MARKET-CARD-NODE-RETENTION
+REVISION: 2026-10-09.PUBLIC-SIM-FEED-ADMISSION
 PRODUCT_CONTEXT: V2.9.5
 STATUS: ACTIVE
-LAST_UPDATED: 2026-10-06
-UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: cf2ffb47c3e71e444935ef6151adc7f9d6208ca4
-TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Retain canonical market-card nodes and their existing presentation decorations during quote and simulation refreshes.
-ANCESTOR: K線西遊記/temples/11520/runtime/game-5d-main.mjs @ cf2ffb47c3e71e444935ef6151adc7f9d6208ca4
+LAST_UPDATED: 2026-10-09
+UPDATED_BY: Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09
+REVIEWED_BY: PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge
+SOURCE_COMMIT: b39c16e5cc5f2409590d62fa9a53b5ceb3750300
+TASK_ID: K11520-PUBLIC-FREE-SIM-FEED-20261009
+CHANGE_REASON: Surface free BTC/ETH/BNB source-time-quality labels and pass only admitted fresh observations to the existing simulation adapter.
+ANCESTOR: K線西遊記/temples/11520/runtime/game-5d-main.mjs @ c35320c6f95ea9411fd9e5f3ad295599f029a3ae
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collision-constrained physical body, plane-aware maps, canonical XYZ world/entity navigation and 3D Life visuals. Signed-C rendering is delegated to its canonical runtime; game state exposes one direct canonical trade-side setter.
 */

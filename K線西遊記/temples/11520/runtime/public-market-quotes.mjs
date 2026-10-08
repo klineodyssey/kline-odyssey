@@ -1,15 +1,15 @@
 /* KGEN_META
 VERSION: 1.0.0
-REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+REVISION: 2026-10-09.PUBLIC-SIM-FEED-ADMISSION
 PRODUCT_CONTEXT: V2.9.5
 STATUS: ACTIVE
-LAST_UPDATED: 2026-10-06
-UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
-TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Add explicitly simulation-only deterministic observations while preserving raw public quote state and provenance.
-ANCESTOR: K線西遊記/temples/11520/runtime/public-market-quotes.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
+LAST_UPDATED: 2026-10-09
+UPDATED_BY: Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09
+REVIEWED_BY: PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge
+SOURCE_COMMIT: b39c16e5cc5f2409590d62fa9a53b5ceb3750300
+TASK_ID: K11520-PUBLIC-FREE-SIM-FEED-20261009
+CHANGE_REASON: Classify the complete free BTC/ETH/BNB quote set as UNKNOWN, FRESH, STALE or FAILED with exact source/time/failure provenance and no invented divergence quorum.
+ANCESTOR: K線西遊記/temples/11520/runtime/public-market-quotes.mjs @ c35320c6f95ea9411fd9e5f3ad295599f029a3ae
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Fetch validated, read-only 11520 public market reference quotes from Binance's market-data-only origin.
 */
