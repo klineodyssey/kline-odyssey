@@ -1,5 +1,57 @@
 # KGEN Organization V2.0 WorkQueue
 
+## KAIOS white-hole cargo escort demo — 2026-10-08
+
+- work_id / task_id: `KAIOS-CARGO-WHITEHOLE-ESCORT-001`; status:
+  `IMPLEMENTED_LOCAL_QA_PASS / PENDING_EXACT_HEAD_REVIEW_AND_CI`; priority: `M1`.
+- task_source_type: `HUMAN_DIRECT_WORK_ORDER`; task_source_actor: `human-primeforge`;
+  task_source_file: current conversation; task_source_commit:
+  `94932522401e94406c17c7b9e7593fdb351fe598`.
+- bounded owner: current Codex task under direct temporary engineering authorization;
+  this is not a new employee, Worker Registry identity, formal worker ACK, payroll
+  entitlement or reviewer appointment.
+- claim: `CLAIM-KAIOS-CARGO-WHITEHOLE-ESCORT-001-CODEX-20261008` on branch
+  `codex/kaios-cargo-whitehole-escort-001`; lease expires at Draft PR handoff or
+  `2026-10-10T23:59:59Z`, whichever occurs first.
+- scope: extend the existing 11520 Digital Ant / Player Courier runtime and mobile
+  shell with one playable, persistent `SIMULATION_ONLY` demo: 50,000 KAIOS cargo,
+  raw K origin `0.00012345`, raw K destination `0.00018921`, and a review-gated
+  10 KGEN simulated freight-revenue receivable. Reuse existing mission, cargo,
+  movement, combat, persistence and receipt owners; do not create a dispatcher,
+  token, ledger or Universe Runtime.
+- coordinate boundary: retain both raw decimals and Physics B4 metadata
+  (`alpha=1.2345` / `alpha=1.8921`) as a local simulation route only. Neither
+  decimal is registered in the current Universe Map. Under the explicit same
+  linear-K-axis / equal-other-XYZ model, `deltaK=0.00006576` gives
+  `1.496810990052 m`; label it only as a linear K-axis model distance, never
+  formal land routing, spherical arc, full flight length or main-universe
+  `12345 -> 18921` routing.
+- accounting boundary: cargo principal remains 50,000 KAIOS and is never trading
+  margin or loss collateral. The 10 KGEN fee is not paid automatically and is not
+  converted through the white-hole `1 KGEN -> 1000 KAIOS` supply-mass rule.
+  Trading/MARGIN/PNL stays owned by the existing `kgen-margin-runtime.mjs` ledger.
+- acceptance: repeated start/accept/reload/replay cannot duplicate cargo principal,
+  fee receivable or receipt; wrong destination, expiry and invalid state fail
+  closed; escort/duel choice remains playable; delivery requires actual local
+  movement and produces one receipt; 390x844 and 844x390 Chromium QA artifacts;
+  exact-head independent technical review.
+- #543 acceptance follow-up: the existing standard ATM path exposes local
+  destination receipt acceptance and permits a fresh second trip after an
+  uninsured delivery or an insured delivery whose simulation-only policy has no
+  open claim. Wrong receipt and replay fail closed/idempotently. Policy evidence
+  is archived; an eligible unresolved claim keeps the policy/reserve and blocks
+  reassignment across real page reload instead of inventing a refund or bypassing
+  the existing guard. Invalid persistence enters review-required fail-closed state.
+- prohibited: Mainnet, real-asset transfer, signer, Treasury, payment, deployment,
+  formal worker ACK, token creation, KUFO/KSHIP deployment, chain write, changes to
+  `tests/11520-browser-settlement.mjs`, or merge before parent integration ordering.
+- overlap: PR #506 owns candidate local writer/credit durability changes in the
+  same logistics files and must not be wholesale imported; PR #544 owns visual
+  shell candidates and its asset/UI files remain untouched.
+- output / handoff owner: existing
+  `K線西遊記/temples/11520/HANDOFF_CURRENT.md`; Draft PR required; merge held for
+  parent coordination with the separate #563 test-only readiness lane.
+
 ## KAIOS World Portal / shared audio — 2026-10-01
 
 - Task: KAIOS-PORTAL-AUDIO-20261001; IMPLEMENTED_LOCAL_QA_PASS / PENDING_EXACT_HEAD_CI_AND_SECOND_REVIEW; P0; owner codex-gm-01.

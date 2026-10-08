@@ -1,5 +1,21 @@
 # 11520 Universal Exchange V3.9
 
+## Standard ATM receipt loop candidate — 2026-10-08
+
+The existing Digital Ant ATM panel now exposes explicit simulation destination
+acceptance after `ARRIVED_AWAITING_RECEIPT`. Receipt evidence is deterministic,
+wrong destination/receipt requests fail closed, and replay returns the existing
+receipt without repeating accounting. Uninsured delivery can start a fresh trip.
+An insured delivery closes only when there is no eligible open claim: the local
+policy evidence is archived, the simulation reserve is released without refund
+or asset transfer, and a second trip can begin after state reload. An unresolved
+eligible claim deliberately retains the policy and reserve, so the existing
+`ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION` guard continues to block reassignment.
+The versioned Digital Ant envelope restores receipt, policy, reserve, incidents
+and resolution evidence after a real page reload. Invalid or mismatched storage
+enters `PERSISTENCE_REVIEW_REQUIRED` and cannot dispatch a replacement mission.
+This is local simulation lifecycle handling, not financial policy settlement.
+
 ## Cargo visual resource lifetime candidate — 2026-10-07
 
 Existing `runtime/life-visual-runtime.mjs` records the geometry/material resources
@@ -401,6 +417,36 @@ A complete trusted address indexer or archive-state proof is required for histor
 
 The first public work snapshot was observed on BSC block `116039099`. It records BNB `0.006`, KGEN `0`, KAIOS `0`, a valid Heart code/config read and an owner-unapproved KGEN acquisition scenario. The scenario is block-stamped evidence only: `broadcast_capability=ABSENT`, `live_trading=false`, `chain_write=false`. V3.5 separates the operational Core Heart Event Indexer from optional advanced transaction-graph analysis; no risk label is escalated without evidence.
 
+
+## White-hole cargo escort demo
+
+The game exposes one `WH 貨運` entry for
+`KAIOS-CARGO-WHITEHOLE-ESCORT-001`. The complete local flow creates a
+simulation customer request and quote, records a clearly labelled simulation
+review (never a formal Worker ACK), loads 50,000 KAIOS, lets the player choose
+escort or LONG/SHORT duel direction, advances the cargo through a local route,
+checks the exact destination and creates one persistent receipt.
+
+- Origin: exact raw K `0.00012345`, B4, alpha `1.2345`.
+- Destination: exact raw K `0.00018921`, B4, alpha `1.8921`.
+- Model distance: `1.496810990052 m` only under the declared same-linear-K-axis
+  and equal-other-XYZ assumptions. It is not a cadastral route, spherical arc,
+  complete flight path, or integer K12345/K18921 mapping.
+- Cargo principal: `50,000 KAIOS`, never revenue, trading margin or a source for
+  MARGIN/PNL losses.
+- Freight: `10 KGEN`, a review-gated simulated receivable after delivery. No
+  wallet debit, payment, credit, white-hole market conversion or chain write.
+- Persistence: repeated start/reload/receipt acceptance restores the same
+  mission and receipt; wrong destination, wrong position and expiry fail closed.
+  Digital Ant mission/receipt/policy/claim evidence uses revision-checked browser
+  persistence; malformed evidence, failed read-back or another-tab conflicts stop
+  every cargo mutation in `PERSISTENCE_REVIEW_REQUIRED` until a reviewed reload.
+
+Implementation stays in the existing Player Courier/logistics owner and mobile
+shell. Financial positions remain exclusively owned by
+`runtime/kgen-margin-runtime.mjs` and require separate KGEN margin. The current
+Universe Map remains unchanged, KAIOS is not redeployed, and KUFO/KSHIP are not
+deployed by this demo.
 
 ## NVIDIA GPU paper-market candidate
 

@@ -152,19 +152,35 @@ await page.screenshot({path:`${OUT}/11520-missile-physics-panel.png`});
 await page.locator('#sheetClose').click();
 
 await stage('home-delivery');
-// Browser-complete home delivery uses an explicitly QA-seeded local-game balance;
-// this never touches a provider, wallet balance or chain state.
-await page.evaluate(()=>{
-  const p=globalThis.__K11520_PRODUCT__.snapshot(),key=`k11520.player:${p.playerId}:k11520.local-product.v1:guest`,saved=JSON.parse(localStorage.getItem(key));
-  saved.progress.kaios=50;saved.progress.claimableKaios=0;localStorage.setItem(key,JSON.stringify(saved));
-});
+// The insured ATM mission above is intentionally persistent. Prove that a real
+// reload keeps its mission and policy instead of silently clearing player data,
+// then run the independent home-delivery scenario in a new browser context.
+const insuredAtmBeforeReload=await page.evaluate(()=>{const s=globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot();return{missionId:s.mission?.missionId,policyId:s.cargoRisk?.policy?.policyId,policyMode:s.cargoRisk?.policy?.mode}});
 await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
 await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
 await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.status==='ACTIVE',null,{timeout:3000});
 assert.equal((await page.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active())).missionId,courierMission.missionId,'Player Courier mission must survive reload without resetting its timer');
+const insuredAtmAfterReload=await page.evaluate(()=>{const s=globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot();return{missionId:s.mission?.missionId,policyId:s.cargoRisk?.policy?.policyId,policyMode:s.cargoRisk?.policy?.mode}});
+assert.deepEqual(insuredAtmAfterReload,insuredAtmBeforeReload,'insured ATM mission and policy must survive reload without bypassing active-mission guards');
+const isolatedProductKey=await page.evaluate(()=>{const p=globalThis.__K11520_PRODUCT__.snapshot();return`k11520.player:${p.playerId}:k11520.local-product.v1:guest`}),persistedStorageState=await page.context().storageState(),isolatedStorageState=structuredClone(persistedStorageState),courierContinuationState=structuredClone(persistedStorageState);
+let isolatedProductSeeded=false;
+for(const origin of isolatedStorageState.origins){origin.localStorage=origin.localStorage.filter(entry=>!['K11520_DIGITAL_ANT_LOGISTICS_V1','K11520_PLAYER_COURIER'].includes(entry.name)).map(entry=>{if(entry.name!==isolatedProductKey)return entry;const saved=JSON.parse(entry.value);saved.progress.kaios=50;saved.progress.claimableKaios=0;isolatedProductSeeded=true;return{...entry,value:JSON.stringify(saved)}})}
+let courierContinuationSeeded=false;
+for(const origin of courierContinuationState.origins)origin.localStorage=origin.localStorage.filter(entry=>entry.name!=='K11520_DIGITAL_ANT_LOGISTICS_V1').map(entry=>{if(entry.name!=='K11520_PLAYER_COURIER')return entry;const saved=JSON.parse(entry.value),mission=saved.missions?.[courierMission.missionId];if(!mission)return entry;mission.bandit.attackWindowStartsAt=Date.now()+600000;mission.bandit.lastRaidAt=0;courierContinuationSeeded=true;return{...entry,value:JSON.stringify(saved)}});
+assert.equal(isolatedProductSeeded,true,'isolated home-delivery context requires an explicit local-game product seed');
+assert.equal(courierContinuationSeeded,true,'Courier continuation context requires the copied active mission');
+await page.close();
+const homeDeliveryContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,storageState:isolatedStorageState});
+page=await homeDeliveryContext.newPage();page.on('pageerror',e=>errors.push(String(e)));
+await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1800);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
+await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
+assert.equal((await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot())).mission,null,'home-delivery QA must start in isolated browser storage instead of deleting the persisted insured ATM mission');
+// Browser-complete home delivery uses an explicitly QA-seeded local-game balance;
+// this never touches a provider, wallet balance or chain state.
 const deliveryKaiosBefore=await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios);
-await page.locator('#homeDeliveryButton').click();await page.locator('#courierOpenLogistics').click();await page.locator('#homeRequest').waitFor({state:'visible'});
+await page.locator('#k11520UtilityMaster').click();await page.locator('#homeDeliveryButton').click();await page.locator('#homeRequest').waitFor({state:'visible'});
 await page.locator('#homeAmount').fill('1000');await page.locator('#homeMovementC').selectOption('1');await page.locator('#homeRequest').click();
 const assignedHome=await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot());
 assert.equal(assignedHome.mission.serviceType,'PLAYER_HOME_CASH_DELIVERY');assert.equal(assignedHome.finance.earned,0);assert.equal(assignedHome.payroll.paid,0);
@@ -173,17 +189,22 @@ await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.s
 assert.equal((await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot())).payroll.paid,0,'arrival alone must not pay salary');
 await page.locator('#sheetClose').click();await page.evaluate(()=>document.getElementById('playerLifeOpen')?.click());await page.locator('#playerLifeHomeNav').click();
 await page.waitForFunction(()=>{const p=globalThis.__K11520_PRODUCT__.snapshot(),x=globalThis.__K11520_WORLD_COORDS__?.physical,h=p.home?.xyz;return h&&Math.hypot(x.x-h.x,x.y-h.y,x.z-h.z)<=2.5},null,{timeout:10000});
-await page.locator('#homeDeliveryButton').click();await page.locator('#courierOpenLogistics').click();await page.locator('#homeAccept').click();
+await page.locator('#homeDeliveryButton').click();await page.locator('#homeAccept').click();
 await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.mission?.status==='DELIVERED',null,{timeout:3000});
 const deliveredHome=await page.evaluate(()=>({ant:globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot(),player:globalThis.__K11520_PRODUCT__.snapshot()}));
 assert.equal(deliveredHome.ant.mission.accounting.cargoPrincipalRecognizedAsRevenue,false);assert.ok(deliveredHome.ant.mission.accounting.freightRevenue>0);assert.ok(deliveredHome.ant.payroll.paid>0);assert.equal(deliveredHome.player.kaios,deliveryKaiosBefore-deliveredHome.ant.mission.accounting.freightRevenue);assert.match(deliveredHome.ant.mission.receiptId,/^HOME-RECEIPT-/);
 assert.match(await page.locator('#homeDeliveryReceipt').textContent(),/DELIVERY VERIFIED/);
+let courierLedgerSeeded=false;
+for(const origin of courierContinuationState.origins)origin.localStorage=origin.localStorage.map(entry=>{if(entry.name!==isolatedProductKey)return entry;const saved=JSON.parse(entry.value);saved.progress.kaios=deliveredHome.player.kaios;saved.progress.claimableKaios=deliveredHome.player.claimableKaios;courierLedgerSeeded=true;return{...entry,value:JSON.stringify(saved)}});
+assert.equal(courierLedgerSeeded,true,'Courier continuation requires the verified post-delivery local-game ledger');
 await page.screenshot({path:`${OUT}/11520-player-home-delivery-receipt.png`});await page.locator('#sheetClose').click();
+await homeDeliveryContext.close();
+const courierContinuationContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,storageState:courierContinuationState});
+page=await courierContinuationContext.newPage();page.on('pageerror',e=>errors.push(String(e)));
 await stage('selected-life');
-// Start the existing selected-Life visual QA with a fresh camera centered on
-// the player's persisted position; the home-delivery flow intentionally leaves
-// the player at home instead of teleporting back to the world origin.
-await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);
+// Resume the active Player Courier state without importing the unrelated insured
+// ATM mission into the existing selected-Life and bandit scenario.
+await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1800);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
 await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.visibleLifeCanvasHitPoints,null,{timeout:5000});
 
