@@ -1011,8 +1011,12 @@ async function m1ReadOnlyBrowserQA(){
     absent.on('requestfailed',request=>recordAbsentDiagnostic('firstRequestFailure','requestfailed',{url:compactDiagnostic(request.url()),resourceType:request.resourceType(),error:compactDiagnostic(request.failure()?.errorText||'REQUEST_FAILED')}));
     await absent.addInitScript(()=>{
       globalThis.__K11520_QA_LAST_BOOT_STATUS__=null;
-      const capture=()=>{const status=document.querySelector('#boot11520Status')?.textContent?.trim();if(status)globalThis.__K11520_QA_LAST_BOOT_STATUS__=status};
-      new MutationObserver(capture).observe(document,{childList:true,subtree:true,characterData:true});
+      let watched=null;
+      const discover=()=>{const status=document.querySelector('#boot11520Status');if(!status||status===watched)return;watched=status;
+        const capture=()=>{const value=status.textContent?.trim();if(value)globalThis.__K11520_QA_LAST_BOOT_STATUS__=value};
+        capture();new MutationObserver(capture).observe(status,{childList:true,subtree:true,characterData:true});
+      };
+      discover();new MutationObserver(discover).observe(document,{childList:true,subtree:true});
     });
     // The no-provider screen never requests the lazily loaded wallet codec.
     const finishAbsentPublicSource=publicSource?attachM1PageSourceProof(absent,{base,...publicSource,assets:publicSource.assets.filter(x=>x.path!=='K線西遊記/assets/ethers-5.7.2.umd.min.js'),createHash}):null;
@@ -1039,6 +1043,7 @@ async function m1ReadOnlyBrowserQA(){
           runtimeMarkers:{execution:!!globalThis.__K11520_EXECUTION__,uiSettings:!!globalThis.__K11520_UI_SETTINGS__,simulationExchange:!!globalThis.__K11520_SIMULATION_EXCHANGE__,signedCImmersive:!!globalThis.__K11520_SIGNED_C_IMMERSIVE__,control3d:!!globalThis.__K11520_3D_CONTROL__,marketOriginRuntime:!!globalThis.__K11520_MARKET_ORIGIN_RUNTIME__},
           serviceWorkerControllerUrl:navigator.serviceWorker?.controller?.scriptURL||null};
       }).catch(inspectError=>({inspectionError:compactDiagnostic(inspectError.message||inspectError)}));
+      if(runtimeState.serviceWorkerControllerUrl)runtimeState.serviceWorkerControllerUrl=compactDiagnostic(runtimeState.serviceWorkerControllerUrl);
       await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({stage:absentStage,message:compactDiagnostic(error.message),...absentDiagnostics,...runtimeState,publicBrowserSource:finishAbsentPublicSource?.snapshot()??null},null,2));throw error
     }finally{await absent.close()}
     for(const [width,height]of[[360,740],[390,844],[412,772],[432,856],[480,900],[844,390]]){
