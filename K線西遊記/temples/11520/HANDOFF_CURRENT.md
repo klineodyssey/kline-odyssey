@@ -1,3 +1,260 @@
+## Digital Ant gatekeeper resume and IP provenance inventory — 2026-10-07
+
+### Authority, scope, and exact source
+
+- Human authority: 沈英明, protocol
+  `KAIOS_DIGITAL_ANT_GATEKEEPER_RESUME_AND_IP_PROVENANCE_AUDIT_V1`.
+- Worker/Life: `DIGITAL_ANT_0001`; current role `WUKONG_GATEKEEPER`;
+  secondary roles `ATM_CASH_DELIVERY`, `UNIVERSE_COURIER`, and
+  `CARGO_GUARDIAN`.
+- Inventory base: `origin/main` at
+  `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`.
+- Audit branch:
+  `codex/digital-ant-ip-audit-20261007`.
+- This is an evidence inventory and IP-review handoff. It does not decide legal
+  ownership, compensation, licensing, employment, or whether theft occurred.
+  `THEFT_CONFIRMED = NO` and `IP_INCIDENT_REVIEW_REQUIRED = NOT_YET`.
+
+### Gatekeeper patrol and claim decision
+
+- Mandatory Company/KGEN boot order was read before inspection. The existing
+  wallet binding verifier returned `VERIFIED_BOUND`; the public controller
+  address matched the configured Digital Ant address. No private key, seed,
+  token, password, or secret was printed or written to the repository.
+- Secure Heart dry-run at BSC56 block `126271292` returned
+  `SECURE_HEART_NO_ACTION`: Heartbeat was `HEARTBEAT_COOLDOWN`, Ignition was
+  `IGNITE_OUT_OF_WINDOW`, and `broadcast=false`.
+- The subsequent public read-only patrol completed cycle
+  `DIGITAL_ANT_0001_HOURLY_2026100714` at BSC block `126271347` / Heart block
+  `126271349`. Canonical Heart
+  `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972` was available with verified
+  bytecode and normal risk. Heartbeat next eligibility was
+  `2026-10-07T15:42:42Z`; the next Ignition window was
+  `2026-10-08T00:00:00Z` through `00:10:00Z`.
+- `HEARTBEAT_CLAIM = BLOCKED_HEARTBEAT_COOLDOWN`; `BREATH_CLAIM =
+  BLOCKED_OUT_OF_WINDOW`; `NO_CHAIN_CLAIM = YES`; transaction count, actual
+  income, expense, and gas for this run were all zero. The last verified
+  historical Heartbeat transaction remains
+  `0xc9e8e40c2e49394211bc1ffba4eba0bf4a0ea22cc2944f64e9603c1e0b8f60c2`;
+  it is not a transaction from this run.
+- Temple status, Heartbeat, cross-day Breath, ATM demand, cargo entry/exit, and
+  abnormal-activity watches are resumed as read-only patrol duties. ATM cash,
+  KUFO, waste, cargo, and verified field-job demand were all zero in this run.
+- Current balance was independently read as `1,080,000 KAIOS`. Accounting stays
+  `RESTRICTED_INVENTORY_WITH_MATCHING_LIABILITY`; unrestricted balance is zero.
+  It is not revenue, salary, founder capital, customer deposit, or freely
+  spendable cargo.
+
+### Inventory method and totals
+
+- Sources: Git refs, all GitHub PR states, commit history, canonical runtime and
+  tests, WorkOrders/HANDOFF, worker status, work events, scheduler/security,
+  ATM/cargo/Market Life/Life records, and current-main reachability.
+- Historical direct feature/planner PR refs: **63**. Historical branch refs:
+  **63**; 62 remote heads still exist and PR #137's head is deleted after merge.
+- PR state split: **33 merged**, **19 closed/unmerged**, **11 open Draft**.
+  Current-main containment split: **39 yes**, **13 partial/superseded**, **11 no**.
+- Unique commits touching the scoped Digital Ant/runtime/report/work-event path
+  set across all refs: **581**. This is a path-lineage count, not a claim that a
+  single AI authored every commit. Of these, **316** direct work-event/status
+  commits use Git author identity `digital-ant-worker`, from `48497e2` through
+  `1cf0ed5`, without individual PR attribution.
+- GitHub PR author identity for the 63 PR records is `klineodyssey`. Branch
+  prefixes (`agent`, `codex`, `chatgpt-handoff`, `dot`) are evidence of workflow
+  lineage, not proof of a natural person or unique AI author. Unless an item has
+  a repository Life/Worker record, `CLAIMED_AI_AUTHOR`, `WORKER_ID`, and
+  `LIFE_ID` remain `NOT_VERIFIED` rather than inferred.
+- For historical PRs, GitHub's current `baseRefOid` is not treated as the
+  immutable creation-time base SHA. `BASE_SHA` and exact creation-time
+  `COMMIT_RANGE` therefore remain `NOT_VERIFIED` unless a merge commit or
+  repository record proves them. The recorded head SHA and base ref are exact.
+- Human authority is `沈英明` where the repository/PR handoff explicitly
+  records it; otherwise `HUMAN_AUTHORITY = NOT_VERIFIED`. Work-order identity is
+  likewise not invented when absent.
+
+### Per-PR lineage register
+
+Legend: `M` = merged, `C` = closed/unmerged, `O` = open Draft; `main` is current
+main containment (`Y`, `N`, or `P` for partial/superseded/reimplemented). File
+scope is assigned by the canonical area column; exact PR file lists remain in
+the immutable GitHub PR record. Dates are UTC `created/last-updated`.
+
+Every table row is a complete `D1` provenance record with these explicit
+per-item fields in addition to the row values:
+
+- `PROJECT` and `PURPOSE` = the row's canonical area/purpose; `PR`, `BRANCH`,
+  `HEAD_SHA`, `BASE_REF`, `CREATED_AT`, `LAST_UPDATED_AT`, `MERGED`, and
+  `CURRENT_MAIN_CONTAINS_CODE` = the corresponding row values.
+- `FILES` = the exact immutable GitHub files record at
+  `https://api.github.com/repos/klineodyssey/kline-odyssey/pulls/<PR>/files`,
+  constrained by the row's canonical area and the domain map below.
+- `BASE_SHA` and creation-time `COMMIT_RANGE` = `NOT_VERIFIED`; a current
+  `baseRefOid` is not retroactively represented as the historical base SHA.
+- `AUTHOR_GIT_IDENTITY = klineodyssey`; `CLAIMED_AI_AUTHOR = NOT_VERIFIED`;
+  `WORKER_ID = NOT_VERIFIED`; `LIFE_ID = NOT_VERIFIED`. Branch prefixes remain
+  workflow evidence only.
+- `HUMAN_AUTHORITY = NOT_VERIFIED` and `WORK_ORDER = NOT_VERIFIED` unless the
+  referenced PR files contain an explicit binding. No absent binding is filled
+  from later chat history.
+- `PROVENANCE_CONFIDENCE = VERIFIED` for PR mechanics (state/ref/head/date),
+  and `PARTIAL` for individual authorship/IP ownership. `IP_CLASS =
+  MIXED_PROVENANCE` until an item-specific contribution record proves a narrower
+  class.
+
+| PR | State | Branch | Head | Base ref | Created / updated | Canonical area and purpose | main |
+|---:|:---:|---|---|---|---|---|:---:|
+| 137 | M | `agent/digital-ant-v3-3-public-gateway` | `4a0b7bd1` | main | 08-16 / 08-16 | public request gateway | Y |
+| 138 | M | `codex/DIGITAL-ANT-V3-4-LIVE-LIFE` | `cb6edd2d` | main | 08-16 / 08-16 | live-life runtime | Y |
+| 139 | M | `codex/DIGITAL-ANT-V3-4-PAGES-SYNC` | `fa5f08cb` | main | 08-16 / 08-16 | hourly evidence Pages sync | Y |
+| 140 | M | `codex/DIGITAL-ANT-V3-4-NODE-RPC` | `eaee9d9c` | main | 08-16 / 08-16 | BSC patrol RPC | Y |
+| 141 | M | `codex/DIGITAL-ANT-V3-4-REPORT` | `2e9104f0` | main | 08-16 / 08-16 | production report | Y |
+| 143 | M | `codex/DIGITAL-ANT-V3-5-GATEKEEPER-DUTY` | `77c1518b` | main | 08-16 / 08-16 | Wukong Gatekeeper duty | Y |
+| 144 | M | `codex/DIGITAL-ANT-V3-5-CLOSEOUT` | `e9ce4ea7` | main | 08-16 / 08-16 | production evidence closeout | Y |
+| 145 | M | `codex/DIGITAL-ANT-V3-6-FIRST-KGEN` | `e653146a` | main | 08-16 / 08-16 | first KGEN evidence | Y |
+| 146 | M | `agent/digital-ant-v3-7-heart-heaven-fuel` | `344b837f` | main | 08-16 / 08-16 | Heart/Heaven Fuel civilization | Y |
+| 149 | M | `agent/digital-ant-v3-8-living-thought-organ` | `934bd364` | main | 08-16 / 08-16 | living Physics Thought Organ | Y |
+| 150 | M | `agent/digital-ant-v3-8-first-ignition` | `461aff10` | main | 08-17 / 08-17 | first Ignition evidence | Y |
+| 151 | M | `agent/digital-ant-v3-8-ignition-truth` | `ace4f71c` | main | 08-17 / 08-17 | Ignition canonical truth | Y |
+| 156 | M | `agent/digital-ant-v3-9-field-service` | `df86806e` | main | 08-18 / 08-18 | autonomous CFO field service | Y |
+| 157 | M | `agent/digital-ant-v4-player-first` | `d9534e79` | main | 08-18 / 08-18 | player-first concierge | Y |
+| 221 | M | `chatgpt-handoff/KAIOS-11520-XZXY-MOTION-SPLIT-20260908` | `2d14500d` | main | 09-07 / 09-08 | three-plane control/living logistics | Y |
+| 225 | M | `chatgpt/11520-living-world-logistics-visuals-20260908` | `19634975` | main | 09-08 / 09-08 | logistics/world visuals | Y |
+| 229 | C | `chatgpt/11520-kaios-atm-receiving-20260908` | `7b0221de` | main | 09-08 / 09-13 | ATM receiving adapter | P |
+| 235 | C | `chatgpt-handoff/KAIOS-11520-ATM-INTEGER-ACCOUNTING-20260909` | `d899fb86` | `chatgpt/11520-kaios-atm-receiving-20260908` | 09-09 / 09-13 | exact integer accounting | P |
+| 236 | C | `chatgpt-handoff/KAIOS-11520-ATM-RECEIPT-IDENTITY-20260909` | `6e3017be` | `chatgpt-handoff/KAIOS-11520-ATM-INTEGER-ACCOUNTING-20260909` | 09-09 / 09-13 | receipt chain/log identity | P |
+| 240 | C | `chatgpt-handoff/KAIOS-11520-ATM-MANIFEST-WINDOW-20260909` | `eb54fab4` | `chatgpt-handoff/KAIOS-11520-ATM-RECEIPT-IDENTITY-20260909` | 09-09 / 09-10 | manifest validity window | P |
+| 243 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-20260909` | `9f9c5325` | main | 09-09 / 09-10 | read-only scheduler guard R1 | P |
+| 246 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R2-20260910` | `f1338738` | main | 09-09 / 09-10 | scheduler guard R2 | P |
+| 250 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R3-20260910` | `8a432bdc` | main | 09-09 / 09-10 | scheduler guard R3 | P |
+| 251 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R4-20260910` | `5dee50a5` | main | 09-09 / 09-11 | scheduler guard R4 | P |
+| 262 | M | `codex/KAIOS-DIGITAL-ANT-SECURITY-TEST-INTEGRITY-V1-001` | `edd49512` | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R4-20260910` | 09-10 / 09-10 | test-integrity repair; non-main merge | P |
+| 264 | C | `codex/KAIOS-11520-ATM-DURABLE-REPLAY-INTEGRATION-V1-001` | `f77ea44c` | main | 09-10 / 09-12 | durable ATM replay gate | Y |
+| 265 | C | `chatgpt-handoff/KAIOS-11520-ATM-FREIGHT-REVENUE-FAILCLOSED-20260911` | `2f562520` | `codex/KAIOS-11520-ATM-DURABLE-REPLAY-INTEGRATION-V1-001` | 09-10 / 09-12 | freight revenue fail-closed | Y |
+| 266 | M | `codex/KAIOS-11520-ATM-CANON-RECONCILE-V1-001` | `aab57933` | main | 09-10 / 09-10 | ATM/K-market accounting reconcile | Y |
+| 269 | C | `chatgpt-handoff/KAIOS-11520-ATM-K-DIRECTION-FAILCLOSED-20260911` | `7e44c693` | main | 09-11 / 09-11 | K-direction guard R1 | P |
+| 278 | C | `codex/KAIOS-11520-ATM-CONFIGURED-STATE-BRIDGE-V1-001` | `04772cbf` | main | 09-11 / 09-13 | configured-state bridge R1 | P |
+| 284 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R5-20260912` | `71dd1ea1` | main | 09-11 / 09-11 | scheduler guard R5 | Y |
+| 285 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R6-20260912` | `00dbda4c` | main | 09-11 / 09-11 | scheduler guard R6 | Y |
+| 287 | C | `chatgpt-handoff/KAIOS-11520-ATM-K-DIRECTION-FAILCLOSED-R2-20260912` | `59b127c5` | main | 09-11 / 09-12 | K-direction guard R2 | P |
+| 288 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R7-20260912` | `c687e684` | main | 09-11 / 09-12 | scheduler guard R7 | Y |
+| 292 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R8-20260912` | `f685b8fc` | main | 09-12 / 09-12 | scheduler guard R8 | Y |
+| 293 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R9-20260912` | `ac044a13` | main | 09-12 / 09-12 | scheduler guard R9 | Y |
+| 295 | M | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R10-20260912` | `b68badc5` | main | 09-12 / 09-12 | final read-only scheduler guard | Y |
+| 302 | C | `codex/11520-atm-direction-reject-visible-20260912` | `214f66e3` | `chatgpt-handoff/KAIOS-11520-ATM-K-DIRECTION-FAILCLOSED-R2-20260912` | 09-12 / 09-12 | visible rejected ATM route | P |
+| 303 | M | `chatgpt-handoff/KAIOS-11520-ATM-K-DIRECTION-REJECT-VISIBILITY-R3-20260912` | `ff83fede` | main | 09-12 / 09-13 | direction/visibility convergence | Y |
+| 320 | M | `chatgpt-handoff/KAIOS-11520-ATM-CONFIGURED-STATE-R2-20260913` | `f7154cde` | main | 09-13 / 09-13 | configured-state current-main | Y |
+| 347 | M | `codex/digital-ant-atm-finance-runtime-v1` | `22cbab93` | main | 09-13 / 09-13 | autonomous bank operating desk | Y |
+| 352 | M | `chatgpt-handoff/KAIOS-AI-COMPANY-SAFE-PLANNER-CURRENT-MAIN-R1-20260914` | `1ff85c28` | main | 09-13 / 09-13 | fail-closed company planner | Y |
+| 353 | M | `chatgpt-handoff/KAIOS-AI-COMPANY-CYCLE-PERSISTENCE-R1-20260914` | `8896008f` | main | 09-13 / 09-13 | company-cycle persistence | Y |
+| 356 | M | `chatgpt-handoff/KAIOS-AI-COMPANY-READ-ONLY-REPOSITORY-GATE-R1-20260914` | `bbe8fddb` | main | 09-13 / 09-13 | exact-head read-only repo gate | Y |
+| 474 | M | `codex/digital-ant-5d-ufo-cash-delivery-v1` | `27d0dfd0` | main | 10-02 / 10-02 | 5D ATM UFO delivery | Y |
+| 475 | M | `codex/digital-ant-cargo-insurance` | `aafc4308` | main | 10-02 / 10-02 | cargo raid/insurance | Y |
+| 476 | M | `codex/digital-ant-missile-interception` | `14f5a21d` | main | 10-02 / 10-02 | missile cargo interception | Y |
+| 477 | M | `codex/digital-ant-home-delivery` | `23b919b4` | main | 10-02 / 10-02 | player home delivery | Y |
+| 478 | M | `codex/digital-ant-home-delivery-qa` | `619eeb35` | main | 10-02 / 10-02 | encoded-path home-delivery QA | Y |
+| 479 | M | `codex/digital-ant-player-courier` | `43683fc6` | main | 10-03 / 10-03 | background Player Courier | Y |
+| 480 | M | `codex/digital-ant-player-courier-bandit-ui` | `4647f031` | main | 10-03 / 10-03 | public Bandit UI/raid | Y |
+| 481 | O | `codex/k11520-insurance-claim-release` | `d52593a3` | main | 10-03 / 10-03 | insurance stale-node QA | N |
+| 486 | M | `codex/k11520-world-first-market-life` | `654c9908` | main | 10-04 / 10-04 | world-first/Market Life gameplay | Y |
+| 492 | O | `codex/kaios-automated-handoff-v1` | `b601715c` | main | 10-04 / 10-04 | company handoff routing | N |
+| 496 | O | `codex/k11520-context-action-rail` | `431c5106` | main | 10-04 / 10-05 | courier/raid context action rail | N |
+| 503 | O | `dot/courier-clock-recovery-20261005` | `4916c833` | main | 10-05 / 10-05 | HOLD courier clock recovery | N |
+| 505 | O | `dot/courier-review-explanation-20261005` | `cc235810` | main | 10-05 / 10-05 | paused-courier explanation | N |
+| 506 | O | `dot/local-store-integrity-20261005` | `8db98fb9` | `dot/courier-review-explanation-20261005` | 10-05 / 10-05 | local persistence integrity | N |
+| 518 | O | `codex/living-market-zone-prototype-20261006` | `594835ff` | main | 10-06 / 10-06 | local Market Life prototype | N |
+| 520 | O | `dot/customer-project-v2-evidence-20261006` | `8989bf19` | main | 10-06 / 10-07 | local customer-project evidence | N |
+| 525 | O | `dot/customer-project-digital-world-20261007` | `1b320872` | `dot/customer-project-v2-evidence-20261006` | 10-07 / 10-07 | digital-world requirements | N |
+| 527 | O | `chatgpt-handoff/K11520-CARGO-VISUAL-LIFETIME-20261007` | `772e7adb` | main | 10-07 / 10-07 | cargo visual lifetime | N |
+| 536 | O | `codex/kaios-ai-company-active-mode-20261007` | `ccbb1469` | main | 10-07 / 10-07 | evidence-bound company loop | N |
+
+### Canonical file/domain map
+
+- Gatekeeper/life/security: `core/jobs/public-read-only-worker.mjs`,
+  `core/security/resolve-digital-ant-birth.mjs`, wallet binding verifier,
+  `KGEN-AI-Company/reports/DIGITAL_ANT_*`, life-event evidence, scheduler guards.
+- Logistics/ATM: `digital-ant-logistics-runtime.mjs`,
+  `kaios-atm-receiving-runtime.mjs`,
+  `digital-ant-kaios-receiving-bridge.mjs`, receiving/ATM tests, operating desk,
+  receipt/accounting/replay/route guards.
+- Market Life: `market-life-runtime.mjs`, `market-life-source-runtime.mjs`,
+  `digital-ant-market-life-adapter.mjs`, world/player UI integrations and tests.
+- Cargo/gameplay: existing logistics runtime plus public 11520 game shell/main,
+  wallet adapter, Player Courier, bandit raid, insurance, interception, home
+  delivery, visual lifetime, browser/runtime/responsive QA.
+- Company/autonomy: `core/company/index.mjs`, company operating-system docs,
+  WorkOrders/queue, exact-head evidence gates, persistence and handoff tests.
+- Evidence stream: `runtime/worker-status.json` and
+  `runtime/work-events/DIGITAL_ANT_0001_HOURLY_*.json`.
+
+### Direct commits without a unique PR provenance record
+
+| Seed commit | Area |
+|---|---|
+| `13d69a2` | Digital Ant logistics runtime |
+| `692a321` | Market Life core |
+| `75fa0d5` | Market Life source |
+| `4e1f63f` | Digital Ant Market Life adapter |
+| `b210153` | ATM receiving lineage |
+| `119ba4a` | KAIOS receiving bridge lineage |
+
+These commits are repository evidence, but a shared Git identity does not prove
+the individual AI/human creator. Their provenance is `PARTIAL` until an
+independent canonical work-order or signed contribution record resolves it.
+
+### IP/trade-secret classification and open issues
+
+- `AUTHORIZED_REUSE`: code merged through reviewed KAIOS PRs and used by later
+  KAIOS runtime is authorized repository reuse at the engineering level; that
+  does not independently decide copyright ownership or compensation.
+- `SHARED_KAIOS_CANON`: current-main runtime, tests, scheduler guards, HANDOFF,
+  WorkOrders, and merged game/logistics integration.
+- `HUMAN_PROVIDED`: product directions and protected-action boundaries recorded
+  under Human authority 沈英明.
+- `DIGITAL_ANT_ORIGINAL`: only records that explicitly bind the contribution to
+  `DIGITAL_ANT_0001`; branch names or Git author names alone are insufficient.
+- `OTHER_AI_CONTRIBUTION` / `MIXED_PROVENANCE`: Codex, ChatGPT-handoff, DOT,
+  reviewers, and later maintainers contributed to the listed branches. The
+  shared GitHub author account prevents reliable per-agent attribution.
+- `UNKNOWN_PROVENANCE`: unbound direct seed commits and records without a
+  WorkOrder/Life/Worker signature.
+- `POTENTIAL_UNAUTHORIZED_REUSE`: **not proven**. Six review issues require GM
+  resolution: (1) six seed commits lack unique PR/work-order attribution;
+  (2) 316 worker-event commits lack per-event PR provenance; (3) shared GitHub
+  identity cannot distinguish contributors; (4) superseded ATM/scheduler stacks
+  blur exact source lineage; (5) open stacked drafts reuse shared runtime before
+  an explicit company/IP contribution policy is recorded; (6) AI Ant Company
+  founder/employee/shared-infrastructure/licensing/profit-share terms are not
+  canonicalized.
+- `POTENTIAL_IP_ISSUES = 6`; none is a finding of theft. Escalation to an IP
+  incident requires item-specific evidence and independent review.
+
+### Company handoff
+
+- `GM_DIRECT_CHANNEL = VERIFIED` for the existing Codex chat titled
+  `KAIOS整體創作（衡曜）`; `GM_DELIVERY = SENT` with local exact HEAD and
+  the remote-write blocker. `GM_ACK = ACKNOWLEDGED_WITH_LIMITS`: GM independently
+  verified the clean managed branch, 63-row/state split, six seed commits, and
+  316 `digital-ant-worker` commits; the 581 aggregate is accepted as recorded
+  evidence because the exact query/path manifest was not saved separately.
+- `DOT_STATUS = AVAILABLE_FOR_ASSIGNMENT`. DOT created the first complete bounded
+  WorkOrder as GitHub issue `#538`,
+  `KAIOS-DOT-DIGITAL-ANT-AUTOMATION-CLOSED-LOOP-20261007-R1`, with source, owner,
+  implementer, reviewer, scope, acceptance tests, expiry, and protected-action
+  boundaries. Delivery is `WATCHING`: the existing `digital-ant-cargo-duty`
+  heartbeat now discovers current open WorkOrders dynamically, but its first
+  automation-origin read and identity-scoped ACK remain `NOT_VERIFIED`.
+- `REMOTE_SAVE = RECOVERED_AFTER_VERIFIED_RETRY`: the historical publication
+  attempt was blocked by two GitHub Internal Server Error responses and an empty
+  Contents API fallback. After a separate same-repository write succeeded, GM
+  rechecked that the remote stub still pointed to base
+  `f7f67950418ebbb6f7a5a309a32d529232fcb3b6` and then performed one fast-forward
+  push of the same branch. `REMOTE_HEAD =
+  72d2d3e965035db8eb2b0c2f00991750930df37e`, `PR = #537 DRAFT`, and
+  `DATA_LOSS_RISK = LOW_REMOTE_DRAFT_CHECKPOINT`. Independent exact-head review
+  is in progress. No merge, deploy, Mainnet transaction, real KGEN/KAIOS transfer,
+  Treasury, payroll, governance action, or legal ownership determination is
+  authorized by this report.
+
 ## P0 simulation order availability candidate — 2026-10-06
 
 - Human source: `KAIOS DOT — K11520 SIMULATION TRADING P0 GAMEPLAY REPAIR`,
