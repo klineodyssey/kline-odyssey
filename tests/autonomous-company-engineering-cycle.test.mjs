@@ -17,6 +17,9 @@ import {
   persistKaiosOfficialMessageLifecycle,
   restoreKaiosOfficialMessageLifecycle,
   projectKaiosOfficialMessageProgressBoard,
+  projectKaiosWorkforceRegistry,
+  verifyKaiosCompanyDayClock,
+  planKaiosCompanyHeartbeatBreathV1,
   KAIOS_OFFICIAL_MESSAGE_V1_FIELDS,
   KAIOS_OFFICIAL_MESSAGE_EVENT_TYPES,
   AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES,
@@ -413,6 +416,9 @@ test("official message closes only after delivery, identity-bound ACK, result, d
   });
   assert.equal(projection.AUTOMATION_CLOSED_LOOP, "NOT_VERIFIED");
   assert.equal(projection.RUNTIME_EVIDENCE_TRUST, "NOT_VERIFIED");
+  assert.equal(projection.ACKNOWLEDGED_AT, "2026-10-08T00:02:00Z");
+  assert.equal(projection.WORK_STARTED_AT, "2026-10-08T00:03:00Z");
+  assert.equal(projection.REVIEWED_AT, "2026-10-08T00:05:00Z");
   assert.equal(projectKaiosOfficialMessageProgressBoard([projection]).available, 0);
   assert.equal(projectKaiosOfficialMessageProgressBoard([projection]).testing, 1);
 
@@ -525,6 +531,132 @@ test("official message fails closed on forged objects, invalid order, self-revie
     () => projectKaiosOfficialMessageLifecycle({ message, events: [...closedEvents, late], observed_at: "2026-10-08T00:08:00Z" }),
     (error) => error.code === "OFFICIAL_MESSAGE_TERMINAL_REOPEN_FORBIDDEN"
   );
+});
+
+test("company Heartbeat and Breath remain truthful when no worker automation endpoint is verified", async () => {
+  const closedMessage = await createKaiosOfficialMessageV1({
+    ...officialMessageInput,
+    MESSAGE_ID: "KAIOS-OFFICIAL-CLOSED-WORKFORCE-TEST",
+    TO: worker.worker_id,
+    ENDPOINT_ID: "automation-chatgpt-01"
+  });
+  const closedEvents = ["DELIVERED", "ACKNOWLEDGED", "WORK_STARTED", "RESULT_RECORDED", "REVIEWED", "GM_CLOSED"]
+    .map((type, index) => officialEvent(closedMessage, index + 1, type));
+  const closedLifecycle = projectKaiosOfficialMessageLifecycle({
+    message: closedMessage, events: closedEvents, observed_at: "2026-10-08T00:07:00Z"
+  });
+  const workforce = projectKaiosWorkforceRegistry({
+    repository_evidence: activeCompanyRepositoryEvidence,
+    current_main_sha: MAIN_SHA,
+    workers: [manager, worker, reviewer],
+    official_message_lifecycles: [closedLifecycle],
+    observed_at: "2026-10-08T02:00:00Z"
+  });
+  assert.equal(workforce.total_verified_workers, 3);
+  assert.deepEqual(workforce.automation_reachable_workers, []);
+  assert.ok(workforce.records.every((record) => record.AUTOMATION_STATUS === "NOT_VERIFIED"));
+  assert.deepEqual(workforce.who_is_reviewing, [{ worker_id: reviewer.worker_id, work_id: closedMessage.WORK_ID, status: "REVIEW_RECORDED" }]);
+  assert.notEqual(workforce.who_is_reviewing[0].worker_id, manager.worker_id);
+
+  const clockRef = "KGEN-Organization/WorkOrders/KAIOS_COMPANY_DAY_CLOCK_TEST.json";
+  const clockFiles = { ...fixtureFiles, [clockRef]: JSON.stringify({
+    schema: "KAIOS_COMPANY_DAY_CLOCK_EVIDENCE_V1", status: "VERIFIED", source: "K12345_CANONICAL_CLOCK",
+    day_key: "2026-10-08", observed_at: "2026-10-08T01:59:00Z", expires_at: "2026-10-08T03:00:00Z"
+  }) };
+  const clockRepositoryEvidence = await resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-08T02:00:00Z", current_main_sha: MAIN_SHA,
+    guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF], work_order_refs: [WORK_ORDER_REF],
+    company_day_clock_evidence_refs: [clockRef], fetch_impl: activeCompanyEvidenceFetch(clockFiles)
+  });
+  const canonicalDayClock = verifyKaiosCompanyDayClock({
+    repository_evidence: clockRepositoryEvidence, current_main_sha: MAIN_SHA,
+    source_ref: clockRef, observed_at: "2026-10-08T02:00:00Z"
+  });
+  const life = planKaiosCompanyHeartbeatBreathV1({
+    observed_at: "2026-10-08T02:00:00Z",
+    workforce_projection: workforce,
+    official_message_lifecycles: [],
+    detected_work_count: 2,
+    last_heartbeat_at: "2026-10-08T00:30:00Z",
+    last_product_report_at: "2026-10-07T23:30:00Z",
+    previous_breath_day_key: "2026-10-07",
+    canonical_day_clock: canonicalDayClock,
+    accounting_ledger: [
+      { category: "SALARY_INCOME", amount: 10 },
+      { category: "TASK_COMPENSATION", amount: 2 },
+      { category: "FREIGHT_REVENUE", amount: 3 },
+      { category: "HEARTBEAT_REWARD", amount: 1 },
+      { category: "CARGO_PRINCIPAL", amount: 50 }
+    ],
+    compute_cost_ledger: [{ work_id: "WORK-1", worker_id: worker.worker_id, usage_delta: 7, duration_ms: 1000 }]
+  });
+  assert.equal(life.heartbeat.status, "DUE_DISPATCH_BLOCKED_NO_VERIFIED_ENDPOINT");
+  assert.equal(life.heartbeat.operational, false);
+  assert.equal(life.heartbeat.first_end_to_end_work_id, null);
+  assert.equal(life.breath.status, "DUE_REBALANCE_CANDIDATE");
+  assert.equal(life.breath.accounting_totals.SALARY_INCOME, 10);
+  assert.equal(life.breath.accounting_totals.HEARTBEAT_REWARD, 1);
+  assert.equal(life.breath.accounting_totals.CARGO_PRINCIPAL, 50);
+  assert.equal(life.breath.accounting_evidence_status, "NOT_VERIFIED_CALLER_INPUT");
+  assert.equal(life.breath.compute_cost_evidence_status, "NOT_VERIFIED_CALLER_INPUT");
+  assert.equal(life.breath.payroll_execution, "NOT_LIVE");
+  assert.equal(life.product_report.due, true);
+  assert.equal(life.status, "PARTIAL_AUTOMATION_CLOSED_LOOP_NOT_VERIFIED");
+  assert.ok(Object.values(life.authority).every((value) => value === false));
+  assert.throws(
+    () => planKaiosCompanyHeartbeatBreathV1({
+      observed_at: "2026-10-08T02:00:00Z", workforce_projection: workforce,
+      accounting_ledger: [{ category: "HEARTBEAT_REWARD", amount: -1 }]
+    }),
+    (error) => error.code === "COMPANY_LIFE_ACCOUNTING_AMOUNT_INVALID"
+  );
+  const forgedClock = planKaiosCompanyHeartbeatBreathV1({
+    observed_at: "2026-10-08T02:00:00Z", workforce_projection: workforce,
+    canonical_day_clock: { status: "VERIFIED_CURRENT_MAIN", day_key: "2026-10-08" }
+  });
+  assert.equal(forgedClock.breath.status, "BLOCKED_CANONICAL_DAY_CLOCK_REQUIRED");
+});
+
+test("workforce projection only marks current-main platform-verified endpoint bindings reachable", async () => {
+  const endpointRef = "KGEN-Organization/WorkOrders/KAIOS_DIRECT_CHANNEL_EVIDENCE_TEST.json";
+  const endpointEvidence = JSON.stringify({
+    schema: "KAIOS_DIRECT_CHANNEL_EVIDENCE_V1",
+    status: "VERIFIED",
+    verification_status: "VERIFIED_BY_PLATFORM",
+    from_worker_id: manager.worker_id,
+    authorized_worker_ids: [worker.worker_id],
+    expires_at: "2026-10-08T03:00:00Z",
+    endpoints: [{
+      worker_id: worker.worker_id,
+      life_identity_ref: worker.life_identity_ref,
+      controller_id: worker.controller_id,
+      endpoint_id: "automation-chatgpt-01",
+      thread_id: "thread-chatgpt-01",
+      status: "REACHABLE"
+    }]
+  });
+  const files = { ...fixtureFiles, [endpointRef]: endpointEvidence };
+  const evidence = await resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-08T02:00:00Z",
+    current_main_sha: MAIN_SHA,
+    guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF],
+    work_order_refs: [WORK_ORDER_REF],
+    direct_channel_evidence_refs: [endpointRef],
+    fetch_impl: activeCompanyEvidenceFetch(files)
+  });
+  const workforce = projectKaiosWorkforceRegistry({
+    repository_evidence: evidence,
+    current_main_sha: MAIN_SHA,
+    workers: [manager, worker, reviewer],
+    official_message_lifecycles: [],
+    observed_at: "2026-10-08T02:00:00Z",
+    direct_channel_evidence_ref: endpointRef
+  });
+  assert.deepEqual(workforce.automation_reachable_workers, [worker.worker_id]);
+  const bound = workforce.records.find((record) => record.WORKER_ID === worker.worker_id);
+  assert.equal(bound.CURRENT_THREAD, "thread-chatgpt-01");
+  assert.equal(bound.CAN_RECEIVE_PROMPT, true);
+  assert.equal(workforce.records.find((record) => record.WORKER_ID === manager.worker_id).AUTOMATION_STATUS, "NOT_VERIFIED");
 });
 
 test("selects one current-main R1 task without imposing a universal reviewer", () => {

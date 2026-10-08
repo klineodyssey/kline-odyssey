@@ -2123,6 +2123,14 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
   let retryAttempt = 0;
   let retryNotBefore = null;
   let lastAt = Date.parse(message.CREATED_AT);
+  let lastActorId = null;
+  let lastActorRole = null;
+  let lastEventAt = null;
+  let acknowledgedAt = null;
+  let workStartedAt = null;
+  let reviewedAt = null;
+  let reviewerActorId = null;
+  let reviewerActorRole = null;
   const seenIds = new Set();
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index];
@@ -2162,15 +2170,21 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
       retryNotBefore = null;
       lifecycle = "DELIVERED"; ack = "DELIVERY_VERIFIED";
     }
-    else if (event.EVENT_TYPE === "ACKNOWLEDGED") { lifecycle = "ACKNOWLEDGED"; ack = "ACKNOWLEDGED"; }
-    else if (event.EVENT_TYPE === "WORK_STARTED") { lifecycle = "WORKING"; execution = "WORK_STARTED"; }
+    else if (event.EVENT_TYPE === "ACKNOWLEDGED") { lifecycle = "ACKNOWLEDGED"; ack = "ACKNOWLEDGED"; acknowledgedAt = event.OCCURRED_AT; }
+    else if (event.EVENT_TYPE === "WORK_STARTED") { lifecycle = "WORKING"; execution = "WORK_STARTED"; workStartedAt = event.OCCURRED_AT; }
     else if (event.EVENT_TYPE === "RESULT_RECORDED") { lifecycle = "REVIEW"; execution = "RESULT_RECORDED"; review = "PENDING"; }
-    else if (event.EVENT_TYPE === "REVIEWED") { lifecycle = "REVIEWED"; review = "PASS"; }
+    else if (event.EVENT_TYPE === "REVIEWED") {
+      lifecycle = "REVIEWED"; review = "PASS"; reviewedAt = event.OCCURRED_AT;
+      reviewerActorId = event.ACTOR_ID; reviewerActorRole = event.ACTOR_ROLE;
+    }
     else if (event.EVENT_TYPE === "GM_CLOSED") lifecycle = "CLOSED";
     else if (event.EVENT_TYPE === "STALE") { lifecycle = "STALE"; ack = "STALE"; execution = "STALE"; review = "STALE"; }
     else if (event.EVENT_TYPE === "SUPERSEDED") { lifecycle = "SUPERSEDED"; ack = "SUPERSEDED"; execution = "SUPERSEDED"; review = "SUPERSEDED"; }
     seenIds.add(event.EVENT_ID);
     lastAt = Date.parse(event.OCCURRED_AT);
+    lastActorId = event.ACTOR_ID;
+    lastActorRole = event.ACTOR_ROLE;
+    lastEventAt = event.OCCURRED_AT;
   }
   if (!KAIOS_OFFICIAL_MESSAGE_TERMINAL_STATES.includes(lifecycle) && Date.parse(observed_at) > Date.parse(message.EXPIRES_AT)) {
     lifecycle = "STALE"; ack = "STALE"; execution = "STALE"; review = "STALE";
@@ -2180,8 +2194,12 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
     : lifecycle === "REVIEWED" ? "REVIEW" : lifecycle === "CLOSED" ? "CLOSED_CANDIDATE" : lifecycle;
   const projection = Object.freeze({
     MESSAGE_ID: message.MESSAGE_ID, WORK_ID: message.WORK_ID, MESSAGE_DIGEST: message.MESSAGE_DIGEST,
+    ADDRESSED_WORKER_ID: message.TO, ENDPOINT_ID: message.ENDPOINT_ID,
     ACK_STATUS: ack, EXECUTION_STATUS: execution, REVIEW_STATUS: review, FINAL_STATUS: finalStatus,
     DELIVERY_FAILURES: deliveryFailures, EVENT_COUNT: events.length,
+    LAST_ACTOR_ID: lastActorId, LAST_ACTOR_ROLE: lastActorRole, LAST_EVENT_AT: lastEventAt,
+    ACKNOWLEDGED_AT: acknowledgedAt, WORK_STARTED_AT: workStartedAt, REVIEWED_AT: reviewedAt,
+    REVIEWER_ACTOR_ID: reviewerActorId, REVIEWER_ACTOR_ROLE: reviewerActorRole,
     RUNTIME_EVIDENCE_TRUST: "NOT_VERIFIED",
     AUTOMATION_CLOSED_LOOP: "NOT_VERIFIED",
     PROGRESS_STATUS: lifecycle === "CLOSED" ? "TESTING" : ["FAILED", "STALE", "SUPERSEDED"].includes(lifecycle) ? "BLOCKED" : "IN_PROGRESS"
@@ -2266,6 +2284,219 @@ export function projectKaiosOfficialMessageProgressBoard(lifecycles = []) {
     in_progress: records.filter((record) => record.status === "IN_PROGRESS").length,
     blocked: records.filter((record) => record.status === "BLOCKED").length,
     records: Object.freeze(records)
+  });
+}
+
+const KAIOS_COMPANY_LIFE_ACCOUNTING_CLASSES = Object.freeze([
+  "SALARY_INCOME", "TASK_COMPENSATION", "FREIGHT_REVENUE", "HEARTBEAT_REWARD", "CARGO_PRINCIPAL",
+  "COMPANY_REVENUE", "COMPANY_EXPENSE", "SALARY_PAYABLE", "FOOD_CONSUMPTION", "ENERGY_CONSUMPTION",
+  "PROJECT_PROFIT"
+]);
+const PRODUCED_KAIOS_WORKFORCE_PROJECTIONS = new WeakSet();
+const VERIFIED_KAIOS_COMPANY_DAY_CLOCKS = new WeakSet();
+
+export function verifyKaiosCompanyDayClock({ repository_evidence, current_main_sha, source_ref, observed_at }) {
+  const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  invariant(typeof source_ref === "string" && source_ref.trim(), "COMPANY_DAY_CLOCK_REF_REQUIRED", "Company day clock requires a repository evidence path");
+  invariant(typeof observed_at === "string" && Number.isFinite(Date.parse(observed_at)), "COMPANY_DAY_CLOCK_OBSERVED_AT_INVALID", "Company day clock requires an ISO observation time");
+  const file = trustedRepository.files[source_ref];
+  invariant(file, "COMPANY_DAY_CLOCK_EVIDENCE_REQUIRED", "Company day clock must be hash-verified at current main");
+  let evidence;
+  try { evidence = JSON.parse(file.content); } catch { invariant(false, "COMPANY_DAY_CLOCK_EVIDENCE_INVALID", "Company day clock evidence must be valid JSON"); }
+  invariant(evidence?.schema === "KAIOS_COMPANY_DAY_CLOCK_EVIDENCE_V1"
+    && evidence?.status === "VERIFIED"
+    && evidence?.source === "K12345_CANONICAL_CLOCK"
+    && typeof evidence?.day_key === "string" && /^\d{4}-\d{2}-\d{2}$/.test(evidence.day_key)
+    && typeof evidence?.observed_at === "string" && Number.isFinite(Date.parse(evidence.observed_at))
+    && Date.parse(evidence.observed_at) <= Date.parse(observed_at)
+    && typeof evidence?.expires_at === "string" && Date.parse(evidence.expires_at) > Date.parse(observed_at),
+  "COMPANY_DAY_CLOCK_EVIDENCE_INVALID", "Company day clock must be current, bounded, and sourced from the canonical K12345 clock");
+  const result = Object.freeze({
+    status: "VERIFIED_CURRENT_MAIN",
+    day_key: evidence.day_key,
+    observed_at: evidence.observed_at,
+    expires_at: evidence.expires_at,
+    source_ref,
+    git_object: file.git_object,
+    current_main_sha
+  });
+  VERIFIED_KAIOS_COMPANY_DAY_CLOCKS.add(result);
+  return result;
+}
+
+/**
+ * Build a current-main worker projection without treating a role name, a stale
+ * registry row, or an automation label as proof that a worker can be reached.
+ * Reachability requires an unexpired platform-verified endpoint record that is
+ * itself present in the trusted current-main repository snapshot.
+ */
+export function projectKaiosWorkforceRegistry({
+  repository_evidence,
+  current_main_sha,
+  workers = [],
+  official_message_lifecycles = [],
+  observed_at,
+  direct_channel_evidence_ref = null
+}) {
+  const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  requireArray(workers, "workforce.workers");
+  requireArray(official_message_lifecycles, "workforce.official_message_lifecycles");
+  invariant(typeof observed_at === "string" && Number.isFinite(Date.parse(observed_at)), "WORKFORCE_OBSERVED_AT_INVALID", "Workforce projection requires an ISO timestamp");
+  invariant(official_message_lifecycles.every((record) => PRODUCED_KAIOS_OFFICIAL_MESSAGE_PROJECTIONS.has(record)),
+    "WORKFORCE_LIFECYCLE_CAPABILITY_REQUIRED", "Workforce activity accepts only canonical official-message lifecycle projections");
+  validateActiveCompanyRegistryEvidence({ repository_evidence: trustedRepository, current_main_sha, actors: workers });
+
+  let endpointEvidence = null;
+  if (direct_channel_evidence_ref !== null) {
+    invariant(typeof direct_channel_evidence_ref === "string" && direct_channel_evidence_ref.trim(), "WORKFORCE_ENDPOINT_REF_INVALID", "Endpoint evidence requires a repository path");
+    const file = trustedRepository.files[direct_channel_evidence_ref];
+    invariant(file, "WORKFORCE_ENDPOINT_EVIDENCE_REQUIRED", "Endpoint evidence must be hash-verified at current main");
+    try { endpointEvidence = JSON.parse(file.content); } catch { invariant(false, "WORKFORCE_ENDPOINT_EVIDENCE_INVALID", "Endpoint evidence must be valid JSON"); }
+    invariant(endpointEvidence?.schema === "KAIOS_DIRECT_CHANNEL_EVIDENCE_V1"
+      && endpointEvidence?.status === "VERIFIED"
+      && endpointEvidence?.verification_status === "VERIFIED_BY_PLATFORM"
+      && Array.isArray(endpointEvidence?.endpoints)
+      && typeof endpointEvidence?.expires_at === "string"
+      && Date.parse(endpointEvidence.expires_at) > Date.parse(observed_at),
+    "WORKFORCE_ENDPOINT_EVIDENCE_INVALID", "Endpoint evidence must be platform-verified, unexpired, and contain endpoint bindings");
+  }
+
+  const endpoints = new Map((endpointEvidence?.endpoints ?? []).map((endpoint) => [endpoint.worker_id, endpoint]));
+  const records = workers.map((worker) => {
+    const endpoint = endpoints.get(worker.worker_id);
+    const endpointVerified = Boolean(endpoint
+      && typeof endpoint.endpoint_id === "string" && endpoint.endpoint_id.trim()
+      && typeof endpoint.thread_id === "string" && endpoint.thread_id.trim()
+      && endpoint.status === "REACHABLE"
+      && endpoint.controller_id === worker.controller_id
+      && endpoint.life_identity_ref === worker.life_identity_ref);
+    const workerLifecycles = official_message_lifecycles.filter((record) => record.ADDRESSED_WORKER_ID === worker.worker_id);
+    const working = workerLifecycles.find((record) => record.EXECUTION_STATUS === "WORK_STARTED");
+    const lastLifecycle = [...workerLifecycles].sort((left, right) => Date.parse(right.LAST_EVENT_AT ?? 0) - Date.parse(left.LAST_EVENT_AT ?? 0))[0] ?? null;
+    const eligible = autonomousEngineeringWorkerEligible(worker);
+    return Object.freeze({
+      WORKER_ID: worker.worker_id,
+      LIFE_ID: typeof worker.life_identity_ref === "string" && worker.life_identity_ref.trim() ? worker.life_identity_ref : "NOT_VERIFIED",
+      CONTROLLER_ID: typeof worker.controller_id === "string" && worker.controller_id.trim() ? worker.controller_id : "NOT_VERIFIED",
+      ROLE: typeof worker.role === "string" && worker.role.trim() ? worker.role : "UNKNOWN",
+      FORMAL_REGISTRY_STATUS: eligible ? "VERIFIED_CURRENT_MAIN" : "REGISTERED_NOT_ELIGIBLE",
+      RUNTIME_STATUS: working ? "ACTIVE" : eligible ? (Number(worker.active_claim_count ?? 0) > 0 ? "ACTIVE_CLAIM_NO_VERIFIED_START" : "AVAILABLE") : "NOT_VERIFIED",
+      AUTOMATION_STATUS: endpointVerified ? "REACHABLE_VERIFIED" : "NOT_VERIFIED",
+      CURRENT_THREAD: endpointVerified ? endpoint.thread_id : "NOT_VERIFIED",
+      AUTOMATION_ENDPOINT: endpointVerified ? endpoint.endpoint_id : "NOT_VERIFIED",
+      CURRENT_WORK_ID: working?.WORK_ID ?? worker.current_task ?? null,
+      LAST_ACK: lastLifecycle?.ACKNOWLEDGED_AT ?? "NOT_VERIFIED",
+      LAST_REAL_ACTIVITY: lastLifecycle?.LAST_EVENT_AT ?? "NOT_VERIFIED",
+      CAN_RECEIVE_PROMPT: endpointVerified,
+      CAN_ACK: endpointVerified && eligible,
+      CAN_EXECUTE: eligible,
+      CAN_REVIEW: eligible && worker.review_qualification === true
+    });
+  });
+  const result = Object.freeze({
+    schema: "KAIOS_WORKFORCE_REGISTRY_PROJECTION_V1",
+    observed_at,
+    current_main_sha,
+    total_registered: records.length,
+    total_verified_workers: records.filter((record) => record.FORMAL_REGISTRY_STATUS === "VERIFIED_CURRENT_MAIN").length,
+    active_workers: Object.freeze(records.filter((record) => record.RUNTIME_STATUS.startsWith("ACTIVE")).map((record) => record.WORKER_ID)),
+    available_workers: Object.freeze(records.filter((record) => record.RUNTIME_STATUS === "AVAILABLE").map((record) => record.WORKER_ID)),
+    automation_reachable_workers: Object.freeze(records.filter((record) => record.AUTOMATION_STATUS === "REACHABLE_VERIFIED").map((record) => record.WORKER_ID)),
+    who_is_actually_coding: Object.freeze(records.filter((record) => record.RUNTIME_STATUS === "ACTIVE").map((record) => Object.freeze({ worker_id: record.WORKER_ID, work_id: record.CURRENT_WORK_ID }))),
+    who_is_reviewing: Object.freeze(official_message_lifecycles.filter((record) => record.REVIEW_STATUS === "PASS" && record.REVIEWER_ACTOR_ID).map((record) => Object.freeze({ worker_id: record.REVIEWER_ACTOR_ID, work_id: record.WORK_ID, status: "REVIEW_RECORDED" }))),
+    records: Object.freeze(records),
+    source: "CURRENT_MAIN_REGISTRY_PLUS_VERIFIED_OFFICIAL_MESSAGE_EVENTS",
+    direct_channel_evidence: endpointEvidence ? direct_channel_evidence_ref : "NOT_VERIFIED"
+  });
+  PRODUCED_KAIOS_WORKFORCE_PROJECTIONS.add(result);
+  return result;
+}
+
+/**
+ * Project the hourly Heartbeat, daily Breath and two-hour product report gates.
+ * This function plans and reconciles evidence only. It never sends a prompt,
+ * creates an ACK, moves money, or upgrades an unverified endpoint.
+ */
+export function planKaiosCompanyHeartbeatBreathV1({
+  observed_at,
+  workforce_projection,
+  official_message_lifecycles = [],
+  detected_work_count = 0,
+  last_heartbeat_at = null,
+  last_product_report_at = null,
+  previous_breath_day_key = null,
+  canonical_day_clock = null,
+  accounting_ledger = [],
+  compute_cost_ledger = []
+}) {
+  invariant(PRODUCED_KAIOS_WORKFORCE_PROJECTIONS.has(workforce_projection), "COMPANY_LIFE_WORKFORCE_CAPABILITY_REQUIRED", "Company Life requires a canonical workforce projection");
+  requireArray(official_message_lifecycles, "company_life.official_message_lifecycles");
+  requireArray(accounting_ledger, "company_life.accounting_ledger");
+  requireArray(compute_cost_ledger, "company_life.compute_cost_ledger");
+  invariant(official_message_lifecycles.every((record) => PRODUCED_KAIOS_OFFICIAL_MESSAGE_PROJECTIONS.has(record)), "COMPANY_LIFE_LIFECYCLE_CAPABILITY_REQUIRED", "Company Life accepts only canonical official-message lifecycles");
+  invariant(typeof observed_at === "string" && Number.isFinite(Date.parse(observed_at)), "COMPANY_LIFE_OBSERVED_AT_INVALID", "Company Life requires an ISO timestamp");
+  invariant(Number.isSafeInteger(detected_work_count) && detected_work_count >= 0, "COMPANY_LIFE_WORK_COUNT_INVALID", "Detected work count must be a non-negative integer");
+  const elapsed = (value) => value === null ? Number.POSITIVE_INFINITY : Date.parse(observed_at) - Date.parse(value);
+  for (const [field, value] of [["last_heartbeat_at", last_heartbeat_at], ["last_product_report_at", last_product_report_at]]) {
+    invariant(value === null || (typeof value === "string" && Number.isFinite(Date.parse(value)) && Date.parse(value) <= Date.parse(observed_at)), "COMPANY_LIFE_TIME_INVALID", `${field} must be null or a prior ISO timestamp`);
+  }
+  for (const entry of accounting_ledger) {
+    invariant(KAIOS_COMPANY_LIFE_ACCOUNTING_CLASSES.includes(entry?.category), "COMPANY_LIFE_ACCOUNTING_CLASS_INVALID", "Accounting entries must preserve the canonical separated categories");
+    invariant(Number.isFinite(Number(entry?.amount)) && Number(entry.amount) >= 0, "COMPANY_LIFE_ACCOUNTING_AMOUNT_INVALID", "Accounting amounts must be finite and non-negative");
+  }
+  for (const entry of compute_cost_ledger) {
+    invariant(typeof entry?.work_id === "string" && entry.work_id.trim() && typeof entry?.worker_id === "string" && entry.worker_id.trim(), "COMPANY_LIFE_COMPUTE_IDENTITY_REQUIRED", "Compute entries require work and worker IDs");
+    invariant(Number.isFinite(Number(entry?.usage_delta)) && Number(entry.usage_delta) >= 0 && Number.isFinite(Number(entry?.duration_ms)) && Number(entry.duration_ms) >= 0, "COMPANY_LIFE_COMPUTE_USAGE_INVALID", "Compute usage and duration must be finite and non-negative");
+  }
+
+  const heartbeatDue = elapsed(last_heartbeat_at) >= 60 * 60 * 1000;
+  const productReportDue = elapsed(last_product_report_at) >= 2 * 60 * 60 * 1000;
+  const reachable = workforce_projection.automation_reachable_workers;
+  const verifiedStarted = official_message_lifecycles.filter((record) => record.EXECUTION_STATUS === "WORK_STARTED");
+  const verifiedClosed = official_message_lifecycles.filter((record) => record.FINAL_STATUS === "CLOSED_CANDIDATE");
+  const closedLoop = official_message_lifecycles.filter((record) => record.AUTOMATION_CLOSED_LOOP === "VERIFIED");
+  const dayClockVerified = VERIFIED_KAIOS_COMPANY_DAY_CLOCKS.has(canonical_day_clock);
+  const breathDue = dayClockVerified && canonical_day_clock.day_key !== previous_breath_day_key;
+  const totals = Object.fromEntries(KAIOS_COMPANY_LIFE_ACCOUNTING_CLASSES.map((category) => [category,
+    accounting_ledger.filter((entry) => entry.category === category).reduce((sum, entry) => sum + Number(entry.amount), 0)]));
+  const heartbeatStatus = !heartbeatDue ? "NOT_DUE"
+    : reachable.length === 0 ? "DUE_DISPATCH_BLOCKED_NO_VERIFIED_ENDPOINT"
+    : detected_work_count === 0 ? "DUE_NO_VALUABLE_WORK_AVAILABLE"
+    : "DUE_READY_FOR_VERIFIED_TRANSPORT";
+  return Object.freeze({
+    schema: "KAIOS_COMPANY_HEARTBEAT_BREATH_V1",
+    life_center: "K11520_花果山",
+    observed_at,
+    heartbeat: Object.freeze({
+      interval: "PT1H", due: heartbeatDue, status: heartbeatStatus,
+      detected_work_count, automation_reachable_workers: reachable.length,
+      verified_work_started_count: verifiedStarted.length,
+      verified_closed_candidate_count: verifiedClosed.length,
+      first_end_to_end_work_id: closedLoop[0]?.WORK_ID ?? null,
+      operational: closedLoop.length > 0
+    }),
+    breath: Object.freeze({
+      cadence: "DAILY_CROSS_DAY", due: Boolean(breathDue),
+      status: !dayClockVerified ? "BLOCKED_CANONICAL_DAY_CLOCK_REQUIRED" : breathDue ? "DUE_REBALANCE_CANDIDATE" : "NOT_DUE",
+      day_key: dayClockVerified ? canonical_day_clock.day_key : null,
+      previous_day_key: previous_breath_day_key,
+      accounting_totals: Object.freeze(totals),
+      accounting_evidence_status: accounting_ledger.length ? "NOT_VERIFIED_CALLER_INPUT" : "NO_ENTRIES",
+      compute_cost_entries: compute_cost_ledger.length,
+      compute_cost_evidence_status: compute_cost_ledger.length ? "NOT_VERIFIED_CALLER_INPUT" : "NO_ENTRIES",
+      payroll_execution: "NOT_LIVE"
+    }),
+    product_report: Object.freeze({
+      cadence: "PT2H", due: productReportDue,
+      active_workers: workforce_projection.active_workers,
+      who_is_actually_coding: workforce_projection.who_is_actually_coding,
+      who_is_reviewing: workforce_projection.who_is_reviewing,
+      idle_workers: workforce_projection.available_workers,
+      blocked_workers: Object.freeze(workforce_projection.records.filter((record) => record.RUNTIME_STATUS === "NOT_VERIFIED").map((record) => record.WORKER_ID))
+    }),
+    accounting_policy: Object.freeze({ categories: KAIOS_COMPANY_LIFE_ACCOUNTING_CLASSES, mixed_categories_forbidden: true }),
+    authority: Object.freeze({ prompt_sent: false, ack_created: false, mainnet_tx_sent: false, treasury_moved: false, payroll_paid: false, secret_accessed: false }),
+    status: closedLoop.length > 0 ? "OPERATIONAL_VERIFIED_CLOSED_LOOP" : "PARTIAL_AUTOMATION_CLOSED_LOOP_NOT_VERIFIED"
   });
 }
 
@@ -2358,6 +2589,7 @@ export async function resolveActiveCompanyRepositoryEvidence({
   pr_work_order_refs = [],
   work_order_history_refs = [],
   direct_channel_evidence_refs = [],
+  company_day_clock_evidence_refs = [],
   active_task_pr = null,
   fetch_impl = CANONICAL_COMPANY_PUBLIC_FETCH
 }) {
@@ -2367,6 +2599,7 @@ export async function resolveActiveCompanyRepositoryEvidence({
   requireArray(pr_work_order_refs, "pr_work_order_refs");
   requireArray(work_order_history_refs, "work_order_history_refs");
   requireArray(direct_channel_evidence_refs, "direct_channel_evidence_refs");
+  requireArray(company_day_clock_evidence_refs, "company_day_clock_evidence_refs");
   invariant(typeof fetch_impl === "function", "PUBLIC_GITHUB_FETCH_REQUIRED", "Public GitHub evidence resolution requires fetch");
   const nodeTestContext = globalThis.process?.env?.NODE_TEST_CONTEXT;
   invariant(fetch_impl === CANONICAL_COMPANY_PUBLIC_FETCH || nodeTestContext === "child-v8", "PUBLIC_GITHUB_CUSTOM_FETCH_FORBIDDEN", "Custom evidence transports are allowed only inside the Node test runner");
@@ -2392,7 +2625,11 @@ export async function resolveActiveCompanyRepositoryEvidence({
     invariant(typeof path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(path), "DIRECT_CHANNEL_EVIDENCE_PATH_INVALID", "Direct-channel evidence must be a JSON file in KGEN-Organization/WorkOrders");
     return path;
   });
-  const paths = [...new Set([...ACTIVE_COMPANY_REPOSITORY_PATHS, ...normalizedGuardianRefs, ...normalizedWorkOrderRefs, ...normalizedChannelRefs])];
+  const normalizedDayClockRefs = company_day_clock_evidence_refs.map((path) => {
+    invariant(typeof path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(path), "COMPANY_DAY_CLOCK_EVIDENCE_PATH_INVALID", "Company day clock evidence must be a JSON file in KGEN-Organization/WorkOrders");
+    return path;
+  });
+  const paths = [...new Set([...ACTIVE_COMPANY_REPOSITORY_PATHS, ...normalizedGuardianRefs, ...normalizedWorkOrderRefs, ...normalizedChannelRefs, ...normalizedDayClockRefs])];
   // Compatibility entry only: canonical reader owns ALL repository HTTP reads.
   const snapshot = await readLatestRepositorySnapshot({
     repository: "klineodyssey/kline-odyssey", observed_at, active_task_pr,
