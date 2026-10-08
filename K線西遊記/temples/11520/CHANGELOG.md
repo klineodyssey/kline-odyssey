@@ -5,17 +5,49 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-06.MARKET-CARD-NODE-RETENTION |
+| REVISION | 2026-10-07.BSC56-REVIEW-CONTROL-CONTRAST |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
-| LAST_UPDATED | 2026-10-06 |
+| LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
-| REVIEWED_BY | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval |
-| SOURCE_COMMIT | cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
-| TASK_ID | K11520-SIMULATION-TRADING-P0-20261006 |
-| CHANGE_REASON | Record retained market-card presentation and preserve the measured HUD-stability gate. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
+| REVIEWED_BY | dot / scoped self-review and parent targeted review / 2026-10-07; browser visual QA pending, no release approval |
+| SOURCE_COMMIT | 0589c16553e781c282b868a374e6fa60e4841f0f |
+| TASK_ID | K11520-BSC56-PRODUCTION-20261007 |
+| CHANGE_REASON | Fix screenshot-confirmed pale-on-white unsigned review controls without changing financial or wallet behavior. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ 0589c16553e781c282b868a374e6fa60e4841f0f |
 | SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-07 — BSC56 review control contrast correction
+
+- Source `0589c16553e781c282b868a374e6fa60e4841f0f` passed settlement Chromium assertions, but inspected screenshots revealed pale select/input text on native white backgrounds. FUNCTIONAL_PASS / VISUAL_FAIL is retained; it is not a releasable UI result.
+- Evidence: Game run `37579408292`, artifact `11464531756`, ZIP SHA256 `c9a710c64bded2820ece99956d4c743b293b6925e680e6fb3c34cebc812b53ce`. Tested merge `918d4758fcd82114a778884a1a0bb59fd6274100` and candidate `0589c165` have identical tree `c2bbfa9ce39a98cf52a7e0d391bb865a0d5468bb`.
+- Scoped explicit select/option/input foreground, background and border colors repair contrast; focus-visible outline, readable placeholders and disabled states are defined without hiding controls. Existing [hidden] guard remains stronger than display styles.
+- Existing settlement browser owner now checks computed enabled/disabled contrast >= 4.5, visible keyboard focus and byte-exact amount preservation; adds controls screenshots in both mobile orientations and desktop resize.
+- Current correction status: LOCAL_CHECKS_PASS / NEW_HEAD_CHROMIUM_PENDING / NEW_HEAD_VISUAL_QA_PENDING / NOT_RELEASEABLE. No functional or visual result is carried forward from the prior candidate. Rollback is the six-file review checkpoint `0589c165` (with its known visual defect).
+
+## 2026-10-07 — BSC56 inline unsigned review candidate
+
+- Existing `runtime/real-trading-preflight-ui.mjs` mounts one inline details section after `#walletSimulation`; the wallet singleton, panel geometry/inert owners, market selection and simulation owners are retained.
+- Eight fields show CHAIN, WALLET, CONTRACT, FUNCTION, TOKEN, AMOUNT, EXPECTED_EFFECT and MAXIMUM_EXPOSURE. Actual page has no trusted deployed-binding/readback owner and remains visibly BLOCKED; no guessed address or synthetic production context is installed.
+- Pure controller clears review on account, chain, session, action, input, source head, binding, block, nonce, allowance or gas change. Bounded descriptor snapshots avoid getters/toJSON. Generation checks reject late results, account ABA, close/reopen and disposal races.
+- Scoped authored [hidden] styling preserves amount/claim and collapsed-panel visibility despite the input display rule; the actual-browser assertion checks the inactive field is hidden.
+- All states keep executionReady, signerRequested and broadcast false. No wallet request, mode change, signing callback, localStorage authority, second wallet or transaction send is added.
+- `tests/11520-real-trading-preflight-ui.test.mjs`: 34/34 pass, including nine new deterministic suites. Focused builder/binding/preflight/static/foundation total: 178/178. `K線西遊記/temples/11520/tests/11520-browser-settlement.mjs` adds actual-entry blocked review, mobile wrapping, desktop resize, session changes, repeated mount and preserved simulation checks.
+- Checkpoint status: FUNCTIONAL_UNIT_PASS / CHROMIUM_NOT_RUN / VISUAL_QA_NOT_RUN / NOT_RELEASEABLE. New screenshots must be captured and inspected at the exact published head before UI product-PASS.
+- Rollback: revert this bounded preflight/runtime/tests/metadata increment to `5351051b2cd8f9e4cf4920841cae2253e99b73cd`; independently reviewed unsigned builder and successful chain56 identity gate remain intact.
+
+## 2026-10-07 — BSC56 unsigned custody review candidate
+
+- Human BSC56-only direction: no new BSC97 product/rehearsal milestone; historical evidence is preserved.
+- Existing `runtime/real-trading-order-intent.mjs::buildBsc56UnsignedCustodyReview` pure-builds KGEN approve/revoke, margin deposit/withdraw and claim review using existing ABI fragments. No provider, wallet, signature, broadcast or ledger mutation.
+- Missing deployed binding returns a null transaction. Calldata requires pinned binding/ABI hashes, explicit token/target/account/nonce/code/source readback metadata and exact uint amounts/gas caps. Input metadata is not a live verification claim.
+- Independent review found and corrected accessor/hash-to-target drift: use one bounded data-descriptor snapshot for all used input/metadata, reject accessors/cycles/nonplain structures and enforce depth/node/UTF-8 budgets. Exact pre-fix runtime blob fails the three new regressions; corrected source passes.
+- Nonzero allowance replacement requires confirmed zero reset; revoke review discloses outstanding allowance exposure. Output is ethers-style unsigned review data, not EIP-1193 request payload.
+- `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs` now pins the authorized helper 1.1.0 metadata and exact executable-body SHA; the other five component pins and historical changelog guards remain exact. Full local UI-static plus focused builder/binding checks pass 140/140.
+- `tests/11520-real-trading-order-intent.test.mjs`: 72/72 focused local tests (twelve new BSC56 cases); with unchanged market-binding tests, 76/76. Full CI/security/browser release gates remain separately pending.
+- `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md` and existing Mainnet manifest record remaining Canon/Oracle/deployment/UX gaps. No invented KAIOS derivative semantics, guessed deployment, USD/USDT conversion or second financial organ.
+- `.github/workflows/11520-trading-readiness.yml` separates preserved public97 evidence into manual opt-in, adds required pinned-hash chain56 KGEN identity evidence and retains every local financial/security/accounting guard. `tests/11520-kgen-margin-wallet-foundation.test.mjs` adds bounded read-only transport and fail-closed adversarial coverage; source/code identity is not production readiness. Local focused/static total: 144/144.
+- Rollback: remove only this builder/import and appended tests, retaining #519/#522 simulation behavior and independent #523 Navigator. Initial matrix checkpoint: `8886aa1fb9956e6abd5d7477b6357a68d573c3ba`; initial builder checkpoint: `7741674612a4707ff579c1dbd35d12bae4efa5fe`.
 
 ## 2026-10-06 — V2.9.5 retained market-card presentation revision
 

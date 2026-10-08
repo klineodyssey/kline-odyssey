@@ -1,6 +1,13 @@
 name: 11520 Trading Readiness
 
 on:
+  workflow_dispatch:
+    inputs:
+      include_historical_bsc97:
+        description: "Run preserved BSC97 read-only evidence; never a BSC56 product gate"
+        required: false
+        type: boolean
+        default: false
   push:
     paths:
       - "KGEN/contracts/KGEN_BrainExchange.sol"
@@ -10,6 +17,8 @@ on:
       - "KGEN/contracts/KGEN_OracleSourceAdapter.sol"
       - "KGEN/scripts/rehearse_bsc_testnet.mjs"
       - "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json"
+      - "docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json"
+      - "tests/11520-kgen-margin-wallet-foundation.test.mjs"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
@@ -33,6 +42,8 @@ on:
       - "KGEN/contracts/KGEN_OracleSourceAdapter.sol"
       - "KGEN/scripts/rehearse_bsc_testnet.mjs"
       - "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json"
+      - "docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json"
+      - "tests/11520-kgen-margin-wallet-foundation.test.mjs"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
@@ -188,7 +199,44 @@ jobs:
           path: artifacts/11520-candidate-wallet-qa/
           if-no-files-found: error
 
+  bsc56-readonly-binding:
+    # Avoid duplicate public RPC traffic on branch push + pull_request events.
+    if: ${{ github.event_name != 'push' || github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      K11520_REVIEWED_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify exact head and BSC56 pinned KGEN identity (read only)
+        env:
+          K11520_RUN_BSC56_READONLY: "1"
+          K11520_BSC56_RPC_URL: https://bsc-dataseed.bnbchain.org
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$K11520_REVIEWED_COMMIT"
+          node --test tests/11520-kgen-margin-wallet-foundation.test.mjs
+          git diff --exit-code
+      - name: Preserve BSC56 identity evidence or precise UNKNOWN failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bsc56-readonly-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/bsc56-readonly/
+          if-no-files-found: error
+
+  # Human BSC56-only decision, 2026-10-07: historical public97 evidence is
+  # preserved as manual opt-in tooling, never a production completion gate.
   m1-readonly-wallet:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_historical_bsc97 == true }}
+    name: Historical BSC97 read-only evidence (manual opt-in)
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
