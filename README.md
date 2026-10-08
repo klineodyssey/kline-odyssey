@@ -1,10 +1,38 @@
 <!-- =========================================================
+
 KLINE ODYSSEY ｜ KGEN OFFICIAL HOMEPAGE
 Purpose: Official project homepage for GitHub Pages, BscScan, CMC, CoinGecko, GeckoTerminal review.
 Last optimized: 2026-06-11
 ========================================================= -->
 
 # KLINE ODYSSEY
+
+## Automated Handoff V2 research/design (2026-10-05)
+
+Human-requested research only; no identity issuance, worker registration, runtime,
+dispatch, credentials, service provisioning or production authority. Historical
+PR #177 is not refreshed or merged. K11520 product engineering retains priority.
+
+| Full repository path | Purpose |
+|---|---|
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_001_IDENTITY.md` | Proposed ADR-001 Identity. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_002_TRANSPORT.md` | Proposed ADR-002 Transport. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_003_DELIVERY_SEMANTICS.md` | Proposed ADR-003 Delivery Semantics. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_004_INBOX_OUTBOX.md` | Proposed ADR-004 Inbox Outbox. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_005_REVIEWER_INDEPENDENCE.md` | Proposed ADR-005 Reviewer Independence. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_006_HUMAN_ESCALATION.md` | Proposed ADR-006 Human Escalation. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_007_GITHUB_CANON.md` | Proposed ADR-007 GitHub Canon. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_008_COST_CONTROL.md` | Proposed ADR-008 Cost Control. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ARCHITECTURE.md` | Durable ownership, inbox/outbox, recovery and real demo gates. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_IDENTITY_MODEL.md` | Life/Worker/Instance/Session/controller binding and review independence. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_RESEARCH.md` | Primary-source research, historical PR177 audit and boundaries. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_STATE_MACHINE.md` | Typed envelope, atomic legal transitions and ACK semantics. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_THREAT_MODEL.md` | Trust boundaries, attack matrix and negative-test requirements. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_TRANSPORT_MATRIX.md` | Verified platform features and unconfigured adapter gaps. |
+
+Boot CURRENT remains protected and unchanged. The precise metadata-only Boot
+inventory gap is documented in `docs/KAIOS_AUTOMATED_HANDOFF_V2_RESEARCH.md`.
+
 
 ### KAIOS Backend / Recovery V1 review candidate
 
