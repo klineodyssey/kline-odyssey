@@ -488,13 +488,15 @@ const responsiveJobs=Object.fromEntries([...responsiveWorkflow.matchAll(/^  ([\w
   .filter(match=>match.index>responsiveWorkflow.indexOf('\njobs:\n'))
   .map(([,name,body])=>[name,{
     needs:(body.match(/^    needs: (.+)$/m)?.[1]||'').replace(/[\[\]]/g,'').split(',').map(value=>value.trim()).filter(Boolean),
-    condition:body.match(/^    if: (.+)$/m)?.[1].replace(/^\$\{\{\s*|\s*\}\}$/g,'')
+    condition:body.match(/^    if: (.+)$/m)?.[1].replace(/^\$\{\{\s*|\s*\}\}$/g,''),
+    timeoutMinutes:Number(body.match(/^    timeout-minutes: (\d+)$/m)?.[1]||0)
   }]));
 
 test('responsive QA serializes heavy jobs without cancelling or hiding failed coverage',()=>{
   assert.deepEqual(responsiveJobs['contextual-hud'].needs,[]);
   assert.deepEqual(responsiveJobs['world-first'].needs,['contextual-hud']);
   assert.deepEqual(responsiveJobs.responsive.needs,['contextual-hud','world-first']);
+  assert.equal(responsiveJobs.responsive.timeoutMinutes,20,'real-entry QA keeps bounded headroom for browser installation plus the full layout matrix');
   assert.deepEqual(responsiveJobs['m1-public-readonly'].needs,['responsive']);
   for(const name of ['world-first','responsive','m1-public-readonly'])assert.match(responsiveJobs[name].condition,/!cancelled\(\)/,name+' overrides implicit ancestor success but respects cancellation');
   assert.match(responsiveJobs['m1-public-readonly'].condition,/needs\.responsive\.result == 'success'/);
