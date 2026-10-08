@@ -595,9 +595,10 @@ test('Digital Ant persistence rejects malformed evidence and review state blocks
   const fakeArchive=structuredClone(envelope);fakeArchive.state.cargoRisk.resolvedPolicies.push({policyId:'FAKE',missionId:'MISSING',receiptId:'FAKE-RECEIPT',status:'COMPLETED_NO_OPEN_CLAIM',reserveReleasedKaios:10,premiumRefundKaios:0,evidenceRetained:true,incidentEvidence:[],assetTransfer:false,chainTransfer:false,mainnetWrite:false});assert.throws(()=>restoreDigitalAntPersistenceEnvelope(fakeArchive,{expectedLifeId:'DIGITAL_ANT_PERSISTENCE'}),/INVALID_DIGITAL_ANT_POLICY_EVIDENCE/);
   ant.cargoRisk.persistenceState={status:'REVIEW_REQUIRED',reason:'CORRUPT_STORAGE'};const mission=createDeliveryMission({missionId:'PERSISTENCE-BLOCK',amount:10,destinationAtmId:'ATM-PERSISTENCE',freightOffer:10}),blocked='DIGITAL_ANT_PERSISTENCE_REVIEW_REQUIRED';
   for(const mutate of [
-    ()=>activateCargoInsurance(ant,null),()=>resolveMissileInterception(ant,{}),()=>attemptCargoRobbery(ant,{}),()=>settleCargoInsuranceClaim(ant,{}),
+    ()=>activateCargoInsurance(ant,null),()=>previewMissileInterception(ant,{}),()=>resolveMissileInterception(ant,{}),()=>attemptCargoRobbery(ant,{}),()=>settleCargoInsuranceClaim(ant,{}),
     ()=>assignDelivery(ant,mission,[{atmId:'ATM-PERSISTENCE',x:1,y:1,z:1,online:true}]),()=>loadCargo(ant),()=>tickDigitalAntDelivery(ant),
-    ()=>verifyDeliveryReceipt(ant,{}),()=>resolveCargoInsuranceAfterDelivery(ant,{}),()=>acceptSimulatedAtmDeliveryReceipt(ant,{})
+    ()=>verifyDeliveryReceipt(ant,{}),()=>resolveCargoInsuranceAfterDelivery(ant,{}),()=>acceptSimulatedAtmDeliveryReceipt(ant,{}),
+    ()=>previewPlayerHomeAcceptance(ant,{}),()=>acceptPlayerHomeDelivery(ant,{})
   ])assert.equal(mutate().reason,blocked);
 });
 

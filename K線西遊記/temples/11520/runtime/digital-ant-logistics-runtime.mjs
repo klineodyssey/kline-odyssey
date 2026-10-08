@@ -418,6 +418,7 @@ export function previewMissileInterception(ant,{
   attackerLifeId,attackerController='PLAYER_LOCAL',playerPosition={},kaiosMass=1,availableKaios=0,attackC=-1,
   replayKey,now=Date.now(),maxDistance=MISSILE_MAX_RANGE_METERS,atmosphereDensityKgM3=0
 }={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const mission=ant?.mission,risk=ant?.cargoRisk;
   if(!mission||mission.status!=='IN_TRANSIT')return {ok:false,reason:'IN_TRANSIT_MISSION_REQUIRED'};
   if(!attackerLifeId||String(attackerLifeId)===String(ant.lifeId))return {ok:false,reason:'DISTINCT_ATTACKER_LIFE_REQUIRED'};
@@ -652,6 +653,7 @@ export function acceptSimulatedAtmDeliveryReceipt(ant,{destinationAtmId=null,rec
 }
 
 export function previewPlayerHomeAcceptance(ant,{requesterLifeId,playerPosition={}}={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const m=ant?.mission;
   if(!m||m.status!=='ARRIVED_AWAITING_RECEIPT')return {ok:false,reason:'NOT_AWAITING_RECEIPT'};
   if(!m.customerAcceptanceRequired||!String(m.serviceType||'').startsWith('PLAYER_HOME_'))return {ok:false,reason:'NOT_PLAYER_HOME_DELIVERY'};
@@ -664,6 +666,7 @@ export function previewPlayerHomeAcceptance(ant,{requesterLifeId,playerPosition=
 }
 
 export function acceptPlayerHomeDelivery(ant,{requesterLifeId,playerPosition={},paymentEvidence=null,now=Date.now()}={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const preview=previewPlayerHomeAcceptance(ant,{requesterLifeId,playerPosition});
   if(!preview.ok)return preview;
   let paidAmount=null;
