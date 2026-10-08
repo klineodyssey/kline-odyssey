@@ -10,17 +10,17 @@ const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CH
 const desktopOnly=process.env.K11520_COURIER_DESKTOP_ONLY==='1',errors=[];
 let page,diagnosticMissionId=null,expectedCourierLifeId=null,diagnosticRunning=false;
 const diagnosticPrefix=desktopOnly?'11520-living-world-desktop':'11520-living-world';
-const stageTimes=[],elapsed=()=>Math.round(performance.now()-processStarted);
+const budgetMs=desktopOnly?90_000:360_000,stageTimes=[],elapsed=()=>Math.round(performance.now()-processStarted);
 const stage=async name=>{
-  const entry={name,elapsedMs:elapsed(),remainingBudgetMs:Math.max(0,90000-elapsed())};
+  const entry={name,elapsedMs:elapsed(),remainingBudgetMs:Math.max(0,budgetMs-elapsed())};
   stageTimes.push(entry);console.log('[11520 LIVING STAGE]',JSON.stringify(entry));
-  await fs.writeFile(`${OUT}/${diagnosticPrefix}-timings.json`,JSON.stringify({sourceSha:process.env.GITHUB_SHA||'LOCAL',budgetMs:90000,stages:stageTimes},null,2));
+  await fs.writeFile(`${OUT}/${diagnosticPrefix}-timings.json`,JSON.stringify({sourceSha:process.env.GITHUB_SHA||'LOCAL',budgetMs,stages:stageTimes},null,2));
 };
-// Read-only evidence before the unchanged outer 90s cap. This timer does not
+// Read-only evidence before the bounded outer cap. This timer does not
 // retry, advance game time, suppress failures, or extend any assertion timeout.
 const captureDiagnostic=async (reason,{screenshot=true}={})=>{
   if(diagnosticRunning)return;diagnosticRunning=true;
-  const report={reason,elapsedMs:elapsed(),remainingBudgetMs:Math.max(0,90000-elapsed()),stage:stageTimes.at(-1)?.name,stages:[...stageTimes]};
+  const report={reason,elapsedMs:elapsed(),remainingBudgetMs:Math.max(0,budgetMs-elapsed()),stage:stageTimes.at(-1)?.name,stages:[...stageTimes]};
   let timer;
   try{
     report.state=await Promise.race([page.evaluate(({missionId,expectedLifeId})=>{
@@ -35,7 +35,7 @@ const captureDiagnostic=async (reason,{screenshot=true}={})=>{
   if(screenshot)await page?.screenshot({path:`${OUT}/${diagnosticPrefix}-${reason}.png`,timeout:1500}).catch(()=>{});
   diagnosticRunning=false;
 };
-const watchdog=setTimeout(()=>{void captureDiagnostic('pre-timeout').catch(error=>console.error('Diagnostic capture failed',String(error)))},Math.max(0,80000-elapsed()));
+const watchdog=setTimeout(()=>{void captureDiagnostic('pre-timeout').catch(error=>console.error('Diagnostic capture failed',String(error)))},Math.max(0,budgetMs-10_000-elapsed()));
 try{
 if(desktopOnly){
 await stage('desktop-boot');
@@ -49,15 +49,20 @@ await page.waitForTimeout(700);
 await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
 // Desktop starts fresh, then crosses the compact breakpoint in both tray states.
 const verifyDesktopContext=async(label)=>{
-  const boxes=await page.evaluate(()=>['cargoInterceptionButton','homeDeliveryButton'].map(id=>{const el=document.getElementById(id),r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{id,x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,hit:el===hit||el.contains(hit)}}));
+  const boxes=await page.evaluate(()=>['cargoInterceptionButton','homeDeliveryButton','whiteholeEscortButton','k11520HudCollapseAll'].map(id=>{const el=document.getElementById(id),r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2),style=getComputedStyle(el);return{id,x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,hit:el===hit||el.contains(hit),background:style.backgroundColor}}));
   for(const box of boxes){assert.ok(box.width>=44&&box.height>=44&&box.hit,`${label}: ${box.id} owns its desktop touch target`);assert.ok(box.x>=0&&box.y>=0&&box.right<=1280&&box.bottom<=800)}
-  assert.ok(boxes[0].bottom<=boxes[1].y||boxes[1].bottom<=boxes[0].y,`${label}: desktop Courier/Raid cannot overlap`);
+  for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++)assert.ok(boxes[i].bottom<=boxes[j].y||boxes[j].bottom<=boxes[i].y||boxes[i].right<=boxes[j].x||boxes[j].right<=boxes[i].x,`${label}: desktop ${boxes[i].id}/${boxes[j].id} cannot overlap`);
+  const preflight=await page.locator('#k11520RealTradePreflight').evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom}}),whitehole=boxes.find(box=>box.id==='whiteholeEscortButton');
+  assert.ok(whitehole.bottom<=preflight.y||preflight.bottom<=whitehole.y||whitehole.right<=preflight.x||preflight.right<=whitehole.x,`${label}: desktop white-hole shortcut cannot overlap the real-trading preflight control`);
+  assert.notEqual(boxes.find(box=>box.id==='k11520HudCollapseAll').background,'rgb(240, 240, 240)',`${label}: rotated HUD collapse control must retain its dark utility skin`);
+  assert.match(await page.locator('#k11520UtilityMaster').getAttribute('aria-controls'),/\bwhiteholeEscortButton\b/,`${label}: utility master must expose the white-hole shortcut relationship`);
   await page.screenshot({path:`${OUT}/desktop-context-${label}-1280x800.png`});
 };
 const desktopMoreStyle=await page.locator('#k11520UtilityMaster').evaluate(el=>{const s=getComputedStyle(el);return{label:el.textContent,color:s.color,background:s.backgroundColor}});
 assert.equal(desktopMoreStyle.label,'☰');assert.equal(desktopMoreStyle.color,'rgb(223, 250, 255)');assert.match(desktopMoreStyle.background,/^rgba?\(16, 25, 35/,'native desktop More keeps the existing readable dark control style');
 assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),false,'fresh desktop idle Raid hidden');
 assert.equal(await page.locator('#homeDeliveryButton').isVisible(),false,'fresh desktop idle Courier hidden');
+assert.equal(await page.locator('#whiteholeEscortButton').isVisible(),false,'fresh desktop white-hole shortcut stays behind the utility master');
 await page.screenshot({path:`${OUT}/desktop-context-idle-1280x800.png`});
 await page.locator('#k11520UtilityMaster').click();await verifyDesktopContext('fresh-open');
 await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);await page.setViewportSize({width:1280,height:800});await page.waitForTimeout(150);await verifyDesktopContext('rotate-open');
