@@ -8,7 +8,7 @@ UPDATED_BY: Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09
 REVIEWED_BY: PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge
 SOURCE_COMMIT: b39c16e5cc5f2409590d62fa9a53b5ceb3750300
 TASK_ID: K11520-PUBLIC-FREE-SIM-FEED-20261009
-CHANGE_REASON: Classify the complete free BTC/ETH/BNB quote set as UNKNOWN, FRESH, STALE or FAILED with exact source/time/failure provenance and no invented divergence quorum.
+CHANGE_REASON: Classify the complete free BTC/ETH/BNB quote set with exact source/time/failure provenance, strict integer provider sequence, and no invented divergence quorum.
 ANCESTOR: K線西遊記/temples/11520/runtime/public-market-quotes.mjs @ c35320c6f95ea9411fd9e5f3ad295599f029a3ae
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Fetch validated, read-only 11520 public market reference quotes from Binance's market-data-only origin.
@@ -33,8 +33,8 @@ export function publicObservationStatus(observation,now=Date.now()){
   const unknown=!observation||observation?.quality===PUBLIC_QUOTE_QUALITY.UNKNOWN,failed=Boolean(observation?.failure);
   const invalid=!unknown&&!failed&&(observation?.source!==PUBLIC_MARKET_QUOTE_SOURCE.id
     ||!Number.isFinite(Number(observation?.price))||Number(observation?.price)<=0
-    ||!Number.isSafeInteger(Number(observation?.updatedAt))||Number(observation?.updatedAt)<=0
-    ||!Number.isSafeInteger(Number(observation?.sequence))||Number(observation?.sequence)<0);
+    ||!Number.isSafeInteger(observation?.updatedAt)||observation.updatedAt<=0
+    ||!Number.isSafeInteger(observation?.sequence)||observation.sequence<0);
   const stale=unknown||failed||invalid||!Number.isFinite(age)||age<0||age>FREE_ORACLE_MAX_AGE_MS;
   const quality=unknown?PUBLIC_QUOTE_QUALITY.UNKNOWN:(failed||invalid)?PUBLIC_QUOTE_QUALITY.FAILED:stale?PUBLIC_QUOTE_QUALITY.STALE:PUBLIC_QUOTE_QUALITY.FRESH;
   return {...observation,age,stale,staleThreshold:FREE_ORACLE_MAX_AGE_MS,

@@ -8,7 +8,7 @@ UPDATED_BY: Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09
 REVIEWED_BY: PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge
 SOURCE_COMMIT: b39c16e5cc5f2409590d62fa9a53b5ceb3750300
 TASK_ID: K11520-PUBLIC-FREE-SIM-FEED-20261009
-CHANGE_REASON: Surface free BTC/ETH/BNB source-time-quality labels and pass only admitted fresh observations to the existing simulation adapter.
+CHANGE_REASON: Surface free BTC/ETH/BNB source-time-quality labels and require adapter admission before the existing native confirmation and PREVIEW journey transition.
 ANCESTOR: K線西遊記/temples/11520/runtime/game-5d-main.mjs @ c35320c6f95ea9411fd9e5f3ad295599f029a3ae
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collision-constrained physical body, plane-aware maps, canonical XYZ world/entity navigation and 3D Life visuals. Signed-C rendering is delegated to its canonical runtime; game state exposes one direct canonical trade-side setter.
@@ -203,7 +203,8 @@ function syncMarketKLabels(){
   $('#feed').title='V1 · |C| 0.001–1 · SIMULATION ONLY · >1C production locked · 免費 REST 參考行情，非低延遲結算 Oracle';
   const selectedMarket=market.markets.find(row=>row.axis===S.axis)||market.markets[0],feedState=publicMarketQuoteSetStatus(publicObservations,{symbols:MARKETS}),selectedFeed=feedState.rows[selectedMarket?.symbol];
   const feedSource=selectedFeed?.source===PUBLIC_MARKET_QUOTE_SOURCE.id?'BINANCE FREE':'UNAVAILABLE',feedTime=Number.isSafeInteger(selectedFeed?.updatedAt)?`${new Date(selectedFeed.updatedAt).toISOString().slice(11,19)}Z`:'--',feedFailure=selectedFeed?.failure?'YES':'NO';
-  $('#feed').textContent=`FREE ${feedState.quality} | ${selectedMarket?.symbol||'NO MARKET'} | SRC ${feedSource} | TIME ${feedTime} | STALE ${selectedFeed?.stale?'YES':'NO'} | FAIL ${feedFailure}${simulationLocal?' | SIM LOCAL':''}`;
+  const legacyFeedStatus=feedState.quality==='FRESH'?'MARKET DATA LIVE':'MARKET DATA STALE';
+  $('#feed').textContent=`${legacyFeedStatus} | FREE ${feedState.quality} | ${selectedMarket?.symbol||'NO MARKET'} | SRC ${feedSource} | TIME ${feedTime} | STALE ${selectedFeed?.stale?'YES':'NO'} | FAIL ${feedFailure}${simulationLocal?' | SIM LOCAL':''}`;
   $('#feed').title=MARKETS.map(symbol=>{const row=feedState.rows[symbol];return `${symbol} SOURCE=${row.source||'UNAVAILABLE'} TIME=${Number.isSafeInteger(row.updatedAt)?new Date(row.updatedAt).toISOString():'UNAVAILABLE'} STATUS=${row.quality} FAILURE=${row.failure||'NONE'}`}).join(' | ')+` | DIVERGENCE=${feedState.divergenceStatus} | SIMULATION ONLY | NO SETTLEMENT AUTHORITY`;
   globalThis.__K11520_FREE_ORACLE__=feedState.rows;
   globalThis.__K11520_MARKET_K__=market;
@@ -433,7 +434,7 @@ async function paintOrderPreview({background=false}={}){
   if(!p.ok){el.textContent=pending.axis+' '+pending.market+' · '+p.code+' · '+p.reason;return}
 el.innerHTML=receiptRows([['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['PRICE SOURCE',p.priceSource||(isTestnet()?'ON_CHAIN_ORACLE':'SIMULATION_OBSERVATION')],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+(isTestnet()?' tKGEN TEST':' KGEN')],['PnL MODEL',p.pnlModel||'NOTIONAL_RETURN_V1'],[p.pnlModel==='INDEX_DELTA_C_LOTS_V1'?'每 1 index point 變動':'每 1% 變動（舊部署）',fmt(p.lots*p.leverage/(p.pnlModel==='INDEX_DELTA_C_LOTS_V1'?1:100),6)+(isTestnet()?' tKGEN TEST':' KGEN')],['AVAILABLE',fmt(p.available,6)+(isTestnet()?' tKGEN TEST':' KGEN')],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+(isTestnet()?'<small>TESTNET · NO REAL VALUE。風險與 liquidation threshold 來自鏈上設定。Oracle stale 時拒絕送出；不以 public browser quote 結算。</small>':'<small>SIMULATION ONLY · 非真實行情／非鏈上成交。若 PRICE SOURCE 為 K11520_DETERMINISTIC_SIMULATION，使用本機時鐘的可重現模擬價格；真實行情恢復也不跳換此市場來源。模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。PnL = ΔIndex × C × Lots；反向歸零 '+fmt(1/p.leverage,6)+' index points。跳空以 observed price 計算實際斷頭價。</small>');
 }
-function openOrder(){
+function openOrderAdmitted(){
   syncTradeAxisFromPlane();const a=axis(),q=executionQuote(a.market),p=q?.price;pending=null;$('#confirmOrder').disabled=true;if(!p){$('#confirm').classList.remove('open');toast(q?.error?'ORDER_REJECTED · '+q.error:'ORACLE_STALE · 行情未就緒');return}
   let c;try{const signed=globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[S.axis];c=signed===undefined?signedCFromLegacyMagnitude(a.c,a.side):normalizeSignedC(signed)}catch{toast('ORDER_REJECTED · C 必須非 0 且介於 -100 與 +100');return}
   pending={axis:S.axis,market:a.market,lots:a.lots,c};
@@ -443,7 +444,17 @@ function openOrder(){
   for(const input of $$('#confirmBody input'))input.addEventListener('input',paintOrderPreview);
   paintOrderPreview();$('#confirm').classList.add('open');if(journey.event('PREVIEW',{c})){emit11520WorldFeedback('QUEST_COMPLETE');try{playerLife.recordEvent({id:'quest:FIRST_JOURNEY',type:'QUEST_COMPLETE'})}catch(error){if(error.message!=='EVENT_REPLAY')toast(error.message)}toast('序章完成 · 可繼續探索；錢包稍後再連，不需確認下單')}
 }
-$('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};
+async function openOrder(){
+  syncTradeAxisFromPlane();const a=axis(),axisAtOpen=S.axis,adapter=execution,q=executionQuote(a.market),p=q?.price,request=++previewSequence;
+  pending=null;$('#confirmOrder').disabled=true;
+  if(!p){$('#confirm').classList.remove('open');toast(q?.error?'ORDER_REJECTED · '+q.error:'ORACLE_STALE · MARKET DATA UNAVAILABLE');return}
+  let c;try{const signed=globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[axisAtOpen];c=signed===undefined?signedCFromLegacyMagnitude(a.c,a.side):normalizeSignedC(signed)}catch{toast('ORDER_REJECTED | INVALID_C');return}
+  const preflight=await adapter.preview({axis:axisAtOpen,market:a.market,lots:a.lots,c,currentPrice:p,priceSource:q?.source,triggerPrice:p,stopPrice:null,takeProfitPrice:null});
+  if(request!==previewSequence||adapter!==execution||axisAtOpen!==S.axis)return;
+  if(!preflight.ok&&(preflight.priceTransitions===false||preflight.code==='ORACLE_STALE')){pending=null;$('#confirm').classList.remove('open');toast(preflight.code+' | '+preflight.reason);return}
+  openOrderAdmitted();
+}
+$('#cancelOrder').onclick=$('#confirmX').onclick=()=>{previewSequence++;pending=null;$('#confirm').classList.remove('open')};
 $('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confirmOrder').disabled=true;const input=orderInput();const r=await executionAction(()=>execution.submit(input));if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜委託已建立');openOrgan('orders');renderAxes();hud()};
 async function closePos(){if(execution.readOnly){toast('M1_READ_ONLY · 部位 NOT_REQUESTED；退出請返回原錢包檢視');return}const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=await executionAction(()=>execution.close(p.positionId));if(!r.ok){toast(r.reason);return}if(r.receipt)recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
 

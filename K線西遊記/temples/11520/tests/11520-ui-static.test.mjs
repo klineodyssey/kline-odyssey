@@ -442,23 +442,32 @@ test('signed-C quote fixture is loopback-only and separates blocked SIMULATION W
   for(const [base,expected] of [[undefined,true],['http://127.0.0.1:4173',true],['http://localhost:4173',true],['https://klineodyssey.github.io/kline-odyssey',false],['https://example.com',false]]){
     const context={URL,Date:{now:()=>40000},process:{env:base?{K11520_BASE_URL:base}:{}}};
     runInNewContext(config+payload+'globalThis.result={local:LOCAL_SIMULATION_QA,rows:quoteFixtureRows,ready:quoteFixtureReady};globalThis.payload=freeQuotePayload;',context);
-    assert.equal(context.result.local,expected);assert.equal(context.result.ready,false,'start with WAIT rather than masking quote rejection');
+    assert.equal(context.result.local,expected);assert.equal(context.result.ready,true,'start fresh so the browser regression can establish a warm saved book before failure');
     const route={request:()=>({url:()=> 'https://data-api.binance.vision/api/v3/aggTrades?symbol=ETHUSDT'})};
     assert.equal(context.payload(route,[]).length,0);const row=context.payload(route,context.result.rows)[0];assert.equal(row.p,'3500');assert.equal(row.T,40000);assert.equal(row.a,40000);
   }
   assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.route('https://data-api.binance.vision/api/v3/aggTrades*'"));
-  assert.ok(source.includes('__K11520_FREE_ORACLE__'));assert.ok(source.includes("row.quality!=='FRESH'"));assert.ok(source.includes("waitBlocked:true"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
+  assert.ok(source.includes('__K11520_FREE_ORACLE__'));assert.ok(source.includes("row.sourceStatus!=='REFERENCE_FRESH'"));assert.ok(source.includes('fullLedgerUnchanged:true'));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
   assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:5000})"),'final fixture readiness is local-only');
   for(const guard of ['V1_HIGH_SPEED_PRODUCTION_LOCKED',"'#confirmOrder').isDisabled(),true",'PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈'])assert.ok(source.includes(guard),guard);
   assert.ok(source.includes("page.locator('#confirm').waitFor({state:'visible',timeout:2500})"),'confirmation timeout remains unchanged');
 });
 
-test('signed-C WAIT blocks price preview until complete fresh public admission without debit',()=>{
+test('signed-C warm feed failure blocks native preview and preserves the full saved ledger and journey state',()=>{
   const source=read('./11520-browser-signed-c-immersive.mjs');
   const block=source.slice(source.indexOf('if(LOCAL_SIMULATION_QA){'),source.indexOf('// Human 12:43'));
-  for(const guard of ['__K11520_FREE_ORACLE__',"row.quality!=='FRESH'",'initialQuality',"'#cNumericInput').fill('1')", "'#orderFire').click", "'#confirm').isVisible(),false", "snapshot().wallet),before", 'quoteFixtureReady=true', "textContent.includes('BINANCE_PUBLIC_MARKET_DATA_ONLY')", "'#confirmOrder').isDisabled(),false", "'#cancelOrder').click()", 'waitPreviewAllowed:false','waitBlocked:true'])assert.ok(block.includes(guard),guard);
-  assert.ok(block.indexOf('signed-c-WAIT-blocked-390x844.png')<block.indexOf('quoteFixtureReady=true'));assert.ok(block.indexOf('quoteFixtureReady=true')<block.indexOf("'#cancelOrder').click()"));
+  for(const guard of ['__K11520_FREE_ORACLE__',"row.sourceStatus!=='REFERENCE_FRESH'",'abnormalQuality',"'#cNumericInput').fill('1')", "'#orderFire').click", "'#confirm').isVisible(),false", 'structuredClone(globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot())','structuredClone(globalThis.__K11520_JOURNEY__.snapshot())','fullLedgerUnchanged:true','journeyPreviewUnchanged:true','quoteFixtureReady=false','quoteFixtureReady=true',"row.source==='BINANCE_PUBLIC_MARKET_DATA_ONLY'",'/SRC BINANCE FREE/', "'#confirmOrder').isDisabled(),false", "'#confirmOrder').click()",'recoverySettlementReceiptsUnchanged:true'])assert.ok(block.includes(guard),guard);
+  assert.ok(block.indexOf('quoteFixtureReady=false')<block.indexOf('signed-c-WAIT-blocked-390x844.png'));assert.ok(block.indexOf('signed-c-WAIT-blocked-390x844.png')<block.lastIndexOf('quoteFixtureReady=true'));
   assert.doesNotMatch(block,/K11520_DETERMINISTIC_SIMULATION|waitPreviewAllowed:true/);
+});
+
+test('native order confirmation and PREVIEW journey event occur only after feed-admission preflight passes',()=>{
+  const source=read('../runtime/game-5d-main.mjs'),wrapper=source.slice(source.indexOf('async function openOrder(){'),source.indexOf("$('#cancelOrder').onclick"));
+  assert.ok(wrapper.indexOf('await adapter.preview')<wrapper.indexOf('openOrderAdmitted()'));
+  assert.ok(wrapper.indexOf("preflight.priceTransitions===false||preflight.code==='ORACLE_STALE'")<wrapper.indexOf('openOrderAdmitted()'));
+  const admitted=source.slice(source.indexOf('function openOrderAdmitted(){'),source.indexOf('async function openOrder(){'));
+  assert.ok(admitted.indexOf("$('#confirm').classList.add('open')")<admitted.indexOf("journey.event('PREVIEW'"));
+  assert.doesNotMatch(wrapper,/journey\.event|classList\.add\('open'\)/);
 });
 
 test('responsive event routing retains standalone mobile-HUD coverage and references only its required exact-tree Game owner',async()=>{
@@ -751,10 +760,10 @@ test('simulation component revisions expose complete provenance and recorded exe
  const {createHash}=await import('node:crypto'),hash=text=>createHash('sha256').update(text).digest('hex');
  const revision='2026-10-06.SIMULATION-ORDER-PLAYABILITY',sourceCommit='0ad0cffe33d23d1104baa963fedef25ad149a0ac';
  const assets=[{"path": "runtime/game-5d-main.mjs", "version": "2.9.0", "status": "ACTIVE", "nonMetadataSha256": "4c4b69e6e0c78160b28c28df12c387a7c9d50af62270b5b5a22a71ebf0e8d950", "priorFullSha256": "d38f0a6c21b73553eddfba6fb1742891bef800f4d1ca33e81e2f46123935afda", "revision": "2026-10-06.MARKET-CARD-NODE-RETENTION", "sourceCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4", "ancestorCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4"}, {"path": "runtime/public-market-quotes.mjs", "version": "1.0.0", "status": "ACTIVE", "nonMetadataSha256": "850908b15e29dfeba665b2d1b28535e7bb7812fa5c8cad271a9154ee0603eeaf", "priorFullSha256": "07d2553b0a918a0d33236202eed35dd93dc6b44f7c4f24b1243b199587f99071"}, {"path": "runtime/real-trading-order-intent.mjs", "version": "1.0.0", "status": "CANDIDATE", "nonMetadataSha256": "59c72325eda86da744153e4f64035f032025a6d5a2529fdf30ad417c373113b0", "priorFullSha256": "f412d5e054e2df611c74efc2ee2a66d7467f28ee8adeef6ed22ed22a20c36ece"}, {"path": "runtime/kgen-margin-runtime.mjs", "version": "CURRENT", "status": "ACTIVE", "nonMetadataSha256": "cbbb60fead493a081252f92b222caa6951b8d0cf7dd6e24669f839dd40bc0341", "priorFullSha256": "03063c4c323826fb3a74275884aac060c9267e7dc7b9db9750298f3ef2787631", "revision": "2026-10-07.BNB-LIQUIDATION-STATUS-CONSISTENCY", "sourceCommit": "35e2a331b05140a33e1b86e6918304e3e36ff039", "ancestorCommit": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6", "lastUpdated": "2026-10-07", "reviewedBy": "dot / independent scoped technical source review / 2026-10-07; no registered Reviewer role or release approval", "taskId": "K11520-BNB-LIQUIDATION-STATUS-20261007"}, {"path": "runtime/game-ui-product-fixes-v23.mjs", "version": "2.4.0", "status": "ACTIVE", "nonMetadataSha256": "ec23460a1632e6ec61eda91a5334c9f08d50173ad6091a4c5cb563f35ba4653b", "priorFullSha256": "a944b9fbe886e0348ad1ef0d39a5af0d64f5acf261be9338cef74d621b13b2f2", "revision": "2026-10-06.TOAST-DISMISSAL-PLACEMENT", "sourceCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9", "ancestorCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9"}, {"path": "game-5d.html", "version": "2.9.5", "status": "ACTIVE", "nonMetadataSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f", "priorFullSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f"}];
- const publicFeedProvenance={
-  'runtime/game-5d-main.mjs':'64938353df552f7b39f4aa6fdc39e73348852d1860c8131c262b269a31b0464f',
-  'runtime/public-market-quotes.mjs':'68f42af1e23a8a1cbac28baafc130d2519ceb13184521fccbd0bd1ca486a477a',
-  'runtime/real-trading-order-intent.mjs':'db02fddd16c73193fbb92a175c128d1da5505808b3f3cbaa2f8eb3540027d4f0'};
+  const publicFeedProvenance={
+   'runtime/game-5d-main.mjs':'fb9eb279674e9cc4cd75654b870847e7f980d0eb9ba027205c3de84cb746f4f8',
+   'runtime/public-market-quotes.mjs':'89971bc954ca497bca074eb3512880600de353a59e1d7941269097d1d8c6817c',
+   'runtime/real-trading-order-intent.mjs':'9e91da150ed768b5016d409f1098910e2a880f774e619a9f22eb86d7773cadf8'};
  for(const asset of assets)if(publicFeedProvenance[asset.path])Object.assign(asset,{nonMetadataSha256:publicFeedProvenance[asset.path],revision:'2026-10-09.PUBLIC-SIM-FEED-ADMISSION',sourceCommit:'b39c16e5cc5f2409590d62fa9a53b5ceb3750300',ancestorCommit:'c35320c6f95ea9411fd9e5f3ad295599f029a3ae',lastUpdated:'2026-10-09',updatedBy:/^Codex \/ delegated implementation \/ HUMAN_AUTHORIZED_2026_10_09$/,reviewedBy:'PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge',taskId:'K11520-PUBLIC-FREE-SIM-FEED-20261009'});
  const mandatory=['VERSION','REVISION','STATUS','LAST_UPDATED','UPDATED_BY','REVIEWED_BY','SOURCE_COMMIT','TASK_ID','CHANGE_REASON','ANCESTOR','SOURCE_OF_TRUTH'];
  for(const asset of assets){

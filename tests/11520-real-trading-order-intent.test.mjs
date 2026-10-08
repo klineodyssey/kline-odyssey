@@ -52,7 +52,13 @@ test('signed C alone supplies direction; contradictory side and negative lots ca
 });
 
 const simulationInput={axis:'KX',market:'BTCUSDT',c:100,lots:10,currentPrice:100,triggerPrice:101};
-function fixture(){const ledger=createKgenLedger(1000),adapter=createExecutionAdapter({ledger});assert.equal(adapter.observe({market:'BTCUSDT',price:100,observedAt:1000,now:1000}).ok,true);return {ledger,adapter}}
+function simulationQuoteSet(at,prices={BTCUSDT:100,ETHUSDT:4000,BNBUSDT:600},sequence=1){return Object.fromEntries(Object.entries(prices).map(([market,price])=>[market,{market,price,updatedAt:at,sequence,receivedAt:at,source:PUBLIC_MARKET_QUOTE_SOURCE.id}]))}
+function fixture(){
+ const ledger=createKgenLedger(1000),adapter=createExecutionAdapter({ledger}),prices={BTCUSDT:100,ETHUSDT:4000,BNBUSDT:600};let sequence=1;
+ const admit=(market,price,at)=>{prices[market]=price;const rows=simulationQuoteSet(at,prices,sequence++),state=adapter.updatePublicMarketQuality(rows,{now:at});assert.equal(state.quality,'FRESH');return adapter.observe({...rows[market],observedAt:at,now:at})};
+ for(const row of Object.values(simulationQuoteSet(1000,prices,sequence++))){adapter.updatePublicMarketQuality(simulationQuoteSet(1000,prices,sequence-1),{now:1000});assert.equal(adapter.observe({...row,observedAt:1000,now:1000}).ok,true)}
+ return {ledger,adapter,observe:(price,at,market='BTCUSDT')=>admit(market,price,at)};
+}
 test('all canonical signed C detents retain precision across common and unsigned EVM intents',()=>{
  for(const c of C_DETENTS.filter(c=>c!==0)){
   const common=buildExecutionOrderIntent({...simulationInput,c,now:1001});
@@ -88,17 +94,17 @@ test('common intent needs no wallet and rejects invalid signed C/lots/identity w
  assert.throws(()=>buildExecutionOrderIntent({...simulationInput,takeProfitPrice:100}),/INVALID_TP_DIRECTION/);
 });
 test('single adapter preview is pure; pending is not a fill; cross reserves once; normal close settles existing ledger',()=>{
- const {ledger,adapter}=fixture(),before=structuredClone(ledger);
+ const {ledger,adapter,observe}=fixture(),before=structuredClone(ledger);
  const preview=adapter.preview(simulationInput,{now:1001});
  assert.equal(preview.ok,true);assert.equal(preview.requiredMargin,10);assert.equal(preview.available,1000);
  assert.equal(preview.estimatedLiquidationPrice,100.99);assert.equal(preview.executionMode,'SIMULATION');
  assert.deepEqual(ledger,before);
  const pending=adapter.submit(preview.intent,{now:1002});
  assert.equal(pending.status,'PENDING_TRIGGER');assert.equal(pending.order.status,'PENDING');assert.equal(ledger.free,1000);assert.equal(ledger.lockedMargin,0);
- assert.equal(adapter.observe({market:'BTCUSDT',price:102,observedAt:1003,now:1003}).ok,true);
+ assert.equal(observe(102,1003).ok,true);
  let book=adapter.snapshot();assert.equal(book.orders[0].status,'FILLED');assert.equal(book.positions[0].status,'OPEN');
  assert.equal(ledger.free,990);assert.equal(ledger.lockedMargin,10);assert.equal(book.receipts.length,1);
- adapter.observe({market:'BTCUSDT',price:103,observedAt:1004,now:1004});
+ observe(103,1004);
  assert.ok(ledger.unrealizedPnl>0);assert.equal(adapter.snapshot().receipts.length,1);
  const settled=adapter.close(book.positions[0].positionId,{now:1005});
  assert.equal(settled.ok,true);assert.equal(settled.receipt.status,'CLOSED');assert.equal(ledger.lockedMargin,0);
@@ -107,14 +113,14 @@ test('single adapter preview is pure; pending is not a fill; cross reserves once
 });
 test('exact touch, upward cross, downward cross fill once and liquidation is isolated, terminal with margin zero',()=>{
  for(const [c,trigger,next,liquidation] of [[100,100,100,99],[100,101,102,98],[-100,99,98,100]]){
-  const {ledger,adapter}=fixture();
+  const {ledger,adapter,observe}=fixture();
   assert.equal(adapter.submit({...simulationInput,c,triggerPrice:trigger},{now:1001}).ok,true);
-  assert.equal(adapter.observe({market:'BTCUSDT',price:next,observedAt:1002,now:1002}).ok,true);
+  assert.equal(observe(next,1002).ok,true);
   assert.equal(adapter.snapshot().receipts.length,1);
-  adapter.observe({market:'BTCUSDT',price:liquidation,observedAt:1003,now:1003});
+  observe(liquidation,1003);
   const book=adapter.snapshot();assert.equal(book.positions[0].status,'LIQUIDATED');assert.equal(book.positions[0].margin,0);
   assert.equal(book.receipts[1].marginAfter,0);assert.equal(ledger.free,990);assert.equal(ledger.lockedMargin,0);
-  adapter.observe({market:'BTCUSDT',price:next,observedAt:1004,now:1004});
+  observe(next,1004);
   assert.equal(adapter.snapshot().positions.length,1);assert.equal(adapter.snapshot().receipts.length,2);
  }
 });
@@ -122,15 +128,15 @@ test('invalid requests, stale observations and insufficient margin fail without 
  const {ledger,adapter}=fixture(),before=structuredClone(ledger);
  for(const input of [{...simulationInput,c:1000},{...simulationInput,lots:101}])assert.equal(adapter.submit(input,{now:1001}).code,'ORDER_REJECTED');
  assert.equal(adapter.submit(simulationInput,{now:20000}).code,'ORACLE_STALE');
- assert.equal(adapter.observe({market:'BTCUSDT',price:105,observedAt:999,now:1000}).code,'ORACLE_STALE');
+ assert.equal(adapter.observe({market:'BTCUSDT',price:105,observedAt:999,now:20000}).code,'ORACLE_STALE');
  assert.deepEqual(ledger,before);
  ledger.free=0;const poor=structuredClone(ledger);
  assert.equal(adapter.submit(simulationInput,{now:1001}).code,'INSUFFICIENT_MARGIN');assert.deepEqual(ledger,poor);
 });
 test('cancel operates on the existing book without margin debit or synthetic receipt',()=>{
- const {ledger,adapter}=fixture(),placed=adapter.submit(simulationInput,{now:1001});
+ const {ledger,adapter,observe}=fixture(),placed=adapter.submit(simulationInput,{now:1001});
  assert.equal(adapter.cancel(placed.order.orderId).ok,true);
- adapter.observe({market:'BTCUSDT',price:102,observedAt:1002,now:1002});
+ observe(102,1002);
  assert.equal(ledger.free,1000);assert.equal(adapter.snapshot().positions.length,0);assert.equal(adapter.snapshot().receipts.length,0);
 });
 test('EVM seam stays disabled despite flags; no provider calls and no fallback or simulation debit on rejection',()=>{
@@ -545,7 +551,8 @@ test('real Testnet rejects simulation provenance and non-live quote state before
 test('malformed saved observations fail closed rather than reanchoring an existing position to synthetic seed',()=>{
  for(const invalid of [{price:NaN,at:1000},{price:-1,at:1000},{price:4000,at:undefined},{price:4000,at:-1}]){
   const ledger=createKgenLedger(100);ledger.simulation={sequence:0,orders:[],positions:[],receipts:[],observations:{ETHUSDT:invalid}};
-  const adapter=createExecutionAdapter({ledger,simulationFallback:true}),before=structuredClone(ledger);
+   const adapter=createExecutionAdapter({ledger,simulationFallback:true}),before=structuredClone(ledger);
+   assert.equal(adapter.updatePublicMarketQuality(publicQuoteSet(20000),{now:20000}).quality,'FRESH');
   assert.equal(adapter.preview({axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4000},{now:20000}).ok,false);
   assert.equal(adapter.tick({now:20000}).ok,false);assert.deepEqual(ledger,before);
  }
@@ -560,8 +567,8 @@ function admitPublicSet(adapter,rows,now){
  for(const row of Object.values(rows)){const result=adapter.observe({market:row.market,price:row.price,observedAt:row.updatedAt,sequence:row.sequence,source:row.source,now});assert.equal(result.ok,true)}
  return admission;
 }
-function activePublicFixture(){
- const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
+function activePublicFixture({simulationFallback=true}={}){
+ const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback});
  admitPublicSet(adapter,publicQuoteSet(1000),1000);
  assert.equal(adapter.submit({axis:'KX',market:'BTCUSDT',c:1,lots:1,triggerPrice:100001},{now:1001}).ok,true);
  assert.equal(adapter.submit({axis:'KY',market:'ETHUSDT',c:-1,lots:2,triggerPrice:4000},{now:1001}).ok,true);
@@ -584,6 +591,29 @@ for(const quality of ['UNKNOWN','STALE','FAILED'])test(`SIMULATION ${quality} ad
  assert.deepEqual(afterCancel.positions,assets.positions);assert.deepEqual(afterCancel.receipts,assets.receipts);assert.deepEqual(afterCancel.wallet,assets.wallet);
 });
 
+test('default nonfallback SIMULATION adapter blocks warm FAILED state with the full saved ledger unchanged',()=>{
+ const {ledger,adapter}=activePublicFixture({simulationFallback:false}),before=structuredClone(ledger),now=20000;
+ assert.equal(adapter.updatePublicMarketQuality(publicMarketFailureObservations({now}),{now}).quality,'FAILED');
+ const position=adapter.snapshot().positions.find(item=>item.status==='OPEN');
+ for(const result of [adapter.preview({axis:'KZ',market:'BNBUSDT',c:1,lots:1,triggerPrice:600},{now}),adapter.tick({now}),adapter.observe({market:'ETHUSDT',price:1,observedAt:now,sequence:99,source:PUBLIC_MARKET_QUOTE_SOURCE.id,now}),adapter.close(position.positionId,{now}),adapter.submit({axis:'KZ',market:'BNBUSDT',c:1,lots:1,triggerPrice:600},{now})]){
+  assert.equal(result.ok,false);assert.equal(result.code,'ORACLE_STALE');assert.equal(result.quoteQuality,'FAILED');assert.equal(result.priceTransitions,false);
+ }
+ assert.deepEqual(ledger,before,'nonfallback exported adapter cannot mutate orders, positions, receipts, observations, margin or wallet');
+});
+
+test('fresh admission rejects malformed or mismatched public observations without mutating the saved ledger',()=>{
+ const {ledger,adapter}=activePublicFixture({simulationFallback:false}),before=structuredClone(ledger),rows=publicQuoteSet(3000,PUBLIC_PRICES,7);
+ assert.equal(adapter.updatePublicMarketQuality(rows,{now:3000}).quality,'FRESH');
+ for(const observation of [
+  {...rows.BTCUSDT,observedAt:3000,sequence:null,now:3000},
+  {...rows.BTCUSDT,observedAt:3000,sequence:'7',now:3000},
+  {...rows.BTCUSDT,observedAt:3000,source:'CORRUPTED_SOURCE',now:3000},
+  {...rows.BTCUSDT,observedAt:3000,price:1,now:3000},
+ ]){
+  const result=adapter.observe(observation);assert.equal(result.ok,false);assert.equal(result.reason,'PUBLIC_QUOTE_ADMISSION_MISMATCH');assert.deepEqual(ledger,before);
+ }
+});
+
 test('fresh three-market admission allows public fills, then age expiry blocks close and further settlement',()=>{
  const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
  admitPublicSet(adapter,publicQuoteSet(1000),1000);
@@ -593,14 +623,16 @@ test('fresh three-market admission allows public fills, then age expiry blocks c
  const before=structuredClone(ledger),closed=adapter.close(filled.positions[0].positionId,{now:17003});assert.equal(closed.ok,false);assert.equal(closed.quoteQuality,'STALE');assert.deepEqual(ledger,before);
 });
 
-test('fresh public recovery cannot reprice or settle a legacy synthetic-source position',()=>{
- const ledger=createKgenLedger(100),source='K11520_DETERMINISTIC_SIMULATION';
- observeSimulationPrice(ledger,{market:'ETHUSDT',price:4000,observedAt:1000,now:1000,source,simulationAnchorPrice:4000,simulationAnchorAt:1000,productV1:true});
- placeSimulationOrder(ledger,{axis:'KY',market:'ETHUSDT',c:1,lots:2,triggerPrice:4000,now:1000});
- observeSimulationPrice(ledger,{market:'ETHUSDT',price:4000,observedAt:1001,now:1001,source,simulationAnchorPrice:4000,simulationAnchorAt:1000,productV1:true});
- const adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true}),before=adapter.snapshot(),rows=publicQuoteSet(2000,{...PUBLIC_PRICES,ETHUSDT:1},2);
- adapter.updatePublicMarketQuality(rows,{now:2000});const recovered=adapter.observe({...rows.ETHUSDT,observedAt:2000,now:2000});assert.equal(recovered.ok,true);assert.equal(recovered.ignored,true);
- const after=adapter.snapshot();assert.equal(after.observations.ETHUSDT.source,source);assert.deepEqual(after.positions,before.positions);assert.deepEqual(after.receipts,before.receipts);assert.deepEqual(after.wallet,before.wallet);
+test('fresh public recovery cannot reprice or settle a legacy synthetic-source position in fallback or default adapters',()=>{
+ for(const simulationFallback of [true,false]){
+  const ledger=createKgenLedger(100),source='K11520_DETERMINISTIC_SIMULATION';
+  observeSimulationPrice(ledger,{market:'ETHUSDT',price:4000,observedAt:1000,now:1000,source,simulationAnchorPrice:4000,simulationAnchorAt:1000,productV1:true});
+  placeSimulationOrder(ledger,{axis:'KY',market:'ETHUSDT',c:1,lots:2,triggerPrice:4000,now:1000});
+  observeSimulationPrice(ledger,{market:'ETHUSDT',price:4000,observedAt:1001,now:1001,source,simulationAnchorPrice:4000,simulationAnchorAt:1000,productV1:true});
+  const adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback}),before=adapter.snapshot(),rows=publicQuoteSet(2000,{...PUBLIC_PRICES,ETHUSDT:1},2);
+  adapter.updatePublicMarketQuality(rows,{now:2000});const recovered=adapter.observe({...rows.ETHUSDT,observedAt:2000,now:2000});assert.equal(recovered.ok,true);assert.equal(recovered.ignored,true);
+  const after=adapter.snapshot();assert.equal(after.observations.ETHUSDT.source,source);assert.deepEqual(after,before,'public recovery never reprices or settles the saved synthetic book');
+ }
 });
 
 test('single-source public admission is explicit that divergence is not independently verified',()=>{

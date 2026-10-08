@@ -8,7 +8,7 @@ UPDATED_BY: Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09
 REVIEWED_BY: PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge
 SOURCE_COMMIT: b39c16e5cc5f2409590d62fa9a53b5ceb3750300
 TASK_ID: K11520-PUBLIC-FREE-SIM-FEED-20261009
-CHANGE_REASON: Stop SIMULATION price-dependent transitions on UNKNOWN, STALE or FAILED public quality while preserving existing positions, margin, receipts and cancel/exploration behavior.
+CHANGE_REASON: Stop every SIMULATION adapter price transition on abnormal public quality and exact-row mismatch while preserving existing positions, margin, receipts and cancel/exploration behavior.
 ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs @ c35320c6f95ea9411fd9e5f3ad295599f029a3ae
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fixed axis/market bindings.
@@ -95,7 +95,6 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   };
   const currentPublicMarketQuality=now=>publicMarketQuoteSetStatus(publicMarketQuality.rows,{symbols:PUBLIC_MARKET_SYMBOLS,now});
   const priceTransitionBlock=now=>{
-    if(!fallback)return null;
     const state=currentPublicMarketQuality(now);
     if(state.allowsPriceTransitions)return null;
     return {ok:false,code:'ORACLE_STALE',reason:`PUBLIC_QUOTE_${state.quality}`,quoteQuality:state.quality,
@@ -118,7 +117,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   };
   const preview=(input,{now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
     if(options.productV1)requireV1TradingC(input.c);
-    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
+    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,currentPrice:selected?.price,now}),book=simulationSnapshot(ledger);
     if(!selected||now<selected.at||now-selected.at>15000)throw new Error('STALE_PRICE');
     if(book.orders.some(o=>o.axis===intent.axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===intent.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
     const margin=requiredMargin(intent),available=book.wallet.free;
@@ -138,15 +137,14 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       return result.ok?{...result,status:'PENDING_TRIGGER'}:result;
     },true),
     observe:(observation)=>priceTransitionBlock(observation?.now??Date.now())||run(()=>{
+      // Every SIMULATION adapter is bound to the currently admitted public row.
       // Once local fallback is selected, public recovery cannot jump a pending
       // order/open position to another source, including after wallet reload.
-      if(fallback){
-        const expected=currentPublicMarketQuality(observation?.now??Date.now()).rows[observation.market];
-        if(observation.source!==PUBLIC_MARKET_QUOTE_SOURCE.id||expected?.source!==observation.source||
-          expected?.updatedAt!==observation.observedAt||expected?.sequence!==observation.sequence||expected?.price!==observation.price)return {ok:false,reason:'PUBLIC_QUOTE_ADMISSION_MISMATCH'};
-        const book=simulationSnapshot(ledger);quote(observation.market,{now:observation.now??Date.now(),book});
-        if(book.observations[observation.market]?.source===SIMULATION_PRICE_SOURCE)return {ok:true,ignored:true,events:[]};
-      }
+      const expected=currentPublicMarketQuality(observation?.now??Date.now()).rows[observation.market];
+      if(observation.source!==PUBLIC_MARKET_QUOTE_SOURCE.id||expected?.source!==observation.source||
+        expected?.updatedAt!==observation.observedAt||expected?.sequence!==observation.sequence||expected?.price!==observation.price)return {ok:false,reason:'PUBLIC_QUOTE_ADMISSION_MISMATCH'};
+      const book=simulationSnapshot(ledger);quote(observation.market,{now:observation.now??Date.now(),book});
+      if(book.observations[observation.market]?.source===SIMULATION_PRICE_SOURCE)return {ok:true,ignored:true,events:[]};
       if(observation.source===SIMULATION_PRICE_SOURCE)return {ok:false,reason:'SIMULATION_SOURCE_REQUIRES_LOCAL_CLOCK'};
       return observeSimulationPrice(ledger,{...observation,productV1:options.productV1===true});
     },true),

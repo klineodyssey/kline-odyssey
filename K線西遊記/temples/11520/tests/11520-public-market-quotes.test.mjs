@@ -66,4 +66,10 @@ test('BTC ETH BNB quality set exposes source, provider time, stale/failure and u
   const rejected=publicMarketQuoteSetStatus(invalid,{symbols:SYMBOLS,now:1001});
   assert.equal(rejected.quality,'FAILED');assert.equal(rejected.allowsPriceTransitions,false);
   assert.equal(rejected.rows.ETHUSDT.failure,'INVALID_PROVIDER_OBSERVATION');
+  for(const sequence of [null,'0','42']){
+    const malformed={...rows,ETHUSDT:{...rows.ETHUSDT,sequence}};
+    const status=publicMarketQuoteSetStatus(malformed,{symbols:SYMBOLS,now:1001});
+    assert.equal(status.quality,'FAILED');assert.equal(status.allowsPriceTransitions,false);
+    assert.equal(status.rows.ETHUSDT.failure,'INVALID_PROVIDER_OBSERVATION');
+  }
 });

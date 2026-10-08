@@ -31,6 +31,19 @@
   deterministic simulation source. Divergence is explicitly
   `NOT_VERIFIED_SINGLE_SOURCE`; no threshold, second endpoint or quorum is
   invented. The feed remains simulation-only and has no settlement authority.
+- Review hardening applies the same quality and exact-row admission to default
+  and nonfallback SIMULATION adapters, rejects null/string provider sequences,
+  and requires a successful feed-admission preflight before the native confirm
+  modal or `PREVIEW` journey event. Warm-feed browser coverage compares the complete
+  saved orders, positions, receipts, observations, wallet and journey state.
+- Post-review focused checks passed 87/87 quote, intent, route, provenance,
+  market-binding and margin tests plus 67/67 applicable static tests. The one
+  skipped static case is an unchanged Linux bash-routing fixture unavailable
+  to Windows `spawnSync`; exact-head Linux CI remains required. Pinned-worktree
+  headless Chromium passed the complete 390x844 signed-C suite, including warm
+  `FRESH` to `FAILED`, blocked native preview, full-ledger invariants, source
+  recovery without a new settlement receipt and the existing visible 100C
+  future-only product lock. Independent rereview is still pending.
 - Focused local checks at source commit `b39c16e5` passed 57/57 quote and intent
   tests, 10/10 existing provenance/market/margin tests and 2/2 targeted UI
   tests. A real headless Chrome 390x844 run preserved the game view and exposed
