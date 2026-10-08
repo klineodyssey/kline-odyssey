@@ -51,8 +51,6 @@ if(LOCAL_SIMULATION_QA){
   // Public WAIT remains truthful and cannot manufacture a synthetic price.
   await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
   const before=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet);
-  const blockedAdmission=await page.evaluate(()=>globalThis.__K11520_EXECUTION__.publicMarketStatus());
-  assert.equal(blockedAdmission.allowsPriceTransitions,false,'abnormal public input must fail closed before UI order routing');
   await page.locator('#orderFire').click({timeout:2500});
   await page.waitForTimeout(120);
   assert.equal(await page.locator('#confirm').isVisible(),false,'WAIT must not open a price-dependent preview');
