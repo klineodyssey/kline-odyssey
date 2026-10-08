@@ -447,7 +447,7 @@ test('signed-C quote fixture is loopback-only and separates blocked SIMULATION W
     assert.equal(context.payload(route,[]).length,0);const row=context.payload(route,context.result.rows)[0];assert.equal(row.p,'3500');assert.equal(row.T,40000);assert.equal(row.a,40000);
   }
   assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.route('https://data-api.binance.vision/api/v3/aggTrades*'"));
-  assert.ok(source.includes("status==='WAIT'"));assert.ok(source.includes("waitBlocked:true"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
+  assert.ok(source.includes('__K11520_FREE_ORACLE__'));assert.ok(source.includes("row.quality!=='FRESH'"));assert.ok(source.includes("waitBlocked:true"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
   assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:5000})"),'final fixture readiness is local-only');
   for(const guard of ['V1_HIGH_SPEED_PRODUCTION_LOCKED',"'#confirmOrder').isDisabled(),true",'PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈'])assert.ok(source.includes(guard),guard);
   assert.ok(source.includes("page.locator('#confirm').waitFor({state:'visible',timeout:2500})"),'confirmation timeout remains unchanged');
@@ -456,7 +456,7 @@ test('signed-C quote fixture is loopback-only and separates blocked SIMULATION W
 test('signed-C WAIT blocks price preview until complete fresh public admission without debit',()=>{
   const source=read('./11520-browser-signed-c-immersive.mjs');
   const block=source.slice(source.indexOf('if(LOCAL_SIMULATION_QA){'),source.indexOf('// Human 12:43'));
-  for(const guard of ["'#cNumericInput').fill('1')", "'#orderFire').click", "textContent.includes('ORACLE_STALE')", "'#confirm').isVisible(),false", "snapshot().wallet),before", 'quoteFixtureReady=true', "textContent.includes('BINANCE_PUBLIC_MARKET_DATA_ONLY')", "'#confirmOrder').isDisabled(),false", "'#cancelOrder').click()", 'waitPreviewAllowed:false','waitBlocked:true'])assert.ok(block.includes(guard),guard);
+  for(const guard of ['__K11520_FREE_ORACLE__',"row.quality!=='FRESH'",'initialQuality',"'#cNumericInput').fill('1')", "'#orderFire').click", "textContent.includes('ORACLE_STALE')", "'#confirm').isVisible(),false", "snapshot().wallet),before", 'quoteFixtureReady=true', "textContent.includes('BINANCE_PUBLIC_MARKET_DATA_ONLY')", "'#confirmOrder').isDisabled(),false", "'#cancelOrder').click()", 'waitPreviewAllowed:false','waitBlocked:true'])assert.ok(block.includes(guard),guard);
   assert.ok(block.indexOf('signed-c-WAIT-blocked-390x844.png')<block.indexOf('quoteFixtureReady=true'));assert.ok(block.indexOf('quoteFixtureReady=true')<block.indexOf("'#cancelOrder').click()"));
   assert.doesNotMatch(block,/K11520_DETERMINISTIC_SIMULATION|waitPreviewAllowed:true/);
 });
