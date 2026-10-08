@@ -29,8 +29,10 @@
   trip can legally close and start a second mission after state reload. Insurance
   resolution archives the policy and releases only its local simulation reserve;
   it performs no refund or asset transfer. An open eligible claim retains policy,
-  reserve and evidence and remains blocked by the existing assignment guard.
-- Current runtime verification after the follow-up: 81/81.
+  reserve and evidence across browser reload and remains blocked by the existing
+  assignment guard. Invalid storage is retained and enters review-required state.
+- Current runtime verification after the follow-up: 82/82. Existing headless
+  Chromium smoke includes a real page reload with an open insured claim.
 
 ## P0 simulation order availability candidate — 2026-10-06
 

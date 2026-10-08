@@ -11,6 +11,9 @@ policy evidence is archived, the simulation reserve is released without refund
 or asset transfer, and a second trip can begin after state reload. An unresolved
 eligible claim deliberately retains the policy and reserve, so the existing
 `ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION` guard continues to block reassignment.
+The versioned Digital Ant envelope restores receipt, policy, reserve, incidents
+and resolution evidence after a real page reload. Invalid or mismatched storage
+enters `PERSISTENCE_REVIEW_REQUIRED` and cannot dispatch a replacement mission.
 This is local simulation lifecycle handling, not financial policy settlement.
 
 ## Cargo visual resource lifetime candidate — 2026-10-07

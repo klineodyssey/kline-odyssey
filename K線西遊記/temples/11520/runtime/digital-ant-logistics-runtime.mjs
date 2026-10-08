@@ -1,10 +1,10 @@
 /*
 KGEN_META
-VERSION: 1.7.1
-REVISION: 2026-10-08.WHITEHOLE-CARGO-ESCORT-ATM-RECEIPT
+VERSION: 1.7.2
+REVISION: 2026-10-08.WHITEHOLE-CARGO-ESCORT-ATM-RECEIPT-PERSISTENCE
 STATUS: ACTIVE / SIMULATION-FIRST
 SOURCE_OF_TRUTH: LOGISTICS_UNIVERSE_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md
-CHANGE_REASON: Add the Human-requested persistent simulation-only white-hole cargo escort demo and complete the existing standard ATM local receipt/no-open-claim policy lifecycle without weakening reassignment guards.
+CHANGE_REASON: Add the Human-requested persistent simulation-only white-hole cargo escort demo and complete the standard ATM local receipt/no-open-claim policy lifecycle with fail-closed browser persistence.
 */
 
 import {universeLevel,routeFromAnchor,logisticsDecision,LOGISTICS_ANCHOR} from './logistics-universe-runtime.mjs';
@@ -35,6 +35,8 @@ export const PLAYER_COURIER_MAX_DURATION_MS=7_200_000;
 export const PLAYER_COURIER_RAID_COOLDOWN_MS=30_000;
 export const WHITEHOLE_ESCORT_WORK_ID='KAIOS-CARGO-WHITEHOLE-ESCORT-001';
 export const WHITEHOLE_ESCORT_ACTIONS=Object.freeze(['ESCORT','LONG_DUEL','SHORT_DUEL']);
+export const DIGITAL_ANT_PERSISTENCE_SCHEMA='K11520_DIGITAL_ANT_LOGISTICS';
+export const DIGITAL_ANT_PERSISTENCE_VERSION=1;
 export const WHITEHOLE_ESCORT_DEMO=Object.freeze({
   workId:WHITEHOLE_ESCORT_WORK_ID,mode:'SIMULATION_ONLY',cargo:Object.freeze({asset:'KAIOS',amount:50_000}),fee:Object.freeze({asset:'KGEN',amount:10}),
   origin:Object.freeze({name:'CAISHEN_TEMPLE_LOCAL_SIMULATION_LABEL',rawK:'0.00012345',band:'B4',alpha:1.2345,registeredInCurrentUniverseMap:false,localPosition:Object.freeze({x:-18,y:1,z:0})}),
@@ -168,6 +170,35 @@ export function createDigitalAnt({
     payroll:{earned:0,paid:0,balance:0,currency:'KAIOS',scope:'LOCAL_SIMULATION_ONLY',lastReceiptId:null},
     cargoRisk:{desk:'AI_ANT_COMPANY_CARGO_RISK_DESK',policy:null,reserveKaios:0,resolvedPolicies:[],incidents:[],replayKeys:[],lastRaidAt:0},
   };
+}
+
+function validateDigitalAntPersistentState(ant,{expectedLifeId=null}={}){
+  if(!ant||typeof ant!=='object'||!String(ant.lifeId||''))throw new Error('INVALID_DIGITAL_ANT_STATE');
+  if(expectedLifeId&&String(ant.lifeId)!==String(expectedLifeId))throw new Error('DIGITAL_ANT_LIFE_ID_MISMATCH');
+  if(!ant.cargo||!Number.isSafeInteger(ant.cargo.amount)||ant.cargo.amount<0)throw new Error('INVALID_DIGITAL_ANT_CARGO');
+  if(!ant.cargoRisk||!Array.isArray(ant.cargoRisk.incidents)||!Array.isArray(ant.cargoRisk.replayKeys)||!Number.isFinite(ant.cargoRisk.reserveKaios)||ant.cargoRisk.reserveKaios<0)throw new Error('INVALID_DIGITAL_ANT_RISK_STATE');
+  if(!Array.isArray(ant.cargoRisk.resolvedPolicies))throw new Error('INVALID_DIGITAL_ANT_POLICY_ARCHIVE');
+  if(ant.mission){
+    if(!String(ant.mission.missionId||'')||!['ASSIGNED','IN_TRANSIT','ARRIVED_AWAITING_RECEIPT','DELIVERED','CRASHING','CRASHED','FAILED'].includes(ant.mission.status))throw new Error('INVALID_DIGITAL_ANT_MISSION');
+    if(!Number.isSafeInteger(ant.mission.amount)||ant.mission.amount<1||!String(ant.mission.destinationAtmId||''))throw new Error('INVALID_DIGITAL_ANT_MISSION_ACCOUNTING');
+    if(ant.mission.status==='DELIVERED'&&(!ant.mission.receiptVerified||!String(ant.mission.receiptId||'')||ant.cargo.amount!==0))throw new Error('INVALID_DIGITAL_ANT_DELIVERY_RECEIPT');
+    if(['IN_TRANSIT','ARRIVED_AWAITING_RECEIPT'].includes(ant.mission.status)&&ant.cargo.amount!==ant.mission.amount)throw new Error('INVALID_DIGITAL_ANT_CARGO_CUSTODY');
+  }
+  if(ant.cargoRisk.policy){
+    if(ant.cargoRisk.policy.status!=='ACTIVE'||!ant.mission||String(ant.cargoRisk.policy.missionId)!==String(ant.mission.missionId))throw new Error('INVALID_DIGITAL_ANT_ACTIVE_POLICY');
+  }else if(ant.cargoRisk.reserveKaios>0)throw new Error('ORPHAN_DIGITAL_ANT_RESERVE');
+  for(const resolution of ant.cargoRisk.resolvedPolicies)if(!resolution||resolution.status!=='COMPLETED_NO_OPEN_CLAIM'||!resolution.evidenceRetained||resolution.assetTransfer!==false||resolution.mainnetWrite!==false)throw new Error('INVALID_DIGITAL_ANT_POLICY_RESOLUTION');
+  return ant;
+}
+
+export function createDigitalAntPersistenceEnvelope(ant,{savedAt=Date.now()}={}){
+  const state=structuredClone(validateDigitalAntPersistentState(ant));
+  return {schema:DIGITAL_ANT_PERSISTENCE_SCHEMA,version:DIGITAL_ANT_PERSISTENCE_VERSION,savedAt:courierClock(savedAt,'SAVED_AT'),state};
+}
+
+export function restoreDigitalAntPersistenceEnvelope(envelope,{expectedLifeId=null}={}){
+  if(!envelope||envelope.schema!==DIGITAL_ANT_PERSISTENCE_SCHEMA||envelope.version!==DIGITAL_ANT_PERSISTENCE_VERSION)throw new Error('INVALID_DIGITAL_ANT_PERSISTENCE_ENVELOPE');
+  courierClock(envelope.savedAt,'SAVED_AT');return structuredClone(validateDigitalAntPersistentState(envelope.state,{expectedLifeId}));
 }
 
 export function createDeliveryMission({
@@ -488,6 +519,7 @@ export function chooseBestDelivery(ant,missions=[],atmRegistry=[],options={}){
 }
 
 export function assignDelivery(ant,mission,atmRegistry=[],options={}){
+  if(ant?.cargoRisk?.persistenceState?.status==='REVIEW_REQUIRED')return {ok:false,reason:'DIGITAL_ANT_PERSISTENCE_REVIEW_REQUIRED'};
   if(n(ant.cargo?.amount)>0||['IN_TRANSIT','ARRIVED_AWAITING_RECEIPT','CRASHING'].includes(ant.mission?.status))return {ok:false,reason:'DELIVERY_MISSION_UNRESOLVED'};
   if(!mission||mission.status!=='CREATED')return {ok:false,reason:'NEW_DELIVERY_MISSION_REQUIRED'};
   if(ant.cargoRisk?.policy||n(ant.cargoRisk?.reserveKaios)>0||n(ant.cargoRisk?.policy?.premiumPaidKaios)>0)return {ok:false,reason:'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION'};
