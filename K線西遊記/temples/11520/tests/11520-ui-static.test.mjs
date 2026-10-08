@@ -177,6 +177,7 @@ test('Player Courier exposes explicit local-only Bandit mode, raid action and on
   for(const token of ['createWhiteholeEscortDemoOffer','reviewWhiteholeEscortDemoOffer','startWhiteholeEscort','advanceWhiteholeEscort','acceptWhiteholeEscortDestination','REVIEW_GATED_SIMULATED_RECEIVABLE','SUPPLY_MASS_RULE_NOT_MARKET_PRICE'])assert.ok(logistics.includes(token),`missing white-hole escort runtime gate: ${token}`);
   assert.equal(mobileShell.includes('spendLocalKaios?.(10'),false,'10 KGEN receivable must never become an automatic local KAIOS payment');
   assert.equal(mobileShell.includes("['LOOT_CRATE','CLAIMED_BY_BANDIT']"),false,'claimed loot must not remain advertised as an eligible target');
+  assert.equal((mobileShell.match(/m\.mode!=='WHITEHOLE_ESCORT_DEMO'/g)||[]).length,2,'generic active and robbed bandit selectors must exclude the specialized white-hole escort');
 });
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','attackKSpace'])assert.ok(main.includes(token),token);assert.equal(main.includes('S.kaios+=r.rewardKaios'),false)});
 
