@@ -1,3 +1,60 @@
+# Navigator missing-delta reconstruction: pre-code checkpoint
+
+Task: K11520-NAVIGATOR-RECONSTRUCTION-20261007. Author: dot, temporary external engineering maintainer under direct Human authorization; not a registered company worker or canonical claimant.
+
+## BOOT / MUST READ / PROTECTED PATH CHECK
+
+Read Boot V1.4 first at main, then Boot CURRENT, root and 11520 AGENTS, company README (proposal only), Workspace Policy, Canon master, worker registry, generic-worker/claim rules, official WorkQueue, current Physics V3.8 and existing domain owners. Latest main verified f7f67950418ebbb6f7a5a309a32d529232fcb3b6. Existing #522 source remains intact. No company claim, identity, Registry, Boot, Constitution, Physics, main/deploy, wallet/signing or financial settlement changes are authorized by this checkpoint.
+
+Human decision: FINAL_RECOVERY_CHECK_THEN_RECONSTRUCT; deadline 2026-10-07 10:19 UTC+8 passed without usable original workspace/files. ORIGINAL_DELTA_NOT_RECOVERED. Reconstruction is a new lineage, not restoration of an original candidate.
+
+Preserved partial: game-5d-main.mjs blob 65350fe6569059212f7ccc5b911605a123c3dc5e, 117042 bytes, SHA-256 9ace7bc824bc84a1386d18d05aefc13d9224864d60f337392743806aa6187d1f, archive commit 066e92390d4429a92b33016bfc1c58b3166dc168. Local bytes independently rehashed. PARTIAL_RECOVERY only. No other frozen original is restored.
+
+## PRESERVED_FUNCTIONS
+
+- Current main's single S.xyz / S.intentXYZ actor position and avatar.position.set(S.xyz...) render path; collision owner resolvePlayerMove in world-runtime.
+- Existing joystick/plane control owner, signed C detents in controls/nonlinear-controls, signedByAxis state in mobile-signed-c-immersive-runtime, trade-axis/plane mapping.
+- Existing spatial-coordinate-runtime local scene calibration, signedUniverseAddress presentation, market/physical dimension guard; no market normalization or scalar address is a local XYZ authority.
+- Existing xyz-map-navigation waypoint/vector owner, legacy XZ route functions, plane-map rendering, camera-only state, home position from PlayerLife, live monster/world-object IDs.
+- Latest #519 simulation availability and #522 card-node retention/toast placement. Partial source would overwrite these, so it is not copied wholesale.
+- UniverseMap canonical source is docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json, blob 0f97fc7e723fc97cd8366a10f0c9eb7892df4605, with exactly 123 points. Same-coordinate distinct IDs must survive.
+
+## MISSING_FUNCTIONS
+
+- Requested elapsed-time speed law .001 K/s per 1C from the active existing canonical C value; C0 pause; unavailable drive must stop rather than guess. Main currently increments .10 local units each animation frame.
+- Frame-rate-invariant actual actor displacement, bounded swept collision checks at high C, truthful committed movement evidence, and pause/resume clock isolation.
+- Full Navigator search/category/favorites and canonical 123-point list through existing owner; no second registry/runtime.
+- Canonical scalar K to local actor XYZ mapping, and local Home/ATM/Monster to canonical scalar mapping. These mappings are not present in current owners. Do not fabricate them or convert Civilization index × 1e8.
+- Complete route ETA/state/restart/cancel/arrival from one clock, live boundary source validation, and full runtime screenshot/functional acceptance for reconstructed behavior.
+- Latest requested market-card active-axis selection, anchor-preserving market collapse, duplicate mini-tile removal and clear camera/joystick affordances remain separately bounded product follow-ups.
+
+## PARTIAL_FUNCTIONS
+
+- Preserved one-file partial has calls to advanceLocalMotionClock/integrateLocalMotion/readCanonicalDriveState/prepareLocalNavigationFrame/commitLocalNavigationFrame and radarSnapshot. Their corresponding historical dependency implementations are absent from the recovered file. This is design evidence, not a buildable candidate.
+- Main already has a magnitude-based drive presentation bridge, but reads DOM and includes C0 walking. Main manual motion consumes vector state per frame; navigation writes to that same vector asynchronously and still has a separate legacy XZ path.
+- Main local-distance labels convert existing scene units using historical Moon-based calibration. That dimensional adapter may present local motion in K; it does not establish canonical UniverseMap XYZ positions. Direct canonical K-distance must be computed from canonical numeric values, separately from signed logarithmic address formatting.
+- Public quote status correctly has WAIT/STALE/LIVE; simulated KSPACE_REFERENCE is not acceptable live boundary evidence. Missing live boundary remains WAIT.
+
+## TESTED_FUNCTIONS
+
+Executed against fetched main before code: 11520-xyz-map-navigation.test.mjs 4/4 PASS; combat-drive-adapter.mjs PASS; combat-drive-live-runtime.mjs PASS; combat-mass-scale-runtime.mjs PASS. These prove preserved baseline behavior only. They currently encode C0 walking, which is superseded for local locomotion by the later explicit Human C0-pause instruction.
+
+FUNCTIONAL_QA for reconstruction: NOT_RUN. VISUAL_QA for reconstruction: NOT_RUN. NOT_COMPLETE.
+
+## TASK PLAN / bounded checkpoint 1
+
+1. Reuse combat-drive-adapter for a strict read of existing active-axis signed C state. Reuse nonlinear-controls validation. Add explicit speedKPerSecond=.001*abs(C), with C0 paused and invalid/missing C unavailable; never create orders or new C state.
+2. Reuse spatial-coordinate-runtime for a pure elapsed clock and local-scene step integration. Use existing kToGameUnits only as dimensional render calibration. Normalize combined input magnitude, substep against the existing collision resolver, never commit unclamped requests. Exclude hidden time, first frame and player changes.
+3. Wire the existing game main actor owner to this clock and speed for a small, testable movement slice; explicitly retain unresolved full Navigator/POI work. Keep camera state unable to move the player.
+4. Add deterministic tests for 30/60/120 FPS, positive/negative C magnitude, zero pause, hidden/resumed/player-switched clock, invalid drive, collisions and bounds, real owner actor displacement and no financial mutations.
+5. Synchronize game product version/revision, changelog, existing build-info mechanism and displayed version for the bounded candidate; keep general 11520 app version distinguished.
+6. Commit, push and record each bounded checkpoint on a dedicated reconstruction branch. Open Draft PR. Then run exact-head CI and real Chromium with screenshots. No merge or deployment in this task.
+
+## EXECUTION / FINAL REPORT
+
+Pre-code analysis only. No product code changed at this checkpoint. Known mapping gaps remain explicit and do not authorize inventing a canonical placement.
+
+
 ## P0 simulation order availability candidate — 2026-10-06
 
 - Human source: `KAIOS DOT — K11520 SIMULATION TRADING P0 GAMEPLAY REPAIR`,

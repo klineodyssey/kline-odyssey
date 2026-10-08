@@ -1,3 +1,38 @@
+### f3 exact-head browser evidence and test-only acceptance successor
+
+- Durable motion/sidestep checkpoint: f3b0dcbdacdf59a570f50da4c76e5541ac189263. No production source changes in this successor.
+- Game run37567405103/job112618165867 passed native XYZ, signed-C, general smoke, character, mobile HUD, action-rail, actual0/+1/-1C elapsed/render evidence and plane navigation; it then failed the home-delivery test at living-world:175. The test reloads player C0, sets the separate Ant delivery C, then expects the player's home route to move. The successor explicitly verifies PAUSED player navigation before native player .1C input; delivery/accounting assertions and deadlines remain.
+- Responsive run37567404927/job112618165652 separately failed cold390 slash-negative OUT_OF_RANGE and landscape zero native Axe strikes. These are retained failures, distinct from the earlier XZ/ATM fixture failure. R2 artifact11458213471 directly measured roughly170ms of held-input travel after readiness at1C; actor traveled2.4–2.7m while target moved only about.05m. The test controller now reads actual speed, joystick geometry and round-trip time, tapers near the original gate, keeps combat C at±1, and executes one native strike within the original5000ms. No range, production speed, retries or timeouts are relaxed.
+- Added separate native1C full-map obstacle traversal with actual rendered-position and per-frame elapsed-budget checks; no actor/target teleport and no navigation API action call in that acceptance path. Runtime browser rerun and screenshot inspection remain required.
+- f3 contextual-HUD, world-first, simulation-regression, Universal Exchange and Portal jobs passed; aggregate Game/Responsive remained FAIL. No Mainnet/Testnet product development, financial runtime, reward/storage or deployment change is included.
+
+## 2026-10-07 — V2.9.6 / 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION
+
+- New missing-delta reconstruction lineage from f7f67950418ebbb6f7a5a309a32d529232fcb3b6; partial Navigator blob remains PARTIAL_RECOVERY, not restored original.
+- Existing actor, spatial-coordinate and drive owners now use elapsed motion with .001 K/s per 1C; C0 pauses and missing canonical C fails closed. Sign stays financial/body representation, not a joystick reversal.
+- Existing XYZ waypoint owner supplies targets to the same actor clock. Legacy duplicate XZ state is removed; swept collision results govern committed body coordinates. Hidden/resumed/player-switch/suspended time cannot cause catch-up travel.
+- Game product version, runtime revisions, bootstrap build-info, displayed label and Portal release consumer are synchronized. General 11520 app VERSION 3.9.0 is a separate product scope; deployed dashboard build-info remains the deployment owner's responsibility.
+- Local evidence: 28 Navigator/elapsed/actual-owner tests and three drive suites pass. Real Chromium, exact-head aggregate CI and screenshot review remain pending. C-rate correction is not yet verified as the full visual root cause.
+- Canonical scalar-to-local XYZ mapping remains NOT_CONFIGURED, canonical POI search/favorites and remaining HUD requests are unfinished. No fake LIVE boundary, new registry/runtime, financial settlement, signer, real transaction, storage architecture, Physics or deployment change.
+
+### Preserved XZ detour review successor
+
+- Successor 300196dcd2d117aa118e1965a5594ffd934fec56 passed exact-head Universal Exchange CI, then real Chromium failed the XZ-right assertion after a held1C thumb screenshot. The screenshot places the actor near the ATM; collision during capture is a hypothesis, not yet a verified browser diagnosis. Thumb-visual capture now remains at explicitly checked C0, and independent direction gestures use native .1C with added position/control/motion/collision diagnostics. Existing directional assertions remain unchanged.
+
+
+- Independent reproduction found that baseline XZ routes could sidestep the existing ATM obstacle, while the first unified implementation stopped short. The existing navigation owner now selects the same bounded perpendicular candidates only for legacy XZ plane-map routes. It spends the same elapsed distance budget and calls the same world collision owner; no second clock or broader pathfinder is introduced.
+- Deterministic fixture {4,0,5} to {12,0,5} now reaches the target at .1C,1C,5C and100C. Detours publish ETA DETOUR without a false straight-path arrival estimate. Default world-collision callers retain their original result shape and behavior.
+- Known exploration-credit dependency and separate dodge/recovery exceptions remain unchanged. Exact-head Chromium and full Navigator acceptance remain pending.
+
+### First-checkpoint review and harness successor
+
+- Durable pre-code matrix: 71b39ec25e1011a0592a84739f50c307c430385a. First code: 1aecc6a3d378b216d40faa953e6934e6aef3be96 on dot/k11520-navigator-reconstruction-20261007, Draft PR #523.
+- Exact first CI failed the old no-argument moveManual signature assertion and the retired #waypointAction selector. These were genuine CI failures, not relabeled PASS. Portal QA passed. The successor checks the elapsed signature and existing unified #xyzWaypointAction owner, with explicit C0 pause followed by native nonzero C input.
+- Independent review reproduced a saved-player trap outside ground bounds and stale ETA after cancellation. The existing collision owner now provides opt-in inward/ascent-only recovery, retains all object collision checks, and never snaps the actor to the old rectangle. Existing unbounded airborne behavior is preserved. Cancellation clears ETA; player switching clears the old target.
+- Existing browser movement suites use native numeric C input and the committed-motion contract. Combat tests restore prior C after moving; no coordinates or progression state are injected for this migration. New read-only renderedPlayer projection and frame evidence compare actual avatar placement to committed position, with 1e-8 local-unit render tolerance and 1e-9K integrated-travel tolerance.
+- Local targeted evidence: 164 tests PASS plus the product-standard and three drive suites. Chromium is blocked locally by the process-socket restriction after the supported retry; exact GitHub CI Chromium remains the verification route. First-head screenshots show a loaded model and unified waypoint button, but do not prove motion correctness or six-size acceptance.
+- Known bounded-scope dependency: the unchanged exploration observer rejects >2m/100ms, so full1C locomotion can produce no exploration credit. No XP/progression policy is changed here. Dodge impulses and explicit journey recovery remain separate pre-existing actions; C0 pause describes joystick/waypoint locomotion, not every possible actor relocation.
+
 # 11520 Changelog
 
 ## Metadata
@@ -5,16 +40,16 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-06.MARKET-CARD-NODE-RETENTION |
-| PRODUCT_CONTEXT | V2.9.5 |
+| REVISION | 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION |
+| PRODUCT_CONTEXT | V2.9.6 |
 | STATUS | ACTIVE |
-| LAST_UPDATED | 2026-10-06 |
-| UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
-| REVIEWED_BY | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval |
-| SOURCE_COMMIT | cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
-| TASK_ID | K11520-SIMULATION-TRADING-P0-20261006 |
-| CHANGE_REASON | Record retained market-card presentation and preserve the measured HUD-stability gate. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
+| LAST_UPDATED | 2026-10-07 |
+| UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_07 |
+| REVIEWED_BY | Independent scoped recovery and state review; known dependency recorded; no release approval |
+| SOURCE_COMMIT | 1aecc6a3d378b216d40faa953e6934e6aef3be96 |
+| TASK_ID | K11520-NAVIGATOR-RECONSTRUCTION-20261007 |
+| CHANGE_REASON | Record the elapsed shared-C locomotion reconstruction and bounded review successor. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ 1aecc6a3d378b216d40faa953e6934e6aef3be96 |
 | SOURCE_OF_TRUTH | TRUE |
 
 ## 2026-10-06 — V2.9.5 retained market-card presentation revision

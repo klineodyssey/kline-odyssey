@@ -1,5 +1,15 @@
 /* KGEN_META
-VERSION: 2.6.17
+VERSION: 2.6.18
+REVISION: 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION
+PRODUCT_CONTEXT: V2.9.6
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_07
+REVIEWED_BY: PENDING / Draft reconstruction checkpoint; no release approval
+SOURCE_COMMIT: f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+TASK_ID: K11520-NAVIGATOR-RECONSTRUCTION-20261007
+CHANGE_REASON: Reconstruct only the elapsed shared-C local motion delta using existing actor, coordinate and waypoint owners.
+ANCESTOR: K線西遊記/temples/11520/runtime/game-5d-bootstrap.mjs @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6; partial evidence blob 65350fe6569059212f7ccc5b911605a123c3dc5e
+SOURCE_OF_TRUTH: TRUE
 STATUS: ACTIVE
 PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, optional capabilities, legacy observers, or mobile tap delivery fail. Installs the persistent XZ / XY / YZ 3D plane controller, keeps its remaining-axis vertical rail authoritative over legacy hidden-Y skin CSS, presents the active K-sphere normal-axis market as the direct trading-axis selection, installs canonical world-item identity/drop bridging across custody states, and installs a simulation-only Movement Combat V1 prototype where XYZ motion determines per-axis conflict, KX/KY/KZ public market ticks judge conflict direction, and KAIOS game HP absorbs damage without mutating KGEN positions, wallet balances, or chain state.
 */
@@ -7,7 +17,9 @@ import {install11520MobileControlLayout} from './mobile-control-layout.mjs';
 const $=s=>document.querySelector(s);
 // Install the existing UI owner before asynchronous Three.js/legacy skin boot.
 install11520MobileControlLayout();
-const PRODUCT_VERSION='V2.9.5';
+const PRODUCT_VERSION='V2.9.6';
+const PRODUCT_REVISION='2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION';
+globalThis.__K11520_BUILD_INFO__=Object.freeze({productVersion:PRODUCT_VERSION,revision:PRODUCT_REVISION,sourceBase:'f7f67950418ebbb6f7a5a309a32d529232fcb3b6',lineage:'MISSING_DELTA_RECONSTRUCTION',status:'DRAFT_CANDIDATE'});
 const BOOT_FAIL_OPEN_MS=1400;
 let journeyAudioUnlocked=false;
 function unlockJourneyAudio(){const fx=globalThis.__K11520_AUDIO_FX__;if(journeyAudioUnlocked||!fx)return;journeyAudioUnlocked=!!fx.startBgm?.();if(journeyAudioUnlocked)fx.speak?.('歡迎來到花果山。先用左下搖桿取經，靠近守關猿後按打怪。錢包稍後再連。')}
@@ -16,7 +28,7 @@ function ensureIntro(){if($('#intro11520'))return $('#intro11520');const style=d
 const intro=ensureIntro(),btn=$('#enter11520'),status=$('#boot11520Status');let entered=false,versionGuard=null;
 function releaseIntro(){const active=$('#intro11520');if(!active)return;try{active.classList.add('hide');active.style.pointerEvents='none'}catch{}setTimeout(()=>{try{active.remove()}catch{}},220)}
 function enterWorld(e){if(e){try{e.preventDefault();e.stopPropagation()}catch{}}if(entered){releaseIntro();return}entered=true;if(btn){btn.disabled=true;btn.textContent='進入中…'}releaseIntro();if(e?.isTrusted)unlockJourneyAudio()}
-function guardProductVersion(){const target=document.querySelector('.brandMetaV250 span:first-child');if(!target)return false;const expected=`${PRODUCT_VERSION} · 5D K線西遊記`;const enforce=()=>{if(target.textContent!==expected)target.textContent=expected;target.dataset.k11520ProductVersion=PRODUCT_VERSION};enforce();versionGuard?.disconnect();versionGuard=new MutationObserver(enforce);versionGuard.observe(target,{childList:true,characterData:true,subtree:true});return true}
+function guardProductVersion(){const target=document.querySelector('.brandMetaV250 span:first-child');if(!target)return false;const expected=`${PRODUCT_VERSION} · 5D K線西遊記`;const enforce=()=>{if(target.textContent!==expected)target.textContent=expected;target.dataset.k11520ProductVersion=PRODUCT_VERSION;target.dataset.k11520ProductRevision=PRODUCT_REVISION;target.title=`${PRODUCT_VERSION} · ${PRODUCT_REVISION}`};enforce();versionGuard?.disconnect();versionGuard=new MutationObserver(enforce);versionGuard.observe(target,{childList:true,characterData:true,subtree:true});return true}
 const mobileLayoutOwnsAxisRail=()=>document.documentElement.dataset.k11520LayoutOwner==='mobile-control-layout'&&(innerWidth<=600||globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches);
 function restoreAxisRail(){if(mobileLayoutOwnsAxisRail())return true;const el=$('#yControl');if(!el)return false;const put=(k,v)=>el.style.setProperty(k,v,'important');for(const [k,v] of [['display','block'],['position','relative'],['left','auto'],['right','auto'],['top','auto'],['bottom','auto'],['width','42px'],['height','112px'],['opacity','1'],['visibility','visible'],['pointer-events','auto'],['z-index','1'],['transform','none'],['margin','0']])put(k,v);el.dataset.k11520RemainingAxisRail='true';return true}
 function guardAxisRail(){if(mobileLayoutOwnsAxisRail()){globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();return}for(const delay of [0,80,220,500,1000,1800])setTimeout(restoreAxisRail,delay);const root=$('#yControl');if(!root)return;try{globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect()}catch{}let busy=false;const mo=new MutationObserver(()=>{if(busy)return;busy=true;restoreAxisRail();queueMicrotask(()=>{busy=false})});mo.observe(root,{attributes:true,attributeFilter:['style','class']});globalThis.__K11520_AXIS_RAIL_GUARD__=mo}

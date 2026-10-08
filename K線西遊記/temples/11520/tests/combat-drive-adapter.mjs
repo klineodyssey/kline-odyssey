@@ -8,8 +8,8 @@ assert.equal(parseLotsRead('1口'),1);
 assert.equal(parseLotsRead('3口'),3);
 
 const walk=buildDriveState({c:0,lots:1,localBaseVelocity:.1});
-assert.equal(walk.cMode,'LOCAL_WALK');
-assert.equal(walk.xyzStep,.1);
+assert.equal(walk.cMode,'PAUSED');
+assert.equal(walk.xyzStep,0);
 assert.equal(walk.kgenEquivalent,1);
 assert.equal(walk.kaiosMass,1000);
 assert.equal(walk.kgMass,1000);

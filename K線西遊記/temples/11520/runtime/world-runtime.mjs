@@ -1,11 +1,15 @@
-/*
-KGEN_META
-VERSION: 2.9.0
-REVISION: 2026-10-01.GAMEPLAY-BOSS-LOOT
+/* KGEN_META
+VERSION: 2.9.1
+REVISION: 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION
+PRODUCT_CONTEXT: V2.9.6
 STATUS: ACTIVE / SIMULATION-FIRST
-LAST_UPDATED: 2026-10-01
-UPDATED_BY: codex-gm-01
-CHANGE_REASON: Add local-only Boss phases and deterministic game loot; derive unlocks from Player Life while preserving local XYZ, market/source Life and settlement boundaries.
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_07
+REVIEWED_BY: Independent scoped recovery review; no release approval
+SOURCE_COMMIT: f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+TASK_ID: K11520-NAVIGATOR-RECONSTRUCTION-20261007
+CHANGE_REASON: Opt-in gradual recovery for valid exterior saved players through the existing collision owner; default callers and gameplay rules unchanged.
+ANCESTOR: K線西遊記/temples/11520/runtime/world-runtime.mjs @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6
 SOURCE_OF_TRUTH: TRUE
 */
 
@@ -351,7 +355,19 @@ export function applyMarketLifeSourceEvents(world,events=[]){
 }
 
 export function distance2D(a,b){return Math.hypot((a.x||0)-(b.x||0),(a.z||0)-(b.z||0))}
-export function resolvePlayerMove(player,next){const bounded={x:Math.max(WORLD_RULES.worldBounds.minX,Math.min(WORLD_RULES.worldBounds.maxX,Number(next.x)||0)),y:Math.max(WORLD_RULES.worldBounds.minY,Math.min(WORLD_RULES.worldBounds.maxY,Number(next.y)||0)),z:Math.max(WORLD_RULES.worldBounds.minZ,Math.min(WORLD_RULES.worldBounds.maxZ,Number(next.z)||0))};const blocker=WORLD_OBJECTS.find(o=>distance2D(bounded,o)<o.radius+WORLD_RULES.playerRadius)||null;return blocker?{x:player.x,y:player.y,z:player.z,blocked:true,blocker}:{...bounded,blocked:false,blocker:null}}
+export function resolvePlayerMove(player,next,{allowBoundsRecovery=false}={}){
+  const bounds=WORLD_RULES.worldBounds;
+  const outside=p=>Math.hypot(Math.max(bounds.minX-p.x,0,p.x-bounds.maxX),Math.max(bounds.minZ-p.z,0,p.z-bounds.maxZ));
+  const before=outside(player),after=outside(next);
+  const recovery=allowBoundsRecovery&&before>0&&(after<before-1e-10||(next.y>player.y&&after<=before+1e-10));
+  if(allowBoundsRecovery&&before>0&&!recovery)return{...player,blocked:true,blocker:{name:'OUTSIDE_WORLD_MOVE_INWARD_OR_UP'}};
+  // A valid restored exterior position may return gradually or rise out of
+  // the ground collision zone. It may not snap to the old rectangle or move
+  // farther out. The same object collision owner still checks every step.
+  const bounded=recovery&&after>0?{...next}:{x:Math.max(bounds.minX,Math.min(bounds.maxX,Number(next.x)||0)),y:Math.max(bounds.minY,Math.min(bounds.maxY,Number(next.y)||0)),z:Math.max(bounds.minZ,Math.min(bounds.maxZ,Number(next.z)||0))};
+  const blocker=WORLD_OBJECTS.find(o=>distance2D(bounded,o)<o.radius+WORLD_RULES.playerRadius)||null;
+  return blocker?{x:player.x,y:player.y,z:player.z,blocked:true,blocker}:{...bounded,blocked:false,blocker:null};
+}
 
 function sideFromText(v){const s=String(v||'');if(/多|LONG|BUY|\+/.test(s))return 1;if(/空|SHORT|SELL|−|-/.test(s))return-1;return 0}
 function readPlayerAxesFromGame(){if(typeof document==='undefined')return {};const out={};for(const axis of ['KX','KY','KZ']){const card=document.querySelector(`[data-axis="${axis}"]`);if(!card)continue;const pos=card.querySelector('.pos')?.textContent||'',market=card.querySelector('select')?.value?.replace('/','')||null;if(!market||/空倉/.test(pos))continue;const lots=Number(pos.match(/([\d.]+)口/)?.[1]||0),c=Number(pos.match(/([\d.]+(?:e[-+]?\d+)?)C/i)?.[1]||0);out[axis]={market,side:sideFromText(pos),lots,c,pnl:0}}return out}

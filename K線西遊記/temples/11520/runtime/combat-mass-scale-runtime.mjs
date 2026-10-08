@@ -1,5 +1,15 @@
 /* KGEN_META
-VERSION: 1.2.1
+VERSION: 1.2.2
+REVISION: 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION
+PRODUCT_CONTEXT: V2.9.6
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_07
+REVIEWED_BY: PENDING / Draft reconstruction checkpoint; no release approval
+SOURCE_COMMIT: f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+TASK_ID: K11520-NAVIGATOR-RECONSTRUCTION-20261007
+CHANGE_REASON: Reconstruct only the elapsed shared-C local motion delta using existing actor, coordinate and waypoint owners.
+ANCESTOR: K線西遊記/temples/11520/runtime/combat-mass-scale-runtime.mjs @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6; partial evidence blob 65350fe6569059212f7ccc5b911605a123c3dc5e
+SOURCE_OF_TRUTH: TRUE
 STATUS: PROTOTYPE
 FORMAL_ORGAN_NAME: 11520 Combat Mass Scale Runtime
 PURPOSE: Canonical simulation-only bridge between KGEN lot/index scale and KAIOS XYZ game mass. C is a signed velocity ratio: +C and -C are opposite velocity directions with the same speed magnitude; c itself remains a positive constant. Lot mass stays non-negative. No wallet, trade, chain, settlement, payment, or treasury mutation.
@@ -46,7 +56,7 @@ export function normalizeC(value) {
 
 export function cMode(value) {
   const c = normalizeC(value);
-  if (c===0) return 'LOCAL_WALK';
+  if (c===0) return 'PAUSED';
   if (c===1) return 'LIGHT_SPEED_SPOT';
   if (c===-1) return 'REVERSE_LIGHT_SPEED';
   const speed=Math.abs(c);
@@ -57,11 +67,11 @@ export function cMode(value) {
 export function movementVelocity({localBaseVelocity=1,c=0}={}) {
   const base = finite(localBaseVelocity) ? Math.max(0,Number(localBaseVelocity)) : 0;
   const velocityRatio = normalizeC(c);
-  // C is signed velocity ratio. 0C keeps ordinary local walking; negative C reverses direction.
-  return velocityRatio===0 ? base : base*velocityRatio;
+  // C is signed velocity ratio. 0C pauses local locomotion. The signed legacy ratio is presentation only; physical motion uses magnitude.
+  return base*velocityRatio;
 }
 
 export function scaleInvariant() {
   const one = lotMass(1);
-  return one.kgenEquivalent===1 && one.indexUnits===1 && one.kaiosMass===1000 && one.kgMass===1000 && cMode(0)==='LOCAL_WALK' && cMode(1)==='LIGHT_SPEED_SPOT' && cMode(-1)==='REVERSE_LIGHT_SPEED';
+  return one.kgenEquivalent===1 && one.indexUnits===1 && one.kaiosMass===1000 && one.kgMass===1000 && cMode(0)==='PAUSED' && cMode(1)==='LIGHT_SPEED_SPOT' && cMode(-1)==='REVERSE_LIGHT_SPEED';
 }

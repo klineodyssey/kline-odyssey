@@ -1,5 +1,15 @@
 /* KGEN_META
-VERSION: 1.1.0
+VERSION: 1.2.0
+REVISION: 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION
+PRODUCT_CONTEXT: V2.9.6
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_07
+REVIEWED_BY: PENDING / Draft reconstruction checkpoint; no release approval
+SOURCE_COMMIT: f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+TASK_ID: K11520-NAVIGATOR-RECONSTRUCTION-20261007
+CHANGE_REASON: Reconstruct only the elapsed shared-C local motion delta using existing actor, coordinate and waypoint owners.
+ANCESTOR: K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6; partial evidence blob 65350fe6569059212f7ccc5b911605a123c3dc5e
+SOURCE_OF_TRUTH: TRUE
 STATUS: ACTIVE
 PURPOSE: Canonical 11520 XYZ/XZ world-coordinate conversions shared by joystick, HUD, maps, navigation and camera-facing logic.
 */
@@ -119,4 +129,45 @@ export function bearingCardinal(from={},to={}){
 export function parseHudXYZ(text=''){
   const m=String(text).match(/X\s*(-?\d+(?:\.\d+)?)\s*[·|,]?\s*Y\s*(-?\d+(?:\.\d+)?)\s*[·|,]?\s*Z\s*(-?\d+(?:\.\d+)?)/i);
   return m?{x:Number(m[1]),y:Number(m[2]),z:Number(m[3])}:null;
+}
+
+// A single elapsed clock for the existing local actor. Hidden, resumed,
+// owner-switched and long suspended frames do not accumulate catch-up travel.
+export function advanceLocalMotionClock(previous,now,{visible=true,ownerKey=null}={}){
+  const valid=Number.isFinite(now),delta=valid&&Number.isFinite(previous?.now)?(now-previous.now)/1000:0;
+  const active=valid&&visible&&previous?.visible&&previous.ownerKey===ownerKey&&delta>=0&&delta<=.25;
+  return Object.freeze({now:valid?now:null,visible:!!visible,ownerKey,elapsedSeconds:active?delta:0,status:!visible?'HIDDEN':active?'ACTIVE':'RESET'});
+}
+
+// LOCAL_METERS is an existing render/collision coordinate frame. Converting
+// physical K speed here does not place a UniverseMap scalar point in XYZ.
+export function integrateLocalMotion({position,vector={x:0,y:0,z:0},target=null,elapsedSeconds=0,speedKPerSecond=null,resolveMove}={}){
+  const axes=['x','y','z'],valid=p=>p&&axes.every(a=>typeof p[a]==='number'&&Number.isFinite(p[a]));
+  if(!valid(position))throw new RangeError('INVALID_LOCAL_POSITION');
+  let current={...position},distanceMoved=0,blocked=false,blocker=null,substeps=0,detour=false;
+  const base={position:current,intentDelta:{x:0,y:0,z:0},distanceMoved:0,distanceMovedK:0,observedSpeedKPerSecond:0,inputThrottle:0,blocked:false,blocker:null,substeps:0};
+  if(typeof speedKPerSecond!=='number'||!Number.isFinite(speedKPerSecond)||speedKPerSecond<0||speedKPerSecond>.1)return{...base,status:'SPEED_UNAVAILABLE'};
+  if(speedKPerSecond===0)return{...base,status:'PAUSED'};
+  if(!Number.isFinite(elapsedSeconds)||elapsedSeconds<0||elapsedSeconds>.25||typeof resolveMove!=='function')return{...base,status:'FRAME_UNAVAILABLE'};
+  if(target!==null&&!valid(target)||!valid(vector))return{...base,status:'INPUT_UNAVAILABLE'};
+  const raw=target?Object.fromEntries(axes.map(a=>[a,target[a]-position[a]])):vector,length=Math.hypot(raw.x,raw.y,raw.z);
+  if(length===0||(!target&&length<.02))return{...base,status:target?'ARRIVED':'IDLE'};
+  const throttle=target?1:Math.min(1,length),budget=kToGameUnits(speedKPerSecond)*elapsedSeconds*throttle;
+  const travel=target?Math.min(length,budget):budget,direction=Object.fromEntries(axes.map(a=>[a,raw[a]/length]));
+  const intentDelta=Object.fromEntries(axes.map(a=>[a,direction[a]*travel]));
+  // World obstacles have finite radius. <=.25 local-unit sweeps prevent the
+  // high-C actor from jumping over them; the resolver remains sole authority.
+  const steps=Math.ceil(travel/.25);
+  for(let i=0;i<steps;i++){
+    const amount=Math.min(.25,travel-i*.25),next=Object.fromEntries(axes.map(a=>[a,current[a]+direction[a]*amount]));
+    const result=resolveMove(current,next);substeps++;
+    if(!valid(result)){blocked=true;blocker={name:'INVALID_COLLISION_RESULT'};break}
+    if(result.blocked){blocked=true;blocker=result.blocker||{name:'WORLD'};break}
+    const moved=Math.hypot(...axes.map(a=>result[a]-current[a]));
+    if(moved>amount+1e-8){blocked=true;blocker={name:'INVALID_COLLISION_DISPLACEMENT'};break}
+    current=Object.fromEntries(axes.map(a=>[a,result[a]]));distanceMoved+=moved;detour=detour||result.detour===true;
+    if(!result.detour&&axes.some(a=>Math.abs(current[a]-next[a])>1e-8)){blocked=true;blocker={name:'WORLD_BOUNDARY'};break}
+  }
+  const distanceMovedK=gameUnitsToK(distanceMoved),arrived=target&&Math.hypot(...axes.map(a=>target[a]-current[a]))<1e-8;
+  return{position:current,intentDelta,distanceMoved,distanceMovedK,inputThrottle:throttle,observedSpeedKPerSecond:elapsedSeconds>0?distanceMovedK/elapsedSeconds:0,blocked,blocker,substeps,detour,status:blocked?'BLOCKED':arrived?'ARRIVED':detour?'DETOUR':distanceMoved>0?'MOVING':'IDLE'};
 }

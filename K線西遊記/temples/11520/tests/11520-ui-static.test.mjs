@@ -113,10 +113,10 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.5 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.5 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.5'"));
-  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.5'"),'Portal registry must advertise the same K11520 release');
+test('V2.9.6 release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes('V2.9.6 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.6'"));
+  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.6'"),'Portal registry must advertise the same K11520 release');
   // Reuse the canonical release guard established by the Courier QA repair;
   // check literal AND escaped active consumers, never historical documents.
   const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
@@ -161,7 +161,7 @@ const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnec
 test('all formal organs remain present in production source',()=>{for(const id of organs)assert.ok(main.includes(`['${id}'`),id)});
 test('all current fixed control surfaces exist in shell HTML',()=>{for(const id of fixed)assert.ok(html.includes(`id="${id}"`),id)});
 test('core controls have runtime event wiring',()=>{for(const token of ["joy.addEventListener('pointerdown'","$('#lookPad').addEventListener('pointerdown'","$('#attack').onclick","$('#skill').onclick","$('#dodge').onclick","$('#tradeSword').onclick","$('#flat').onclick","$('#orderFire').onclick","$('#dockToggle').onclick","$('#walletConnect').onclick","$('#walletRefresh').onclick","$('#walletToggle').onclick","bindVertical('#lotsControl'","bindVertical('#cControl'"])assert.ok(main.includes(token),token);for(const token of ['function bindDisc()','function bindRail()','__K11520_3D_CONTROL__','railAxis','discAxes'])assert.ok(xyzControl.includes(token),token);assert.equal(main.includes("bindVertical('#yControl'"),false,'remaining-axis rail must not use legacy bounded Y slider wiring')});
-test('0C walking remains independent from C control',()=>{assert.equal(source.includes('D.warp===0?0'),false);assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('const speed=.10'))});
+test('local actor uses one elapsed shared-C clock and C0 pauses',()=>{assert.ok(main.includes('function moveManual(elapsedSeconds)'));assert.ok(main.includes('advanceLocalMotionClock(playerMotionClock,now'));assert.ok(main.includes('speedKPerSecond:drive.speedKPerSecond'));assert.ok(!main.includes('const speed=.10'))});
 test('current dynamic organ actions are wired',()=>{for(const token of ['data-organ','openOrgan(','data-axis','data-market','openOrder()','closePos','setWaypoint','bindMap','PLANE_TRADE_AXIS','syncTradeAxisFromPlane'])assert.ok(main.includes(token),token)});
 
 test('Player Courier exposes explicit local-only Bandit mode, raid action and one-shot loot UI',()=>{
@@ -197,8 +197,8 @@ test('human-approved current control imagery is production-wired',()=>{
 test('XYZ plane control is unbounded intent with collision-constrained body',()=>{
   assert.ok(main.includes('intentXYZ:{x:0,y:0,z:0}'));
   assert.ok(main.includes('unboundedIntent:true'));
-  assert.ok(main.includes("blocker={name:'GROUND'}"));
-  assert.ok(main.includes('S.intentXYZ={x:S.intentXYZ.x+v.x*speed'));
+  assert.ok(main.includes("blocker:{name:'GROUND'}"));
+  assert.ok(main.includes("S.intentXYZ=Object.fromEntries(['x','y','z'].map(a=>[a,S.intentXYZ[a]+delta[a]]))"));
   assert.ok(xyzControl.includes('unboundedCoordinateIntent:true'));
 });
 
@@ -209,7 +209,7 @@ test('C and lot drive bridge is installed by XYZ authority without asset mutatio
   assert.ok(driveLive.includes('__K11520_3D_CONTROL__=live'),'scaled control must reach canonical main runtime input');
   assert.ok(driveLive.includes('simulationOnly:true'),'drive bridge must remain simulation-only');
   assert.ok(massScale.includes('kaiosPerKgen: 1000'),'1 KGEN must remain 1000 KAIOS');
-  assert.ok(massScale.includes("if (c===0) return 'LOCAL_WALK'"),'0C must remain local walking');
+  assert.ok(massScale.includes("if (c===0) return 'PAUSED'"),'0C pauses local movement under the current Human calibration');
   assert.ok(massScale.includes("if (c===1) return 'LIGHT_SPEED_SPOT'"),'1C must remain light-speed spot');
   for(const forbidden of ['sendTransaction','eth_sendTransaction','privateKey','treasuryTransfer'])assert.equal(driveLive.includes(forbidden),false,forbidden);
 });
@@ -525,7 +525,7 @@ test('world-first minimap waits for dismissal and requires native owned pointer 
   const good=await run();assert.equal(good.error,undefined);assert.deepEqual(good.order,['hidden','reset','click']);
   for(const option of ['wrongTarget','untrusted','missingUp','wrongPlane'])assert.ok((await run({[option]:true})).error,option+' must fail closed');
   const blocked=await run({blocked:true,diagnosticsFail:true});assert.equal(blocked.error,blocked.clickError,'diagnostics cannot mask native input failure');
-  assert.match(source,/await clickWorldFirstMinimap\(page,result\);\s*await page.locator\('#waypointAction'\).waitFor\(\{state:'visible'\}\)/);
+  assert.match(source,/await clickWorldFirstMinimap\(page,result\);\s*await page.locator\('#xyzWaypointAction'\).waitFor\(\{state:'visible'\}\)/);
 });
 
 test('FULL HUD readiness diagnostics observe existing queries without extra hit tests or relaxed thresholds',async()=>{
@@ -680,16 +680,16 @@ test('offline toast visual gate cannot pass without actual preview and history o
 test('simulation component revisions expose complete provenance and recorded executable bytes',async()=>{
  const {createHash}=await import('node:crypto'),hash=text=>createHash('sha256').update(text).digest('hex');
  const revision='2026-10-06.SIMULATION-ORDER-PLAYABILITY',sourceCommit='0ad0cffe33d23d1104baa963fedef25ad149a0ac';
- const assets=[{"path": "runtime/game-5d-main.mjs", "version": "2.9.0", "status": "ACTIVE", "nonMetadataSha256": "4c4b69e6e0c78160b28c28df12c387a7c9d50af62270b5b5a22a71ebf0e8d950", "priorFullSha256": "d38f0a6c21b73553eddfba6fb1742891bef800f4d1ca33e81e2f46123935afda", "revision": "2026-10-06.MARKET-CARD-NODE-RETENTION", "sourceCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4", "ancestorCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4"}, {"path": "runtime/public-market-quotes.mjs", "version": "1.0.0", "status": "ACTIVE", "nonMetadataSha256": "850908b15e29dfeba665b2d1b28535e7bb7812fa5c8cad271a9154ee0603eeaf", "priorFullSha256": "07d2553b0a918a0d33236202eed35dd93dc6b44f7c4f24b1243b199587f99071"}, {"path": "runtime/real-trading-order-intent.mjs", "version": "1.0.0", "status": "CANDIDATE", "nonMetadataSha256": "59c72325eda86da744153e4f64035f032025a6d5a2529fdf30ad417c373113b0", "priorFullSha256": "f412d5e054e2df611c74efc2ee2a66d7467f28ee8adeef6ed22ed22a20c36ece"}, {"path": "runtime/kgen-margin-runtime.mjs", "version": "CURRENT", "status": "ACTIVE", "nonMetadataSha256": "4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed", "priorFullSha256": "4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed"}, {"path": "runtime/game-ui-product-fixes-v23.mjs", "version": "2.4.0", "status": "ACTIVE", "nonMetadataSha256": "ec23460a1632e6ec61eda91a5334c9f08d50173ad6091a4c5cb563f35ba4653b", "priorFullSha256": "a944b9fbe886e0348ad1ef0d39a5af0d64f5acf261be9338cef74d621b13b2f2", "revision": "2026-10-06.TOAST-DISMISSAL-PLACEMENT", "sourceCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9", "ancestorCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9"}, {"path": "game-5d.html", "version": "2.9.5", "status": "ACTIVE", "nonMetadataSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f", "priorFullSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f"}];
+ const assets=[{"path": "runtime/game-5d-main.mjs", "version": "2.9.6", "status": "ACTIVE", "nonMetadataSha256": "8dddf2196e6181fcd01210b50558aea1d1b857e3af5de007817a0d4c9b5447f5", "priorFullSha256": "d38f0a6c21b73553eddfba6fb1742891bef800f4d1ca33e81e2f46123935afda", "revision": "2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION", "sourceCommit": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6", "ancestorCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4", "productContext": "V2.9.6", "lastUpdated": "2026-10-07", "reviewer": "PENDING / Draft reconstruction checkpoint; no release approval", "ancestor": "K線西遊記/temples/11520/runtime/game-5d-main.mjs @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6; partial evidence blob 65350fe6569059212f7ccc5b911605a123c3dc5e"}, {"path": "runtime/public-market-quotes.mjs", "version": "1.0.0", "status": "ACTIVE", "nonMetadataSha256": "850908b15e29dfeba665b2d1b28535e7bb7812fa5c8cad271a9154ee0603eeaf", "priorFullSha256": "07d2553b0a918a0d33236202eed35dd93dc6b44f7c4f24b1243b199587f99071"}, {"path": "runtime/real-trading-order-intent.mjs", "version": "1.0.0", "status": "CANDIDATE", "nonMetadataSha256": "59c72325eda86da744153e4f64035f032025a6d5a2529fdf30ad417c373113b0", "priorFullSha256": "f412d5e054e2df611c74efc2ee2a66d7467f28ee8adeef6ed22ed22a20c36ece"}, {"path": "runtime/kgen-margin-runtime.mjs", "version": "CURRENT", "status": "ACTIVE", "nonMetadataSha256": "4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed", "priorFullSha256": "4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed"}, {"path": "runtime/game-ui-product-fixes-v23.mjs", "version": "2.4.0", "status": "ACTIVE", "nonMetadataSha256": "ec23460a1632e6ec61eda91a5334c9f08d50173ad6091a4c5cb563f35ba4653b", "priorFullSha256": "a944b9fbe886e0348ad1ef0d39a5af0d64f5acf261be9338cef74d621b13b2f2", "revision": "2026-10-06.TOAST-DISMISSAL-PLACEMENT", "sourceCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9", "ancestorCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9"}, {"path": "game-5d.html", "version": "2.9.6", "status": "ACTIVE", "nonMetadataSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f", "priorFullSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f", "revision": "2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION", "productContext": "V2.9.6", "sourceCommit": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6", "lastUpdated": "2026-10-07", "reviewer": "PENDING / Draft reconstruction checkpoint; no release approval", "ancestor": "K線西遊記/temples/11520/game-5d.html @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6"}];
  const mandatory=['VERSION','REVISION','STATUS','LAST_UPDATED','UPDATED_BY','REVIEWED_BY','SOURCE_COMMIT','TASK_ID','CHANGE_REASON','ANCESTOR','SOURCE_OF_TRUTH'];
  for(const asset of assets){
   const source=read('../'+asset.path),match=asset.path.endsWith('.mjs')?source.match(/^\/\* KGEN_META\n([\s\S]*?)\*\/\n/):source.match(/^\ufeff<!doctype html>\n<!-- KGEN_META\n([\s\S]*?)-->\n/);
   assert.ok(match,asset.path+' has one leading metadata comment');const fields=Object.fromEntries(match[1].trim().split('\n').map(line=>[line.slice(0,line.indexOf(':')),line.slice(line.indexOf(':')+1).trim()]));
-  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,asset.revision||revision);assert.equal(fields.PRODUCT_CONTEXT,'V2.9.5');assert.equal(fields.SOURCE_COMMIT,asset.sourceCommit||sourceCommit);assert.equal(fields.LAST_UPDATED,'2026-10-06');assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,'TRUE');assert.equal(fields.REVIEWED_BY,'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','accepted metadata review required');
-  assert.equal(fields.ANCESTOR,'K線西遊記/temples/11520/'+asset.path+' @ '+(asset.ancestorCommit||'e26f3a76ef0be7f43058225f46def3fbe123371e'));
+  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,asset.revision||revision);assert.equal(fields.PRODUCT_CONTEXT,asset.productContext||'V2.9.5');assert.equal(fields.SOURCE_COMMIT,asset.sourceCommit||sourceCommit);assert.equal(fields.LAST_UPDATED,asset.lastUpdated||'2026-10-06');assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,'TRUE');assert.equal(fields.REVIEWED_BY,asset.reviewer||'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','accepted metadata review required');
+  assert.equal(fields.ANCESTOR,asset.ancestor||'K線西遊記/temples/11520/'+asset.path+' @ '+(asset.ancestorCommit||'e26f3a76ef0be7f43058225f46def3fbe123371e'));
   const body=asset.path.endsWith('.mjs')?source.slice(match[0].length):'\ufeff<!doctype html>\n'+source.slice(match[0].length);assert.equal(hash(body),asset.nonMetadataSha256,asset.path+' changed non-metadata bytes');
  }
- const changelog=read('../CHANGELOG.md');assert.ok(changelog.includes('| REVISION | 2026-10-06.MARKET-CARD-NODE-RETENTION |'));assert.ok(changelog.includes('| SOURCE_COMMIT | cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |'));assert.ok(changelog.includes('V2.9.5 simulation-playability component revision'));assert.ok(changelog.includes('full VISUAL_QA/release gate remained FAIL'));assert.ok(changelog.includes('needs its own exact-head Chromium'));
+ const changelog=read('../CHANGELOG.md');assert.ok(changelog.includes('| REVISION | 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION |'));assert.ok(changelog.includes('| SOURCE_COMMIT | 1aecc6a3d378b216d40faa953e6934e6aef3be96 |'));assert.ok(changelog.includes('V2.9.5 simulation-playability component revision'));assert.ok(changelog.includes('full VISUAL_QA/release gate remained FAIL'));assert.ok(changelog.includes('needs its own exact-head Chromium'));
  const logMetadata=changelog.split('## Metadata\n')[1]?.split('## 2026-10-06')[0]||'';for(const field of mandatory)assert.ok(logMetadata.includes('| '+field+' | '),'CHANGELOG '+field);
  const entryFields=['Date','Version / Revision','Task ID','Actor','Reviewer','Files','Reason','Compatibility','Rollback'];assert.ok(changelog.includes('| '+entryFields.join(' | ')+' |'));
  for(const path of [".github/workflows/11520-game-product-qa.yml", "K線西遊記/temples/11520/CHANGELOG.md", "K線西遊記/temples/11520/HANDOFF_CURRENT.md", "K線西遊記/temples/11520/game-5d.html", "K線西遊記/temples/11520/runtime/game-5d-main.mjs", "K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs", "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs", "K線西遊記/temples/11520/runtime/public-market-quotes.mjs", "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs", "K線西遊記/temples/11520/tests/11520-browser-responsive.mjs", "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs", "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs", "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs", "tests/11520-order-route.test.mjs", "tests/11520-real-trading-order-intent.test.mjs"])assert.ok(changelog.includes('`'+path+'`'),'CHANGELOG aggregate file '+path);
@@ -757,4 +757,22 @@ assert.deepEqual(opened,['KX','KY','KZ']);assert(original.every((card,i)=>card==
 ctx.execution.readOnly=true;delete ctx.S.quotes.ETHUSDT;vm.runInContext('renderAxes()',ctx);assert(current.every(card=>card.querySelector('.pos').textContent==='NOT_REQUESTED'));assert.equal(current[1].querySelector('.q').textContent,'--');
 ctx.__K11520_3D_CONTROL__.mode='YZ';advance(1237);assert.deepEqual(current.filter(card=>card.classList.contains('k11520NormalActive')).map(card=>card.dataset.axis),['KX'],'existing normal owner still follows the current control plane');assert.equal(doc.querySelectorAll('[data-market-card]').length,3);assert(originalBadges.every((badge,i)=>badge===current[i].querySelector('.k11520NormalBadge')));
 
+});
+
+test('native pursuit keeps canonical1C and bounds near-gate travel by current speed and latency',async()=>{
+ const vm=await import('node:vm'),{kToGameUnits}=await import('../runtime/spatial-coordinate-runtime.mjs');
+ const source=read('./11520-browser-responsive.mjs'),start=source.indexOf('function planPursuitTravel('),fn=source.slice(start,source.indexOf('async function verifyKSpaceGameplay(',start));
+ const context=vm.createContext({assert,kToGameUnits});vm.runInContext(fn+'globalThis.plan=planPursuitTravel;',context);
+ for(const sharedC of [-1,1]){
+  const current={relative:{x:0,y:0,z:.52},speedKPerSecond:.001,sharedC,joyRadius:49.64};
+  const before=JSON.stringify(current),plan=context.plan(current,{limit:.8,magnitude:35,roundTripMs:170});
+  assert.equal(JSON.stringify(current),before,'test controller must not mutate C or actor state');
+  assert.ok(Math.abs(plan.travel)<3,'near-gate displacement must not retain the old12px floor');
+  assert.ok(Math.abs(plan.travel)/current.joyRadius*plan.speed*.17<.15,'measured170ms release latency must remain within the approach margin');
+  const far=context.plan({...current,relative:{x:0,y:0,z:7}},{limit:.8,magnitude:35,roundTripMs:170});assert.ok(far.travel>8&&far.travel<=35,'far native approach latches the existing drag without exceeding the prior cap');
+ }
+ assert.match(source,/await page.waitForTimeout\(430\)/,'small fresh contacts cannot accidentally become a short center tap');
+ assert.match(source,/await pursue\(variant,\.8,5000,35,strike\)/,'every actual strike stays within the original native approach budget');
+ assert.match(source,/beforeStrike.distance<\.8/,'one-shot attack retains a fresh distance precondition');
+ assert.ok(!source.includes("else{await pursue(variant,.8,5000,35);await strike(await state())}"),'do not release then strike using stale readiness');
 });
