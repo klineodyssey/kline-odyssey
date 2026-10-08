@@ -35,6 +35,12 @@
   closed; escort/duel choice remains playable; delivery requires actual local
   movement and produces one receipt; 390x844 and 844x390 Chromium QA artifacts;
   exact-head independent technical review.
+- #543 acceptance follow-up: the existing standard ATM path exposes local
+  destination receipt acceptance and permits a fresh second trip after an
+  uninsured delivery or an insured delivery whose simulation-only policy has no
+  open claim. Wrong receipt and replay fail closed/idempotently. Policy evidence
+  is archived; an eligible unresolved claim keeps the policy/reserve and blocks
+  reassignment instead of inventing a refund or bypassing the existing guard.
 - prohibited: Mainnet, real-asset transfer, signer, Treasury, payment, deployment,
   formal worker ACK, token creation, KUFO/KSHIP deployment, chain write, changes to
   `tests/11520-browser-settlement.mjs`, or merge before parent integration ordering.

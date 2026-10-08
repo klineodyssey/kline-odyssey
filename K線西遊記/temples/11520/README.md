@@ -1,5 +1,18 @@
 # 11520 Universal Exchange V3.9
 
+## Standard ATM receipt loop candidate — 2026-10-08
+
+The existing Digital Ant ATM panel now exposes explicit simulation destination
+acceptance after `ARRIVED_AWAITING_RECEIPT`. Receipt evidence is deterministic,
+wrong destination/receipt requests fail closed, and replay returns the existing
+receipt without repeating accounting. Uninsured delivery can start a fresh trip.
+An insured delivery closes only when there is no eligible open claim: the local
+policy evidence is archived, the simulation reserve is released without refund
+or asset transfer, and a second trip can begin after state reload. An unresolved
+eligible claim deliberately retains the policy and reserve, so the existing
+`ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION` guard continues to block reassignment.
+This is local simulation lifecycle handling, not financial policy settlement.
+
 ## Cargo visual resource lifetime candidate — 2026-10-07
 
 Existing `runtime/life-visual-runtime.mjs` records the geometry/material resources

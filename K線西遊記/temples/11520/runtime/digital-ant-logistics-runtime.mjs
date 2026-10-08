@@ -1,10 +1,10 @@
 /*
 KGEN_META
-VERSION: 1.7.0
-REVISION: 2026-10-08.WHITEHOLE-CARGO-ESCORT-DEMO
+VERSION: 1.7.1
+REVISION: 2026-10-08.WHITEHOLE-CARGO-ESCORT-ATM-RECEIPT
 STATUS: ACTIVE / SIMULATION-FIRST
 SOURCE_OF_TRUTH: LOGISTICS_UNIVERSE_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md
-CHANGE_REASON: Add the Human-requested persistent simulation-only white-hole cargo escort demo to the existing Player Courier owner with explicit KAIOS principal, KGEN fee receivable, local route metadata, movement and one-shot destination receipt.
+CHANGE_REASON: Add the Human-requested persistent simulation-only white-hole cargo escort demo and complete the existing standard ATM local receipt/no-open-claim policy lifecycle without weakening reassignment guards.
 */
 
 import {universeLevel,routeFromAnchor,logisticsDecision,LOGISTICS_ANCHOR} from './logistics-universe-runtime.mjs';
@@ -166,7 +166,7 @@ export function createDigitalAnt({
     vehicle:{vehicleId:String(vehicle?.vehicleId||'ATM-UFO-DIGITAL-ANT-0001'),type:String(vehicle?.type||ATM_UFO_TRANSPORT_MODE),lifeId:vehicle?.lifeId||null,independentLife:false,maxOperationalEnergy:ATM_UFO_MAX_OPERATIONAL_ENERGY,operationalEnergy:ATM_UFO_MAX_OPERATIONAL_ENERGY,propulsion:'ONLINE'},
     finance:{earned:0,spent:0,tips:0,freight:0,fuel:0,salary:0,maintenance:0,risk:0,time:0,lastNet:0},
     payroll:{earned:0,paid:0,balance:0,currency:'KAIOS',scope:'LOCAL_SIMULATION_ONLY',lastReceiptId:null},
-    cargoRisk:{desk:'AI_ANT_COMPANY_CARGO_RISK_DESK',policy:null,reserveKaios:0,incidents:[],replayKeys:[],lastRaidAt:0},
+    cargoRisk:{desk:'AI_ANT_COMPANY_CARGO_RISK_DESK',policy:null,reserveKaios:0,resolvedPolicies:[],incidents:[],replayKeys:[],lastRaidAt:0},
   };
 }
 
@@ -315,7 +315,7 @@ export function activateCargoInsurance(ant,quote,{policyId=`CARGO-POLICY-${Date.
   if(String(reserveSource)!=='LOCAL_GAME_INSURANCE_RESERVE')return {ok:false,reason:'CARGO_PRINCIPAL_CANNOT_BE_RESERVE'};
   if(whole(premiumPaidKaios,'PREMIUM_PAID')!==quote.premiumKaios)return {ok:false,reason:'EXACT_PREMIUM_REQUIRED'};
   ant.cargoRisk.reserveKaios=quote.reserveKaios;
-  ant.cargoRisk.policy={...structuredClone(quote),policyId:String(policyId),mode:'LOCAL_SIMULATION_COVERED',premiumPaidKaios:quote.premiumKaios,activatedAt:Date.now(),claimsPaidKaios:0,status:'ACTIVE'};
+  ant.cargoRisk.policy={...structuredClone(quote),policyId:String(policyId),missionId:String(ant.mission.missionId),mode:'LOCAL_SIMULATION_COVERED',premiumPaidKaios:quote.premiumKaios,activatedAt:Date.now(),claimsPaidKaios:0,status:'ACTIVE'};
   return {ok:true,policy:structuredClone(ant.cargoRisk.policy)};
 }
 
@@ -558,6 +558,41 @@ export function verifyDeliveryReceipt(ant,{receiptId=null,verified=false,now=Dat
   ant.capital=Math.max(0,ant.capital+q.net);
   if(q.net>0){const reserve=q.net*0.2;ant.retirementReserve+=reserve;ant.capital=Math.max(0,ant.capital-reserve);}
   return {ok:true,delivered:true,atmId:m.destination.atmId,cargo:delivered,missionId:m.missionId,receiptId:m.receiptId,quote:q,accounting:structuredClone(m.accounting),payroll:structuredClone(ant.payroll),retirementReserve:ant.retirementReserve};
+}
+
+export function resolveCargoInsuranceAfterDelivery(ant,{receiptId=null,now=Date.now()}={}){
+  const mission=ant?.mission,risk=ant?.cargoRisk,policy=risk?.policy;
+  if(!mission||mission.status!=='DELIVERED'||!mission.receiptVerified)return {ok:false,reason:'DELIVERED_RECEIPT_REQUIRED'};
+  if(String(receiptId||'')!==String(mission.receiptId||''))return {ok:false,reason:'RECEIPT_EVIDENCE_MISMATCH'};
+  risk.resolvedPolicies??=[];
+  const prior=risk.resolvedPolicies.find(item=>item.missionId===mission.missionId&&item.receiptId===mission.receiptId);
+  if(prior)return {ok:true,replayed:true,resolution:structuredClone(prior)};
+  if(!policy)return {ok:true,replayed:false,resolution:null,status:'NO_POLICY'};
+  if(policy.status!=='ACTIVE'||String(policy.missionId)!==String(mission.missionId))return {ok:false,reason:'ACTIVE_POLICY_MISSION_MISMATCH'};
+  const unresolved=risk.incidents.filter(item=>item.missionId===mission.missionId&&item.claimStatus==='CLAIM_ELIGIBLE');
+  if(unresolved.length)return {ok:false,reason:'UNRESOLVED_CARGO_POLICY_CLAIM',incidentIds:unresolved.map(item=>item.incidentId)};
+  const resolution={policyId:policy.policyId,missionId:mission.missionId,receiptId:mission.receiptId,status:'COMPLETED_NO_OPEN_CLAIM',resolvedAt:now,reserveReleasedKaios:risk.reserveKaios,premiumRefundKaios:0,evidenceRetained:true,policyEvidence:structuredClone(policy),incidentEvidence:risk.incidents.filter(item=>item.missionId===mission.missionId).map(item=>structuredClone(item)),scope:'LOCAL_SIMULATION_ONLY',assetTransfer:false,chainTransfer:false,mainnetWrite:false};
+  risk.resolvedPolicies.push(resolution);policy.status=resolution.status;policy.resolvedAt=now;policy.receiptId=mission.receiptId;risk.policy=null;risk.reserveKaios=0;
+  return {ok:true,replayed:false,resolution:structuredClone(resolution)};
+}
+
+export function acceptSimulatedAtmDeliveryReceipt(ant,{destinationAtmId=null,receiptId=null,accepted=false,now=Date.now()}={}){
+  const mission=ant?.mission;
+  if(!mission||mission.customerAcceptanceRequired)return {ok:false,reason:'STANDARD_ATM_DELIVERY_REQUIRED'};
+  if(String(destinationAtmId||'')!==String(mission.destinationAtmId||''))return {ok:false,reason:'WRONG_ATM_DESTINATION'};
+  if(!accepted)return {ok:false,reason:'SIMULATION_DESTINATION_ACCEPTANCE_REQUIRED'};
+  const expected=`ATM-RECEIPT-${raidHash(`${mission.missionId}:${mission.destinationAtmId}:SIMULATION_ACCEPTANCE`).toString(16).padStart(8,'0')}`;
+  const supplied=String(receiptId||expected);if(supplied!==expected)return {ok:false,reason:'RECEIPT_EVIDENCE_MISMATCH'};
+  if(mission.status==='DELIVERED'){
+    if(mission.receiptId!==expected)return {ok:false,reason:'DELIVERY_RECEIPT_CONFLICT'};
+    const policyResolution=resolveCargoInsuranceAfterDelivery(ant,{receiptId:expected,now});
+    return {ok:true,delivered:true,replayed:true,missionId:mission.missionId,receiptId:expected,policyResolution};
+  }
+  if(mission.status!=='ARRIVED_AWAITING_RECEIPT')return {ok:false,reason:'NOT_AWAITING_RECEIPT'};
+  mission.destinationAcceptance={role:'SIMULATION_DESTINATION_ROLE',formalWorkerAck:false,acceptedAt:now,destinationAtmId:mission.destinationAtmId,receiptId:expected,scope:'LOCAL_SIMULATION_ONLY'};
+  const result=verifyDeliveryReceipt(ant,{receiptId:expected,verified:true,now});
+  const policyResolution=resolveCargoInsuranceAfterDelivery(ant,{receiptId:expected,now});
+  return {...result,replayed:false,policyResolution};
 }
 
 export function previewPlayerHomeAcceptance(ant,{requesterLifeId,playerPosition={}}={}){

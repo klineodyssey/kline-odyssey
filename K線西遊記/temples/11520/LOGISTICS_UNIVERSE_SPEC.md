@@ -1,8 +1,8 @@
 # 11520 倉儲物流宇宙｜Logistics Universe Spec
 
 ## Metadata
-- VERSION: 1.5.0
-- REVISION: 2026-10-08.WHITEHOLE-ESCORT
+- VERSION: 1.5.1
+- REVISION: 2026-10-08.WHITEHOLE-ESCORT-ATM-RECEIPT
 - STATUS: ACTIVE / PRODUCT CONCEPT
 - PLACE_ID: 11520
 - RELATION: MARKET_LIFE_AI_SPEC.md
@@ -37,6 +37,15 @@ The reviewer is explicitly a simulation role with `formalWorkerAck=false`.
 Start, reload and receipt replay are idempotent. Expiry, wrong destination,
 wrong local position and invalid state fail closed. Every result remains
 `SIMULATION_ONLY`, `chainTransfer=false`, `mainnetWrite=false`.
+
+Standard ATM delivery uses a separate local acceptance helper after
+`ARRIVED_AWAITING_RECEIPT`. Its deterministic receipt is destination-bound and
+replay-safe. If no insurance exists, delivery immediately permits a new mission.
+If a local simulation policy exists, delivery archives and clears it only when
+there is no `CLAIM_ELIGIBLE` incident. That resolution retains evidence, releases
+only the simulated reserve, records zero premium refund and performs no asset or
+chain transfer. An eligible open claim keeps policy and reserve active, so the
+existing reassignment guard remains fail closed.
 
 ## 1. 產品定位
 11520 除了是 Market Life 的市場世界，也是花果山台灣交易所的倉儲／物流中心。Digital Ant、自動物流生命、行動 ATM 飛碟、可馴養送貨生命都可以成為物流載體。它們不是無生命 icon，而是具有 LIFE_ID、資本、生命、風險、任務與市場方向的生命。

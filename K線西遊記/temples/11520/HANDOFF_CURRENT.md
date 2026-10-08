@@ -24,6 +24,13 @@
   Chromium with direct 390x844 and 844x390 receipt screenshots. Exact-head CI
   and independent technical review remain release gates. Draft PR only; merge
   remains held for parent integration ordering.
+- #543 receipt follow-up: standard ATM deliveries now expose a simulation-only
+  destination acceptance action. A no-policy trip or a no-open-claim insured
+  trip can legally close and start a second mission after state reload. Insurance
+  resolution archives the policy and releases only its local simulation reserve;
+  it performs no refund or asset transfer. An open eligible claim retains policy,
+  reserve and evidence and remains blocked by the existing assignment guard.
+- Current runtime verification after the follow-up: 81/81.
 
 ## P0 simulation order availability candidate — 2026-10-06
 
