@@ -12,7 +12,13 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.match(workflow, /uses: actions\/upload-artifact@v7/);
   assert.doesNotMatch(workflow, /uses: actions\/upload-artifact@v4/);
   assert.equal((workflow.match(/uses: actions\/checkout@v7/g) || []).length, 2);
-  assert.equal((workflow.match(/uses: actions\/setup-node@v7/g) || []).length, 2);
+  // Third pinned setup selects SQLite-capable Node only after the untouched Node 20 baseline.
+  assert.equal((workflow.match(/uses: actions\/setup-node@v7/g) || []).length, 3);
+  assert.match(workflow, /node-version: "20"/);
+  assert.match(workflow, /Select Node 24 for offline handoff SQLite tests[\s\S]*node-version: "24"\s+package-manager-cache: false/);
+  assert.match(workflow, /Run mandatory offline V2 handoff tests\s+timeout-minutes: 2/);
+  assert.match(workflow, /node --test --test-name-pattern="\^offline V2:" tests\/autonomous-company-engineering-cycle.test.mjs/);
+  assert.doesNotMatch(workflow, /continue-on-error:/);
   assert.equal((workflow.match(/timeout-minutes:\s*10/g) || []).length, 2);
   assert.match(workflow, /Confirm exact pull request head and clean patch/);
   assert.match(workflow, /test "\$\(git rev-parse HEAD\)" = "\$HEAD_SHA"/);
