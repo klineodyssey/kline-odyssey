@@ -1,5 +1,6 @@
 import { requireArray, requireFields, requireId, requireEnum } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
+import { sha256, stableStringify } from "../shared/utils.mjs";
 
 export const COMPANY_FIELDS = Object.freeze([
   "company_id", "founder_life_id", "name", "wallet_address", "treasury_address", "employees", "equity",
@@ -1983,6 +1984,7 @@ export function createAquacultureProjectDraft({
 
 export const AUTONOMOUS_ENGINEERING_SAFE_ACTIONS = Object.freeze([
   "READ", "RESEARCH", "ANALYZE", "DOCUMENT", "TEST", "SIMULATE",
+  "CODE", "DEBUG", "REFACTOR", "LOCAL_QA", "BROWSER_QA", "ASSIGN_WORK",
   "ISSUE_TRIAGE", "SAFE_BRANCH_WORK", "COMMIT_TASK_BRANCH", "PUSH_TASK_BRANCH",
   "OPEN_PR", "CI", "STATUS_RECONCILIATION", "WORK_EVIDENCE", "HANDOFF",
   "REVIEW_REQUEST", "VERIFY_STATIC_PAGES"
@@ -1993,6 +1995,8 @@ export const AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS = Object.freeze([
   "SELF_TRUST_ESCALATION", "SELF_PAYROLL_APPROVAL", "PRIVATE_KEY_ACCESS",
   "TREASURY_TRANSFER", "PAYROLL_PAYMENT", "MAINNET_TRANSACTION", "TOKEN_TRANSFER",
   "CONTRACT_DEPLOYMENT", "GOVERNANCE_EXECUTION", "OWNERSHIP_TRANSFER",
+  "TESTNET_DEPLOYMENT", "SECRET_ACCESS", "ADMIN_EXECUTION", "KYC_EXECUTION",
+  "PRODUCTION_ORACLE_ACTIVATION", "DESTRUCTIVE_PLAYER_LIFE_OPERATION",
   "PUSH_MAIN", "MERGE_MAIN", "EXTERNAL_AGENT_LAUNCH", "PAID_EXTERNAL_API",
   "IRREVERSIBLE_EXTERNAL_ACTION"
 ]);
@@ -2004,6 +2008,153 @@ export const AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES = Object.freeze([
   "CLOCK_OUT"
 ]);
 
+export const ACTIVE_COMPANY_BOOT_READS = Object.freeze([
+  "company_boot",
+  "boot_manifest",
+  "boot_current",
+  "latest_main",
+  "handoff_current",
+  "human_owner_policy",
+  "company_queue",
+  "worker_identity_authority",
+  "active_pr_branch_ci_blockers",
+  "task_safety_runtime_product_docs"
+]);
+
+export const ACTIVE_COMPANY_BOOT_SOURCE_PATHS = Object.freeze({
+  company_boot: "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md",
+  boot_manifest: "KGEN-KAIOS/governance/autopilot/company_boot_manifest.json",
+  boot_current: "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+  latest_main: "git://origin/main",
+  handoff_current: "handoff/HANDOFF_CURRENT.md",
+  human_owner_policy: "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md",
+  company_queue: "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+  worker_identity_authority: "KGEN-KAIOS/worker_registry.json",
+  active_pr_branch_ci_blockers: "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+  task_safety_runtime_product_docs: "AGENTS.md",
+  universe_map: "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json"
+});
+
+const ACTIVE_COMPANY_REPOSITORY_EVIDENCE = new WeakSet();
+const CANONICAL_COMPANY_PUBLIC_FETCH = globalThis.fetch;
+const ACTIVE_COMPANY_REPOSITORY_PATHS = Object.freeze([
+  ...new Set(Object.values(ACTIVE_COMPANY_BOOT_SOURCE_PATHS).filter((path) => !path.startsWith("git://")))
+]);
+
+function decodePublicGitHubBase64(value) {
+  invariant(typeof value === "string", "PUBLIC_GITHUB_FILE_CONTENT_REQUIRED", "Public GitHub file evidence requires base64 content");
+  const compact = value.replace(/\s+/g, "");
+  const binary = globalThis.atob(compact);
+  return new TextDecoder().decode(Uint8Array.from(binary, (character) => character.charCodeAt(0)));
+}
+
+async function gitBlobObjectId(content) {
+  const body = new TextEncoder().encode(content);
+  const header = new TextEncoder().encode(`blob ${body.byteLength}\0`);
+  const bytes = new Uint8Array(header.byteLength + body.byteLength);
+  bytes.set(header);
+  bytes.set(body, header.byteLength);
+  const digest = await globalThis.crypto.subtle.digest("SHA-1", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Resolve a read-only, hash-checked repository snapshot from public GitHub.
+ * The returned object carries a module-private capability and is the only
+ * repository evidence accepted by Active Company planning.
+ */
+export async function resolveActiveCompanyRepositoryEvidence({
+  current_main_sha,
+  observed_at,
+  guardian_evidence_refs = [],
+  work_order_refs = [],
+  pr_work_order_refs = [],
+  work_order_history_refs = [],
+  direct_channel_evidence_refs = [],
+  active_task_pr = null,
+  fetch_impl = CANONICAL_COMPANY_PUBLIC_FETCH
+}) {
+  invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
+  requireArray(guardian_evidence_refs, "guardian_evidence_refs");
+  requireArray(work_order_refs, "work_order_refs");
+  requireArray(pr_work_order_refs, "pr_work_order_refs");
+  requireArray(work_order_history_refs, "work_order_history_refs");
+  requireArray(direct_channel_evidence_refs, "direct_channel_evidence_refs");
+  invariant(typeof fetch_impl === "function", "PUBLIC_GITHUB_FETCH_REQUIRED", "Public GitHub evidence resolution requires fetch");
+  const nodeTestContext = globalThis.process?.env?.NODE_TEST_CONTEXT;
+  invariant(fetch_impl === CANONICAL_COMPANY_PUBLIC_FETCH || nodeTestContext === "child-v8", "PUBLIC_GITHUB_CUSTOM_FETCH_FORBIDDEN", "Custom evidence transports are allowed only inside the Node test runner");
+  const normalizedGuardianRefs = guardian_evidence_refs.map((path) => {
+    invariant(typeof path === "string" && path.trim() && !path.startsWith("/") && !path.includes("..") && !path.includes("\\"), "GUARDIAN_EVIDENCE_PATH_INVALID", "Guardian evidence must be a repository-relative path");
+    return path;
+  });
+  const normalizedWorkOrderRefs = work_order_refs.map((path) => {
+    invariant(typeof path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(path), "WORK_ORDER_EVIDENCE_PATH_INVALID", "Work-order evidence must be a JSON file in KGEN-Organization/WorkOrders");
+    return path;
+  });
+  const normalizedPrWorkOrderRefs = pr_work_order_refs.map((path) => {
+    invariant(typeof path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(path), "PR_WORK_ORDER_EVIDENCE_PATH_INVALID", "PR work-order evidence must be a JSON file in KGEN-Organization/WorkOrders");
+    return path;
+  });
+  const normalizedHistoryRefs = work_order_history_refs.map((entry) => {
+    invariant(entry && typeof entry === "object" && !Array.isArray(entry), "WORK_ORDER_HISTORY_REF_INVALID", "History evidence requires path and commit");
+    invariant(typeof entry.path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(entry.path), "WORK_ORDER_HISTORY_PATH_INVALID", "History evidence must be a WorkOrders JSON path");
+    invariant(/^[0-9a-f]{40}$/.test(entry.commit ?? ""), "WORK_ORDER_HISTORY_COMMIT_INVALID", "History evidence requires an exact commit SHA");
+    return Object.freeze({ path: entry.path, commit: entry.commit });
+  });
+  const normalizedChannelRefs = direct_channel_evidence_refs.map((path) => {
+    invariant(typeof path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(path), "DIRECT_CHANNEL_EVIDENCE_PATH_INVALID", "Direct-channel evidence must be a JSON file in KGEN-Organization/WorkOrders");
+    return path;
+  });
+  const paths = [...new Set([...ACTIVE_COMPANY_REPOSITORY_PATHS, ...normalizedGuardianRefs, ...normalizedWorkOrderRefs, ...normalizedChannelRefs])];
+  // Compatibility entry only: canonical reader owns ALL repository HTTP reads.
+  const snapshot = await readLatestRepositorySnapshot({
+    repository: "klineodyssey/kline-odyssey", observed_at, active_task_pr,
+    required_check_names: ["test"], expected_main_sha: current_main_sha,
+    evidence_paths: paths, pr_evidence_paths: normalizedPrWorkOrderRefs, historical_evidence_refs: normalizedHistoryRefs, fetch_impl
+  });
+  const evidence = Object.freeze({
+    status: snapshot.transport_provenance === "DEFAULT_PUBLIC_GITHUB" ? "PUBLIC_GITHUB_REPOSITORY_EVIDENCE_VERIFIED" : "DIAGNOSTIC_REPOSITORY_EVIDENCE_NOT_VERIFIED",
+    evidence_class: snapshot.transport_provenance,
+    repository: snapshot.repository, main_sha: snapshot.main_sha,
+    observed_at: snapshot.observed_at, files: snapshot.files,
+    snapshot, external_effect: false
+  });
+  ACTIVE_COMPANY_REPOSITORY_EVIDENCE.add(evidence);
+  return evidence;
+}
+
+function requireTrustedActiveCompanyRepositoryEvidence(repositoryEvidence, currentMainSha) {
+  invariant(ACTIVE_COMPANY_REPOSITORY_EVIDENCE.has(repositoryEvidence), "TRUSTED_REPOSITORY_EVIDENCE_REQUIRED", "Active Company Mode requires evidence returned by the public GitHub resolver");
+  invariant(repositoryEvidence.main_sha === currentMainSha, "REPOSITORY_EVIDENCE_MAIN_MISMATCH", "Repository evidence must bind current_main_sha");
+  return repositoryEvidence;
+}
+
+export const ACTIVE_COMPANY_ROLES = Object.freeze({
+  GENERAL_MANAGER: "GENERAL_MANAGER",
+  PRIMEFORGE: "PRIMEFORGE",
+  DOT: "DOT",
+  CHATGPT: "CHATGPT",
+  CHATGPT_WORK: "CHATGPT_WORK",
+  CODEX: "CODEX",
+  CODEX_CLOUD: "CODEX_CLOUD",
+  REVIEWER: "REVIEWER",
+  HUMAN_RESOURCES: "HUMAN_RESOURCES"
+});
+
+export const ACTIVE_COMPANY_ORACLE_POLICY = Object.freeze({
+  strategy: "FREE_PRICE_FEEDS_FIRST",
+  speed_target: "1C",
+  paid_oracle_procurement: "NOT_ACTIVE",
+  material_triggers: Object.freeze([
+    "NEW_PROVIDER_REPLY",
+    "TRIAL_ACCESS_GRANTED",
+    "MATERIAL_PRICE_CHANGE",
+    "NEW_REQUIRED_ACTION",
+    "FREE_FEED_NO_LONGER_SUFFICIENT",
+    "HUMAN_REQUESTS_PAID_ORACLE_REVIEW"
+  ])
+});
+
 const AUTONOMOUS_ENGINEERING_PRIORITY = Object.freeze({ P0: 0, P1: 1, P2: 2 });
 const AUTONOMOUS_ENGINEERING_TRUST = Object.freeze({ T0: 0, T1: 1, T2: 2, T3: 3, T4: 4, T5: 5 });
 const AUTONOMOUS_ENGINEERING_SAFE_RISKS = Object.freeze(["R0", "R1", "LOW"]);
@@ -2013,11 +2164,12 @@ const AUTONOMOUS_ENGINEERING_ACKS = Object.freeze([
 
 function autonomousEngineeringWorkerEligible(worker, task = null) {
   if (!worker || worker.status !== "ACTIVE" || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return false;
-  if ((AUTONOMOUS_ENGINEERING_TRUST[worker.trust_level] ?? -1) < 2 || worker.suspension) return false;
+  if (!Object.hasOwn(AUTONOMOUS_ENGINEERING_TRUST, worker.trust_level) || AUTONOMOUS_ENGINEERING_TRUST[worker.trust_level] < 2 || worker.suspension) return false;
   if (!AUTONOMOUS_ENGINEERING_ACKS.every((field) => worker[field] === true)) return false;
   if (typeof worker.worker_id !== "string" || !worker.worker_id.trim()) return false;
   if (typeof worker.life_identity_ref !== "string" || !worker.life_identity_ref.trim()) return false;
   if (typeof worker.controller_id !== "string" || !worker.controller_id.trim()) return false;
+  if (worker.revoked === true || worker.credential_status === "REVOKED") return false;
   if (Number(worker.active_claim_count ?? 0) > 1) return false;
   if (task && Number(worker.active_claim_count ?? 0) > 0 && worker.current_task !== task.task_id) return false;
   if (task && worker.current_task && worker.current_task !== task.task_id) return false;
@@ -2037,8 +2189,316 @@ function autonomousEngineeringActorsDistinct(left, right) {
 
 function autonomousEngineeringBranchMatches(pattern, branch, taskId) {
   if (typeof pattern !== "string" || typeof branch !== "string" || typeof taskId !== "string") return false;
-  if (branch === "main" || branch.startsWith("codex/")) return false;
+  if (branch === "main") return false;
   return pattern.replace("<Task-ID>", taskId) === branch;
+}
+
+export const PRIMEFORGE_IDENTITY_BOUNDARY = Object.freeze({
+  canonical_identity: "human-primeforge",
+  display_lineage: Object.freeze(["PrimeForge", "human-primeforge"]),
+  identity_type: "HUMAN_REVIEWER_AUTHORITY_LINEAGE",
+  human_authority: "沈英明",
+  ai_runtime_identity: false,
+  system_runtime_maintainer: "NOT_ASSIGNED_VERIFIED_IDENTITY_REQUIRED",
+  active_writer_authority: false,
+  runtime_maintainer_authority: false,
+  reviewer_authority: false
+});
+
+const VERIFIED_BRANCH_WRITER_ATTESTATIONS = new WeakSet();
+const CONSUMED_BRANCH_WRITER_ATTESTATIONS = new WeakSet();
+const BRANCH_WRITER_CHALLENGES = new WeakSet();
+const BRANCH_WRITER_CHALLENGE_METADATA = new WeakMap();
+const BRANCH_WRITER_WORK_ORDER_REF = "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json";
+// Deliberately empty until an action-specific identity/security decision installs
+// a controller key fingerprint in shipped code. Repository/network responses
+// cannot create or replace this independent trust anchor.
+export const BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS = Object.freeze({});
+const BRANCH_WRITER_MAX_LEASE_MS = 4 * 60 * 60 * 1000;
+const BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS = 15 * 60 * 1000;
+const BRANCH_WRITER_CHALLENGE_TTL_MS = 2 * 60 * 1000;
+const BRANCH_WRITER_DATE = Date;
+const BRANCH_WRITER_DATE_PARSE = Date.parse.bind(Date);
+const BRANCH_WRITER_WALL_NOW = Date.now.bind(Date);
+const BRANCH_WRITER_MONOTONIC_NOW = globalThis.performance?.now.bind(globalThis.performance) ?? BRANCH_WRITER_WALL_NOW;
+const branchWriterIsoTime = (milliseconds) => new BRANCH_WRITER_DATE(milliseconds).toISOString();
+
+function branchWriterSignatureBytes(value) {
+  invariant(typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value), "BRANCH_WRITER_SIGNATURE_INVALID", "Writer attestation requires a base64url signature");
+  const padded = `${value.replaceAll("-", "+").replaceAll("_", "/")}${"=".repeat((4 - value.length % 4) % 4)}`;
+  return Uint8Array.from(globalThis.atob(padded), (character) => character.charCodeAt(0));
+}
+
+export function createBranchWriterChallenge({ branch, work_id, handoff_head }) {
+  invariant(typeof branch === "string" && branch.startsWith("codex/") && branch !== "main", "BRANCH_WRITER_CHALLENGE_BRANCH_INVALID", "Writer challenge requires a task branch");
+  invariant(typeof work_id === "string" && work_id.trim(), "BRANCH_WRITER_CHALLENGE_WORK_INVALID", "Writer challenge requires a work ID");
+  invariant(/^[0-9a-f]{40}$/.test(handoff_head ?? ""), "BRANCH_WRITER_CHALLENGE_HEAD_INVALID", "Writer challenge requires an exact handoff head");
+  const challenge = Object.freeze({
+    nonce: globalThis.crypto.randomUUID(),
+    branch,
+    work_id,
+    handoff_head
+  });
+  BRANCH_WRITER_CHALLENGES.add(challenge);
+  BRANCH_WRITER_CHALLENGE_METADATA.set(challenge, Object.freeze({
+    issued_wall_ms: BRANCH_WRITER_WALL_NOW(),
+    issued_monotonic_ms: BRANCH_WRITER_MONOTONIC_NOW()
+  }));
+  return challenge;
+}
+
+/**
+ * Mint a module-private runtime capability only after exact-PR-file,
+ * canonical-registry and Ed25519 proof verification. Plain caller objects can
+ * never be used as a branch-writer attestation.
+ */
+export async function verifyBranchWriterRuntimeAttestation({
+  repository_evidence,
+  current_main_sha,
+  source_ref,
+  claim_id,
+  signed_payload,
+  challenge,
+  public_key_jwk,
+  signature_base64url
+}) {
+  invariant(BRANCH_WRITER_CHALLENGES.has(challenge), "BRANCH_WRITER_FRESH_CHALLENGE_REQUIRED", "Writer proof requires a fresh current-process challenge");
+  const challengeMetadata = BRANCH_WRITER_CHALLENGE_METADATA.get(challenge);
+  // A challenge is consumed by its first verification attempt, whether that
+  // attempt succeeds or fails. This prevents corrected payloads from probing a
+  // reusable authority-bearing nonce.
+  BRANCH_WRITER_CHALLENGES.delete(challenge);
+  BRANCH_WRITER_CHALLENGE_METADATA.delete(challenge);
+  const verifiedAtMs = BRANCH_WRITER_WALL_NOW();
+  const challengeAgeMs = BRANCH_WRITER_MONOTONIC_NOW() - challengeMetadata?.issued_monotonic_ms;
+  invariant(challengeMetadata && Number.isFinite(challengeAgeMs)
+    && challengeAgeMs >= 0 && challengeAgeMs <= BRANCH_WRITER_CHALLENGE_TTL_MS,
+  "BRANCH_WRITER_CHALLENGE_EXPIRED", "Writer proof requires an unexpired module-timed challenge");
+  invariant(Math.abs(verifiedAtMs - challengeMetadata.issued_wall_ms) <= BRANCH_WRITER_CHALLENGE_TTL_MS * 2,
+    "BRANCH_WRITER_CLOCK_DISCONTINUITY", "Writer proof stopped because the module wall clock changed unexpectedly");
+  const repository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  invariant(repository.status === "PUBLIC_GITHUB_REPOSITORY_EVIDENCE_VERIFIED"
+    && repository.evidence_class === "DEFAULT_PUBLIC_GITHUB"
+    && VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository.snapshot),
+  "BRANCH_WRITER_PUBLIC_EVIDENCE_REQUIRED", "Writer authority requires the canonical public GitHub transport; diagnostic/custom evidence cannot mint authority");
+  invariant(source_ref === BRANCH_WRITER_WORK_ORDER_REF, "BRANCH_WRITER_SOURCE_REF_INVALID", "Writer claim must come from the one canonical active Company WorkOrder path");
+  const file = repository.snapshot.pr_files[source_ref];
+  invariant(file && file.ref === repository.snapshot.active_task_pr?.head_sha, "BRANCH_WRITER_PR_EVIDENCE_REQUIRED", "Writer claim must be hash-checked at the exact PR head");
+  let manifest;
+  try { manifest = JSON.parse(file.content); } catch { invariant(false, "BRANCH_WRITER_MANIFEST_INVALID", "Writer claim manifest must be valid JSON"); }
+  const claims = manifest?.branch_concurrency_gate?.claims;
+  requireArray(claims, "branch_concurrency_gate.claims");
+  const claim = claims.find((entry) => entry?.claim_id === claim_id);
+  invariant(claim, "BRANCH_WRITER_CLAIM_NOT_FOUND", "Writer claim is absent from exact-PR evidence");
+  invariant(repository.snapshot.active_task_pr?.head_ref === claim.branch, "BRANCH_WRITER_PR_BRANCH_MISMATCH", "Writer claim branch must match the exact PR head branch");
+  const verifiedAt = branchWriterIsoTime(verifiedAtMs);
+  const inspected = inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: verifiedAt, claims });
+  invariant(inspected.status === "STRUCTURALLY_VALID", "BRANCH_WRITER_CLAIM_NOT_CURRENT", `Writer claim is not current: ${inspected.reasons.join(",")}`);
+
+  const registryFile = repository.files[ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority];
+  invariant(registryFile, "WORKER_REGISTRY_EVIDENCE_REQUIRED", "Writer attestation requires canonical registry evidence");
+  let registry;
+  try { registry = JSON.parse(registryFile.content); } catch { invariant(false, "WORKER_REGISTRY_JSON_INVALID", "Canonical worker registry evidence must be valid JSON"); }
+  const worker = registry?.workers?.find((entry) => entry?.worker_id === claim.active_writer);
+  invariant(worker, "REGISTERED_WORKER_REQUIRED", "Claimed writer is absent from canonical registry evidence");
+  const independentAnchor = BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS[worker.worker_id];
+  invariant(independentAnchor && typeof independentAnchor === "object",
+    "INDEPENDENT_CONTROLLER_TRUST_ANCHOR_REQUIRED", "Repository evidence alone cannot establish writer controller identity");
+  invariant(typeof worker.controller_id === "string" && worker.controller_id.trim(), "REGISTERED_CONTROLLER_REQUIRED", "Claimed writer requires a canonical controller binding");
+  invariant(independentAnchor.controller_id === worker.controller_id
+    && independentAnchor.controller_public_key_sha256 === worker.controller_public_key_sha256,
+  "INDEPENDENT_CONTROLLER_TRUST_ANCHOR_MISMATCH", "Canonical controller evidence must match the shipped independent trust anchor");
+  invariant(claim.controller_registry_id === worker.controller_id, "CONTROLLER_REGISTRY_BINDING_MISMATCH", "Claim controller must match the canonical worker controller");
+  invariant(/^[0-9a-f]{64}$/.test(worker.controller_public_key_sha256 ?? "")
+    && worker.controller_public_key_sha256 === claim.controller_binding_hash,
+  "CONTROLLER_PUBLIC_KEY_BINDING_REQUIRED", "Canonical worker registry must bind the controller to the signing public key hash");
+  invariant(public_key_jwk && typeof public_key_jwk === "object" && !Array.isArray(public_key_jwk), "BRANCH_WRITER_PUBLIC_KEY_REQUIRED", "Writer attestation requires a public verification key");
+  invariant(await sha256(public_key_jwk) === claim.controller_binding_hash, "BRANCH_WRITER_PUBLIC_KEY_MISMATCH", "Public verification key must match the claim binding");
+  invariant(signed_payload && typeof signed_payload === "object" && !Array.isArray(signed_payload), "BRANCH_WRITER_SIGNED_PAYLOAD_REQUIRED", "Writer attestation requires a signed payload");
+  invariant(signed_payload.claim_id === claim.claim_id && signed_payload.claim_hash === await sha256(claim), "BRANCH_WRITER_SIGNED_CLAIM_MISMATCH", "Signed payload must bind the exact claim bytes");
+  invariant(signed_payload.branch === claim.branch && signed_payload.work_id === claim.work_id && signed_payload.handoff_head === claim.handoff_head
+    && signed_payload.fencing_token === claim.fencing_token && signed_payload.fencing_epoch === claim.fencing_epoch,
+  "BRANCH_WRITER_SIGNED_SCOPE_MISMATCH", "Signed payload must bind branch, work, head and fencing epoch");
+  invariant(signed_payload.challenge_nonce === challenge.nonce && challenge.branch === claim.branch
+    && challenge.work_id === claim.work_id && challenge.handoff_head === claim.handoff_head,
+  "BRANCH_WRITER_CHALLENGE_MISMATCH", "Signed payload must bind the fresh current-process challenge");
+  invariant(signed_payload.pr_head === file.ref && signed_payload.source_git_object === file.git_object,
+    "BRANCH_WRITER_SIGNED_SOURCE_MISMATCH", "Signed payload must bind exact PR head and WorkOrder blob");
+  const signedAtMs = BRANCH_WRITER_DATE_PARSE(signed_payload.attested_at ?? "");
+  invariant(Number.isFinite(signedAtMs) && Math.abs(verifiedAtMs - signedAtMs) <= BRANCH_WRITER_CHALLENGE_TTL_MS,
+    "BRANCH_WRITER_SIGNED_TIME_INVALID", "Signed writer time must be close to module-owned verification time");
+  const key = await globalThis.crypto.subtle.importKey("jwk", public_key_jwk, { name: "Ed25519" }, false, ["verify"]);
+  const verified = await globalThis.crypto.subtle.verify(
+    { name: "Ed25519" }, key, branchWriterSignatureBytes(signature_base64url), new TextEncoder().encode(stableStringify(signed_payload))
+  );
+  invariant(verified, "BRANCH_WRITER_SIGNATURE_VERIFICATION_FAILED", "Writer runtime attestation signature is invalid");
+  const attestation = Object.freeze({
+    claim: Object.freeze({ ...claim }),
+    claims: Object.freeze(claims.map((entry) => Object.freeze({ ...entry }))),
+    worker: Object.freeze({ ...worker }),
+    signed_payload: Object.freeze({ ...signed_payload }),
+    source_ref,
+    source_git_object: file.git_object,
+    pr_head: file.ref,
+    verified_at: verifiedAt
+  });
+  VERIFIED_BRANCH_WRITER_ATTESTATIONS.add(attestation);
+  return attestation;
+}
+
+/** Structural inspection only; never grants writer authority. */
+export function inspectBranchConcurrencyClaimSet({ branch, observed_at, claims = [] }) {
+  const result = (status, reasons = []) => Object.freeze({ status, reasons: Object.freeze(reasons), authority_granted: false });
+  const observedMs = BRANCH_WRITER_DATE_PARSE(observed_at ?? "");
+  if (typeof branch !== "string" || !branch.startsWith("codex/") || branch === "main") return result("INVALID", ["BRANCH_INVALID"]);
+  if (Number.isNaN(observedMs) || !Array.isArray(claims)) return result("INVALID", ["CLAIM_OR_TIME_INVALID"]);
+  const branchClaims = claims.filter((claim) => claim?.branch === branch);
+  if (new Set(branchClaims.map((claim) => claim.claim_id)).size !== branchClaims.length) return result("INVALID", ["DUPLICATE_CLAIM_ID"]);
+  if (new Set(branchClaims.map((claim) => claim.fencing_token)).size !== branchClaims.length) return result("INVALID", ["DUPLICATE_FENCING_TOKEN"]);
+  if (new Set(branchClaims.map((claim) => claim.fencing_epoch)).size !== branchClaims.length) return result("INVALID", ["DUPLICATE_FENCING_EPOCH"]);
+  const malformed = branchClaims.find((claim) => {
+    const claimed = BRANCH_WRITER_DATE_PARSE(claim?.claimed_at ?? "");
+    const heartbeat = BRANCH_WRITER_DATE_PARSE(claim?.last_heartbeat ?? "");
+    const expires = BRANCH_WRITER_DATE_PARSE(claim?.lease_expires_at ?? "");
+    return !Number.isFinite(claimed) || !Number.isFinite(heartbeat) || !Number.isFinite(expires)
+      || claimed > heartbeat || heartbeat > observedMs || expires <= observedMs
+      || expires - claimed > BRANCH_WRITER_MAX_LEASE_MS || observedMs - heartbeat > BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS
+      || !Number.isSafeInteger(claim?.fencing_epoch) || claim.fencing_epoch < 1;
+  });
+  if (malformed) return result("INVALID", ["CLAIM_FRESHNESS_INVALID"]);
+  const activeClaims = branchClaims.filter((claim) => claim?.lease_status === "ACTIVE");
+  if (activeClaims.length !== 1) return result("INVALID", [activeClaims.length === 0 ? "ACTIVE_WRITER_REQUIRED" : "MULTIPLE_ACTIVE_WRITERS"]);
+  return Object.freeze({ status: "STRUCTURALLY_VALID", reasons: Object.freeze([]), active_claim: activeClaims[0], authority_granted: false });
+}
+
+/**
+ * Fail-closed branch lease check. This does not grant repository authority; it
+ * only verifies that one already-authorized worker owns one exact branch lease.
+ */
+export function evaluateBranchConcurrencyGate({
+  branch,
+  work_id,
+  handoff_head,
+  verified_attestation = null
+}) {
+  const hold = (...reasons) => Object.freeze({
+    status: "STOP_WRITES",
+    active_writer: null,
+    lease_status: "HOLD",
+    reasons: Object.freeze(reasons)
+  });
+  if (VERIFIED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) {
+    if (CONSUMED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) return hold("WRITER_ATTESTATION_REPLAYED");
+    // A real capability is consumed at the start of its first gate evaluation,
+    // even when the caller supplied an invalid branch, work ID or handoff head.
+    CONSUMED_BRANCH_WRITER_ATTESTATIONS.add(verified_attestation);
+  }
+  if (typeof branch !== "string" || !branch.startsWith("codex/") || branch === "main") return hold("BRANCH_INVALID");
+  if (typeof work_id !== "string" || !work_id.trim()) return hold("WORK_ID_INVALID");
+  if (!/^[0-9a-f]{40}$/.test(handoff_head ?? "")) return hold("HANDOFF_HEAD_INVALID");
+  if (!VERIFIED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) return hold("VERIFIED_RUNTIME_ATTESTATION_REQUIRED");
+  const claims = verified_attestation.claims;
+  const signed = verified_attestation.signed_payload;
+  const observedAtMs = BRANCH_WRITER_WALL_NOW();
+  const verifiedAtMs = BRANCH_WRITER_DATE_PARSE(verified_attestation.verified_at ?? "");
+  if (!Number.isFinite(verifiedAtMs) || observedAtMs < verifiedAtMs
+    || observedAtMs - verifiedAtMs > BRANCH_WRITER_CHALLENGE_TTL_MS) return hold("WRITER_ATTESTATION_EXPIRED");
+  const inspected = inspectBranchConcurrencyClaimSet({ branch, observed_at: branchWriterIsoTime(observedAtMs), claims });
+  if (inspected.status !== "STRUCTURALLY_VALID") return hold(...inspected.reasons);
+  const claim = inspected.active_claim;
+  const worker = verified_attestation.worker;
+  if (claim.work_id !== work_id || verified_attestation.claim.claim_id !== claim.claim_id) return hold("WORK_CLAIM_MISMATCH");
+  if (worker.status !== "ACTIVE" || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return hold("ACTIVE_EMPLOYEE_REQUIRED");
+  if (!Object.hasOwn(AUTONOMOUS_ENGINEERING_TRUST, worker.trust_level) || AUTONOMOUS_ENGINEERING_TRUST[worker.trust_level] < 2) return hold("T2_WORKER_REQUIRED");
+  if (!AUTONOMOUS_ENGINEERING_ACKS.every((field) => worker[field] === true) || worker.suspension || worker.revoked === true) return hold("WORKER_ACK_OR_STATUS_INVALID");
+  if (worker.life_identity_ref !== claim.life_id) return hold("LIFE_BINDING_MISMATCH");
+  if (claim.handoff_head !== handoff_head) return hold("HANDOFF_HEAD_MISMATCH");
+  if (claim.current_writer_release !== true || claim.next_writer_ack !== true) return hold("WRITER_HANDOFF_INCOMPLETE");
+  if (!Array.isArray(claim.handoff_scope) || claim.handoff_scope.length === 0) return hold("HANDOFF_SCOPE_REQUIRED");
+  if (!/^FENCE-[A-Za-z0-9._-]+$/.test(claim.fencing_token ?? "")) return hold("FENCING_TOKEN_INVALID");
+  if (!/^[0-9a-f]{64}$/.test(claim.controller_binding_hash ?? "") || !/^[0-9a-f]{64}$/.test(claim.session_binding_hash ?? "")) return hold("CONTROLLER_BINDING_INVALID");
+  if (claim.branch_authority !== "HUMAN_EXPLICIT_EXISTING_PR_BRANCH") return hold("BRANCH_AUTHORITY_REQUIRED");
+  const attestedMs = BRANCH_WRITER_DATE_PARSE(signed.attested_at ?? "");
+  if (!Number.isFinite(attestedMs) || Math.abs(attestedMs - verifiedAtMs) > BRANCH_WRITER_CHALLENGE_TTL_MS
+    || signed.session_binding_hash !== claim.session_binding_hash) return hold("RUNTIME_ATTESTATION_FRESHNESS_INVALID");
+
+  return Object.freeze({
+    status: "SINGLE_WRITER_PASS",
+    active_writer: claim.active_writer,
+    life_id: claim.life_id,
+    claim_id: claim.claim_id,
+    fencing_token: claim.fencing_token,
+    handoff_head,
+    lease_status: "ACTIVE",
+    lease_expires_at: claim.lease_expires_at,
+    other_workers: "READ_REVIEW_WATCH_ONLY",
+    authority_expanded: false
+  });
+}
+
+export function validateActiveCompanyBoot({ boot, current_main_sha, manager, observed_at, repository_evidence }) {
+  const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  invariant(boot && typeof boot === "object" && !Array.isArray(boot), "COMPANY_BOOT_EVIDENCE_REQUIRED", "Active Company Mode requires boot evidence");
+  invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
+  invariant(manager && typeof manager.worker_id === "string" && manager.worker_id.trim(), "COMPANY_BOOT_MANAGER_REQUIRED", "Active Company Mode requires a registered manager");
+  invariant(boot.worker_id === manager.worker_id, "COMPANY_BOOT_WORKER_MISMATCH", "Boot evidence must belong to the active manager");
+  invariant(boot.latest_main_sha === current_main_sha, "COMPANY_BOOT_STALE_MAIN", "Boot evidence must bind the latest main SHA");
+  invariant(typeof boot.completed_at === "string" && !Number.isNaN(Date.parse(boot.completed_at)), "COMPANY_BOOT_TIME_REQUIRED", "Boot evidence requires an ISO completion time");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_ENGINEERING_CYCLE_TIME", "observed_at must be an ISO timestamp");
+  invariant(Date.parse(boot.completed_at) <= Date.parse(observed_at), "COMPANY_BOOT_FROM_FUTURE", "Boot evidence cannot be newer than the observed cycle time");
+  invariant(boot.reads && typeof boot.reads === "object" && !Array.isArray(boot.reads), "COMPANY_BOOT_READS_REQUIRED", "Boot evidence requires canonical read references");
+  const missingReads = ACTIVE_COMPANY_BOOT_READS.filter((field) => {
+    const evidence = boot.reads[field];
+    const expectedSource = ACTIVE_COMPANY_BOOT_SOURCE_PATHS[field];
+    if (!evidence || typeof evidence !== "object" || Array.isArray(evidence) || evidence.source_ref !== expectedSource) return true;
+    if (field === "latest_main") return evidence.git_object !== current_main_sha;
+    return trustedRepository.files[expectedSource]?.git_object !== evidence.git_object;
+  });
+  invariant(missingReads.length === 0, "COMPANY_BOOT_INCOMPLETE", `Missing Company Boot reads: ${missingReads.join(", ")}`);
+  invariant(boot.reads.latest_main.git_object === current_main_sha, "COMPANY_BOOT_MAIN_EVIDENCE_MISMATCH", "latest_main evidence must bind current_main_sha");
+  return Object.freeze({
+    status: "COMPANY_BOOT_COMPLETE",
+    worker_id: manager.worker_id,
+    latest_main_sha: current_main_sha,
+    completed_at: boot.completed_at,
+    reads: Object.freeze({ ...boot.reads }),
+    repository_written: false,
+    external_effect: false
+  });
+}
+
+export function validateActiveCompanyRegistryEvidence({ repository_evidence, current_main_sha, actors }) {
+  const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  const registryFile = trustedRepository.files[ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority];
+  invariant(registryFile, "WORKER_REGISTRY_EVIDENCE_REQUIRED", "Active Company Mode requires the canonical registry blob");
+  let registry;
+  try {
+    registry = JSON.parse(registryFile.content);
+  } catch {
+    invariant(false, "WORKER_REGISTRY_JSON_INVALID", "Canonical worker registry evidence must be valid JSON");
+  }
+  requireArray(registry.workers, "registry.workers");
+  requireArray(actors, "actors");
+  const comparedFields = Object.freeze([
+    "worker_id", "life_identity_ref", "controller_id", "revoked", "credential_status", "role", "allowed_branch_pattern", "status",
+    "employee_status", "trust_level", "boot_acknowledged", "canon_acknowledged",
+    "workspace_policy_acknowledged", "do_not_touch_acknowledged", "suspension",
+    "active_claim_count", "current_task", "capabilities", "current_load", "past_performance",
+    "review_qualification", "authority_scope"
+  ]);
+  for (const actor of actors) {
+    const registered = registry.workers.find((entry) => entry?.worker_id === actor?.worker_id);
+    invariant(registered, "WORKER_NOT_IN_REGISTRY_EVIDENCE", `Worker is absent from registry evidence: ${actor?.worker_id ?? "UNKNOWN"}`);
+    invariant(comparedFields.every((field) => stableStringify(registered[field] ?? null) === stableStringify(actor[field] ?? null)), "WORKER_REGISTRY_EVIDENCE_MISMATCH", `Worker differs from registry evidence: ${actor.worker_id}`);
+  }
+  return Object.freeze({
+    status: "WORKER_REGISTRY_VERIFIED",
+    source_ref: ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority,
+    git_object: registryFile.git_object,
+    main_sha: trustedRepository.main_sha,
+    verified_worker_ids: Object.freeze(actors.map((actor) => actor.worker_id)),
+    external_effect: false
+  });
 }
 
 function createAutonomousEngineeringEvent(cycleId, sequence, eventType, actorId, observedAt, payload = {}) {
@@ -2062,7 +2522,7 @@ function createAutonomousEngineeringEvent(cycleId, sequence, eventType, actorId,
  * one bounded work-order candidate. It never claims work, writes GitHub, starts
  * a worker, merges, deploys, pays, accesses a signer, or mutates chain state.
  */
-export function planAutonomousCompanyEngineeringCycle({
+function planAutonomousCompanyEngineeringCycleCore({
   cycle_id,
   observed_at,
   current_main_sha,
@@ -2109,7 +2569,7 @@ export function planAutonomousCompanyEngineeringCycle({
     return result("IDEMPOTENT_NOOP", { next_safe_action: "WAIT_FOR_NEW_CYCLE_ID" });
   }
 
-  invariant(autonomousEngineeringWorkerEligible(manager), "GM_REGISTRATION_REQUIRED", "General Manager must be active, T2+ and fully acknowledged");
+  if (!autonomousEngineeringWorkerEligible(manager)) return result("WATCHING", { blocker: "WAITING_FOR_QUALIFIED_WORKER", next_safe_action: "WAIT_FOR_VERIFIED_REGISTRY_CHANGE" });
   invariant(String(manager.role ?? "").includes("General Manager"), "GM_ROLE_REQUIRED", "Manager role must include General Manager");
 
   const events = [];
@@ -2128,10 +2588,12 @@ export function planAutonomousCompanyEngineeringCycle({
   }
 
   const ordered = work_queue
-    .filter((candidate) => ["OPEN", "CLAIMABLE", "READY"].includes(candidate?.status))
+    .filter((candidate) => ["OPEN", "CLAIMABLE", "READY", "READY_FOR_ATOMIC_CLAIM"].includes(candidate?.status))
     .sort((left, right) => {
       const byPriority = (AUTONOMOUS_ENGINEERING_PRIORITY[left.priority] ?? 99) - (AUTONOMOUS_ENGINEERING_PRIORITY[right.priority] ?? 99);
       if (byPriority) return byPriority;
+      const byDynamicScore = Number(right.dynamic_priority_score ?? 0) - Number(left.dynamic_priority_score ?? 0);
+      if (byDynamicScore) return byDynamicScore;
       return String(left.created_at ?? "").localeCompare(String(right.created_at ?? ""))
         || String(left.task_id ?? "").localeCompare(String(right.task_id ?? ""));
     });
@@ -2145,7 +2607,7 @@ export function planAutonomousCompanyEngineeringCycle({
     const reasons = [];
     const forbidden = requestedActions.filter((action) => AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS.includes(action));
     const unknown = requestedActions.filter((action) => !AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes(action));
-    if (!(candidate.priority in AUTONOMOUS_ENGINEERING_PRIORITY)) reasons.push("PRIORITY_NOT_P0_P1_P2");
+    if (!(Object.hasOwn(AUTONOMOUS_ENGINEERING_PRIORITY, candidate.priority))) reasons.push("PRIORITY_NOT_P0_P1_P2");
     if (!AUTONOMOUS_ENGINEERING_SAFE_RISKS.includes(candidate.risk_level)) reasons.push("RISK_NOT_R0_R1");
     if (candidate.task_envelope_status !== "AUTHORIZED" || candidate.authority_status !== "MACHINE_VERIFIED") reasons.push("AUTHORITY_NOT_MACHINE_VERIFIED");
     if (candidate.dependencies_complete !== true) reasons.push("DEPENDENCIES_INCOMPLETE");
@@ -2173,6 +2635,22 @@ export function planAutonomousCompanyEngineeringCycle({
       reviewer = workers.find((entry) => entry.worker_id === candidate.reviewer_id);
       if (!autonomousEngineeringWorkerEligible(reviewer) || !autonomousEngineeringActorsDistinct(worker, reviewer)) reasons.push("DISTINCT_REVIEWER_REQUIRED");
     }
+    if (candidate.active_company_mode === true) {
+      reasons.push(...(candidate.opportunity_blockers ?? []));
+      if (candidate.work_order_evidence_verified !== true) reasons.push("WORK_ORDER_EVIDENCE_MISMATCH");
+      if (typeof candidate.project_owner_id !== "string" || !candidate.project_owner_id.trim()) reasons.push("PROJECT_OWNER_REQUIRED");
+      if (candidate.implementer_id !== candidate.assigned_worker_id) reasons.push("PROJECT_IMPLEMENTER_MISMATCH");
+      if (reviewRequirement !== "REQUIRED") reasons.push("ACTIVE_COMPANY_REVIEW_REQUIRED");
+      if (!String(reviewer?.role ?? "").includes("Reviewer")) reasons.push("REVIEWER_ROLE_REQUIRED");
+      const projectActors = [candidate.project_owner_id, candidate.implementer_id, candidate.reviewer_id]
+        .map((value) => typeof value === "string" ? value.trim().toLowerCase() : "");
+      if (projectActors.some((value) => !value) || new Set(projectActors).size !== 3) reasons.push("PROJECT_ACTORS_MUST_BE_DISTINCT");
+      if (candidate.guardian_denial?.status === "UNRESOLVED") reasons.push("GUARDIAN_STOP_REPEAT");
+      if (candidate.work_category === "PAID_ORACLE_PROCUREMENT"
+        && !ACTIVE_COMPANY_ORACLE_POLICY.material_triggers.includes(candidate.oracle_material_trigger)) {
+        reasons.push("ORACLE_NO_MATERIAL_CHANGE");
+      }
+    }
 
     if (reasons.length) {
       rejected.push(Object.freeze({
@@ -2180,7 +2658,8 @@ export function planAutonomousCompanyEngineeringCycle({
         priority: candidate.priority ?? null,
         reasons: Object.freeze([...new Set(reasons)]),
         forbidden_actions: Object.freeze(forbidden),
-        unknown_actions: Object.freeze(unknown)
+        unknown_actions: Object.freeze(unknown),
+        guardian_denial: candidate.guardian_denial ?? null
       }));
       continue;
     }
@@ -2189,12 +2668,17 @@ export function planAutonomousCompanyEngineeringCycle({
   }
 
   if (!selection) {
-    append("BLOCKER_STATE", { blocker: "NO_VERIFIED_SAFE_WORK", rejected_task_ids: rejected.map((entry) => entry.task_id) });
+    append("BLOCKER_STATE", {
+      blocker: "NO_VERIFIED_SAFE_WORK",
+      rejected_task_ids: rejected.map((entry) => entry.task_id),
+      guardian_denials: rejected.filter((entry) => entry.guardian_denial?.status === "UNRESOLVED").map((entry) => entry.guardian_denial)
+    });
     append("CLOCK_OUT", { result: "NO_VERIFIED_SAFE_WORK" });
-    return result("NO_VERIFIED_SAFE_WORK", {
+    return result("WATCHING", {
+      blocker: "NO_VERIFIED_SAFE_WORK",
       rejected_candidates: Object.freeze(rejected),
       events: Object.freeze(events),
-      next_safe_action: "REPAIR_CANDIDATE_EVIDENCE_OR_WAIT"
+      next_safe_action: "WATCH_MAIN_QUEUE_REGISTRY_CI_AND_DEPENDENCIES"
     });
   }
 
@@ -2211,6 +2695,11 @@ export function planAutonomousCompanyEngineeringCycle({
     authorized_actions: Object.freeze([...(candidate.authorized_actions ?? [])]),
     scope: Object.freeze([...(candidate.scope ?? [])]),
     acceptance_tests: Object.freeze([...(candidate.acceptance_tests ?? [])]),
+    active_company_mode: candidate.active_company_mode === true,
+    project_owner_id: candidate.project_owner_id ?? null,
+    implementer_id: candidate.implementer_id ?? worker.worker_id,
+    expected_output: candidate.expected_output ?? null,
+    dependencies: Object.freeze([...(candidate.dependencies ?? [])]),
     execution_authorized: false,
     merge_authorized: false,
     deployment_authorized: false,
@@ -2233,6 +2722,744 @@ export function planAutonomousCompanyEngineeringCycle({
     events: Object.freeze(events),
     next_safe_action: "EXECUTOR_MUST_REVALIDATE_MAIN_AND_AUTHORITY_BEFORE_EACH_WRITE"
   });
+}
+
+/**
+ * Active Company Mode preflight for one bounded engineering cycle.
+ *
+ * This composes the existing fail-closed planner. It validates durable boot
+ * evidence, binds every candidate to a Project Owner / Implementer / independent
+ * Reviewer triad, stops unresolved Guardian-denied actions, and keeps paid
+ * Oracle chasing silent until a material trigger exists. It plans only; it does
+ * not claim, launch, write, merge, deploy, pay, sign, or mutate chain state.
+ */
+// V1.0.0 candidate projection inside the existing Company owner. No dispatcher,
+// transport, runtime activation, receipt, or new identity authority is introduced.
+export const DYNAMIC_COMPANY_WORK_TYPES = Object.freeze([
+  "CODE", "DEBUG", "TEST", "QA", "REVIEW", "RESEARCH", "DESIGN", "WRITE",
+  "CREATE", "BUILD_WORLD", "CONTENT", "CUSTOMER", "PLAYER", "COMPANY",
+  "ATM_REPLENISH", "KGEN_CARGO", "KAIOS_CARGO", "SECURITY", "DOCS"
+]);
+
+export const DYNAMIC_COMPANY_WAIT_STATES = Object.freeze([
+  "CI_RUNNING", "REVIEW_WAITING", "PAGES_WAITING", "EXTERNAL_RESPONSE_WAITING", "HUMAN_PROTECTED_ACTION_WAITING"
+]);
+
+export const DYNAMIC_COMPANY_PRIORITY_FACTORS = Object.freeze([
+  "severity", "user_impact", "player_impact", "system_blocking", "security", "data_loss_risk",
+  "dependency", "worker_capability", "time_value", "review_capacity", "universe_demand"
+]);
+
+const DYNAMIC_COMPANY_PRIORITY_WEIGHTS = Object.freeze({
+  severity: 8, data_loss_risk: 8, security: 7, system_blocking: 6, user_impact: 5,
+  player_impact: 5, dependency: 4, time_value: 3, universe_demand: 2,
+  worker_capability: 1, review_capacity: 1
+});
+const DYNAMIC_COMPANY_CARGO_TYPES = Object.freeze(["ATM_REPLENISH", "KGEN_CARGO", "KAIOS_CARGO"]);
+const DYNAMIC_COMPANY_UNIVERSE_MAP_PATH = "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json";
+const DYNAMIC_COMPANY_CARGO_RISK = Object.freeze({ LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 });
+
+function dynamicCompanyPriority(task) {
+  const supplied = task.priority_factors ?? {};
+  invariant(supplied && typeof supplied === "object" && !Array.isArray(supplied), "PRIORITY_FACTORS_INVALID", "Priority factors must be an object");
+  const unknown = Object.keys(supplied).filter((field) => !DYNAMIC_COMPANY_PRIORITY_FACTORS.includes(field));
+  invariant(unknown.length === 0, "PRIORITY_FACTOR_UNKNOWN", `Unknown priority factors: ${unknown.join(", ")}`);
+  const normalized = Object.fromEntries(DYNAMIC_COMPANY_PRIORITY_FACTORS.map((field) => {
+    const baseSeverity = Object.freeze({ P0: 5, P1: 3, P2: 1 });
+    const fallback = field === "severity" && Object.hasOwn(baseSeverity, task.priority) ? baseSeverity[task.priority] : 0;
+    const value = supplied[field] ?? fallback;
+    invariant(Number.isInteger(value) && value >= 0 && value <= 5, "PRIORITY_FACTOR_OUT_OF_RANGE", `${field} must be an integer from 0 to 5`);
+    return [field, value];
+  }));
+  const score = DYNAMIC_COMPANY_PRIORITY_FACTORS.reduce((sum, field) => sum + normalized[field] * DYNAMIC_COMPANY_PRIORITY_WEIGHTS[field], 0);
+  return Object.freeze({ factors: Object.freeze(normalized), score });
+}
+
+function resolveDynamicCompanyCargo(task, repository) {
+  if (!DYNAMIC_COMPANY_CARGO_TYPES.includes(task.work_type)) {
+    return Object.freeze({ required: "NO", asset: null, amount: null, origin: null, destination: null, capacity: null, blocker: null });
+  }
+  const request = task.cargo_request;
+  const mapFile = repository.files[DYNAMIC_COMPANY_UNIVERSE_MAP_PATH];
+  if (!request || !mapFile) return Object.freeze({ required: "YES", asset: request?.asset ?? null, amount: request?.amount ?? null, origin: null, destination: null, capacity: null, blocker: "CARGO_POLICY_CAPACITY_RIGHTS_UNVERIFIED" });
+  let universeMap;
+  try { universeMap = JSON.parse(mapFile.content); } catch { universeMap = null; }
+  const points = Array.isArray(universeMap?.point_index_sorted) ? universeMap.point_index_sorted : [];
+  const candidates = Array.isArray(request.destination_candidates) ? request.destination_candidates : [];
+  const scored = candidates.filter((candidate) => candidate && typeof candidate.point_id === "string"
+      && Number.isInteger(candidate.need_score) && candidate.need_score >= 0 && candidate.need_score <= 100)
+    .map((candidate) => ({ candidate, point: points.find((point) => point.id === candidate.point_id) }))
+    .filter((entry) => entry.point)
+    .sort((left, right) => right.candidate.need_score - left.candidate.need_score || left.point.id.localeCompare(right.point.id));
+  const origin = points.find((point) => point.id === request.origin_point_id) ?? null;
+  const metrics = request.capacity_metrics ?? {};
+  const numeric = ["ability", "reliability", "performance", "completion_history"].every((field) => Number.isInteger(metrics[field]) && metrics[field] >= 0 && metrics[field] <= 5);
+  const risk = DYNAMIC_COMPANY_CARGO_RISK[metrics.risk_tier];
+  const capacity = numeric && risk !== undefined
+    ? Math.max(1, Math.floor((metrics.ability * 3 + metrics.reliability * 3 + metrics.performance * 2 + metrics.completion_history * 2 - risk * 2) / 10))
+    : null;
+  const amount = Number.isInteger(request.amount) && request.amount >= 1 ? request.amount : null;
+  const assetAllowed = request.asset === "KGEN" || request.asset === "KAIOS";
+  const destination = scored[0]?.point ?? null;
+  const blocker = (!origin || !destination || capacity === null || amount === null || !assetAllowed || amount > capacity || request.rights_verified !== true)
+    ? "CARGO_POLICY_CAPACITY_RIGHTS_UNVERIFIED" : null;
+  return Object.freeze({
+    required: "YES", asset: assetAllowed ? request.asset : null, amount,
+    origin: origin ? Object.freeze({ point_id: origin.id, coord: origin.coord, name: origin.name }) : null,
+    destination: destination ? Object.freeze({ point_id: destination.id, coord: destination.coord, name: destination.name, need_score: scored[0].candidate.need_score }) : null,
+    capacity, capacity_policy: "DOT_CARGO_CAPACITY_V1", blocker
+  });
+}
+
+function selectDynamicCompanyWorker(task, workers) {
+  const explicit = task.assigned_worker_id;
+  if (typeof explicit === "string" && explicit !== "AUTO" && explicit.trim()) return workers.find((worker) => worker.worker_id === explicit) ?? null;
+  return workers.filter((worker) => autonomousEngineeringWorkerEligible(worker, task)
+      && Array.isArray(worker.capabilities) && worker.capabilities.includes(task.work_type)
+      && Array.isArray(worker.authority_scope) && (task.authorized_actions ?? []).every((action) => worker.authority_scope.includes(action)))
+    .sort((left, right) => Number(left.current_load ?? 0) - Number(right.current_load ?? 0)
+      || Number(right.past_performance ?? 0) - Number(left.past_performance ?? 0)
+      || left.worker_id.localeCompare(right.worker_id))[0] ?? null;
+}
+
+function dynamicCompanyReviewerEligible(task, project, implementer, reviewer, projectOwner = null) {
+  return autonomousEngineeringWorkerEligible(reviewer)
+    && String(reviewer.role ?? "").includes("Reviewer")
+    && autonomousEngineeringActorsDistinct(reviewer, implementer)
+    && ![project?.project_owner_id, implementer?.worker_id].includes(reviewer.worker_id)
+    && (reviewer.review_qualification === true || (Array.isArray(reviewer.review_qualification) && reviewer.review_qualification.includes(task.work_type)))
+    && (projectOwner === null || autonomousEngineeringActorsDistinct(reviewer, projectOwner));
+}
+
+function selectDynamicCompanyReviewer(task, project, implementer, workers) {
+  const explicit = project?.reviewer_id ?? task.reviewer_id;
+  const projectOwner = workers.find((worker) => worker.worker_id === project?.project_owner_id) ?? null;
+  if (typeof explicit === "string" && explicit !== "AUTO" && explicit.trim()) {
+    const reviewer = workers.find((worker) => worker.worker_id === explicit) ?? null;
+    return dynamicCompanyReviewerEligible(task, project, implementer, reviewer, projectOwner) ? reviewer : null;
+  }
+  return workers.filter((worker) => dynamicCompanyReviewerEligible(task, project, implementer, worker, projectOwner))
+    .sort((left, right) => Number(left.current_load ?? 0) - Number(right.current_load ?? 0)
+      || Number(right.past_performance ?? 0) - Number(left.past_performance ?? 0)
+      || left.worker_id.localeCompare(right.worker_id))[0] ?? null;
+}
+
+const PRODUCED_COMPANY_OPPORTUNITY_RECORDS = new WeakSet();
+
+function dynamicCompanyCompletionVerified(task, project, repository, observedAt) {
+  const claim = task.completion_evidence;
+  if (!claim || typeof claim !== "object" || Array.isArray(claim)) return false;
+  if (typeof claim.result_ref !== "string" || !/^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(claim.result_ref)) return false;
+  const file = repository.files[claim.result_ref];
+  if (!file || claim.result_blob !== file.git_object) return false;
+  let result, registry;
+  try {
+    result = JSON.parse(file.content);
+    registry = JSON.parse(repository.files[ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority]?.content);
+  } catch { return false; }
+  const pr = repository.snapshot.active_task_pr;
+  const implementer = registry?.workers?.find((actor) => actor.worker_id === project?.implementer_id);
+  const reviewer = registry?.workers?.find((actor) => actor.worker_id === project?.reviewer_id);
+  const projectOwner = registry?.workers?.find((actor) => actor.worker_id === project?.project_owner_id);
+  const dispatchAt = task.dispatch_evidence?.occurred_at;
+  const testsAt = result?.tests?.completed_at;
+  const ciAt = result?.ci?.completed_at;
+  const reviewAt = result?.independent_review?.reviewed_at;
+  const completedAt = result?.completed_at;
+  const validTime = (value) => typeof value === "string" && Number.isFinite(Date.parse(value));
+  return claim.status === "VERIFIED"
+    && claim.work_id === task.task_id
+    && result?.schema === "KAIOS_WORK_COMPLETION_EVIDENCE_V1"
+    && result?.work_id === task.task_id
+    && result?.result_status === "COMPLETED"
+    && result?.head_sha === claim.head_sha
+    && result?.tests?.status === "PASS"
+    && Number.isInteger(result?.tests?.total) && result.tests.total > 0
+    && validTime(testsAt)
+    && result?.ci?.status === "PASS"
+    && result?.ci?.head_sha === claim.head_sha
+    && validTime(ciAt)
+    && result?.independent_review?.status === "PASS"
+    && result?.independent_review?.reviewer_id === project?.reviewer_id
+    && validTime(reviewAt) && validTime(completedAt) && validTime(dispatchAt)
+    && Date.parse(dispatchAt) <= Date.parse(testsAt)
+    && Date.parse(dispatchAt) <= Date.parse(ciAt)
+    && Date.parse(testsAt) <= Date.parse(reviewAt)
+    && Date.parse(ciAt) <= Date.parse(reviewAt)
+    && Date.parse(reviewAt) <= Date.parse(completedAt)
+    && Date.parse(completedAt) <= Date.parse(observedAt)
+    && pr?.number === task.target_pr
+    && pr?.head_sha === claim.head_sha
+    && pr?.ci_status === "PASS"
+    && autonomousEngineeringWorkerEligible(implementer, task)
+    && projectOwner
+    && dynamicCompanyReviewerEligible(task, project, implementer, reviewer, projectOwner);
+}
+
+function projectDynamicCompanyOpportunities({ work_queue, projects, repository, observed_at, previous_work_orders, previous_work_orders_verified }) {
+  invariant(Array.isArray(previous_work_orders) && previous_work_orders.length <= 256, "PREVIOUS_WORK_BOUND", "At most 256 previous candidate records may be compared");
+  invariant(work_queue.length <= 256, "OPPORTUNITY_BOUND", "At most 256 demands per bounded cycle");
+  const prior = new Map();
+  for (const record of previous_work_orders) {
+    requireId(record?.WORK_ID, "previous.WORK_ID");
+    invariant(!prior.has(record.WORK_ID), "PREVIOUS_WORK_CONFLICT", "Previous candidate IDs must be unique");
+    prior.set(record.WORK_ID, record);
+  }
+  const records = [];
+  for (const task of work_queue) {
+    const file = repository.files[task.work_order_ref];
+    let envelope;
+    try { envelope = file ? JSON.parse(file.content) : null; } catch { envelope = null; }
+    const project = projects.find((entry) => entry.task_id === task.task_id);
+    const bound = Boolean(envelope && stableStringify(envelope.planner_task) === stableStringify(task)
+      && stableStringify(envelope.active_project) === stableStringify(project));
+    // Unverified caller data is never normalized into a canonical WorkOrder.
+    if (!bound) continue;
+    const type = task.work_type;
+    const priority = dynamicCompanyPriority(task);
+    const blockers = [];
+    if (!DYNAMIC_COMPANY_WORK_TYPES.includes(type)) blockers.push("UNSUPPORTED_WORK_TYPE");
+    if (!(Object.hasOwn(AUTONOMOUS_ENGINEERING_PRIORITY, task.priority))) blockers.push("PRIORITY_POLICY_REQUIRED");
+    if (task.expected_base_sha !== repository.main_sha) blockers.push("STALE_MAIN");
+    if (task.dependencies_complete !== true) blockers.push("DEPENDENCIES_INCOMPLETE");
+    if (task.target_pr != null && repository.snapshot.active_task_pr?.number !== task.target_pr) blockers.push("ACTIVE_PR_EVIDENCE_REQUIRED");
+    const waiting = DYNAMIC_COMPANY_WAIT_STATES.includes(task.status);
+    if (waiting && (typeof task.watcher_id !== "string" || !task.watcher_id.trim()
+        || typeof task.next_check_condition !== "string" || !task.next_check_condition.trim())) blockers.push("WATCHER_AND_NEXT_CHECK_REQUIRED");
+    const cargo = resolveDynamicCompanyCargo(task, repository);
+    if (cargo.blocker) blockers.push(cargo.blocker);
+    const binding = Object.freeze({ main_sha: repository.main_sha, work_order_blob: file.git_object,
+      project: stableStringify(project), task: stableStringify(task), pr: repository.snapshot.active_task_pr ?? null });
+    const canonicalHistoryCandidate = Array.isArray(envelope.previous_work_orders)
+      ? envelope.previous_work_orders.find((record) => record?.WORK_ID === task.task_id) : null;
+    const historyKey = canonicalHistoryCandidate
+      ? `${canonicalHistoryCandidate.SOURCE_COMMIT}:${canonicalHistoryCandidate.CANONICAL_HISTORY_REF}` : null;
+    const verifiedHistory = historyKey ? repository.snapshot.history_records?.[historyKey] : null;
+    let canonicalHistory = null;
+    if (verifiedHistory
+        && canonicalHistoryCandidate.SOURCE_BLOB === verifiedHistory.git_object
+        && canonicalHistoryCandidate.RECORD_HASH === verifiedHistory.record_hash) {
+      const claimedRecord = { ...canonicalHistoryCandidate };
+      for (const field of ["CANONICAL_HISTORY_REF", "SOURCE_COMMIT", "SOURCE_BLOB", "RECORD_HASH"]) delete claimedRecord[field];
+      if (stableStringify(claimedRecord) === stableStringify(verifiedHistory.opportunity_record)) canonicalHistory = verifiedHistory.opportunity_record;
+    }
+    const previous = canonicalHistory ?? prior.get(task.task_id);
+    const previousVerified = Boolean(canonicalHistory) || Boolean(previous && previous_work_orders_verified.includes(previous.WORK_ID));
+    if ((previous || canonicalHistoryCandidate) && !previousVerified) blockers.push("PREDECESSOR_PROVENANCE_REQUIRED");
+    const changed = previousVerified && stableStringify(previous.EVIDENCE_BINDING) !== stableStringify(binding);
+    const expired = task.expires_at != null && (!Number.isFinite(Date.parse(task.expires_at)) || Date.parse(task.expires_at) <= Date.parse(observed_at));
+    if (expired) blockers.push("EXPIRED");
+    const lifecycle = String(task.status ?? "READY").toUpperCase();
+    const lifecycleNeedsDispatch = ["ASSIGN", "WORKING", "ACTIVE", "REVIEW", "REVIEWING", "DONE", "COMPLETED"].includes(lifecycle);
+    const dispatchEvidence = task.dispatch_evidence;
+    const dispatched = lifecycleNeedsDispatch
+      && dispatchEvidence?.status === "VERIFIED"
+      && dispatchEvidence?.work_id === task.task_id
+      && dispatchEvidence?.worker_id === project?.implementer_id
+      && typeof dispatchEvidence?.occurred_at === "string"
+      && Number.isFinite(Date.parse(dispatchEvidence.occurred_at))
+      && Date.parse(dispatchEvidence.occurred_at) <= Date.parse(observed_at);
+    if (lifecycleNeedsDispatch && !dispatched) blockers.push("DISPATCH_EVIDENCE_REQUIRED");
+    const completionVerified = ["DONE", "COMPLETED"].includes(lifecycle)
+      ? dynamicCompanyCompletionVerified(task, project, repository, observed_at) : false;
+    if (["DONE", "COMPLETED"].includes(lifecycle) && !completionVerified) blockers.push("COMPLETION_EVIDENCE_REQUIRED");
+    const projectedStatus = blockers.includes("STALE_MAIN") || expired ? "STALE"
+      : waiting ? "WATCHING"
+      : blockers.length ? "BLOCKED"
+      : ["WORKING", "ACTIVE", "ASSIGN"].includes(lifecycle) ? "ACTIVE"
+      : ["REVIEW", "REVIEWING"].includes(lifecycle) ? "REVIEWING"
+      : ["DONE", "COMPLETED"].includes(lifecycle) && completionVerified ? "COMPLETED"
+      : lifecycle === "BLOCKED" ? "BLOCKED"
+      : "PROPOSED_UNADMITTED";
+    records.push(Object.freeze({
+      WORK_ID: task.task_id, GENERATED_AT: observed_at, WORK_TYPE: type ?? "UNKNOWN",
+      SOURCE: Object.freeze({ path: task.work_order_ref, git_object: file.git_object, main_sha: repository.main_sha }),
+      WHY_NOW: task.why_now ?? "CANONICAL_DEMAND_REQUIRES_REVIEW", PRIORITY: task.priority ?? "UNKNOWN",
+      PRIORITY_SCORE: priority.score, PRIORITY_FACTORS: priority.factors,
+      BASE_MAIN_SHA: repository.main_sha, PROJECT: task.project_id ?? task.task_id,
+      TARGET_PR: task.target_pr ?? null, TARGET_BRANCH: task.branch ?? null,
+      PROJECT_OWNER: project.project_owner_id ?? null, IMPLEMENTER: project.implementer_id ?? null,
+      REVIEWER: project.reviewer_id ?? null, SCOPE: Object.freeze([...(task.scope ?? [])]),
+      DEPENDENCIES: Object.freeze([...(project.dependencies ?? [])]), EXPECTED_OUTPUT: project.expected_output ?? null,
+      ACCEPTANCE_TESTS: Object.freeze([...(task.acceptance_tests ?? [])]),
+      PROTECTED_ACTIONS: Object.freeze({ permitted: false, requested: [...(task.authorized_actions ?? [])].filter((action) => !AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes(action)) }),
+      CARGO_REQUIRED: cargo.required, CARGO_ASSET: cargo.asset,
+      CARGO_AMOUNT: cargo.amount, CARGO_CAPACITY: cargo.capacity ?? null, CARGO_CAPACITY_POLICY: cargo.capacity_policy ?? null,
+      ORIGIN: cargo.origin, DESTINATION: cargo.destination,
+      EXPIRES_WHEN: Object.freeze({ at: task.expires_at ?? null, conditions: ["MAIN_CHANGED", "PR_OR_CI_CHANGED", "DEPENDENCY_CHANGED", "REGISTRY_CHANGED", "HUMAN_CANCELLED"] }),
+      SUPERSEDES: changed ? Object.freeze({ WORK_ID: previous.WORK_ID, EVIDENCE_BINDING: previous.EVIDENCE_BINDING }) : null,
+      STATUS: projectedStatus,
+      BLOCKERS: Object.freeze(blockers), EVIDENCE_BINDING: binding,
+      WATCHER: waiting ? task.watcher_id ?? null : null,
+      NEXT_CHECK_CONDITION: waiting ? task.next_check_condition ?? null : null,
+      PREDECESSOR_VERIFICATION: canonicalHistory ? "CANONICAL_GIT_ANCESTOR_RECORD" : canonicalHistoryCandidate ? "HISTORICAL_GIT_PROVENANCE_NOT_VERIFIED" : previous ? (previousVerified ? "SAME_PROCESS_PRODUCED_RECORD" : "NOT_VERIFIED") : "NOT_APPLICABLE",
+      IDEMPOTENT: Boolean(previousVerified && !changed), DISPATCHED: dispatched, ACK: "ACK_NOT_VERIFIED"
+    }));
+  }
+  for (const record of records) PRODUCED_COMPANY_OPPORTUNITY_RECORDS.add(record);
+  return Object.freeze(records.sort((a, b) => (AUTONOMOUS_ENGINEERING_PRIORITY[a.PRIORITY] ?? 99) - (AUTONOMOUS_ENGINEERING_PRIORITY[b.PRIORITY] ?? 99)
+    || b.PRIORITY_SCORE - a.PRIORITY_SCORE || a.WORK_ID.localeCompare(b.WORK_ID)));
+}
+
+function dynamicCompanyCycleEvidence({ opportunities, repository, observed_at, workers, duplicate_removed = 0 }) {
+  const watching = opportunities.filter((record) => record.STATUS === "WATCHING");
+  const blocked = opportunities.filter((record) => record.STATUS === "BLOCKED");
+  const stale = opportunities.filter((record) => record.STATUS === "STALE");
+  const ready = opportunities.filter((record) => record.STATUS === "PROPOSED_UNADMITTED");
+  const active = opportunities.filter((record) => record.STATUS === "ACTIVE");
+  const reviewing = opportunities.filter((record) => record.STATUS === "REVIEWING");
+  const completed = opportunities.filter((record) => record.STATUS === "COMPLETED");
+  const dispatched = opportunities.filter((record) => record.DISPATCHED === true);
+  const availableWorkers = workers.filter((worker) => autonomousEngineeringWorkerEligible(worker) && Number(worker.active_claim_count ?? 0) === 0);
+  const signatures = Object.freeze({ manufacturer: "NOT_VERIFIED", runtime_maintainer: "NOT_VERIFIED", independent_inspector: "NOT_VERIFIED", gm_acceptance: "NOT_VERIFIED" });
+  return Object.freeze({
+    organ_version: "1.0.0", evidence_class: repository.evidence_class, owner: "core/company/index.mjs", opportunity_records: opportunities,
+    generated_proposals: opportunities.length, dispatched_count: 0, acknowledged_count: 0,
+    direct_channel: "NOT_VERIFIED", delivery_status: "HANDOFF_REQUIRED", ack_status: "ACK_NOT_VERIFIED",
+    heartbeat: Object.freeze({ observed_at, evidence_at: repository.observed_at, status: "OBSERVATION_ONLY", actual_receipt: null }),
+    day_breath: Object.freeze({ status: "BLOCKED_CANONICAL_K12345_DAY_BOUNDARY_AND_CLOCK_REQUIRED", day_key: null, actual_receipt: null }),
+    heartbeat_result: Object.freeze({
+      HEARTBEAT_ID: `DOT-${observed_at}`, DETECTED_WORK_COUNT: opportunities.length,
+      NEW_WORK_ORDERS: ready.length, DISPATCHED: dispatched.length, ACTIVE: active.length, WATCHING: watching.length,
+      BLOCKED: blocked.length, COMPLETED: completed.length, REVIEWING: reviewing.length,
+      AVAILABLE_WORKERS: availableWorkers.length, IDLE_WORKERS: availableWorkers.map((worker) => worker.worker_id),
+      STALE_REMOVED: stale.length, DUPLICATE_REMOVED: duplicate_removed
+    }),
+    watching_chains: Object.freeze(watching.map((record) => Object.freeze({ work_id: record.WORK_ID, watcher: record.WATCHER, next_check_condition: record.NEXT_CHECK_CONDITION, dependency_chain_only: true }))),
+    no_global_idle: true,
+    manufacture: Object.freeze({
+      ORGAN_ID: "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE", ORGAN_NAME: "KAIOS DOT Dynamic Opportunity & Task Engine",
+      VERSION: "1.0.0", DESIGNED_BY: "沈英明", IMPLEMENTED_BY: "DOT_NOT_VERIFIED",
+      REVIEWED_BY: "NOT_VERIFIED", MAINTAINED_BY: "NOT_ASSIGNED_VERIFIED_SYSTEM_IDENTITY_REQUIRED", POLICY_OWNER: "衡曜_UNDER_HUMAN_AUTHORITY",
+      CREATED_AT: observed_at, INSTALLED_AT: "NOT_INSTALLED", BASE_MAIN_SHA: repository.main_sha,
+      HEAD_SHA: "NOT_VERIFIED", BRANCH: "codex/kaios-ai-company-active-mode-20261007", PR: 536,
+      CHANGED_FILES: Object.freeze(["core/company/index.mjs", "tests/autonomous-company-engineering-cycle.test.mjs", "KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md", "KGEN-Organization/WorkOrders/WORK_QUEUE.md", "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json"]),
+      TESTS: "NOT_ESTABLISHED_BY_PLANNER", CI: "NOT_VERIFIED", RUNTIME_QA: "CANDIDATE_ONLY", SECURITY_QA: "PENDING_INDEPENDENT_REVIEW",
+      KNOWN_LIMITS: Object.freeze(["NOT_INSTALLED", "NO_REGISTERED_DOT_IDENTITY", "NO_ELIGIBLE_DISTINCT_REVIEWER_CONFIRMED", "NO_AUTHENTICATED_DIRECT_CHANNEL"]),
+      ROLLBACK_PLAN: "OWNER_REVIEWED_REVERT_OF_BOUNDED_CANDIDATE_DIFF", STATUS: "CANDIDATE_NOT_INSTALLED", SIGNATURES: signatures,
+      signature: "NOT_SIGNED", verification: "NOT_VERIFIED"
+    }),
+    inspection: Object.freeze({
+      INSPECTION_ID: `DOT-INSPECTION-${observed_at.slice(0, 10)}`, DATE: observed_at.slice(0, 10), VERSION: "1.0.0", MAIN_SHA: repository.main_sha,
+      HEARTBEAT_LAST_SEEN: observed_at, HEARTBEAT_STATUS: "OBSERVATION_ONLY", BREATH_STATUS: "BLOCKED_CANONICAL_CLOCK_BOUNDARY_REQUIRED",
+      DOT_STATUS: "CANDIDATE_NOT_INSTALLED", QUEUE_STATUS: opportunities.length ? "OBSERVED" : "EMPTY", DISPATCH_STATUS: "NO_DISPATCH",
+      REVIEW_STATUS: "PENDING", CARGO_STATUS: "NO_MOVEMENT", ERRORS: Object.freeze([]), P0: 0, P1: 0, P2: 0,
+      REPAIR_REQUIRED: false, REPAIR_OWNER: null, NEXT_INSPECTION: "NEXT_VERIFIED_HEARTBEAT_OR_MATERIAL_STATE_CHANGE", SIGNATURES: signatures
+    }),
+    maintenance: Object.freeze({
+      MAINTENANCE_ID: `DOT-MAINTENANCE-${observed_at}`, ORGAN_VERSION_BEFORE: "NOT_INSTALLED", ISSUE: null, ROOT_CAUSE: null,
+      CHANGED_FILES: Object.freeze([]), PATCH: null, TEST: "NOT_APPLICABLE", CI: "NOT_APPLICABLE", REVIEW: "NOT_APPLICABLE",
+      VERSION_AFTER: "1.0.0-CANDIDATE", ROLLBACK: "NOT_APPLICABLE_NO_INSTALL", MAINTAINED_BY: "NOT_VERIFIED", REVIEWED_BY: "NOT_VERIFIED", GM_ACK: "NOT_VERIFIED", DATE: observed_at.slice(0, 10),
+      status: "WATCHING", next_check_condition: "MAIN_PR_CI_QUEUE_REGISTRY_OR_DEPENDENCY_CHANGE", background_service: false
+    }),
+    rollback: Object.freeze({ status: "PLAN_ONLY", last_known_good_version: "NONE_NOT_INSTALLED", last_known_good_head: null, action: "REVERT_REVIEWED_CANDIDATE_DIFF_WITH_OWNER_APPROVAL", previous_head: "b00aee498cfd14bb0b4435326edabed2129bf9f2", stop_new_dispatch_on_p0: true }),
+    seal: Object.freeze({ ORGAN_ID: "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE", VERSION: "1.0.0", HEAD_SHA: "NOT_VERIFIED", TEST_RESULT: "NOT_VERIFIED", REVIEW_RESULT: "NOT_VERIFIED", INSPECTION_RESULT: "PENDING", MANUFACTURER: "NOT_VERIFIED", MAINTAINER: "NOT_VERIFIED", REVIEWER: "NOT_VERIFIED", GM_ACK: "NOT_VERIFIED", SEALED_AT: null, status: "INVALID", SUPERSEDED_BY: null, reason: "INSTALLATION_INSPECTION_SIGNATURE_AND_AUTHENTICATED_ACK_NOT_VERIFIED" })
+  });
+}
+
+const DOT_MANUFACTURING_FIELDS = Object.freeze("ORGAN_ID ORGAN_NAME VERSION DESIGNED_BY IMPLEMENTED_BY REVIEWED_BY MAINTAINED_BY POLICY_OWNER CREATED_AT INSTALLED_AT BASE_MAIN_SHA HEAD_SHA BRANCH PR CHANGED_FILES TESTS CI RUNTIME_QA SECURITY_QA KNOWN_LIMITS ROLLBACK_PLAN STATUS SIGNATURES".split(" "));
+const DOT_SIGNATURE_STATES = Object.freeze(["SIGNED", "NOT_SIGNED", "NOT_VERIFIED"]);
+const DOT_SIGNATURE_FIELDS = Object.freeze(["manufacturer", "runtime_maintainer", "independent_inspector", "gm_acceptance"]);
+const DOT_DEGRADED_ISSUES = Object.freeze(["BUG", "STALE_LOGIC", "DUPLICATE_PROMPT", "BROKEN_CHANNEL", "WRONG_PRIORITY", "BAD_DISPATCH", "QUEUE_DRIFT", "CARGO_ROUTING_ERROR", "REVIEW_ROUTING_ERROR"]);
+const VERIFIED_DOT_INSPECTIONS = new WeakSet();
+const VERIFIED_DOT_REVIEW_EVIDENCE = new WeakSet();
+const VERIFIED_DOT_GM_ACK_EVIDENCE = new WeakSet();
+const VERIFIED_DOT_ACTOR_EVIDENCE = new WeakSet();
+const VERIFIED_DOT_EXACT_HEAD_GATES = new WeakSet();
+
+export function validateDotOrganManufacturingRecord(record) {
+  requireFields(record, DOT_MANUFACTURING_FIELDS, "DotOrganManufacturingRecord");
+  invariant(record.ORGAN_ID === "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE" && record.VERSION === "1.0.0", "DOT_ORGAN_IDENTITY_INVALID", "DOT organ identity/version mismatch");
+  for (const field of ["ORGAN_NAME", "DESIGNED_BY", "IMPLEMENTED_BY", "REVIEWED_BY", "MAINTAINED_BY", "POLICY_OWNER", "TESTS", "CI", "RUNTIME_QA", "SECURITY_QA", "ROLLBACK_PLAN"]) {
+    invariant(typeof record[field] === "string" && record[field].trim(), "DOT_MANUFACTURING_TEXT_INVALID", `Manufacturing record requires ${field}`);
+  }
+  invariant(typeof record.CREATED_AT === "string" && Number.isFinite(Date.parse(record.CREATED_AT)), "DOT_MANUFACTURING_CREATED_AT_INVALID", "Manufacturing record requires an ISO creation time");
+  invariant(/^[0-9a-f]{40}$/.test(record.BASE_MAIN_SHA ?? ""), "DOT_MANUFACTURING_BASE_SHA_INVALID", "Manufacturing record requires an exact base SHA");
+  invariant(record.HEAD_SHA === "NOT_VERIFIED" || /^[0-9a-f]{40}$/.test(record.HEAD_SHA ?? ""), "DOT_MANUFACTURING_HEAD_SHA_INVALID", "Manufacturing head must be exact or NOT_VERIFIED");
+  invariant(typeof record.BRANCH === "string" && /^codex\/[A-Za-z0-9._/-]+$/.test(record.BRANCH) && record.BRANCH !== "codex/main", "DOT_MANUFACTURING_BRANCH_INVALID", "Manufacturing branch must be a bounded codex branch");
+  invariant(Number.isInteger(record.PR) && record.PR > 0, "DOT_MANUFACTURING_PR_INVALID", "Manufacturing record requires a positive PR number");
+  invariant(Array.isArray(record.CHANGED_FILES) && record.CHANGED_FILES.length > 0 && record.CHANGED_FILES.every((path) => typeof path === "string" && path.trim()), "DOT_MANUFACTURING_ARRAYS_REQUIRED", "Manufacturing record requires changed files");
+  invariant(Array.isArray(record.KNOWN_LIMITS), "DOT_MANUFACTURING_ARRAYS_REQUIRED", "Manufacturing record requires known limits");
+  invariant(record.SIGNATURES && !Array.isArray(record.SIGNATURES)
+    && Object.keys(record.SIGNATURES).length === DOT_SIGNATURE_FIELDS.length
+    && DOT_SIGNATURE_FIELDS.every((field) => Object.hasOwn(record.SIGNATURES, field) && DOT_SIGNATURE_STATES.includes(record.SIGNATURES[field])),
+  "DOT_SIGNATURE_STATUS_INVALID", "DOT signatures require every exact role and an explicit state");
+  invariant(["CANDIDATE_NOT_INSTALLED", "INSTALLED"].includes(record.STATUS), "DOT_MANUFACTURING_STATUS_INVALID", "Unsupported manufacturing state");
+  if (record.STATUS !== "INSTALLED") {
+    invariant(record.INSTALLED_AT === "NOT_INSTALLED", "DOT_PREMATURE_INSTALLATION", "A non-installed candidate must state NOT_INSTALLED");
+  } else {
+    invariant(/^[0-9a-f]{40}$/.test(record.HEAD_SHA), "DOT_INSTALLED_HEAD_REQUIRED", "Installation requires an exact head SHA");
+    invariant(typeof record.INSTALLED_AT === "string" && Number.isFinite(Date.parse(record.INSTALLED_AT)) && Date.parse(record.INSTALLED_AT) >= Date.parse(record.CREATED_AT), "DOT_INSTALLED_AT_INVALID", "Installation requires a valid installation time");
+    invariant(DOT_SIGNATURE_FIELDS.every((field) => record.SIGNATURES[field] === "SIGNED"), "DOT_INSTALLED_SIGNATURES_REQUIRED", "Installation requires all four signatures");
+    for (const field of ["IMPLEMENTED_BY", "REVIEWED_BY", "MAINTAINED_BY", "POLICY_OWNER"]) {
+      invariant(typeof record[field] === "string" && record[field].trim() && !record[field].includes("NOT_VERIFIED"), "DOT_INSTALLED_ACTOR_REQUIRED", `Installation requires verified ${field}`);
+    }
+  }
+  return record;
+}
+
+export function inspectDotOrganCandidate({ manufacturing_record, main_sha, observed_at, checks = {}, signatures = {} }) {
+  validateDotOrganManufacturingRecord(manufacturing_record);
+  invariant(/^[0-9a-f]{40}$/.test(main_sha ?? ""), "DOT_INSPECTION_MAIN_INVALID", "Inspection requires exact main SHA");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "DOT_INSPECTION_TIME_INVALID", "Inspection requires an ISO time");
+  invariant(main_sha === manufacturing_record.BASE_MAIN_SHA, "DOT_INSPECTION_MAIN_MISMATCH", "Inspection must bind the manufacturing base SHA");
+  invariant(Date.parse(observed_at) >= Date.parse(manufacturing_record.CREATED_AT), "DOT_INSPECTION_TIME_PRECEDES_BUILD", "Inspection cannot predate manufacturing");
+  const requiredChecks = Object.freeze(["heartbeat_input", "breath_input", "boot_read", "github_access", "queue_access", "worker_registry", "direct_channels", "priority_engine", "work_order_generator", "dedup_engine", "stale_engine", "dispatch_engine", "review_router", "cargo_resolver", "universe_destination_resolver", "payroll_handoff", "guardian_logging"]);
+  // String claims are diagnostic input only. A future canonical inspection
+  // reader must issue the private evidence capability before PASS can activate.
+  const failures = requiredChecks.filter(() => true);
+  const normalizedSignatures = Object.freeze(Object.fromEntries(DOT_SIGNATURE_FIELDS.map((field) => [field, "NOT_VERIFIED"])));
+  const inspection = Object.freeze({
+    INSPECTION_ID: `DOT-INSPECTION-${observed_at}`, DATE: observed_at.slice(0, 10), VERSION: manufacturing_record.VERSION,
+    MAIN_SHA: main_sha, HEARTBEAT_LAST_SEEN: observed_at, HEARTBEAT_STATUS: "NOT_VERIFIED",
+    BREATH_STATUS: "NOT_VERIFIED", DOT_STATUS: "DEGRADED_UNVERIFIED_INSPECTION_INPUT",
+    QUEUE_STATUS: "NOT_VERIFIED", DISPATCH_STATUS: "NO_DISPATCH", REVIEW_STATUS: "NOT_VERIFIED",
+    CARGO_STATUS: "NOT_VERIFIED", ERRORS: Object.freeze(failures.map((field) => `${field.toUpperCase()}_NOT_VERIFIED`)),
+    P0: failures.includes("guardian_logging") ? 1 : 0, P1: failures.length, P2: 0,
+    REPAIR_REQUIRED: failures.length > 0, REPAIR_OWNER: failures.length ? "DOT + GM" : null,
+    NEXT_INSPECTION: "NEXT_VERIFIED_DAILY_BREATH_OR_MATERIAL_CHANGE", SIGNATURES: normalizedSignatures
+  });
+  // Deliberately not added to VERIFIED_DOT_INSPECTIONS: caller strings did not
+  // establish a canonical inspection receipt.
+  return inspection;
+}
+
+export function createDotOrganMaintenanceRecord({ issue = null, root_cause = null, changed_files = [], version_before = "1.0.0", version_after = "1.0.0", observed_at, reviewed_by = "NOT_VERIFIED", gm_ack = "NOT_VERIFIED" }) {
+  invariant(issue === null || DOT_DEGRADED_ISSUES.includes(issue), "DOT_MAINTENANCE_ISSUE_INVALID", "Unsupported DOT maintenance classification");
+  invariant(Array.isArray(changed_files), "DOT_MAINTENANCE_FILES_REQUIRED", "Maintenance changed_files must be an array");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "DOT_MAINTENANCE_TIME_INVALID", "Maintenance requires an ISO time");
+  return Object.freeze({
+    MAINTENANCE_ID: `DOT-MAINTENANCE-${observed_at}`, ORGAN_VERSION_BEFORE: version_before, ISSUE: issue, ROOT_CAUSE: root_cause,
+    CHANGED_FILES: Object.freeze([...changed_files]), PATCH: issue ? "BOUNDED_CANDIDATE_REQUIRED" : null, TEST: "PENDING", CI: "PENDING", REVIEW: "PENDING",
+    VERSION_AFTER: version_after, ROLLBACK: "REVERT_BOUNDED_CANDIDATE", MAINTAINED_BY: "NOT_VERIFIED", REVIEWED_BY: reviewed_by, GM_ACK: gm_ack,
+    DATE: observed_at.slice(0, 10), ORGAN_STATUS: issue ? "DEGRADED" : "CANDIDATE_NOT_INSTALLED"
+  });
+}
+
+export function evaluateDotOrganSeal({ manufacturing_record, inspection_record, exact_head_gate = null, independent_review_evidence = null, gm_ack_evidence = null, actor_registry_evidence = null, prior_seal = null }) {
+  validateDotOrganManufacturingRecord(manufacturing_record);
+  const exactHeadVerified = VERIFIED_DOT_EXACT_HEAD_GATES.has(exact_head_gate)
+    && exact_head_gate.expected_main_sha === manufacturing_record.BASE_MAIN_SHA
+    && exact_head_gate.expected_head_sha === manufacturing_record.HEAD_SHA;
+  const inspectionVerified = VERIFIED_DOT_INSPECTIONS.has(inspection_record) && inspection_record?.REPAIR_REQUIRED === false;
+  const reviewVerified = VERIFIED_DOT_REVIEW_EVIDENCE.has(independent_review_evidence);
+  const gmAckVerified = VERIFIED_DOT_GM_ACK_EVIDENCE.has(gm_ack_evidence);
+  const actorsVerified = VERIFIED_DOT_ACTOR_EVIDENCE.has(actor_registry_evidence);
+  const valid = manufacturing_record.STATUS === "INSTALLED" && manufacturing_record.INSTALLED_AT !== "NOT_INSTALLED"
+    && inspectionVerified && exactHeadVerified && reviewVerified && gmAckVerified && actorsVerified
+    && DOT_SIGNATURE_FIELDS.every((field) => manufacturing_record.SIGNATURES[field] === "SIGNED");
+  if (prior_seal?.status === "VALID") invariant(typeof prior_seal.SUPERSEDED_BY === "string" && prior_seal.SUPERSEDED_BY.trim(), "DOT_PRIOR_SEAL_SUPERSESSION_REQUIRED", "A prior valid seal must be retained and superseded explicitly");
+  return Object.freeze({ ORGAN_ID: manufacturing_record.ORGAN_ID, VERSION: manufacturing_record.VERSION, HEAD_SHA: manufacturing_record.HEAD_SHA,
+    TEST_RESULT: exactHeadVerified ? "PASS" : "NOT_VERIFIED", REVIEW_RESULT: reviewVerified ? "PASS" : "NOT_VERIFIED", INSPECTION_RESULT: inspectionVerified ? "PASS" : "NOT_VERIFIED",
+    MANUFACTURER: manufacturing_record.SIGNATURES.manufacturer, MAINTAINER: manufacturing_record.SIGNATURES.runtime_maintainer,
+    REVIEWER: manufacturing_record.SIGNATURES.independent_inspector, GM_ACK: gmAckVerified ? "SIGNED" : "NOT_VERIFIED", SEALED_AT: valid ? manufacturing_record.INSTALLED_AT : null,
+    status: valid ? "VALID" : "INVALID", SUPERSEDED_BY: null });
+}
+
+export function evaluateDotDispatchSafety({ p0 = false, data_loss = false, duplicate_dispatch = false, authority_breach = false } = {}) {
+  const triggers = Object.freeze(Object.entries({ P0: p0, DATA_LOSS: data_loss, DUPLICATE_DISPATCH: duplicate_dispatch, AUTHORITY_BREACH: authority_breach }).filter(([, active]) => active === true).map(([name]) => name));
+  return Object.freeze({ ORGAN_STATUS: triggers.length ? "DEGRADED" : "CANDIDATE_READY", STOP_NEW_DISPATCH: triggers.length > 0, ROLLBACK_REQUIRED: triggers.length > 0, ESCALATE_GM: triggers.length > 0, TRIGGERS: triggers });
+}
+
+// Copy data through descriptors before any policy read. Accessors never run;
+// later mutations to the caller's graph cannot change verified actor/task facts.
+function captureCompanyData(value, budget = { nodes: 0 }, depth = 0) {
+  invariant(++budget.nodes <= 20000 && depth <= 24, "COMPANY_INPUT_BOUND", "Company input exceeds bounded data size");
+  if (value === null || value === undefined || ["string", "boolean"].includes(typeof value)) return value;
+  if (typeof value === "number") {
+    invariant(Number.isFinite(value), "COMPANY_INPUT_NUMBER_INVALID", "Company numbers must be finite");
+    return value;
+  }
+  invariant(typeof value === "object", "COMPANY_INPUT_DATA_ONLY", "Company input accepts data only");
+  const array = Array.isArray(value);
+  const prototype = Object.getPrototypeOf(value);
+  invariant(prototype === (array ? Array.prototype : Object.prototype) || (!array && prototype === null), "COMPANY_INPUT_PROTOTYPE_INVALID", "Company input requires plain data");
+  invariant(Object.getOwnPropertySymbols(value).length === 0, "COMPANY_INPUT_SYMBOL_FORBIDDEN", "Symbol properties are not Company data");
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const copy = array ? [] : {};
+  for (const [key, descriptor] of Object.entries(descriptors)) {
+    invariant(Object.hasOwn(descriptor, "value"), "COMPANY_INPUT_ACCESSOR_FORBIDDEN", "Company input must not contain accessors");
+    if (array && key === "length") continue;
+    invariant(descriptor.enumerable && (!array || /^(0|[1-9][0-9]*)$/.test(key)), "COMPANY_INPUT_PROPERTY_INVALID", "Only enumerable data properties are accepted");
+    Object.defineProperty(copy, key, { value: captureCompanyData(descriptor.value, budget, depth + 1), enumerable: true });
+  }
+  return Object.freeze(copy);
+}
+
+function captureCompanyCycleInput(input) {
+  invariant(input && typeof input === "object" && !Array.isArray(input), "COMPANY_INPUT_REQUIRED", "Company input is required");
+  invariant([Object.prototype, null].includes(Object.getPrototypeOf(input)) && Object.getOwnPropertySymbols(input).length === 0, "COMPANY_INPUT_PROTOTYPE_INVALID", "Cycle input requires plain data");
+  const descriptors = Object.getOwnPropertyDescriptors(input);
+  const evidence = descriptors.repository_evidence;
+  invariant(evidence && Object.hasOwn(evidence, "value"), "COMPANY_INPUT_ACCESSOR_FORBIDDEN", "Repository evidence must be an own data property");
+  invariant(ACTIVE_COMPANY_REPOSITORY_EVIDENCE.has(evidence.value), "TRUSTED_REPOSITORY_EVIDENCE_REQUIRED", "Repository evidence must originate from the canonical reader");
+  const other = Object.create(null);
+  for (const [key, descriptor] of Object.entries(descriptors)) {
+    invariant(Object.hasOwn(descriptor, "value"), "COMPANY_INPUT_ACCESSOR_FORBIDDEN", "Cycle properties must not be accessors");
+    if (key !== "repository_evidence") Object.defineProperty(other, key, descriptor);
+  }
+  const data = captureCompanyData(other);
+  const previousDescriptor = descriptors.previous_work_orders;
+  const previous = previousDescriptor?.value;
+  const verifiedPrevious = [];
+  if (Array.isArray(previous)) {
+    const recordDescriptors = Object.getOwnPropertyDescriptors(previous);
+    for (const [key, descriptor] of Object.entries(recordDescriptors)) {
+      if (key !== "length" && Object.hasOwn(descriptor, "value") && PRODUCED_COMPANY_OPPORTUNITY_RECORDS.has(descriptor.value)) {
+        verifiedPrevious.push(descriptor.value.WORK_ID);
+      }
+    }
+  }
+  return Object.freeze({ ...data, repository_evidence: evidence.value, previous_work_orders_verified: Object.freeze(verifiedPrevious) });
+}
+
+export function planActiveCompanyOperatingCycle(input) {
+  let {
+  cycle_id,
+  observed_at,
+  current_main_sha,
+  expected_main_sha,
+  manager,
+  workers = [],
+  work_queue = [],
+  projects = [],
+  guardian_denials = [],
+  repository_evidence,
+  previous_cycle_ids = [],
+  boot,
+  direct_channel = "NOT_AVAILABLE",
+  direct_channel_evidence_ref = null,
+  durable_handoff_ref = null,
+  previous_work_orders = [],
+  previous_work_orders_verified = []
+} = captureCompanyCycleInput(input);
+  const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  const bootStatus = validateActiveCompanyBoot({ boot, current_main_sha, manager, observed_at, repository_evidence: trustedRepository });
+  requireArray(work_queue, "work_queue");
+  requireArray(projects, "projects");
+  requireArray(guardian_denials, "guardian_denials");
+  requireArray(workers, "workers");
+  invariant(new Set(workers.map((worker) => worker?.worker_id)).size === workers.length, "DUPLICATE_WORKER_ID", "Worker IDs must be unique within a cycle");
+  const registryStatus = validateActiveCompanyRegistryEvidence({
+    repository_evidence: trustedRepository,
+    current_main_sha,
+    actors: [manager, ...workers]
+  });
+  invariant(["AVAILABLE", "NOT_AVAILABLE", "NOT_VERIFIED"].includes(direct_channel), "DIRECT_CHANNEL_STATUS_INVALID", "Unsupported direct channel status");
+  // Caller availability cannot prove delivery. Only a current-main, time-bounded,
+  // platform-verified channel record may make the route available; it still does
+  // not prove dispatch or ACK.
+  let directChannelEvidence = null;
+  if (direct_channel_evidence_ref !== null) {
+    invariant(typeof direct_channel_evidence_ref === "string" && direct_channel_evidence_ref.trim(), "DIRECT_CHANNEL_EVIDENCE_REF_INVALID", "Direct-channel evidence reference must be a repository path");
+    const channelFile = trustedRepository.files[direct_channel_evidence_ref];
+    invariant(channelFile, "DIRECT_CHANNEL_EVIDENCE_REQUIRED", "Direct channel must be hash-verified at current main");
+    try { directChannelEvidence = JSON.parse(channelFile.content); } catch { invariant(false, "DIRECT_CHANNEL_EVIDENCE_INVALID", "Direct-channel evidence must be valid JSON"); }
+    invariant(directChannelEvidence?.schema === "KAIOS_DIRECT_CHANNEL_EVIDENCE_V1"
+      && directChannelEvidence?.status === "VERIFIED"
+      && directChannelEvidence?.verification_status === "VERIFIED_BY_PLATFORM"
+      && directChannelEvidence?.from_worker_id === manager.worker_id
+      && Array.isArray(directChannelEvidence?.authorized_worker_ids)
+      && typeof directChannelEvidence?.expires_at === "string"
+      && Date.parse(directChannelEvidence.expires_at) > Date.parse(observed_at),
+    "DIRECT_CHANNEL_EVIDENCE_INVALID", "Direct-channel evidence is incomplete, expired, or not bound to the manager");
+  }
+  direct_channel = directChannelEvidence ? "AVAILABLE_VERIFIED" : "NOT_VERIFIED";
+  durable_handoff_ref = durable_handoff_ref ?? "handoff/HANDOFF_CURRENT.md";
+  invariant(repository_evidence.files[durable_handoff_ref], "DURABLE_HANDOFF_REQUIRED", "Handoff must be a verified current-main repository file");
+  invariant(Date.parse(observed_at) >= Date.parse(trustedRepository.observed_at), "SNAPSHOT_FROM_FUTURE", "Cycle cannot predate repository observation");
+  invariant(projects.every((project) => typeof project?.task_id === "string" && project.task_id.trim()), "ACTIVE_PROJECT_TASK_ID_REQUIRED", "Every project requires a task ID");
+  invariant(new Set(projects.map((project) => project.task_id)).size === projects.length, "DUPLICATE_ACTIVE_PROJECT", "Projects must be unique");
+  const originalWorkQueueLength = work_queue.length;
+  const unique = new Map();
+  for (const candidate of work_queue) {
+    requireId(candidate?.task_id, "task_id");
+    invariant(!unique.has(candidate.task_id) || stableStringify(unique.get(candidate.task_id)) === stableStringify(candidate), "DUPLICATE_WORK_QUEUE_TASK", "Same demand ID with different bytes conflicts");
+    unique.set(candidate.task_id, candidate);
+  }
+  work_queue = [...unique.values()];
+  const duplicateRemoved = originalWorkQueueLength - work_queue.length;
+  const opportunities = projectDynamicCompanyOpportunities({ work_queue, projects, repository: trustedRepository, observed_at, previous_work_orders, previous_work_orders_verified });
+  const dynamicEvidence = dynamicCompanyCycleEvidence({ opportunities, repository: trustedRepository, observed_at, workers, duplicate_removed: duplicateRemoved });
+  const projectsByTask = new Map(projects.map((project) => [project?.task_id, project]));
+  const commonPreflight = planAutonomousCompanyEngineeringCycleCore({
+    cycle_id,
+    observed_at,
+    current_main_sha,
+    expected_main_sha,
+    manager,
+    workers,
+    work_queue: [],
+    previous_cycle_ids
+  });
+  if (["IDEMPOTENT_NOOP", "HOLD_STALE_MAIN"].includes(commonPreflight.status)) {
+    return Object.freeze({
+      ...commonPreflight,
+      ...dynamicEvidence,
+      mode: "ACTIVE_COMPANY_MODE",
+      boot_status: bootStatus.status,
+      registry_status: registryStatus.status,
+      direct_channel,
+      durable_handoff_ref: durable_handoff_ref,
+      oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
+      silent_task_ids: Object.freeze([]),
+      guardian_denials: Object.freeze([]),
+      protected_action_authority_granted: false
+    });
+  }
+  const workOrderEvidenceVerified = (candidate) => {
+    const project = projectsByTask.get(candidate?.task_id);
+    const evidenceFile = typeof candidate?.work_order_ref === "string"
+      ? trustedRepository.files[candidate.work_order_ref]
+      : null;
+    if (!evidenceFile) return false;
+    try {
+      const envelope = JSON.parse(evidenceFile.content);
+      return stableStringify(envelope?.planner_task) === stableStringify(candidate)
+        && stableStringify(envelope?.active_project) === stableStringify(project);
+    } catch {
+      return false;
+    }
+  };
+  const normalizeGuardianDenial = (denial) => {
+    const normalized = Object.fromEntries(
+      ["turn_id", "review_id", "target_item_id", "action", "reason", "timestamp"].map((field) => [
+        field,
+        typeof denial?.[field] === "string" && denial[field].trim() ? denial[field] : "UNKNOWN"
+      ])
+    );
+    const status = denial?.status === "RESOLVED" ? "RESOLVED" : "UNRESOLVED";
+    if (status === "RESOLVED") {
+      invariant(denial?.resolution_actor_id === manager.worker_id, "GUARDIAN_RESOLUTION_ACTOR_REQUIRED", "Resolved Guardian denial must be authorized by the registry-verified General Manager");
+      invariant(typeof denial?.resolution_evidence_ref === "string" && denial.resolution_evidence_ref.trim(), "GUARDIAN_RESOLUTION_EVIDENCE_REQUIRED", "Resolved Guardian denial requires durable evidence");
+      invariant(typeof denial?.resolved_at === "string" && !Number.isNaN(Date.parse(denial.resolved_at)), "GUARDIAN_RESOLUTION_TIME_REQUIRED", "Resolved Guardian denial requires an ISO timestamp");
+      invariant(typeof denial?.timestamp === "string" && !Number.isNaN(Date.parse(denial.timestamp)), "GUARDIAN_DENIAL_TIME_REQUIRED", "Resolved Guardian denial requires the original denial timestamp");
+      invariant(Date.parse(denial.resolved_at) >= Date.parse(denial.timestamp) && Date.parse(denial.resolved_at) <= Date.parse(observed_at), "GUARDIAN_RESOLUTION_TIME_INVALID", "Guardian resolution must follow the denial and not be from the future");
+      const resolutionFile = trustedRepository.files[denial.resolution_evidence_ref];
+      invariant(resolutionFile, "GUARDIAN_RESOLUTION_EVIDENCE_UNVERIFIED", "Guardian resolution evidence must be a hash-verified file at current_main_sha");
+      let resolution;
+      try {
+        resolution = JSON.parse(resolutionFile.content);
+      } catch {
+        invariant(false, "GUARDIAN_RESOLUTION_EVIDENCE_INVALID", "Guardian resolution evidence must be valid JSON");
+      }
+      invariant(
+        resolution?.status === "RESOLVED"
+        && resolution?.decision === "APPROVED_TO_RETRY"
+        && resolution?.resolution_actor_id === denial.resolution_actor_id
+        && resolution?.target_item_id === normalized.target_item_id
+        && resolution?.action === normalized.action
+        && resolution?.review_id === normalized.review_id
+        && resolution?.resolved_at === denial.resolved_at,
+        "GUARDIAN_RESOLUTION_EVIDENCE_MISMATCH",
+        "Guardian resolution payload must match the denied action and authorized resolution"
+      );
+    }
+    return Object.freeze({
+      ...normalized,
+      status,
+      resolution_actor_id: status === "RESOLVED" ? denial.resolution_actor_id : null,
+      resolution_evidence_ref: status === "RESOLVED" ? denial.resolution_evidence_ref : null,
+      resolved_at: status === "RESOLVED" ? denial.resolved_at : null
+    });
+  };
+  const normalizedDenials = guardian_denials.map(normalizeGuardianDenial);
+  const silentOracleTaskIds = work_queue.filter((candidate) => (
+    candidate?.work_category === "PAID_ORACLE_PROCUREMENT"
+    && !ACTIVE_COMPANY_ORACLE_POLICY.material_triggers.includes(candidate?.oracle_material_trigger)
+    && workOrderEvidenceVerified(candidate)
+  )).map((candidate) => candidate.task_id);
+  const actionableQueue = work_queue.filter((candidate) => !silentOracleTaskIds.includes(candidate?.task_id));
+  if (work_queue.length > 0 && actionableQueue.length === 0) {
+    return Object.freeze({
+      ...dynamicEvidence,
+      cycle_id,
+      status: "IDEMPOTENT_NOOP",
+      mode: "ACTIVE_COMPANY_MODE",
+      selected_task_id: null,
+      selected_worker_id: null,
+      selected_reviewer_id: null,
+      work_order_candidate: null,
+      rejected_candidates: Object.freeze([]),
+      events: Object.freeze([]),
+      authority: Object.freeze({
+        repository_written: false,
+        main_modified: false,
+        merge_executed: false,
+        deployment_executed: false,
+        mainnet_tx_sent: false,
+        payment_sent: false,
+        private_key_accessed: false,
+        external_agent_started: false,
+        worker_activated: false,
+        workqueue_modified: false
+      }),
+      boot_status: bootStatus.status,
+      registry_status: registryStatus.status,
+      direct_channel,
+      durable_handoff_ref: durable_handoff_ref,
+      oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
+      silent_task_ids: Object.freeze(silentOracleTaskIds),
+      guardian_denials: Object.freeze(normalizedDenials),
+      protected_action_authority_granted: false,
+      next_safe_action: "SILENT_UNTIL_MATERIAL_ORACLE_CHANGE"
+    });
+  }
+  const activeQueue = actionableQueue.map((candidate) => {
+    const project = projectsByTask.get(candidate?.task_id);
+    const resolvedWorker = selectDynamicCompanyWorker(candidate, workers);
+    const resolvedReviewer = selectDynamicCompanyReviewer(candidate, project, resolvedWorker, workers);
+    const inlineDenial = candidate?.guardian_denial ? normalizeGuardianDenial(candidate.guardian_denial) : null;
+    const guardianDenial = normalizedDenials.find((denial) => (
+      denial.status === "UNRESOLVED"
+      && [candidate?.task_id, "UNKNOWN"].includes(denial.target_item_id)
+    )) ?? inlineDenial;
+    return {
+      ...candidate,
+      assigned_worker_id: resolvedWorker?.worker_id ?? null,
+      reviewer_id: resolvedReviewer?.worker_id ?? null,
+      active_company_mode: true,
+      opportunity_blockers: opportunities.find((record) => record.WORK_ID === candidate.task_id)?.BLOCKERS ?? ["WORK_ORDER_EVIDENCE_MISMATCH"],
+      dynamic_priority_score: opportunities.find((record) => record.WORK_ID === candidate.task_id)?.PRIORITY_SCORE ?? 0,
+      work_order_evidence_verified: workOrderEvidenceVerified(candidate),
+      project_owner_id: project?.project_owner_id ?? null,
+      implementer_id: project?.implementer_id === "AUTO" ? resolvedWorker?.worker_id ?? null : project?.implementer_id ?? null,
+      review_requirement: "REQUIRED",
+      expected_output: project?.expected_output ?? candidate?.expected_output ?? null,
+      dependencies: project?.dependencies ?? candidate?.dependencies ?? [],
+      guardian_denial: guardianDenial
+    };
+  });
+
+  const planned = planAutonomousCompanyEngineeringCycleCore({
+    cycle_id,
+    observed_at,
+    current_main_sha,
+    expected_main_sha,
+    manager,
+    workers,
+    work_queue: activeQueue,
+    previous_cycle_ids
+  });
+  return Object.freeze({
+    ...planned,
+    ...dynamicEvidence,
+    mode: "ACTIVE_COMPANY_MODE",
+    boot_status: bootStatus.status,
+    registry_status: registryStatus.status,
+    direct_channel,
+    durable_handoff_ref: durable_handoff_ref,
+    oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
+    silent_task_ids: Object.freeze(silentOracleTaskIds),
+    guardian_denials: Object.freeze(normalizedDenials),
+    protected_action_authority_granted: false
+  });
+}
+
+// Compatibility name retained for existing importers. There is one strict
+// Active Company planner, not a weaker parallel entry point.
+export function planAutonomousCompanyEngineeringCycle(input) {
+  return planActiveCompanyOperatingCycle(input);
 }
 
 /**
@@ -2365,6 +3592,9 @@ function aggregateAutonomousEngineeringCheckRuns(checkRuns, totalCount, required
  * omits Authorization and cookies, rejects redirects, and exposes no write,
  * dispatch, merge, deployment, worker, signer, payment, or chain capability.
  */
+const VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS = new WeakSet();
+const DIAGNOSTIC_COMPANY_REPOSITORY_SNAPSHOTS = new WeakSet();
+
 export async function readLatestRepositorySnapshot(options) {
   invariant(options && typeof options === "object" && !Array.isArray(options), "GITHUB_READ_OPTIONS_REQUIRED", "GitHub read options are required");
   for (const forbiddenField of ["token", "authorization", "headers", "api_base", "api_origin", "credentials"]) {
@@ -2375,7 +3605,11 @@ export async function readLatestRepositorySnapshot(options) {
     active_task_pr = null,
     observed_at,
     required_check_names = [],
-    fetch_impl = globalThis.fetch
+    evidence_paths = [],
+    pr_evidence_paths = [],
+    historical_evidence_refs = [],
+    expected_main_sha = null,
+    fetch_impl = CANONICAL_COMPANY_PUBLIC_FETCH
   } = options;
   invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? ""), "INVALID_GITHUB_REPOSITORY", "Repository must use owner/name form");
   invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_REPOSITORY_OBSERVATION_TIME", "observed_at must be an ISO timestamp");
@@ -2384,6 +3618,18 @@ export async function readLatestRepositorySnapshot(options) {
   invariant(Array.isArray(required_check_names) && required_check_names.length > 0 && required_check_names.every((name) => typeof name === "string" && name.trim()), "GITHUB_REQUIRED_CHECKS_INVALID", "required_check_names must contain one or more exact check names");
   invariant(new Set(required_check_names).size === required_check_names.length, "GITHUB_REQUIRED_CHECKS_DUPLICATE", "required_check_names must not contain duplicates");
 
+  invariant(Array.isArray(evidence_paths) && evidence_paths.length <= 32, "GITHUB_EVIDENCE_PATH_BOUND", "Evidence read accepts at most 32 files");
+  invariant(evidence_paths.every((path) => typeof path === "string" && path.length <= 300 && /^[A-Za-z0-9_./-]+$/.test(path) && !path.startsWith("/") && !path.split("/").some((part) => !part || part === "." || part === "..")), "GITHUB_EVIDENCE_PATH_INVALID", "Evidence paths must be safe repository-relative paths");
+  invariant(Array.isArray(pr_evidence_paths) && pr_evidence_paths.length <= 16, "GITHUB_PR_EVIDENCE_PATH_BOUND", "PR evidence read accepts at most 16 files");
+  invariant(pr_evidence_paths.every((path) => typeof path === "string" && path.length <= 300 && /^[A-Za-z0-9_./-]+$/.test(path) && !path.startsWith("/") && !path.split("/").some((part) => !part || part === "." || part === "..")), "GITHUB_PR_EVIDENCE_PATH_INVALID", "PR evidence paths must be safe repository-relative paths");
+  invariant(active_task_pr !== null || pr_evidence_paths.length === 0, "GITHUB_PR_REQUIRED_FOR_PR_EVIDENCE", "PR evidence paths require an active pull request");
+  invariant(Array.isArray(historical_evidence_refs) && historical_evidence_refs.length <= 16, "GITHUB_HISTORY_EVIDENCE_BOUND", "Historical evidence accepts at most 16 files");
+  invariant(historical_evidence_refs.every((entry) => entry && typeof entry === "object" && !Array.isArray(entry)
+    && /^[0-9a-f]{40}$/.test(entry.commit ?? "")
+    && typeof entry.path === "string" && entry.path.length <= 300 && /^[A-Za-z0-9_./-]+$/.test(entry.path)
+    && !entry.path.startsWith("/") && !entry.path.split("/").some((part) => !part || part === "." || part === "..")),
+  "GITHUB_HISTORY_EVIDENCE_INVALID", "Historical evidence requires safe paths and exact commits");
+  invariant(expected_main_sha === null || /^[0-9a-f]{40}$/.test(expected_main_sha), "INVALID_EXPECTED_MAIN_SHA", "Expected main must be an exact SHA");
   const headers = Object.freeze({
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28"
@@ -2415,7 +3661,40 @@ export async function readLatestRepositorySnapshot(options) {
   const mainCommitTime = mainCommit.commit?.committer?.date ?? mainCommit.commit?.author?.date;
   invariant(typeof mainCommitTime === "string" && !Number.isNaN(Date.parse(mainCommitTime)), "GITHUB_MAIN_TIME_INVALID", "GitHub main commit time is invalid");
 
+  invariant(expected_main_sha === null || mainCommit.sha === expected_main_sha, "PUBLIC_GITHUB_MAIN_MISMATCH", "Requested evidence is not the current default-branch HEAD");
+  const files = {};
+  for (const path of [...new Set(evidence_paths)]) {
+    const file = await read(`/contents/${path.split("/").map(encodeURIComponent).join("/")}?ref=${mainCommit.sha}`);
+    invariant(file.type === "file" && file.encoding === "base64" && typeof file.content === "string" && file.content.length <= 1400000, "PUBLIC_GITHUB_FILE_EVIDENCE_INVALID", `Invalid or oversized file evidence: ${path}`);
+    const content = decodePublicGitHubBase64(file.content);
+    invariant(await gitBlobObjectId(content) === file.sha, "PUBLIC_GITHUB_BLOB_HASH_MISMATCH", `Blob hash mismatch: ${path}`);
+    files[path] = Object.freeze({ path, git_object: file.sha, content });
+  }
+  const historyFiles = {};
+  const historyRecords = {};
+  for (const entry of historical_evidence_refs) {
+    const commit = await read(`/commits/${entry.commit}`);
+    invariant(commit.sha === entry.commit, "GITHUB_HISTORY_COMMIT_MISMATCH", "Historical evidence commit did not resolve exactly");
+    const ancestry = await read(`/compare/${entry.commit}...${mainCommit.sha}`);
+    invariant(ancestry.merge_base_commit?.sha === entry.commit && ancestry.behind_by === 0 && Number.isInteger(ancestry.ahead_by) && ancestry.ahead_by >= 0,
+      "GITHUB_HISTORY_NOT_MAIN_ANCESTOR", "Historical evidence must be an ancestor of current main");
+    const file = await read(`/contents/${entry.path.split("/").map(encodeURIComponent).join("/")}?ref=${entry.commit}`);
+    invariant(file.type === "file" && file.encoding === "base64" && typeof file.content === "string" && file.content.length <= 1400000, "PUBLIC_GITHUB_HISTORY_FILE_INVALID", `Invalid or oversized historical evidence: ${entry.path}`);
+    const content = decodePublicGitHubBase64(file.content);
+    invariant(await gitBlobObjectId(content) === file.sha, "PUBLIC_GITHUB_HISTORY_BLOB_HASH_MISMATCH", `Historical blob hash mismatch: ${entry.path}`);
+    let payload;
+    try { payload = JSON.parse(content); } catch { invariant(false, "GITHUB_HISTORY_JSON_INVALID", "Historical work-order evidence must be valid JSON"); }
+    invariant(payload?.schema === "KAIOS_DOT_WORK_ORDER_HISTORY_V1" && payload?.opportunity_record && typeof payload.opportunity_record === "object" && !Array.isArray(payload.opportunity_record)
+      && /^[0-9a-f]{64}$/.test(payload.record_hash ?? "")
+      && await sha256(payload.opportunity_record) === payload.record_hash,
+    "GITHUB_HISTORY_RECORD_HASH_MISMATCH", "Historical record hash must recompute from canonical record bytes");
+    const key = `${entry.commit}:${entry.path}`;
+    invariant(!Object.hasOwn(historyFiles, key), "GITHUB_HISTORY_EVIDENCE_DUPLICATE", "Historical evidence refs must be unique");
+    historyFiles[key] = Object.freeze({ path: entry.path, commit: entry.commit, git_object: file.sha, content });
+    historyRecords[key] = Object.freeze({ path: entry.path, commit: entry.commit, git_object: file.sha, record_hash: payload.record_hash, opportunity_record: Object.freeze(payload.opportunity_record) });
+  }
   let pullRequest = null;
+  const prFiles = {};
   if (active_task_pr !== null) {
     const pr = await read(`/pulls/${active_task_pr}`);
     invariant(/^[0-9a-f]{40}$/.test(pr.head?.sha ?? ""), "GITHUB_PR_HEAD_INVALID", "GitHub pull request head is invalid");
@@ -2432,6 +3711,7 @@ export async function readLatestRepositorySnapshot(options) {
       head_ref: pr.head.ref,
       head_repository: pr.head.repo?.full_name ?? null,
       base_ref: pr.base.ref,
+      base_repository: pr.base.repo?.full_name ?? null,
       state: String(pr.state ?? "").toUpperCase(),
       draft: pr.draft === true,
       mergeable: pr.mergeable === true ? true : pr.mergeable === false ? false : null,
@@ -2451,10 +3731,26 @@ export async function readLatestRepositorySnapshot(options) {
         html_url: run.html_url ?? null
       })))
     });
+    for (const path of [...new Set(pr_evidence_paths)]) {
+      const file = await read(`/contents/${path.split("/").map(encodeURIComponent).join("/")}?ref=${pr.head.sha}`);
+      invariant(file.type === "file" && file.encoding === "base64" && typeof file.content === "string" && file.content.length <= 1400000, "PUBLIC_GITHUB_PR_FILE_EVIDENCE_INVALID", `Invalid or oversized PR file evidence: ${path}`);
+      const content = decodePublicGitHubBase64(file.content);
+      invariant(await gitBlobObjectId(content) === file.sha, "PUBLIC_GITHUB_PR_BLOB_HASH_MISMATCH", `PR blob hash mismatch: ${path}`);
+      prFiles[path] = Object.freeze({ path, ref: pr.head.sha, git_object: file.sha, content });
+    }
   }
 
-  return Object.freeze({
+  if (evidence_paths.length || pr_evidence_paths.length || historical_evidence_refs.length) {
+    const refreshed = await read(`/commits/${encodeURIComponent(defaultBranch)}`);
+    invariant(refreshed.sha === mainCommit.sha, "GITHUB_MAIN_MOVED_DURING_SNAPSHOT", "Default branch changed during evidence collection");
+  }
+  const snapshot = Object.freeze({
     snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
+    transport_provenance: fetch_impl === CANONICAL_COMPANY_PUBLIC_FETCH ? "DEFAULT_PUBLIC_GITHUB" : "DIAGNOSTIC_CUSTOM_TRANSPORT",
+    files: Object.freeze(files),
+    pr_files: Object.freeze(prFiles),
+    history_files: Object.freeze(historyFiles),
+    history_records: Object.freeze(historyRecords),
     observed_at,
     repository,
     default_branch: defaultBranch,
@@ -2474,12 +3770,14 @@ export async function readLatestRepositorySnapshot(options) {
       chain_write: false
     })
   });
+  (fetch_impl === CANONICAL_COMPANY_PUBLIC_FETCH ? VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS : DIAGNOSTIC_COMPANY_REPOSITORY_SNAPSHOTS).add(snapshot);
+  return snapshot;
 }
 
 /**
  * Evaluate a snapshot only. A passing result is evidence, never merge power.
  */
-export function evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha, expected_head_sha }) {
+export function evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha, expected_head_sha, work_order_ref = null }) {
   invariant(repository_snapshot?.snapshot_type === "LATEST_REPOSITORY_READ_ONLY", "LATEST_REPOSITORY_SNAPSHOT_REQUIRED", "Exact-head CI gate requires a fresh read-only repository snapshot");
   invariant(/^[0-9a-f]{40}$/.test(expected_main_sha ?? ""), "EXPECTED_MAIN_SHA_INVALID", "Expected main must be a lowercase Git SHA");
   invariant(/^[0-9a-f]{40}$/.test(expected_head_sha ?? ""), "EXPECTED_HEAD_SHA_INVALID", "Expected PR head must be a lowercase Git SHA");
@@ -2504,13 +3802,33 @@ export function evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha
   if (pr.state !== "OPEN") return hold("HOLD_PR_NOT_OPEN");
   if (pr.draft) return hold("HOLD_PR_DRAFT");
   if (pr.base_ref !== repository_snapshot.default_branch) return hold("HOLD_PR_BASE_BRANCH_MISMATCH", { expected_base: repository_snapshot.default_branch, observed_base: pr.base_ref });
-  if (pr.head_ref === repository_snapshot.default_branch || pr.head_ref.startsWith("codex/")) return hold("HOLD_FORBIDDEN_BRANCH_PATH", { observed_head_ref: pr.head_ref });
+  if (pr.head_ref === repository_snapshot.default_branch) return hold("HOLD_FORBIDDEN_BRANCH_PATH", { observed_head_ref: pr.head_ref });
   if (pr.behind_main !== 0) return hold("HOLD_PR_BEHIND_MAIN");
   if (pr.ahead_main < 1) return hold("HOLD_PR_HAS_NO_BRANCH_DIFF");
   if (pr.mergeable === false) return hold("HOLD_PR_NOT_MERGEABLE");
   if (pr.mergeable === null) return hold("HOLD_PR_MERGEABILITY_UNKNOWN");
   if (pr.ci_status !== "PASS") return hold(pr.ci_status === "FAIL" ? "HOLD_EXACT_HEAD_CI_FAILED" : "HOLD_EXACT_HEAD_CI_INCOMPLETE");
-  return hold("EXACT_MAIN_HEAD_CI_PASS", { exact_main: true, exact_head: true, ci_status: "PASS", behind_main: 0 });
+  if ((!VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository_snapshot) && !DIAGNOSTIC_COMPANY_REPOSITORY_SNAPSHOTS.has(repository_snapshot)) || typeof work_order_ref !== "string") return hold("HOLD_BRANCH_EVIDENCE_REQUIRED");
+  let envelope, registry;
+  const branchEnvelopeFile = repository_snapshot.pr_files?.[work_order_ref] ?? repository_snapshot.files[work_order_ref];
+  try {
+    envelope = JSON.parse(branchEnvelopeFile?.content);
+    registry = JSON.parse(repository_snapshot.files[ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority]?.content);
+  } catch { return hold("HOLD_BRANCH_EVIDENCE_REQUIRED"); }
+  const task = envelope?.planner_task;
+  if (task?.target_pr !== pr.number || pr.head_repository !== repository_snapshot.repository || pr.base_repository !== repository_snapshot.repository) return hold("HOLD_PR_IDENTITY_OR_REPOSITORY_MISMATCH");
+  if (repository_snapshot.pr_files?.[work_order_ref] && repository_snapshot.pr_files[work_order_ref].ref !== pr.head_sha) return hold("HOLD_PR_EVIDENCE_HEAD_MISMATCH");
+  const registered = registry?.workers?.find((worker) => worker.worker_id === task?.assigned_worker_id);
+  if (!task || task.work_order_ref !== work_order_ref || task.expected_base_sha !== expected_main_sha
+      || task.branch !== pr.head_ref || !autonomousEngineeringWorkerEligible(registered, task)
+      || !autonomousEngineeringBranchMatches(registered.allowed_branch_pattern, pr.head_ref, task.task_id)) {
+    return hold("HOLD_BRANCH_REGISTRY_TASK_MISMATCH");
+  }
+  const result = hold(VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository_snapshot) ? "EXACT_MAIN_HEAD_CI_PASS" : "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED", { evidence_class: repository_snapshot.transport_provenance, exact_main: true, exact_head: true, ci_status: "PASS", behind_main: 0,
+    branch_policy_status: "REGISTRY_TASK_BOUND", branch_policy_work_order: work_order_ref,
+    branch_policy_evidence_source: repository_snapshot.pr_files?.[work_order_ref] ? "EXACT_PR_HEAD" : "CURRENT_MAIN" });
+  if (result.status === "EXACT_MAIN_HEAD_CI_PASS") VERIFIED_DOT_EXACT_HEAD_GATES.add(result);
+  return result;
 }
 
 export function createAutonomousBusinessWorkOrder({ cycle_id, primary_job_status, candidates }) {

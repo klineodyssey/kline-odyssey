@@ -1,5 +1,92 @@
 # KGEN Organization V2.0 WorkQueue
 
+## DOT Dynamic Opportunity & Task Engine V1.0.0 candidate — 2026-10-07
+
+WORK_ID: KAIOS-DOT-ORGAN-V1-20261007. Human design 沈英明; Company owner 衡曜 / codex-gm-01. `codex-gm-01 / LIFE-CODEX-GM-0001` is the only selected writer candidate under provisional claim `CLAIM-KAIOS-DOT-ORGAN-V1-20261007-codex-gm-01-R1`, handoff head `86061cbcc7913641fa06062566b954e834cc20a8`, and fencing token `FENCE-KAIOS-DOT-ORGAN-V1-20261007-R1`. The canonical worker record lacks controller ID and no platform-signed runtime attestation exists, so `ACTIVE_WRITER=null` and writes return to HOLD after this security repair. All other actors are READ/REVIEW/WATCH only. Existing PR #536 / codex/kaios-ai-company-active-mode-20261007 is the sole lineage. Base main f7f67950418ebbb6f7a5a309a32d529232fcb3b6; predecessor b00aee498cfd14bb0b4435326edabed2129bf9f2.
+
+`PrimeForge` and `human-primeforge` belong to the same Human reviewer/authority identity lineage for 沈英明. They are not an AI runtime-maintainer identity and cannot be used as this branch's writer or automated maintainer. A mother-machine runtime maintainer must be a separately verified AI or system identity. No identity, employment, trust or permission is created by this record.
+
+`BRANCH_CONCURRENCY_GATE`: one branch-global exact lease only, loaded from the fixed WorkOrder path through a real `DEFAULT_PUBLIC_GITHUB` hash-checked exact-PR snapshot and bound to canonical registry controller plus signing-key hash, an independently shipped controller trust anchor, and an Ed25519 signature over a fresh current-process random challenge and exact source bytes. Module-captured wall/monotonic clocks enforce a two-minute challenge TTL and current lease; the signer's timestamp is never the authority clock. The first challenge verification attempt consumes the nonce, and the first gate evaluation consumes the verified capability even when a later check fails. Repository/network responses cannot install the independent anchor; this candidate intentionally ships none, so transport replacement cannot activate a writer. A second live writer under any WORK_ID, copied caller object, duplicate claim/token/epoch, future or stale heartbeat, excessive lease, incomplete release/ACK or binding mismatch produces `STOP_WRITES`. Writer transfer requires `CURRENT_WRITER_RELEASE=YES` and `NEXT_WRITER_ACK=YES`.
+
+Current status: WRITER_CONTROLLER_PROOF_HOLD / MANUFACTURING_INCOMPLETE / INDEPENDENT_REVIEW_PENDING / EXACT_HEAD_CI_PENDING / NOT_INSTALLED / NOT_DEPLOYED. Target version 1.0.0 is not complete. The earlier review [5440566159](https://github.com/klineodyssey/kline-odyssey/pull/536#pullrequestreview-5440566159) remains historical FAIL evidence; later technical review of head `86061cbcc7913641fa06062566b954e834cc20a8` passed as engineering evidence but did not create canonical Reviewer authority. Review of `ad0be3b5787aba0e3cf1b1d7aadaf6fc60f9a226` then reproduced branch-global, provenance and freshness bypasses; this revision repairs those findings and requires another exact-head review.
+
+One owner remains core/company/index.mjs. Its existing planner produces canonical evidence-bound proposals across all nineteen work types, deterministic P0/P1/P2 ordering, duplicate/conflict handling, stale/supersede evidence and WATCHING. The existing readLatestRepositorySnapshot exclusively owns hardened GET/file/hash/default-branch verification; the old resolver name is only a compatibility delegator. Controller separation is restored from main, where #536 had removed it. Unknown identity, reviewer, capacity, cargo rights or work types stay blocked; proposal detection is possible without granting a worker identity.
+
+The existing safe-planner WorkOrder JSON contains the real held envelope and versioned manufacturing/inspection/maintenance/rollback records. It is a branch candidate, not a dispatched main queue item. DOT has no invented registry employee, Life, controller or trust grant. Fake second_review is not an assigned reviewer. At most one safe proposal is selected; actual dispatch/ACK counts remain zero. Direct AVAILABLE is not evidence: the canonical repository handoff is retained and ACK_NOT_VERIFIED persists.
+
+No cargo is required for ordinary code/research. Cargo types cannot acquire invented coordinates, weight coefficients, rights, max capacity, receipts or a funding grant; minimum 1 KGEN is only Human input. Day breath is blocked until verified clock and canonical K12345 boundary exist, without using Cloud host timezone. Heartbeat is observation-only, not a reward or receipt.
+
+Checkpoint limits: the single-writer gate and its fifty-fifth bounded regression test pass locally. A target PR without observed evidence remains held. Serialized/copied predecessors lack source provenance and remain held; only reader-verified ancestry may supersede durable evidence. The actual branch WorkOrder test establishes parse/projection compatibility, not main admission. Local focused source suite passed 55/55; Universal 258/258, workflow security 3/3 and native-market 24/24 also pass. The full Windows glob retains three unrelated CRLF-sensitive 11520 workflow-text baseline failures; no production rule or assertion was changed. None of this is exact-head CI or production evidence.
+
+Security checkpoint history: first review reproduced accessor/policy-prototype/manager-alias bypasses; second reproduced custom-transport provenance and PR/fork binding gaps. Repairs retain these FAIL findings and require independent rereview. Injected transports now produce DIAGNOSTIC_CI_MATCH_NOT_VERIFIED, including outside the test runner and under spoofed test environment; they never mint production CI evidence. Positive CI evidence also requires exact canonical WorkOrder target PR, head/base repository and registered task branch.
+
+Manufacture signature NOT_SIGNED; verification NOT_VERIFIED; inspection PENDING; seal INVALID. Runtime installation, daemon scheduling, deployment, payments, chain state and real assets are not performed. Rollback is an owner-reviewed revert of this bounded diff, not history rewriting. #520 overlaps core/OS and #501 overlaps tests; their unmerged changes are not imported or falsely claimed preserved here. Existing unrelated base content remains intact.
+
+## Superseded predecessor narrative (historical, not current status)
+
+
+## KAIOS AI Company Active Mode — 2026-10-07
+
+- `WORK_ID`: `KAIOS-AI-COMPANY-ACTIVE-MODE-20261007`.
+- `STATUS`: `DRAFT_PR_OPEN_REVIEW_PASS_EXACT_HEAD_CI_PENDING`; `PRIORITY`: `P1`; `RISK`: `R1`.
+- `PROJECT_OWNER`: Human / 沈英明; `OWNER` and `IMPLEMENTER`: `codex-gm-01`;
+  `REVIEWER`: independent `second_review` session, not a new canonical employee.
+- `BASE_SHA`: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`.
+- `BRANCH`: `codex/kaios-ai-company-active-mode-20261007`.
+- `DRAFT_PR`: `#536` (`https://github.com/klineodyssey/kline-odyssey/pull/536`).
+- `SCOPE`: cumulative update of the existing Company OS and existing safe planner;
+  machine-verifiable Company Boot, project triad, Codex branch policy, Guardian
+  stop-repeat and material-change-only paid Oracle routing. No second company
+  runtime, worker registry rewrite or protected Canon/CURRENT modification.
+- `DEPENDENCIES`: current Boot / Physics / Universe Map / AGENTS, current handoff,
+  Human Owner policy, worker registry, open PR ownership and exact current main.
+- `EXPECTED_OUTPUT`: bounded implementation, existing test-suite coverage,
+  task-branch commit/push, Draft PR, exact-head CI and independent review.
+- `RESULT`: `LOCAL_QA_PASS / INDEPENDENT_REVIEW_PASS / PENDING_EXACT_HEAD_CI`;
+  `HEAD`: Git commit containing this record; `CI`: `PENDING_EXACT_HEAD`.
+- `TESTS`: Active Company 29/29, Universal 258/258, workflow security 3/3 and
+  11520 native market 24/24 PASS. Full `tests/*.test.mjs` retains three unrelated
+  11520 Windows-CRLF baseline failures reproduced at the exact base SHA.
+- `REVIEW_STATUS`: first independent review returned `FAIL` for a weak compatibility
+  entry point, caller-trusted boot/registry data, incomplete actor separation,
+  malformed Guardian handling, noisy Oracle no-change handling and merge-policy
+  wording. The candidate now routes both public planner names through the same
+  strict Active Company preflight, binds Git-object boot and registry evidence,
+  requires pairwise-distinct project actors, fails closed on malformed denials,
+  emits zero Oracle events without a material trigger and preserves the Human
+  Owner merge policy. The later independent rereviews and Draft PR preserve this
+  finding as resolved evidence; no merge authority was granted.
+- `SECOND_REVIEW_STATUS`: `FAIL` found that hexadecimal Boot/registry values and
+  Guardian resolution strings were still caller-asserted. The candidate now
+  accepts only a module-private snapshot produced by the read-only public GitHub
+  resolver, pins the exact commit, recomputes every allowlisted Git blob ID,
+  parses worker and branch authority from the verified registry blob, and accepts
+  Guardian resolution only from the registry-verified GM with a time-valid,
+  matching JSON resolution file in that same main snapshot. The later independent
+  reviews confirmed this correction before Draft PR publication.
+- `THIRD_REVIEW_STATUS`: `FAIL` found that task/project envelopes were still
+  caller-supplied despite the verified queue blob, and the all-silent Oracle path
+  returned before common stale-main/replay/GM checks. Every selectable candidate
+  now requires a semantic match to a hash-verified machine work-order JSON at the
+  same main commit; caller-invented tasks fail closed. Oracle silence now follows
+  common preflight, with explicit stale-main and replay tests. The intentionally
+  stricter compatibility-export contract is documented. The final independent
+  rereview passed before Draft PR publication.
+- `FOURTH_REVIEW_STATUS`: `FAIL` found duplicate queue task IDs could share a
+  task-ID-keyed envelope result. The planner now rejects duplicate task IDs before
+  selection and verifies each candidate against its own envelope instead of a
+  shared task-ID lookup. A dedicated duplicate-ID regression test passes.
+- `FINAL_REVIEW_STATUS`: `PASS`; independent review confirmed all prior findings
+  corrected, focused tests 29/29, syntax and diff checks pass, and the changed-file
+  scope remains exactly the five approved files. No merge or deployment approved.
+- `DATA_LOSS_RISK`: no protected or existing dirty worktree was modified; this
+  candidate is isolated and is durably saved on its task branch and Draft PR.
+- `DIRECT_CHANNEL`: available to the independent reviewer in this task; other
+  instances require a repository handoff.
+- `PROTECTED_ACTIONS`: Mainnet, Testnet deployment, real assets, Treasury,
+  payroll, signer, private key, secret, governance/admin, production Oracle,
+  merge and production deployment remain `NOT_AUTHORIZED`.
+
 ## KAIOS World Portal / shared audio — 2026-10-01
 
 - Task: KAIOS-PORTAL-AUDIO-20261001; IMPLEMENTED_LOCAL_QA_PASS / PENDING_EXACT_HEAD_CI_AND_SECOND_REVIEW; P0; owner codex-gm-01.
