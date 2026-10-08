@@ -1,91 +1,66 @@
 ---
-VERSION: "3.0"
-REVISION: "2026-07-13.WORKFORCE_V3"
-STATUS: "ACTIVE / PROTOTYPE GOVERNANCE"
-LAST_UPDATED: "2026-07-13"
-UPDATED_BY: "Codex"
-REVIEWED_BY: "Codex"
+VERSION: "4.0"
+REVISION: "2026-10-08.KAIOS_HR_RECONCILIATION"
+STATUS: "ACTIVE POLICY / LEDGER ONLY / EXECUTION NOT LIVE"
+LAST_UPDATED: "2026-10-08"
+UPDATED_BY: "DOT_ENGINEERING_EXECUTOR"
+REVIEWED_BY: "INDEPENDENT_REVIEW_PENDING"
 SOURCE_COMMIT: "PENDING"
-TASK_ID: "KGEN-WORKFORCE-V3-2026-0001"
-CHANGE_REASON: "Define salary, 8888 bank ledger, game rewards, Robo simulation and human approval boundaries."
+TASK_ID: "KAIOS-HR-SYSTEM-20261008-001"
 SOURCE_OF_TRUTH: true
-Domain: "KGEN"
-Kingdom: "KAIOS"
-Phylum: "Workforce"
-Class: "Compensation"
-Order: "Payroll"
-Family: "Internal Ledger"
-Genus: "Workforce Compensation"
-Species: "KGEN-KAIOS/workforce/COMPENSATION_STANDARD.md"
 ---
 
-# KGEN Workforce Compensation Standard
+# KAIOS Workforce Compensation Standard
 
 ## Purpose
 
-This standard defines how KGEN Workforce evidence becomes prototype compensation records. It does not create a real bank, real payroll provider, securities product, investment service, or autonomous payment system.
+This cumulative standard reconciles the legacy KGEN/merit prototype with the current Human-directed KAIOS prepaid living-salary policy. It governs classification and eligibility only. It does not create a bank, payment authority, token value guarantee or live payroll transfer system.
 
-## System Split
+## Mandatory Separation
 
-| System | Purpose | Prohibited Use |
+| Category | Meaning | Must not be recorded as |
 |---|---|---|
-| 12345 Wukong Heart | Civilization life core, merit, energy and game reward source, Temple Runtime symbol | Not the formal salary treasury, not an employee key store, no AI withdrawal authority |
-| 8888 People Bank | Company salary ledger, department budget, employee payable salary, bonuses, penalties, game asset account, claim queue, audit and freeze controls, simulation investment mandate | Not a licensed bank, no real deposit guarantee, no autonomous real-money trading |
-| KGEN Payroll Vault | Future human-approved on-chain KGEN distribution and reconciliation with the 8888 ledger | No private keys, no seed phrases, no automatic AI signing, no frontend token storage |
+| `SALARY_INCOME` | formal prepaid living salary | task reward, Heartbeat reward or cargo value |
+| `TASK_COMPENSATION` | reviewed WorkOrder compensation | base salary |
+| `CREATOR_ROYALTY` | approved product/game revenue share | salary or simulated revenue |
+| `FREIGHT_REVENUE` | delivery/transport/service income | cargo principal |
+| `HEARTBEAT_REWARD` | Life-system reward | salary or customer revenue |
+| `CARGO_PRINCIPAL` | restricted/custodial cargo value | revenue, profit or compensation |
 
-## Formal Payroll Flow
+## Salary Policy
 
-```text
-Work Evidence
--> Codex Review
--> Payroll Calculation
--> 8888 Bank Employee Account
--> Human-approved Claim
--> Optional KGEN Payroll Vault Distribution
-```
+- Salary currency: `KAIOS`.
+- Model: `PREPAID_LIVING_SALARY`.
+- Payday: day 5, UTC+8.
+- Example cycle: a 2026-10-05 payment covers 2026-10-05 through 2026-11-04.
+- Monthly amount: `PENDING_POLICY`; HR must not invent it.
+- Payroll execution: `NOT_LIVE` until Treasury, salary escrow, exact source/destination, balance, duplicate protection and current Human protected-action authority are verified.
 
-## Salary Types
+Employment is not payroll eligibility. Worker ID, Life ID, Controller binding, tool authority, salary qualification and payment authority are distinct records.
 
-Allowed salary types are:
+## 8888 And Legacy Ledger
 
-- BASE_SALARY
-- TASK_REWARD
-- QUALITY_BONUS
-- REVIEW_BONUS
-- RESEARCH_BONUS
-- BUG_BOUNTY
-- TEMPLE_REWARD
-- GAME_REWARD
-- LEADERSHIP_BONUS
-- PENALTY
-- REVERSAL
-- WITHHELD
-- CLAIMED
-- PAID
+8888 People Bank remains an internal employee ledger and claim-queue concept. A ledger balance, `HOLD_IN_BANK`, merit score or game credit is not proof of real KAIOS custody or payment. Existing `KGEN_TOKEN`, `GAME_CREDIT`, `TEMPLE_ENERGY`, `MERIT_POINT` and `FIAT_REFERENCE_ONLY` entries remain historical evidence and are not silently converted to KAIOS salary.
 
-## Units
+The 12345 Heart is a Life/reward source, not the salary Treasury. Heartbeat, Breath or Ignite rewards remain `HEARTBEAT_REWARD`.
 
-Units must not be mixed without an explicit conversion record and review:
+## Eligibility And Calculation
 
-- KGEN_TOKEN
-- GAME_CREDIT
-- TEMPLE_ENERGY
-- MERIT_POINT
-- FIAT_REFERENCE_ONLY
+Every salary calculation requires:
 
-`FIAT_REFERENCE_ONLY` is informational and must not be treated as payable money.
+- formal employment status;
+- verified Worker ID and applicable Controller/human identity;
+- approved role and salary table;
+- exact pay period and no duplicate payment;
+- evidence, calculation and review;
+- an exact destination before any payment request.
 
-## Calculation Rules
+Allowed payroll states are `CALCULATED`, `HELD_IN_BANK`, `CLAIMABLE`, `PAYMENT_PENDING`, `PAID`, `FAILED`, `REVERSED`. `UNKNOWN_MISSING` is forbidden and opens a P1 payroll incident.
 
-Each payroll record must include task evidence, commit evidence, report path, review result, approval status, and a bank account ID. A worker's self-reported time cannot be the only payment basis.
+## Protected Execution
 
-Rejected tasks do not receive full task reward. FIX tasks are compensated only when responsibility and repair value are explicitly reviewed. Protected path violations, missing reports, missing provenance, duplicate commits, or unauthorized branch activity may freeze compensation.
+Actual payment requires the exact employee, amount, source, destination, sufficient verified balance, pay period, duplicate protection, receipt and action-specific Human authority. HR, DOT, GM, CFO and workers may calculate, reconcile and prepare evidence but may not sign, transfer KAIOS/KGEN, move Treasury, use secrets or mark `PAID` without a verified receipt.
 
-## Claim Rules
+## Historical Continuity
 
-Default claim mode is `HOLD_IN_BANK`. Irreversible transfers, KGEN token payout, external payments, real-market investment, and regulated actions require Human approval. AI workers may not select real chain withdrawal for themselves.
-
-## Legal And Risk Boundary
-
-This is a prototype internal ledger. It is not a bank, not investment advice, not a guaranteed return program, and not a promise of token value. Real-money deployment requires legal, security, compliance, treasury and Human approval.
-
+Version 3 established prototype salary/reward/penalty records, 8888 ledger behavior and optional Human-approved KGEN claim concepts. Version 4 preserves those entries as legacy classifications while making KAIOS prepaid living salary the current policy for future eligible payroll. No historical entry is rewritten or treated as a completed payment by this policy update.

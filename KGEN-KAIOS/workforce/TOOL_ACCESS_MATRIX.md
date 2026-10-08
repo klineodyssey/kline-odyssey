@@ -1,9 +1,9 @@
 # KGEN Tool Access Matrix
 
-**Status:** ACTIVE  
-**Version:** 1.0  
-**Last Updated:** 2026-07-12  
-**Task ID:** KGEN-WORKFORCE-ROSTER-2026-0001
+**Status:** ACTIVE
+**Version:** 1.1
+**Last Updated:** 2026-10-08
+**Task ID:** KAIOS-HR-SYSTEM-20261008-001
 
 ## Purpose
 
@@ -22,8 +22,15 @@ This matrix records which worker may use each tool class. It is a permission rec
 |---|---|---|---|---|---|---|---|---|---|---|
 | `codex-gm-01` | ALLOWED | ALLOWED | DENIED | ALLOWED | ALLOWED | ALLOWED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | DENIED | HUMAN_APPROVAL_REQUIRED |
 | `cursor-01` | ALLOWED | ALLOWED | ALLOWED | DENIED | DENIED | ALLOWED | DENIED | DENIED | DENIED | DENIED |
+| `chatgpt-01` | ALLOWED | ALLOWED | ALLOWED | ALLOWED | ALLOWED | ALLOWED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | DENIED | HUMAN_APPROVAL_REQUIRED |
 | `human-primeforge` | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | DENIED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | DENIED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | DENIED | HUMAN_APPROVAL_REQUIRED |
 | all unactivated candidates | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED |
+
+## DOT Conditional Authority Record
+
+Human policy evidence [#559](https://github.com/klineodyssey/kline-odyssey/issues/559) authorizes DOT to perform bounded R0/R1 GitHub engineering and integrate qualified PRs after applicable tests, review and protection rules. DOT is not added to the formal worker rows until an exact runtime/session, Controller, WorkOrder and non-duplicated Worker ID are bound. This prevents both administrative deadlock and a fabricated identity grant.
+
+This conditional policy never grants Mainnet, Treasury, signer, secret, real-asset, payroll-execution, governance or irreversible destructive authority.
 
 ## Permanent Denials
 
