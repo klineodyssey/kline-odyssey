@@ -456,7 +456,7 @@ test('signed-C quote fixture is loopback-only and separates blocked SIMULATION W
 test('signed-C WAIT blocks price preview until complete fresh public admission without debit',()=>{
   const source=read('./11520-browser-signed-c-immersive.mjs');
   const block=source.slice(source.indexOf('if(LOCAL_SIMULATION_QA){'),source.indexOf('// Human 12:43'));
-  for(const guard of ['__K11520_FREE_ORACLE__',"row.quality!=='FRESH'",'initialQuality',"'#cNumericInput').fill('1')", "'#orderFire').click", "textContent.includes('ORACLE_STALE')", "'#confirm').isVisible(),false", "snapshot().wallet),before", 'quoteFixtureReady=true', "textContent.includes('BINANCE_PUBLIC_MARKET_DATA_ONLY')", "'#confirmOrder').isDisabled(),false", "'#cancelOrder').click()", 'waitPreviewAllowed:false','waitBlocked:true'])assert.ok(block.includes(guard),guard);
+  for(const guard of ['__K11520_FREE_ORACLE__',"row.quality!=='FRESH'",'initialQuality',"'#cNumericInput').fill('1')",'publicMarketStatus()','allowsPriceTransitions,false',"'#orderFire').click", "'#confirm').isVisible(),false", "snapshot().wallet),before", 'quoteFixtureReady=true', "textContent.includes('BINANCE_PUBLIC_MARKET_DATA_ONLY')", "'#confirmOrder').isDisabled(),false", "'#cancelOrder').click()", 'waitPreviewAllowed:false','waitBlocked:true'])assert.ok(block.includes(guard),guard);
   assert.ok(block.indexOf('signed-c-WAIT-blocked-390x844.png')<block.indexOf('quoteFixtureReady=true'));assert.ok(block.indexOf('quoteFixtureReady=true')<block.indexOf("'#cancelOrder').click()"));
   assert.doesNotMatch(block,/K11520_DETERMINISTIC_SIMULATION|waitPreviewAllowed:true/);
 });
