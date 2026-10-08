@@ -275,7 +275,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
-import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createPlayerCourierStore,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createWhiteholeEscortDemoOffer,reviewWhiteholeEscortDemoOffer,createPlayerCourierStore,WHITEHOLE_ESCORT_WORK_ID,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
@@ -768,6 +768,45 @@ test('Player Courier rejects clock tampering, player switching and stale-tab dou
   const cleanStorage=courierStorage(),tabA=createPlayerCourierStore({storage:cleanStorage,now:()=>20_000,monotonicNow:()=>200,sessionId:'TAB-A'}),active=tabA.accept(courierOffer({missionId:'COURIER-TABS'}),{courierLifeId:courier}),tabB=createPlayerCourierStore({storage:cleanStorage,now:()=>active.dueAt,monotonicNow:()=>1,sessionId:'TAB-B'});
   assert.equal(tabA.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1_800_200}).ok,true);
   assert.throws(()=>tabB.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1}),/REVISION_CONFLICT_RELOAD_REQUIRED/);tabB.reload();assert.equal(tabB.snapshot(active.missionId).mission.status,'DELIVERED');
+});
+
+test('white-hole escort preserves raw B4 coordinates, KAIOS principal and review-gated KGEN fee without market conversion',()=>{
+  const offer=createWhiteholeEscortDemoOffer({createdAt:1_000,offerLifetimeMs:60_000});
+  assert.equal(offer.workId,WHITEHOLE_ESCORT_WORK_ID);assert.equal(offer.mode,'WHITEHOLE_ESCORT_DEMO');assert.equal(offer.cargo.amount,50_000);assert.equal(offer.cargo.unit,'KAIOS');
+  assert.deepEqual({rawK:offer.routeAddress.origin.rawK,band:offer.routeAddress.origin.band,alpha:offer.routeAddress.origin.alpha},{rawK:'0.00012345',band:'B4',alpha:1.2345});
+  assert.deepEqual({rawK:offer.routeAddress.destination.rawK,band:offer.routeAddress.destination.band,alpha:offer.routeAddress.destination.alpha},{rawK:'0.00018921',band:'B4',alpha:1.8921});
+  assert.equal(offer.routeAddress.origin.registeredInCurrentUniverseMap,false);assert.equal(offer.routeAddress.destination.registeredInCurrentUniverseMap,false);assert.equal(offer.routeAddress.canonicalLandRouteClaimed,false);assert.equal(offer.routeAddress.localAnimationCoordinatesAreModelDistance,false);assert.equal(offer.distanceMeters,1.496810990052);assert.deepEqual(offer.routeAddress.linearKAxisModel,{deltaK:'0.00006576',distanceMeters:1.496810990052,sameAxisAssumption:true,otherAxesEqualAssumption:true,classification:'LINEAR_K_AXIS_MODEL_DISTANCE_NOT_CADASTRAL_ROUTE_ARC_OR_FULL_FLIGHT'});
+  assert.equal(offer.economics.cargoPrincipalAsset,'KAIOS');assert.equal(offer.economics.cargoPrincipalRecognizedAsRevenue,false);assert.equal(offer.economics.cargoPrincipalEligibleAsTradingMargin,false);
+  assert.equal(offer.economics.freightRevenueAsset,'KGEN');assert.equal(offer.economics.freightRevenue,10);assert.equal(offer.economics.freightRevenueReceivable.status,'REVIEW_GATED_SIMULATED_RECEIVABLE');assert.equal(offer.economics.freightRevenueReceivable.paid,false);
+  assert.equal(offer.whiteholeRule.classification,'SUPPLY_MASS_RULE_NOT_MARKET_PRICE');assert.equal(offer.whiteholeRule.usedForFreightConversion,false);assert.equal(offer.economics.whiteholeMarketConversionUsed,false);
+  assert.equal(offer.escort.speedUnit,'LOCAL_ANIMATION_UNITS_PER_SECOND');assert.equal(offer.escort.physicalCSpeedClaim,null,'local progress must not claim a physical C speed');
+  assert.equal(offer.quoteReview.formalWorkerAck,false);assert.equal(offer.customerJob.formalCustomerIdentity,false);
+});
+
+test('white-hole escort start, movement, destination acceptance and receipt are persistent and replay safe',()=>{
+  const storage=courierStorage(),courier='KAIOS-P-WHITEHOLE-COURIER-1234567890',ledger=createKgenLedger(25),ledgerBefore=structuredClone(ledger);
+  const pending=createWhiteholeEscortDemoOffer({createdAt:1_000,offerLifetimeMs:60_000}),reviewed=reviewWhiteholeEscortDemoOffer(pending,{reviewedAt:1_500});
+  const first=createPlayerCourierStore({storage,now:()=>2_000,monotonicNow:()=>10,sessionId:'WHITEHOLE-A'});
+  assert.throws(()=>first.startWhiteholeEscort(pending,{courierLifeId:courier,wallNow:2_000}),/SIMULATION_QUOTE_REVIEW_REQUIRED/);
+  const started=first.startWhiteholeEscort(reviewed,{courierLifeId:courier,wallNow:2_000,monoNow:10});assert.equal(started.ok,true);assert.equal(started.replayed,false);assert.equal(started.mission.cargo.ownerState,'OWNED_BY_COURIER');
+  const reloaded=createPlayerCourierStore({storage,now:()=>2_100,monotonicNow:()=>1,sessionId:'WHITEHOLE-B'}),replay=reloaded.startWhiteholeEscort(reviewed,{courierLifeId:courier,wallNow:2_100,monoNow:1});
+  assert.equal(replay.replayed,true);assert.equal(Object.keys(reloaded.snapshot().missions).length,1,'start/reload replay never duplicates the principal or fee');
+  const selected=reloaded.chooseWhiteholeEscortAction(WHITEHOLE_ESCORT_WORK_ID,{courierLifeId:courier,action:'LONG_DUEL'});assert.equal(selected.escort.tradingDirection,'LONG');assert.equal(selected.escort.tradingOwner,'kgen-margin-runtime.mjs');assert.equal(selected.escort.cargoPrincipalAsTradingMargin,false);assert.equal(selected.escort.realOrderCreated,false);assert.deepEqual(ledger,ledgerBefore,'choosing a duel never touches the existing KGEN margin ledger');
+  let moved;for(let i=1;i<=5;i++)moved=reloaded.advanceWhiteholeEscort(WHITEHOLE_ESCORT_WORK_ID,{courierLifeId:courier,deltaMs:1000,wallNow:2_000+i*1_000});
+  assert.equal(moved.arrived,true);assert.equal(moved.mission.status,'ARRIVED_AWAITING_RECEIPT');assert.equal(moved.mission.escort.position.x,18);assert.equal(moved.mission.cargo.amount,50_000);
+  assert.throws(()=>reloaded.acceptWhiteholeEscortDestination(WHITEHOLE_ESCORT_WORK_ID,{courierLifeId:courier,destinationRawK:'18921',playerPosition:{x:18,y:1,z:0},wallNow:8_000}),/WRONG_WHITEHOLE_DESTINATION/);
+  assert.throws(()=>reloaded.acceptWhiteholeEscortDestination(WHITEHOLE_ESCORT_WORK_ID,{courierLifeId:courier,destinationRawK:'0.00018921',playerPosition:{x:0,y:1,z:0},wallNow:8_000}),/DESTINATION_POSITION_MISMATCH/);
+  const accepted=reloaded.acceptWhiteholeEscortDestination(WHITEHOLE_ESCORT_WORK_ID,{courierLifeId:courier,destinationRawK:'0.00018921',playerPosition:{x:18,y:1,z:0},wallNow:8_000});
+  assert.equal(accepted.ok,true);assert.match(accepted.receiptId,/^WHITEHOLE-RECEIPT-[0-9a-f]{8}$/);assert.equal(accepted.mission.settlement.cargoPrincipal.amount,50_000);assert.equal(accepted.mission.settlement.cargoPrincipal.usedForTradingLoss,false);assert.deepEqual(accepted.mission.settlement.freightRevenueReceivable,{asset:'KGEN',amount:10,status:'REVIEW_GATED_SIMULATED_RECEIVABLE',paid:false,cashReceived:false,recognizedAsCash:false});assert.equal(accepted.mission.settlement.chainTransfer,false);assert.equal(accepted.mission.settlement.mainnetWrite,false);
+  const receiptReplay=reloaded.acceptWhiteholeEscortDestination(WHITEHOLE_ESCORT_WORK_ID,{courierLifeId:courier,destinationRawK:'0.00018921',playerPosition:{x:18,y:1,z:0},wallNow:8_001});assert.equal(receiptReplay.replayed,true);assert.equal(receiptReplay.receiptId,accepted.receiptId);assert.equal(reloaded.snapshot().missions[WHITEHOLE_ESCORT_WORK_ID].settlement.receiptId,accepted.receiptId);assert.deepEqual(ledger,ledgerBefore);
+});
+
+test('white-hole escort expires and fails closed without earning the KGEN fee',()=>{
+  const courier='KAIOS-P-WHITEHOLE-EXPIRED-1234567890',offer=createWhiteholeEscortDemoOffer({createdAt:1_000,offerLifetimeMs:60_000});
+  assert.throws(()=>reviewWhiteholeEscortDemoOffer(offer,{reviewedAt:61_001}),/WHITEHOLE_OFFER_EXPIRED/);
+  const reviewed=reviewWhiteholeEscortDemoOffer(offer,{reviewedAt:2_000}),store=createPlayerCourierStore({storage:courierStorage(),now:()=>3_000,monotonicNow:()=>1,sessionId:'WHITEHOLE-EXPIRY'}),started=store.startWhiteholeEscort(reviewed,{courierLifeId:courier,wallNow:3_000});
+  store.chooseWhiteholeEscortAction(WHITEHOLE_ESCORT_WORK_ID,{courierLifeId:courier,action:'ESCORT'});const expired=store.advanceWhiteholeEscort(WHITEHOLE_ESCORT_WORK_ID,{courierLifeId:courier,deltaMs:1000,wallNow:started.mission.dueAt+1});
+  assert.equal(expired.ok,false);assert.equal(expired.reason,'MISSION_EXPIRED');assert.equal(expired.mission.status,'FAILED');assert.equal(expired.mission.settlement.freightRevenueReceivable.status,'NOT_EARNED');assert.equal(expired.mission.settlement.cargoPrincipal.usedForTradingLoss,false);assert.equal(expired.mission.settlement.chainTransfer,false);
 });
 
 test('Cargo Risk Desk quotes exact integer KAIOS and never uses cargo principal as insurance reserve',()=>{

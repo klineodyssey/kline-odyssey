@@ -173,6 +173,9 @@ test('Player Courier exposes explicit local-only Bandit mode, raid action and on
   for(const token of ['recordCourierInsurancePayout','courierInsuranceReceipts','COURIER_INSURANCE_RECEIPT_CONFLICT'])assert.ok(walletRuntime.includes(token),`missing replay-protected local insurance ledger: ${token}`);
   assert.ok(mobileShell.includes("kind:'TREASURE',treasureClass:'CARGO_CRATE'"),'loot crate must use the existing backpack item model');
   assert.ok(mobileShell.includes('#courierInsuranceClaim{display:block;width:100%;min-height:44px'),'insurance claim must be a mobile-sized touch target');
+  for(const token of ['whiteholeEscortButton','KAIOS-CARGO-WHITEHOLE-ESCORT-001','50,000 KAIOS','10 KGEN','SIMULATION_ONLY','formal worker ACK = false','kgen-margin-runtime.mjs'])assert.ok(mobileShell.includes(token),`missing white-hole escort disclosure or entry: ${token}`);
+  for(const token of ['createWhiteholeEscortDemoOffer','reviewWhiteholeEscortDemoOffer','startWhiteholeEscort','advanceWhiteholeEscort','acceptWhiteholeEscortDestination','REVIEW_GATED_SIMULATED_RECEIVABLE','SUPPLY_MASS_RULE_NOT_MARKET_PRICE'])assert.ok(logistics.includes(token),`missing white-hole escort runtime gate: ${token}`);
+  assert.equal(mobileShell.includes('spendLocalKaios?.(10'),false,'10 KGEN receivable must never become an automatic local KAIOS payment');
   assert.equal(mobileShell.includes("['LOOT_CRATE','CLAIMED_BY_BANDIT']"),false,'claimed loot must not remain advertised as an eligible target');
 });
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','attackKSpace'])assert.ok(main.includes(token),token);assert.equal(main.includes('S.kaios+=r.rewardKaios'),false)});
@@ -283,8 +286,8 @@ test('Settings context preserves organ states and restores only its temporary in
   const {runInNewContext}=await import('node:vm');
   const ui=read('../runtime/mobile-ui-settings.mjs');
   const element=(id,inert=false)=>({id,inert,attributes:{},classList:{values:new Set(),contains(v){return this.values.has(v)},toggle(v,on){if(on)this.values.add(v);else this.values.delete(v)}},hasAttribute(name){return name==='inert'&&this.inert},setAttribute(name,value){this.attributes[name]=value},focus(){focused=this.id}});
-  let focused=null;const root=element('root'),panel=element('k11520UiSettings'),launcher=element('gameModeToggle'),close=element('k11520UiSettingsClose'),courier=element('homeDeliveryButton'),rail=element('yControl'),preexisting=element('bgmButton',true);
-  courier.dataset={contextState:'active'};const nodes=[launcher,courier,rail,preexisting],byId=Object.fromEntries([panel,launcher,close,...nodes].map(el=>['#'+el.id,el]));
+  let focused=null;const root=element('root'),panel=element('k11520UiSettings'),launcher=element('gameModeToggle'),close=element('k11520UiSettingsClose'),courier=element('homeDeliveryButton'),whitehole=element('whiteholeEscortButton'),rail=element('yControl'),preexisting=element('bgmButton',true);
+  courier.dataset={contextState:'active'};const nodes=[launcher,courier,whitehole,rail,preexisting],byId=Object.fromEntries([panel,launcher,close,...nodes].map(el=>['#'+el.id,el]));
   const context={document:{documentElement:root,querySelector:s=>byId[s]||null,querySelectorAll:()=>nodes,dispatchEvent(){}},CustomEvent:class{constructor(type,{detail}){this.type=type;this.detail=detail}}};
   runInNewContext("const $=s=>document.querySelector(s);"+ui.slice(ui.indexOf('const SETTINGS_BACKGROUND='),ui.indexOf('// Visibility stays'))+'globalThis.openSettings=setSettingsOpen;globalThis.syncSettings=syncSettingsContext;',context);
   context.openSettings(true);assert.equal(focused,'k11520UiSettingsClose');assert.ok(nodes.every(el=>el.inert));assert.equal(root.classList.contains('k11520SettingsOpen'),true);

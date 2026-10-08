@@ -1,10 +1,10 @@
 /*
 KGEN_META
-VERSION: 1.6.0
-REVISION: 2026-10-03.DIGITAL-ANT-PLAYER-COURIER
+VERSION: 1.7.0
+REVISION: 2026-10-08.WHITEHOLE-CARGO-ESCORT-DEMO
 STATUS: ACTIVE / SIMULATION-FIRST
 SOURCE_OF_TRUTH: LOGISTICS_UNIVERSE_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md
-CHANGE_REASON: Extend the existing Digital Ant logistics runtime with persistent background Player Courier missions, explicit bandit raids, canonical cargo ownership and one-shot local-game settlement while preserving ATM-UFO delivery and keeping cargo principal out of revenue.
+CHANGE_REASON: Add the Human-requested persistent simulation-only white-hole cargo escort demo to the existing Player Courier owner with explicit KAIOS principal, KGEN fee receivable, local route metadata, movement and one-shot destination receipt.
 */
 
 import {universeLevel,routeFromAnchor,logisticsDecision,LOGISTICS_ANCHOR} from './logistics-universe-runtime.mjs';
@@ -33,6 +33,14 @@ export const PLAYER_COURIER_ACTIVE_STATES=Object.freeze(['ACTIVE','CLOCK_REVIEW'
 export const PLAYER_COURIER_MIN_DURATION_MS=60_000;
 export const PLAYER_COURIER_MAX_DURATION_MS=7_200_000;
 export const PLAYER_COURIER_RAID_COOLDOWN_MS=30_000;
+export const WHITEHOLE_ESCORT_WORK_ID='KAIOS-CARGO-WHITEHOLE-ESCORT-001';
+export const WHITEHOLE_ESCORT_ACTIONS=Object.freeze(['ESCORT','LONG_DUEL','SHORT_DUEL']);
+export const WHITEHOLE_ESCORT_DEMO=Object.freeze({
+  workId:WHITEHOLE_ESCORT_WORK_ID,mode:'SIMULATION_ONLY',cargo:Object.freeze({asset:'KAIOS',amount:50_000}),fee:Object.freeze({asset:'KGEN',amount:10}),
+  origin:Object.freeze({name:'CAISHEN_TEMPLE_LOCAL_SIMULATION_LABEL',rawK:'0.00012345',band:'B4',alpha:1.2345,registeredInCurrentUniverseMap:false,localPosition:Object.freeze({x:-18,y:1,z:0})}),
+  destination:Object.freeze({name:'ZHANYAOTAI_LOCAL_SIMULATION_LABEL',rawK:'0.00018921',band:'B4',alpha:1.8921,registeredInCurrentUniverseMap:false,localPosition:Object.freeze({x:18,y:1,z:0})}),
+  routeAuthority:'LOCAL_SIMULATION_ROUTE_NOT_CANONICAL_LAND',linearKAxisModel:Object.freeze({deltaK:'0.00006576',distanceMeters:1.496810990052,sameAxisAssumption:true,otherAxesEqualAssumption:true,classification:'LINEAR_K_AXIS_MODEL_DISTANCE_NOT_CADASTRAL_ROUTE_ARC_OR_FULL_FLIGHT'}),whiteholeRule:Object.freeze({inputAsset:'KGEN',inputAmount:1,outputAsset:'KAIOS',outputAmount:1000,classification:'SUPPLY_MASS_RULE_NOT_MARKET_PRICE',usedForFreightConversion:false}),
+});
 export const KAIOS_MASS_KG=1;
 // Gameplay hull normalization. It converts simulated joules into the UFO's
 // bounded 0..100 operational-energy meter; it is not a real materials claim.
@@ -593,18 +601,20 @@ export function estimatePlayerCourierDuration({
 export function createPlayerCourierOffer({
   missionId=`COURIER-${Date.now()}`,requesterLifeId,cargoId,cargoKind='CASH',cargoAmount=0,cargoUnit='KAIOS',
   origin={},destination={},distanceMeters=null,risk=0,freightFeeKaios=0,courierSalaryKaios=0,
+  freightFeeAsset='KAIOS',freightFeeAmount=null,freightRevenueReviewStatus=null,
   estimatedDurationMs=null,insuranceQuote=null,createdAt=Date.now()
 }={}){
   const id=courierId(missionId,'MISSION_ID'),requester=courierId(requesterLifeId,'REQUESTER_LIFE_ID');
-  const kind=String(cargoKind||'').toUpperCase(),unit=String(cargoUnit||'').toUpperCase();
+  const kind=String(cargoKind||'').toUpperCase(),unit=String(cargoUnit||'').toUpperCase(),feeAsset=String(freightFeeAsset||'').toUpperCase();
   if(!['CASH','GOODS','KUFO','KSHIP'].includes(kind))throw new Error('INVALID_CARGO_KIND');
   if(!['KAIOS','KGEN','KUFO','KSHIP','GOODS'].includes(unit))throw new Error('INVALID_CARGO_UNIT');
+  if(!['KAIOS','KGEN'].includes(feeAsset))throw new Error('INVALID_FREIGHT_FEE_ASSET');
   const amount=whole(cargoAmount,'CARGO_AMOUNT');if(amount<1)throw new Error('CARGO_AMOUNT_REQUIRED');
-  const fee=whole(freightFeeKaios,'FREIGHT_FEE'),salary=whole(courierSalaryKaios,'COURIER_SALARY');if(salary>fee)throw new Error('SALARY_EXCEEDS_FREIGHT_FEE');
+  const fee=whole(freightFeeAmount??freightFeeKaios,'FREIGHT_FEE'),salary=whole(courierSalaryKaios,'COURIER_SALARY');if(feeAsset!=='KAIOS'&&salary>0)throw new Error('CROSS_ASSET_SALARY_NOT_SUPPORTED');if(salary>fee)throw new Error('SALARY_EXCEEDS_FREIGHT_FEE');
   const distance=distanceMeters==null?distance3d(origin,destination):Math.max(0,n(distanceMeters));
   const duration=estimatedDurationMs==null?estimatePlayerCourierDuration({distanceMeters:distance,cargoAmount:amount,risk,missionType:kind}):courierClock(estimatedDurationMs,'ESTIMATED_DURATION');
   if(duration<PLAYER_COURIER_MIN_DURATION_MS||duration>PLAYER_COURIER_MAX_DURATION_MS)throw new Error('INVALID_ESTIMATED_DURATION');
-  const freightShare=Math.max(0,Math.floor((fee-salary)*.25)),operatingCost=Math.max(0,Number(((fee-salary-freightShare)*.25).toFixed(3)));
+  const freightShare=feeAsset==='KAIOS'?Math.max(0,Math.floor((fee-salary)*.25)):0,operatingCost=feeAsset==='KAIOS'?Math.max(0,Number(((fee-salary-freightShare)*.25).toFixed(3))):0;
   const insurance=insuranceQuote?{
     status:'QUOTE_ONLY',
     policyId:`COURIER-POLICY-${raidHash(`${id}:${cargoId||id}`).toString(16).padStart(8,'0')}`,
@@ -615,7 +625,7 @@ export function createPlayerCourierOffer({
     schema:PLAYER_COURIER_SCHEMA,missionId:id,requesterLifeId:requester,mode:'PLAYER_COURIER',status:'OFFERED',createdAt:courierClock(createdAt,'CREATED_AT'),
     estimatedDurationMs:duration,origin:{x:n(origin.x),y:n(origin.y),z:n(origin.z)},destination:{x:n(destination.x),y:n(destination.y),z:n(destination.z)},distanceMeters:distance,risk:clamp(risk,0,1),
     cargo:{cargoId:courierId(cargoId||`CARGO-${raidHash(id).toString(16).padStart(8,'0')}`,'CARGO_ID'),kind,amount,unit,durability:100,ownerState:'LOGISTICS_INVENTORY',ownerLifeId:null,dropId:null,lootClaimedAt:null},
-    economics:{currency:'KAIOS',cargoPrincipal:amount,cargoPrincipalRecognizedAsRevenue:false,freightRevenue:fee,courierSalary:salary,courierFreightShare:freightShare,courierPayout:salary+freightShare,operatingCost,companyNet:Number((fee-salary-freightShare-operatingCost).toFixed(3)),chainTransfer:false},
+    economics:{currency:feeAsset,cargoPrincipalAsset:unit,cargoPrincipal:amount,cargoPrincipalRecognizedAsRevenue:false,cargoPrincipalEligibleAsTradingMargin:false,freightRevenueAsset:feeAsset,freightRevenue:fee,freightRevenueReceivable:{asset:feeAsset,amount:fee,status:freightRevenueReviewStatus||'SIMULATION_UNSETTLED',paid:false,cashReceived:false},courierSalary:salary,courierFreightShare:freightShare,courierPayout:salary+freightShare,operatingCost,companyNet:feeAsset==='KAIOS'?Number((fee-salary-freightShare-operatingCost).toFixed(3)):null,chainTransfer:false,whiteholeMarketConversionUsed:false},
     insurance,startedAt:null,dueAt:null,lastWallAt:null,lastMonotonicAt:null,clockSessionId:null,clockState:'NOT_STARTED',settlement:null,
     bandit:{modeRequired:'BANDIT_MODE',actionRequired:'CARGO_RAID_ACTION',attackWindowStartsAt:null,lastRaidAt:0,cooldownMs:PLAYER_COURIER_RAID_COOLDOWN_MS,attempts:[],lootReceiptId:null},
     backgroundMission:true,blocksMovement:false,blocksCombat:false,blocksExploration:false,blocksHome:false,
@@ -623,14 +633,43 @@ export function createPlayerCourierOffer({
   };
 }
 
+export function createWhiteholeEscortDemoOffer({createdAt=Date.now(),offerLifetimeMs=1_800_000}={}){
+  const at=courierClock(createdAt,'CREATED_AT'),lifetime=courierClock(offerLifetimeMs,'OFFER_LIFETIME');
+  if(lifetime<60_000||lifetime>7_200_000)throw new Error('INVALID_OFFER_LIFETIME');
+  const offer=createPlayerCourierOffer({
+    missionId:WHITEHOLE_ESCORT_WORK_ID,requesterLifeId:'SIMULATION-CUSTOMER-KAIOS-CARGO-WHITEHOLE',cargoId:'CARGO-KAIOS-50000-WHITEHOLE-ESCORT',cargoKind:'CASH',cargoAmount:WHITEHOLE_ESCORT_DEMO.cargo.amount,cargoUnit:WHITEHOLE_ESCORT_DEMO.cargo.asset,
+    origin:WHITEHOLE_ESCORT_DEMO.origin.localPosition,destination:WHITEHOLE_ESCORT_DEMO.destination.localPosition,distanceMeters:WHITEHOLE_ESCORT_DEMO.linearKAxisModel.distanceMeters,risk:.2,freightFeeAsset:WHITEHOLE_ESCORT_DEMO.fee.asset,freightFeeAmount:WHITEHOLE_ESCORT_DEMO.fee.amount,freightRevenueReviewStatus:'REVIEW_GATED_SIMULATED_RECEIVABLE',courierSalaryKaios:0,estimatedDurationMs:600_000,createdAt:at
+  });
+  return {...offer,workId:WHITEHOLE_ESCORT_WORK_ID,mode:'WHITEHOLE_ESCORT_DEMO',offerExpiresAt:at+lifetime,
+    routeAddress:{origin:courierClone(WHITEHOLE_ESCORT_DEMO.origin),destination:courierClone(WHITEHOLE_ESCORT_DEMO.destination),authority:WHITEHOLE_ESCORT_DEMO.routeAuthority,linearKAxisModel:courierClone(WHITEHOLE_ESCORT_DEMO.linearKAxisModel),canonicalLandRouteClaimed:false,localAnimationCoordinatesAreModelDistance:false},
+    whiteholeRule:courierClone(WHITEHOLE_ESCORT_DEMO.whiteholeRule),
+    customerJob:{status:'SIMULATION_CUSTOMER_REQUEST',customerRole:'SIMULATION_ONLY_ROLE',formalCustomerIdentity:false},
+    quoteReview:{status:'SIMULATION_REVIEW_PENDING',reviewerRole:'SIMULATION_ONLY_ROLE',formalWorkerAck:false,reviewedAt:null},
+    escort:{action:'UNSELECTED',progress:0,position:courierClone(WHITEHOLE_ESCORT_DEMO.origin.localPosition),speedLocalUnitsPerSecond:7.2,speedUnit:'LOCAL_ANIMATION_UNITS_PER_SECOND',physicalCSpeedClaim:null,arrivedAt:null,
+      battleOwner:'DIGITAL_ANT_ENCOUNTER_RUNTIME',tradingOwner:'kgen-margin-runtime.mjs',tradingMarginSource:'SEPARATE_KGEN_MARGIN_ONLY',cargoPrincipalAsTradingMargin:false,realOrderCreated:false}
+  };
+}
+
+export function reviewWhiteholeEscortDemoOffer(offer,{reviewedAt=Date.now()}={}){
+  validateCourierMission(offer);
+  if(offer.workId!==WHITEHOLE_ESCORT_WORK_ID||offer.mode!=='WHITEHOLE_ESCORT_DEMO'||offer.status!=='OFFERED')throw new Error('WHITEHOLE_ESCORT_OFFER_REQUIRED');
+  const at=courierClock(reviewedAt,'REVIEWED_AT');if(at>offer.offerExpiresAt)throw new Error('WHITEHOLE_OFFER_EXPIRED');
+  const reviewed=courierClone(offer);reviewed.quoteReview={status:'SIMULATION_PLAYER_REVIEWED',reviewerRole:'SIMULATION_ONLY_ROLE',formalWorkerAck:false,reviewedAt:at};return reviewed;
+}
+
 function validateCourierMission(mission){
   if(!mission||mission.schema!==PLAYER_COURIER_SCHEMA)throw new Error('INVALID_COURIER_MISSION');
   courierId(mission.missionId,'MISSION_ID');courierId(mission.requesterLifeId,'REQUESTER_LIFE_ID');courierId(mission.cargo?.cargoId,'CARGO_ID');
-  if(!['OFFERED','ACTIVE','CLOCK_REVIEW',...PLAYER_COURIER_TERMINAL_STATES].includes(mission.status))throw new Error('INVALID_COURIER_STATUS');
+  if(!['OFFERED','ACTIVE','ARRIVED_AWAITING_RECEIPT','CLOCK_REVIEW',...PLAYER_COURIER_TERMINAL_STATES].includes(mission.status))throw new Error('INVALID_COURIER_STATUS');
   if(!Number.isSafeInteger(mission.cargo?.amount)||mission.cargo.amount<1||!Number.isFinite(mission.cargo?.durability)||mission.cargo.durability<0||mission.cargo.durability>100)throw new Error('INVALID_COURIER_CARGO');
   if(courierTerminal(mission.status)!==Boolean(mission.settlement))throw new Error('INVALID_COURIER_SETTLEMENT');
   if(mission.status==='ROBBED'&&!['LOOT_CRATE','CLAIMED_BY_BANDIT'].includes(mission.cargo.ownerState))throw new Error('INVALID_ROBBED_OWNERSHIP');
   if(mission.status==='DELIVERED'&&mission.cargo.ownerState!=='DELIVERED_TO_DESTINATION')throw new Error('INVALID_DELIVERED_OWNERSHIP');
+  if(mission.mode==='WHITEHOLE_ESCORT_DEMO'){
+    if(mission.workId!==WHITEHOLE_ESCORT_WORK_ID||mission.cargo.unit!=='KAIOS'||mission.cargo.amount!==50_000||mission.economics?.freightRevenueAsset!=='KGEN'||mission.economics?.freightRevenue!==10)throw new Error('INVALID_WHITEHOLE_ESCORT_ACCOUNTING');
+    if(mission.routeAddress?.origin?.rawK!=='0.00012345'||mission.routeAddress?.destination?.rawK!=='0.00018921'||mission.routeAddress?.authority!==WHITEHOLE_ESCORT_DEMO.routeAuthority||mission.routeAddress?.linearKAxisModel?.distanceMeters!==WHITEHOLE_ESCORT_DEMO.linearKAxisModel.distanceMeters||mission.distanceMeters!==WHITEHOLE_ESCORT_DEMO.linearKAxisModel.distanceMeters)throw new Error('INVALID_WHITEHOLE_ESCORT_ROUTE');
+    if(mission.escort?.cargoPrincipalAsTradingMargin!==false||mission.economics.cargoPrincipalEligibleAsTradingMargin!==false)throw new Error('CARGO_PRINCIPAL_MARGIN_BOUNDARY_REQUIRED');
+  }
   return mission;
 }
 
@@ -655,6 +694,32 @@ export function createPlayerCourierStore({storage,now=Date.now,monotonicNow=()=>
     validateCourierMission(offer);if(offer.status!=='OFFERED')throw new Error('COURIER_OFFER_REQUIRED');const courier=courierId(courierLifeId,'COURIER_LIFE_ID'),at=courierClock(wallNow,'CLOCK'),mono=Math.max(0,n(monoNow));
     return mutate(envelope=>{const activeId=envelope.activeByCourier[courier],active=activeId&&envelope.missions[activeId];if(active&&!courierTerminal(active.status))throw new Error('COURIER_ALREADY_ACTIVE');if(envelope.missions[offer.missionId])throw new Error('MISSION_REPLAY_BLOCKED');const mission=courierClone(offer);mission.status='ACTIVE';mission.courierLifeId=courier;mission.startedAt=at;mission.dueAt=at+mission.estimatedDurationMs;mission.lastWallAt=at;mission.lastMonotonicAt=mono;mission.clockSessionId=String(sessionId);mission.clockState='OK';mission.cargo.ownerState='OWNED_BY_COURIER';mission.cargo.ownerLifeId=courier;mission.bandit.attackWindowStartsAt=at+Math.floor(mission.estimatedDurationMs*.2);envelope.missions[mission.missionId]=mission;envelope.activeByCourier[courier]=mission.missionId;return mission})
   }
+  function startWhiteholeEscort(offer,{courierLifeId,wallNow=now(),monoNow=monotonicNow()}={}){
+    validateCourierMission(offer);const courier=courierId(courierLifeId,'COURIER_LIFE_ID'),at=courierClock(wallNow,'CLOCK');
+    if(offer.workId!==WHITEHOLE_ESCORT_WORK_ID||offer.mode!=='WHITEHOLE_ESCORT_DEMO')throw new Error('WHITEHOLE_ESCORT_OFFER_REQUIRED');
+    if(offer.quoteReview?.status!=='SIMULATION_PLAYER_REVIEWED'||offer.quoteReview?.formalWorkerAck!==false)throw new Error('SIMULATION_QUOTE_REVIEW_REQUIRED');
+    if(at>offer.offerExpiresAt)throw new Error('WHITEHOLE_OFFER_EXPIRED');
+    const existing=state.missions[WHITEHOLE_ESCORT_WORK_ID];
+    if(existing){if(existing.mode!=='WHITEHOLE_ESCORT_DEMO'||existing.courierLifeId!==courier)throw new Error('MISSION_REPLAY_CONFLICT');return {ok:true,replayed:true,mission:courierClone(existing)}}
+    const mission=accept(offer,{courierLifeId:courier,wallNow:at,monoNow});return {ok:true,replayed:false,mission};
+  }
+  function chooseWhiteholeEscortAction(missionId,{courierLifeId,action}={}){
+    return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.mode!=='WHITEHOLE_ESCORT_DEMO'||mission.status!=='ACTIVE')throw new Error('ACTIVE_WHITEHOLE_ESCORT_REQUIRED');if(mission.courierLifeId!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');const selected=String(action||'').toUpperCase();if(!WHITEHOLE_ESCORT_ACTIONS.includes(selected))throw new Error('INVALID_WHITEHOLE_ESCORT_ACTION');mission.escort.action=selected;mission.escort.combatMode=selected==='ESCORT'?'TRAVEL_TOGETHER':'MOVEMENT_LONG_SHORT_DUEL_WAIT_SETTLEMENT';mission.escort.tradingDirection=selected==='LONG_DUEL'?'LONG':selected==='SHORT_DUEL'?'SHORT':null;mission.escort.realOrderCreated=false;mission.escort.cargoPrincipalAsTradingMargin=false;return mission})
+  }
+  function failExpiredWhiteholeMission(envelope,mission,at){
+    const receiptId=`WHITEHOLE-FAILED-${raidHash(`${mission.missionId}:${mission.startedAt}:EXPIRED`).toString(16).padStart(8,'0')}`;
+    mission.status='FAILED';mission.clockState='MISSION_EXPIRED';mission.settlement={outcome:'FAILED',reason:'MISSION_EXPIRED',receiptId,settledAt:at,cargoPrincipal:{asset:'KAIOS',amount:50_000,usedForTradingLoss:false},freightRevenueReceivable:{asset:'KGEN',amount:10,status:'NOT_EARNED'},chainTransfer:false,mainnetWrite:false};
+    if(!envelope.settledReceipts.includes(receiptId))envelope.settledReceipts.push(receiptId);delete envelope.activeByCourier[mission.courierLifeId];return {ok:false,reason:'MISSION_EXPIRED',mission};
+  }
+  function advanceWhiteholeEscort(missionId,{courierLifeId,deltaMs=1000,wallNow=now()}={}){
+    const current=missionIn(state,missionId);if(current.status==='ARRIVED_AWAITING_RECEIPT')return {ok:true,arrived:true,replayed:true,mission:courierClone(current)};
+    return mutate(envelope=>{const mission=missionIn(envelope,missionId),at=courierClock(wallNow,'CLOCK');if(mission.mode!=='WHITEHOLE_ESCORT_DEMO'||mission.status!=='ACTIVE')throw new Error('ACTIVE_WHITEHOLE_ESCORT_REQUIRED');if(mission.courierLifeId!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');if(mission.escort.action==='UNSELECTED')throw new Error('WHITEHOLE_ESCORT_ACTION_REQUIRED');if(at>mission.dueAt)return failExpiredWhiteholeMission(envelope,mission,at);if(at+1000<mission.lastWallAt){mission.status='CLOCK_REVIEW';mission.clockState='CLOCK_ROLLBACK_DETECTED';return {ok:false,reason:mission.clockState,mission}}const delta=courierClock(deltaMs,'DELTA_MS');if(delta<1||delta>1000)throw new Error('INVALID_ESCORT_DELTA');mission.lastWallAt=Math.max(mission.lastWallAt,at);
+      const origin=mission.origin,destination=mission.destination,total=distance3d(origin,destination);if(total<=0)throw new Error('INVALID_WHITEHOLE_LOCAL_ROUTE');const step=mission.escort.speedLocalUnitsPerSecond*delta/1000,next=clamp(mission.escort.progress+step/total,0,1);mission.escort.progress=next;mission.escort.position={x:origin.x+(destination.x-origin.x)*next,y:origin.y+(destination.y-origin.y)*next,z:origin.z+(destination.z-origin.z)*next};if(next>=1){mission.status='ARRIVED_AWAITING_RECEIPT';mission.escort.arrivedAt=at}return {ok:true,arrived:next>=1,mission}})
+  }
+  function acceptWhiteholeEscortDestination(missionId,{courierLifeId,destinationRawK,playerPosition={},wallNow=now()}={}){
+    const existing=missionIn(state,missionId);if(existing.mode==='WHITEHOLE_ESCORT_DEMO'&&existing.status==='DELIVERED')return {ok:true,replayed:true,mission:courierClone(existing),receiptId:existing.settlement.receiptId};
+    return mutate(envelope=>{const mission=missionIn(envelope,missionId),at=courierClock(wallNow,'CLOCK');if(mission.mode!=='WHITEHOLE_ESCORT_DEMO'||mission.status!=='ARRIVED_AWAITING_RECEIPT')throw new Error('WHITEHOLE_DESTINATION_ACCEPTANCE_REQUIRED');if(mission.courierLifeId!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');if(at>mission.dueAt)return failExpiredWhiteholeMission(envelope,mission,at);if(String(destinationRawK)!==mission.routeAddress.destination.rawK)throw new Error('WRONG_WHITEHOLE_DESTINATION');const position={x:Number(playerPosition.x),y:Number(playerPosition.y),z:Number(playerPosition.z)};if(Object.values(position).some(value=>!Number.isFinite(value)))throw new Error('DESTINATION_POSITION_REQUIRED');const localDistance=distance3d(position,mission.destination);if(localDistance>HOME_DELIVERY_ACCEPTANCE_RANGE_METERS)throw new Error('DESTINATION_POSITION_MISMATCH');if(mission.quoteReview?.status!=='SIMULATION_PLAYER_REVIEWED'||mission.quoteReview?.formalWorkerAck!==false)throw new Error('SIMULATION_QUOTE_REVIEW_REQUIRED');const receiptId=`WHITEHOLE-RECEIPT-${raidHash(`${mission.missionId}:${mission.courierLifeId}:${mission.startedAt}`).toString(16).padStart(8,'0')}`;if(envelope.settledReceipts.includes(receiptId))throw new Error('SETTLEMENT_REPLAY_BLOCKED');mission.status='DELIVERED';mission.cargo.ownerState='DELIVERED_TO_DESTINATION';mission.cargo.ownerLifeId=null;mission.economics.freightRevenueReceivable={asset:'KGEN',amount:10,status:'REVIEW_GATED_SIMULATED_RECEIVABLE',paid:false,cashReceived:false,recognizedAsCash:false};mission.settlement={outcome:'DELIVERED',receiptId,settledAt:at,courierLifeId:mission.courierLifeId,destinationRawK:mission.routeAddress.destination.rawK,localDistance,cargoPrincipal:{asset:'KAIOS',amount:50_000,recognizedAsRevenue:false,usedForTradingLoss:false},freightRevenueReceivable:courierClone(mission.economics.freightRevenueReceivable),quoteReview:courierClone(mission.quoteReview),whiteholeMarketConversionUsed:false,scope:'LOCAL_SIMULATION_ONLY',chainTransfer:false,mainnetWrite:false};envelope.settledReceipts.push(receiptId);delete envelope.activeByCourier[mission.courierLifeId];return {ok:true,replayed:false,mission,receiptId}})
+  }
   function observeClock(mission,{wallNow=now(),monoNow=monotonicNow()}={}){
     const wall=courierClock(wallNow,'CLOCK'),mono=Math.max(0,n(monoNow));let reason=null;
     if(wall+1000<mission.lastWallAt)reason='CLOCK_ROLLBACK_DETECTED';
@@ -668,7 +733,7 @@ export function createPlayerCourierStore({storage,now=Date.now,monotonicNow=()=>
   }
   function observe(missionId,options={}){return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(courierTerminal(mission.status))return mission;observeClock(mission,options);return mission})}
   function settleDue(missionId,{courierLifeId,wallNow=now(),monoNow=monotonicNow()}={}){
-    return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(courierTerminal(mission.status))throw new Error('MISSION_ALREADY_SETTLED');if(String(mission.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');const clock=observeClock(mission,{wallNow,monoNow});if(!clock.ok)return {ok:false,reason:clock.reason,mission};if(clock.wall<mission.dueAt)return {ok:false,reason:'DELIVERY_TIMER_ACTIVE',remainingMs:mission.dueAt-clock.wall,mission};if(mission.status!=='ACTIVE'||mission.cargo.ownerState!=='OWNED_BY_COURIER'||mission.cargo.ownerLifeId!==mission.courierLifeId)throw new Error('CARGO_SURVIVAL_CHECK_FAILED');const receiptId=`COURIER-RECEIPT-${raidHash(`${mission.missionId}:${mission.courierLifeId}:${mission.dueAt}`).toString(16).padStart(8,'0')}`;if(envelope.settledReceipts.includes(receiptId))throw new Error('SETTLEMENT_REPLAY_BLOCKED');mission.status='DELIVERED';mission.cargo.ownerState='DELIVERED_TO_DESTINATION';mission.cargo.ownerLifeId=null;mission.settlement={outcome:'DELIVERED',receiptId,settledAt:clock.wall,courierLifeId:mission.courierLifeId,rewardKaios:mission.economics.courierPayout,salaryKaios:mission.economics.courierSalary,freightShareKaios:mission.economics.courierFreightShare,insurancePayoutKaios:0,scope:'LOCAL_SIMULATION_ONLY',chainTransfer:false};envelope.settledReceipts.push(receiptId);delete envelope.activeByCourier[mission.courierLifeId];return {ok:true,mission}})
+    return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.mode==='WHITEHOLE_ESCORT_DEMO')throw new Error('WHITEHOLE_DESTINATION_ACCEPTANCE_REQUIRED');if(courierTerminal(mission.status))throw new Error('MISSION_ALREADY_SETTLED');if(String(mission.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');const clock=observeClock(mission,{wallNow,monoNow});if(!clock.ok)return {ok:false,reason:clock.reason,mission};if(clock.wall<mission.dueAt)return {ok:false,reason:'DELIVERY_TIMER_ACTIVE',remainingMs:mission.dueAt-clock.wall,mission};if(mission.status!=='ACTIVE'||mission.cargo.ownerState!=='OWNED_BY_COURIER'||mission.cargo.ownerLifeId!==mission.courierLifeId)throw new Error('CARGO_SURVIVAL_CHECK_FAILED');const receiptId=`COURIER-RECEIPT-${raidHash(`${mission.missionId}:${mission.courierLifeId}:${mission.dueAt}`).toString(16).padStart(8,'0')}`;if(envelope.settledReceipts.includes(receiptId))throw new Error('SETTLEMENT_REPLAY_BLOCKED');mission.status='DELIVERED';mission.cargo.ownerState='DELIVERED_TO_DESTINATION';mission.cargo.ownerLifeId=null;mission.settlement={outcome:'DELIVERED',receiptId,settledAt:clock.wall,courierLifeId:mission.courierLifeId,rewardKaios:mission.economics.courierPayout,salaryKaios:mission.economics.courierSalary,freightShareKaios:mission.economics.courierFreightShare,insurancePayoutKaios:0,scope:'LOCAL_SIMULATION_ONLY',chainTransfer:false};envelope.settledReceipts.push(receiptId);delete envelope.activeByCourier[mission.courierLifeId];return {ok:true,mission}})
   }
   function applyCombatDamage(missionId,{courierLifeId,damage=0,source='MONSTER',eligibleCargoRaid=false,wallNow=now()}={}){
     return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.status!=='ACTIVE')throw new Error('ACTIVE_COURIER_MISSION_REQUIRED');if(String(mission.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');const amount=Math.min(100,whole(damage,'CARGO_DAMAGE')),special=Boolean(eligibleCargoRaid)&&['BOSS_SPECIAL_RAID','BANDIT_CARGO_RAID'].includes(String(source));mission.cargo.durability=Math.max(special?0:1,mission.cargo.durability-amount);mission.risk=clamp(mission.risk+amount/500,0,1);if(mission.cargo.durability<=0){mission.status='FAILED';mission.cargo.ownerState='DESTROYED';mission.cargo.ownerLifeId=null;mission.settlement={outcome:'FAILED',reason:'CARGO_DESTROYED_BY_ELIGIBLE_RAID',receiptId:`COURIER-FAILED-${raidHash(`${mission.missionId}:${wallNow}`).toString(16).padStart(8,'0')}`,settledAt:courierClock(wallNow,'CLOCK'),rewardKaios:0,scope:'LOCAL_SIMULATION_ONLY',chainTransfer:false};envelope.settledReceipts.push(mission.settlement.receiptId);delete envelope.activeByCourier[mission.courierLifeId]}return mission})
@@ -688,7 +753,7 @@ export function createPlayerCourierStore({storage,now=Date.now,monotonicNow=()=>
   function claimLoot(missionId,{attackerLifeId,backpackEvidence}={}){return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.status!=='ROBBED'||mission.cargo.ownerState!=='LOOT_CRATE')throw new Error('LOOT_NOT_AVAILABLE');if(String(attackerLifeId)!==mission.cargo.ownerLifeId)throw new Error('LOOT_OWNER_MISMATCH');const receiptId=mission.bandit.lootReceiptId;if(envelope.lootReceipts.includes(receiptId))throw new Error('LOOT_REPLAY_BLOCKED');if(backpackEvidence?.ok!==true||backpackEvidence?.rewardId!==receiptId||backpackEvidence?.scope!=='LOCAL_PLAYER_BACKPACK')throw new Error('BACKPACK_DELIVERY_EVIDENCE_REQUIRED');mission.cargo.ownerState='CLAIMED_BY_BANDIT';mission.cargo.lootClaimedAt=courierClock(now(),'CLOCK');envelope.lootReceipts.push(receiptId);return {missionId:mission.missionId,cargo:courierClone(mission.cargo),receiptId,scope:'LOCAL_GAME_CARGO_ONLY',chainTransfer:false}})}
   function confirmInsurancePayout(missionId,{courierLifeId,paymentEvidence,wallNow=now()}={}){return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.status!=='ROBBED'||mission.insurance.status!=='ACTIVE')throw new Error('INSURED_ROBBERY_REQUIRED');if(String(mission.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');if(mission.insurance.claimStatus!=='APPROVED')throw new Error(mission.insurance.claimStatus==='PAID'?'INSURANCE_PAYOUT_REPLAY_BLOCKED':'INSURANCE_PAYOUT_NOT_APPROVED');const value=Number(paymentEvidence?.rewardKaios),receiptId=String(paymentEvidence?.receiptId||'');if(paymentEvidence?.ok!==true||receiptId!==mission.insurance.payoutReceiptId||value!==mission.insurance.payoutKaios||paymentEvidence?.purpose!=='PLAYER_COURIER_INSURANCE_PAYOUT'||paymentEvidence?.scope!=='LOCAL_SIMULATION_NO_CHAIN_TRANSFER')throw new Error('EXACT_LOCAL_INSURANCE_PAYOUT_EVIDENCE_REQUIRED');mission.insurance.claimStatus='PAID';mission.insurance.paidAt=courierClock(wallNow,'CLOCK');mission.insurance.payoutEvidence={receiptId,rewardKaios:value,scope:paymentEvidence.scope,replayed:Boolean(paymentEvidence.replayed)};return mission})}
   function snapshot(missionId=null){const mission=missionId?state.missions[String(missionId)]||null:null;return {schema:PLAYER_COURIER_SCHEMA,status,revision:state.revision,mission:courierClone(mission),missions:courierClone(state.missions),activeByCourier:courierClone(state.activeByCourier)}}
-  return Object.freeze({accept,activeMission,observe,settleDue,applyCombatDamage,previewInsuranceActivation,activateInsurance,raid,previewLoot,claimLoot,confirmInsurancePayout,snapshot,reload});
+  return Object.freeze({accept,startWhiteholeEscort,chooseWhiteholeEscortAction,advanceWhiteholeEscort,acceptWhiteholeEscortDestination,activeMission,observe,settleDue,applyCombatDamage,previewInsuranceActivation,activateInsurance,raid,previewLoot,claimLoot,confirmInsurancePayout,snapshot,reload});
 }
 
 export function deliverySnapshot(ant){

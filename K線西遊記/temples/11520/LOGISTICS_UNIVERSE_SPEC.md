@@ -1,11 +1,42 @@
 # 11520 倉儲物流宇宙｜Logistics Universe Spec
 
 ## Metadata
-- VERSION: 1.4.0
-- REVISION: 2026-10-03.3
+- VERSION: 1.5.0
+- REVISION: 2026-10-08.WHITEHOLE-ESCORT
 - STATUS: ACTIVE / PRODUCT CONCEPT
 - PLACE_ID: 11520
 - RELATION: MARKET_LIFE_AI_SPEC.md
+
+## 0.1 White-hole cargo escort simulation profile
+
+`KAIOS-CARGO-WHITEHOLE-ESCORT-001` is one persistent local Player Courier demo,
+not a second dispatcher, token, ledger or Universe Runtime. It carries exactly
+`50,000 KAIOS` from raw K `0.00012345` (B4, alpha `1.2345`) to raw K
+`0.00018921` (B4, alpha `1.8921`). Neither decimal is registered land in the
+current Universe Map and neither may be rewritten as integer K12345/K18921.
+
+For the explicit same-linear-K-axis model with the other XYZ axes equal,
+`deltaK=0.00006576` and `1 K-index=384400/16888 km` yield
+`1.496810990052 m`. This is labelled only as a linear K-axis model distance;
+it is not a cadastral route, spherical arc or complete flight path. The local
+`-18 -> +18` animation coordinates are gameplay coordinates and are not that
+physical model distance.
+
+The freight quote is `10 KGEN`, recorded only after verified local delivery as
+`REVIEW_GATED_SIMULATED_RECEIVABLE`. It is never automatically paid, credited
+or converted. The white-hole `1 KGEN -> 1000 KAIOS` rule is supply-mass
+metadata, not a freight market price. Cargo principal remains a separate KAIOS
+custody class, is never revenue, and is never eligible to pay MARGIN/PNL losses.
+LONG/SHORT duel selection records gameplay direction only; financial orders, if
+ever separately authorized, remain owned by the existing
+`kgen-margin-runtime.mjs` ledger and require independent KGEN margin.
+
+The state path is `SIMULATION_CUSTOMER_REQUEST -> SIMULATION_REVIEW_PENDING ->
+SIMULATION_PLAYER_REVIEWED -> ACTIVE -> ARRIVED_AWAITING_RECEIPT -> DELIVERED`.
+The reviewer is explicitly a simulation role with `formalWorkerAck=false`.
+Start, reload and receipt replay are idempotent. Expiry, wrong destination,
+wrong local position and invalid state fail closed. Every result remains
+`SIMULATION_ONLY`, `chainTransfer=false`, `mainnetWrite=false`.
 
 ## 1. 產品定位
 11520 除了是 Market Life 的市場世界，也是花果山台灣交易所的倉儲／物流中心。Digital Ant、自動物流生命、行動 ATM 飛碟、可馴養送貨生命都可以成為物流載體。它們不是無生命 icon，而是具有 LIFE_ID、資本、生命、風險、任務與市場方向的生命。

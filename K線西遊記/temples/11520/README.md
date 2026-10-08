@@ -402,6 +402,33 @@ A complete trusted address indexer or archive-state proof is required for histor
 The first public work snapshot was observed on BSC block `116039099`. It records BNB `0.006`, KGEN `0`, KAIOS `0`, a valid Heart code/config read and an owner-unapproved KGEN acquisition scenario. The scenario is block-stamped evidence only: `broadcast_capability=ABSENT`, `live_trading=false`, `chain_write=false`. V3.5 separates the operational Core Heart Event Indexer from optional advanced transaction-graph analysis; no risk label is escalated without evidence.
 
 
+## White-hole cargo escort demo
+
+The game exposes one `WH 貨運` entry for
+`KAIOS-CARGO-WHITEHOLE-ESCORT-001`. The complete local flow creates a
+simulation customer request and quote, records a clearly labelled simulation
+review (never a formal Worker ACK), loads 50,000 KAIOS, lets the player choose
+escort or LONG/SHORT duel direction, advances the cargo through a local route,
+checks the exact destination and creates one persistent receipt.
+
+- Origin: exact raw K `0.00012345`, B4, alpha `1.2345`.
+- Destination: exact raw K `0.00018921`, B4, alpha `1.8921`.
+- Model distance: `1.496810990052 m` only under the declared same-linear-K-axis
+  and equal-other-XYZ assumptions. It is not a cadastral route, spherical arc,
+  complete flight path, or integer K12345/K18921 mapping.
+- Cargo principal: `50,000 KAIOS`, never revenue, trading margin or a source for
+  MARGIN/PNL losses.
+- Freight: `10 KGEN`, a review-gated simulated receivable after delivery. No
+  wallet debit, payment, credit, white-hole market conversion or chain write.
+- Persistence: repeated start/reload/receipt acceptance restores the same
+  mission and receipt; wrong destination, wrong position and expiry fail closed.
+
+Implementation stays in the existing Player Courier/logistics owner and mobile
+shell. Financial positions remain exclusively owned by
+`runtime/kgen-margin-runtime.mjs` and require separate KGEN margin. The current
+Universe Map remains unchanged, KAIOS is not redeployed, and KUFO/KSHIP are not
+deployed by this demo.
+
 ## NVIDIA GPU paper-market candidate
 
 The K12345 → K11520 NVIDIA GPU route, landed-cost model, acquisition evidence model, and isolated GPU/KGEN and GPU/KAIOS order books are bounded paper-simulation candidates.

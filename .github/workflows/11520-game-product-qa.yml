@@ -216,6 +216,10 @@ jobs:
             echo "[11520-QA] QA_RED: mandatory 390x844 runtime screenshot missing or empty: $SCREENSHOT"
             exit 1
           fi
+          for IMAGE in 11520-whitehole-escort-arrived-390x844 11520-whitehole-escort-receipt-390x844 11520-whitehole-escort-receipt-844x390; do
+            FILE="artifacts/11520-visual-qa/$IMAGE.png"
+            test -s "$FILE" || { echo "[11520-QA] QA_RED: missing white-hole escort screenshot $FILE"; exit 1; }
+          done
           SIGNED="artifacts/11520-visual-qa/11520-mobile-signed-c-immersive.png"
           if [ ! -s "$SIGNED" ]; then echo "[11520-QA] QA_RED: signed-C immersive screenshot missing: $SIGNED"; exit 1; fi
           CHARACTER="artifacts/11520-visual-qa/11520-mobile-character-status.png"
