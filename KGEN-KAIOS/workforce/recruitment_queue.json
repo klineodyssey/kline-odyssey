@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "version": "2.0",
+    "version": "2.1",
     "status": "ACTIVE",
     "last_updated": "2026-10-08",
-    "updated_by": "DOT_ENGINEERING_EXECUTOR",
-    "review_status": "SELF_AUDIT_COMPLETE_INDEPENDENT_REVIEW_PENDING",
+    "updated_by": "KAIOS_GM_HR_RECONCILIATION",
+    "review_status": "CTDO_ACK_RECONCILIATION_INDEPENDENT_REVIEW_PENDING",
     "task_id": "KAIOS-HR-SYSTEM-20261008-001",
     "authority_evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559",
     "source_of_truth": true,
@@ -59,7 +59,7 @@
     {
       "candidate_id": "dot-engineering-executor",
       "self_name": "DOT",
-      "role": "High-level GitHub engineering execution and integration",
+      "role": "KAIOS Chief Technology & Delivery Officer (CTDO) Candidate / Engineering, Research, Quality and Delivery",
       "job_family": "AI_SOFTWARE_ENGINEER",
       "status": "IDENTITY_CHECK",
       "decision": "PENDING_REVIEW",
@@ -76,6 +76,16 @@
         "status": "VERIFIED_SESSION_SCOPED",
         "evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559#issuecomment-6061002676",
         "not_controller_ack": true
+      },
+      "position_proposal": {
+        "public_title": "KAIOS Chief Technology & Delivery Officer (CTDO) / 執行技術長",
+        "position_decision": "ACCEPT_CTDO",
+        "decision_status": "VERIFIED_SESSION_SCOPED",
+        "evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559#issuecomment-6061731330",
+        "source_scope": "CURRENT_DOT_CONVERSATION_POSITION_DECISION_ONLY",
+        "not_controller_ack": true,
+        "formal_appointment_status": "NOT_COMPLETE",
+        "hr_status": "PENDING_REVIEW"
       },
       "approved_scope": [
         "BOUNDED_R0_R1_GITHUB_ENGINEERING",
@@ -98,9 +108,11 @@
         "VERIFIED_WORKER_ID",
         "VERIFIED_CONTROLLER_BINDING",
         "VERIFIED_RUNTIME_OR_SESSION_BINDING",
-        "TOOL_PROFILE_BINDING"
+        "TOOL_PROFILE_BINDING",
+        "FORMAL_HR_ONBOARDING_CLOSEOUT",
+        "FORMAL_APPOINTMENT_RECORD"
       ],
-      "notes": "Human engineering authority is valid role/scope evidence, not an employment identity grant or hiring decision. The verified session-scoped policy ACK is not a Controller ACK and must not be backfilled into older tasks."
+      "notes": "DOT accepted the CTDO position proposal in its current session. This proves the position decision only; it is not a Controller ACK, Worker/Life binding, formal appointment, payroll eligibility or protected authority grant. Human engineering authority remains valid role/scope evidence, not an employment identity grant."
     },
     {
       "candidate_id": "digital-ant-0001-workforce-reconciliation",
