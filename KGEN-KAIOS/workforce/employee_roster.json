@@ -27,13 +27,13 @@
   ],
   "summary": {
     "total_roster_records": 11,
-    "formal_active_employees": 3,
+    "formal_active_employees": 2,
     "today_on_duty_verified": 0,
     "working_now_verified": 0,
     "waiting_review": 0,
     "blocked": 0,
     "registered_not_activated": 7,
-    "suspended": 0,
+    "suspended": 1,
     "revoked": 0,
     "human_operator": 1,
     "runtime_projection_status": "STALE_REQUIRES_FRESH_HEARTBEAT",
@@ -42,12 +42,12 @@
   "identity_audit": [
     {
       "subject": "DOT",
-      "employment_decision": "CONDITIONAL_OFFER",
+      "employment_decision": "PENDING_REVIEW",
       "worker_id": "NOT_ASSIGNED",
       "life_id": "NOT_VERIFIED",
       "controller_binding": "NOT_VERIFIED",
       "runtime_binding": "NOT_VERIFIED",
-      "tool_authority": "HUMAN_AUTHORIZED_BOUNDED_GITHUB_ENGINEERING_PENDING_IDENTITY_BINDING",
+      "tool_authority": "HUMAN_AUTHORIZED_ENGINEERING_ROLE_NOT_EMPLOYMENT_IDENTITY_GRANT",
       "payroll_eligibility": "NOT_VERIFIED",
       "evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559",
       "next_action": "Bind one exact runtime/session and Controller to a non-duplicated Worker ID; record policy ACK without backfilling prior tasks."
@@ -77,11 +77,11 @@
     },
     {
       "worker_id": "cursor-01",
-      "employee_status": "ACTIVE",
-      "payroll_eligibility": "PENDING_POLICY",
+      "employee_status": "SUSPENDED",
+      "payroll_eligibility": "NOT_ELIGIBLE_WHILE_SUSPENDED",
       "monthly_kaios_salary": "PENDING_POLICY",
       "payment_status": "NOT_LIVE",
-      "reason": "Formal worker is offline and the approved KAIOS salary table is not present."
+      "reason": "Human cost suspension is active; no salary eligibility may be inferred while suspended."
     },
     {
       "worker_id": "chatgpt-01",
@@ -94,7 +94,7 @@
     {
       "worker_id": "NOT_ASSIGNED",
       "subject": "DOT",
-      "employee_status": "CONDITIONAL_OFFER",
+      "employee_status": "PENDING_REVIEW",
       "payroll_eligibility": "NOT_VERIFIED",
       "monthly_kaios_salary": "PENDING_POLICY",
       "payment_status": "NOT_LIVE",
@@ -149,11 +149,11 @@
       "department": "Foundational Life / Ecology Research / Documentation / QA",
       "role": "FOUNDATIONAL_LIFE_CREATOR / LIFE_RESEARCH_ANALYST / Documentation Agent / QA Agent",
       "manager": "codex-gm-01",
-      "status": "OFF_DUTY",
+      "status": "SUSPENDED",
       "trust_level": "T2",
-      "can_claim_task": true,
-      "can_create_branch": true,
-      "can_push_handoff": true,
+      "can_claim_task": false,
+      "can_create_branch": false,
+      "can_push_handoff": false,
       "can_review": false,
       "can_merge": false,
       "can_push_main": false,
@@ -168,8 +168,8 @@
       "last_report_path": "KGEN-AI-Company/reports/DAILY_HANDOFF_REVIEW_2026-07-13.md",
       "performance_score": 82,
       "violation_count": 1,
-      "suspension_reason": null,
-      "notes": "Registered formal worker for bounded Grass, Tree, Fish, Shrimp, Mountain, Soil, Water, and River candidate packages. The sole executable namespace remains cursor-handoff/<Task-ID>; cursor/<feature-name> is normalized before claim. Fresh Boot evidence and one valid claim lease remain required."
+      "suspension_reason": "CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_BY_HUMAN_COST_DECISION",
+      "notes": "Registered identity is retained, but the active Human cost suspension and OFFLINE runtime exclude this worker from the formal-active count. A traceable Human release, fresh Boot and fresh claim are required before work."
     },
     {
       "worker_id": "cursor-generic-01",

@@ -8,21 +8,21 @@
 
 ## Current Formal Roster
 
-The active worker registry currently records three formal employees. None has a current October runtime heartbeat in the retained registry, so employment is not presented as proof of who is working now.
+The active worker registry currently yields two formal active employees after applying the canonical no-active-suspension rule. None has a current October runtime heartbeat in the retained registry, so employment is not presented as proof of who is working now.
 
 | Worker | Employment | Trust | Runtime projection | Current work verified | Payroll eligibility |
 |---|---|---:|---|---|---|
 | `codex-gm-01` | ACTIVE | T5 | STALE | NO | NOT_VERIFIED |
-| `cursor-01` | ACTIVE | T2 | OFFLINE / fresh claim required | NO | NOT_VERIFIED |
+| `cursor-01` | SUSPENDED | T2 | OFFLINE / Human cost suspension | NO | NOT_ELIGIBLE_WHILE_SUSPENDED |
 | `chatgpt-01` | ACTIVE | T5 | STALE | NO | NOT_VERIFIED |
 
-`human-primeforge` is retained as the Human authority/operator record and is not counted as an automated employee. Seven legacy candidate records remain registered but not activated. Names in a candidate pool are not evidence that a runtime, endpoint or employee is available.
+`cursor-01` retains its registered identity but is excluded from the formal-active count until a traceable Human release. `human-primeforge` is retained as the Human authority/operator record and is not counted as an automated employee. Seven legacy candidate records remain registered but not activated. Names in a candidate pool are not evidence that a runtime, endpoint or employee is available.
 
 ## Priority Identity Reconciliation
 
 | Subject | Employment decision | Worker ID | Life ID | Controller | Current result |
 |---|---|---|---|---|---|
-| DOT | CONDITIONAL_OFFER | NOT_ASSIGNED | NOT_VERIFIED | NOT_VERIFIED | Human GitHub engineering authority is verified as policy evidence; formal onboarding remains incomplete |
+| DOT | PENDING_REVIEW | NOT_ASSIGNED | NOT_VERIFIED | NOT_VERIFIED | Human GitHub engineering authority is verified role evidence, not an employment identity grant |
 | Digital Ant 0001 | PENDING_REVIEW | NOT_VERIFIED | `DIGITAL_ANT_0001` VERIFIED_EXISTING | Workforce binding NOT_VERIFIED | reuse the existing Life; resolve Worker/controller/payroll separately |
 
 DOT authority evidence is issue [#559](https://github.com/klineodyssey/kline-odyssey/issues/559). It authorizes prospective bounded GitHub engineering but does not create a Controller ACK, Worker ID, Life ID or payroll entitlement and does not validate older work retroactively.

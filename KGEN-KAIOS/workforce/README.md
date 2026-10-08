@@ -43,7 +43,7 @@ If any requirement is missing, the worker is not a formal registered worker. A s
 | `WORKER_SUSPENSION_SCHEMA.json` | Suspension, revocation, and reinstatement format |
 | `WORKER_AUDIT_LOG.json` | Current baseline workforce audit log |
 | `EMPLOYEE_ROSTER.md` | Human-readable formal employee roster, status and assignment summary |
-| `employee_roster.json` | Machine-readable source of truth for worker identity, status, workspace, task and authority |
+| `employee_roster.json` | Machine-readable HR projection; formal worker authority remains in `KGEN-KAIOS/worker_registry.json` |
 | `OFFICE_DESK_STANDARD.md` | Logical workspace / worktree / branch namespace desk rules |
 | `office_desks.json` | Machine-readable office desk registry |
 | `TOOL_ACCESS_MATRIX.md` | Human-readable tool and permission matrix |
@@ -59,13 +59,13 @@ If any requirement is missing, the worker is not a formal registered worker. A s
 | `recruitment_queue.json` | Machine-readable candidate queue |
 | `EMPLOYEE_APPLICATION_TEMPLATE.md` | Application, standardized assessment and separate identity/permission/payroll gate template |
 | `AGENT_WORKFORCE_V2_STANDARD.md` | V2 rule: every Agent work unit is one employee with permanent UUID |
-| `agent_registry.json` | V2 machine-readable Agent employee registry |
+| `agent_registry.json` | Legacy Agent work-unit UUID/desk compatibility mapping; not employment or authority canon |
 | `desk_registry.json` | V2 per-Agent office desk registry |
 | `department_registry.json` | V2 department registry and staffing counts |
 | `agent_runtime_status.json` | V2 runtime status snapshot for current working agents, commits, PRs and errors |
 | `agent_daily_report.json` | V2 daily workforce report |
-| `COMPENSATION_STANDARD.md` | V3 salary, reward, penalty, 8888 bank and Human approval compensation rules |
-| `payroll_policy.json` | V3 machine-readable payroll policy, units, claim options and approval matrix |
+| `COMPENSATION_STANDARD.md` | V4 KAIOS salary classification, legacy-ledger continuity and protected execution rules |
+| `payroll_policy.json` | V4 machine-readable payroll eligibility, separation and execution gates |
 | `salary_ledger.jsonl` | V3 append-only prototype payroll ledger |
 | `payroll_snapshot.json` | V3 current payroll summary for dashboard display |
 | `bonus_penalty_rules.json` | V3 quality bonus, research bonus, bug bounty, withholding and penalty rules |
@@ -76,7 +76,7 @@ No worker, including Senior Trusted workers, may bypass protected paths, contrac
 
 ## Current Workforce Snapshot
 
-The current roster is maintained in `employee_roster.json` and projected from `KGEN-KAIOS/worker_registry.json`. The 2026-10-08 audit records three formal employees (`codex-gm-01`, `cursor-01`, `chatgpt-01`) but no current October runtime heartbeat, so none is claimed to be working now. The Human Operator is recorded separately. DOT has a conditional onboarding record backed by Human policy issue #559, while Digital Ant reuses the existing `DIGITAL_ANT_0001` Life and remains pending separate Worker/Controller/payroll resolution.
+The current roster is projected from `KGEN-KAIOS/worker_registry.json`. After applying the no-active-suspension rule, the 2026-10-08 audit records two formal active employees (`codex-gm-01`, `chatgpt-01`); `cursor-01` retains a registered identity but remains suspended by the Human cost decision. No current October runtime heartbeat exists, so none is claimed to be working now. DOT has Human engineering role authority but hiring remains pending, while Digital Ant reuses the existing `DIGITAL_ANT_0001` Life and remains pending separate Worker/Controller/payroll resolution.
 
 ## HR Lifecycle
 
@@ -88,7 +88,7 @@ Employment, Worker ID, Life ID, Controller/runtime binding, tool permission, rev
 
 ## Workforce V2 Agent Model
 
-V2 preserves the V1 files and adds `agent_registry.json` as the current Agent-per-employee source. `cursor-01` is not deleted; it is mapped as the legacy worker ID for `cursor-agent-0001`. New Cursor work units must use `cursor-agent-0002`, `cursor-agent-0003`, and so on. Candidates remain `WAITING` or `OFFLINE` until Boot, desk, claim, branch, report and review evidence exists.
+V2 records in `agent_registry.json` are retained only as legacy Agent work-unit UUID/desk mappings. Their status, activation and current-work fields are not operational authority. `KGEN-KAIOS/worker_registry.json` controls formal worker status, and current runtime activity requires fresh evidence. A legacy Agent UUID never creates employment, Worker/Life identity, Controller binding or payroll eligibility.
 
 ## Workforce V4 Compensation And Bank Model
 

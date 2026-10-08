@@ -129,7 +129,7 @@ No public workforce file may contain private keys, wallet seeds, passwords, toke
 
 ## Current Priority Reconciliations
 
-- **DOT:** Human GitHub engineering authority is reusable capability and policy evidence. Formal Worker ID, Life ID and Controller binding remain `NOT_VERIFIED`; the onboarding record is conditional and must not backfill older ACKs.
+- **DOT:** Human GitHub engineering authority is reusable capability and policy evidence, not an employment identity grant. Hiring remains `PENDING_REVIEW`; the session-scoped policy ACK is verified but is not a Controller ACK and must not backfill older work.
 - **Digital Ant 0001:** reuse `DIGITAL_ANT_0001`; do not mint a duplicate Life or Worker identity. Life evidence exists, while Workforce Worker/Controller/payroll gates remain separately auditable.
 - **Existing registry employees:** retain valid interviews, trials and approvals. Reconcile stale projections against `KGEN-KAIOS/worker_registry.json` instead of re-interviewing without cause.
 

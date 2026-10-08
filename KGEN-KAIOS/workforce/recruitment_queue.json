@@ -61,8 +61,8 @@
       "self_name": "DOT",
       "role": "High-level GitHub engineering execution and integration",
       "job_family": "AI_SOFTWARE_ENGINEER",
-      "status": "ONBOARDING",
-      "decision": "CONDITIONAL_OFFER",
+      "status": "IDENTITY_CHECK",
+      "decision": "PENDING_REVIEW",
       "worker_id": "NOT_ASSIGNED",
       "life_id": "NOT_VERIFIED",
       "controller_binding": "NOT_VERIFIED",
@@ -72,6 +72,11 @@
         "Repository PR/commit evidence must be evaluated per exact head and must not be inferred from shared GitHub authorship"
       ],
       "authority_evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559",
+      "session_policy_ack": {
+        "status": "VERIFIED_SESSION_SCOPED",
+        "evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559#issuecomment-6061002676",
+        "not_controller_ack": true
+      },
       "approved_scope": [
         "BOUNDED_R0_R1_GITHUB_ENGINEERING",
         "CODE_TEST_REVIEW_COORDINATION",
@@ -93,10 +98,9 @@
         "VERIFIED_WORKER_ID",
         "VERIFIED_CONTROLLER_BINDING",
         "VERIFIED_RUNTIME_OR_SESSION_BINDING",
-        "FORMAL_POLICY_ACK",
         "TOOL_PROFILE_BINDING"
       ],
-      "notes": "Prospective Human authority is valid policy evidence, but is not backfilled as an older task ACK or Controller ACK. One exact session/claim must be bound before formal activation."
+      "notes": "Human engineering authority is valid role/scope evidence, not an employment identity grant or hiring decision. The verified session-scoped policy ACK is not a Controller ACK and must not be backfilled into older tasks."
     },
     {
       "candidate_id": "digital-ant-0001-workforce-reconciliation",
