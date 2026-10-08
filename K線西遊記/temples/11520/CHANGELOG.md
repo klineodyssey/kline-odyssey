@@ -36,7 +36,12 @@
   and requires a successful feed-admission preflight before the native confirm
   modal or `PREVIEW` journey event. Warm-feed browser coverage compares the complete
   saved orders, positions, receipts, observations, wallet and journey state.
-- Post-review focused checks passed 163/163 runtime, quote, intent, route,
+- Final rereview hardening validates every persisted deterministic-simulation
+  price and anchor before close in both fallback and nonfallback adapters. A
+  finite corrupt cached price, future anchor or invalid anchor now returns
+  `SIMULATION_RECOVERY_REQUIRED` with the complete saved book and existing
+  source evidence unchanged.
+- Post-review focused checks passed 170/170 runtime, quote, intent, route,
   provenance, market-binding and margin tests plus 67/67 applicable static tests. The one
   skipped static case is an unchanged Linux bash-routing fixture unavailable
   to Windows `spawnSync`; exact-head Linux CI remains required. Pinned-worktree

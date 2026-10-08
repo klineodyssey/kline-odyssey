@@ -770,7 +770,7 @@ test('simulation component revisions expose complete provenance and recorded exe
   const publicFeedProvenance={
    'runtime/game-5d-main.mjs':'fb9eb279674e9cc4cd75654b870847e7f980d0eb9ba027205c3de84cb746f4f8',
    'runtime/public-market-quotes.mjs':'89971bc954ca497bca074eb3512880600de353a59e1d7941269097d1d8c6817c',
-   'runtime/real-trading-order-intent.mjs':'9e91da150ed768b5016d409f1098910e2a880f774e619a9f22eb86d7773cadf8'};
+   'runtime/real-trading-order-intent.mjs':'e035fc8b07a57486af1ca1f02650a2ce11bfbec5f1a389d8b71485cc18375aa2'};
  for(const asset of assets)if(publicFeedProvenance[asset.path])Object.assign(asset,{nonMetadataSha256:publicFeedProvenance[asset.path],revision:'2026-10-09.PUBLIC-SIM-FEED-ADMISSION',sourceCommit:'b39c16e5cc5f2409590d62fa9a53b5ceb3750300',ancestorCommit:'c35320c6f95ea9411fd9e5f3ad295599f029a3ae',lastUpdated:'2026-10-09',updatedBy:/^Codex \/ delegated implementation \/ HUMAN_AUTHORIZED_2026_10_09$/,reviewedBy:'PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge',taskId:'K11520-PUBLIC-FREE-SIM-FEED-20261009'});
  const mandatory=['VERSION','REVISION','STATUS','LAST_UPDATED','UPDATED_BY','REVIEWED_BY','SOURCE_COMMIT','TASK_ID','CHANGE_REASON','ANCESTOR','SOURCE_OF_TRUTH'];
  for(const asset of assets){

@@ -635,6 +635,26 @@ test('fresh public recovery cannot reprice or settle a legacy synthetic-source p
  }
 });
 
+test('synthetic recovery rejects corrupt cached price or anchor before close in fallback and default adapters',()=>{
+ const corruptions=[
+  observation=>({...observation,price:observation.price+1}),
+  observation=>({...observation,simulationAnchorAt:2001}),
+  observation=>({...observation,simulationAnchorPrice:null}),
+ ];
+ for(const simulationFallback of [true,false])for(const corrupt of corruptions){
+  const ledger=createKgenLedger(100),source='K11520_DETERMINISTIC_SIMULATION';
+  observeSimulationPrice(ledger,{market:'ETHUSDT',price:4000,observedAt:1000,now:1000,source,simulationAnchorPrice:4000,simulationAnchorAt:1000,productV1:true});
+  placeSimulationOrder(ledger,{axis:'KY',market:'ETHUSDT',c:1,lots:2,triggerPrice:4000,now:1000});
+  observeSimulationPrice(ledger,{market:'ETHUSDT',price:4000,observedAt:1001,now:1001,source,simulationAnchorPrice:4000,simulationAnchorAt:1000,productV1:true});
+  ledger.simulation.observations.ETHUSDT=corrupt(ledger.simulation.observations.ETHUSDT);
+  const adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback}),rows=publicQuoteSet(2000,{...PUBLIC_PRICES,ETHUSDT:1},2);
+  adapter.updatePublicMarketQuality(rows,{now:2000});const position=adapter.snapshot().positions.find(item=>item.status==='OPEN'),before=structuredClone(ledger);
+  const result=adapter.close(position.positionId,{now:2000});
+  assert.equal(result.ok,false);assert.equal(result.reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before,'corrupt saved synthetic evidence cannot mutate or settle the full book');
+  assert.equal(adapter.snapshot().observations.ETHUSDT.source,source,'the existing synthetic source evidence remains pinned');
+ }
+});
+
 test('single-source public admission is explicit that divergence is not independently verified',()=>{
  const adapter=createExecutionAdapter({ledger:createKgenLedger(100),simulationFallback:true}),state=adapter.updatePublicMarketQuality(publicQuoteSet(1000),{now:1000});
  assert.equal(state.divergenceStatus,'NOT_VERIFIED_SINGLE_SOURCE');assert.equal(state.settlementAuthority,false);assert.equal(state.allowsPriceTransitions,true);

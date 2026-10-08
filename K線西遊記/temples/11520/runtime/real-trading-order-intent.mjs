@@ -105,8 +105,12 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE);
     if((!previous&&active)||(pinned&&previous?.source!==SIMULATION_PRICE_SOURCE))throw new Error('SIMULATION_RECOVERY_REQUIRED');
     if(previous&&(!Number.isFinite(previous.price)||previous.price<=0||!Number.isSafeInteger(previous.at)||previous.at<0))throw new Error(active?'SIMULATION_RECOVERY_REQUIRED':'INVALID_SIMULATION_SOURCE');
-    if(fallback&&previous?.source===SIMULATION_PRICE_SOURCE){
-      try{return deterministicSimulationObservation({market,previous,now})}catch(error){if(active)throw new Error('SIMULATION_RECOVERY_REQUIRED');throw error}
+    if(previous?.source===SIMULATION_PRICE_SOURCE){
+      // Validate persisted synthetic evidence in every SIMULATION mode. A
+      // nonfallback adapter must not advance it, but it also must not settle a
+      // recovered position from a finite corrupted price/anchor.
+      try{const advanced=deterministicSimulationObservation({market,previous,now});return fallback?advanced:previous}
+      catch(error){if(active)throw new Error('SIMULATION_RECOVERY_REQUIRED');throw error}
     }
     return previous;
   };
