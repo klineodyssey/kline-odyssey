@@ -20,7 +20,7 @@
 - Safety: simulation role is not a formal Worker ACK; no wallet debit, provider,
   signer, Treasury, payment, Mainnet, real asset, KUFO/KSHIP deployment or chain
   write. `tests/11520-browser-settlement.mjs` is untouched.
-- Verification: runtime suite 79/79; browser smoke passed in real headless
+- Verification: runtime suite 82/82; browser smoke passed in real headless
   Chromium with direct 390x844 and 844x390 receipt screenshots. Exact-head CI
   and independent technical review remain release gates. Draft PR only; merge
   remains held for parent integration ordering.
@@ -30,7 +30,9 @@
   resolution archives the policy and releases only its local simulation reserve;
   it performs no refund or asset transfer. An open eligible claim retains policy,
   reserve and evidence across browser reload and remains blocked by the existing
-  assignment guard. Invalid storage is retained and enters review-required state.
+  assignment guard. Invalid evidence, failed write/read-back, record removal and
+  stale-tab revision conflicts enter review-required state; every cargo mutation
+  remains blocked rather than overwriting persisted mission or claim evidence.
 - Current runtime verification after the follow-up: 82/82. Existing headless
   Chromium smoke includes a real page reload with an open insured claim.
 

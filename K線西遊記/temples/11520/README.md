@@ -438,6 +438,9 @@ checks the exact destination and creates one persistent receipt.
   wallet debit, payment, credit, white-hole market conversion or chain write.
 - Persistence: repeated start/reload/receipt acceptance restores the same
   mission and receipt; wrong destination, wrong position and expiry fail closed.
+  Digital Ant mission/receipt/policy/claim evidence uses revision-checked browser
+  persistence; malformed evidence, failed read-back or another-tab conflicts stop
+  every cargo mutation in `PERSISTENCE_REVIEW_REQUIRED` until a reviewed reload.
 
 Implementation stays in the existing Player Courier/logistics owner and mobile
 shell. Financial positions remain exclusively owned by

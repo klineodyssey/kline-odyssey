@@ -187,18 +187,27 @@ function validateDigitalAntPersistentState(ant,{expectedLifeId=null}={}){
   if(ant.cargoRisk.policy){
     if(ant.cargoRisk.policy.status!=='ACTIVE'||!ant.mission||String(ant.cargoRisk.policy.missionId)!==String(ant.mission.missionId))throw new Error('INVALID_DIGITAL_ANT_ACTIVE_POLICY');
   }else if(ant.cargoRisk.reserveKaios>0)throw new Error('ORPHAN_DIGITAL_ANT_RESERVE');
-  for(const resolution of ant.cargoRisk.resolvedPolicies)if(!resolution||resolution.status!=='COMPLETED_NO_OPEN_CLAIM'||!resolution.evidenceRetained||resolution.assetTransfer!==false||resolution.mainnetWrite!==false)throw new Error('INVALID_DIGITAL_ANT_POLICY_RESOLUTION');
+  const validIncidentEvidence=incident=>Boolean(incident&&String(incident.incidentId||'')&&String(incident.missionId||'')&&incident.evidenceStatus==='LOCAL_GAME_EVIDENCE'&&['CLAIM_ELIGIBLE','PAID','NOT_COVERED_OR_NO_LOSS'].includes(incident.claimStatus));
+  for(const incident of ant.cargoRisk.incidents){
+    if(!validIncidentEvidence(incident))throw new Error('INVALID_DIGITAL_ANT_INCIDENT_EVIDENCE');
+    if(incident.claimStatus==='CLAIM_ELIGIBLE'&&(!ant.cargoRisk.policy||incident.missionId!==ant.cargoRisk.policy.missionId||incident.missionId!==ant.mission?.missionId))throw new Error('ORPHAN_DIGITAL_ANT_OPEN_CLAIM');
+  }
+  for(const resolution of ant.cargoRisk.resolvedPolicies){
+    if(!resolution||resolution.status!=='COMPLETED_NO_OPEN_CLAIM'||!String(resolution.policyId||'')||!String(resolution.missionId||'')||!String(resolution.receiptId||'')||!resolution.evidenceRetained||resolution.premiumRefundKaios!==0||!Number.isFinite(resolution.reserveReleasedKaios)||resolution.reserveReleasedKaios<0||resolution.assetTransfer!==false||resolution.chainTransfer!==false||resolution.mainnetWrite!==false)throw new Error('INVALID_DIGITAL_ANT_POLICY_RESOLUTION');
+    const policyEvidence=resolution.policyEvidence;if(!policyEvidence||policyEvidence.policyId!==resolution.policyId||policyEvidence.missionId!==resolution.missionId||policyEvidence.status!=='ACTIVE')throw new Error('INVALID_DIGITAL_ANT_POLICY_EVIDENCE');
+    if(!Array.isArray(resolution.incidentEvidence)||resolution.incidentEvidence.some(item=>!validIncidentEvidence(item)||item.missionId!==resolution.missionId||item.claimStatus==='CLAIM_ELIGIBLE'))throw new Error('INVALID_DIGITAL_ANT_RESOLUTION_INCIDENTS');
+  }
   return ant;
 }
 
-export function createDigitalAntPersistenceEnvelope(ant,{savedAt=Date.now()}={}){
+export function createDigitalAntPersistenceEnvelope(ant,{savedAt=Date.now(),revision=0}={}){
   const state=structuredClone(validateDigitalAntPersistentState(ant));
-  return {schema:DIGITAL_ANT_PERSISTENCE_SCHEMA,version:DIGITAL_ANT_PERSISTENCE_VERSION,savedAt:courierClock(savedAt,'SAVED_AT'),state};
+  return {schema:DIGITAL_ANT_PERSISTENCE_SCHEMA,version:DIGITAL_ANT_PERSISTENCE_VERSION,revision:courierClock(revision,'REVISION'),savedAt:courierClock(savedAt,'SAVED_AT'),state};
 }
 
 export function restoreDigitalAntPersistenceEnvelope(envelope,{expectedLifeId=null}={}){
   if(!envelope||envelope.schema!==DIGITAL_ANT_PERSISTENCE_SCHEMA||envelope.version!==DIGITAL_ANT_PERSISTENCE_VERSION)throw new Error('INVALID_DIGITAL_ANT_PERSISTENCE_ENVELOPE');
-  courierClock(envelope.savedAt,'SAVED_AT');return structuredClone(validateDigitalAntPersistentState(envelope.state,{expectedLifeId}));
+  courierClock(envelope.revision,'REVISION');courierClock(envelope.savedAt,'SAVED_AT');return structuredClone(validateDigitalAntPersistentState(envelope.state,{expectedLifeId}));
 }
 
 export function createDeliveryMission({
@@ -338,7 +347,14 @@ export function quoteCargoInsurance({
   };
 }
 
+function digitalAntPersistenceGuard(ant){
+  return ant?.cargoRisk?.persistenceState?.status==='REVIEW_REQUIRED'
+    ? {ok:false,reason:'DIGITAL_ANT_PERSISTENCE_REVIEW_REQUIRED'}
+    : null;
+}
+
 export function activateCargoInsurance(ant,quote,{policyId=`CARGO-POLICY-${Date.now()}`,premiumPaidKaios=0,reserveSource=''}={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   if(!ant?.mission)return {ok:false,reason:'MISSION_REQUIRED'};
   if(ant.cargoRisk?.policy||n(ant.cargoRisk?.reserveKaios)>0||n(ant.cargoRisk?.policy?.premiumPaidKaios)>0)return {ok:false,reason:'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION'};
   if(!quote||quote.mode!=='UNDERWRITING_READY')return {ok:false,reason:'INDEPENDENT_RESERVE_REQUIRED'};
@@ -420,6 +436,7 @@ export function previewMissileInterception(ant,{
 }
 
 export function resolveMissileInterception(ant,preview={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const mission=ant?.mission,risk=ant?.cargoRisk;
   if(!preview?.ok||!preview.physics)return {ok:false,reason:'VALID_MISSILE_PREVIEW_REQUIRED'};
   if(!mission||mission.status!=='IN_TRANSIT')return {ok:false,reason:'IN_TRANSIT_MISSION_REQUIRED'};
@@ -445,6 +462,7 @@ export function attemptCargoRobbery(ant,{
   attackerLifeId,attackerController='PLAYER_LOCAL',playerPosition={},playerMovement={},attackPower=1,energySpent=1,
   replayKey,now=Date.now(),maxDistance=CARGO_RAID_RANGE_METERS
 }={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const mission=ant?.mission,risk=ant?.cargoRisk;
   if(!mission||mission.status!=='IN_TRANSIT')return {ok:false,reason:'IN_TRANSIT_MISSION_REQUIRED'};
   if(!attackerLifeId||String(attackerLifeId)===String(ant.lifeId))return {ok:false,reason:'DISTINCT_ATTACKER_LIFE_REQUIRED'};
@@ -477,6 +495,7 @@ export function attemptCargoRobbery(ant,{
 }
 
 export function settleCargoInsuranceClaim(ant,{incidentId}={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const risk=ant?.cargoRisk,policy=risk?.policy,incident=risk?.incidents?.find(item=>item.incidentId===incidentId);
   if(!incident)return {ok:false,reason:'INCIDENT_NOT_FOUND'};
   if(incident.evidenceStatus!=='LOCAL_GAME_EVIDENCE'||incident.missionId!==ant?.mission?.missionId)return {ok:false,reason:'VERIFIED_INCIDENT_EVIDENCE_REQUIRED'};
@@ -519,7 +538,7 @@ export function chooseBestDelivery(ant,missions=[],atmRegistry=[],options={}){
 }
 
 export function assignDelivery(ant,mission,atmRegistry=[],options={}){
-  if(ant?.cargoRisk?.persistenceState?.status==='REVIEW_REQUIRED')return {ok:false,reason:'DIGITAL_ANT_PERSISTENCE_REVIEW_REQUIRED'};
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   if(n(ant.cargo?.amount)>0||['IN_TRANSIT','ARRIVED_AWAITING_RECEIPT','CRASHING'].includes(ant.mission?.status))return {ok:false,reason:'DELIVERY_MISSION_UNRESOLVED'};
   if(!mission||mission.status!=='CREATED')return {ok:false,reason:'NEW_DELIVERY_MISSION_REQUIRED'};
   if(ant.cargoRisk?.policy||n(ant.cargoRisk?.reserveKaios)>0||n(ant.cargoRisk?.policy?.premiumPaidKaios)>0)return {ok:false,reason:'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION'};
@@ -536,6 +555,7 @@ export function assignDelivery(ant,mission,atmRegistry=[],options={}){
 }
 
 export function loadCargo(ant){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   if(!ant.mission)return {ok:false,reason:'NO_MISSION'};
   const m=ant.mission;
   if(m.status!=='ASSIGNED')return {ok:false,reason:'ASSIGNED_DELIVERY_MISSION_REQUIRED'};
@@ -546,6 +566,7 @@ export function loadCargo(ant){
 }
 
 export function tickDigitalAntDelivery(ant,{deltaMs=16,speed=null}={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const m=ant.mission;
   if(!m||!['IN_TRANSIT','CRASHING'].includes(m.status))return {ok:false,reason:'NOT_IN_TRANSIT',state:ant.state};
   if(m.status==='CRASHING'){
@@ -576,6 +597,7 @@ export function tickDigitalAntDelivery(ant,{deltaMs=16,speed=null}={}){
 }
 
 export function verifyDeliveryReceipt(ant,{receiptId=null,verified=false,now=Date.now()}={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const m=ant.mission;
   if(!m||m.status!=='ARRIVED_AWAITING_RECEIPT')return {ok:false,reason:'NOT_AWAITING_RECEIPT'};
   if(!verified||!receiptId)return {ok:false,reason:'VERIFIED_RECEIPT_REQUIRED'};
@@ -593,6 +615,7 @@ export function verifyDeliveryReceipt(ant,{receiptId=null,verified=false,now=Dat
 }
 
 export function resolveCargoInsuranceAfterDelivery(ant,{receiptId=null,now=Date.now()}={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const mission=ant?.mission,risk=ant?.cargoRisk,policy=risk?.policy;
   if(!mission||mission.status!=='DELIVERED'||!mission.receiptVerified)return {ok:false,reason:'DELIVERED_RECEIPT_REQUIRED'};
   if(String(receiptId||'')!==String(mission.receiptId||''))return {ok:false,reason:'RECEIPT_EVIDENCE_MISMATCH'};
@@ -609,6 +632,7 @@ export function resolveCargoInsuranceAfterDelivery(ant,{receiptId=null,now=Date.
 }
 
 export function acceptSimulatedAtmDeliveryReceipt(ant,{destinationAtmId=null,receiptId=null,accepted=false,now=Date.now()}={}){
+  const persistenceGuard=digitalAntPersistenceGuard(ant);if(persistenceGuard)return persistenceGuard;
   const mission=ant?.mission;
   if(!mission||mission.customerAcceptanceRequired)return {ok:false,reason:'STANDARD_ATM_DELIVERY_REQUIRED'};
   if(String(destinationAtmId||'')!==String(mission.destinationAtmId||''))return {ok:false,reason:'WRONG_ATM_DESTINATION'};

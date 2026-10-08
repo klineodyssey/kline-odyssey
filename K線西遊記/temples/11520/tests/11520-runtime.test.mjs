@@ -586,11 +586,19 @@ test('insured ATM delivery closes only a no-open-claim simulation policy and ret
   const blockedEnvelope=JSON.parse(JSON.stringify(createDigitalAntPersistenceEnvelope(blocked,{savedAt:3002}))),blockedReload=restoreDigitalAntPersistenceEnvelope(blockedEnvelope,{expectedLifeId:'DIGITAL_ANT_ATM-INSURED-OPEN-CLAIM'});assert.equal(blockedReload.cargoRisk.policy.policyId,'POLICY-ATM-INSURED-OPEN-CLAIM');assert.equal(blockedReload.cargoRisk.reserveKaios,blocked.cargoRisk.reserveKaios);assert.equal(blockedReload.cargoRisk.incidents[0].claimStatus,'CLAIM_ELIGIBLE');assert.equal(assignDelivery(blockedReload,createDeliveryMission({missionId:'ATM-BLOCKED-RELOAD-NEXT',amount:10,destinationAtmId:'ATM-INSURED-LOOP',freightOffer:10}),atms).reason,'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION');
 });
 
-test('Digital Ant persistence rejects mismatched identity and orphan reserve, while review state blocks assignment',()=>{
+test('Digital Ant persistence rejects malformed evidence and review state blocks every cargo mutation',()=>{
   const ant=createDigitalAnt({lifeId:'DIGITAL_ANT_PERSISTENCE',cargoCapacity:100}),envelope=createDigitalAntPersistenceEnvelope(ant,{savedAt:1});
+  assert.equal(envelope.revision,0);const invalidRevision=structuredClone(envelope);invalidRevision.revision=-1;assert.throws(()=>restoreDigitalAntPersistenceEnvelope(invalidRevision),/INVALID_REVISION/);
   assert.throws(()=>restoreDigitalAntPersistenceEnvelope(envelope,{expectedLifeId:'OTHER_ANT'}),/DIGITAL_ANT_LIFE_ID_MISMATCH/);
   const orphan=structuredClone(envelope);orphan.state.cargoRisk.reserveKaios=10;assert.throws(()=>restoreDigitalAntPersistenceEnvelope(orphan,{expectedLifeId:'DIGITAL_ANT_PERSISTENCE'}),/ORPHAN_DIGITAL_ANT_RESERVE/);
-  ant.cargoRisk.persistenceState={status:'REVIEW_REQUIRED',reason:'CORRUPT_STORAGE'};const mission=createDeliveryMission({missionId:'PERSISTENCE-BLOCK',amount:10,destinationAtmId:'ATM-PERSISTENCE',freightOffer:10});assert.equal(assignDelivery(ant,mission,[{atmId:'ATM-PERSISTENCE',x:1,y:1,z:1,online:true}]).reason,'DIGITAL_ANT_PERSISTENCE_REVIEW_REQUIRED');
+  const orphanClaim=structuredClone(envelope);orphanClaim.state.cargoRisk.incidents.push({incidentId:'ORPHAN-CLAIM',missionId:'MISSING',claimStatus:'CLAIM_ELIGIBLE',evidenceStatus:'LOCAL_GAME_EVIDENCE'});assert.throws(()=>restoreDigitalAntPersistenceEnvelope(orphanClaim,{expectedLifeId:'DIGITAL_ANT_PERSISTENCE'}),/ORPHAN_DIGITAL_ANT_OPEN_CLAIM/);
+  const fakeArchive=structuredClone(envelope);fakeArchive.state.cargoRisk.resolvedPolicies.push({policyId:'FAKE',missionId:'MISSING',receiptId:'FAKE-RECEIPT',status:'COMPLETED_NO_OPEN_CLAIM',reserveReleasedKaios:10,premiumRefundKaios:0,evidenceRetained:true,incidentEvidence:[],assetTransfer:false,chainTransfer:false,mainnetWrite:false});assert.throws(()=>restoreDigitalAntPersistenceEnvelope(fakeArchive,{expectedLifeId:'DIGITAL_ANT_PERSISTENCE'}),/INVALID_DIGITAL_ANT_POLICY_EVIDENCE/);
+  ant.cargoRisk.persistenceState={status:'REVIEW_REQUIRED',reason:'CORRUPT_STORAGE'};const mission=createDeliveryMission({missionId:'PERSISTENCE-BLOCK',amount:10,destinationAtmId:'ATM-PERSISTENCE',freightOffer:10}),blocked='DIGITAL_ANT_PERSISTENCE_REVIEW_REQUIRED';
+  for(const mutate of [
+    ()=>activateCargoInsurance(ant,null),()=>resolveMissileInterception(ant,{}),()=>attemptCargoRobbery(ant,{}),()=>settleCargoInsuranceClaim(ant,{}),
+    ()=>assignDelivery(ant,mission,[{atmId:'ATM-PERSISTENCE',x:1,y:1,z:1,online:true}]),()=>loadCargo(ant),()=>tickDigitalAntDelivery(ant),
+    ()=>verifyDeliveryReceipt(ant,{}),()=>resolveCargoInsuranceAfterDelivery(ant,{}),()=>acceptSimulatedAtmDeliveryReceipt(ant,{})
+  ])assert.equal(mutate().reason,blocked);
 });
 
 test('Digital Ant pickup requires an assigned mission and preserves every rejected state',()=>{
