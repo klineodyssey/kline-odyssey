@@ -1003,15 +1003,15 @@ async function m1ReadOnlyBrowserQA(){
     const finishAbsentPublicSource=publicSource?attachM1PageSourceProof(absent,{base,...publicSource,assets:publicSource.assets.filter(x=>x.path!=='K線西遊記/assets/ethers-5.7.2.umd.min.js'),createHash}):null;
     try{
       await routeThree(absent);await boot(absent);
+      // Settings is a late bootstrap import and owns wallet visibility. Wait
+      // for that real owner before asserting the no-provider UI is visible.
+      await absent.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__,null,{timeout:15000});
       await absent.waitForFunction(()=>document.querySelector('#walletProviderHelp')?.hidden===false);
       if(!await absent.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await absent.locator('#k11520UtilityMaster').click();
       if(await absent.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await absent.locator('#walletToggle').click();
       assert.equal(await absent.locator('#walletProviderHelp').isVisible(),true);
       assert.equal(await absent.locator('#wAddr').textContent(),'DISCONNECTED');
       await absent.waitForFunction(()=>document.querySelector('#walletM1ReadOnly')?.disabled===false&&document.querySelector('#k11520RealTradePreflight'));
-      // Settings is a late bootstrap import and owns wallet visibility. Wait
-      // for that real owner before capturing its source-bound public state.
-      if(publicSource)await absent.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__,null,{timeout:15000});
       await absent.screenshot({path:`${out}/390x844-no-injected-wallet.png`});
       if(finishAbsentPublicSource)await fs.writeFile(out+'/no-provider-source.json',JSON.stringify(await finishAbsentPublicSource(),null,2));
     }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message),publicBrowserSource:finishAbsentPublicSource?.snapshot()??null},null,2));throw error}finally{await absent.close()}
