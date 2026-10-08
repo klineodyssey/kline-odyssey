@@ -48,7 +48,12 @@
   headless Chromium passed the complete 390x844 signed-C suite, including warm
   `FRESH` to `FAILED`, blocked native preview, full-ledger invariants, source
   recovery without a new settlement receipt and the existing visible 100C
-  future-only product lock. Independent rereview is still pending.
+  future-only product lock. The same native browser harness now crosses the
+  awaited preflight boundary with Cancel, a newer click and a plane-axis switch;
+  stale requests cannot open confirmation or mutate ledger/journey state, and
+  the newer canonical `0.1C` click wins over the old `1C` request. JSON and a
+  390x844 screenshot are retained in the normal visual-QA artifact. Independent
+  delta source rereview passed; CI, visual and integration gates remain.
 - Focused local checks at source commit `b39c16e5` passed 57/57 quote and intent
   tests, 10/10 existing provenance/market/margin tests and 2/2 targeted UI
   tests. A real headless Chrome 390x844 run preserved the game view and exposed
