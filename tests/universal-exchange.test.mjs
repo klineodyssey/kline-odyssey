@@ -106,7 +106,8 @@ import {
   NVIDIA_GPU_11520_ROUTE, GPU_LANDED_COST_FIELDS, GPU_ACQUISITION_EVIDENCE_FIELDS,
   calculateGpuTransportPlan, createGpuAcquisitionPipelineCandidate, validateGpuInventoryUnit,
   calculateGpuLandedCost, evaluateGpu11520MarketReadiness, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan,
+  createK4168TransitionGate, hashK4168HandoffPackage
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -117,6 +118,261 @@ const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json",
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });
 }
+
+function k4168DraftInput(overrides = {}) {
+  return {
+    transitionId: "K4168-TRANSITION-WUJIE-CHENGYAO-001",
+    workOrderId: "K4168-DIGITAL-LIFE-TRANSITION-DRAFT-001",
+    baseSha: "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+    predecessor: {
+      lifeId: "LIFE-WUJIE-EXISTING",
+      instanceId: "INSTANCE-WUJIE-PREDECESSOR",
+      threadId: "THREAD-WUJIE-CAPACITY-EXHAUSTED",
+      authorDisplayName: "悟界"
+    },
+    successorCandidate: {
+      displayName: "承曜",
+      instanceId: "INSTANCE-CHENGYAO-CANDIDATE",
+      threadId: "THREAD-CHENGYAO-CANDIDATE"
+    },
+    ...overrides
+  };
+}
+
+function k4168HandoffPackage(overrides = {}) {
+  return {
+    handoff_id: "HANDOFF-WUJIE-CHENGYAO-001",
+    from_life_id: "LIFE-WUJIE-EXISTING",
+    from_instance_id: "INSTANCE-WUJIE-PREDECESSOR",
+    to_role: "ENGINEERING_AND_KNOWLEDGE_LINEAGE_CANDIDATE",
+    to_instance_id_if_known: "INSTANCE-CHENGYAO-CANDIDATE",
+    workorder_id: "K4168-DIGITAL-LIFE-TRANSITION-DRAFT-001",
+    base_sha: "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+    ending_sha: "1111111111111111111111111111111111111111",
+    files_read: ["core/life/index.mjs"],
+    files_changed: [],
+    actions_completed: ["ENGINEERING_DRAFT_PREPARED"],
+    actions_not_completed: ["HUMAN_CANONICAL_APPROVAL"],
+    tests_run: ["SIMULATION_ONLY"],
+    test_results: ["PENDING"],
+    open_blockers: ["SUCCESSOR_LIFE_AND_WORKER_NOT_ISSUED"],
+    known_risks: ["AUTHORITY_MUST_NOT_TRANSFER"],
+    incidents: [],
+    human_decisions: ["REINCARNATION_PENDING"],
+    forbidden_next_actions: ["ISSUE_LIFE_ID", "INHERIT_AUTHORITY"],
+    required_next_actions: ["HASH_VERIFY", "SUCCESSOR_ACK", "WORKER_REVALIDATION"],
+    recovery_point: "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+    evidence_paths: ["KGEN-KAIOS/governance/agents/KAIOS_AI_AGENT_HANDOFF_PROTOCOL_V1.md"],
+    created_at: "2026-10-08T02:00:00.000Z",
+    signature: "STRUCTURAL_DRAFT_SIGNATURE_NOT_AUTHENTICATED",
+    ...overrides
+  };
+}
+
+function createK4168TestGate(store, overrides = {}) {
+  return createK4168TransitionGate({
+    store,
+    verifyPredecessorHandoff: async () => true,
+    verifySuccessorAcknowledgement: async () => true,
+    verifyExistingWorker: async () => true,
+    clock: () => "2026-10-08T02:00:00.000Z",
+    ...overrides
+  });
+}
+
+test("K4168 transition draft preserves identity and authority boundaries through restart", async () => {
+  const store = new MemoryUniverseStore();
+  let successorVerified = true;
+  const gate = createK4168TestGate(store, { verifySuccessorAcknowledgement: async () => successorVerified });
+  const draft = await gate.createDraft(k4168DraftInput(), "DOT");
+  assert.equal(draft.stage, "DRAFT");
+  assert.equal(draft.sameTechnicalInstance, false);
+  assert.equal(draft.successorCandidate.lifeId, null);
+  assert.equal(draft.successorCandidate.workerId, null);
+  assert.equal(draft.successorCandidate.employeeId, null);
+  assert.equal(draft.authorityInherited, false);
+  assert.deepEqual(Object.values(draft.inheritedAuthorities), Array(7).fill(false));
+
+  const handoff = k4168HandoffPackage();
+  const expectedHash = await hashK4168HandoffPackage(handoff);
+  const saved = await gate.saveHandoff({ transitionId: draft.transitionId, handoffPackage: handoff, endingSha: handoff.ending_sha, actorId: "WUJIE" });
+  assert.equal(saved.stage, "HANDOFF_SAVED");
+  assert.equal(saved.handoffHash, expectedHash);
+
+  await assert.rejects(
+    gate.verifyHandoff({ transitionId: draft.transitionId, handoffPackage: { ...handoff, actions_completed: ["CORRUPTED"] }, actorId: "DOT" }),
+    (error) => error.code === "K4168_HANDOFF_HASH_MISMATCH"
+  );
+  const verified = await gate.verifyHandoff({ transitionId: draft.transitionId, handoffPackage: handoff, actorId: "DOT" });
+  assert.equal(verified.stage, "HASH_VERIFIED");
+
+  await assert.rejects(
+    gate.recordLineageDecision({ transitionId: draft.transitionId, decisionEvidenceHash: "2".repeat(64), actorId: "WUJIE" }),
+    (error) => error.code === "K4168_STAGE_CONFLICT"
+  );
+  const wrongAck = {
+    ack_id: "ACK-WRONG-001", transition_id: draft.transitionId, handoff_id: handoff.handoff_id,
+    acknowledged_by_instance_id: "INSTANCE-WRONG", acknowledged_by_thread_id: "THREAD-CHENGYAO-CANDIDATE",
+    acknowledged_at: "2026-10-08T02:01:00.000Z", main_sha_at_ack: handoff.ending_sha,
+    handoff_sha256: expectedHash, staleness_result: "CURRENT", required_next_actions_accepted: true
+  };
+  await assert.rejects(gate.acknowledgeSuccessor({ transitionId: draft.transitionId, acknowledgement: wrongAck, actorId: "UNKNOWN" }), (error) => error.code === "K4168_WRONG_SUCCESSOR");
+
+  const acknowledgement = {
+    ack_id: "ACK-CHENGYAO-001", transition_id: draft.transitionId, handoff_id: handoff.handoff_id,
+    acknowledged_by_instance_id: "INSTANCE-CHENGYAO-CANDIDATE", acknowledged_by_thread_id: "THREAD-CHENGYAO-CANDIDATE",
+    acknowledged_at: "2026-10-08T02:01:00.000Z", main_sha_at_ack: handoff.ending_sha,
+    handoff_sha256: expectedHash, staleness_result: "CURRENT", required_next_actions_accepted: true
+  };
+  await assert.rejects(
+    gate.acknowledgeSuccessor({ transitionId: draft.transitionId, acknowledgement: { ...acknowledgement, main_sha_at_ack: "9".repeat(40), staleness_result: "STALE" }, actorId: "CHENGYAO_CANDIDATE" }),
+    (error) => error.code === "K4168_STALE_HANDOFF"
+  );
+  successorVerified = false;
+  await assert.rejects(
+    gate.acknowledgeSuccessor({ transitionId: draft.transitionId, acknowledgement, actorId: "CHENGYAO_CANDIDATE" }),
+    (error) => error.code === "K4168_SUCCESSOR_ACK_UNVERIFIED"
+  );
+  successorVerified = true;
+  const acknowledged = await gate.acknowledgeSuccessor({ transitionId: draft.transitionId, acknowledgement, actorId: "CHENGYAO_CANDIDATE" });
+  assert.equal(acknowledged.stage, "SUCCESSOR_ACKNOWLEDGED");
+  await assert.rejects(gate.acknowledgeSuccessor({ transitionId: draft.transitionId, acknowledgement, actorId: "CHENGYAO_CANDIDATE" }), (error) => error.code === "K4168_STAGE_CONFLICT");
+
+  const reviewed = await gate.recordLineageDecision({ transitionId: draft.transitionId, decisionEvidenceHash: "2".repeat(64), actorId: "WUJIE_REVIEW" });
+  assert.equal(reviewed.stage, "LINEAGE_REVIEWED");
+  assert.equal(reviewed.lineageDecision, "ENGINEERING_AND_KNOWLEDGE_LINEAGE_CANDIDATE_ONLY");
+  await assert.rejects(
+    gate.revalidateWorker({ transitionId: draft.transitionId, existingWorkerId: "chengyao-worker", evidenceHash: "3".repeat(64), actorId: "GM" }),
+    (error) => error.code === "K4168_WORKER_BINDING_NOT_CANONICAL"
+  );
+
+  const restartedGate = createK4168TestGate(store, { clock: () => "2026-10-08T02:02:00.000Z" });
+  assert.equal((await restartedGate.get(draft.transitionId)).stage, "LINEAGE_REVIEWED");
+  assert.equal(await restartedGate.verifyHistory(draft.transitionId), true);
+  const readiness = await restartedGate.evaluateResume(draft.transitionId);
+  assert.equal(readiness.status, "ENGINEERING_DRAFT_HOLD");
+  assert.deepEqual(readiness.blockers, [
+    "WORKER_REVALIDATION_INCOMPLETE",
+    "HUMAN_CANONICAL_APPROVAL_PENDING",
+    "SUCCESSOR_LIFE_ID_NOT_ISSUED",
+    "SUCCESSOR_WORKER_ID_NOT_VERIFIED"
+  ]);
+});
+
+test("K4168 transition fails closed for duplicate identities, stale handoff and unavailable predecessor", async () => {
+  const duplicateStore = new MemoryUniverseStore();
+  const duplicateGate = createK4168TestGate(duplicateStore, { verifyExistingWorker: async () => false, clock: () => "2026-10-08T03:00:00.000Z" });
+  await assert.rejects(
+    duplicateGate.createDraft(k4168DraftInput({ successorCandidate: { displayName: "承曜", instanceId: "INSTANCE-WUJIE-PREDECESSOR", threadId: "THREAD-CHENGYAO-CANDIDATE" } }), "DOT"),
+    (error) => error.code === "K4168_DUPLICATE_IDENTITY"
+  );
+
+  const store = new MemoryUniverseStore();
+  const gate = createK4168TestGate(store, { verifyExistingWorker: async () => false, clock: () => "2026-10-08T03:00:00.000Z" });
+  const draft = await gate.createDraft(k4168DraftInput({ transitionId: "K4168-TRANSITION-UNAVAILABLE-001" }), "DOT");
+  const unavailable = await gate.markPredecessorUnavailable({ transitionId: draft.transitionId, evidenceHash: "4".repeat(64), actorId: "DOT" });
+  assert.equal(unavailable.stage, "HOLD_PREDECESSOR_UNAVAILABLE");
+  assert.equal(unavailable.predecessorAvailability, "UNAVAILABLE");
+  assert.equal((await gate.evaluateResume(draft.transitionId)).status, "ENGINEERING_DRAFT_HOLD");
+  await assert.rejects(
+    gate.saveHandoff({ transitionId: draft.transitionId, handoffPackage: k4168HandoffPackage(), endingSha: "1".repeat(40), actorId: "UNKNOWN" }),
+    (error) => error.code === "K4168_STAGE_CONFLICT"
+  );
+
+  const staleStore = new MemoryUniverseStore();
+  const staleGate = createK4168TestGate(staleStore, { verifyExistingWorker: async () => false, clock: () => "2026-10-08T03:00:00.000Z" });
+  const staleDraft = await staleGate.createDraft(k4168DraftInput({ transitionId: "K4168-TRANSITION-STALE-001" }), "DOT");
+  await assert.rejects(
+    staleGate.saveHandoff({
+      transitionId: staleDraft.transitionId,
+      handoffPackage: k4168HandoffPackage({ signature: "" }),
+      endingSha: "1".repeat(40), actorId: "WUJIE"
+    }),
+    (error) => error.code === "K4168_PREDECESSOR_ACK_REQUIRED"
+  );
+  await assert.rejects(
+    staleGate.saveHandoff({
+      transitionId: staleDraft.transitionId,
+      handoffPackage: k4168HandoffPackage({ to_instance_id_if_known: "INSTANCE-WRONG" }),
+      endingSha: "1".repeat(40), actorId: "WUJIE"
+    }),
+    (error) => error.code === "K4168_WRONG_SUCCESSOR"
+  );
+  await assert.rejects(
+    staleGate.saveHandoff({
+      transitionId: staleDraft.transitionId,
+      handoffPackage: k4168HandoffPackage({ base_sha: "9".repeat(40) }),
+      endingSha: "1".repeat(40), actorId: "WUJIE"
+    }),
+    (error) => error.code === "K4168_HANDOFF_BINDING_INVALID"
+  );
+  assert.equal((await staleGate.get(staleDraft.transitionId)).stage, "DRAFT");
+
+  const unverifiedStore = new MemoryUniverseStore();
+  const unverifiedGate = createK4168TestGate(unverifiedStore, { verifyPredecessorHandoff: async () => false });
+  const unverifiedDraft = await unverifiedGate.createDraft(k4168DraftInput({ transitionId: "K4168-TRANSITION-UNVERIFIED-001" }), "DOT");
+  await assert.rejects(
+    unverifiedGate.saveHandoff({ transitionId: unverifiedDraft.transitionId, handoffPackage: k4168HandoffPackage(), endingSha: "1".repeat(40), actorId: "WUJIE" }),
+    (error) => error.code === "K4168_PREDECESSOR_ACK_UNVERIFIED"
+  );
+  assert.equal((await unverifiedGate.get(unverifiedDraft.transitionId)).stage, "DRAFT");
+});
+
+test("K4168 existing Worker revalidation is reachable without issuing identity or resume authority", async () => {
+  const store = new MemoryUniverseStore();
+  const gate = createK4168TestGate(store);
+  const draft = await gate.createDraft(k4168DraftInput({
+    transitionId: "K4168-TRANSITION-EXISTING-WORKER-001",
+    successorCandidate: {
+      displayName: "Registered Worker Candidate",
+      instanceId: "INSTANCE-REGISTERED-WORKER-CANDIDATE",
+      threadId: "THREAD-REGISTERED-WORKER-CANDIDATE",
+      existingWorkerCandidateRef: "verified-worker-01"
+    }
+  }), "DOT");
+  const handoff = k4168HandoffPackage({
+    handoff_id: "HANDOFF-EXISTING-WORKER-001",
+    to_instance_id_if_known: "INSTANCE-REGISTERED-WORKER-CANDIDATE"
+  });
+  const saved = await gate.saveHandoff({ transitionId: draft.transitionId, handoffPackage: handoff, endingSha: handoff.ending_sha, actorId: "WUJIE" });
+  await gate.verifyHandoff({ transitionId: draft.transitionId, handoffPackage: handoff, actorId: "DOT" });
+  const handoffHash = saved.handoffHash;
+  await gate.acknowledgeSuccessor({
+    transitionId: draft.transitionId,
+    acknowledgement: {
+      ack_id: "ACK-EXISTING-WORKER-001",
+      transition_id: draft.transitionId,
+      handoff_id: handoff.handoff_id,
+      acknowledged_by_instance_id: "INSTANCE-REGISTERED-WORKER-CANDIDATE",
+      acknowledged_by_thread_id: "THREAD-REGISTERED-WORKER-CANDIDATE",
+      acknowledged_at: "2026-10-08T02:01:00.000Z",
+      main_sha_at_ack: handoff.ending_sha,
+      handoff_sha256: handoffHash,
+      staleness_result: "CURRENT",
+      required_next_actions_accepted: true
+    },
+    actorId: "REGISTERED_WORKER_CANDIDATE"
+  });
+  await gate.recordLineageDecision({ transitionId: draft.transitionId, decisionEvidenceHash: "5".repeat(64), actorId: "WUJIE_REVIEW" });
+
+  const restartedGate = createK4168TestGate(store, { clock: () => "2026-10-08T02:03:00.000Z" });
+  const revalidated = await restartedGate.revalidateWorker({
+    transitionId: draft.transitionId,
+    existingWorkerId: "verified-worker-01",
+    evidenceHash: "6".repeat(64),
+    actorId: "GM"
+  });
+  assert.equal(revalidated.stage, "WORKER_REVALIDATED");
+  assert.equal(revalidated.workerRevalidation.status, "VERIFIED_EXISTING_WORKER");
+  assert.equal(revalidated.successorCandidate.workerId, null);
+  assert.equal(revalidated.successorCandidate.lifeId, null);
+  assert.equal(revalidated.resumeAuthorized, false);
+  assert.equal(await restartedGate.verifyHistory(draft.transitionId), true);
+  assert.deepEqual((await restartedGate.evaluateResume(draft.transitionId)).blockers, [
+    "HUMAN_CANONICAL_APPROVAL_PENDING",
+    "SUCCESSOR_LIFE_ID_NOT_ISSUED"
+  ]);
+});
 
 async function withIndexedDb(fakeIndexedDb, callback) {
   const original = globalThis.indexedDB;
