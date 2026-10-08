@@ -176,6 +176,12 @@ function validateDigitalAntPersistentState(ant,{expectedLifeId=null}={}){
   if(!ant||typeof ant!=='object'||!String(ant.lifeId||''))throw new Error('INVALID_DIGITAL_ANT_STATE');
   if(expectedLifeId&&String(ant.lifeId)!==String(expectedLifeId))throw new Error('DIGITAL_ANT_LIFE_ID_MISMATCH');
   if(!ant.cargo||!Number.isSafeInteger(ant.cargo.amount)||ant.cargo.amount<0)throw new Error('INVALID_DIGITAL_ANT_CARGO');
+  const finiteFields=(value,fields,error)=>{if(!value||typeof value!=='object'||fields.some(field=>!Number.isFinite(value[field])))throw new Error(error)};
+  finiteFields(ant.finance,['earned','spent','tips','freight','fuel','salary','maintenance','risk','time','lastNet'],'INVALID_DIGITAL_ANT_FINANCE');
+  finiteFields(ant.payroll,['earned','paid','balance'],'INVALID_DIGITAL_ANT_PAYROLL');
+  if(!String(ant.payroll.currency||'')||!String(ant.payroll.scope||'')||!(ant.payroll.lastReceiptId===null||typeof ant.payroll.lastReceiptId==='string'))throw new Error('INVALID_DIGITAL_ANT_PAYROLL');
+  finiteFields(ant.vehicle,['maxOperationalEnergy','operationalEnergy'],'INVALID_DIGITAL_ANT_VEHICLE');
+  if(!String(ant.vehicle.vehicleId||'')||!String(ant.vehicle.type||'')||!String(ant.vehicle.propulsion||'')||typeof ant.vehicle.independentLife!=='boolean'||!(ant.vehicle.lifeId===null||typeof ant.vehicle.lifeId==='string')||ant.vehicle.maxOperationalEnergy<=0||ant.vehicle.operationalEnergy<0||ant.vehicle.operationalEnergy>ant.vehicle.maxOperationalEnergy)throw new Error('INVALID_DIGITAL_ANT_VEHICLE');
   if(!ant.cargoRisk||!Array.isArray(ant.cargoRisk.incidents)||!Array.isArray(ant.cargoRisk.replayKeys)||!Number.isFinite(ant.cargoRisk.reserveKaios)||ant.cargoRisk.reserveKaios<0)throw new Error('INVALID_DIGITAL_ANT_RISK_STATE');
   if(!Array.isArray(ant.cargoRisk.resolvedPolicies))throw new Error('INVALID_DIGITAL_ANT_POLICY_ARCHIVE');
   if(ant.mission){

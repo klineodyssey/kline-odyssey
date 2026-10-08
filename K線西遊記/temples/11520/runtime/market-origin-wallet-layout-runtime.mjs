@@ -10,7 +10,7 @@ let walletInitial=null,utilityBound=false,walletWasOpen=false;
 const settingsOpen=()=>document.documentElement.classList.contains('k11520SettingsOpen');
 function put(el,key,value){if(el.style.getPropertyValue(key)!==value||el.style.getPropertyPriority(key)!=='important')el.style.setProperty(key,value,'important')}
 const MOBILE={utilityBottom:150,raidBottom:198,deliveryBottom:246,dockBottom:294,gameBottom:342,walletBottom:390,chatBottom:438,bgmBottom:486,aiBottom:534,bagBottom:582,masterBottom:102,portalBottom:630};
-const OPTIONAL_UTILITIES=['#dock','#gameModeToggle','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#k11520HudCollapseAll','#kaiosPortalButton'];
+const OPTIONAL_UTILITIES=['#whiteholeEscortButton','#dock','#gameModeToggle','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#k11520HudCollapseAll','#kaiosPortalButton'];
 function installStyle(){let s=$('#k11520StableWalletRailStyle');if(!s){s=document.createElement('style');s.id='k11520StableWalletRailStyle';document.head.appendChild(s)}const css=`
 #walletToggle{position:fixed!important;right:5px!important;top:auto!important;bottom:${MOBILE.walletBottom}px!important;left:auto!important;transform:none!important;z-index:9990!important;width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;pointer-events:auto!important;visibility:visible!important;opacity:1!important;font-size:21px!important;line-height:1!important}
 @media(max-width:600px){
@@ -58,20 +58,20 @@ function pinMobileUtilityStack(){
     // Restore a distinct desktop context lane, including after rotating out of
     // compact mode. This same owner must clear every previous inline anchor.
     const collapsed=document.documentElement.classList.contains('k11520HudCollapsed')||settingsOpen();
-    for(const [selector,top]of [['#k11520UtilityMaster',218],['#cargoInterceptionButton',274],['#homeDeliveryButton',330]]){
+    for(const [selector,top]of [['#k11520UtilityMaster',218],['#cargoInterceptionButton',274],['#homeDeliveryButton',330],['#whiteholeEscortButton',386]]){
       const el=$(selector);if(!el)continue;
-      const idle=(selector==='#cargoInterceptionButton'||selector==='#homeDeliveryButton')&&el.dataset.worldContext!=='true';
+      const idle=selector==='#whiteholeEscortButton'||((selector==='#cargoInterceptionButton'||selector==='#homeDeliveryButton')&&el.dataset.worldContext!=='true');
       const values={position:'fixed',top:`${top}px`,bottom:'auto',left:'auto',right:'64px',transform:'none',width:'44px',height:'44px',minWidth:'44px',minHeight:'44px',maxWidth:'44px',maxHeight:'44px',boxSizing:'border-box',margin:'0',padding:'0',zIndex:'9991',display:collapsed||(!open&&idle)?'none':'grid',placeItems:'center',visibility:'visible',opacity:'1',pointerEvents:'auto'};
       for(const [key,value]of Object.entries(values))put(el,key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),value);
       if(selector==='#k11520UtilityMaster')for(const [key,value]of Object.entries({border:'1px solid #68e4ff66',borderRadius:'13px',background:'#101923ef',color:'#dffaff',font:'900 18px system-ui',touchAction:'manipulation'}))put(el,key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),value);
     }
     return;
   }
-  const landscapeOpen=[['#k11520UtilityMaster',18,5,9993],['#cargoInterceptionButton',18,53,9991],['#homeDeliveryButton',18,101,9991],['#dock',18,149,9980],['#gameModeToggle',66,5,9979],['#walletToggle',66,53,9990],['#chatHandle',66,101,9978],['#bgmButton',66,149,9977],['#aiChatButton',114,5,9976],['#backpackButton',114,53,9975],['#k11520HudCollapseAll',114,101,9992],['#kaiosPortalButton',114,149,9974]];
+  const landscapeOpen=[['#k11520UtilityMaster',18,5,9993],['#cargoInterceptionButton',18,53,9991],['#homeDeliveryButton',18,101,9991],['#dock',18,149,9980],['#gameModeToggle',66,5,9979],['#walletToggle',66,53,9990],['#chatHandle',66,101,9978],['#bgmButton',66,149,9977],['#aiChatButton',114,5,9976],['#backpackButton',114,53,9975],['#k11520HudCollapseAll',114,101,9992],['#kaiosPortalButton',114,149,9974],['#whiteholeEscortButton',162,5,9973]];
   const landscapeClosed=[['#k11520UtilityMaster',18,5,9993],['#cargoInterceptionButton',66,5,9991],['#homeDeliveryButton',114,5,9991]];
   // FULL portrait uses the existing rail as a compact 3-column tray below the
   // World/Life row. This keeps 44px targets without reaching into market cards.
-  const portraitOpen=[['#dock',294,101,9980],['#gameModeToggle',294,53,9979],['#walletToggle',294,5,9990],['#aiChatButton',342,101,9976],['#bgmButton',342,53,9977],['#chatHandle',342,5,9978],['#kaiosPortalButton',390,101,9974],['#k11520HudCollapseAll',390,53,9992],['#backpackButton',390,5,9975],['#k11520UtilityMaster',MOBILE.utilityBottom,5,9993],['#cargoInterceptionButton',MOBILE.raidBottom,5,9991],['#homeDeliveryButton',MOBILE.deliveryBottom,5,9991]];
+  const portraitOpen=[['#dock',294,101,9980],['#gameModeToggle',294,53,9979],['#walletToggle',294,5,9990],['#aiChatButton',342,101,9976],['#bgmButton',342,53,9977],['#chatHandle',342,5,9978],['#kaiosPortalButton',390,101,9974],['#k11520HudCollapseAll',390,53,9992],['#backpackButton',390,5,9975],['#whiteholeEscortButton',438,101,9973],['#k11520UtilityMaster',MOBILE.utilityBottom,5,9993],['#cargoInterceptionButton',MOBILE.raidBottom,5,9991],['#homeDeliveryButton',MOBILE.deliveryBottom,5,9991]];
   const portraitClosed=[['#k11520UtilityMaster',MOBILE.utilityBottom,5,9993],['#cargoInterceptionButton',MOBILE.raidBottom,5,9991],['#homeDeliveryButton',MOBILE.deliveryBottom,5,9991]];
   const specs=landscape?(open?landscapeOpen:landscapeClosed):(open?portraitOpen:portraitClosed),hudCollapsed=document.documentElement.classList.contains('k11520HudCollapsed');
   for(const [selector,bottom,right,zIndex]of specs){

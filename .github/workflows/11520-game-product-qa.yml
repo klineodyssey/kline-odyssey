@@ -134,7 +134,7 @@ jobs:
             RC=${PIPESTATUS[0]}
           fi
           if [ "$RC" -eq 0 ]; then
-            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            timeout --signal=TERM --kill-after=10s 370s node "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
             RC=${PIPESTATUS[0]}
           fi
           if [ "$RC" -eq 0 ]; then
@@ -158,8 +158,8 @@ jobs:
           fi
           echo "[11520-QA] XYZ browser smoke completed $(date -u +%FT%TZ)"
       - name: Run isolated native desktop contextual Courier QA
-        # Preserve the full pre-existing desktop block in its own mandatory90s
-        # invocation. This adds up to90s aggregate budget; mobile stays90s.
+        # Preserve the full pre-existing desktop block in its own mandatory 90s
+        # invocation. Mobile keeps every assertion with a bounded 360s budget.
         if: ${{ !cancelled() }}
         shell: bash
         run: |

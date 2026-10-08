@@ -11,6 +11,7 @@ const html=read('../game-5d.html');
 const main=read('../runtime/game-5d-main.mjs');
 const mobileShell=read('../runtime/game-mobile-shell.mjs');
 const logistics=read('../runtime/digital-ant-logistics-runtime.mjs');
+const marketLayout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
 const walletRuntime=read('../runtime/evm-wallet-runtime.mjs');
 test('dodge tries safe alternatives without bypassing midpoint or endpoint collision',()=>{
   const dodge=main.split("$('#dodge').onclick=")[1]?.split('\n')[0]||'';
@@ -174,6 +175,9 @@ test('Player Courier exposes explicit local-only Bandit mode, raid action and on
   assert.ok(mobileShell.includes("kind:'TREASURE',treasureClass:'CARGO_CRATE'"),'loot crate must use the existing backpack item model');
   assert.ok(mobileShell.includes('#courierInsuranceClaim{display:block;width:100%;min-height:44px'),'insurance claim must be a mobile-sized touch target');
   for(const token of ['whiteholeEscortButton','KAIOS-CARGO-WHITEHOLE-ESCORT-001','50,000 KAIOS','10 KGEN','SIMULATION_ONLY','formal worker ACK = false','kgen-margin-runtime.mjs'])assert.ok(mobileShell.includes(token),`missing white-hole escort disclosure or entry: ${token}`);
+  assert.ok(mobileShell.includes("playerPosition:globalThis.__K11520_WORLD_COORDS__?.physical"),'white-hole acceptance must use the live canonical player position');
+  assert.equal(mobileShell.includes('playerPosition:current.destination'),false,'white-hole acceptance must not substitute the mission destination for player position');
+  for(const token of ["source:'WHITEHOLE_ESCORT'","'#whiteholeEscortButton',438,101","'#whiteholeEscortButton',162,5","html:not(.k11520UtilitiesOpen) #whiteholeEscortButton"])assert.ok((mobileShell+marketLayout).includes(token),`white-hole shortcut must stay in the existing utility lane: ${token}`);
   for(const token of ['atmReceipt','acceptSimulatedAtmDeliveryReceipt','Existing receipt verified; no duplicate settlement','policy remains blocked'])assert.ok(mobileShell.includes(token),`missing standard ATM receipt lifecycle UI: ${token}`);
   for(const token of ['createWhiteholeEscortDemoOffer','reviewWhiteholeEscortDemoOffer','startWhiteholeEscort','advanceWhiteholeEscort','acceptWhiteholeEscortDestination','REVIEW_GATED_SIMULATED_RECEIVABLE','SUPPLY_MASS_RULE_NOT_MARKET_PRICE'])assert.ok(logistics.includes(token),`missing white-hole escort runtime gate: ${token}`);
   for(const token of ['acceptSimulatedAtmDeliveryReceipt','resolveCargoInsuranceAfterDelivery','UNRESOLVED_CARGO_POLICY_CLAIM','COMPLETED_NO_OPEN_CLAIM','premiumRefundKaios:0','evidenceRetained:true'])assert.ok(logistics.includes(token),`missing standard ATM receipt or policy-resolution gate: ${token}`);
