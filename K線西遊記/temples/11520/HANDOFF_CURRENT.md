@@ -1,3 +1,41 @@
+## White-hole cargo escort M1 candidate — 2026-10-08
+
+- Work/claim: `KAIOS-CARGO-WHITEHOLE-ESCORT-001` /
+  `CLAIM-KAIOS-CARGO-WHITEHOLE-ESCORT-001-CODEX-20261008`, branch
+  `codex/kaios-cargo-whitehole-escort-001`, base
+  `94932522401e94406c17c7b9e7593fdb351fe598`.
+- Existing owners only: Player Courier persistence/accounting,
+  `digital-ant-logistics-runtime.mjs`, `game-mobile-shell.mjs`, and the existing
+  `kgen-margin-runtime.mjs` financial boundary. No dispatcher, token, ledger,
+  Runtime CURRENT, Universe Map or settlement owner was created.
+- Playable path: simulation request -> simulation reviewer -> load 50,000 KAIOS
+  -> escort/LONG/SHORT choice -> five local movement steps -> exact destination
+  acceptance -> one persistent receipt.
+- Coordinates remain exact decimal B4 metadata. The same-axis model records
+  `deltaK=0.00006576 -> 1.496810990052 m`; this is not registered land, a
+  spherical arc, full flight length or integer K12345/K18921 route.
+- Accounting: cargo principal is 50,000 KAIOS and never MARGIN/PNL collateral.
+  Freight is 10 KGEN `REVIEW_GATED_SIMULATED_RECEIVABLE`, unpaid and unconverted.
+  The 1 KGEN -> 1000 KAIOS white-hole rule is supply-mass metadata only.
+- Safety: simulation role is not a formal Worker ACK; no wallet debit, provider,
+  signer, Treasury, payment, Mainnet, real asset, KUFO/KSHIP deployment or chain
+  write. `tests/11520-browser-settlement.mjs` is untouched.
+- Verification: runtime suite 82/82; browser smoke passed in real headless
+  Chromium with direct 390x844 and 844x390 receipt screenshots. Exact-head CI
+  and independent technical review remain release gates. Draft PR only; merge
+  remains held for parent integration ordering.
+- #543 receipt follow-up: standard ATM deliveries now expose a simulation-only
+  destination acceptance action. A no-policy trip or a no-open-claim insured
+  trip can legally close and start a second mission after state reload. Insurance
+  resolution archives the policy and releases only its local simulation reserve;
+  it performs no refund or asset transfer. An open eligible claim retains policy,
+  reserve and evidence across browser reload and remains blocked by the existing
+  assignment guard. Invalid evidence, failed write/read-back, record removal and
+  stale-tab revision conflicts enter review-required state; every cargo mutation
+  remains blocked rather than overwriting persisted mission or claim evidence.
+- Current runtime verification after the follow-up: 82/82. Existing headless
+  Chromium smoke includes a real page reload with an open insured claim.
+
 ## P0 simulation order availability candidate — 2026-10-06
 
 - Human source: `KAIOS DOT — K11520 SIMULATION TRADING P0 GAMEPLAY REPAIR`,

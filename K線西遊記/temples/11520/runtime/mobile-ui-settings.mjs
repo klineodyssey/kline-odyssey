@@ -29,7 +29,7 @@ let profile='MINIMAL',marketOpen=false,marketTimer=0,marketPointers=new Set();
 // Human 2026-10-05 12:43: hide/inert the background right HUD while
 // Settings owns the foreground, including partly covered C/lots/Y rails.
 // Preserve each organ's values/preferences; this owns only interaction.
-const SETTINGS_BACKGROUND='#k11520UtilityMaster,#cargoInterceptionButton,#homeDeliveryButton,#dock,#gameModeToggle,#walletToggle,#walletPanel,#chatHandle,#gameChat,#bgmButton,#aiChatButton,#aiChatPanel,#backpackButton,#backpackPanel,#k11520HudCollapseAll,#kaiosPortalButton,#playerCourierDetails,#playerBanditPanel,#k11520RealTradePreflight,#cControl,#lotsControl,#yControl,.sliderDock,.controls';
+const SETTINGS_BACKGROUND='#k11520UtilityMaster,#cargoInterceptionButton,#homeDeliveryButton,#whiteholeEscortButton,#dock,#gameModeToggle,#walletToggle,#walletPanel,#chatHandle,#gameChat,#bgmButton,#aiChatButton,#aiChatPanel,#backpackButton,#backpackPanel,#k11520HudCollapseAll,#kaiosPortalButton,#playerCourierDetails,#playerBanditPanel,#k11520RealTradePreflight,#cControl,#lotsControl,#yControl,.sliderDock,.controls';
 const settingsInertBefore=new Map();
 let settingsWasOpen=false,settingsEscapeBound=false;
 function syncSettingsContext(){
