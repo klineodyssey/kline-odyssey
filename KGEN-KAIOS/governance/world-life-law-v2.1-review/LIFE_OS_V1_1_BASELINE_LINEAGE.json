@@ -1,0 +1,35 @@
+{
+  "artifact_id": "LIFE-OS-V1.1-BASELINE-LINEAGE-001",
+  "artifact_type": "APPEND_ONLY_BASELINE_LINEAGE",
+  "decision_id": "FRZ-HASH-001-OPTION-D",
+  "created_at": "2026-07-23T00:00:00+08:00",
+  "parent": {
+    "version": "LIFE-OS-V1.0",
+    "revision": "2026-07-16.1",
+    "manifest_path": "KGEN-KAIOS/life/life_os_architecture_baseline.json",
+    "manifest_sha256": "23f4f6bcac9230478d79b1c4eb0fa468288412353772bc83560fedf333740f63",
+    "readme_sha256": "cd56927bba9d54375e54887d64b952cef553c67783b6161c30a5814c87672490",
+    "publication_commit": "5baeb80d794ee5c1ec466d9c343f673fec868095",
+    "preserved": true,
+    "superseded": false
+  },
+  "child": {
+    "version": "LIFE-OS-V1.1",
+    "revision": "2026-07-23.1",
+    "manifest_path": "KGEN-KAIOS/life/life_os_architecture_baseline_v1_1.json",
+    "readme_sha256": "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60",
+    "status": "ARCHITECTURE_BASELINE_FROZEN_CANDIDATE",
+    "activation": "PENDING_HUMAN_MERGE_DECISION"
+  },
+  "transition": {
+    "classification": "LEGITIMATE_POST_FREEZE_DOCUMENT_UPDATE",
+    "reason": "APPEND_ONLY_NAVIGATION_UPDATE",
+    "source_commit": "e9fb9b462eb105ac1d455471a71753bc79c5d8c2",
+    "related_pr": 38,
+    "semantic_change": false,
+    "runtime_authority_change": false,
+    "freeze_authority_change": false,
+    "old_manifest_rewritten": false,
+    "old_artifacts_rewritten": false
+  }
+}
