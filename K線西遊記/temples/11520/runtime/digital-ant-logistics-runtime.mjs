@@ -301,6 +301,7 @@ export function quoteCargoInsurance({
 
 export function activateCargoInsurance(ant,quote,{policyId=`CARGO-POLICY-${Date.now()}`,premiumPaidKaios=0,reserveSource=''}={}){
   if(!ant?.mission)return {ok:false,reason:'MISSION_REQUIRED'};
+  if(ant.cargoRisk?.policy||n(ant.cargoRisk?.reserveKaios)>0||n(ant.cargoRisk?.policy?.premiumPaidKaios)>0)return {ok:false,reason:'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION'};
   if(!quote||quote.mode!=='UNDERWRITING_READY')return {ok:false,reason:'INDEPENDENT_RESERVE_REQUIRED'};
   if(whole(quote.cargoAmount,'POLICY_CARGO_AMOUNT')!==whole(ant.mission.amount,'MISSION_CARGO_AMOUNT'))return {ok:false,reason:'CARGO_POLICY_AMOUNT_MISMATCH'};
   if(String(reserveSource)!=='LOCAL_GAME_INSURANCE_RESERVE')return {ok:false,reason:'CARGO_PRINCIPAL_CANNOT_BE_RESERVE'};

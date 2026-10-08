@@ -671,6 +671,20 @@ test('Digital Ant insurance activation binds the existing exact cargo amount wit
   assert.deepEqual(ant,before,'rejected amount mismatch cannot create policy, reserve or premium evidence');
 });
 
+test('Digital Ant insurance activation cannot replace unresolved policy evidence',()=>{
+  const ant=createDigitalAnt({capital:20,cargoCapacity:6000});
+  const atms=buildAtmRegistry([{id:'ATM-POLICY-REPLAY',type:'ATM',x:1,y:1,z:1}]);
+  const mission=createDeliveryMission({missionId:'POLICY-REPLAY-MISSION',amount:1000,destinationAtmId:'ATM-POLICY-REPLAY',freightOffer:10});
+  assert.equal(assignDelivery(ant,mission,atms).ok,true);
+  const original=quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000});
+  assert.equal(activateCargoInsurance(ant,original,{policyId:'POLICY-REPLAY-ORIGINAL',premiumPaidKaios:original.premiumKaios,reserveSource:'LOCAL_GAME_INSURANCE_RESERVE'}).ok,true);
+  const before=structuredClone(ant);
+  const replacement=quoteCargoInsurance({cargoAmount:1000,coverageBps:0,reserveKaios:0});
+  assert.equal(replacement.mode,'UNDERWRITING_READY');
+  assert.equal(activateCargoInsurance(ant,replacement,{policyId:'POLICY-REPLAY-REPLACEMENT',premiumPaidKaios:replacement.premiumKaios,reserveSource:'LOCAL_GAME_INSURANCE_RESERVE'}).reason,'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION');
+  assert.deepEqual(ant,before,'rejected reactivation cannot replace policy, reserve or premium evidence');
+});
+
 test('player action creates one home-delivery demand at the canonical player-home XYZ',()=>{
   const destination=createPlayerHomeDestination({requestId:'HOME-QA-1',requesterLifeId:'KAIOS-P-HOME-1234567890',homePlotId:'KAIOS-H-HOME-1234567890',position:{x:4,y:0,z:-3}});
   assert.equal(destination.ok,true);assert.equal(destination.destination.kind,'PLAYER_HOME');assert.deepEqual({x:destination.destination.x,y:destination.destination.y,z:destination.destination.z},{x:4,y:0,z:-3});
