@@ -2129,6 +2129,8 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
   let acknowledgedAt = null;
   let workStartedAt = null;
   let reviewedAt = null;
+  let reviewerActorId = null;
+  let reviewerActorRole = null;
   const seenIds = new Set();
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index];
@@ -2171,7 +2173,10 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
     else if (event.EVENT_TYPE === "ACKNOWLEDGED") { lifecycle = "ACKNOWLEDGED"; ack = "ACKNOWLEDGED"; acknowledgedAt = event.OCCURRED_AT; }
     else if (event.EVENT_TYPE === "WORK_STARTED") { lifecycle = "WORKING"; execution = "WORK_STARTED"; workStartedAt = event.OCCURRED_AT; }
     else if (event.EVENT_TYPE === "RESULT_RECORDED") { lifecycle = "REVIEW"; execution = "RESULT_RECORDED"; review = "PENDING"; }
-    else if (event.EVENT_TYPE === "REVIEWED") { lifecycle = "REVIEWED"; review = "PASS"; reviewedAt = event.OCCURRED_AT; }
+    else if (event.EVENT_TYPE === "REVIEWED") {
+      lifecycle = "REVIEWED"; review = "PASS"; reviewedAt = event.OCCURRED_AT;
+      reviewerActorId = event.ACTOR_ID; reviewerActorRole = event.ACTOR_ROLE;
+    }
     else if (event.EVENT_TYPE === "GM_CLOSED") lifecycle = "CLOSED";
     else if (event.EVENT_TYPE === "STALE") { lifecycle = "STALE"; ack = "STALE"; execution = "STALE"; review = "STALE"; }
     else if (event.EVENT_TYPE === "SUPERSEDED") { lifecycle = "SUPERSEDED"; ack = "SUPERSEDED"; execution = "SUPERSEDED"; review = "SUPERSEDED"; }
@@ -2194,6 +2199,7 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
     DELIVERY_FAILURES: deliveryFailures, EVENT_COUNT: events.length,
     LAST_ACTOR_ID: lastActorId, LAST_ACTOR_ROLE: lastActorRole, LAST_EVENT_AT: lastEventAt,
     ACKNOWLEDGED_AT: acknowledgedAt, WORK_STARTED_AT: workStartedAt, REVIEWED_AT: reviewedAt,
+    REVIEWER_ACTOR_ID: reviewerActorId, REVIEWER_ACTOR_ROLE: reviewerActorRole,
     RUNTIME_EVIDENCE_TRUST: "NOT_VERIFIED",
     AUTOMATION_CLOSED_LOOP: "NOT_VERIFIED",
     PROGRESS_STATUS: lifecycle === "CLOSED" ? "TESTING" : ["FAILED", "STALE", "SUPERSEDED"].includes(lifecycle) ? "BLOCKED" : "IN_PROGRESS"
@@ -2397,7 +2403,7 @@ export function projectKaiosWorkforceRegistry({
     available_workers: Object.freeze(records.filter((record) => record.RUNTIME_STATUS === "AVAILABLE").map((record) => record.WORKER_ID)),
     automation_reachable_workers: Object.freeze(records.filter((record) => record.AUTOMATION_STATUS === "REACHABLE_VERIFIED").map((record) => record.WORKER_ID)),
     who_is_actually_coding: Object.freeze(records.filter((record) => record.RUNTIME_STATUS === "ACTIVE").map((record) => Object.freeze({ worker_id: record.WORKER_ID, work_id: record.CURRENT_WORK_ID }))),
-    who_is_reviewing: Object.freeze(official_message_lifecycles.filter((record) => record.REVIEW_STATUS === "PASS" && record.LAST_ACTOR_ID).map((record) => Object.freeze({ worker_id: record.LAST_ACTOR_ID, work_id: record.WORK_ID, status: "REVIEW_RECORDED" }))),
+    who_is_reviewing: Object.freeze(official_message_lifecycles.filter((record) => record.REVIEW_STATUS === "PASS" && record.REVIEWER_ACTOR_ID).map((record) => Object.freeze({ worker_id: record.REVIEWER_ACTOR_ID, work_id: record.WORK_ID, status: "REVIEW_RECORDED" }))),
     records: Object.freeze(records),
     source: "CURRENT_MAIN_REGISTRY_PLUS_VERIFIED_OFFICIAL_MESSAGE_EVENTS",
     direct_channel_evidence: endpointEvidence ? direct_channel_evidence_ref : "NOT_VERIFIED"

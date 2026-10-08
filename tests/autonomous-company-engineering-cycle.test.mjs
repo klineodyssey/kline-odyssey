@@ -534,16 +534,29 @@ test("official message fails closed on forged objects, invalid order, self-revie
 });
 
 test("company Heartbeat and Breath remain truthful when no worker automation endpoint is verified", async () => {
+  const closedMessage = await createKaiosOfficialMessageV1({
+    ...officialMessageInput,
+    MESSAGE_ID: "KAIOS-OFFICIAL-CLOSED-WORKFORCE-TEST",
+    TO: worker.worker_id,
+    ENDPOINT_ID: "automation-chatgpt-01"
+  });
+  const closedEvents = ["DELIVERED", "ACKNOWLEDGED", "WORK_STARTED", "RESULT_RECORDED", "REVIEWED", "GM_CLOSED"]
+    .map((type, index) => officialEvent(closedMessage, index + 1, type));
+  const closedLifecycle = projectKaiosOfficialMessageLifecycle({
+    message: closedMessage, events: closedEvents, observed_at: "2026-10-08T00:07:00Z"
+  });
   const workforce = projectKaiosWorkforceRegistry({
     repository_evidence: activeCompanyRepositoryEvidence,
     current_main_sha: MAIN_SHA,
     workers: [manager, worker, reviewer],
-    official_message_lifecycles: [],
+    official_message_lifecycles: [closedLifecycle],
     observed_at: "2026-10-08T02:00:00Z"
   });
   assert.equal(workforce.total_verified_workers, 3);
   assert.deepEqual(workforce.automation_reachable_workers, []);
   assert.ok(workforce.records.every((record) => record.AUTOMATION_STATUS === "NOT_VERIFIED"));
+  assert.deepEqual(workforce.who_is_reviewing, [{ worker_id: reviewer.worker_id, work_id: closedMessage.WORK_ID, status: "REVIEW_RECORDED" }]);
+  assert.notEqual(workforce.who_is_reviewing[0].worker_id, manager.worker_id);
 
   const clockRef = "KGEN-Organization/WorkOrders/KAIOS_COMPANY_DAY_CLOCK_TEST.json";
   const clockFiles = { ...fixtureFiles, [clockRef]: JSON.stringify({
