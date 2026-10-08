@@ -54,7 +54,7 @@
     "active_idle": 1,
     "waiting": 6,
     "offline": 6,
-    "suspended": 0,
+    "suspended": 1,
     "archived": 0
   },
   "agents": [
@@ -84,7 +84,7 @@
       "legacy_worker_id": "cursor-01",
       "name": "Cursor Primary Worker",
       "agent_type": "Cursor Agent",
-      "status": "LEGACY_SUSPENDED",
+      "status": "SUSPENDED",
       "activation_state": "NON_AUTHORITATIVE_SEE_WORKER_REGISTRY",
       "department": "Documentation",
       "office_desk": "Desk-002",
@@ -324,7 +324,7 @@
       "legacy_worker_id": "chatgpt-01",
       "name": "ChatGPT Legacy Agent Mapping",
       "agent_type": "ChatGPT Agent",
-      "status": "LEGACY_RECORD",
+      "status": "OFFLINE",
       "activation_state": "NON_AUTHORITATIVE_SEE_WORKER_REGISTRY",
       "department": "Documentation",
       "office_desk": "Desk-014",
