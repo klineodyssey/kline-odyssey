@@ -999,13 +999,30 @@ async function m1ReadOnlyBrowserQA(){
   const boot=page=>bootM1ReadOnlyPage(page,url);
   try{
     const absent=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+    let absentStage='BEFORE_NAVIGATION',diagnosticSequence=0;
+    const compactDiagnostic=value=>String(value??'').replace(/https?:\/\/[^\s"'<>]+/g,raw=>{try{const target=new URL(raw);return target.origin+target.pathname}catch{return'[URL]'}}).slice(0,4096);
+    const absentDiagnostics={firstError:null,firstConsoleError:null,firstPageError:null,firstRequestFailure:null};
+    const recordAbsentDiagnostic=(field,kind,detail)=>{
+      const entry={sequence:++diagnosticSequence,kind,...detail};
+      absentDiagnostics[field]??=entry;absentDiagnostics.firstError??=entry;
+    };
+    absent.on('console',message=>{if(message.type()==='error')recordAbsentDiagnostic('firstConsoleError','console',{message:compactDiagnostic(message.text())})});
+    absent.on('pageerror',error=>recordAbsentDiagnostic('firstPageError','pageerror',{message:compactDiagnostic(error.message),stack:compactDiagnostic(error.stack||error)}));
+    absent.on('requestfailed',request=>recordAbsentDiagnostic('firstRequestFailure','requestfailed',{url:compactDiagnostic(request.url()),resourceType:request.resourceType(),error:compactDiagnostic(request.failure()?.errorText||'REQUEST_FAILED')}));
+    await absent.addInitScript(()=>{
+      globalThis.__K11520_QA_LAST_BOOT_STATUS__=null;
+      const capture=()=>{const status=document.querySelector('#boot11520Status')?.textContent?.trim();if(status)globalThis.__K11520_QA_LAST_BOOT_STATUS__=status};
+      new MutationObserver(capture).observe(document,{childList:true,subtree:true,characterData:true});
+    });
     // The no-provider screen never requests the lazily loaded wallet codec.
     const finishAbsentPublicSource=publicSource?attachM1PageSourceProof(absent,{base,...publicSource,assets:publicSource.assets.filter(x=>x.path!=='K線西遊記/assets/ethers-5.7.2.umd.min.js'),createHash}):null;
     try{
-      await routeThree(absent);await boot(absent);
+      await routeThree(absent);absentStage='BOOT';await boot(absent);
       // Settings is a late bootstrap import and owns wallet visibility. Wait
       // for that real owner before asserting the no-provider UI is visible.
+      absentStage='UI_SETTINGS';
       await absent.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__,null,{timeout:15000});
+      absentStage='NO_PROVIDER_VISIBILITY';
       await absent.waitForFunction(()=>document.querySelector('#walletProviderHelp')?.hidden===false);
       if(!await absent.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await absent.locator('#k11520UtilityMaster').click();
       if(await absent.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await absent.locator('#walletToggle').click();
@@ -1014,7 +1031,16 @@ async function m1ReadOnlyBrowserQA(){
       await absent.waitForFunction(()=>document.querySelector('#walletM1ReadOnly')?.disabled===false&&document.querySelector('#k11520RealTradePreflight'));
       await absent.screenshot({path:`${out}/390x844-no-injected-wallet.png`});
       if(finishAbsentPublicSource)await fs.writeFile(out+'/no-provider-source.json',JSON.stringify(await finishAbsentPublicSource(),null,2));
-    }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message),publicBrowserSource:finishAbsentPublicSource?.snapshot()??null},null,2));throw error}finally{await absent.close()}
+    }catch(error){
+      await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`}).catch(()=>{});
+      const runtimeState=await absent.evaluate(()=>{
+        const text=selector=>document.querySelector(selector)?.textContent?.trim()||null;
+        return {documentReadyState:document.readyState,charState:text('#charState'),bootStatus:text('#boot11520Status')||globalThis.__K11520_QA_LAST_BOOT_STATUS__||null,
+          runtimeMarkers:{execution:!!globalThis.__K11520_EXECUTION__,uiSettings:!!globalThis.__K11520_UI_SETTINGS__,simulationExchange:!!globalThis.__K11520_SIMULATION_EXCHANGE__,signedCImmersive:!!globalThis.__K11520_SIGNED_C_IMMERSIVE__,control3d:!!globalThis.__K11520_3D_CONTROL__,marketOriginRuntime:!!globalThis.__K11520_MARKET_ORIGIN_RUNTIME__},
+          serviceWorkerControllerUrl:navigator.serviceWorker?.controller?.scriptURL||null};
+      }).catch(inspectError=>({inspectionError:compactDiagnostic(inspectError.message||inspectError)}));
+      await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({stage:absentStage,message:compactDiagnostic(error.message),...absentDiagnostics,...runtimeState,publicBrowserSource:finishAbsentPublicSource?.snapshot()??null},null,2));throw error
+    }finally{await absent.close()}
     for(const [width,height]of[[360,740],[390,844],[412,772],[432,856],[480,900],[844,390]]){
       const state={account:accounts[width===390?0:1],chain:'0x1',connected:true},methods=[],forbidden=[],errors=[],phaseCounts={M1:{},LEGACY:{},INITIAL:{}};let logFallbacks=0,phase='INITIAL';
       const consoleErrors=[],requestFailures=[],evidence=[],rpcDiagnostics=createM1RpcDiagnostics();let stage='BOOT';
