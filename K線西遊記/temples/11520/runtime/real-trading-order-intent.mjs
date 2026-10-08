@@ -89,8 +89,28 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   const run=(fn,mutating=false)=>{try{if(mutating)options.beforeMutation?.();const result=fn();if(result.ok&&mutating)options.afterMutation?.();return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){return executionFailure(error)}};
   const fallback=options.simulationFallback===true;
   let publicMarketQuality=publicMarketQuoteSetStatus(null,{symbols:PUBLIC_MARKET_SYMBOLS});
+  const pinColdSimulationSource=now=>{
+    if(!fallback)return;
+    const book=simulationSnapshot(ledger),draft=structuredClone(ledger);let changed=false;
+    for(const market of PUBLIC_MARKET_SYMBOLS){
+      if(book.observations[market])continue;
+      const active=book.orders.some(order=>order.market===market&&order.status==='PENDING')||book.positions.some(position=>position.market===market&&position.status==='OPEN');
+      if(active)continue;
+      const observation=deterministicSimulationObservation({market,now}),result=observeSimulationPrice(draft,{...observation,observedAt:observation.at,now,productV1:options.productV1===true});
+      if(!result.ok)throw new Error(result.reason||'SIMULATION_SOURCE_PIN_FAILED');
+      changed=true;
+    }
+    if(!changed)return;
+    options.beforeMutation?.();Object.assign(ledger,draft);options.afterMutation?.();
+  };
   const updatePublicMarketQuality=(observations,{now=Date.now()}={})=>{
     publicMarketQuality=publicMarketQuoteSetStatus(observations,{symbols:PUBLIC_MARKET_SYMBOLS,now});
+    // A cold local book keeps the pre-existing deterministic source identity so
+    // offline gameplay and persisted source pinning remain inspectable. This
+    // establishes no order, position, margin, PnL or receipt and never advances
+    // an existing observation; the admission gate below still blocks every
+    // price-dependent transition while the public set is abnormal.
+    if(!publicMarketQuality.allowsPriceTransitions)pinColdSimulationSource(now);
     return publicMarketQuality;
   };
   const currentPublicMarketQuality=now=>publicMarketQuoteSetStatus(publicMarketQuality.rows,{symbols:PUBLIC_MARKET_SYMBOLS,now});

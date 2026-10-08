@@ -202,9 +202,11 @@ function syncMarketKLabels(){
   $('#feed').textContent=`${label} · ${market.status==='LIVE'?'參考價 / SIM':'MARKET DATA STALE'}${simulationLocal?' · SIM LOCAL':''}`;
   $('#feed').title='V1 · |C| 0.001–1 · SIMULATION ONLY · >1C production locked · 免費 REST 參考行情，非低延遲結算 Oracle';
   const selectedMarket=market.markets.find(row=>row.axis===S.axis)||market.markets[0],feedState=publicMarketQuoteSetStatus(publicObservations,{symbols:MARKETS}),selectedFeed=feedState.rows[selectedMarket?.symbol];
-  const feedSource=selectedFeed?.source===PUBLIC_MARKET_QUOTE_SOURCE.id?'BINANCE FREE':'UNAVAILABLE',feedTime=Number.isSafeInteger(selectedFeed?.updatedAt)?`${new Date(selectedFeed.updatedAt).toISOString().slice(11,19)}Z`:'--',feedFailure=selectedFeed?.failure?'YES':'NO';
-  const legacyFeedStatus=feedState.quality==='FRESH'?'MARKET DATA LIVE':'MARKET DATA STALE';
-  $('#feed').textContent=`${legacyFeedStatus} | FREE ${feedState.quality} | ${selectedMarket?.symbol||'NO MARKET'} | SRC ${feedSource} | TIME ${feedTime} | STALE ${selectedFeed?.stale?'YES':'NO'} | FAIL ${feedFailure}${simulationLocal?' | SIM LOCAL':''}`;
+  const feedSource=selectedFeed?.source===PUBLIC_MARKET_QUOTE_SOURCE.id?'BINANCE FREE':'UNAVAILABLE',feedTime=Number.isSafeInteger(selectedFeed?.updatedAt)?`${new Date(selectedFeed.updatedAt).toISOString().slice(11,19)}Z`:'--',feedFailure=selectedFeed?.failure?'Y':'N',feedMarket=selectedMarket?.symbol?.replace(/USDT$/,'')||'--';
+  // Keep every required quality field visible without expanding the landscape
+  // telemetry owner into the parameter rails. Full per-market evidence remains
+  // available in the title and __K11520_FREE_ORACLE__ inspection surface.
+  $('#feed').textContent=`FREE ${feedState.quality} | ${feedMarket} | SRC ${feedSource} | TIME ${feedTime} | STALE ${selectedFeed?.stale?'Y':'N'} | FAIL ${feedFailure}${simulationLocal?' | SIM LOCAL':''}`;
   $('#feed').title=MARKETS.map(symbol=>{const row=feedState.rows[symbol];return `${symbol} SOURCE=${row.source||'UNAVAILABLE'} TIME=${Number.isSafeInteger(row.updatedAt)?new Date(row.updatedAt).toISOString():'UNAVAILABLE'} STATUS=${row.quality} FAILURE=${row.failure||'NONE'}`}).join(' | ')+` | DIVERGENCE=${feedState.divergenceStatus} | SIMULATION ONLY | NO SETTLEMENT AUTHORITY`;
   globalThis.__K11520_FREE_ORACLE__=feedState.rows;
   globalThis.__K11520_MARKET_K__=market;

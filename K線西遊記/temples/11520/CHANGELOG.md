@@ -41,6 +41,14 @@
   finite corrupt cached price, future anchor or invalid anchor now returns
   `SIMULATION_RECOVERY_REQUIRED` with the complete saved book and existing
   source evidence unchanged.
+- Candidate-gate hardening keeps the existing deterministic source pinned when
+  an empty local book first encounters `UNKNOWN`, `STALE` or `FAILED` public
+  data, without creating or advancing any order, position, margin, PnL or
+  receipt. The same abnormal admission still blocks every price-dependent
+  operation. Visible feed evidence now uses a compact FREE/market/SRC/TIME/
+  STALE/FAIL line so the existing landscape telemetry owner stays clear of all
+  three parameter rails; full BTC/ETH/BNB evidence remains in the inspection
+  surface and title.
 - Post-review focused checks passed 170/170 runtime, quote, intent, route,
   provenance, market-binding and margin tests plus 67/67 applicable static tests. The one
   skipped static case is an unchanged Linux bash-routing fixture unavailable

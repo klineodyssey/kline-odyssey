@@ -591,6 +591,22 @@ for(const quality of ['UNKNOWN','STALE','FAILED'])test(`SIMULATION ${quality} ad
  assert.deepEqual(afterCancel.positions,assets.positions);assert.deepEqual(afterCancel.receipts,assets.receipts);assert.deepEqual(afterCancel.wallet,assets.wallet);
 });
 
+test('cold abnormal public feed pins local simulation identity without creating or advancing financial state',()=>{
+ for(const [quality,rows] of [['UNKNOWN',null],['STALE',publicQuoteSet(1000)],['FAILED',publicMarketFailureObservations({now:20000})]]){
+  const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true}),wallet=structuredClone(adapter.snapshot().wallet);
+  assert.equal(adapter.updatePublicMarketQuality(rows,{now:20000}).quality,quality);
+  const seeded=adapter.snapshot();assert.deepEqual(Object.keys(seeded.observations).sort(),['BNBUSDT','BTCUSDT','ETHUSDT']);
+  assert.ok(Object.values(seeded.observations).every(row=>row.source==='K11520_DETERMINISTIC_SIMULATION'&&row.at===20000));
+  assert.deepEqual(seeded.orders,[]);assert.deepEqual(seeded.positions,[]);assert.deepEqual(seeded.receipts,[]);assert.deepEqual(seeded.wallet,wallet);
+  const before=structuredClone(ledger);
+  for(const result of [adapter.preview({axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4000},{now:20000}),adapter.submit({axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4000},{now:20000}),adapter.tick({now:24000})]){
+   assert.equal(result.ok,false);assert.equal(result.code,'ORACLE_STALE');assert.equal(result.priceTransitions,false);
+  }
+  assert.deepEqual(ledger,before,'abnormal admission cannot advance the pinned source or create financial state');
+ }
+ const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,simulationFallback:false});adapter.updatePublicMarketQuality(null,{now:20000});assert.deepEqual(adapter.snapshot().observations,{});
+});
+
 test('default nonfallback SIMULATION adapter blocks warm FAILED state with the full saved ledger unchanged',()=>{
  const {ledger,adapter}=activePublicFixture({simulationFallback:false}),before=structuredClone(ledger),now=20000;
  assert.equal(adapter.updatePublicMarketQuality(publicMarketFailureObservations({now}),{now}).quality,'FAILED');
