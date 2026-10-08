@@ -207,7 +207,7 @@ function syncMarketKLabels(){
   // Keep every required quality field visible without expanding the landscape
   // telemetry owner into the parameter rails. Full per-market evidence remains
   // available in the title and __K11520_FREE_ORACLE__ inspection surface.
-  $('#feed').textContent=`FREE ${feedState.quality} | ${feedMarket} | SRC ${feedSource} | TIME ${feedTime} | STALE ${selectedFeed?.stale?'Y':'N'} | FAIL ${feedFailure}${simulationLocal?' | SIM LOCAL':''}`;
+  $('#feed').textContent=`MARKET DATA ${feedState.quality}|${feedMarket}|SRC ${feedSource}|TIME ${feedTime}|STALE ${selectedFeed?.stale?'Y':'N'}|FAIL ${feedFailure}${simulationLocal?'|SIM LOCAL':''}`;
   $('#feed').title=MARKETS.map(symbol=>{const row=feedState.rows[symbol];return `${symbol} SOURCE=${row.source||'UNAVAILABLE'} TIME=${Number.isSafeInteger(row.updatedAt)?new Date(row.updatedAt).toISOString():'UNAVAILABLE'} STATUS=${row.quality} FAILURE=${row.failure||'NONE'}`}).join(' | ')+` | DIVERGENCE=${feedState.divergenceStatus} | SIMULATION ONLY | NO SETTLEMENT AUTHORITY`;
   globalThis.__K11520_FREE_ORACLE__=feedState.rows;
   globalThis.__K11520_MARKET_K__=market;
