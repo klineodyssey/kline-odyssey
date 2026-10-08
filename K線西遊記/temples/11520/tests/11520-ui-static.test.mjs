@@ -482,6 +482,73 @@ test('responsive event routing retains standalone mobile-HUD coverage and refere
   assert.ok(script.includes("assert head==os.environ['K11520_SOURCE_SHA']"));
 });
 
+// Read the actual job gates so routing tests fail when workflow expressions drift.
+const responsiveWorkflow=read('../../../../.github/workflows/11520-responsive-qa.yml');
+const responsiveJobs=Object.fromEntries([...responsiveWorkflow.matchAll(/^  ([\w-]+):\n([\s\S]*?)(?=^  [\w-]+:|$(?![\s\S]))/gm)]
+  .filter(match=>match.index>responsiveWorkflow.indexOf('\njobs:\n'))
+  .map(([,name,body])=>[name,{
+    needs:(body.match(/^    needs: (.+)$/m)?.[1]||'').replace(/[\[\]]/g,'').split(',').map(value=>value.trim()).filter(Boolean),
+    condition:body.match(/^    if: (.+)$/m)?.[1].replace(/^\$\{\{\s*|\s*\}\}$/g,'')
+  }]));
+
+test('responsive QA serializes heavy jobs without cancelling or hiding failed coverage',()=>{
+  assert.deepEqual(responsiveJobs['contextual-hud'].needs,[]);
+  assert.deepEqual(responsiveJobs['world-first'].needs,['contextual-hud']);
+  assert.deepEqual(responsiveJobs.responsive.needs,['contextual-hud','world-first']);
+  assert.deepEqual(responsiveJobs['m1-public-readonly'].needs,['responsive']);
+  for(const name of ['world-first','responsive','m1-public-readonly'])assert.match(responsiveJobs[name].condition,/!cancelled\(\)/,name+' overrides implicit ancestor success but respects cancellation');
+  assert.match(responsiveJobs['m1-public-readonly'].condition,/needs\.responsive\.result == 'success'/);
+  assert.doesNotMatch(responsiveWorkflow,/continue-on-error:/);
+});
+
+test('responsive DAG preserves event, failed ancestor, intentional skip and cancellation routing',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const order=['contextual-hud','world-first','responsive','m1-public-readonly'];
+  const routes=[
+    ['pull_request',false,'success',[true,true,true,false]],
+    ['push',false,'success',[true,true,true,false]],
+    ['workflow_dispatch',false,'success',[true,true,true,false]],
+    ['workflow_dispatch',true,'success',[true,false,true,true]],
+    ['workflow_run',false,'success',[true,false,true,true]],
+    ['workflow_run',false,'failure',[false,false,false,false]],
+    ['workflow_run',false,'cancelled',[false,false,false,false]],
+    ['workflow_run',false,'skipped',[false,false,false,false]]
+  ];
+  for(const [event,production,conclusion,expected] of routes){
+    for(const contextualResult of ['success','failure'])for(const worldResult of ['success','failure'])for(const responsiveResult of ['success','failure']){
+      const needs={},observed=[];
+      const github={event_name:event,event:{workflow_run:{conclusion}},head_ref:''};
+      for(const [index,name] of order.entries()){
+        const job=responsiveJobs[name];
+        const enabled=runInNewContext(job.condition,{github,inputs:{production},needs,cancelled:()=>false});
+        // A gate without a status function also has GitHub's implicit success().
+        const implicitSuccess=/\b(?:always|cancelled|success|failure)\(/.test(job.condition)||job.needs.every(parent=>needs[parent].result==='success');
+        observed.push(Boolean(enabled&&implicitSuccess));
+        needs[name]={result:observed[index]?([contextualResult,worldResult,responsiveResult,'success'][index]):'skipped'};
+      }
+      const wanted=[...expected];wanted[3]&&=responsiveResult==='success';
+      assert.deepEqual(observed,wanted,JSON.stringify({event,production,conclusion,contextualResult,worldResult,responsiveResult}));
+      // A cancelled workflow must never start any dependent browser runner.
+      for(const name of order.slice(1))assert.equal(runInNewContext(responsiveJobs[name].condition,{github,inputs:{production},needs,cancelled:()=>true}),false,name+' cancelled');
+    }
+  }
+});
+
+test('one open-PR push stays within four heavy runners including bounded diagnostics',()=>{
+  // Enumerate all antichains: jobs in one chain cannot be simultaneously running,
+  // regardless of duration, failed predecessors or intentionally skipped jobs.
+  const names=Object.keys(responsiveJobs);
+  const depends=(name,parent)=>responsiveJobs[name].needs.some(dependency=>dependency===parent||depends(dependency,parent));
+  let width=0;
+  for(let mask=0;mask<(1<<names.length);mask++){
+    const parallel=names.filter((_,index)=>mask&(1<<index));
+    if(parallel.every(a=>parallel.every(b=>a===b||!depends(a,b))))width=Math.max(width,parallel.length);
+  }
+  assert.equal(width,2,'serialized QA plus optional public-input-diagnostics');
+  assert.equal(width+2,4,'push Game + PR Game + Responsive antichain');
+  assert.equal(names.filter(name=>name!=='public-input-diagnostics').length,4,'all existing primary jobs retained');
+});
+
 test('contextual entry tolerates only a completed intro transition and still requires character readiness',async()=>{
   const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
   const contextual=browserSource.slice(browserSource.indexOf('async function verifyContextualHud(){'));
@@ -680,12 +747,12 @@ test('offline toast visual gate cannot pass without actual preview and history o
 test('simulation component revisions expose complete provenance and recorded executable bytes',async()=>{
  const {createHash}=await import('node:crypto'),hash=text=>createHash('sha256').update(text).digest('hex');
  const revision='2026-10-06.SIMULATION-ORDER-PLAYABILITY',sourceCommit='0ad0cffe33d23d1104baa963fedef25ad149a0ac';
- const assets=[{"path": "runtime/game-5d-main.mjs", "version": "2.9.0", "status": "ACTIVE", "nonMetadataSha256": "4c4b69e6e0c78160b28c28df12c387a7c9d50af62270b5b5a22a71ebf0e8d950", "priorFullSha256": "d38f0a6c21b73553eddfba6fb1742891bef800f4d1ca33e81e2f46123935afda", "revision": "2026-10-06.MARKET-CARD-NODE-RETENTION", "sourceCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4", "ancestorCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4"}, {"path": "runtime/public-market-quotes.mjs", "version": "1.0.0", "status": "ACTIVE", "nonMetadataSha256": "850908b15e29dfeba665b2d1b28535e7bb7812fa5c8cad271a9154ee0603eeaf", "priorFullSha256": "07d2553b0a918a0d33236202eed35dd93dc6b44f7c4f24b1243b199587f99071"}, {"path": "runtime/real-trading-order-intent.mjs", "version": "1.0.0", "status": "CANDIDATE", "nonMetadataSha256": "59c72325eda86da744153e4f64035f032025a6d5a2529fdf30ad417c373113b0", "priorFullSha256": "f412d5e054e2df611c74efc2ee2a66d7467f28ee8adeef6ed22ed22a20c36ece"}, {"path": "runtime/kgen-margin-runtime.mjs", "version": "CURRENT", "status": "ACTIVE", "nonMetadataSha256": "4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed", "priorFullSha256": "4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed"}, {"path": "runtime/game-ui-product-fixes-v23.mjs", "version": "2.4.0", "status": "ACTIVE", "nonMetadataSha256": "ec23460a1632e6ec61eda91a5334c9f08d50173ad6091a4c5cb563f35ba4653b", "priorFullSha256": "a944b9fbe886e0348ad1ef0d39a5af0d64f5acf261be9338cef74d621b13b2f2", "revision": "2026-10-06.TOAST-DISMISSAL-PLACEMENT", "sourceCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9", "ancestorCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9"}, {"path": "game-5d.html", "version": "2.9.5", "status": "ACTIVE", "nonMetadataSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f", "priorFullSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f"}];
+ const assets=[{"path": "runtime/game-5d-main.mjs", "version": "2.9.0", "status": "ACTIVE", "nonMetadataSha256": "4c4b69e6e0c78160b28c28df12c387a7c9d50af62270b5b5a22a71ebf0e8d950", "priorFullSha256": "d38f0a6c21b73553eddfba6fb1742891bef800f4d1ca33e81e2f46123935afda", "revision": "2026-10-06.MARKET-CARD-NODE-RETENTION", "sourceCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4", "ancestorCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4"}, {"path": "runtime/public-market-quotes.mjs", "version": "1.0.0", "status": "ACTIVE", "nonMetadataSha256": "850908b15e29dfeba665b2d1b28535e7bb7812fa5c8cad271a9154ee0603eeaf", "priorFullSha256": "07d2553b0a918a0d33236202eed35dd93dc6b44f7c4f24b1243b199587f99071"}, {"path": "runtime/real-trading-order-intent.mjs", "version": "1.0.0", "status": "CANDIDATE", "nonMetadataSha256": "59c72325eda86da744153e4f64035f032025a6d5a2529fdf30ad417c373113b0", "priorFullSha256": "f412d5e054e2df611c74efc2ee2a66d7467f28ee8adeef6ed22ed22a20c36ece"}, {"path": "runtime/kgen-margin-runtime.mjs", "version": "CURRENT", "status": "ACTIVE", "nonMetadataSha256": "cbbb60fead493a081252f92b222caa6951b8d0cf7dd6e24669f839dd40bc0341", "priorFullSha256": "03063c4c323826fb3a74275884aac060c9267e7dc7b9db9750298f3ef2787631", "revision": "2026-10-07.BNB-LIQUIDATION-STATUS-CONSISTENCY", "sourceCommit": "35e2a331b05140a33e1b86e6918304e3e36ff039", "ancestorCommit": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6", "lastUpdated": "2026-10-07", "reviewedBy": "dot / independent scoped technical source review / 2026-10-07; no registered Reviewer role or release approval", "taskId": "K11520-BNB-LIQUIDATION-STATUS-20261007"}, {"path": "runtime/game-ui-product-fixes-v23.mjs", "version": "2.4.0", "status": "ACTIVE", "nonMetadataSha256": "ec23460a1632e6ec61eda91a5334c9f08d50173ad6091a4c5cb563f35ba4653b", "priorFullSha256": "a944b9fbe886e0348ad1ef0d39a5af0d64f5acf261be9338cef74d621b13b2f2", "revision": "2026-10-06.TOAST-DISMISSAL-PLACEMENT", "sourceCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9", "ancestorCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9"}, {"path": "game-5d.html", "version": "2.9.5", "status": "ACTIVE", "nonMetadataSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f", "priorFullSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f"}];
  const mandatory=['VERSION','REVISION','STATUS','LAST_UPDATED','UPDATED_BY','REVIEWED_BY','SOURCE_COMMIT','TASK_ID','CHANGE_REASON','ANCESTOR','SOURCE_OF_TRUTH'];
  for(const asset of assets){
   const source=read('../'+asset.path),match=asset.path.endsWith('.mjs')?source.match(/^\/\* KGEN_META\n([\s\S]*?)\*\/\n/):source.match(/^\ufeff<!doctype html>\n<!-- KGEN_META\n([\s\S]*?)-->\n/);
   assert.ok(match,asset.path+' has one leading metadata comment');const fields=Object.fromEntries(match[1].trim().split('\n').map(line=>[line.slice(0,line.indexOf(':')),line.slice(line.indexOf(':')+1).trim()]));
-  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,asset.revision||revision);assert.equal(fields.PRODUCT_CONTEXT,'V2.9.5');assert.equal(fields.SOURCE_COMMIT,asset.sourceCommit||sourceCommit);assert.equal(fields.LAST_UPDATED,'2026-10-06');assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,'TRUE');assert.equal(fields.REVIEWED_BY,'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','accepted metadata review required');
+  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,asset.revision||revision);assert.equal(fields.PRODUCT_CONTEXT,'V2.9.5');assert.equal(fields.SOURCE_COMMIT,asset.sourceCommit||sourceCommit);assert.equal(fields.LAST_UPDATED,asset.lastUpdated||'2026-10-06');assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,'TRUE');assert.equal(fields.REVIEWED_BY,asset.reviewedBy||'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','recorded scoped review required');if(asset.taskId)assert.equal(fields.TASK_ID,asset.taskId);
   assert.equal(fields.ANCESTOR,'K線西遊記/temples/11520/'+asset.path+' @ '+(asset.ancestorCommit||'e26f3a76ef0be7f43058225f46def3fbe123371e'));
   const body=asset.path.endsWith('.mjs')?source.slice(match[0].length):'\ufeff<!doctype html>\n'+source.slice(match[0].length);assert.equal(hash(body),asset.nonMetadataSha256,asset.path+' changed non-metadata bytes');
  }

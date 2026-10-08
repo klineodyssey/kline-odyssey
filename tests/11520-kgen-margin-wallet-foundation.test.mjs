@@ -44,6 +44,63 @@ assert.equal(blown.principal,100);assert.equal(blown.pnl,-100);assert.equal(blow
 const safe=positionRisk({entry:100,mark:99.99,side:'多',lots:100,c:50});
 assert.ok(Math.abs(safe.pnl+50)<1e-8);assert.ok(Math.abs(safe.remaining-50)<1e-8);assert.equal(safe.liquidated,false);assert.equal(safe.liquidationMark,99.98);
 
+// K11520-BNB-LIQUIDATION-STATUS-20261007: the risk flag follows the same
+// exact price boundary as the existing lifecycle, without rounding PnL.
+const marketRiskFixtures=[['KX','BTCUSDT',60000.0004],['KY','ETHUSDT',3000.0004],['KZ','BNBUSDT',600.0004]];
+function adjacentPositivePrice(value,up){
+  const bytes=new ArrayBuffer(8),price=new Float64Array(bytes),bits=new BigUint64Array(bytes);
+  price[0]=value;bits[0]+=up?1n:-1n;return price[0];
+}
+for(const [axis,market,entry] of marketRiskFixtures)for(const c of C_DETENTS.filter(c=>c!==0))for(const lots of [1,100]){
+  const boundary=positionRisk({entry,mark:entry,c,lots}).liquidationMark;
+  if(boundary<=0){
+    assert.equal(positionRisk({entry,mark:Number.MIN_VALUE,c,lots}).liquidated,false,'positive prices cannot reach a nonpositive LONG boundary');
+    continue;
+  }
+  for(const mark of [adjacentPositivePrice(boundary,false),boundary,adjacentPositivePrice(boundary,true)]){
+    const risk=positionRisk({entry,mark,c,lots}),liquidated=c>0?mark<=boundary:mark>=boundary;
+    assert.equal(risk.liquidated,liquidated,`${market} ${c}C ${lots} lots at ${mark}`);
+    assert.equal(risk.liquidationMark,boundary);
+    assert.equal(risk.rawPnl,pnlForMove({entry,mark,c,lots}),'risk status must not round raw PnL');
+    assert.equal(risk.pnl,Math.max(-lots,risk.rawPnl));
+    assert.equal(risk.remaining,Math.max(0,lots+risk.pnl));
+    if(lots!==1||Math.abs(c)>1)continue;
+    const l=createKgenLedger(10),observe=(price,at)=>observeSimulationPrice(l,{market,price,observedAt:at,now:at,productV1:true});
+    assert.equal(observe(entry-1,1000).ok,true);
+    assert.equal(placeSimulationOrder(l,{axis,market,c,lots,triggerPrice:entry,now:1001}).ok,true);
+    assert.equal(observe(entry,1002).events[0].status,'FILLED');
+    const outcome=observe(mark,1003),state=simulationSnapshot(l);
+    assert.equal(state.positions[0].status,liquidated?'LIQUIDATED':'OPEN');
+    assert.equal(state.receipts.length,liquidated?2:1);
+    if(liquidated){
+      assert.equal(outcome.events[0].status,'LIQUIDATED');assert.equal(outcome.events[0].realizedPnl,-1);
+      assert.equal(l.free,9);assert.equal(l.lockedMargin,0);
+    }else{assert.equal(outcome.events.length,0);assert.equal(l.free,9);assert.equal(l.lockedMargin,1);}
+  }
+}
+{
+  const l=createKgenLedger(100),positions=new Map();
+  const observe=(market,price,at)=>observeSimulationPrice(l,{market,price,observedAt:at,now:at,sequence:at,productV1:true});
+  for(const [i,[axis,market,entry]] of marketRiskFixtures.entries()){
+    const c=i===2?-.001:i===1?-1:1,lots=i+1;
+    observe(market,entry-1,1000);assert.equal(placeSimulationOrder(l,{axis,market,c,lots,triggerPrice:entry,now:1001}).ok,true);observe(market,entry,1002);
+    positions.set(market,simulationSnapshot(l).positions.find(p=>p.market===market));
+  }
+  const bnb=positions.get('BNBUSDT'),boundary=positionRisk(bnb).liquidationMark;
+  assert.equal(positionRisk({...bnb,mark:boundary}).liquidated,true,'BNB -0.001C exact-boundary regression');
+  const others=simulationSnapshot(l).positions.filter(p=>p.market!=='BNBUSDT');
+  const receipt=observe('BNBUSDT',boundary,1003).events[0];
+  assert.equal(receipt.status,'LIQUIDATED');assert.equal(receipt.market,'BNBUSDT');assert.equal(receipt.axis,'KZ');assert.equal(receipt.realizedPnl,-3);
+  assert.deepEqual(simulationSnapshot(l).positions.filter(p=>p.market!=='BNBUSDT'),others,'one market liquidation cannot change other positions');
+  assert.equal(l.free,94);assert.equal(l.lockedMargin,3);
+  for(const market of ['BTCUSDT','ETHUSDT'])assert.equal(closeSimulationPosition(l,positions.get(market).positionId,{now:1004}).receipt.status,'CLOSED');
+  assert.equal(l.free,97);assert.equal(l.lockedMargin,0);assert.equal(l.realizedPnl,-3);
+  const state=simulationSnapshot(l),before=structuredClone(l);
+  assert.equal(state.receipts.length,6);assert.equal(new Set(state.receipts.map(r=>r.receiptId)).size,6);
+  assert.equal(closeSimulationPosition(l,bnb.positionId,{now:1005}).reason,'POSITION_NOT_OPEN');assert.deepEqual(l,before);
+}
+console.log('11520 exact liquidation risk flag + three-market receipt isolation PASS');
+
 const ledger=createKgenLedger(100);
 assert.equal(reserveOrder(ledger,10).ok,true);
 assert.deepEqual(snapshot(ledger),{total:100,free:90,lockedMargin:0,reservedOrders:10,unrealizedPnl:0,realizedPnl:0,equity:100});

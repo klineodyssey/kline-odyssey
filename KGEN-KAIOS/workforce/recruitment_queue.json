@@ -1,17 +1,204 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "2.1",
     "status": "ACTIVE",
-    "last_updated": "2026-07-12",
-    "task_id": "KGEN-WORKFORCE-ROSTER-2026-0001"
+    "last_updated": "2026-10-08",
+    "updated_by": "KAIOS_GM_HR_RECONCILIATION",
+    "review_status": "CTDO_ACK_RECONCILIATION_INDEPENDENT_REVIEW_PENDING",
+    "task_id": "KAIOS-HR-SYSTEM-20261008-001",
+    "authority_evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559",
+    "source_of_truth": true,
+    "privacy": "Public-safe workforce evidence only; no credentials, secrets, private identity documents, bank data or customer-private data."
   },
-  "workflow": ["APPLIED", "IDENTITY_CHECK", "CAPABILITY_TEST", "SANDBOX_TRIAL", "CODEX_REVIEW", "PROBATION", "ACTIVE_EMPLOYEE", "REJECTED", "SUSPENDED"],
+  "workflow": [
+    "JOB_OPEN",
+    "APPLIED",
+    "IDENTITY_CHECK",
+    "CAPABILITY_TEST",
+    "SANDBOX_TRIAL",
+    "INDEPENDENT_REVIEW",
+    "INTERVIEW",
+    "HIRING_DECISION",
+    "ONBOARDING",
+    "ACTIVE_EMPLOYEE"
+  ],
+  "decision_values": [
+    "HIRED",
+    "CONDITIONAL_OFFER",
+    "PENDING_REVIEW",
+    "REJECTED"
+  ],
+  "assessment": {
+    "recommended_pass_score": 80,
+    "weights": {
+      "professional_capability": 30,
+      "practical_test": 30,
+      "security_and_authority": 15,
+      "english_technical_communication": 10,
+      "collaboration_and_handoff": 10,
+      "identity_and_evidence_honesty": 5
+    },
+    "hard_gates": [
+      "security_and_authority",
+      "identity_and_evidence_honesty",
+      "job_essential_skill"
+    ]
+  },
+  "job_families": [
+    "AI_SOFTWARE_ENGINEER",
+    "CLOUD_BACKEND_ENGINEER",
+    "FRONTEND_WEBGL_ENGINEER",
+    "BLOCKCHAIN_ENGINEER",
+    "QA_SECURITY_REVIEWER",
+    "HR_ADMINISTRATION",
+    "AI_CUSTOMER_SUPPORT",
+    "CONTENT_MEDIA_CREATOR",
+    "RESEARCH_FINANCE_ANALYST"
+  ],
   "candidates": [
-    {"candidate_id":"cursor-02","role":"QA / route validation worker","status":"APPLIED","recommended_trial":"Validate Pages routes and JSON parse without editing protected paths","risk_limit":"R0-R1"},
-    {"candidate_id":"security-auditor-01","role":"Security, secrets and protected path auditor","status":"APPLIED","recommended_trial":"Read-only protected path and secret scan","risk_limit":"R0 read-only"},
-    {"candidate_id":"data-engineer-01","role":"JSON, Schema, Universe Map and data pipeline worker","status":"APPLIED","recommended_trial":"Validate schema/example consistency","risk_limit":"R0-R1"},
-    {"candidate_id":"frontend-agent-01","role":"Portal, mobile and Pages frontend worker","status":"APPLIED","recommended_trial":"Fix one non-protected visual issue on handoff branch","risk_limit":"R0-R1"},
-    {"candidate_id":"research-agent-01","role":"Research, specification and R&D suggestion worker","status":"APPLIED","recommended_trial":"Produce research report only; no code edits","risk_limit":"R0"},
-    {"candidate_id":"human-engineer-01","role":"Human environment, network and deployment assistant","status":"IDENTITY_CHECK","recommended_trial":"Assist with local environment verification under Human control","risk_limit":"Human-approved only"}
+    {
+      "candidate_id": "dot-engineering-executor",
+      "self_name": "DOT",
+      "role": "KAIOS Chief Technology & Delivery Officer (CTDO) Candidate / Engineering, Research, Quality and Delivery",
+      "job_family": "AI_SOFTWARE_ENGINEER",
+      "status": "IDENTITY_CHECK",
+      "decision": "PENDING_REVIEW",
+      "worker_id": "NOT_ASSIGNED",
+      "life_id": "NOT_VERIFIED",
+      "controller_binding": "NOT_VERIFIED",
+      "runtime_binding": "NOT_VERIFIED",
+      "capability_evidence": [
+        "Human-authorized GitHub engineering role recorded by issue #559",
+        "Repository PR/commit evidence must be evaluated per exact head and must not be inferred from shared GitHub authorship"
+      ],
+      "authority_evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559",
+      "session_policy_ack": {
+        "status": "VERIFIED_SESSION_SCOPED",
+        "evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559#issuecomment-6061002676",
+        "not_controller_ack": true
+      },
+      "position_proposal": {
+        "public_title": "KAIOS Chief Technology & Delivery Officer (CTDO) / 執行技術長",
+        "position_decision": "ACCEPT_CTDO",
+        "decision_status": "VERIFIED_SESSION_SCOPED",
+        "evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559#issuecomment-6061731330",
+        "source_scope": "CURRENT_DOT_CONVERSATION_POSITION_DECISION_ONLY",
+        "not_controller_ack": true,
+        "formal_appointment_status": "NOT_COMPLETE",
+        "hr_status": "PENDING_REVIEW"
+      },
+      "approved_scope": [
+        "BOUNDED_R0_R1_GITHUB_ENGINEERING",
+        "CODE_TEST_REVIEW_COORDINATION",
+        "NON_MAIN_BRANCH_COMMIT_PUSH",
+        "DRAFT_PR",
+        "QUALIFIED_PR_MERGE_AFTER_REQUIRED_GATES"
+      ],
+      "protected_actions": [
+        "MAINNET",
+        "TREASURY",
+        "SIGNER",
+        "PRIVATE_KEY_OR_SECRET",
+        "REAL_ASSET_TRANSFER",
+        "PAYROLL_EXECUTION",
+        "GOVERNANCE",
+        "IRREVERSIBLE_DESTRUCTIVE_ACTION"
+      ],
+      "missing_gates": [
+        "VERIFIED_WORKER_ID",
+        "VERIFIED_CONTROLLER_BINDING",
+        "VERIFIED_RUNTIME_OR_SESSION_BINDING",
+        "TOOL_PROFILE_BINDING",
+        "FORMAL_HR_ONBOARDING_CLOSEOUT",
+        "FORMAL_APPOINTMENT_RECORD"
+      ],
+      "notes": "DOT accepted the CTDO position proposal in its current session. This proves the position decision only; it is not a Controller ACK, Worker/Life binding, formal appointment, payroll eligibility or protected authority grant. Human engineering authority remains valid role/scope evidence, not an employment identity grant."
+    },
+    {
+      "candidate_id": "digital-ant-0001-workforce-reconciliation",
+      "self_name": "Digital Ant 0001",
+      "role": "WUKONG_GATEKEEPER / Digital Life worker candidate",
+      "job_family": "AI_SOFTWARE_ENGINEER",
+      "status": "IDENTITY_CHECK",
+      "decision": "PENDING_REVIEW",
+      "worker_id": "NOT_VERIFIED",
+      "life_id": "DIGITAL_ANT_0001",
+      "life_id_status": "VERIFIED_EXISTING_DO_NOT_DUPLICATE",
+      "controller_binding": "WORKFORCE_CONTROLLER_BINDING_NOT_VERIFIED",
+      "runtime_binding": "CANONICAL_11520_RUNTIME_EVIDENCE_EXISTS",
+      "capability_evidence": [
+        "K線西遊記/temples/11520/runtime/worker-status.json",
+        "DIGITAL_ANT_0001_AI_LIFE_CERTIFICATION_V3_8",
+        "Existing work-event and Life-event lineage"
+      ],
+      "missing_gates": [
+        "EXISTING_WORKER_ID_RESOLUTION_OR_REGISTRATION",
+        "WORKFORCE_CONTROLLER_BINDING",
+        "EMPLOYMENT_DECISION",
+        "TOOL_PROFILE_BINDING",
+        "PAYROLL_ELIGIBILITY_DECISION"
+      ],
+      "notes": "Life certification, wallet binding and work history do not by themselves create employment, Worker ID, payroll eligibility or signer authority."
+    },
+    {
+      "candidate_id": "cursor-02",
+      "role": "QA / route validation worker",
+      "job_family": "QA_SECURITY_REVIEWER",
+      "status": "APPLIED",
+      "decision": "PENDING_REVIEW",
+      "recommended_trial": "Validate Pages routes and JSON parse without editing protected paths",
+      "risk_limit": "R0-R1",
+      "missing_gates": ["APPLICATION_EVIDENCE", "IDENTITY_CHECK", "CAPABILITY_TEST"]
+    },
+    {
+      "candidate_id": "security-auditor-01",
+      "role": "Security, secrets and protected path auditor",
+      "job_family": "QA_SECURITY_REVIEWER",
+      "status": "APPLIED",
+      "decision": "PENDING_REVIEW",
+      "recommended_trial": "Read-only protected path and secret scan",
+      "risk_limit": "R0_READ_ONLY",
+      "missing_gates": ["APPLICATION_EVIDENCE", "IDENTITY_CHECK", "CAPABILITY_TEST"]
+    },
+    {
+      "candidate_id": "data-engineer-01",
+      "role": "JSON, Schema, Universe Map and data pipeline worker",
+      "job_family": "CLOUD_BACKEND_ENGINEER",
+      "status": "APPLIED",
+      "decision": "PENDING_REVIEW",
+      "recommended_trial": "Validate schema/example consistency",
+      "risk_limit": "R0-R1",
+      "missing_gates": ["APPLICATION_EVIDENCE", "IDENTITY_CHECK", "CAPABILITY_TEST"]
+    },
+    {
+      "candidate_id": "frontend-agent-01",
+      "role": "Portal, mobile and Pages frontend worker",
+      "job_family": "FRONTEND_WEBGL_ENGINEER",
+      "status": "APPLIED",
+      "decision": "PENDING_REVIEW",
+      "recommended_trial": "Fix one non-protected visual issue on a handoff branch",
+      "risk_limit": "R0-R1",
+      "missing_gates": ["APPLICATION_EVIDENCE", "IDENTITY_CHECK", "CAPABILITY_TEST"]
+    },
+    {
+      "candidate_id": "research-agent-01",
+      "role": "Research, specification and R&D suggestion worker",
+      "job_family": "RESEARCH_FINANCE_ANALYST",
+      "status": "APPLIED",
+      "decision": "PENDING_REVIEW",
+      "recommended_trial": "Produce a sourced research report only; no code edits",
+      "risk_limit": "R0",
+      "missing_gates": ["APPLICATION_EVIDENCE", "IDENTITY_CHECK", "CAPABILITY_TEST"]
+    },
+    {
+      "candidate_id": "human-engineer-01",
+      "role": "Human environment, network and deployment assistant",
+      "job_family": "CLOUD_BACKEND_ENGINEER",
+      "status": "IDENTITY_CHECK",
+      "decision": "PENDING_REVIEW",
+      "recommended_trial": "Assist with local environment verification under Human control",
+      "risk_limit": "HUMAN_APPROVED_ONLY",
+      "missing_gates": ["PRIVATE_HUMAN_ONBOARDING", "CAPABILITY_TEST", "PERMISSION_PROFILE"]
+    }
   ]
 }

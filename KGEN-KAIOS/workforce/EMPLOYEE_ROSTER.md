@@ -1,55 +1,53 @@
-# KGEN Employee Roster
+# KAIOS Employee Roster And Identity Audit
 
-**Status:** ACTIVE  
-**Version:** 1.0  
-**Last Updated:** 2026-07-12  
-**Updated By:** codex-gm-01  
-**Reviewed By:** codex-gm-01  
-**Task ID:** KGEN-WORKFORCE-ROSTER-2026-0001  
-**Base Commit:** 0f256afa969dbf834df1eb1a6036e639ab2b5cd3  
-**Source Of Truth:** `KGEN-KAIOS/workforce/employee_roster.json`
+**Status:** ACTIVE
+**Version:** 1.3
+**Last Updated:** 2026-10-08
+**Task ID:** KAIOS-HR-SYSTEM-20261008-001
+**Machine Source:** `KGEN-KAIOS/workforce/employee_roster.json`
 
-## Purpose
+## Current Formal Roster
 
-This roster records who is a real KGEN worker, who is on duty, who is registered but not activated, and which logical workspace, branch namespace, tool profile, task and reviewer apply to each worker.
+The active worker registry currently yields two formal active employees after applying the canonical no-active-suspension rule. None has a current October runtime heartbeat in the retained registry, so employment is not presented as proof of who is working now.
 
-A registry name is not enough to mark a worker active. Active duty requires Boot evidence, a registered worker ID, a logical workspace, a task or claim, branch/report evidence, recent activity and verifiable Git records.
+| Worker | Employment | Trust | Runtime projection | Current work verified | Payroll eligibility |
+|---|---|---:|---|---|---|
+| `codex-gm-01` | ACTIVE | T5 | STALE | NO | NOT_VERIFIED |
+| `cursor-01` | SUSPENDED | T2 | OFFLINE / Human cost suspension | NO | NOT_ELIGIBLE_WHILE_SUSPENDED |
+| `chatgpt-01` | ACTIVE | T5 | STALE | NO | NOT_VERIFIED |
 
-## Summary
+`cursor-01` retains its registered identity but is excluded from the formal-active count until a traceable Human release. `human-primeforge` is retained as the Human authority/operator record and is not counted as an automated employee. Seven legacy candidate records remain registered but not activated. Names in a candidate pool are not evidence that a runtime, endpoint or employee is available.
 
-| Metric | Count |
-|---|---:|
-| Roster records | 11 |
-| Formal active employees | 2 |
-| Today on duty | 1 |
-| Working now | 1 |
-| Waiting review | 0 |
-| Blocked | 0 |
-| Registered not activated | 8 |
-| Suspended | 0 |
-| Revoked | 0 |
-| Human operators | 1 |
+## Priority Identity Reconciliation
 
-## Employee Records
+| Subject | Employment decision | Worker ID | Life ID | Controller | Current result |
+|---|---|---|---|---|---|
+| DOT | PENDING_REVIEW | NOT_ASSIGNED | NOT_VERIFIED | NOT_VERIFIED | CTDO proposal accepted in the current DOT session; formal appointment remains incomplete |
+| Digital Ant 0001 | PENDING_REVIEW | NOT_VERIFIED | `DIGITAL_ANT_0001` VERIFIED_EXISTING | Workforce binding NOT_VERIFIED | reuse the existing Life; resolve Worker/controller/payroll separately |
 
-| Worker ID | Name | Type | Department | Status | Trust | Desk | Current Task |
-|---|---|---|---|---|---|---|---|
-| `codex-gm-01` | Codex-General-Manager | Codex | CEO_Codex | ACTIVE_ON_DUTY | T5 | Codex Review Workspace | KGEN-WORKFORCE-ROSTER-2026-0001 |
-| `cursor-01` | Cursor Primary Worker | Cursor | Construction / Documentation / QA | ACTIVE_IDLE | T2 | Cursor Worker Workspace | - |
-| `cursor-generic-01` | Cursor Generic Candidate | Cursor | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
-| `claude-01` | Claude Candidate | Claude | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
-| `gemini-01` | Gemini Candidate | Gemini | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
-| `openhands-01` | OpenHands Candidate | OpenHands | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
-| `copilot-01` | GitHub Copilot Candidate | GitHub Copilot | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
-| `chatgpt-01` | ChatGPT Candidate | ChatGPT | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
-| `deep-research-01` | Deep Research Candidate | Deep Research | Research | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
-| `human-engineer-01` | Human Engineer Candidate | Human Engineer | Engineering | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
-| `human-primeforge` | Father / Human Operator | Human Operator | Founder / Human Decision Gate | HUMAN_OPERATOR | T5 | Human Main Workspace | - |
+DOT authority evidence is issue [#559](https://github.com/klineodyssey/kline-odyssey/issues/559). The session-scoped CTDO position decision is [recorded here](https://github.com/klineodyssey/kline-odyssey/issues/559#issuecomment-6061731330). It confirms acceptance of the proposed public role only. It does not create a Controller ACK, Worker ID, Life ID, formal appointment, payroll entitlement or protected authority, and it does not validate older work retroactively.
 
-## Rules
+Digital Ant evidence is `K線西遊記/temples/11520/runtime/worker-status.json`, including the existing Life certification and read-only runtime history. No duplicate Life/Worker record may be created from that evidence.
 
-- Codex is the only default merge and push-main authority.
-- Cursor may push only `cursor-handoff/<Task-ID>` and may not push main.
-- Unactivated AI workers are candidates, not active employees.
-- Human Engineer and Human Operator are separate records.
-- No token, private key, password, seed phrase, IP address, private email or real local path is stored in this roster.
+## Activation Rule
+
+A formal worker must satisfy `KGEN-KAIOS/worker_registry.json` and the Workforce README gates. HR additionally projects, but never conflates:
+
+- hiring decision;
+- Worker ID;
+- Life ID;
+- Controller/runtime binding;
+- tool permission profile;
+- reviewer qualification;
+- payroll eligibility;
+- current runtime availability.
+
+Missing runtime heartbeat means `STALE` or `UNKNOWN`, not `ACTIVE_NOW`. A chat/session ACK is not a Controller ACK. Shared GitHub authorship is not proof of which AI performed a commit.
+
+## Candidate And Onboarding Queue
+
+The complete list of candidates, decisions, evidence and missing gates is in `KGEN-KAIOS/workforce/recruitment_queue.json`. HR reuses valid assessments and work evidence; it does not require repetitive interviews solely because a projection was stale.
+
+## Privacy
+
+This public roster stores only public-safe role, registry and evidence references. It must not contain identity documents, private contact data, private bank data, credentials, secrets, private endpoints or customer-private information.
