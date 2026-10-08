@@ -1981,6 +1981,139 @@ export function createAquacultureProjectDraft({
   });
 }
 
+export const KAIOS_AUTOMATED_HANDOFF_V1_FIELDS = Object.freeze([
+  "WORK_ID", "WORKER_ID", "LIFE_ID", "PROJECT", "BRANCH", "PR", "HEAD", "BASE",
+  "STATUS", "COMPLETED", "BLOCKED", "TESTS", "CI", "SECURITY", "NEXT_ACTION",
+  "NEEDS_HUMAN_DECISION", "HUMAN_DECISION_CATEGORY", "ARTIFACTS", "TIMESTAMP"
+]);
+
+export const KAIOS_AUTOMATED_HANDOFF_V1_STATUSES = Object.freeze([
+  "ASSIGN", "WORKING", "REVIEW", "BLOCKED", "DONE"
+]);
+
+export const KAIOS_AUTOMATED_HANDOFF_V1_HUMAN_ESCALATIONS = Object.freeze([
+  "PRODUCT_RULE_DECISION",
+  "MAJOR_RELEASE_DECISION",
+  "LIFE_IDENTITY_CONFLICT",
+  "IRREVERSIBLE_IDENTITY_ACTION",
+  "MAINNET",
+  "TREASURY",
+  "PAYROLL_PAYMENT",
+  "SALARY_POLICY",
+  "ROLE_PERMISSION_ESCALATION",
+  "SECRET_SIGNING_AUTHORIZATION",
+  "MAJOR_SECURITY_RISK_ACCEPTANCE"
+]);
+
+export const KAIOS_AUTOMATED_HANDOFF_V1_DISPATCH_SOURCES = Object.freeze([
+  "WORKER", "KAIOS_GENERAL_MANAGER", "ASSIGNED_REVIEWER"
+]);
+
+const KAIOS_AUTOMATED_HANDOFF_V1_TRANSITIONS = Object.freeze({
+  ASSIGN: Object.freeze(["WORKING", "BLOCKED"]),
+  WORKING: Object.freeze(["REVIEW", "BLOCKED"]),
+  REVIEW: Object.freeze(["DONE", "WORKING", "BLOCKED"]),
+  BLOCKED: Object.freeze(["WORKING", "REVIEW"]),
+  DONE: Object.freeze([])
+});
+
+function requireHandoffEvidenceList(record, field) {
+  requireArray(record[field], `automated_handoff.${field}`);
+  invariant(
+    record[field].every((item) => typeof item === "string" || (item && typeof item === "object" && !Array.isArray(item))),
+    "AUTOMATED_HANDOFF_EVIDENCE_INVALID",
+    `${field} entries must be strings or machine-readable objects`
+  );
+}
+
+/**
+ * Validate the repository handoff contract without granting dispatch, review,
+ * merge, payment, worker activation, or chain authority.
+ */
+export function validateKaiosAutomatedHandoffV1(record) {
+  requireFields(record, KAIOS_AUTOMATED_HANDOFF_V1_FIELDS, "KaiosAutomatedHandoffV1");
+  for (const field of ["WORK_ID", "PROJECT"]) requireId(record[field], field);
+  for (const field of ["WORKER_ID", "BRANCH", "NEXT_ACTION"]) invariant(typeof record[field] === "string" && record[field].trim(), "AUTOMATED_HANDOFF_TEXT_REQUIRED", `${field} must be a non-empty string`);
+  invariant(record.LIFE_ID === null || (typeof record.LIFE_ID === "string" && record.LIFE_ID.trim()), "AUTOMATED_HANDOFF_LIFE_ID_INVALID", "LIFE_ID must be a verified identifier or null; it may not be invented");
+  invariant(record.PR === null || (Number.isInteger(record.PR) && record.PR > 0), "AUTOMATED_HANDOFF_PR_INVALID", "PR must be a positive integer or null");
+  for (const field of ["HEAD", "BASE"]) invariant(/^[0-9a-f]{40}$/.test(record[field] ?? ""), "AUTOMATED_HANDOFF_GIT_SHA_INVALID", `${field} must be a lowercase 40-character Git SHA`);
+  requireEnum(record.STATUS, KAIOS_AUTOMATED_HANDOFF_V1_STATUSES, "automated_handoff.STATUS");
+  for (const field of ["COMPLETED", "BLOCKED", "TESTS", "CI", "SECURITY", "ARTIFACTS"]) requireHandoffEvidenceList(record, field);
+  invariant(typeof record.NEEDS_HUMAN_DECISION === "boolean", "AUTOMATED_HANDOFF_HUMAN_DECISION_INVALID", "NEEDS_HUMAN_DECISION must be boolean");
+  invariant(
+    record.NEEDS_HUMAN_DECISION
+      ? KAIOS_AUTOMATED_HANDOFF_V1_HUMAN_ESCALATIONS.includes(record.HUMAN_DECISION_CATEGORY)
+      : record.HUMAN_DECISION_CATEGORY === null,
+    "AUTOMATED_HANDOFF_HUMAN_ESCALATION_INVALID",
+    "Human routing requires one approved escalation category; ordinary handoffs must use null"
+  );
+  for (const item of record.CI) {
+    invariant(item && typeof item === "object" && !Array.isArray(item), "AUTOMATED_HANDOFF_CI_EVIDENCE_INVALID", "CI entries must be machine-readable objects");
+    invariant(item.head === record.HEAD, "AUTOMATED_HANDOFF_CI_HEAD_MISMATCH", "CI evidence must bind to the handoff HEAD");
+    requireEnum(item.status, ["PASS", "FAIL", "PENDING", "SKIPPED"], "automated_handoff.CI.status");
+  }
+  invariant(typeof record.TIMESTAMP === "string" && !Number.isNaN(Date.parse(record.TIMESTAMP)), "AUTOMATED_HANDOFF_TIMESTAMP_INVALID", "TIMESTAMP must be an ISO timestamp");
+  invariant(record.STATUS !== "BLOCKED" || record.BLOCKED.length > 0, "AUTOMATED_HANDOFF_BLOCKER_REQUIRED", "BLOCKED status requires at least one exact blocker");
+  invariant(record.STATUS !== "DONE" || record.BLOCKED.length === 0, "AUTOMATED_HANDOFF_DONE_WITH_BLOCKERS", "DONE cannot retain unresolved blockers");
+  return record;
+}
+
+export function createKaiosAutomatedHandoffV1(input, { source = "WORKER" } = {}) {
+  const record = Object.fromEntries(KAIOS_AUTOMATED_HANDOFF_V1_FIELDS.map((field) => [field, input?.[field]]));
+  validateKaiosAutomatedHandoffV1(record);
+  requireEnum(source, KAIOS_AUTOMATED_HANDOFF_V1_DISPATCH_SOURCES, "automated_handoff.dispatch_source");
+  const targets = record.STATUS === "REVIEW"
+    ? [source === "WORKER" ? "KAIOS_GENERAL_MANAGER" : source === "KAIOS_GENERAL_MANAGER" ? "ASSIGNED_REVIEWER" : "KAIOS_GENERAL_MANAGER"]
+    : record.STATUS === "BLOCKED"
+      ? [record.NEEDS_HUMAN_DECISION ? "HUMAN_DECISION_INBOX" : "KAIOS_GENERAL_MANAGER"]
+      : record.STATUS === "DONE"
+        ? [record.NEEDS_HUMAN_DECISION ? "HUMAN_DECISION_INBOX" : "DONE_ARCHIVE"]
+        : [record.STATUS === "ASSIGN" ? "ASSIGNED_WORKER" : "KAIOS_GENERAL_MANAGER"];
+  return Object.freeze({
+    SCHEMA: "KAIOS_AUTOMATED_HANDOFF_V1",
+    REPLAY_KEY: `${record.WORK_ID}:${record.HEAD}:${record.STATUS}`,
+    DISPATCH_SOURCE: source,
+    ...record,
+    COMPLETED: Object.freeze([...record.COMPLETED]),
+    BLOCKED: Object.freeze([...record.BLOCKED]),
+    TESTS: Object.freeze([...record.TESTS]),
+    CI: Object.freeze([...record.CI]),
+    SECURITY: Object.freeze([...record.SECURITY]),
+    ARTIFACTS: Object.freeze([...record.ARTIFACTS]),
+    ROUTE_TO: Object.freeze(targets),
+    AUTHORITY: Object.freeze({
+      worker_activated: false,
+      employment_granted: false,
+      reviewer_permission_granted: false,
+      merge_authorized: false,
+      repository_write_authorized: false,
+      payment_authorized: false,
+      payroll_sent: false,
+      treasury_authorized: false,
+      kgen_transfer_authorized: false,
+      kaios_transfer_authorized: false,
+      mainnet_tx_sent: false
+    })
+  });
+}
+
+export function validateKaiosAutomatedHandoffTransition(previous, next) {
+  validateKaiosAutomatedHandoffV1(previous);
+  validateKaiosAutomatedHandoffV1(next);
+  invariant(previous.WORK_ID === next.WORK_ID, "AUTOMATED_HANDOFF_WORK_ID_CHANGED", "A handoff transition cannot change WORK_ID");
+  invariant(previous.WORKER_ID === next.WORKER_ID, "AUTOMATED_HANDOFF_WORKER_CHANGED", "A handoff transition cannot silently change WORKER_ID");
+  invariant(previous.PROJECT === next.PROJECT, "AUTOMATED_HANDOFF_PROJECT_CHANGED", "A handoff transition cannot change PROJECT");
+  invariant(`${previous.WORK_ID}:${previous.HEAD}:${previous.STATUS}` !== `${next.WORK_ID}:${next.HEAD}:${next.STATUS}`, "AUTOMATED_HANDOFF_REPLAY", "An identical work/head/stage handoff is a replay");
+  invariant(KAIOS_AUTOMATED_HANDOFF_V1_TRANSITIONS[previous.STATUS].includes(next.STATUS), "AUTOMATED_HANDOFF_TRANSITION_INVALID", `${previous.STATUS} cannot transition to ${next.STATUS}`);
+  invariant(Date.parse(next.TIMESTAMP) >= Date.parse(previous.TIMESTAMP), "AUTOMATED_HANDOFF_TIME_REGRESSION", "A handoff transition cannot move backward in time");
+  return true;
+}
+
+export function serializeKaiosAutomatedHandoffV1(record, options) {
+  const handoff = createKaiosAutomatedHandoffV1(record, options);
+  return `${JSON.stringify(handoff, null, 2)}\n`;
+}
+
 export const AUTONOMOUS_ENGINEERING_SAFE_ACTIONS = Object.freeze([
   "READ", "RESEARCH", "ANALYZE", "DOCUMENT", "TEST", "SIMULATE",
   "ISSUE_TRIAGE", "SAFE_BRANCH_WORK", "COMMIT_TASK_BRANCH", "PUSH_TASK_BRANCH",
