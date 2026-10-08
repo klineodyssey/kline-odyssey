@@ -2126,6 +2126,9 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
   let lastActorId = null;
   let lastActorRole = null;
   let lastEventAt = null;
+  let acknowledgedAt = null;
+  let workStartedAt = null;
+  let reviewedAt = null;
   const seenIds = new Set();
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index];
@@ -2165,10 +2168,10 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
       retryNotBefore = null;
       lifecycle = "DELIVERED"; ack = "DELIVERY_VERIFIED";
     }
-    else if (event.EVENT_TYPE === "ACKNOWLEDGED") { lifecycle = "ACKNOWLEDGED"; ack = "ACKNOWLEDGED"; }
-    else if (event.EVENT_TYPE === "WORK_STARTED") { lifecycle = "WORKING"; execution = "WORK_STARTED"; }
+    else if (event.EVENT_TYPE === "ACKNOWLEDGED") { lifecycle = "ACKNOWLEDGED"; ack = "ACKNOWLEDGED"; acknowledgedAt = event.OCCURRED_AT; }
+    else if (event.EVENT_TYPE === "WORK_STARTED") { lifecycle = "WORKING"; execution = "WORK_STARTED"; workStartedAt = event.OCCURRED_AT; }
     else if (event.EVENT_TYPE === "RESULT_RECORDED") { lifecycle = "REVIEW"; execution = "RESULT_RECORDED"; review = "PENDING"; }
-    else if (event.EVENT_TYPE === "REVIEWED") { lifecycle = "REVIEWED"; review = "PASS"; }
+    else if (event.EVENT_TYPE === "REVIEWED") { lifecycle = "REVIEWED"; review = "PASS"; reviewedAt = event.OCCURRED_AT; }
     else if (event.EVENT_TYPE === "GM_CLOSED") lifecycle = "CLOSED";
     else if (event.EVENT_TYPE === "STALE") { lifecycle = "STALE"; ack = "STALE"; execution = "STALE"; review = "STALE"; }
     else if (event.EVENT_TYPE === "SUPERSEDED") { lifecycle = "SUPERSEDED"; ack = "SUPERSEDED"; execution = "SUPERSEDED"; review = "SUPERSEDED"; }
@@ -2190,6 +2193,7 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
     ACK_STATUS: ack, EXECUTION_STATUS: execution, REVIEW_STATUS: review, FINAL_STATUS: finalStatus,
     DELIVERY_FAILURES: deliveryFailures, EVENT_COUNT: events.length,
     LAST_ACTOR_ID: lastActorId, LAST_ACTOR_ROLE: lastActorRole, LAST_EVENT_AT: lastEventAt,
+    ACKNOWLEDGED_AT: acknowledgedAt, WORK_STARTED_AT: workStartedAt, REVIEWED_AT: reviewedAt,
     RUNTIME_EVIDENCE_TRUST: "NOT_VERIFIED",
     AUTOMATION_CLOSED_LOOP: "NOT_VERIFIED",
     PROGRESS_STATUS: lifecycle === "CLOSED" ? "TESTING" : ["FAILED", "STALE", "SUPERSEDED"].includes(lifecycle) ? "BLOCKED" : "IN_PROGRESS"
@@ -2375,7 +2379,7 @@ export function projectKaiosWorkforceRegistry({
       CURRENT_THREAD: endpointVerified ? endpoint.thread_id : "NOT_VERIFIED",
       AUTOMATION_ENDPOINT: endpointVerified ? endpoint.endpoint_id : "NOT_VERIFIED",
       CURRENT_WORK_ID: working?.WORK_ID ?? worker.current_task ?? null,
-      LAST_ACK: lastLifecycle?.ACK_STATUS === "ACKNOWLEDGED" ? lastLifecycle.LAST_EVENT_AT : "NOT_VERIFIED",
+      LAST_ACK: lastLifecycle?.ACKNOWLEDGED_AT ?? "NOT_VERIFIED",
       LAST_REAL_ACTIVITY: lastLifecycle?.LAST_EVENT_AT ?? "NOT_VERIFIED",
       CAN_RECEIVE_PROMPT: endpointVerified,
       CAN_ACK: endpointVerified && eligible,

@@ -416,6 +416,9 @@ test("official message closes only after delivery, identity-bound ACK, result, d
   });
   assert.equal(projection.AUTOMATION_CLOSED_LOOP, "NOT_VERIFIED");
   assert.equal(projection.RUNTIME_EVIDENCE_TRUST, "NOT_VERIFIED");
+  assert.equal(projection.ACKNOWLEDGED_AT, "2026-10-08T00:02:00Z");
+  assert.equal(projection.WORK_STARTED_AT, "2026-10-08T00:03:00Z");
+  assert.equal(projection.REVIEWED_AT, "2026-10-08T00:05:00Z");
   assert.equal(projectKaiosOfficialMessageProgressBoard([projection]).available, 0);
   assert.equal(projectKaiosOfficialMessageProgressBoard([projection]).testing, 1);
 
