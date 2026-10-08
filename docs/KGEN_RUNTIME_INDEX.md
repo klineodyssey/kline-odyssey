@@ -349,6 +349,19 @@ Runtime authority remains: `C:\Desktop\kline-odyssey\docs\physics\KGEN_Universe_
 
 No Runtime CURRENT file was modified by this registration pass.
 
+## KAIOS CFO Finance Engine V1 Candidate
+
+| Runtime module | Primary callers | Notes |
+|---|---|---|
+| `C:\Desktop\kline-odyssey\core\accounting\runtime-finance.js` | `core/accounting/index.mjs`, tests and future evidence adapters | Fixed-name subordinate company accounting organ. Exact integer strings and BigInt protect money calculations; KUFO decay delegates to the existing company/Physics CURRENT model. Simulation only; no execution authority. |
+| `C:\Desktop\kline-odyssey\tests\cfo-finance-organ.test.mjs` | Universal Exchange Node test workflow | Double-entry, classification, royalty, compute, consumption, KUFO and no-payment regressions. |
+| `C:\Desktop\kline-odyssey\KGEN-Organization\WorkOrders\KAIOS_CFO_FINANCE_ENGINE_V1_20261008.json` | DOT/GM/reviewer | Manufacturing record, work orders, deterministic demo and governance state. |
+
+The protected Boot sequence files are intentionally unchanged because repository
+policy requires separate explicit Boot-update authority. This candidate must not be
+called installed or sealed until cumulative Boot CURRENT registration and independent
+review are complete.
+
 ## 11520 V3.4 Subordinate Runtime Registration
 
 `core/index.mjs` is the subordinate domain entry used by
