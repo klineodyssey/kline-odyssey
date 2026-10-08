@@ -21,7 +21,7 @@
 
 | Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
 |---|---|---|---|---|---|---|---|---|
-| 2026-10-07 | V2.9.5 / 2026-10-07.BNB-LIQUIDATION-STATUS-CONSISTENCY | K11520-BNB-LIQUIDATION-STATUS-20261007 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER | dot / independent scoped technical source review / 2026-10-07; no registered Reviewer role or release approval | `K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs`; `tests/11520-kgen-margin-wallet-foundation.test.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `K線西遊記/temples/11520/CHANGELOG.md` | Align the exported risk flag with the existing exact lifecycle liquidation boundary and accurately record the intentional source change. | No accounting, margin, capital, fees, price precision, oracle, units, speed caps, storage or receipt behavior changes. | Reverting only this provenance checkpoint returns to 35e2a331b05140a33e1b86e6918304e3e36ff039 and restores its recorded failing hash check. Reverting the complete liquidation-status increment to f7f67950418ebbb6f7a5a309a32d529232fcb3b6 restores the prior inconsistent boolean; no data reset or migration is required by this boolean-only change. |
+| 2026-10-07 | V2.9.5 / 2026-10-07.BNB-LIQUIDATION-STATUS-CONSISTENCY | K11520-BNB-LIQUIDATION-STATUS-20261007 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER | dot / independent scoped technical source review / 2026-10-07; no registered Reviewer role or release approval | `.github/workflows/11520-responsive-qa.yml`; `K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs`; `tests/11520-kgen-margin-wallet-foundation.test.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `K線西遊記/temples/11520/CHANGELOG.md` | Align the exported risk flag with the existing exact lifecycle liquidation boundary, serialize the existing responsive QA jobs, and accurately record the intentional source and workflow changes. | No accounting, margin, capital, fees, price precision, oracle, units, speed caps, storage or receipt behavior changes. The workflow keeps the existing triggers, commands, permissions, artifact routes and failure visibility. | Reverting only this provenance checkpoint returns to 35e2a331b05140a33e1b86e6918304e3e36ff039 and restores its recorded failing hash check. Reverting the complete liquidation-status increment to f7f67950418ebbb6f7a5a309a32d529232fcb3b6 restores the prior inconsistent boolean; no data reset or migration is required by this boolean-only change. |
 
 - Source parent: `35e2a331b05140a33e1b86e6918304e3e36ff039`; clean pre-fix main: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`.
 - Reproduction: BNB/KZ SHORT, -0.001C, entry 600.0004, 1 lot and
@@ -54,9 +54,11 @@
   Pre-fix main full runtime SHA-256:
   `03063c4c323826fb3a74275884aac060c9267e7dc7b9db9750298f3ef2787631`.
 - This checkpoint changes the existing runtime metadata, its one strict
-  provenance record and this cumulative changelog only. Other assets retain
-  their existing expected hashes and metadata. No workflow change, rerun,
-  held BSC/backpack/persistence hunk, general product version change, live
+  provenance record, this cumulative changelog and the existing responsive QA
+  job ordering. The workflow keeps its triggers, commands, permissions,
+  artifact routes and failure visibility while serializing the browser jobs.
+  Other assets retain their existing expected hashes and metadata. No held
+  BSC/backpack/persistence hunk, general product version change, live
   transaction, canonical role change or release approval is included.
 
 ### Previous checkpoint metadata (historical, preserved verbatim)
