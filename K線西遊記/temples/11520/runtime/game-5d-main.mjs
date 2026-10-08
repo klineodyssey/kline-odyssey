@@ -201,8 +201,9 @@ function syncMarketKLabels(){
   const mode=resolveCMode(combatSelection().c),simulationLocal=execution.mode==='SIMULATION'&&Object.values(execution.snapshot().observations).some(q=>q.source==='K11520_DETERMINISTIC_SIMULATION'),label=mode.mode==='MONSTER_MODE'?'取經 / MONSTER':mode.canTrade?'FREE TRADE · 0 FEE':'HIGH C LOCKED';
   $('#feed').textContent=`${label} · ${market.status==='LIVE'?'參考價 / SIM':'MARKET DATA STALE'}${simulationLocal?' · SIM LOCAL':''}`;
   $('#feed').title='V1 · |C| 0.001–1 · SIMULATION ONLY · >1C production locked · 免費 REST 參考行情，非低延遲結算 Oracle';
-  const selectedMarket=market.markets.find(row=>row.axis===S.axis)||market.markets[0],feedState=publicMarketQuoteSetStatus(publicObservations,{symbols:MARKETS}),selectedFeed=feedState.rows[selectedMarket?.symbol];
-  const feedSource=selectedFeed?.source===PUBLIC_MARKET_QUOTE_SOURCE.id?'BINANCE FREE':'UNAVAILABLE',feedTime=Number.isSafeInteger(selectedFeed?.updatedAt)?`${new Date(selectedFeed.updatedAt).toISOString().slice(11,19)}Z`:'--',feedFailure=selectedFeed?.failure?'Y':'N',feedMarket=selectedMarket?.symbol?.replace(/USDT$/,'')||'--';
+  const selectedMarket=market.markets.find(row=>row.axis===S.axis)||market.markets[0],feedState=publicMarketQuoteSetStatus(publicObservations,{symbols:MARKETS});
+  const feedSymbol=selectedMarket?.symbol||AXIS_MARKETS[S.axis]||MARKETS[0],selectedFeed=feedState.rows[feedSymbol];
+  const feedSource=selectedFeed?.source===PUBLIC_MARKET_QUOTE_SOURCE.id?'BINANCE FREE':'UNAVAILABLE',feedTime=Number.isSafeInteger(selectedFeed?.updatedAt)?`${new Date(selectedFeed.updatedAt).toISOString().slice(11,19)}Z`:'--',feedFailure=selectedFeed?.failure?'Y':'N',feedMarket=feedSymbol.replace(/USDT$/,'');
   // Keep every required quality field visible without expanding the landscape
   // telemetry owner into the parameter rails. Full per-market evidence remains
   // available in the title and __K11520_FREE_ORACLE__ inspection surface.
