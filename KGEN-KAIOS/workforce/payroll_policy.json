@@ -1,81 +1,111 @@
 {
   "metadata": {
-    "version": "3.0",
-    "revision": "2026-07-13.WORKFORCE_V3",
-    "status": "ACTIVE_PROTOTYPE_INTERNAL_LEDGER",
-    "last_updated": "2026-07-13",
-    "updated_by": "Codex",
-    "reviewed_by": "Codex",
+    "version": "4.0",
+    "revision": "2026-10-08.KAIOS_HR_RECONCILIATION",
+    "status": "ACTIVE_POLICY_LEDGER_ONLY_EXECUTION_NOT_LIVE",
+    "last_updated": "2026-10-08",
+    "updated_by": "DOT_ENGINEERING_EXECUTOR",
+    "reviewed_by": "INDEPENDENT_REVIEW_PENDING",
     "source_commit": "PENDING",
-    "task_id": "KGEN-WORKFORCE-V3-2026-0001",
-    "change_reason": "Define payroll policy for Workforce V3.",
+    "task_id": "KAIOS-HR-SYSTEM-20261008-001",
+    "change_reason": "Reconcile legacy KGEN/merit compensation with the Human-directed KAIOS prepaid living salary model and preserve separate compensation categories.",
     "source_of_truth": true,
-    "legal_notice": "Prototype / Simulation / Internal Ledger. Not a bank, not investment advice, no guaranteed return, human approval required for irreversible transfers."
+    "legal_notice": "Internal ledger and policy only. No salary payment, transfer, signing, treasury movement or guaranteed token value is authorized by this file."
   },
-  "salary_types": [
-    "BASE_SALARY",
-    "TASK_REWARD",
-    "QUALITY_BONUS",
-    "REVIEW_BONUS",
-    "RESEARCH_BONUS",
-    "BUG_BOUNTY",
-    "TEMPLE_REWARD",
-    "GAME_REWARD",
-    "LEADERSHIP_BONUS",
-    "PENALTY",
-    "REVERSAL",
-    "WITHHELD",
-    "CLAIMED",
-    "PAID"
+  "compensation_categories": [
+    "SALARY_INCOME",
+    "TASK_COMPENSATION",
+    "CREATOR_ROYALTY",
+    "FREIGHT_REVENUE",
+    "HEARTBEAT_REWARD",
+    "CARGO_PRINCIPAL"
   ],
-  "units": [
+  "category_rules": {
+    "SALARY_INCOME": "Fixed prepaid living salary for a payroll-eligible employee; payable unit KAIOS; amount requires approved salary table.",
+    "TASK_COMPENSATION": "Reviewed WorkOrder compensation; never base salary.",
+    "CREATOR_ROYALTY": "Evidence-based product/game royalty under an approved revenue-sharing policy.",
+    "FREIGHT_REVENUE": "Delivery, transport or service income; never cargo principal.",
+    "HEARTBEAT_REWARD": "Life-system reward; never salary or company customer revenue.",
+    "CARGO_PRINCIPAL": "Restricted/custodial cargo value; never revenue, profit or salary."
+  },
+  "salary_policy": {
+    "currency": "KAIOS",
+    "model": "PREPAID_LIVING_SALARY",
+    "payday_day": 5,
+    "payday_timezone": "UTC+08:00",
+    "coverage_example": "2026-10-05 payment covers 2026-10-05 through 2026-11-04",
+    "monthly_amount": "PENDING_POLICY",
+    "execution_status": "NOT_LIVE",
+    "treasury_status": "NOT_VERIFIED",
+    "salary_escrow_status": "NOT_VERIFIED"
+  },
+  "legacy_units": [
     "KGEN_TOKEN",
     "GAME_CREDIT",
     "TEMPLE_ENERGY",
     "MERIT_POINT",
     "FIAT_REFERENCE_ONLY"
   ],
+  "legacy_rule": "Legacy entries remain historical ledger evidence. They are not converted to KAIOS salary, paid status or payroll entitlement without an explicit reviewed migration record.",
+  "payroll_eligibility_gates": [
+    "FORMAL_EMPLOYEE_STATUS",
+    "VERIFIED_WORKER_ID",
+    "VERIFIED_CONTROLLER_OR_APPLICABLE_HUMAN_IDENTITY",
+    "APPROVED_ROLE_AND_SALARY_TABLE",
+    "PAY_PERIOD",
+    "NO_DUPLICATE_PAYMENT",
+    "EXACT_DESTINATION",
+    "EVIDENCE_AND_REVIEW"
+  ],
+  "payroll_states": [
+    "CALCULATED",
+    "HELD_IN_BANK",
+    "CLAIMABLE",
+    "PAYMENT_PENDING",
+    "PAID",
+    "FAILED",
+    "REVERSED"
+  ],
+  "forbidden_state": "UNKNOWN_MISSING",
+  "incident_rule": "Any unexplained missing payroll record is a P1 PAYROLL_INCIDENT; do not silently delete or rewrite it.",
   "master_flow": [
-    "Work Evidence",
-    "Codex Review",
-    "Payroll Calculation",
-    "8888 Bank Employee Account",
-    "Human-approved Claim",
-    "Optional KGEN Payroll Vault Distribution"
+    "Employment And Payroll Eligibility Evidence",
+    "Work And Salary Calculation",
+    "Independent Review Or Authorized Payroll Audit",
+    "8888 Internal Employee Ledger",
+    "Human-Protected Payment Authorization",
+    "KAIOS Payment Receipt And Reconciliation"
   ],
-  "default_claim_option": "HOLD_IN_BANK",
-  "claim_options": [
-    "HOLD_IN_BANK",
-    "CLAIM_KGEN",
-    "CONVERT_TO_GAME_CREDIT",
-    "CONVERT_TO_TEMPLE_ENERGY",
-    "BUY_GAME_ITEM",
-    "FUND_GAME_MISSION",
-    "SIMULATION_INVESTMENT",
-    "DONATE_TO_CIVILIZATION",
-    "MANUAL_REVIEW"
-  ],
+  "bank_8888_role": "Prototype internal employee salary ledger and claim queue; ledger balance is not proof of real KAIOS custody or transfer.",
   "calculation_rules": {
     "verified_evidence_required": true,
     "self_report_only_allowed": false,
-    "rejected_task_full_reward_allowed": false,
     "duplicate_commit_double_pay_allowed": false,
-    "protected_path_violation_freezes_salary": true,
+    "salary_amount_invention_allowed": false,
+    "heartbeat_as_salary_allowed": false,
+    "cargo_principal_as_revenue_allowed": false,
+    "ledger_entry_as_real_payment_allowed": false,
     "chain_payment_requires_human_approval": true,
     "fixed_token_value_guarantee": false
   },
-  "system_roles": {
-    "temple_12345": "Civilization life core and game reward source; not formal salary treasury.",
-    "bank_8888": "Prototype internal salary ledger, employee account and claim queue.",
-    "kgen_payroll_vault": "Future human-approved KGEN distribution reconciliation layer."
-  },
+  "protected_execution_requirements": [
+    "EXACT_EMPLOYEE",
+    "EXACT_AMOUNT",
+    "EXACT_SOURCE_ACCOUNT",
+    "EXACT_DESTINATION",
+    "SUFFICIENT_BALANCE",
+    "NO_DUPLICATE_PAYMENT",
+    "PAY_PERIOD",
+    "PAYROLL_RECEIPT",
+    "CURRENT_HUMAN_PROTECTED_ACTION_AUTHORITY"
+  ],
   "approval_matrix": {
-    "HOLD_IN_BANK": "CODEX_REVIEW_REQUIRED",
-    "CONVERT_TO_GAME_CREDIT": "CODEX_REVIEW_REQUIRED",
-    "CONVERT_TO_TEMPLE_ENERGY": "CODEX_REVIEW_REQUIRED",
-    "CLAIM_KGEN": "HUMAN_APPROVAL_REQUIRED",
-    "SIMULATION_INVESTMENT": "HUMAN_APPROVAL_REQUIRED",
-    "REAL_TRANSFER": "HUMAN_APPROVAL_REQUIRED"
+    "CALCULATE": "HR_AND_CFO_POLICY_ALLOWED",
+    "RECONCILE": "HR_AND_CFO_POLICY_ALLOWED",
+    "HELD_IN_BANK": "AUTHORIZED_REVIEW_REQUIRED",
+    "CLAIMABLE": "TREASURY_AND_DESTINATION_VERIFICATION_REQUIRED",
+    "PAYMENT_PENDING": "HUMAN_PROTECTED_ACTION_REQUIRED",
+    "REAL_TRANSFER": "HUMAN_PROTECTED_ACTION_REQUIRED",
+    "PAID": "VERIFIED_RECEIPT_REQUIRED"
   }
 }
-

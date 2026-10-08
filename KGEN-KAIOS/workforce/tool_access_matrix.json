@@ -1,12 +1,26 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "1.1",
     "status": "ACTIVE",
-    "last_updated": "2026-07-12",
-    "task_id": "KGEN-WORKFORCE-ROSTER-2026-0001"
+    "last_updated": "2026-10-08",
+    "task_id": "KAIOS-HR-SYSTEM-20261008-001",
+    "authority_evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559",
+    "review_status": "SELF_AUDIT_COMPLETE_INDEPENDENT_REVIEW_PENDING"
   },
   "allowed_values": ["ALLOWED", "REVIEW_REQUIRED", "DENIED", "HUMAN_APPROVAL_REQUIRED"],
   "categories": ["Git read", "Git commit", "Git push handoff", "Git merge", "Git push main", "Filesystem read", "Filesystem write", "Browser", "Terminal", "Python", "Node", "Testing", "GitHub Actions", "Pages", "Contracts", "Wallet", "Secrets", "Production deployment"],
+  "conditional_authority_records": [
+    {
+      "subject": "DOT",
+      "employment_decision": "PENDING_REVIEW",
+      "worker_id": "NOT_ASSIGNED",
+      "controller_binding": "NOT_VERIFIED",
+      "policy_scope": "BOUNDED_R0_R1_GITHUB_ENGINEERING_AND_QUALIFIED_PR_INTEGRATION",
+      "policy_evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559",
+      "activation_condition": "Bind the exact runtime/session, Controller, WorkOrder and branch before claiming formal worker execution.",
+      "protected_actions": "DENIED_WITHOUT_SEPARATE_HUMAN_APPROVAL"
+    }
+  ],
   "workers": [
     {
       "worker_id": "codex-gm-01",
@@ -37,14 +51,40 @@
     {
       "worker_id": "cursor-01",
       "display_name": "Cursor Primary Worker",
-      "status": "ACTIVE_IDLE",
+      "status": "SUSPENDED_HUMAN_COST_DECISION",
       "trust_level": "T2",
+      "access": {
+        "Git read": "DENIED",
+        "Git commit": "DENIED",
+        "Git push handoff": "DENIED",
+        "Git merge": "DENIED",
+        "Git push main": "DENIED",
+        "Filesystem read": "DENIED",
+        "Filesystem write": "DENIED",
+        "Browser": "DENIED",
+        "Terminal": "DENIED",
+        "Python": "DENIED",
+        "Node": "DENIED",
+        "Testing": "DENIED",
+        "GitHub Actions": "DENIED",
+        "Pages": "DENIED",
+        "Contracts": "DENIED",
+        "Wallet": "DENIED",
+        "Secrets": "DENIED",
+        "Production deployment": "DENIED"
+      }
+    },
+    {
+      "worker_id": "chatgpt-01",
+      "display_name": "ChatGPT System Maintainer",
+      "status": "OFF_DUTY_STALE_RUNTIME",
+      "trust_level": "T5",
       "access": {
         "Git read": "ALLOWED",
         "Git commit": "ALLOWED",
         "Git push handoff": "ALLOWED",
-        "Git merge": "DENIED",
-        "Git push main": "DENIED",
+        "Git merge": "ALLOWED",
+        "Git push main": "ALLOWED",
         "Filesystem read": "ALLOWED",
         "Filesystem write": "ALLOWED",
         "Browser": "ALLOWED",
@@ -52,12 +92,12 @@
         "Python": "ALLOWED",
         "Node": "ALLOWED",
         "Testing": "ALLOWED",
-        "GitHub Actions": "DENIED",
-        "Pages": "REVIEW_REQUIRED",
-        "Contracts": "DENIED",
-        "Wallet": "DENIED",
+        "GitHub Actions": "ALLOWED",
+        "Pages": "ALLOWED",
+        "Contracts": "HUMAN_APPROVAL_REQUIRED",
+        "Wallet": "HUMAN_APPROVAL_REQUIRED",
         "Secrets": "DENIED",
-        "Production deployment": "DENIED"
+        "Production deployment": "HUMAN_APPROVAL_REQUIRED"
       }
     },
     {
