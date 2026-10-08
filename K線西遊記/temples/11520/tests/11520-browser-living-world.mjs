@@ -49,11 +49,13 @@ await page.waitForTimeout(700);
 await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
 // Desktop starts fresh, then crosses the compact breakpoint in both tray states.
 const verifyDesktopContext=async(label)=>{
-  const boxes=await page.evaluate(()=>['cargoInterceptionButton','homeDeliveryButton','whiteholeEscortButton'].map(id=>{const el=document.getElementById(id),r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{id,x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,hit:el===hit||el.contains(hit)}}));
+  const boxes=await page.evaluate(()=>['cargoInterceptionButton','homeDeliveryButton','whiteholeEscortButton','k11520HudCollapseAll'].map(id=>{const el=document.getElementById(id),r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2),style=getComputedStyle(el);return{id,x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,hit:el===hit||el.contains(hit),background:style.backgroundColor}}));
   for(const box of boxes){assert.ok(box.width>=44&&box.height>=44&&box.hit,`${label}: ${box.id} owns its desktop touch target`);assert.ok(box.x>=0&&box.y>=0&&box.right<=1280&&box.bottom<=800)}
   for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++)assert.ok(boxes[i].bottom<=boxes[j].y||boxes[j].bottom<=boxes[i].y||boxes[i].right<=boxes[j].x||boxes[j].right<=boxes[i].x,`${label}: desktop ${boxes[i].id}/${boxes[j].id} cannot overlap`);
   const preflight=await page.locator('#k11520RealTradePreflight').evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom}}),whitehole=boxes.find(box=>box.id==='whiteholeEscortButton');
   assert.ok(whitehole.bottom<=preflight.y||preflight.bottom<=whitehole.y||whitehole.right<=preflight.x||preflight.right<=whitehole.x,`${label}: desktop white-hole shortcut cannot overlap the real-trading preflight control`);
+  assert.notEqual(boxes.find(box=>box.id==='k11520HudCollapseAll').background,'rgb(240, 240, 240)',`${label}: rotated HUD collapse control must retain its dark utility skin`);
+  assert.match(await page.locator('#k11520UtilityMaster').getAttribute('aria-controls'),/\bwhiteholeEscortButton\b/,`${label}: utility master must expose the white-hole shortcut relationship`);
   await page.screenshot({path:`${OUT}/desktop-context-${label}-1280x800.png`});
 };
 const desktopMoreStyle=await page.locator('#k11520UtilityMaster').evaluate(el=>{const s=getComputedStyle(el);return{label:el.textContent,color:s.color,background:s.backgroundColor}});
