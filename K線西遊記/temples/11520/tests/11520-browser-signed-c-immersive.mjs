@@ -47,21 +47,24 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 if(LOCAL_SIMULATION_QA){
   await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='WAIT',null,{timeout:5000});
   const simulationMode=await page.evaluate(()=>globalThis.__K11520_EXECUTION__.snapshot().mode);assert.equal(simulationMode,'SIMULATION_WALLET');
-  // Public WAIT remains truthful while explicit SIMULATION can preview.
+  // Public WAIT remains truthful and cannot manufacture a synthetic price.
   await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
   const before=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet);
   await page.locator('#orderFire').click({timeout:2500});
-  await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
-  await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('K11520_DETERMINISTIC_SIMULATION'));
-  assert.equal(await page.locator('#confirmOrder').isDisabled(),false,'WAIT must allow explicit simulation preview');
+  await page.waitForFunction(()=>document.querySelector('#toast')?.textContent.includes('ORACLE_STALE'),null,{timeout:2500});
+  assert.equal(await page.locator('#confirm').isVisible(),false,'WAIT must not open a price-dependent preview');
   assert.equal(await page.evaluate(()=>globalThis.__K11520_MARKET_K__.status),'WAIT','local source never becomes a fake LIVE public quote');
   assert.deepEqual(await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet),before,'preview does not debit');
-  await page.screenshot({path:`${OUT}/signed-c-WAIT-simulation-preview-390x844.png`});
-  await page.locator('#cancelOrder').click();
-  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await page.screenshot({path:`${OUT}/signed-c-WAIT-blocked-390x844.png`});
   quoteFixtureReady=true;
   await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});
-  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'HARNESS_LOCAL_SIMULATION_QUOTES',base:BASE,realMarketValidation:false,providerCallsIntercepted:'/api/v3/aggTrades',rows:quoteFixtureRows,waitPreviewAllowed:true,simulationSource:'K11520_DETERMINISTIC_SIMULATION',firstValidBatch:'LIVE',simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
+  await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
+  await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('BINANCE_PUBLIC_MARKET_DATA_ONLY'));
+  assert.equal(await page.locator('#confirmOrder').isDisabled(),false,'fresh complete public set allows simulation preview');
+  assert.deepEqual(await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet),before,'fresh preview does not debit');
+  await page.screenshot({path:`${OUT}/signed-c-FRESH-public-preview-390x844.png`});await page.locator('#cancelOrder').click();
+  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'HARNESS_LOCAL_SIMULATION_QUOTES',base:BASE,realMarketValidation:false,providerCallsIntercepted:'/api/v3/aggTrades',rows:quoteFixtureRows,waitPreviewAllowed:false,waitBlocked:true,freshPreviewSource:'BINANCE_PUBLIC_MARKET_DATA_ONLY',firstValidBatch:'LIVE',simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
 }
 // Human 12:43 Market collapse applies to FULL too; explicitly disclose it
 // before measuring the full-information HUD, rather than defeating idle hide.
