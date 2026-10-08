@@ -22,7 +22,7 @@ The active worker registry currently yields two formal active employees after ap
 
 | Subject | Employment decision | Worker ID | Life ID | Controller | Current result |
 |---|---|---|---|---|---|
-| DOT | CONDITIONAL / PENDING_REVIEW | NOT_ASSIGNED | NOT_VERIFIED | NOT_VERIFIED | CTDO proposal accepted in the current DOT session; formal appointment remains incomplete |
+| DOT | PENDING_REVIEW | NOT_ASSIGNED | NOT_VERIFIED | NOT_VERIFIED | CTDO proposal accepted in the current DOT session; formal appointment remains incomplete |
 | Digital Ant 0001 | PENDING_REVIEW | NOT_VERIFIED | `DIGITAL_ANT_0001` VERIFIED_EXISTING | Workforce binding NOT_VERIFIED | reuse the existing Life; resolve Worker/controller/payroll separately |
 
 DOT authority evidence is issue [#559](https://github.com/klineodyssey/kline-odyssey/issues/559). The session-scoped CTDO position decision is [recorded here](https://github.com/klineodyssey/kline-odyssey/issues/559#issuecomment-6061731330). It confirms acceptance of the proposed public role only. It does not create a Controller ACK, Worker ID, Life ID, formal appointment, payroll entitlement or protected authority, and it does not validate older work retroactively.

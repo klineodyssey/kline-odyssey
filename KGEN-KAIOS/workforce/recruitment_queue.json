@@ -85,7 +85,7 @@
         "source_scope": "CURRENT_DOT_CONVERSATION_POSITION_DECISION_ONLY",
         "not_controller_ack": true,
         "formal_appointment_status": "NOT_COMPLETE",
-        "hr_status": "CONDITIONAL_PENDING_REVIEW"
+        "hr_status": "PENDING_REVIEW"
       },
       "approved_scope": [
         "BOUNDED_R0_R1_GITHUB_ENGINEERING",
