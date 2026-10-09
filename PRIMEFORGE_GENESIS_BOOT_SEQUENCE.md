@@ -1168,3 +1168,7 @@ PrimeForge 以母機之名，開啟金融生命。
 Where the Market Becomes the Myth.
 
 —— 樂天帝 ⌖
+
+## Engineering handbook entry
+
+[docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md](docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md) — Boot lineage 後的工程參考入口，供查閱 dot 工程狀態、既有來源、測試與交接／下一步；不變更 Boot rules、Physics、Signed Universe Math、UniverseMap law、Authority、Permissions 或 Financial rules。
