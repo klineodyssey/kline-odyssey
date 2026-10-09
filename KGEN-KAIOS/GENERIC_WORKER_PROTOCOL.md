@@ -57,8 +57,8 @@ Read registry
 
 ```text
 Read mandatory Boot and governance
--> verify complete Human authorization evidence
--> bind unique company temporary execution reference
+-> verify complete privately retained Human authorization evidence
+-> bind a non-public company trial correlation reference
 -> bind exact WorkOrder, branch, base, scope, actions and R0/R1 ceiling
 -> verify one writer, lease, revocation and no conflicting live claim
 -> verify current tool/platform permission
@@ -69,7 +69,9 @@ Read mandatory Boot and governance
 -> stop for the distinct reviewer
 ```
 
-The temporary reference must be labelled `COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID`. It is correlation data only and proves no platform session, identity, employment, Worker/Life/Controller registration, review authority, payroll eligibility, or protected authority. The trial claim must use `claimant_kind: HUMAN_DELEGATED_TRIAL` in `KGEN-KAIOS/task_claim_schema.json`.
+The public record stores only the `HUMAN_AUTHORIZED_CANDIDATE` classification and external verification state. Private message IDs, personal names, runtime/session identifiers and derived correlation references stay in private task evidence. A company-local trial reference is correlation data only and proves no platform session, identity, employment, Worker/Life/Controller registration, review authority, payroll eligibility, or protected authority. The trial claim must use `claimant_kind: HUMAN_DELEGATED_TRIAL` in `KGEN-KAIOS/task_claim_schema.json`.
+
+Schema-valid fixtures prove structural compatibility only. They do not verify the private Human evidence, runtime identity, current lease/revocation, unique writer, exact scope, reviewer independence or live tool result. The executing controller must enforce those facts from external evidence; absent such enforcement, the task reports `LIVE_RUNTIME_ENFORCEMENT_UNVERIFIED` and cannot treat the fixture as formal ACK or active authority.
 
 ## Branch Rule
 
@@ -102,7 +104,7 @@ Each worker report must include:
 - Blockers
 - Recommendation
 
-A Human-delegated trial report replaces formal worker identity fields with claimant kind, temporary contributor/execution references, Human authorization evidence, lease/revocation state, exact allowed and forbidden scope, single-writer evidence, denial log, and distinct-review state. It must state that no formal identity or grant was activated.
+A Human-delegated trial report replaces formal worker identity fields with claimant kind, public Human-authorized classification, private-evidence verification state, lease/revocation state, exact allowed and forbidden scope, bounded output, single-writer evidence, denial log, distinct-review state, and a separate live-runtime-enforcement result. It must omit private source/person/runtime/reference data and state that no formal identity or grant was activated.
 
 ## Stop Rule
 

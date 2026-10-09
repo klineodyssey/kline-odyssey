@@ -75,21 +75,23 @@ A specifically Human-authorized candidate uses `claimant_kind: HUMAN_DELEGATED_T
 
 | Field | Required | Meaning |
 |---|---|---|
-| `temporary_contributor_ref` | Yes | Non-authoritative candidate label; never identity proof |
-| `temporary_execution_ref` | Yes | Unique company correlation reference |
-| `temporary_execution_ref_kind` | Yes | Must be `COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID` |
-| `authorization_evidence` | Yes | Complete exact Human source, issuer, time, decision and scope |
+| `candidate_public_ref` | Yes | Non-identifying public label matching `CANDIDATE-*`; never identity proof |
+| `private_trial_reference_retained` | Yes | `true`; the unique private correlation reference exists outside the public repository |
+| `authorization_evidence` | Yes | Public `HUMAN_AUTHORIZED_CANDIDATE` classification and private-evidence verification state; no private source metadata |
 | `work_order_id` | Yes | Exact WorkOrder or bounded delegated work ID |
 | `risk_level` | Yes | `R0` or `R1` only |
 | `allowed_paths` | Yes | Exact writable paths |
 | `allowed_actions` | Yes | Exact least-privilege actions |
 | `forbidden_actions` | Yes | Protected/irreversible actions explicitly denied |
 | `acceptance_criteria` | Yes | Test and output gates for handoff |
+| `output` | Yes | Bounded artifacts, destination and `NOT_ACTIVATED` state |
 | `single_writer` | Yes | Must be `true` |
 | `grant_status` | Yes | `ACTIVE`, `REVOKED`, or `EXPIRED` |
 | `reviewer_independence_required` | Yes | Must be `true` |
 
-The temporary reference is not a platform-issued session ID and does not mint an employee, Worker, Life, Controller, trust level, reviewer qualification, payroll right, credential, or tool permission. Claim data is evidence to evaluate; it cannot override a tool, host, GitHub, branch-protection, or policy denial.
+The temporary reference is not a platform-issued session ID and does not mint an employee, Worker, Life, Controller, trust level, reviewer qualification, payroll right, credential, or tool permission. Private message IDs, personal names, runtime/session identifiers and derived references remain outside the public repository. Claim data is evidence to evaluate; it cannot override a tool, host, GitHub, branch-protection, or policy denial.
+
+JSON Schema validation proves only that required public fields have an allowed shape. `verification_state`, `scope_complete`, `single_writer` and `reviewer_independence_required` are assertions, not proof. A separate runtime/controller must verify the retained private authorization, current time/revocation, exact scope, competing claims, reviewer identity and live tool/platform result. Until that evidence exists, runtime enforcement is `UNVERIFIED` and the record cannot be treated as ACK or active authority.
 
 ## Claim Rules
 

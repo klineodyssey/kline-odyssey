@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/task_claim_schema.json",
   "title": "KAIOS Task Claim Lease",
-  "description": "Backward-compatible registered-worker claims plus one bounded Human-delegated R0/R1 trial path. This schema defines evidence fields; it does not activate a grant.",
+  "description": "Backward-compatible registered-worker claims plus one bounded Human-delegated R0/R1 trial path. This schema validates public record structure only; it does not verify external authorization, identity, scope truth, time, writer uniqueness, reviewer independence or tool permission and does not activate a grant.",
   "type": "object",
   "required": [
     "task_id",
@@ -27,30 +27,21 @@
       "type": "string",
       "enum": ["Codex", "Cursor", "Claude", "Gemini", "OpenHands", "GitHub Copilot", "ChatGPT", "Deep Research", "Human Engineer"]
     },
-    "temporary_contributor_ref": { "type": "string", "minLength": 1 },
-    "temporary_execution_ref": {
+    "candidate_public_ref": {
       "type": "string",
-      "minLength": 16,
-      "pattern": "^TEMP-EXEC-[A-Za-z0-9._:-]+$"
+      "description": "Non-identifying public candidate label; the private evidence provides the real binding.",
+      "pattern": "^CANDIDATE-[A-Z0-9-]{4,64}$"
     },
-    "temporary_execution_ref_kind": {
-      "const": "COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID"
-    },
+    "private_trial_reference_retained": { "const": true },
     "authorization_evidence": {
       "type": "object",
-      "required": ["source_type", "source_id", "authorized_by", "issued_at", "decision", "scope_complete"],
+      "required": ["classification", "private_evidence_retained", "verification_state", "scope_complete"],
       "properties": {
-        "source_type": {
+        "classification": { "const": "HUMAN_AUTHORIZED_CANDIDATE" },
+        "private_evidence_retained": { "const": true },
+        "verification_state": {
           "type": "string",
-          "enum": ["HUMAN_MESSAGE", "HUMAN_ISSUE_COMMENT", "HUMAN_SIGNED_RECORD"]
-        },
-        "source_id": { "type": "string", "minLength": 1 },
-        "source_url": { "type": "string", "minLength": 1 },
-        "authorized_by": { "type": "string", "minLength": 1 },
-        "issued_at": { "type": "string", "format": "date-time" },
-        "decision": {
-          "type": "string",
-          "enum": ["APPROVED", "APPROVED_WITH_LIMITS"]
+          "enum": ["PENDING_EXTERNAL_VERIFICATION", "EXTERNALLY_VERIFIED", "REVOKED"]
         },
         "scope_complete": { "const": true }
       },
@@ -94,6 +85,27 @@
       "uniqueItems": true,
       "items": { "type": "string", "minLength": 1 }
     },
+    "output": {
+      "type": "object",
+      "required": ["allowed_artifacts", "destination", "activation_state"],
+      "properties": {
+        "allowed_artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["PATCH", "TEST_EVIDENCE", "NON_MAIN_COMMIT", "NON_MAIN_BRANCH", "DRAFT_PR", "REPORT"]
+          }
+        },
+        "destination": {
+          "type": "string",
+          "enum": ["LOCAL_ONLY", "AUTHORIZED_NON_MAIN_BRANCH", "DRAFT_PR"]
+        },
+        "activation_state": { "const": "NOT_ACTIVATED" }
+      },
+      "additionalProperties": false
+    },
     "single_writer": { "const": true },
     "grant_status": {
       "type": "string",
@@ -124,15 +136,15 @@
       "then": {
         "required": [
           "work_order_id",
-          "temporary_contributor_ref",
-          "temporary_execution_ref",
-          "temporary_execution_ref_kind",
+          "candidate_public_ref",
+          "private_trial_reference_retained",
           "authorization_evidence",
           "risk_level",
           "allowed_paths",
           "allowed_actions",
           "forbidden_actions",
           "acceptance_criteria",
+          "output",
           "single_writer",
           "grant_status",
           "reviewer_independence_required"

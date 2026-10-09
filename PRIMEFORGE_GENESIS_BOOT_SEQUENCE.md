@@ -321,14 +321,14 @@ The formal employee rule remains the only route to registered-worker authority. 
 
 Before any trial write, one claim record must bind all of the following:
 
-1. Human authorization evidence with source, issuer, decision, timestamp, and complete exact scope;
-2. one unique `COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID` execution reference and a non-authoritative contributor label;
+1. privately retained Human authorization evidence with source, issuer, decision, timestamp, and complete exact scope; the public record stores only `HUMAN_AUTHORIZED_CANDIDATE` and the external verification state;
+2. one unique company-local trial correlation reference that is never published with private message, person, runtime/session or derived-reference data and is not an identity;
 3. exact WorkOrder/task, branch, base commit, allowed paths/actions, forbidden actions, output, and acceptance criteria;
 4. R0/R1 ceiling, one writer, start/expiry/heartbeat, current revocation state, and no conflicting live claim;
 5. a named reviewer distinct from the implementer, with review evidence still pending until that reviewer acts; and
 6. current tool/platform permission at the moment of every action.
 
-An absent, incomplete, expired, revoked, duplicated, out-of-scope, wrong-branch, wrong-base, self-reviewed, or platform-denied trial fails closed to `REGISTRATION_REQUIRED` or `BLOCKED`. A self-selected name, provider label, shared login, role title, historical work, message delivery, or Draft/CI state cannot substitute for the bound evidence. The first platform or policy denial stops the exact action and records action, target, reason, UTC time, and available review/request identifier; no alternate route may be used to obtain the denied effect.
+An absent, incomplete, expired, revoked, duplicated, out-of-scope, wrong-branch, wrong-base, self-reviewed, or platform-denied trial fails closed to `REGISTRATION_REQUIRED` or `BLOCKED`. A self-selected name, provider label, shared login, role title, historical work, message delivery, schema-valid fixture, boolean assertion, or Draft/CI state cannot substitute for independently verified external evidence. JSON Schema validation proves record shape only; it cannot prove Human source authenticity, runtime identity, current lease/revocation, unique writer, exact scope, reviewer independence, or live tool permission. The first platform or policy denial stops the exact action and records action, target, reason, UTC time, and available review/request identifier in private task evidence; no alternate route may be used to obtain the denied effect.
 
 Candidate trials never authorize main push/merge, Mainnet or Testnet deployment/upgrade, real token/BNB/Treasury/payroll/payment/liquidity movement, signer/private-key/seed/credential/secret access, governance/admin-role execution, production oracle activation, protected-path work outside the exact Human scope, or irreversible/destructive action. A candidate branch or Draft PR that proposes this rule activates no trial grant and changes neither `worker_registry.json` nor `recruitment_queue.json`.
 

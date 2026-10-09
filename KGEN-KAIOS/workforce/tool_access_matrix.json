@@ -23,28 +23,10 @@
     }
   ],
   "candidate_rule_patch": {
-    "work_id": "KAIOS-HUMAN-DELEGATED-TRIAL-ADMISSION-CANDIDATE-20261009",
-    "temporary_execution_ref": "TEMP-EXEC-Sentinel_dcbfb651dd648191a5a18d0f21ddce6a-20261009T081939Z",
-    "temporary_execution_ref_kind": "COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID",
+    "authorization_classification": "HUMAN_AUTHORIZED_CANDIDATE",
     "status": "CANDIDATE_ONLY_NOT_ACTIVE",
-    "authorization_evidence": {
-      "source_type": "HUMAN_MESSAGE",
-      "source_id": "Sentinel_dcbfb651dd648191a5a18d0f21ddce6a",
-      "authorized_by": "human-primeforge / Human Authority 沈英明",
-      "issued_at": "2026-10-09T08:19:39Z",
-      "decision": "APPROVED_WITH_LIMITS",
-      "candidate_status": "CANDIDATE_AUTHORIZED",
-      "scope_complete": true
-    },
-    "owner": "human-primeforge",
-    "implementer": "DOT_DELEGATED_CANDIDATE_RUNTIME_UNBOUND",
-    "reviewer": "PENDING_DISTINCT_TECHNICAL_REVIEW_ASSIGNED_BY_PARENT",
     "base_commit": "4a31413095c73c04ea83443498780106af0510cf",
-    "branch": "dot/kaios-temporary-admission-candidate-20261009",
-    "risk_level": "R1",
-    "single_writer": true,
-    "expires_at": "2026-10-11T08:19:39Z",
-    "expires_earlier_on": "DRAFT_PR_HANDOFF",
+    "reviewed_source_head": "aadd1e3b987ad964d0fe01967ff7e755ea74fc6a",
     "allowed_paths": [
       "AGENTS.md",
       "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
@@ -55,40 +37,9 @@
       "KGEN-KAIOS/workforce/tool_access_matrix.json",
       "KGEN-KAIOS/workforce/WORKER_EXECUTION_REPORT_TEMPLATE.md"
     ],
-    "allowed_actions": [
-      "read",
-      "analyze",
-      "edit_allowed_paths",
-      "run_tests",
-      "create_test_fixtures_outside_commit",
-      "git_commit_non_main",
-      "git_push_non_main",
-      "open_draft_pr"
-    ],
-    "forbidden_actions": [
-      "activate_grant",
-      "modify_worker_registry",
-      "modify_recruitment_queue",
-      "claim_formal_worker_life_or_controller_identity",
-      "self_approve_or_self_review",
-      "merge_or_push_main",
-      "bypass_branch_protection_or_platform_denial",
-      "mainnet_testnet_or_production_deployment",
-      "real_asset_treasury_payroll_or_liquidity_action",
-      "signer_private_key_credential_or_secret_access",
-      "governance_or_admin_role_execution",
-      "irreversible_or_destructive_action"
-    ],
-    "output": "Commit and push one non-main candidate branch, open one Draft PR, then stop for distinct technical review.",
-    "acceptance_criteria": [
-      "Only the eight authorized tracked files differ from base.",
-      "Legacy registered-worker claims remain schema-compatible.",
-      "Positive temporary-trial fixture passes schema and runtime invariants.",
-      "Impersonation, incomplete authorization, expired/revoked grant, wrong branch/scope, duplicate writer, self-review, protected action and unknown-field fixtures fail.",
-      "Formal worker matrix rows, worker_registry.json and recruitment_queue.json remain unchanged.",
-      "No active grant, merge, deployment or identity activation is recorded.",
-      "A distinct technical reviewer evaluates the exact candidate HEAD before any later readiness decision."
-    ]
+    "external_runtime_evidence": "NOT_RECORDED_IN_PUBLIC_REPOSITORY",
+    "activation": false,
+    "public_evidence_note": "Private authorization source, person, runtime/session and derived correlation details remain in private task evidence. This record does not verify or activate them."
   },
   "workers": [
     {

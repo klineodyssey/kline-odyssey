@@ -4,7 +4,7 @@
 **Version:** 1.2-candidate
 **Revision:** 2026-10-09.1-candidate
 **Last Updated:** 2026-10-09
-**Updated By:** DOT delegated candidate (runtime unbound)
+**Updated By:** Human-authorized candidate patch
 **Reviewed By:** PENDING_DISTINCT_TECHNICAL_REVIEW
 **Source Commit:** PENDING_CANDIDATE_HEAD
 **Task ID:** KAIOS-HUMAN-DELEGATED-TRIAL-ADMISSION-CANDIDATE-20261009
@@ -68,11 +68,12 @@ Copy this structure into every Codex, Cursor, Generic Worker, or Human Engineer 
 ### Human-Delegated Trial Identity (use instead of formal worker fields only when applicable)
 
 - claimant_kind: HUMAN_DELEGATED_TRIAL
-- temporary_contributor_ref:
-- temporary_execution_ref:
-- temporary_execution_ref_kind: COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID
+- candidate_public_ref: CANDIDATE-<NON_IDENTIFYING_LABEL>
+- private trial correlation reference retained outside public repository: YES / NO
 - Formal worker / employee / Life / Controller activated: NO
-- Human authorization source / issuer / issued_at / decision:
+- Public authorization classification: HUMAN_AUTHORIZED_CANDIDATE
+- Private authorization evidence retained outside public repository: YES / NO
+- External authorization verification state: PENDING / VERIFIED / REVOKED / NOT_AVAILABLE
 - WorkOrder / bounded work ID:
 - risk_level: R0 / R1
 - exact branch / base commit:
@@ -88,6 +89,8 @@ Copy this structure into every Codex, Cursor, Generic Worker, or Human Engineer 
 - distinct reviewer reference:
 - reviewer independence check: PASS / FAIL / PENDING
 - current tool/platform permission check:
+- Structural schema fixture result: PASS / FAIL / NOT_RUN
+- Live runtime evidence enforcement: VERIFIED / UNVERIFIED / NOT_APPLICABLE
 - first denial log (action / target / reason / UTC time / request or review ID): NONE / details
 - Candidate result: PASS / FAIL / REGISTRATION_REQUIRED / BLOCKED
 
@@ -186,4 +189,4 @@ If any protected path appears in `Files Modified`, the report must include the e
 
 ## Human-Delegated Trial Reporting Rule
 
-The temporary-trial section is mandatory for `claimant_kind: HUMAN_DELEGATED_TRIAL`. A candidate must not copy values into formal worker fields, assert reviewer PASS for its own work, or treat a temporary reference, branch, commit, Draft PR, CI result, shared account, provider name, or role label as identity/authority proof. The report must fail closed when authorization, scope, lease, revocation, single-writer, branch/base, tool permission, or distinct-review evidence is missing or inconsistent.
+The temporary-trial section is mandatory for `claimant_kind: HUMAN_DELEGATED_TRIAL`. Private message IDs, personal names, runtime/session identifiers and derived correlation references must stay in private task evidence and must not be copied into a public repository report. A candidate must not copy values into formal worker fields, assert reviewer PASS for its own work, or treat a temporary reference, branch, commit, Draft PR, CI result, shared account, provider name, role label, schema-valid object, `scope_complete`, `single_writer`, or reviewer-independence boolean as identity/authority proof. Structural schema fixtures and simulated invariant tests are not live runtime enforcement or formal ACK. The report must fail closed when independently verified external authorization, scope, lease, revocation, single-writer, branch/base, tool permission, or distinct-review evidence is missing or inconsistent.
