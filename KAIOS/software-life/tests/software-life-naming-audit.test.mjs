@@ -150,7 +150,8 @@ test("24 hour queue is bounded and Cursor remains one task at a time", async () 
   assert.deepEqual(queue.active_claims, []);
   assert.equal(queue.cursor.current_task, null);
   assert.equal(queue.cursor.current_branch, null);
-  assert.equal(queue.cursor.current_status, "IDLE_NO_CURRENT_TASK");
+  assert.equal(queue.cursor.current_status, "ON_DEMAND_EXTERNAL_CAPACITY_ONLY_SUSPENDED");
+  assert.equal(queue.cursor.bounded_pilot_status, "SUSPENDED_BY_HUMAN_COST_DECISION");
   assert.equal(queue.cursor.prepared_task, "KAIOS-CURSOR-MICROBIAL-RESEARCH-001");
   assert.equal(queue.cursor.prepared_task_status, "PREPARATION_ONLY");
   assert.deepEqual(queue.cursor.current_active_tasks, {});
