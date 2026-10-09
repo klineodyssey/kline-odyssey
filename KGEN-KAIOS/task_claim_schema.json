@@ -2,11 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://klineodyssey.github.io/kline-odyssey/KGEN-KAIOS/task_claim_schema.json",
   "title": "KAIOS Task Claim Lease",
+  "description": "Backward-compatible registered-worker claims plus one bounded Human-delegated R0/R1 trial path. This schema defines evidence fields; it does not activate a grant.",
   "type": "object",
   "required": [
     "task_id",
-    "worker_id",
-    "worker_type",
     "status",
     "branch",
     "base_commit",
@@ -17,12 +16,90 @@
     "reviewer"
   ],
   "properties": {
+    "claimant_kind": {
+      "type": "string",
+      "enum": ["REGISTERED_WORKER", "HUMAN_DELEGATED_TRIAL"]
+    },
     "task_id": { "type": "string", "minLength": 1 },
+    "work_order_id": { "type": "string", "minLength": 1 },
     "worker_id": { "type": "string", "minLength": 1 },
     "worker_type": {
       "type": "string",
       "enum": ["Codex", "Cursor", "Claude", "Gemini", "OpenHands", "GitHub Copilot", "ChatGPT", "Deep Research", "Human Engineer"]
     },
+    "temporary_contributor_ref": { "type": "string", "minLength": 1 },
+    "temporary_execution_ref": {
+      "type": "string",
+      "minLength": 16,
+      "pattern": "^TEMP-EXEC-[A-Za-z0-9._:-]+$"
+    },
+    "temporary_execution_ref_kind": {
+      "const": "COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID"
+    },
+    "authorization_evidence": {
+      "type": "object",
+      "required": ["source_type", "source_id", "authorized_by", "issued_at", "decision", "scope_complete"],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": ["HUMAN_MESSAGE", "HUMAN_ISSUE_COMMENT", "HUMAN_SIGNED_RECORD"]
+        },
+        "source_id": { "type": "string", "minLength": 1 },
+        "source_url": { "type": "string", "minLength": 1 },
+        "authorized_by": { "type": "string", "minLength": 1 },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "decision": {
+          "type": "string",
+          "enum": ["APPROVED", "APPROVED_WITH_LIMITS"]
+        },
+        "scope_complete": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "risk_level": { "type": "string", "enum": ["R0", "R1"] },
+    "allowed_paths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "allowed_actions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "read",
+          "analyze",
+          "edit_allowed_paths",
+          "run_tests",
+          "create_test_fixtures_outside_commit",
+          "git_commit_non_main",
+          "git_push_non_main",
+          "open_draft_pr",
+          "update_draft_pr"
+        ]
+      }
+    },
+    "forbidden_actions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "single_writer": { "const": true },
+    "grant_status": {
+      "type": "string",
+      "enum": ["ACTIVE", "REVOKED", "EXPIRED"]
+    },
+    "reviewer_independence_required": { "const": true },
     "status": {
       "type": "string",
       "enum": ["OPEN", "CLAIMED", "IN_PROGRESS", "REVIEW", "APPROVED", "MERGED", "DONE", "REJECTED", "FIX", "BLOCKED"]
@@ -36,5 +113,59 @@
     "reviewer": { "type": "string", "minLength": 1 },
     "notes": { "type": "string" }
   },
+  "allOf": [
+    {
+      "if": {
+        "required": ["claimant_kind"],
+        "properties": {
+          "claimant_kind": { "const": "HUMAN_DELEGATED_TRIAL" }
+        }
+      },
+      "then": {
+        "required": [
+          "work_order_id",
+          "temporary_contributor_ref",
+          "temporary_execution_ref",
+          "temporary_execution_ref_kind",
+          "authorization_evidence",
+          "risk_level",
+          "allowed_paths",
+          "allowed_actions",
+          "forbidden_actions",
+          "acceptance_criteria",
+          "single_writer",
+          "grant_status",
+          "reviewer_independence_required"
+        ],
+        "not": {
+          "anyOf": [
+            { "required": ["worker_id"] },
+            { "required": ["worker_type"] }
+          ]
+        },
+        "properties": {
+          "status": {
+            "enum": ["OPEN", "CLAIMED", "IN_PROGRESS", "REVIEW", "REJECTED", "FIX", "BLOCKED"]
+          },
+          "branch": { "not": { "const": "main" } },
+          "base_commit": { "pattern": "^[0-9a-fA-F]{7,40}$" },
+          "claimed_at": { "format": "date-time" },
+          "lease_expires_at": { "format": "date-time" },
+          "heartbeat": {
+            "anyOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "else": {
+        "required": ["worker_id", "worker_type"],
+        "properties": {
+          "claimant_kind": { "const": "REGISTERED_WORKER" }
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }

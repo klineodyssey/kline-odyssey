@@ -1,14 +1,14 @@
 # KGEN Worker Execution Report Template
 
-**Status:** ACTIVE
-**Version:** 1.1
-**Revision:** 2026-07-13.1
-**Last Updated:** 2026-07-13
-**Updated By:** Codex
-**Reviewed By:** Codex
-**Source Commit:** fcba675
-**Task ID:** KAIOS-GM-V4-2026-0001
-**Change Reason:** Add the visible BOOT to DONE state chain and prevent Worker self-close without Codex review.
+**Status:** ACTIVE BASE / CANDIDATE ADDITION NOT ACTIVE
+**Version:** 1.2-candidate
+**Revision:** 2026-10-09.1-candidate
+**Last Updated:** 2026-10-09
+**Updated By:** DOT delegated candidate (runtime unbound)
+**Reviewed By:** PENDING_DISTINCT_TECHNICAL_REVIEW
+**Source Commit:** PENDING_CANDIDATE_HEAD
+**Task ID:** KAIOS-HUMAN-DELEGATED-TRIAL-ADMISSION-CANDIDATE-20261009
+**Change Reason:** Add fail-closed reporting fields for a bounded Human-delegated R0/R1 candidate trial without activating formal identity or tool authority.
 **Ancestor:** KGEN-Agent-Office/CURSOR_REPORT_TEMPLATE.md
 **Source Of Truth:** TRUE
 
@@ -64,6 +64,32 @@ Copy this structure into every Codex, Cursor, Generic Worker, or Human Engineer 
 - can_push_main:
 - reviewer:
 - Credential result: PASS / FAIL / REGISTRATION_REQUIRED
+
+### Human-Delegated Trial Identity (use instead of formal worker fields only when applicable)
+
+- claimant_kind: HUMAN_DELEGATED_TRIAL
+- temporary_contributor_ref:
+- temporary_execution_ref:
+- temporary_execution_ref_kind: COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID
+- Formal worker / employee / Life / Controller activated: NO
+- Human authorization source / issuer / issued_at / decision:
+- WorkOrder / bounded work ID:
+- risk_level: R0 / R1
+- exact branch / base commit:
+- lease start / expiry / heartbeat:
+- grant_status: ACTIVE / REVOKED / EXPIRED
+- single_writer evidence:
+- conflict / duplicate-scope check:
+- allowed paths:
+- allowed actions:
+- forbidden actions:
+- output and acceptance criteria:
+- implementer reference:
+- distinct reviewer reference:
+- reviewer independence check: PASS / FAIL / PENDING
+- current tool/platform permission check:
+- first denial log (action / target / reason / UTC time / request or review ID): NONE / details
+- Candidate result: PASS / FAIL / REGISTRATION_REQUIRED / BLOCKED
 
 ## 3. PROTECTED PATH CHECK
 
@@ -121,6 +147,8 @@ Copy this structure into every Codex, Cursor, Generic Worker, or Human Engineer 
 - Protected path violation:
 - Human decision needed:
 - Codex review needed:
+- Distinct technical review status: PENDING / PASS / FAIL / NOT_APPLICABLE
+- Trial activation status: NOT_ACTIVATED / ACTIVE_BY_SEPARATE_VALID_RECORD / REVOKED / EXPIRED
 - Next recommended action:
 ```
 
@@ -155,3 +183,7 @@ PROPOSED -> DRAFT -> OPEN
 ## Protected Path Rule
 
 If any protected path appears in `Files Modified`, the report must include the exact user authorization and Codex review boundary. Without that evidence, the task is BLOCKED.
+
+## Human-Delegated Trial Reporting Rule
+
+The temporary-trial section is mandatory for `claimant_kind: HUMAN_DELEGATED_TRIAL`. A candidate must not copy values into formal worker fields, assert reviewer PASS for its own work, or treat a temporary reference, branch, commit, Draft PR, CI result, shared account, provider name, or role label as identity/authority proof. The report must fail closed when authorization, scope, lease, revocation, single-writer, branch/base, tool permission, or distinct-review evidence is missing or inconsistent.

@@ -1,7 +1,7 @@
 # Generic Worker Protocol
 
-**Version:** V7.1 Minimal Worker Layer
-**Status:** Active / Draft for Review
+**Version:** V7.1.1 Candidate
+**Status:** Candidate / Distinct Technical Review Pending
 
 ## Purpose
 
@@ -51,9 +51,31 @@ Read registry
 -> stop for Codex review
 ```
 
+## Human-Delegated Candidate Trial Loop
+
+`KGEN-KAIOS/workforce/RECRUITMENT_STANDARD.md` permits one separate, bounded R0/R1 trial when a Human has authorized the exact candidate and scope. The candidate does not enter the registered-worker loop and must not invent a `worker_id`, `worker_type`, Life ID, Controller binding, trust level, reviewer status, or employee status.
+
+```text
+Read mandatory Boot and governance
+-> verify complete Human authorization evidence
+-> bind unique company temporary execution reference
+-> bind exact WorkOrder, branch, base, scope, actions and R0/R1 ceiling
+-> verify one writer, lease, revocation and no conflicting live claim
+-> verify current tool/platform permission
+-> work only inside the bound scope
+-> test and write a candidate report
+-> push only the authorized non-main branch
+-> open or update only the authorized Draft PR
+-> stop for the distinct reviewer
+```
+
+The temporary reference must be labelled `COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID`. It is correlation data only and proves no platform session, identity, employment, Worker/Life/Controller registration, review authority, payroll eligibility, or protected authority. The trial claim must use `claimant_kind: HUMAN_DELEGATED_TRIAL` in `KGEN-KAIOS/task_claim_schema.json`.
+
 ## Branch Rule
 
 A worker may only push branches matching its registry `allowed_branch_pattern`. Workers must not push `main` unless `can_push_main` is true.
+
+A Human-delegated trial candidate may use only the exact non-main branch in its trial record. It may not merge, push main, retarget the branch, broaden scope, or continue after expiry/revocation/first denial.
 
 ## Report Rule
 
@@ -79,6 +101,8 @@ Each worker report must include:
 - Risks
 - Blockers
 - Recommendation
+
+A Human-delegated trial report replaces formal worker identity fields with claimant kind, temporary contributor/execution references, Human authorization evidence, lease/revocation state, exact allowed and forbidden scope, single-writer evidence, denial log, and distinct-review state. It must state that no formal identity or grant was activated.
 
 ## Stop Rule
 
@@ -120,6 +144,8 @@ If verification fails, the worker must stop and output only:
 ```text
 REGISTRATION_REQUIRED
 ```
+
+The sole alternative is the fully bound Human-delegated trial path above. If any required trial field is absent or invalid, the candidate also stops with `REGISTRATION_REQUIRED`; if a previously valid trial expires, is revoked, conflicts, leaves scope, or encounters a policy/platform denial, it stops the exact action as `BLOCKED` and records the denial without trying another route.
 
 ## R&D Suggestion Rule
 

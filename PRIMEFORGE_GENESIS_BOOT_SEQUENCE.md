@@ -315,6 +315,23 @@ If verification fails, the worker is `UNREGISTERED_WORKER` and may only output:
 REGISTRATION_REQUIRED
 ```
 
+### Human-Delegated Candidate Trial Exception
+
+The formal employee rule remains the only route to registered-worker authority. Separately, `KGEN-KAIOS/workforce/RECRUITMENT_STANDARD.md` permits one reversible R0/R1 engineering trial for a specifically Human-authorized candidate. This is a temporary work envelope, not employment, onboarding, identity creation, Controller binding, reviewer qualification, payroll eligibility, or registry activation.
+
+Before any trial write, one claim record must bind all of the following:
+
+1. Human authorization evidence with source, issuer, decision, timestamp, and complete exact scope;
+2. one unique `COMPANY_TEMP_WORK_REF_NOT_PLATFORM_ID` execution reference and a non-authoritative contributor label;
+3. exact WorkOrder/task, branch, base commit, allowed paths/actions, forbidden actions, output, and acceptance criteria;
+4. R0/R1 ceiling, one writer, start/expiry/heartbeat, current revocation state, and no conflicting live claim;
+5. a named reviewer distinct from the implementer, with review evidence still pending until that reviewer acts; and
+6. current tool/platform permission at the moment of every action.
+
+An absent, incomplete, expired, revoked, duplicated, out-of-scope, wrong-branch, wrong-base, self-reviewed, or platform-denied trial fails closed to `REGISTRATION_REQUIRED` or `BLOCKED`. A self-selected name, provider label, shared login, role title, historical work, message delivery, or Draft/CI state cannot substitute for the bound evidence. The first platform or policy denial stops the exact action and records action, target, reason, UTC time, and available review/request identifier; no alternate route may be used to obtain the denied effect.
+
+Candidate trials never authorize main push/merge, Mainnet or Testnet deployment/upgrade, real token/BNB/Treasury/payroll/payment/liquidity movement, signer/private-key/seed/credential/secret access, governance/admin-role execution, production oracle activation, protected-path work outside the exact Human scope, or irreversible/destructive action. A candidate branch or Draft PR that proposes this rule activates no trial grant and changes neither `worker_registry.json` nor `recruitment_queue.json`.
+
 ### Trust Levels
 
 | Trust | Name | Rule |
