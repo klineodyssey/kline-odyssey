@@ -90,6 +90,7 @@ jobs:
     permissions:
       contents: read
       issues: read
+      actions: read
     concurrency:
       group: digital-ant-public-hourly-worker
       cancel-in-progress: false
@@ -101,21 +102,74 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "20"
+      - name: Locate previous Digital Ant runtime evidence
+        id: previous-runtime
+        continue-on-error: true
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
+              ...context.repo,
+              workflow_id: "universal_exchange_v2.yml",
+              branch: "main",
+              status: "completed",
+              per_page: 50
+            });
+            const candidates = runs
+              .filter((run) => String(run.id) !== String(context.runId) && run.status === "completed" && run.head_branch === "main" && ["schedule", "workflow_dispatch"].includes(run.event))
+              .sort((a, b) => Number(b.run_number) - Number(a.run_number) || Number(b.run_attempt) - Number(a.run_attempt) || Number(b.id) - Number(a.id));
+            for (const run of candidates) {
+              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+                ...context.repo,
+                run_id: run.id,
+                per_page: 100
+              });
+              const expectedName = `digital-ant-hourly-${run.id}-${run.run_attempt}`;
+              const artifact = artifacts.find((item) => item.expired !== true && item.name === expectedName);
+              if (!artifact) continue;
+              core.setOutput("run-id", String(run.id));
+              core.setOutput("artifact-name", artifact.name);
+              break;
+            }
+      - name: Download previous Digital Ant runtime evidence
+        if: steps.previous-runtime.outputs.run-id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ steps.previous-runtime.outputs.artifact-name }}
+          path: ${{ runner.temp }}/digital-ant-previous
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.previous-runtime.outputs.run-id }}
+      - name: Restore previous read-only status for consecutive-cycle detection
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/digital-ant-runtime/work-events"
+          previous_runtime="$RUNNER_TEMP/digital-ant-previous/digital-ant-runtime"
+          previous_status="$previous_runtime/worker-status.json"
+          previous_events="$previous_runtime/work-events"
+          if test -f "$previous_status"; then
+            cp "$previous_status" "$RUNNER_TEMP/digital-ant-runtime/worker-status.json"
+          fi
+          if test -d "$previous_events" && compgen -G "$previous_events/DIGITAL_ANT_0001_HOURLY_*.json" > /dev/null; then
+            cp "$previous_events"/DIGITAL_ANT_0001_HOURLY_*.json "$RUNNER_TEMP/digital-ant-runtime/work-events/"
+          fi
       - name: Run one independent read-only hourly or ignition-window cycle
         env:
           BSC_RPC_URL: ${{ vars.BSC_RPC_URL }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           node core/jobs/public-read-only-worker.mjs \
-            --status "K線西遊記/temples/11520/runtime/worker-status.json" \
-            --events-dir "K線西遊記/temples/11520/runtime/work-events" \
+            --status "$RUNNER_TEMP/digital-ant-runtime/worker-status.json" \
+            --events-dir "$RUNNER_TEMP/digital-ant-runtime/work-events" \
             --output "$RUNNER_TEMP/digital-ant-hourly-worker.json"
-      - name: Preserve public Work Event evidence without repository mutation
+      - name: Preserve status and actual incident Work Event evidence without repository mutation
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: digital-ant-hourly-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/digital-ant-hourly-worker.json
-            K線西遊記/temples/11520/runtime/worker-status.json
+            ${{ runner.temp }}/digital-ant-runtime/
           if-no-files-found: error
           retention-days: 30
