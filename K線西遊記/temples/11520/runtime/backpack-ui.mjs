@@ -5,6 +5,7 @@ import {createPlayerScopedStorage} from './evm-wallet-runtime.mjs';
 
 const KEY='11520.backpack.v1';
 let backpack=createBackpack(),owner=null,scoped=null,storageStatus='SESSION_ONLY';
+let previewGeneration=0;
 function ensureOwner(){
   const snapshot=globalThis.__K11520_PLAYER_LIFE__?.snapshot();
   const next=snapshot?.player?.playerId||getActivePlayerId();
@@ -40,10 +41,12 @@ function install(){
   syncToggle();render();
 }
 
-async function render3dPreviews(items){
+async function render3dPreviews(items,generation){
   for(const item of items){
+    if(generation!==previewGeneration||!document.getElementById('backpackPanel')?.classList.contains('open'))return;
     const canvas=document.querySelector(`canvas.bp3d[data-item-id="${CSS.escape(item.itemId)}"]`);if(!canvas)continue;
-    try{await renderItemPreview(canvas,item,{size:88})}catch(error){canvas.dataset.item3d='error';canvas.setAttribute('aria-label',`${item.name} 3D preview unavailable`);console.warn('[11520 ITEM 3D]',item.itemId,error)}
+    const shouldRender=()=>generation===previewGeneration&&canvas.isConnected&&document.getElementById('backpackPanel')?.classList.contains('open');
+    try{await renderItemPreview(canvas,item,{size:88,shouldRender})}catch(error){if(shouldRender()){canvas.dataset.item3d='error';canvas.setAttribute('aria-label',`${item.name} 3D preview unavailable`);console.warn('[11520 ITEM 3D]',item.itemId,error)}}
   }
 }
 
@@ -61,6 +64,7 @@ async function requestLivingRelease(item){
 }
 
 function render(){
+  const generation=++previewGeneration;
   ensureOwner();
   if(typeof document==='undefined')return;
   const stats=document.getElementById('backpackStats'),grid=document.getElementById('backpackGrid');if(!stats||!grid)return;
@@ -69,7 +73,7 @@ function render(){
   if(journey)stats.textContent+=` · 取經碎片 ${journey.loot}（本機）`;
   grid.innerHTML=s.items.length?s.items.map(i=>{const d=itemVisualDescriptor(i);return `<div class="bpSlot" data-item="${esc(i.itemId)}"><canvas class="bp3d" width="88" height="88" data-item-id="${esc(i.itemId)}"></canvas><span class="shape">${esc(d.label)}</span><b>${esc(i.name)}${i.qty>1?` ×${i.qty}`:''}</b><small>${esc(i.kind)}${i.lifeId?` · ${esc(i.lifeId)}`:''}</small><button class="${i.kind==='LIVING_CARGO'?'':'discard'}" data-action="${i.kind==='LIVING_CARGO'?'release':'discard'}" data-item-id="${esc(i.itemId)}">${i.kind==='LIVING_CARGO'?'放出':'丟棄'}</button></div>`}).join(''):`<div class="bpEmpty">背包目前是空的。靠近可採集生命或取得寶物後才會放入，不預塞假物品。</div>`;
   grid.querySelectorAll('[data-action]').forEach(b=>b.onclick=async()=>{const item=backpack.items.find(i=>i.itemId===b.dataset.itemId);if(!item)return;if(b.dataset.action==='release')await requestLivingRelease(item);else{removeItem(backpack,item.itemId,1);save();render();notice(`${item.name} 已丟棄`)}});
-  void render3dPreviews(s.items);
+  void render3dPreviews(s.items,generation);
 }
 
 export function addBackpackItem(item){ensureOwner();const blocked=mutationBlocked();if(blocked)return {ok:false,reason:blocked,...persistence()};const r=storeItem(backpack,item);if(r.ok){save();render()}return {...r,...persistence()}}
