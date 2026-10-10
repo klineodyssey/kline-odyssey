@@ -1,10 +1,10 @@
 {
   "metadata": {
     "version": "2.2",
-    "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+    "status": "ACTIVE_FAIL_CLOSED_PRECHECK_ONLY",
     "last_updated": "2026-10-10",
     "updated_by": "KAIOS_GM_TEMPORARY_WORKER_POLICY",
-    "review_status": "CTDO_ACK_RECONCILIATION_INDEPENDENT_REVIEW_PENDING",
+    "review_status": "PR_571_SECURITY_REVIEW_PASS_558326D6",
     "task_id": "KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001",
     "authority_evidence": "https://github.com/klineodyssey/kline-odyssey/issues/559",
     "source_of_truth": true,
@@ -56,7 +56,7 @@
     "RESEARCH_FINANCE_ANALYST"
   ],
   "temporary_worker_policy": {
-    "status": "PROPOSED_PENDING_INDEPENDENT_REVIEW",
+    "status": "ACTIVE_FAIL_CLOSED_PRECHECK_ONLY",
     "lane": "EXISTING_WORKQUEUE_TASK_SCOPED_R0_R1",
     "formal_employee_required": false,
     "permanent_worker_id_required": false,

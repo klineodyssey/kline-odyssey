@@ -1,14 +1,15 @@
 # Codex Review Log
 
-## 2026-10-10 · KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001 · implementer evidence only
+## 2026-10-10 · KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001 · exact-head security review
 
 - State progress: `BOOT=PASS`; `CLAIM=PASS`; `WORK=COMPLETE`;
-  `TEST=SCOPED_PASS_WITH_REPOSITORY_BASELINE_BLOCKERS`; `REPORT=RECORDED`; `REVIEW=PENDING_INDEPENDENT_EXACT_HEAD`;
-  `READY_FOR_PUSH=IMPLEMENTER_READY`; `DONE=NO`.
+  `TEST=SCOPED_AND_EXACT_HEAD_CI_PASS`; `REPORT=RECORDED`;
+  `REVIEW=PASS_AT_558326d664730a3750cfe0f11a85767ffeae4985`;
+  `READY_FOR_INTEGRATION=YES`; `DONE=NO_UNTIL_MERGED`.
 - Provenance: `SECURITY_FINDING` from PR #571 independent review at source head
   `e0a8fc5ef67b3f097e0ec7d6b1b60b4e25680eab`; source actor
   `INDEPENDENT_REVIEWER`; owner `HENGYAO_GM`; implementer `codex-gm-01`;
-  reviewer `INDEPENDENT_REVIEW_PENDING`; priority `P1`; risk `R1`.
+  reviewer `INDEPENDENT_SECURITY_REVIEWER`; priority `P1`; risk `R1`.
 - BOOT: read `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`, Physics Runtime
   CURRENT, Universe Map V10.2, `AGENTS.md`, current Boot and Worker Registry in
   the required order. Registry gate was ACTIVE/T5 with no suspension; branch
@@ -39,11 +40,16 @@
   conditions, including absent local `ethers`/`playwright` packages and existing
   governance, registry, homepage/route and workflow assertions outside this
   task's diff. No dependency installation or out-of-scope repair was performed.
+- Independent Security Review: PASS at exact head
+  `558326d664730a3750cfe0f11a85767ffeae4985`; all six findings from rejected
+  head `e0a8fc5ef67b3f097e0ec7d6b1b60b4e25680eab` are resolved; exact-head CI
+  includes two successful `11520 Universal Exchange V2 / test` jobs; blocking
+  findings: NONE. This PASS does not transfer across a new program or scope change.
 - Protected actions performed: NONE. No Mainnet, Treasury, signer, secret,
   payment, deploy, external account/message, repository destruction, main push
   or merge occurred. This entry is not an independent review and does not mark
   the candidate ACTIVE, reviewed, eligible, accepted, compensable or DONE. The
-  independent reviewer must bind the delivered Git exact head after commit.
+  reviewed implementation remains fail-closed and grants no Worker eligibility.
 
 ## 2026-09-29 · Complete-product settlement capital / PR #445
 

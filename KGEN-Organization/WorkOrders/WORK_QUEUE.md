@@ -3,12 +3,12 @@
 ## Temporary-worker ordinary-work eligibility — 2026-10-10
 
 - `WORK_ID`: `KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001`; status:
-  `IMPLEMENTED_SCOPED_QA_PASS / REPOSITORY_BASELINE_BLOCKERS / NOT_ELIGIBLE / PENDING_INDEPENDENT_EXACT_HEAD_REVIEW`; priority: `P1`.
+  `IMPLEMENTED_SCOPED_QA_PASS / SECURITY_REVIEW_PASS / NOT_ELIGIBLE / READY_FOR_INTEGRATION`; priority: `P1`.
 - `GENERATED_AT`: `2026-10-10T13:50:38+08:00`; `BASE_MAIN_SHA`:
   `4a31413095c73c04ea83443498780106af0510cf`; `TARGET_PR_OR_BRANCH`:
   `codex/temp-worker-eligibility`.
 - `PROJECT_OWNER`: `HENGYAO_GM`; `IMPLEMENTER`: `codex-gm-01` under the
-  current direct Human WorkOrder; `REVIEWER`: `INDEPENDENT_REVIEW_PENDING`.
+  current direct Human WorkOrder; `REVIEWER`: `INDEPENDENT_SECURITY_REVIEWER`.
 - `TASK_SOURCE_TYPE`: `SECURITY_FINDING`; `TASK_SOURCE_ID`:
   `PR-571-INDEPENDENT-REVIEW`; `TASK_SOURCE_ACTOR`: `INDEPENDENT_REVIEWER`;
   `TASK_SOURCE_FILE`: `https://github.com/klineodyssey/kline-odyssey/pull/571`;
@@ -17,9 +17,12 @@
   WorkOrders, unknown/protected actions, branch aliases, reviewer aliases and
   invalid compensation values.
 - `CREATED_BY`: `codex-gm-01`; `CREATED_AT`: `2026-10-10T13:50:38+08:00`;
-  `OWNER`: `HENGYAO_GM`; `REVIEWER`: `INDEPENDENT_REVIEW_PENDING`; `PRIORITY`:
+  `OWNER`: `HENGYAO_GM`; `REVIEWER`: `INDEPENDENT_SECURITY_REVIEWER`; `PRIORITY`:
   `P1`; `RISK_LEVEL`: `R1`; `EXECUTION_BASE_SHA`:
   `e0a8fc5ef67b3f097e0ec7d6b1b60b4e25680eab`.
+- `DELIVERY_COMMIT`: `558326d664730a3750cfe0f11a85767ffeae4985`;
+  `SECURITY_REVIEW`: `PASS`; `REVIEWED_HEAD`:
+  `558326d664730a3750cfe0f11a85767ffeae4985`; `BLOCKING_FINDINGS`: `NONE`.
 - `SCOPE`: correct the existing Workforce, WorkOrder, tool-access and
   compensation policies that treated formal registration or Life birth as a
   prerequisite for ordinary R0/R1 work; add one fail-closed validator and

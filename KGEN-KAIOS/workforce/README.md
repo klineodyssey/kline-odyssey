@@ -1,12 +1,12 @@
 # KGEN Workforce Governance
 
-**Status:** DRAFT / PENDING INDEPENDENT REVIEW
+**Status:** ACTIVE / FAIL-CLOSED PRECHECK ONLY
 **Version:** 1.2
 **Revision:** 2026-10-10.TEMPORARY_WORKER_ELIGIBILITY
 **Last Updated:** 2026-10-10
 **Updated By:** Codex
-**Reviewed By:** INDEPENDENT_REVIEW_PENDING
-**Source Commit:** PENDING_PR_HEAD
+**Reviewed By:** INDEPENDENT_SECURITY_REVIEWER
+**Source Commit:** 558326d664730a3750cfe0f11a85767ffeae4985
 **Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
 **Change Reason:** Separate ordinary temporary-work eligibility from formal Digital Life, employment and payroll while preserving WorkOrder, review and protected financial gates.
 **Source Of Truth:** TRUE

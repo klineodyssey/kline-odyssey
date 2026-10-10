@@ -1,6 +1,6 @@
 # KAIOS HR Recruitment And Employment Standard
 
-**Status:** DRAFT / PENDING INDEPENDENT REVIEW
+**Status:** ACTIVE / FAIL-CLOSED PRECHECK ONLY
 **Version:** 2.1
 **Last Updated:** 2026-10-10
 **Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001

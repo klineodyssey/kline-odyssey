@@ -1,6 +1,6 @@
 # KGEN Tool Access Matrix
 
-**Status:** DRAFT / PENDING INDEPENDENT REVIEW
+**Status:** ACTIVE / FAIL-CLOSED PRECHECK ONLY
 **Version:** 1.2
 **Last Updated:** 2026-10-10
 **Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
