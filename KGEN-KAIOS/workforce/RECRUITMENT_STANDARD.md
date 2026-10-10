@@ -1,10 +1,10 @@
 # KAIOS HR Recruitment And Employment Standard
 
-**Status:** ACTIVE
-**Version:** 2.0
-**Last Updated:** 2026-10-08
-**Task ID:** KAIOS-HR-SYSTEM-20261008-001
-**Authority:** Human Authority 沈英明, 2026-10-08
+**Status:** ACTIVE / FAIL-CLOSED PRECHECK ONLY
+**Version:** 2.1
+**Last Updated:** 2026-10-10
+**Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
+**Authority:** Human Authority 沈英明, 2026-10-10
 **Source Of Truth:** `KGEN-KAIOS/workforce/recruitment_queue.json`
 
 ## Purpose
@@ -119,9 +119,22 @@ Employment, Life, worker registration, Controller binding, tool authority and pa
 
 A session ACK is not a Controller ACK. A Human engineering authorization is not a Worker ID. A Life ID is not employment. Hiring is not payroll payment authority.
 
-## Transitional Safe Work
+## Temporary Ordinary Work
 
-A candidate with a recorded Human scope authorization may perform one bounded, reversible R0/R1 trial when the exact claimant, branch, WorkOrder, scope and reviewer are recorded. This does not activate a formal employee, create a Worker/Life ID, grant review authority, or authorize mainnet, Treasury, signer, secrets, payroll or irreversible actions.
+Temporary work is a task lane, not a hiring shortcut and not a one-trial-only exception. A qualified temporary worker may claim ordinary, reversible R0/R1 work without formal employment, a permanent Worker ID, a Digital Life ID, species, birthplace or birth ceremony when all of these gates pass:
+
+1. task-scoped work identity and its evidence are verifiable;
+2. the worker can receive the WorkOrder through a verified channel and returns an explicit ACK;
+3. the current WorkOrder records exact scope, non-main branch, dependencies, acceptance tests, expiry/protected actions and a distinct reviewer;
+4. capability evidence matches the requested tools and scope;
+5. a public BSC56 compensation wallet and ownership evidence are recorded without exposing or requesting secrets;
+6. the work remains R0/R1 and requests no protected action.
+
+Before delivery acceptance, the record is only a claim. After delivery, a distinct reviewer must verify the exact head, tests and output. An accepted result may become eligible for `TASK_COMPENSATION` only under an approved budget; it never becomes salary or proof of payment. Actual KGEN/KAIOS payment still requires exact recipient, amount, source, duplicate check, Treasury, signer, receipt and action-specific Human authority.
+
+Failure of any gate returns a precise fail-closed reason. No missing Life ID or birth record is a failure reason for this lane. No Life ID, wallet, display name or shared provider account alone proves the work identity. Until a canonical resolver verifies durable registry records, the repository validator reports only `PRECHECK_PASSED`, `eligible: false` and `canonical_verification_required: true`.
+
+DOT is the primary dispatcher for ordinary engineering. HR and the General Manager govern policy, capacity, integration, audit and independent review routing; they do not replace the implementer ACK or reviewer evidence.
 
 ## Privacy And Security
 
@@ -129,7 +142,7 @@ No public workforce file may contain private keys, wallet seeds, passwords, toke
 
 ## Current Priority Reconciliations
 
-- **DOT:** Human GitHub engineering authority is reusable capability and policy evidence, not an employment identity grant. Hiring remains `PENDING_REVIEW`; the session-scoped policy ACK is verified but is not a Controller ACK and must not backfill older work.
+- **DOT:** Human GitHub engineering authority is reusable capability and policy evidence, not an employment identity grant. Hiring remains `PENDING_REVIEW`; ordinary R0/R1 work may use the temporary lane only when the exact task-scoped identity, channel, ACK, WorkOrder, branch, reviewer and recipient wallet gates pass. A prior session ACK must not backfill a new claim.
 - **Digital Ant 0001:** reuse `DIGITAL_ANT_0001`; do not mint a duplicate Life or Worker identity. Life evidence exists, while Workforce Worker/Controller/payroll gates remain separately auditable.
 - **Existing registry employees:** retain valid interviews, trials and approvals. Reconcile stale projections against `KGEN-KAIOS/worker_registry.json` instead of re-interviewing without cause.
 

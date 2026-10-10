@@ -53,7 +53,8 @@ import {
   validateDigitalTwinWorld, validateWorldStateObject, validateSupplyChainPlan,
   validateStaffingPlan, validateUniversalWorkMarket, validateSafetyPlan,
   validateProjectIncident, validateDefinitionOfDone, validateCustomerIdealMatch,
-  validateCreativeEnhancement, validateExternalAiOnboarding, validateCivilizationConcierge,
+  validateCreativeEnhancement, validateExternalAiOnboarding, validateTemporaryWorkerClaim,
+  TEMPORARY_WORK_ORDINARY_ACTIONS, TEMPORARY_WORK_PROTECTED_ACTIONS, validateCivilizationConcierge,
   validateSocialAssistanceWorkflow, validateAiCivilizationOs,
   replayCanonicalAiCivilizationOsArchitecture, validateAcquisitionNeed,
   validateCivilizationDemandScan, validateAcquisitionLead, validateAcquisitionLeadTransition,
@@ -2289,6 +2290,168 @@ test("V3.1 External AI is not automatically a Life or eligible Worker", () => {
   assert.equal(validateExternalAiOnboarding(tool), tool);
   assert.throws(() => validateExternalAiOnboarding({ ...tool, assigned_class: "LIFE" }), (error) => error.code === "EXTERNAL_AI_IS_NOT_AUTOMATIC_LIFE");
   assert.equal(validateCivilizationConcierge(seed.next_stage.ai_civilization_os.concierge), seed.next_stage.ai_civilization_os.concierge);
+});
+
+test("temporary worker precheck is fail-closed without a canonical evidence resolver", () => {
+  const baseSha = "a".repeat(40);
+  const headSha = "b".repeat(40);
+  const evidence = (recordId, commitSha = baseSha) => ({
+    record_type: "TEST_FIXTURE_ONLY",
+    record_id: recordId,
+    registry_ref: "KGEN-KAIOS/workforce/WORKER_AUDIT_LOG.json",
+    commit_sha: commitSha,
+    sha256: "c".repeat(64)
+  });
+  const claim = {
+    claim_id: "TEMP-CLAIM-POLICY-TEST-0001",
+    work_identity: {
+      work_identity_id: "TEMP-WORKER-POLICY-TEST-0001",
+      identity_type: "TEST_FIXTURE",
+      controller_id: "TEMP-CONTROLLER-POLICY-TEST-0001",
+      verification_status: "VERIFIED",
+      evidence_ref: evidence("IDENTITY-EVIDENCE-0001")
+    },
+    claim_capability: {
+      status: "VERIFIED",
+      ack_status: "VERIFIED",
+      tools: ["GIT", "NODE"],
+      channel_evidence_ref: evidence("CHANNEL-EVIDENCE-0001"),
+      ack_evidence_ref: evidence("ACK-EVIDENCE-0001"),
+      capability_evidence_ref: evidence("CAPABILITY-EVIDENCE-0001")
+    },
+    work_order: {
+      work_order_id: "TEMP-WORKORDER-POLICY-TEST-0001",
+      current_revision: "REVISION-2",
+      status: "CLAIMED",
+      risk_level: "R1",
+      scope: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+      allowed_actions: [...TEMPORARY_WORK_ORDINARY_ACTIONS],
+      branch: "codex/temp-worker-policy-test",
+      base_sha: baseSha,
+      head_sha: headSha,
+      dependencies: [],
+      acceptance_tests: ["TEMPORARY_WORKER_POLICY_TEST"],
+      protected_actions: [...TEMPORARY_WORK_PROTECTED_ACTIONS],
+      expires_at: "2026-10-11T00:00:00.000Z",
+      active_claim: {
+        claim_id: "TEMP-CLAIM-POLICY-TEST-0001",
+        status: "ACTIVE",
+        work_identity_id: "TEMP-WORKER-POLICY-TEST-0001",
+        controller_id: "TEMP-CONTROLLER-POLICY-TEST-0001",
+        work_order_revision: "REVISION-2",
+        branch: "codex/temp-worker-policy-test",
+        base_sha: baseSha,
+        head_sha: headSha
+      },
+      review_assignment: {
+        reviewer_id: "INDEPENDENT_REVIEWER_POLICY_TEST",
+        controller_id: "INDEPENDENT_REVIEWER_CONTROLLER_TEST",
+        status: "PENDING_INDEPENDENT_REVIEW",
+        registry_evidence_ref: evidence("REVIEWER-REGISTRY-0001"),
+        qualification_evidence_ref: evidence("REVIEWER-QUALIFICATION-0001"),
+        exact_head_sha: headSha,
+        exact_head_evidence_ref: evidence("REVIEWER-EXACT-HEAD-0001", headSha)
+      },
+      compensation_budget: {
+        status: "APPROVED_BUDGET_RECORD",
+        currency: "KAIOS",
+        max_amount: "100.00",
+        approval_evidence_ref: evidence("BUDGET-EVIDENCE-0001")
+      },
+      task_source_type: "SECURITY_FINDING",
+      task_source_id: "PR-571-REVIEW",
+      task_source_actor: "INDEPENDENT_REVIEWER",
+      task_source_file: "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+      task_source_commit: baseSha,
+      task_source_reason: "Adversarial temporary-worker precheck fixture",
+      created_by: "codex-gm-01",
+      created_at: "2026-10-10T00:00:00.000Z",
+      owner: "HENGYAO_GM",
+      reviewer: "INDEPENDENT_REVIEWER_POLICY_TEST",
+      priority: "P1"
+    },
+    payment_wallet: {
+      chain_id: 56,
+      address: "0x1111111111111111111111111111111111111111",
+      ownership_status: "VERIFIED",
+      ownership_evidence_ref: evidence("WALLET-EVIDENCE-0001"),
+      signing_authority: false
+    },
+    requested_actions: [...TEMPORARY_WORK_ORDINARY_ACTIONS],
+    requested_tools: ["GIT", "NODE"],
+    work_order_revision: "REVISION-2",
+    execution_base_sha: baseSha,
+    delivery_head_sha: headSha,
+    life_id: null,
+    formal_employee_id: null
+  };
+
+  const validate = (candidate) => validateTemporaryWorkerClaim(candidate, { evaluatedAt: "2026-10-10T12:00:00.000Z" });
+  const result = validate(claim);
+  assert.equal(result.status, "PRECHECK_PASSED");
+  assert.equal(result.eligible, false);
+  assert.equal(result.canonical_verification_required, true);
+  assert.equal(result.life_id_required, false);
+  assert.equal(result.formal_employee_required, false);
+  assert.equal(result.compensation_status, "NOT_CALCULABLE_PRECHECK_ONLY");
+  assert.equal(result.real_payment_authorized, false);
+
+  // Caller assertions such as VERIFIED remain untrusted and never produce eligibility.
+  const forged = validate({
+    ...claim,
+    work_identity: { ...claim.work_identity, verification_status: "VERIFIED", evidence_ref: evidence("FORGED-BUT-WELL-FORMED") },
+    claim_capability: { ...claim.claim_capability, status: "VERIFIED", ack_status: "VERIFIED" }
+  });
+  assert.equal(forged.eligible, false);
+  assert.equal(forged.canonical_verification_required, true);
+  assert.throws(() => validate({ ...claim, work_identity: { ...claim.work_identity, evidence_ref: { ...claim.work_identity.evidence_ref, commit_sha: "not-a-commit" } } }), (error) => error.code === "TEMP_EVIDENCE_COMMIT_INVALID");
+
+  assert.throws(() => validate({ ...claim, work_order: { ...claim.work_order, expires_at: "2026-10-10T11:59:59.000Z" } }), (error) => error.code === "TEMP_WORK_ORDER_EXPIRED");
+  assert.throws(() => validate({ ...claim, work_order: { ...claim.work_order, status: "SUPERSEDED" } }), (error) => error.code === "TEMP_WORK_ORDER_NOT_CLAIMABLE");
+  assert.throws(() => validate({ ...claim, work_order: { ...claim.work_order, active_claim: { ...claim.work_order.active_claim, status: "CLOSED" } } }), (error) => error.code === "TEMP_ACTIVE_CLAIM_REQUIRED");
+  assert.throws(() => validate({ ...claim, work_order_revision: "REVISION-1" }), (error) => error.code === "TEMP_WORK_ORDER_REVISION_MISMATCH");
+  assert.throws(() => validate({ ...claim, execution_base_sha: "d".repeat(40) }), (error) => error.code === "TEMP_WORK_ORDER_BASE_MISMATCH");
+  assert.throws(() => validate({ ...claim, delivery_head_sha: "e".repeat(40) }), (error) => error.code === "TEMP_WORK_ORDER_HEAD_MISMATCH");
+  assert.throws(() => validate({
+    ...claim,
+    work_order: {
+      ...claim.work_order,
+      review_assignment: { ...claim.work_order.review_assignment, exact_head_evidence_ref: evidence("WRONG-REVIEW-HEAD", baseSha) }
+    }
+  }), (error) => error.code === "TEMP_REVIEW_HEAD_EVIDENCE_MISMATCH");
+  assert.throws(() => validate({ ...claim, requested_actions: [...claim.requested_actions, "UNKNOWN_ACTION"] }), (error) => error.code === "TEMP_ACTION_NOT_ALLOWED");
+  assert.throws(() => validate({ ...claim, requested_actions: [...claim.requested_actions, "TREASURY_TRANSFER"] }), (error) => error.code === "TEMP_ACTION_NOT_ALLOWED");
+  assert.throws(() => validate({ ...claim, requested_actions: ["OPEN_DRAFT_PR"], work_order: { ...claim.work_order, allowed_actions: ["READ_REPOSITORY"] } }), (error) => error.code === "TEMP_ACTION_OUTSIDE_WORK_ORDER");
+  assert.throws(() => validate({ ...claim, requested_tools: ["GIT", "NODE", "SOLIDITY"] }), (error) => error.code === "TEMP_CAPABILITY_MISMATCH");
+  assert.throws(() => validate({ ...claim, work_order: { ...claim.work_order, risk_level: "R2" } }), (error) => error.code === "TEMP_WORK_RISK_FORBIDDEN");
+  assert.throws(() => validate({ ...claim, work_order: { ...claim.work_order, protected_actions: ["MAINNET_TRANSACTION"] } }), (error) => error.code === "TEMP_PROTECTED_ACTION_LIST_INVALID");
+
+  for (const branch of ["MAIN", "origin/main", "origin-main", "origin_main", "refs/heads/main", "refs/remotes/origin/main", "master"]) {
+    assert.throws(() => validate({ ...claim, work_order: { ...claim.work_order, branch } }), (error) => error.code === "TEMP_MAIN_BRANCH_FORBIDDEN");
+  }
+  assert.throws(() => validate({
+    ...claim,
+    work_order: {
+      ...claim.work_order,
+      review_assignment: { ...claim.work_order.review_assignment, reviewer_id: "REVIEWER_ALIAS", controller_id: claim.work_identity.controller_id }
+    }
+  }), (error) => error.code === "TEMP_INDEPENDENT_REVIEWER_REQUIRED");
+  assert.throws(() => validate({
+    ...claim,
+    work_order: { ...claim.work_order, review_assignment: { ...claim.work_order.review_assignment, status: "REVIEWED" } }
+  }), (error) => error.code === "TEMP_REVIEW_STATUS_PREMATURE");
+
+  for (const maxAmount of ["0x64", "1e2", "Infinity", "-1", "0", "", 100]) {
+    assert.throws(() => validate({
+      ...claim,
+      work_order: { ...claim.work_order, compensation_budget: { ...claim.work_order.compensation_budget, max_amount: maxAmount } }
+    }), (error) => error.code === "TEMP_COMPENSATION_AMOUNT_INVALID");
+  }
+
+  for (const action of [
+    "REAL_ASSET_TRANSFER", "ADMIN_ROLE_CHANGE", "KYC_AML_SUBMISSION", "EXTERNAL_ACCOUNT_CREATE",
+    "PAID_ORACLE_PURCHASE", "PLAYER_LIFE_DELETE", "REPOSITORY_DELETE"
+  ]) assert.ok(TEMPORARY_WORK_PROTECTED_ACTIONS.includes(action));
 });
 
 test("V3.1 Social Assistance requires individual identity, eligibility and consent", () => {

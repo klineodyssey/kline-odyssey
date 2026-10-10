@@ -1,14 +1,14 @@
 # KGEN Workforce Governance
 
-**Status:** ACTIVE
-**Version:** 1.1
-**Revision:** 2026-10-08.HR_SYSTEM
-**Last Updated:** 2026-10-08
+**Status:** ACTIVE / FAIL-CLOSED PRECHECK ONLY
+**Version:** 1.2
+**Revision:** 2026-10-10.TEMPORARY_WORKER_ELIGIBILITY
+**Last Updated:** 2026-10-10
 **Updated By:** Codex
-**Reviewed By:** Codex
-**Source Commit:** 1ce29b4cb53fcba77213d7792e2ad66e4498eb80
-**Task ID:** KAIOS-HR-SYSTEM-20261008-001
-**Change Reason:** Extend the existing workforce canon into an operational recruitment, onboarding, identity-audit, permission, performance and payroll-eligibility lifecycle without creating a second employee database.
+**Reviewed By:** INDEPENDENT_SECURITY_REVIEWER
+**Source Commit:** 558326d664730a3750cfe0f11a85767ffeae4985
+**Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
+**Change Reason:** Separate ordinary temporary-work eligibility from formal Digital Life, employment and payroll while preserving WorkOrder, review and protected financial gates.
 **Source Of Truth:** TRUE
 
 ## Purpose
@@ -27,7 +27,26 @@ A worker is a formal KGEN employee only when all of these are true:
 - Boot, Canon, Workspace Policy, WorkQueue, and DO_NOT_TOUCH acknowledgments are recorded
 - no suspension, ban, expired credential, or active blocking violation exists
 
-If any requirement is missing, the worker is not a formal registered worker. A specifically Human-authorized candidate may still perform one identity-bound, bounded R0/R1 trial under `RECRUITMENT_STANDARD.md`; that trial does not create formal employment, Worker/Life identity, review authority or payroll eligibility.
+If any requirement is missing, the worker is not a formal registered worker. That does not by itself prohibit ordinary temporary work.
+
+## Temporary Worker Rule
+
+A temporary worker may claim bounded ordinary R0/R1 work without a Digital Life ID, species, birthplace, birth date, birth ceremony, formal employee record or permanent Worker ID. The temporary lane reuses the same WorkQueue and review system; it is not a second company system.
+
+Every temporary claim must ultimately have all of the following canonical evidence:
+
+- a verifiable task-scoped work identity and evidence reference;
+- a verified claim channel and explicit Worker ACK;
+- one current, bounded WorkOrder with scope, non-main branch, risk level, expiry/protected actions and a distinct reviewer;
+- demonstrated capability for the assigned scope;
+- a public BSC56 recipient wallet whose ownership is verified without obtaining a seed, private key or signature authority;
+- delivery evidence and independent acceptance before any task compensation is calculated.
+
+Life identity is optional for this lane and cannot substitute for work identity. A recipient wallet is a payment destination only and grants no Treasury, signer, governance or payroll authority. Mainnet transactions, real-asset movement, Treasury, payroll execution, signer/secret use, governance, production deployment and irreversible actions remain Human-protected.
+
+The repository-only `validateTemporaryWorkerClaim` function performs schema and consistency prechecks only. The current architecture has no canonical evidence resolver, signature verifier or durable registry lookup, so a passing precheck returns `eligible: false` and `canonical_verification_required: true`. Caller-supplied `VERIFIED` strings or evidence references never establish eligibility.
+
+DOT is the primary dispatcher for ordinary engineering. The General Manager owns HR policy, company management, integration, audit and review routing, and may route overflow to another qualified worker. Dispatch, implementation and independent review must remain distinct whenever the same subject would otherwise approve its own delivery.
 
 ## Files
 
@@ -84,7 +103,7 @@ The single HR lifecycle is:
 
 `JOB -> APPLICATION -> IDENTITY -> ASSESSMENT -> TRIAL -> REVIEW -> INTERVIEW -> DECISION -> ONBOARDING -> WORK -> PERFORMANCE -> PAYROLL_ELIGIBILITY -> TRANSFER/SUSPENSION/EXIT`.
 
-Employment, Worker ID, Life ID, Controller/runtime binding, tool permission, reviewer qualification and payroll eligibility are independent gates. HR maintains and reconciles these records but cannot mint identities outside their canon or execute protected payroll/asset actions.
+Employment, Worker ID, Life ID, Controller/runtime binding, temporary-work identity, tool permission, reviewer qualification, task-compensation eligibility and payroll eligibility are independent gates. HR maintains and reconciles these records but cannot mint identities outside their canon or execute protected payroll/asset actions.
 
 ## Workforce V2 Agent Model
 

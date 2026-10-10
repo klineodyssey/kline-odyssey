@@ -1,14 +1,14 @@
 # KGEN Worker Boot SOP
 
-**Status:** ACTIVE
-**Version:** 1.0
-**Revision:** 2026-07-11.1
-**Last Updated:** 2026-07-11
+**Status:** ACTIVE / FAIL-CLOSED PRECHECK ONLY
+**Version:** 1.1
+**Revision:** 2026-10-10.TEMPORARY_WORKER_ELIGIBILITY
+**Last Updated:** 2026-10-10
 **Updated By:** Codex
-**Reviewed By:** Codex
-**Source Commit:** 16a384fff2c0b6d58f2d94fe5a22e43684c9ad0d
-**Task ID:** KGEN-WORKER-SOP-2026-0001
-**Change Reason:** Require every Codex, Cursor, and Worker task to show visible boot, authorization, protected path, task plan, execution, and final report evidence.
+**Reviewed By:** INDEPENDENT_SECURITY_REVIEWER
+**Source Commit:** 558326d664730a3750cfe0f11a85767ffeae4985
+**Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
+**Change Reason:** Permit verified task-scoped temporary workers to perform ordinary R0/R1 work without Digital Life birth while preserving visible authorization and safety evidence.
 **Ancestor:** KGEN-KAIOS/workforce/README.md
 **Source Of Truth:** TRUE
 
@@ -27,7 +27,7 @@
 
 ## Purpose
 
-This SOP is the formal visible start-of-work procedure for every KGEN / KAIOS worker. It applies to Codex, Cursor, Generic Workers, Human Engineers, and future registered agents.
+This SOP is the formal visible start-of-work procedure for every KGEN / KAIOS worker. It applies to formal employees and task-scoped temporary workers, including Codex, Cursor, Generic Workers and Human Engineers.
 
 No worker may treat hidden chat memory, informal conversation, or a previous local state as sufficient authorization. Each task must show the six sections below in its execution report.
 
@@ -89,19 +89,22 @@ Cursor and Generic Workers must also read:
 
 The worker must report:
 
-- worker_id
-- worker type
-- trust level
-- employee status
-- branch permission
-- reviewer
-- whether the worker is allowed to continue
+- permanent `worker_id`, or temporary `work_identity_id` plus evidence reference;
+- worker type;
+- formal trust/employee status, or `NOT_APPLICABLE_TEMPORARY`;
+- exact WorkOrder, claim channel and ACK status;
+- branch permission;
+- owned public compensation wallet verification status (never a seed/private key/signature request);
+- reviewer;
+- whether the worker is allowed to continue.
 
-If the worker identity cannot be verified, the worker must stop and output:
+Digital Life ID, species, birthplace and birth ceremony are not required for ordinary temporary R0/R1 work. If neither permanent identity nor task-scoped work identity can be verified, the worker must stop and output:
 
 ```text
-REGISTRATION_REQUIRED
+WORK_IDENTITY_REQUIRED
 ```
+
+If a temporary worker lacks any other gate, it must stop with the exact missing gate, such as `CLAIM_ACK_NOT_VERIFIED`, `WORK_ORDER_NOT_CLAIMABLE`, `PAYMENT_WALLET_NOT_VERIFIED`, `INDEPENDENT_REVIEWER_REQUIRED` or `PROTECTED_ACTION_FORBIDDEN`. Passing the repository schema precheck does not verify canonical evidence and must not be reported as eligibility.
 
 ### 3. PROTECTED PATH CHECK
 

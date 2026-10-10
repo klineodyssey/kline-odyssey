@@ -8,11 +8,11 @@
 
 ## 1. Purpose
 
-This standard defines how Codex assigns work, how Cursor accepts work, how Cursor submits results, and how Codex reviews and publishes work.
+This standard defines how DOT dispatches ordinary work, how qualified workers accept and submit it, and how the General Manager routes integration, audit and independent review. Codex retains repository integration duties where separately authorized.
 
-## 2. Codex Assignment
+## 2. DOT Assignment And GM Governance
 
-Codex checks origin/main, protected paths, active Canon, current WorkQueue, and dependency impact. Codex then writes a scoped WorkOrder with target files, allowed actions, forbidden actions, output report, and acceptance criteria.
+DOT is the primary automatic dispatcher for ordinary engineering. DOT checks origin/main, protected paths, active Canon, current WorkQueue, existing claims, worker capability and dependency impact, then persists one scoped WorkOrder before delivery through a verified channel. The General Manager owns priority, HR policy, capacity, cross-project decisions, integration, audit and independent-review routing. Overflow may be assigned to another qualified worker without converting that worker into an employee or Digital Life.
 
 Every WorkOrder must have a traceable source. Codex must not create a source-less WorkOrder. Required provenance fields:
 
@@ -34,11 +34,15 @@ Every WorkOrder must have a traceable source. Codex must not create a source-les
 
 Allowed `task_source_type` values are `HUMAN_REQUEST`, `AI_RECOMMENDATION`, `CURSOR_REPORT`, `CODEX_REVIEW`, `QA_FINDING`, `RUNTIME_ALERT`, `CANON_GAP`, `ROADMAP`, `SECURITY_FINDING`, and `LEGAL_FINDING`.
 
-## 3. Cursor Acceptance
+## 3. Worker Acceptance
 
 Cursor reads the Cursor Agent Prompt, WorkQueue, Daily Workflow, DO_NOT_TOUCH, Canon Master JSON, Master Library Index, and assigned WorkOrder. Cursor accepts only one OPEN task at a time.
 
-Before acceptance, Cursor must pass the formal worker gate in `KGEN-KAIOS/worker_registry.json`. If Cursor cannot verify `worker_id`, `employee_status`, `trust_level`, acknowledgments, branch pattern, and reviewer, Cursor must output `REGISTRATION_REQUIRED` and stop.
+Formal employees pass the permanent worker gate in `KGEN-KAIOS/worker_registry.json`. A temporary worker may instead pass the task-scoped gate in `KGEN-KAIOS/workforce/RECRUITMENT_STANDARD.md`; formal Digital Life, species, birthplace, birth ceremony, permanent Worker ID and employee status are not ordinary-work prerequisites.
+
+The temporary gate requires verifiable work identity, claim capability, explicit ACK, one current R0/R1 WorkOrder, capability evidence, normalized non-main branch, distinct reviewer ID and controller, reviewer registry/qualification/exact-head evidence and verified owned BSC56 recipient wallet. The WorkOrder revision, execution base, delivery head and active claim must all match. Missing work identity returns `WORK_IDENTITY_REQUIRED`; missing ACK returns `CLAIM_ACK_NOT_VERIFIED`; missing wallet blocks the temporary claim/compensation route. A Life ID alone never passes the gate.
+
+`core/company/index.mjs` is only a repository schema/consistency precheck because the current architecture has no canonical evidence resolver, signature verifier or durable registry lookup. It must return `PRECHECK_PASSED`, `eligible: false` and `canonical_verification_required: true`; caller-supplied `VERIFIED` fields and well-shaped references cannot establish eligibility.
 
 ## 4. Cursor Execution
 
@@ -59,15 +63,15 @@ Codex also checks provenance before merge:
 - commit is visible
 - branch matches the WorkOrder branch pattern
 - report exists
-- author is registered
+- author has either a registered worker identity or the exact verified temporary work identity bound to the claim
 - `task_id` exists
 - `changed_files` match the diff
 - protected paths are not modified without explicit approval
 - provenance fields are complete
-- worker is registered and active
-- worker trust level is sufficient for task risk
-- worker is not suspended, revoked, archived, or in pending registration
-- branch matches the worker allowed branch pattern
+- formal workers are registered, active, sufficiently trusted and not suspended/revoked/archived
+- temporary workers have a valid task-scoped identity, R0/R1 scope, claim ACK and compensation-wallet evidence
+- branch matches the formal permission or temporary WorkOrder branch
+- the reviewer is distinct from the implementer and reviews the exact delivered head
 
 ## 7. Status Model
 
@@ -107,6 +111,7 @@ A task is complete only when the report exists, checks pass or risks are recorde
 
 | Version | Date | Description |
 |---|---|---|
+| V2.3 | 2026-10-10 | Added DOT-first dispatch and task-scoped temporary-worker eligibility without Life/birth prerequisites; retained review and protected-action gates. |
 | V2.2 | 2026-07-11 | Added formal workforce registration, trust level, and credential gates. |
 | V2.1 | 2026-07-11 | Added source provenance, R&D suggestion, PROPOSED status, and Codex provenance gate. |
 | V2.0 | 2026-07-10 | Established WorkOrder standard for Organization V2.0. |

@@ -931,6 +931,186 @@ export function validateExternalAiOnboarding(profile) {
   return profile;
 }
 
+export const TEMPORARY_WORK_ORDINARY_ACTIONS = Object.freeze([
+  "READ_REPOSITORY",
+  "EDIT_EXISTING_FILES",
+  "ADD_SCOPED_TESTS",
+  "RUN_LOCAL_TESTS",
+  "COMMIT_NON_MAIN",
+  "PUSH_NON_MAIN",
+  "OPEN_DRAFT_PR"
+]);
+
+export const TEMPORARY_WORK_PROTECTED_ACTIONS = Object.freeze([
+  "PUSH_MAIN",
+  "FORCE_PUSH",
+  "HISTORY_REWRITE",
+  "REPOSITORY_DELETE",
+  "RECURSIVE_FILE_DELETE",
+  "MAINNET_TRANSACTION",
+  "REAL_ASSET_TRANSFER",
+  "TREASURY_TRANSFER",
+  "PAYROLL_EXECUTION",
+  "LIQUIDITY_MOVEMENT",
+  "EXCHANGE_SETTLEMENT",
+  "LAND_OWNERSHIP_TRANSFER",
+  "SIGNER_USE",
+  "PRIVATE_KEY_OR_SECRET_USE",
+  "ADMIN_ROLE_CHANGE",
+  "GOVERNANCE_EXECUTION",
+  "MEMBERSHIP_PERMISSION_CHANGE",
+  "KYC_AML_SUBMISSION",
+  "ACCOUNT_OWNERSHIP_SUBMISSION",
+  "EXTERNAL_ACCOUNT_CREATE",
+  "EXTERNAL_ACCOUNT_UPDATE",
+  "EXTERNAL_ACCOUNT_DELETE",
+  "EXTERNAL_MESSAGE_SEND",
+  "PAID_ORACLE_PURCHASE",
+  "PRODUCTION_ORACLE_ACTIVATION",
+  "PRODUCTION_DEPLOYMENT",
+  "PLAYER_LIFE_DELETE",
+  "PLAYER_LIFE_IRREVERSIBLE_MUTATION",
+  "IRREVERSIBLE_DESTRUCTIVE_ACTION"
+]);
+
+function requireTemporaryEvidenceDescriptor(evidence, field) {
+  requireFields(evidence, ["record_type", "record_id", "registry_ref", "commit_sha", "sha256"], field);
+  requireId(evidence.record_id, `${field}.record_id`);
+  invariant(typeof evidence.registry_ref === "string" && /^(?:KGEN-KAIOS|KGEN-Organization|KGEN-AI-Company|docs)\//.test(evidence.registry_ref), "TEMP_EVIDENCE_REGISTRY_REF_INVALID", `${field} must use a canonical repository evidence-path shape`);
+  invariant(/^[0-9a-f]{40}$/.test(evidence.commit_sha), "TEMP_EVIDENCE_COMMIT_INVALID", `${field} must bind an exact lowercase Git commit`);
+  invariant(/^[0-9a-f]{64}$/.test(evidence.sha256), "TEMP_EVIDENCE_HASH_INVALID", `${field} must include a lowercase SHA-256 digest`);
+}
+
+function requireTemporaryGitSha(value, field) {
+  invariant(typeof value === "string" && /^[0-9a-f]{40}$/.test(value), "TEMP_GIT_SHA_INVALID", `${field} must be an exact lowercase 40-character Git SHA`);
+}
+
+function requireTemporaryBranch(branch, field) {
+  invariant(typeof branch === "string" && branch === branch.trim() && branch.length > 0, "TEMP_BRANCH_INVALID", `${field} must be a normalized non-empty branch`);
+  const normalized = branch.replace(/\\/g, "/").toLowerCase();
+  invariant(!/^(?:(?:refs\/(?:heads|remotes)\/)?(?:origin\/)?|origin[-_])(?:main|master)$/.test(normalized), "TEMP_MAIN_BRANCH_FORBIDDEN", "Temporary work cannot target main, master or a ref/origin alias");
+  invariant(!normalized.startsWith("refs/") && !normalized.startsWith("origin/") && !normalized.startsWith("remotes/") && !branch.includes("\\") && !branch.includes("..") && !branch.includes("//") && !branch.startsWith("/") && !branch.endsWith("/") && !branch.endsWith(".lock"), "TEMP_BRANCH_NOT_NORMALIZED", `${field} must use a canonical branch name, not a ref or remote alias`);
+  invariant(/^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(branch), "TEMP_BRANCH_INVALID", `${field} contains unsupported branch characters`);
+  return branch;
+}
+
+function requirePositiveDecimal(value, field) {
+  invariant(typeof value === "string" && /^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value), "TEMP_COMPENSATION_AMOUNT_INVALID", `${field} must be a plain non-negative decimal string`);
+  invariant(Number(value) > 0 && Number.isFinite(Number(value)), "TEMP_COMPENSATION_AMOUNT_INVALID", `${field} must be greater than zero`);
+}
+
+export function validateTemporaryWorkerClaim(claim, { evaluatedAt = new Date().toISOString() } = {}) {
+  requireFields(claim, [
+    "claim_id", "work_identity", "claim_capability", "work_order", "payment_wallet",
+    "requested_actions", "requested_tools", "work_order_revision", "execution_base_sha",
+    "delivery_head_sha", "life_id", "formal_employee_id"
+  ], "TemporaryWorkerClaim");
+  requireId(claim.claim_id, "temporary_worker.claim_id");
+  requireArray(claim.requested_actions, "temporary_worker.requested_actions");
+  requireArray(claim.requested_tools, "temporary_worker.requested_tools");
+  invariant(claim.requested_actions.length > 0 && claim.requested_tools.length > 0, "TEMP_WORK_REQUEST_EMPTY", "Temporary work requires explicit actions and tool requirements");
+  invariant(claim.requested_actions.every((action) => TEMPORARY_WORK_ORDINARY_ACTIONS.includes(action)), "TEMP_ACTION_NOT_ALLOWED", "Temporary work rejects unknown or non-ordinary actions");
+  requireTemporaryGitSha(claim.execution_base_sha, "temporary_worker.execution_base_sha");
+  requireTemporaryGitSha(claim.delivery_head_sha, "temporary_worker.delivery_head_sha");
+
+  const identity = claim.work_identity;
+  requireFields(identity, ["work_identity_id", "identity_type", "controller_id", "evidence_ref"], "TemporaryWorkIdentity");
+  requireId(identity.work_identity_id, "temporary_worker.work_identity_id");
+  requireId(identity.controller_id, "temporary_worker.controller_id");
+  requireTemporaryEvidenceDescriptor(identity.evidence_ref, "TemporaryWorkIdentityEvidence");
+
+  const capability = claim.claim_capability;
+  requireFields(capability, ["tools", "channel_evidence_ref", "ack_evidence_ref", "capability_evidence_ref"], "TemporaryClaimCapability");
+  requireArray(capability.tools, "temporary_worker.claim_capability.tools");
+  requireTemporaryEvidenceDescriptor(capability.channel_evidence_ref, "TemporaryClaimChannelEvidence");
+  requireTemporaryEvidenceDescriptor(capability.ack_evidence_ref, "TemporaryClaimAckEvidence");
+  requireTemporaryEvidenceDescriptor(capability.capability_evidence_ref, "TemporaryCapabilityEvidence");
+  invariant(claim.requested_tools.every((tool) => capability.tools.includes(tool)), "TEMP_CAPABILITY_MISMATCH", "Temporary worker capability evidence must cover every requested tool");
+
+  const order = claim.work_order;
+  requireFields(order, [
+    "work_order_id", "current_revision", "status", "risk_level", "scope", "allowed_actions", "branch",
+    "base_sha", "head_sha", "dependencies", "acceptance_tests", "protected_actions", "expires_at",
+    "compensation_budget", "active_claim", "review_assignment", "task_source_type", "task_source_id",
+    "task_source_actor", "task_source_file", "task_source_commit", "task_source_reason", "created_by",
+    "created_at", "owner", "reviewer", "priority"
+  ], "TemporaryWorkOrder");
+  requireId(order.work_order_id, "temporary_worker.work_order_id");
+  requireArray(order.scope, "temporary_worker.work_order.scope");
+  requireArray(order.allowed_actions, "temporary_worker.work_order.allowed_actions");
+  requireArray(order.dependencies, "temporary_worker.work_order.dependencies");
+  requireArray(order.acceptance_tests, "temporary_worker.work_order.acceptance_tests");
+  requireArray(order.protected_actions, "temporary_worker.work_order.protected_actions");
+  invariant(order.status === "CLAIMED", "TEMP_WORK_ORDER_NOT_CLAIMABLE", "Temporary work requires the current WorkOrder and one active atomic claim");
+  invariant(["R0", "R1"].includes(order.risk_level), "TEMP_WORK_RISK_FORBIDDEN", "Temporary-worker authority is limited to ordinary R0/R1 work");
+  invariant(order.scope.length > 0 && order.acceptance_tests.length > 0, "TEMP_WORK_ORDER_SCOPE_REQUIRED", "Temporary work requires bounded scope and acceptance tests");
+  invariant(order.allowed_actions.length > 0 && order.allowed_actions.every((action) => TEMPORARY_WORK_ORDINARY_ACTIONS.includes(action)), "TEMP_WORK_ORDER_ACTIONS_INVALID", "WorkOrder allowed actions must be a non-empty ordinary-action subset");
+  invariant(claim.requested_actions.every((action) => order.allowed_actions.includes(action)), "TEMP_ACTION_OUTSIDE_WORK_ORDER", "Every requested action must be explicitly allowed by the exact WorkOrder");
+  requireTemporaryBranch(order.branch, "temporary_worker.work_order.branch");
+  requireTemporaryGitSha(order.base_sha, "temporary_worker.work_order.base_sha");
+  requireTemporaryGitSha(order.head_sha, "temporary_worker.work_order.head_sha");
+  requireTemporaryGitSha(order.task_source_commit, "temporary_worker.work_order.task_source_commit");
+  invariant(claim.work_order_revision === order.current_revision, "TEMP_WORK_ORDER_REVISION_MISMATCH", "Claim must bind the current WorkOrder revision");
+  invariant(claim.execution_base_sha === order.base_sha, "TEMP_WORK_ORDER_BASE_MISMATCH", "Claim execution base must match the current WorkOrder");
+  invariant(claim.delivery_head_sha === order.head_sha, "TEMP_WORK_ORDER_HEAD_MISMATCH", "Claim delivery head must match the current WorkOrder exact head");
+  const expiry = Date.parse(order.expires_at);
+  const evaluationTime = Date.parse(evaluatedAt);
+  invariant(Number.isFinite(expiry) && Number.isFinite(evaluationTime) && expiry > evaluationTime, "TEMP_WORK_ORDER_EXPIRED", "Temporary WorkOrder expiry must be valid and later than the trusted evaluation time");
+
+  const activeClaim = order.active_claim;
+  requireFields(activeClaim, ["claim_id", "status", "work_identity_id", "controller_id", "work_order_revision", "branch", "base_sha", "head_sha"], "TemporaryActiveClaim");
+  invariant(activeClaim.status === "ACTIVE" && activeClaim.claim_id === claim.claim_id, "TEMP_ACTIVE_CLAIM_REQUIRED", "WorkOrder must contain this exact active atomic claim");
+  invariant(activeClaim.work_identity_id === identity.work_identity_id && activeClaim.controller_id === identity.controller_id, "TEMP_ACTIVE_CLAIM_IDENTITY_MISMATCH", "Active claim must bind the exact work identity and controller");
+  invariant(activeClaim.work_order_revision === order.current_revision, "TEMP_ACTIVE_CLAIM_REVISION_MISMATCH", "Active claim must bind the current WorkOrder revision");
+  invariant(requireTemporaryBranch(activeClaim.branch, "temporary_worker.work_order.active_claim.branch") === order.branch, "TEMP_ACTIVE_CLAIM_BRANCH_MISMATCH", "Active claim branch must match the WorkOrder branch");
+  invariant(activeClaim.base_sha === order.base_sha && activeClaim.head_sha === order.head_sha, "TEMP_ACTIVE_CLAIM_HEAD_MISMATCH", "Active claim must bind the WorkOrder base and exact head");
+
+  invariant(order.protected_actions.every((action) => TEMPORARY_WORK_PROTECTED_ACTIONS.includes(action)) && TEMPORARY_WORK_PROTECTED_ACTIONS.every((action) => order.protected_actions.includes(action)), "TEMP_PROTECTED_ACTION_LIST_INVALID", "WorkOrder must preserve the complete canonical protected-action list");
+
+  const review = order.review_assignment;
+  requireFields(review, ["reviewer_id", "controller_id", "status", "registry_evidence_ref", "qualification_evidence_ref", "exact_head_sha", "exact_head_evidence_ref"], "TemporaryReviewAssignment");
+  requireId(review.reviewer_id, "temporary_worker.reviewer_id");
+  requireId(review.controller_id, "temporary_worker.reviewer_controller_id");
+  invariant(review.reviewer_id !== identity.work_identity_id && review.controller_id !== identity.controller_id, "TEMP_INDEPENDENT_REVIEWER_REQUIRED", "Reviewer and reviewer controller must be distinct from the implementer identity and controller");
+  invariant(order.reviewer === review.reviewer_id, "TEMP_REVIEWER_ASSIGNMENT_MISMATCH", "WorkOrder reviewer must match the review assignment");
+  invariant(review.status === "PENDING_INDEPENDENT_REVIEW", "TEMP_REVIEW_STATUS_PREMATURE", "Claim precheck cannot mark an exact-head review completed");
+  requireTemporaryEvidenceDescriptor(review.registry_evidence_ref, "TemporaryReviewerRegistryEvidence");
+  requireTemporaryEvidenceDescriptor(review.qualification_evidence_ref, "TemporaryReviewerQualificationEvidence");
+  requireTemporaryEvidenceDescriptor(review.exact_head_evidence_ref, "TemporaryReviewerExactHeadEvidence");
+  invariant(review.exact_head_sha === order.head_sha, "TEMP_REVIEW_HEAD_MISMATCH", "Reviewer assignment must bind the exact delivery head");
+  invariant(review.exact_head_evidence_ref.commit_sha === order.head_sha, "TEMP_REVIEW_HEAD_EVIDENCE_MISMATCH", "Reviewer exact-head evidence descriptor must bind the delivery head");
+
+  const wallet = claim.payment_wallet;
+  requireFields(wallet, ["chain_id", "address", "ownership_evidence_ref", "signing_authority"], "TemporaryWorkerPaymentWallet");
+  invariant(wallet.chain_id === 56 && /^0x[0-9a-fA-F]{40}$/.test(wallet.address), "TEMP_PAYMENT_WALLET_REQUIRED", "KGEN/KAIOS task compensation requires an exact BSC56 recipient wallet");
+  requireTemporaryEvidenceDescriptor(wallet.ownership_evidence_ref, "TemporaryPaymentWalletOwnershipEvidence");
+  invariant(wallet.signing_authority === false, "TEMP_WORKER_SIGNER_AUTHORITY_FORBIDDEN", "A recipient wallet does not grant Treasury or signer authority");
+
+  const budget = order.compensation_budget;
+  requireFields(budget, ["status", "currency", "max_amount", "approval_evidence_ref"], "TemporaryCompensationBudget");
+  invariant(budget.status === "APPROVED_BUDGET_RECORD" && ["KGEN", "KAIOS"].includes(budget.currency), "TEMP_COMPENSATION_BUDGET_INVALID", "Task compensation requires a recognized currency and budget record");
+  requirePositiveDecimal(budget.max_amount, "temporary_worker.work_order.compensation_budget.max_amount");
+  requireTemporaryEvidenceDescriptor(budget.approval_evidence_ref, "TemporaryCompensationBudgetEvidence");
+
+  return Object.freeze({
+    status: "PRECHECK_PASSED",
+    eligible: false,
+    canonical_verification_required: true,
+    canonical_evidence_resolver: "NOT_AVAILABLE_IN_CORE_COMPANY_SCHEMA_VALIDATOR",
+    claim_id: claim.claim_id,
+    work_identity_id: identity.work_identity_id,
+    work_order_id: order.work_order_id,
+    risk_level: order.risk_level,
+    life_id_required: false,
+    formal_employee_required: false,
+    payment_wallet_schema_valid: true,
+    compensation_status: "NOT_CALCULABLE_PRECHECK_ONLY",
+    independent_review_required: true,
+    independent_review_status: "PENDING_INDEPENDENT_REVIEW",
+    real_payment_authorized: false
+  });
+}
+
 export function validateCivilizationConcierge(concierge) {
   requireFields(concierge, ["concierge_id", "supported_inputs", "response_fields", "automatic_commitment", "voice_storage", "status"], "CivilizationConcierge");
   requireArray(concierge.supported_inputs, "concierge.supported_inputs");

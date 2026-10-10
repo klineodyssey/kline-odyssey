@@ -1,5 +1,56 @@
 # Codex Review Log
 
+## 2026-10-10 · KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001 · exact-head security review
+
+- State progress: `BOOT=PASS`; `CLAIM=PASS`; `WORK=COMPLETE`;
+  `TEST=SCOPED_AND_EXACT_HEAD_CI_PASS`; `REPORT=RECORDED`;
+  `REVIEW=PASS_AT_558326d664730a3750cfe0f11a85767ffeae4985`;
+  `READY_FOR_INTEGRATION=YES`; `DONE=NO_UNTIL_MERGED`.
+- Provenance: `SECURITY_FINDING` from PR #571 independent review at source head
+  `e0a8fc5ef67b3f097e0ec7d6b1b60b4e25680eab`; source actor
+  `INDEPENDENT_REVIEWER`; owner `HENGYAO_GM`; implementer `codex-gm-01`;
+  reviewer `INDEPENDENT_SECURITY_REVIEWER`; priority `P1`; risk `R1`.
+- BOOT: read `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`, Physics Runtime
+  CURRENT, Universe Map V10.2, `AGENTS.md`, current Boot and Worker Registry in
+  the required order. Registry gate was ACTIVE/T5 with no suspension; branch
+  `codex/temp-worker-eligibility` matched policy. Same-function search covered
+  `docs`, `KGEN`, `K線西遊記`, temple 12345 and the existing workforce/company
+  implementation. No duplicate validation system or new file was created.
+- Execution: downgraded `validateTemporaryWorkerClaim` to schema/consistency
+  precheck because no canonical evidence resolver, signature verifier or durable
+  registry lookup exists in the current core. A passing fixture returns
+  `PRECHECK_PASSED`, `eligible=false` and
+  `canonical_verification_required=true`; caller `VERIFIED` fields never grant
+  eligibility, tool access, compensation or payment authority.
+- Safety: ordinary actions are explicit and unknown actions fail closed; complete
+  protected categories include main/history/repository destruction, real assets,
+  admin/governance/KYC, external accounts/messages, paid or production oracles,
+  Treasury/payroll/liquidity/settlement, signer/secrets, production deploy and
+  destructive Player Life changes. Revision/base/head/active claim, normalized
+  non-main branch, expiry, reviewer ID/controller/registry/qualification/exact
+  head and strict decimal budget bindings are mandatory.
+- Modified existing canonical paths only: workforce README, recruitment,
+  compensation, boot/tool policies and their three JSON projections;
+  WorkOrder standard/queue; `core/company/index.mjs`; the universal exchange
+  test; and this existing review log.
+- Local evidence: modified `.mjs` `node --check` PASS;
+  `node --test tests/universal-exchange.test.mjs` PASS (259/259); all three
+  modified JSON files parse; `git diff --check` PASS. Repository-wide
+  `node --test` was also executed and remains non-green on unrelated baseline
+  conditions, including absent local `ethers`/`playwright` packages and existing
+  governance, registry, homepage/route and workflow assertions outside this
+  task's diff. No dependency installation or out-of-scope repair was performed.
+- Independent Security Review: PASS at exact head
+  `558326d664730a3750cfe0f11a85767ffeae4985`; all six findings from rejected
+  head `e0a8fc5ef67b3f097e0ec7d6b1b60b4e25680eab` are resolved; exact-head CI
+  includes two successful `11520 Universal Exchange V2 / test` jobs; blocking
+  findings: NONE. This PASS does not transfer across a new program or scope change.
+- Protected actions performed: NONE. No Mainnet, Treasury, signer, secret,
+  payment, deploy, external account/message, repository destruction, main push
+  or merge occurred. This entry is not an independent review and does not mark
+  the candidate ACTIVE, reviewed, eligible, accepted, compensable or DONE. The
+  reviewed implementation remains fail-closed and grants no Worker eligibility.
+
 ## 2026-09-29 · Complete-product settlement capital / PR #445
 
 - PR446 merged6f567ca0, exact-head checks PASS and production feedback/recovery
