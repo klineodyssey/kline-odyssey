@@ -2315,7 +2315,7 @@ test("temporary worker may claim ordinary work without Life birth while financia
       reviewer_id: "independent-reviewer-policy-test",
       dependencies: [],
       acceptance_tests: ["TEMPORARY_WORKER_POLICY_TEST"],
-      protected_actions: ["MAINNET_TRANSACTION", "TREASURY_TRANSFER", "SIGNER_USE"],
+      protected_actions: ["PUSH_MAIN", "MAINNET_TRANSACTION", "TREASURY_TRANSFER", "PAYROLL_EXECUTION", "SIGNER_USE", "PRIVATE_KEY_OR_SECRET_USE", "GOVERNANCE_EXECUTION", "PRODUCTION_DEPLOYMENT", "IRREVERSIBLE_DESTRUCTIVE_ACTION"],
       expires_when: "DELIVERED_OR_SUPERSEDED",
       compensation_budget: { status: "APPROVED", currency: "KAIOS", max_amount: "100", approval_ref: "TEST_FIXTURE_BUDGET" }
     },
@@ -2343,6 +2343,7 @@ test("temporary worker may claim ordinary work without Life birth while financia
   assert.throws(() => validateTemporaryWorkerClaim({ ...claim, work_order: { ...claim.work_order, risk_level: "R2" } }), (error) => error.code === "TEMP_WORK_RISK_FORBIDDEN");
   assert.throws(() => validateTemporaryWorkerClaim({ ...claim, requested_tools: ["GIT", "NODE", "SOLIDITY"] }), (error) => error.code === "TEMP_CAPABILITY_MISMATCH");
   assert.throws(() => validateTemporaryWorkerClaim({ ...claim, requested_actions: [...claim.requested_actions, "TREASURY_TRANSFER"] }), (error) => error.code === "TEMP_PROTECTED_ACTION_FORBIDDEN");
+  assert.throws(() => validateTemporaryWorkerClaim({ ...claim, work_order: { ...claim.work_order, protected_actions: ["MAINNET_TRANSACTION"] } }), (error) => error.code === "TEMP_PROTECTED_ACTION_LIST_INVALID");
   assert.throws(() => validateTemporaryWorkerClaim({ ...claim, claim_capability: { ...claim.claim_capability, ack_status: "NOT_VERIFIED" } }), (error) => error.code === "TEMP_CLAIM_CAPABILITY_REQUIRED");
 });
 

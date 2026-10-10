@@ -951,6 +951,7 @@ export function validateTemporaryWorkerClaim(claim) {
   requireId(claim.claim_id, "temporary_worker.claim_id");
   requireArray(claim.requested_actions, "temporary_worker.requested_actions");
   requireArray(claim.requested_tools, "temporary_worker.requested_tools");
+  invariant(claim.requested_actions.length > 0 && claim.requested_tools.length > 0, "TEMP_WORK_REQUEST_EMPTY", "Temporary work requires explicit actions and tool requirements");
 
   const identity = claim.work_identity;
   requireFields(identity, ["work_identity_id", "identity_type", "verification_status", "evidence_ref"], "TemporaryWorkIdentity");
@@ -977,7 +978,7 @@ export function validateTemporaryWorkerClaim(claim) {
 
   const requestedProtected = claim.requested_actions.filter((action) => TEMPORARY_WORK_PROTECTED_ACTIONS.includes(action));
   invariant(requestedProtected.length === 0, "TEMP_PROTECTED_ACTION_FORBIDDEN", "Temporary-worker claims cannot include protected actions");
-  invariant(order.protected_actions.every((action) => TEMPORARY_WORK_PROTECTED_ACTIONS.includes(action)), "TEMP_PROTECTED_ACTION_LIST_INVALID", "WorkOrder protected actions must use the canonical protected-action list");
+  invariant(order.protected_actions.every((action) => TEMPORARY_WORK_PROTECTED_ACTIONS.includes(action)) && TEMPORARY_WORK_PROTECTED_ACTIONS.every((action) => order.protected_actions.includes(action)), "TEMP_PROTECTED_ACTION_LIST_INVALID", "WorkOrder must preserve the complete canonical protected-action list");
 
   const wallet = claim.payment_wallet;
   requireFields(wallet, ["chain_id", "address", "ownership_status", "evidence_ref", "signing_authority"], "TemporaryWorkerPaymentWallet");
