@@ -1,12 +1,12 @@
 ---
-VERSION: "4.0"
-REVISION: "2026-10-08.KAIOS_HR_RECONCILIATION"
+VERSION: "4.1"
+REVISION: "2026-10-10.TEMPORARY_WORKER_TASK_COMPENSATION"
 STATUS: "ACTIVE POLICY / LEDGER ONLY / EXECUTION NOT LIVE"
-LAST_UPDATED: "2026-10-08"
+LAST_UPDATED: "2026-10-10"
 UPDATED_BY: "DOT_ENGINEERING_EXECUTOR"
 REVIEWED_BY: "INDEPENDENT_REVIEW_PENDING"
 SOURCE_COMMIT: "PENDING"
-TASK_ID: "KAIOS-HR-SYSTEM-20261008-001"
+TASK_ID: "KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001"
 SOURCE_OF_TRUTH: true
 ---
 
@@ -37,6 +37,12 @@ This cumulative standard reconciles the legacy KGEN/merit prototype with the cur
 - Payroll execution: `NOT_LIVE` until Treasury, salary escrow, exact source/destination, balance, duplicate protection and current Human protected-action authority are verified.
 
 Employment is not payroll eligibility. Worker ID, Life ID, Controller binding, tool authority, salary qualification and payment authority are distinct records.
+
+## Temporary Worker Task Compensation
+
+Formal employment, permanent Worker ID, Digital Life ID, species, birthplace and birth ceremony are not prerequisites for `TASK_COMPENSATION`. A temporary worker becomes calculation-eligible only after all of these are verified: task-scoped work identity, explicit claim ACK, valid WorkOrder, accepted exact-head delivery, independent review, approved budget, exact KGEN/KAIOS amount and an owned BSC56 recipient wallet.
+
+Calculation is not payment. The recipient wallet grants no signing authority. Treasury source, signer, sufficient balance, duplicate protection, receipt and action-specific Human approval remain mandatory before any real transfer. Temporary task compensation must never be recorded as `SALARY_INCOME`, `HEARTBEAT_REWARD`, `FREIGHT_REVENUE`, `CREATOR_ROYALTY` or `CARGO_PRINCIPAL`.
 
 ## 8888 And Legacy Ledger
 

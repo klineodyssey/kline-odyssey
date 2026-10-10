@@ -931,6 +931,81 @@ export function validateExternalAiOnboarding(profile) {
   return profile;
 }
 
+export const TEMPORARY_WORK_PROTECTED_ACTIONS = Object.freeze([
+  "PUSH_MAIN",
+  "MAINNET_TRANSACTION",
+  "TREASURY_TRANSFER",
+  "PAYROLL_EXECUTION",
+  "SIGNER_USE",
+  "PRIVATE_KEY_OR_SECRET_USE",
+  "GOVERNANCE_EXECUTION",
+  "PRODUCTION_DEPLOYMENT",
+  "IRREVERSIBLE_DESTRUCTIVE_ACTION"
+]);
+
+export function validateTemporaryWorkerClaim(claim) {
+  requireFields(claim, [
+    "claim_id", "work_identity", "claim_capability", "work_order", "payment_wallet",
+    "requested_actions", "requested_tools", "life_id", "formal_employee_id"
+  ], "TemporaryWorkerClaim");
+  requireId(claim.claim_id, "temporary_worker.claim_id");
+  requireArray(claim.requested_actions, "temporary_worker.requested_actions");
+  requireArray(claim.requested_tools, "temporary_worker.requested_tools");
+
+  const identity = claim.work_identity;
+  requireFields(identity, ["work_identity_id", "identity_type", "verification_status", "evidence_ref"], "TemporaryWorkIdentity");
+  requireId(identity.work_identity_id, "temporary_worker.work_identity_id");
+  invariant(identity.verification_status === "VERIFIED" && Boolean(identity.evidence_ref), "TEMP_WORK_IDENTITY_REQUIRED", "Temporary work requires a verifiable work identity and evidence reference");
+
+  const capability = claim.claim_capability;
+  requireFields(capability, ["status", "channel_ref", "ack_status", "tools"], "TemporaryClaimCapability");
+  requireArray(capability.tools, "temporary_worker.claim_capability.tools");
+  invariant(capability.status === "VERIFIED" && capability.ack_status === "VERIFIED" && Boolean(capability.channel_ref), "TEMP_CLAIM_CAPABILITY_REQUIRED", "Temporary work requires a verified claim channel and Worker ACK");
+  invariant(claim.requested_tools.every((tool) => capability.tools.includes(tool)), "TEMP_CAPABILITY_MISMATCH", "Temporary worker capability evidence must cover every requested tool");
+
+  const order = claim.work_order;
+  requireFields(order, ["work_order_id", "status", "risk_level", "scope", "branch", "reviewer_id", "dependencies", "acceptance_tests", "protected_actions", "expires_when", "compensation_budget"], "TemporaryWorkOrder");
+  requireId(order.work_order_id, "temporary_worker.work_order_id");
+  requireArray(order.scope, "temporary_worker.work_order.scope");
+  requireArray(order.dependencies, "temporary_worker.work_order.dependencies");
+  requireArray(order.acceptance_tests, "temporary_worker.work_order.acceptance_tests");
+  requireArray(order.protected_actions, "temporary_worker.work_order.protected_actions");
+  invariant(["OPEN", "READY_FOR_ATOMIC_CLAIM"].includes(order.status), "TEMP_WORK_ORDER_NOT_CLAIMABLE", "Temporary workers may claim only an open, current WorkOrder");
+  invariant(["R0", "R1"].includes(order.risk_level), "TEMP_WORK_RISK_FORBIDDEN", "Temporary-worker authority is limited to ordinary R0/R1 work");
+  invariant(order.scope.length > 0 && order.acceptance_tests.length > 0 && Boolean(order.expires_when) && Boolean(order.branch) && !["main", "master"].includes(order.branch), "TEMP_WORK_ORDER_SCOPE_REQUIRED", "Temporary work requires bounded scope, acceptance tests, expiry and a non-main branch");
+  invariant(Boolean(order.reviewer_id) && order.reviewer_id !== identity.work_identity_id, "TEMP_INDEPENDENT_REVIEWER_REQUIRED", "Temporary work requires a distinct reviewer");
+
+  const requestedProtected = claim.requested_actions.filter((action) => TEMPORARY_WORK_PROTECTED_ACTIONS.includes(action));
+  invariant(requestedProtected.length === 0, "TEMP_PROTECTED_ACTION_FORBIDDEN", "Temporary-worker claims cannot include protected actions");
+  invariant(order.protected_actions.every((action) => TEMPORARY_WORK_PROTECTED_ACTIONS.includes(action)), "TEMP_PROTECTED_ACTION_LIST_INVALID", "WorkOrder protected actions must use the canonical protected-action list");
+
+  const wallet = claim.payment_wallet;
+  requireFields(wallet, ["chain_id", "address", "ownership_status", "evidence_ref", "signing_authority"], "TemporaryWorkerPaymentWallet");
+  invariant(wallet.chain_id === 56 && /^0x[0-9a-fA-F]{40}$/.test(wallet.address), "TEMP_PAYMENT_WALLET_REQUIRED", "KGEN/KAIOS task compensation requires an exact BSC56 recipient wallet");
+  invariant(wallet.ownership_status === "VERIFIED" && Boolean(wallet.evidence_ref), "TEMP_PAYMENT_WALLET_OWNERSHIP_REQUIRED", "Temporary-worker payment wallet ownership must be verified without exposing a secret");
+  invariant(wallet.signing_authority === false, "TEMP_WORKER_SIGNER_AUTHORITY_FORBIDDEN", "A recipient wallet does not grant Treasury or signer authority");
+
+  const budget = order.compensation_budget;
+  const approvedMaximum = Number(budget?.max_amount);
+  const compensationStatus = budget?.status === "APPROVED" && ["KGEN", "KAIOS"].includes(budget.currency) && Number.isFinite(approvedMaximum) && approvedMaximum > 0 && Boolean(budget.approval_ref)
+    ? "CALCULABLE_AFTER_ACCEPTED_DELIVERY"
+    : "APPROVED_BUDGET_REQUIRED";
+
+  return Object.freeze({
+    status: "TEMPORARY_WORKER_CLAIM_ELIGIBLE",
+    claim_id: claim.claim_id,
+    work_identity_id: identity.work_identity_id,
+    work_order_id: order.work_order_id,
+    risk_level: order.risk_level,
+    life_id_required: false,
+    formal_employee_required: false,
+    payment_wallet_verified: true,
+    compensation_status: compensationStatus,
+    independent_review_required: true,
+    real_payment_authorized: false
+  });
+}
+
 export function validateCivilizationConcierge(concierge) {
   requireFields(concierge, ["concierge_id", "supported_inputs", "response_fields", "automatic_commitment", "voice_storage", "status"], "CivilizationConcierge");
   requireArray(concierge.supported_inputs, "concierge.supported_inputs");

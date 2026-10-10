@@ -1,5 +1,37 @@
 # KGEN Organization V2.0 WorkQueue
 
+## Temporary-worker ordinary-work eligibility — 2026-10-10
+
+- `WORK_ID`: `KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001`; status:
+  `IMPLEMENTED_LOCAL_QA_PASS / PENDING_INDEPENDENT_EXACT_HEAD_REVIEW`; priority: `P1`.
+- `GENERATED_AT`: `2026-10-10T13:50:38+08:00`; `BASE_MAIN_SHA`:
+  `4a31413095c73c04ea83443498780106af0510cf`; `TARGET_PR_OR_BRANCH`:
+  `codex/temp-worker-eligibility`.
+- `PROJECT_OWNER`: `HENGYAO_GM`; `IMPLEMENTER`: `codex-gm-01` under the
+  current direct Human WorkOrder; `REVIEWER`: `INDEPENDENT_REVIEW_PENDING`.
+- `SCOPE`: correct the existing Workforce, WorkOrder, tool-access and
+  compensation policies that treated formal registration or Life birth as a
+  prerequisite for ordinary R0/R1 work; add one fail-closed validator and
+  regression test without creating a second workforce or payment system.
+- `WHY_NOW`: Human Authority established that verifiable task-scoped identity,
+  claim capability, WorkOrder, delivery and owned recipient wallet are the
+  ordinary-work gates; Life birth/species/birthplace are not.
+- `DEPENDENCIES`: current Workforce canon, existing WorkQueue, exact-head Git
+  evidence, independent review, and current protected-action policy.
+- `EXPECTED_OUTPUT`: cumulative policy correction, executable claim validation,
+  deterministic first policy fixture, tests, commit, Draft PR and exact SHA.
+- `ACCEPTANCE_TESTS`: no-Life claim passes with every task gate; missing wallet,
+  ACK or capability fails; R2 and protected actions fail; JSON parses; full
+  `tests/universal-exchange.test.mjs` passes; no Mainnet or payment action.
+- `PROTECTED_ACTIONS`: Mainnet transaction, Treasury/payroll transfer, signer or
+  secret use, governance execution, production deployment, push main and
+  irreversible actions are not authorized.
+- `EXPIRES_WHEN`: merged, rejected, superseded, or the exact branch head/scope
+  materially changes. `SUPERSEDES`: the one-trial-only interpretation of
+  `Transitional Safe Work`; formal employee and Digital Life rules remain valid.
+- First temporary-worker result is a deterministic policy fixture only, not a
+  real Worker ACK, delivery, compensation entitlement or payment receipt.
+
 ## KAIOS white-hole cargo escort demo — 2026-10-08
 
 - work_id / task_id: `KAIOS-CARGO-WHITEHOLE-ESCORT-001`; status:

@@ -1,14 +1,14 @@
 {
   "metadata": {
-    "version": "4.0",
-    "revision": "2026-10-08.KAIOS_HR_RECONCILIATION",
+    "version": "4.1",
+    "revision": "2026-10-10.TEMPORARY_WORKER_TASK_COMPENSATION",
     "status": "ACTIVE_POLICY_LEDGER_ONLY_EXECUTION_NOT_LIVE",
-    "last_updated": "2026-10-08",
+    "last_updated": "2026-10-10",
     "updated_by": "DOT_ENGINEERING_EXECUTOR",
     "reviewed_by": "INDEPENDENT_REVIEW_PENDING",
     "source_commit": "PENDING",
-    "task_id": "KAIOS-HR-SYSTEM-20261008-001",
-    "change_reason": "Reconcile legacy KGEN/merit compensation with the Human-directed KAIOS prepaid living salary model and preserve separate compensation categories.",
+    "task_id": "KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001",
+    "change_reason": "Separate temporary-worker WorkOrder compensation from formal employment, Digital Life and salary while preserving protected payment execution.",
     "source_of_truth": true,
     "legal_notice": "Internal ledger and policy only. No salary payment, transfer, signing, treasury movement or guaranteed token value is authorized by this file."
   },
@@ -22,7 +22,7 @@
   ],
   "category_rules": {
     "SALARY_INCOME": "Fixed prepaid living salary for a payroll-eligible employee; payable unit KAIOS; amount requires approved salary table.",
-    "TASK_COMPENSATION": "Reviewed WorkOrder compensation; never base salary.",
+    "TASK_COMPENSATION": "Accepted WorkOrder compensation for a formal or temporary worker; never base salary and never proof of payment.",
     "CREATOR_ROYALTY": "Evidence-based product/game royalty under an approved revenue-sharing policy.",
     "FREIGHT_REVENUE": "Delivery, transport or service income; never cargo principal.",
     "HEARTBEAT_REWARD": "Life-system reward; never salary or company customer revenue.",
@@ -57,6 +57,24 @@
     "EXACT_DESTINATION",
     "EVIDENCE_AND_REVIEW"
   ],
+  "task_compensation_eligibility_gates": [
+    "VERIFIED_TASK_SCOPED_WORK_IDENTITY",
+    "VERIFIED_CLAIM_CHANNEL_AND_ACK",
+    "CURRENT_BOUNDED_R0_R1_WORKORDER",
+    "ACCEPTED_EXACT_HEAD_DELIVERY",
+    "INDEPENDENT_REVIEW",
+    "APPROVED_BUDGET_AND_EXACT_AMOUNT",
+    "VERIFIED_OWNED_BSC56_RECIPIENT_WALLET",
+    "NO_DUPLICATE_COMPENSATION"
+  ],
+  "task_compensation_non_requirements": [
+    "FORMAL_EMPLOYMENT",
+    "PERMANENT_WORKER_ID",
+    "DIGITAL_LIFE_ID",
+    "SPECIES",
+    "BIRTHPLACE",
+    "LIFE_BIRTH_CEREMONY"
+  ],
   "payroll_states": [
     "CALCULATED",
     "HELD_IN_BANK",
@@ -86,7 +104,10 @@
     "cargo_principal_as_revenue_allowed": false,
     "ledger_entry_as_real_payment_allowed": false,
     "chain_payment_requires_human_approval": true,
-    "fixed_token_value_guarantee": false
+    "fixed_token_value_guarantee": false,
+    "temporary_worker_task_compensation_allowed": true,
+    "temporary_worker_salary_income_allowed": false,
+    "recipient_wallet_grants_signer_authority": false
   },
   "protected_execution_requirements": [
     "EXACT_EMPLOYEE",

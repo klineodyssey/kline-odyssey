@@ -53,7 +53,7 @@ import {
   validateDigitalTwinWorld, validateWorldStateObject, validateSupplyChainPlan,
   validateStaffingPlan, validateUniversalWorkMarket, validateSafetyPlan,
   validateProjectIncident, validateDefinitionOfDone, validateCustomerIdealMatch,
-  validateCreativeEnhancement, validateExternalAiOnboarding, validateCivilizationConcierge,
+  validateCreativeEnhancement, validateExternalAiOnboarding, validateTemporaryWorkerClaim, validateCivilizationConcierge,
   validateSocialAssistanceWorkflow, validateAiCivilizationOs,
   replayCanonicalAiCivilizationOsArchitecture, validateAcquisitionNeed,
   validateCivilizationDemandScan, validateAcquisitionLead, validateAcquisitionLeadTransition,
@@ -2289,6 +2289,61 @@ test("V3.1 External AI is not automatically a Life or eligible Worker", () => {
   assert.equal(validateExternalAiOnboarding(tool), tool);
   assert.throws(() => validateExternalAiOnboarding({ ...tool, assigned_class: "LIFE" }), (error) => error.code === "EXTERNAL_AI_IS_NOT_AUTOMATIC_LIFE");
   assert.equal(validateCivilizationConcierge(seed.next_stage.ai_civilization_os.concierge), seed.next_stage.ai_civilization_os.concierge);
+});
+
+test("temporary worker may claim ordinary work without Life birth while financial and protected gates remain closed", () => {
+  const claim = {
+    claim_id: "TEMP-CLAIM-POLICY-TEST-0001",
+    work_identity: {
+      work_identity_id: "TEMP-WORKER-POLICY-TEST-0001",
+      identity_type: "TEST_FIXTURE",
+      verification_status: "VERIFIED",
+      evidence_ref: "LOCAL_DETERMINISTIC_TEST_FIXTURE"
+    },
+    claim_capability: {
+      status: "VERIFIED",
+      channel_ref: "LOCAL_DETERMINISTIC_TEST_CHANNEL",
+      ack_status: "VERIFIED",
+      tools: ["GIT", "NODE"]
+    },
+    work_order: {
+      work_order_id: "TEMP-WORKORDER-POLICY-TEST-0001",
+      status: "OPEN",
+      risk_level: "R1",
+      scope: ["EXISTING_FILE_EDIT", "TEST"],
+      branch: "codex/temp-worker-policy-test",
+      reviewer_id: "independent-reviewer-policy-test",
+      dependencies: [],
+      acceptance_tests: ["TEMPORARY_WORKER_POLICY_TEST"],
+      protected_actions: ["MAINNET_TRANSACTION", "TREASURY_TRANSFER", "SIGNER_USE"],
+      expires_when: "DELIVERED_OR_SUPERSEDED",
+      compensation_budget: { status: "APPROVED", currency: "KAIOS", max_amount: "100", approval_ref: "TEST_FIXTURE_BUDGET" }
+    },
+    payment_wallet: {
+      chain_id: 56,
+      address: "0x1111111111111111111111111111111111111111",
+      ownership_status: "VERIFIED",
+      evidence_ref: "TEST_FIXTURE_WALLET_BINDING",
+      signing_authority: false
+    },
+    requested_actions: ["READ", "EDIT", "TEST", "COMMIT", "PUSH_NON_MAIN", "DRAFT_PR"],
+    requested_tools: ["GIT", "NODE"],
+    life_id: null,
+    formal_employee_id: null
+  };
+
+  const result = validateTemporaryWorkerClaim(claim);
+  assert.equal(result.status, "TEMPORARY_WORKER_CLAIM_ELIGIBLE");
+  assert.equal(result.life_id_required, false);
+  assert.equal(result.formal_employee_required, false);
+  assert.equal(result.compensation_status, "CALCULABLE_AFTER_ACCEPTED_DELIVERY");
+  assert.equal(result.real_payment_authorized, false);
+
+  assert.throws(() => validateTemporaryWorkerClaim({ ...claim, payment_wallet: { ...claim.payment_wallet, ownership_status: "NOT_VERIFIED" } }), (error) => error.code === "TEMP_PAYMENT_WALLET_OWNERSHIP_REQUIRED");
+  assert.throws(() => validateTemporaryWorkerClaim({ ...claim, work_order: { ...claim.work_order, risk_level: "R2" } }), (error) => error.code === "TEMP_WORK_RISK_FORBIDDEN");
+  assert.throws(() => validateTemporaryWorkerClaim({ ...claim, requested_tools: ["GIT", "NODE", "SOLIDITY"] }), (error) => error.code === "TEMP_CAPABILITY_MISMATCH");
+  assert.throws(() => validateTemporaryWorkerClaim({ ...claim, requested_actions: [...claim.requested_actions, "TREASURY_TRANSFER"] }), (error) => error.code === "TEMP_PROTECTED_ACTION_FORBIDDEN");
+  assert.throws(() => validateTemporaryWorkerClaim({ ...claim, claim_capability: { ...claim.claim_capability, ack_status: "NOT_VERIFIED" } }), (error) => error.code === "TEMP_CLAIM_CAPABILITY_REQUIRED");
 });
 
 test("V3.1 Social Assistance requires individual identity, eligibility and consent", () => {
