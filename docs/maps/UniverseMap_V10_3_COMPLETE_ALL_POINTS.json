@@ -29,8 +29,51 @@
         "summary": "孫悟空在斜月三星洞學藝期間，為炫耀所學而變作松樹，並自立為國，不將菩提祖師看在眼裡；菩提祖師震怒，將悟空掃地出門。",
         "cause": "悟空炫技、自立為國並輕視師尊",
         "consequence": "被菩提祖師逐出師門，返回花果山，進入下一階段命運主線",
-        "characters": ["孫悟空", "菩提祖師"],
-        "tags": ["斜月三星洞", "松樹國", "炫技", "自立為國", "輕視師尊", "掃地出門", "逐出師門", "悟空命運轉折"]
+        "characters": [
+          "孫悟空",
+          "菩提祖師"
+        ],
+        "tags": [
+          "斜月三星洞",
+          "松樹國",
+          "炫技",
+          "自立為國",
+          "輕視師尊",
+          "掃地出門",
+          "逐出師門",
+          "悟空命運轉折"
+        ]
+      },
+      "historical_lineage": {
+        "former_name": "靈台方寸山",
+        "former_coord": 6888,
+        "current_name": "松樹國",
+        "event": "孫悟空變作松樹並插樹為旗，在 KAIOS AU 改編敘事中宣示主權；菩提祖師因其賣弄本領及輕慢師道而逐之。",
+        "event_scope": "KAIOS_FICTIONAL_STORY_ONLY",
+        "source_novel_distinction": "原著只明確敘述變松樹炫技及被逐出師門；插樹為旗與主權變更是 KAIOS AU 改編設定。",
+        "successor_place_name": "靈台方寸山",
+        "successor_coord": 12800,
+        "related_teaching_cave_coord": 6128,
+        "property_rights": "FICTIONAL_MAP_STORY_NOT_REAL_PROPERTY_TITLE"
+      }
+    },
+    {
+      "target_id": "P_12800p0_靈台方寸山_R39",
+      "coord": 12800,
+      "name": "靈台方寸山",
+      "type": "mountain",
+      "role": "菩提祖師修行主殿，K6888 松樹國主權覺醒後靈台方寸山名號的後續承接地",
+      "historical_lineage": {
+        "former_name_location": "K6888（歷史稱靈台方寸山）",
+        "current_coord": 12800,
+        "transition_reason": "KAIOS AU 劇情：K6888 改名松樹國後，靈台方寸山主殿於 K12800 承接；保留 K6128 三星洞祖師授法洞府。",
+        "event_scope": "KAIOS_FICTIONAL_STORY_ONLY",
+        "related_coords": [
+          6888,
+          6128
+        ],
+        "coordinate_policy": "DO_NOT_MOVE_OR_DELETE_BASE_POINTS",
+        "property_rights": "FICTIONAL_MAP_STORY_NOT_REAL_PROPERTY_TITLE"
       }
     }
   ],
@@ -44,7 +87,10 @@
     "resolved_total_points": 123,
     "shared_axis_rule": "XYZ / K-Sphere",
     "profit_axis": "Z-KZ",
-    "explore_axes": ["X-KX", "Y-KY"]
+    "explore_axes": [
+      "X-KX",
+      "Y-KY"
+    ]
   },
   "governance": {
     "do_not_copy_to_temple_folders": true,
