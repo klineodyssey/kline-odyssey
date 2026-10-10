@@ -40,7 +40,9 @@ Cursor reads the Cursor Agent Prompt, WorkQueue, Daily Workflow, DO_NOT_TOUCH, C
 
 Formal employees pass the permanent worker gate in `KGEN-KAIOS/worker_registry.json`. A temporary worker may instead pass the task-scoped gate in `KGEN-KAIOS/workforce/RECRUITMENT_STANDARD.md`; formal Digital Life, species, birthplace, birth ceremony, permanent Worker ID and employee status are not ordinary-work prerequisites.
 
-The temporary gate requires verifiable work identity, claim capability, explicit ACK, one current R0/R1 WorkOrder, capability evidence, non-main branch, distinct reviewer and verified owned BSC56 recipient wallet. Missing work identity returns `WORK_IDENTITY_REQUIRED`; missing ACK returns `CLAIM_ACK_NOT_VERIFIED`; missing wallet blocks the temporary claim/compensation route. A Life ID alone never passes the gate.
+The temporary gate requires verifiable work identity, claim capability, explicit ACK, one current R0/R1 WorkOrder, capability evidence, normalized non-main branch, distinct reviewer ID and controller, reviewer registry/qualification/exact-head evidence and verified owned BSC56 recipient wallet. The WorkOrder revision, execution base, delivery head and active claim must all match. Missing work identity returns `WORK_IDENTITY_REQUIRED`; missing ACK returns `CLAIM_ACK_NOT_VERIFIED`; missing wallet blocks the temporary claim/compensation route. A Life ID alone never passes the gate.
+
+`core/company/index.mjs` is only a repository schema/consistency precheck because the current architecture has no canonical evidence resolver, signature verifier or durable registry lookup. It must return `PRECHECK_PASSED`, `eligible: false` and `canonical_verification_required: true`; caller-supplied `VERIFIED` fields and well-shaped references cannot establish eligibility.
 
 ## 4. Cursor Execution
 

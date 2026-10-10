@@ -1,7 +1,7 @@
 ---
 VERSION: "4.1"
 REVISION: "2026-10-10.TEMPORARY_WORKER_TASK_COMPENSATION"
-STATUS: "ACTIVE POLICY / LEDGER ONLY / EXECUTION NOT LIVE"
+STATUS: "DRAFT / PENDING INDEPENDENT REVIEW / EXECUTION NOT LIVE"
 LAST_UPDATED: "2026-10-10"
 UPDATED_BY: "DOT_ENGINEERING_EXECUTOR"
 REVIEWED_BY: "INDEPENDENT_REVIEW_PENDING"
@@ -40,7 +40,7 @@ Employment is not payroll eligibility. Worker ID, Life ID, Controller binding, t
 
 ## Temporary Worker Task Compensation
 
-Formal employment, permanent Worker ID, Digital Life ID, species, birthplace and birth ceremony are not prerequisites for `TASK_COMPENSATION`. A temporary worker becomes calculation-eligible only after all of these are verified: task-scoped work identity, explicit claim ACK, valid WorkOrder, accepted exact-head delivery, independent review, approved budget, exact KGEN/KAIOS amount and an owned BSC56 recipient wallet.
+Formal employment, permanent Worker ID, Digital Life ID, species, birthplace and birth ceremony are not prerequisites for `TASK_COMPENSATION`. A temporary worker becomes calculation-eligible only after canonical durable evidence verifies task-scoped work identity, explicit claim ACK, valid WorkOrder, accepted exact-head delivery, independent review, approved budget, exact KGEN/KAIOS amount and an owned BSC56 recipient wallet. The current repository validator is only a schema precheck and cannot establish that eligibility.
 
 Calculation is not payment. The recipient wallet grants no signing authority. Treasury source, signer, sufficient balance, duplicate protection, receipt and action-specific Human approval remain mandatory before any real transfer. Temporary task compensation must never be recorded as `SALARY_INCOME`, `HEARTBEAT_REWARD`, `FREIGHT_REVENUE`, `CREATOR_ROYALTY` or `CARGO_PRINCIPAL`.
 

@@ -3,12 +3,23 @@
 ## Temporary-worker ordinary-work eligibility — 2026-10-10
 
 - `WORK_ID`: `KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001`; status:
-  `IMPLEMENTED_LOCAL_QA_PASS / PENDING_INDEPENDENT_EXACT_HEAD_REVIEW`; priority: `P1`.
+  `IMPLEMENTED_SCOPED_QA_PASS / REPOSITORY_BASELINE_BLOCKERS / NOT_ELIGIBLE / PENDING_INDEPENDENT_EXACT_HEAD_REVIEW`; priority: `P1`.
 - `GENERATED_AT`: `2026-10-10T13:50:38+08:00`; `BASE_MAIN_SHA`:
   `4a31413095c73c04ea83443498780106af0510cf`; `TARGET_PR_OR_BRANCH`:
   `codex/temp-worker-eligibility`.
 - `PROJECT_OWNER`: `HENGYAO_GM`; `IMPLEMENTER`: `codex-gm-01` under the
   current direct Human WorkOrder; `REVIEWER`: `INDEPENDENT_REVIEW_PENDING`.
+- `TASK_SOURCE_TYPE`: `SECURITY_FINDING`; `TASK_SOURCE_ID`:
+  `PR-571-INDEPENDENT-REVIEW`; `TASK_SOURCE_ACTOR`: `INDEPENDENT_REVIEWER`;
+  `TASK_SOURCE_FILE`: `https://github.com/klineodyssey/kline-odyssey/pull/571`;
+  `TASK_SOURCE_COMMIT`: `e0a8fc5ef67b3f097e0ec7d6b1b60b4e25680eab`;
+  `TASK_SOURCE_REASON`: fail closed against forged evidence, stale/mismatched
+  WorkOrders, unknown/protected actions, branch aliases, reviewer aliases and
+  invalid compensation values.
+- `CREATED_BY`: `codex-gm-01`; `CREATED_AT`: `2026-10-10T13:50:38+08:00`;
+  `OWNER`: `HENGYAO_GM`; `REVIEWER`: `INDEPENDENT_REVIEW_PENDING`; `PRIORITY`:
+  `P1`; `RISK_LEVEL`: `R1`; `EXECUTION_BASE_SHA`:
+  `e0a8fc5ef67b3f097e0ec7d6b1b60b4e25680eab`.
 - `SCOPE`: correct the existing Workforce, WorkOrder, tool-access and
   compensation policies that treated formal registration or Life birth as a
   prerequisite for ordinary R0/R1 work; add one fail-closed validator and
@@ -18,19 +29,23 @@
   ordinary-work gates; Life birth/species/birthplace are not.
 - `DEPENDENCIES`: current Workforce canon, existing WorkQueue, exact-head Git
   evidence, independent review, and current protected-action policy.
-- `EXPECTED_OUTPUT`: cumulative policy correction, executable claim validation,
-  deterministic first policy fixture, tests, commit, Draft PR and exact SHA.
-- `ACCEPTANCE_TESTS`: no-Life claim passes with every task gate; missing wallet,
-  ACK or capability fails; R2 and protected actions fail; JSON parses; full
-  `tests/universal-exchange.test.mjs` passes; no Mainnet or payment action.
+- `EXPECTED_OUTPUT`: cumulative policy correction, schema-only fail-closed claim
+  precheck, deterministic policy fixture, adversarial tests, commit and exact SHA.
+- `ACCEPTANCE_TESTS`: schema-valid no-Life claim returns `PRECHECK_PASSED` with
+  `eligible=false`; forged evidence, expiry/supersession, wrong revision/base/head,
+  unknown or out-of-scope actions, main aliases, same-controller reviewer,
+  incomplete protected categories and hex/invalid compensation fail; JSON parses;
+  full `tests/universal-exchange.test.mjs` passes; no Mainnet or payment action.
 - `PROTECTED_ACTIONS`: Mainnet transaction, Treasury/payroll transfer, signer or
   secret use, governance execution, production deployment, push main and
   irreversible actions are not authorized.
 - `EXPIRES_WHEN`: merged, rejected, superseded, or the exact branch head/scope
   materially changes. `SUPERSEDES`: the one-trial-only interpretation of
   `Transitional Safe Work`; formal employee and Digital Life rules remain valid.
-- First temporary-worker result is a deterministic policy fixture only, not a
-  real Worker ACK, delivery, compensation entitlement or payment receipt.
+- The current architecture has no canonical evidence resolver, signature verifier
+  or durable registry lookup. First temporary-worker result is a deterministic
+  schema-precheck fixture only, not eligibility, a real Worker ACK, delivery,
+  compensation entitlement, access grant or payment receipt.
 
 ## KAIOS white-hole cargo escort demo — 2026-10-08
 

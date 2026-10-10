@@ -1,12 +1,12 @@
 # KGEN Worker Boot SOP
 
-**Status:** ACTIVE
+**Status:** DRAFT / PENDING INDEPENDENT REVIEW
 **Version:** 1.1
 **Revision:** 2026-10-10.TEMPORARY_WORKER_ELIGIBILITY
 **Last Updated:** 2026-10-10
 **Updated By:** Codex
-**Reviewed By:** Codex
-**Source Commit:** 16a384fff2c0b6d58f2d94fe5a22e43684c9ad0d
+**Reviewed By:** INDEPENDENT_REVIEW_PENDING
+**Source Commit:** PENDING_PR_HEAD
 **Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
 **Change Reason:** Permit verified task-scoped temporary workers to perform ordinary R0/R1 work without Digital Life birth while preserving visible authorization and safety evidence.
 **Ancestor:** KGEN-KAIOS/workforce/README.md
@@ -104,7 +104,7 @@ Digital Life ID, species, birthplace and birth ceremony are not required for ord
 WORK_IDENTITY_REQUIRED
 ```
 
-If a temporary worker lacks any other gate, it must stop with the exact missing gate, such as `CLAIM_ACK_NOT_VERIFIED`, `WORK_ORDER_NOT_CLAIMABLE`, `PAYMENT_WALLET_NOT_VERIFIED`, `INDEPENDENT_REVIEWER_REQUIRED` or `PROTECTED_ACTION_FORBIDDEN`.
+If a temporary worker lacks any other gate, it must stop with the exact missing gate, such as `CLAIM_ACK_NOT_VERIFIED`, `WORK_ORDER_NOT_CLAIMABLE`, `PAYMENT_WALLET_NOT_VERIFIED`, `INDEPENDENT_REVIEWER_REQUIRED` or `PROTECTED_ACTION_FORBIDDEN`. Passing the repository schema precheck does not verify canonical evidence and must not be reported as eligibility.
 
 ### 3. PROTECTED PATH CHECK
 

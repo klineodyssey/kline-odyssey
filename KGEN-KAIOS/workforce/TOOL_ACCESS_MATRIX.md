@@ -1,6 +1,6 @@
 # KGEN Tool Access Matrix
 
-**Status:** ACTIVE
+**Status:** DRAFT / PENDING INDEPENDENT REVIEW
 **Version:** 1.2
 **Last Updated:** 2026-10-10
 **Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
@@ -24,7 +24,7 @@ This matrix records which worker may use each tool class. It is a permission rec
 | `cursor-01` | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED |
 | `chatgpt-01` | ALLOWED | ALLOWED | ALLOWED | ALLOWED | ALLOWED | ALLOWED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | DENIED | HUMAN_APPROVAL_REQUIRED |
 | `human-primeforge` | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | DENIED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | HUMAN_APPROVAL_REQUIRED | DENIED | HUMAN_APPROVAL_REQUIRED |
-| temporary worker with validated WorkOrder claim | REVIEW_REQUIRED | REVIEW_REQUIRED | REVIEW_REQUIRED | DENIED | DENIED | REVIEW_REQUIRED | DENIED | DENIED | DENIED | DENIED |
+| temporary worker with canonically verified WorkOrder claim | REVIEW_REQUIRED | REVIEW_REQUIRED | REVIEW_REQUIRED | DENIED | DENIED | REVIEW_REQUIRED | DENIED | DENIED | DENIED | DENIED |
 | all other unactivated candidates | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED | DENIED |
 
 ## DOT Conditional Authority Record
@@ -35,7 +35,7 @@ This conditional policy never grants Mainnet, Treasury, signer, secret, real-ass
 
 ## Temporary Worker Tool Boundary
 
-Tool access is created by the exact WorkOrder, not by Life birth or a display name. A validated temporary claim may use only the R0/R1 tools and paths enumerated in that order, may commit/push only to its non-main handoff branch, and may never self-review or inherit protected authority. When the claim closes, expires, is superseded or loses identity/channel binding, its conditional access ends.
+Tool access is created by the exact WorkOrder, not by Life birth or a display name. A canonically verified temporary claim may use only the R0/R1 tools and paths enumerated in that order, may commit/push only to its non-main handoff branch, and may never self-review or inherit protected authority. The repository schema precheck alone grants no access or eligibility. When the claim closes, expires, is superseded or loses identity/channel binding, its conditional access ends.
 
 ## Permanent Denials
 

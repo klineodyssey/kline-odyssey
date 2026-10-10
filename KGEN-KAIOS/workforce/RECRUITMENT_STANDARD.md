@@ -1,6 +1,6 @@
 # KAIOS HR Recruitment And Employment Standard
 
-**Status:** ACTIVE
+**Status:** DRAFT / PENDING INDEPENDENT REVIEW
 **Version:** 2.1
 **Last Updated:** 2026-10-10
 **Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
@@ -132,7 +132,7 @@ Temporary work is a task lane, not a hiring shortcut and not a one-trial-only ex
 
 Before delivery acceptance, the record is only a claim. After delivery, a distinct reviewer must verify the exact head, tests and output. An accepted result may become eligible for `TASK_COMPENSATION` only under an approved budget; it never becomes salary or proof of payment. Actual KGEN/KAIOS payment still requires exact recipient, amount, source, duplicate check, Treasury, signer, receipt and action-specific Human authority.
 
-Failure of any gate returns a precise fail-closed reason. No missing Life ID or birth record is a failure reason for this lane. No Life ID, wallet, display name or shared provider account alone proves the work identity.
+Failure of any gate returns a precise fail-closed reason. No missing Life ID or birth record is a failure reason for this lane. No Life ID, wallet, display name or shared provider account alone proves the work identity. Until a canonical resolver verifies durable registry records, the repository validator reports only `PRECHECK_PASSED`, `eligible: false` and `canonical_verification_required: true`.
 
 DOT is the primary dispatcher for ordinary engineering. HR and the General Manager govern policy, capacity, integration, audit and independent review routing; they do not replace the implementer ACK or reviewer evidence.
 

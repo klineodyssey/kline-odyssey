@@ -1,11 +1,11 @@
 # KGEN Workforce Governance
 
-**Status:** ACTIVE
+**Status:** DRAFT / PENDING INDEPENDENT REVIEW
 **Version:** 1.2
 **Revision:** 2026-10-10.TEMPORARY_WORKER_ELIGIBILITY
 **Last Updated:** 2026-10-10
 **Updated By:** Codex
-**Reviewed By:** Codex
+**Reviewed By:** INDEPENDENT_REVIEW_PENDING
 **Source Commit:** PENDING_PR_HEAD
 **Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
 **Change Reason:** Separate ordinary temporary-work eligibility from formal Digital Life, employment and payroll while preserving WorkOrder, review and protected financial gates.
@@ -33,7 +33,7 @@ If any requirement is missing, the worker is not a formal registered worker. Tha
 
 A temporary worker may claim bounded ordinary R0/R1 work without a Digital Life ID, species, birthplace, birth date, birth ceremony, formal employee record or permanent Worker ID. The temporary lane reuses the same WorkQueue and review system; it is not a second company system.
 
-Every temporary claim must have all of the following:
+Every temporary claim must ultimately have all of the following canonical evidence:
 
 - a verifiable task-scoped work identity and evidence reference;
 - a verified claim channel and explicit Worker ACK;
@@ -43,6 +43,8 @@ Every temporary claim must have all of the following:
 - delivery evidence and independent acceptance before any task compensation is calculated.
 
 Life identity is optional for this lane and cannot substitute for work identity. A recipient wallet is a payment destination only and grants no Treasury, signer, governance or payroll authority. Mainnet transactions, real-asset movement, Treasury, payroll execution, signer/secret use, governance, production deployment and irreversible actions remain Human-protected.
+
+The repository-only `validateTemporaryWorkerClaim` function performs schema and consistency prechecks only. The current architecture has no canonical evidence resolver, signature verifier or durable registry lookup, so a passing precheck returns `eligible: false` and `canonical_verification_required: true`. Caller-supplied `VERIFIED` strings or evidence references never establish eligibility.
 
 DOT is the primary dispatcher for ordinary engineering. The General Manager owns HR policy, company management, integration, audit and review routing, and may route overflow to another qualified worker. Dispatch, implementation and independent review must remain distinct whenever the same subject would otherwise approve its own delivery.
 

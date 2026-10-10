@@ -2,7 +2,7 @@
   "metadata": {
     "version": "4.1",
     "revision": "2026-10-10.TEMPORARY_WORKER_TASK_COMPENSATION",
-    "status": "ACTIVE_POLICY_LEDGER_ONLY_EXECUTION_NOT_LIVE",
+    "status": "DRAFT_PENDING_INDEPENDENT_REVIEW_EXECUTION_NOT_LIVE",
     "last_updated": "2026-10-10",
     "updated_by": "DOT_ENGINEERING_EXECUTOR",
     "reviewed_by": "INDEPENDENT_REVIEW_PENDING",
@@ -22,7 +22,7 @@
   ],
   "category_rules": {
     "SALARY_INCOME": "Fixed prepaid living salary for a payroll-eligible employee; payable unit KAIOS; amount requires approved salary table.",
-    "TASK_COMPENSATION": "Accepted WorkOrder compensation for a formal or temporary worker; never base salary and never proof of payment.",
+    "TASK_COMPENSATION": "Canonically verified and accepted WorkOrder compensation for a formal or temporary worker; never base salary and never proof of payment. A schema precheck is insufficient.",
     "CREATOR_ROYALTY": "Evidence-based product/game royalty under an approved revenue-sharing policy.",
     "FREIGHT_REVENUE": "Delivery, transport or service income; never cargo principal.",
     "HEARTBEAT_REWARD": "Life-system reward; never salary or company customer revenue.",
@@ -105,7 +105,8 @@
     "ledger_entry_as_real_payment_allowed": false,
     "chain_payment_requires_human_approval": true,
     "fixed_token_value_guarantee": false,
-    "temporary_worker_task_compensation_allowed": true,
+    "temporary_worker_task_compensation_allowed_after_canonical_verification": true,
+    "schema_precheck_grants_compensation_eligibility": false,
     "temporary_worker_salary_income_allowed": false,
     "recipient_wallet_grants_signer_authority": false
   },
