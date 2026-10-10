@@ -112,6 +112,7 @@ import {
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+import { createCustomerProjectPrototype, createFrozenV1CustomerProjectTestAdapter, SMALL_HOUSE_REQUIRED_STAGES } from "../core/company/index.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
@@ -3417,4 +3418,936 @@ test("V4.1 production shell exposes animated concierge and resilient storage cac
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+// These cases are local model fixtures, not a customer, tariff or service launch.
+function customerProjectFixture({ planningAdapter = null, executionEvidenceSource = null } = {}) {
+  let time = 1000;
+  let principal = { accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' };
+  let planner = {
+    policyId: 'TEST-ONLY-SYNTHETIC-COSTS', policyRevision: 1,
+    stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64),
+    costs: [{ name: 'fixture-materials', amount: '60000' }, { name: 'fixture-labor', amount: '5000' }],
+    conditions: ['Execution remains held'], assumptions: ['All resources are synthetic test fixtures'],
+    validForMs: 10000, durationHours: 100
+  };
+  const model = createCustomerProjectPrototype({ identityAdapter: { resolve: () => structuredClone(principal) },
+    quotePlanner: { plan: async () => structuredClone(planner) }, planningAdapter, executionEvidenceSource, now: () => time });
+  const request = { objective: 'SMALL_HOUSE', locationRef: 'TEST-HOME-PLOT', rightsRef: 'TEST-SIMULATED-USAGE', quality: 'STANDARD_SIMULATION', quantity: 1,
+    budget: { amount: '220000', unit: 'SIMULATED_CREDIT', scale: 0 }, deadlineHours: 1000, intendedUse: 'TEST_ONLY' };
+  const command = (type, key, revision, data) => ({ type, idempotencyKey: key, expectedRevision: revision, data });
+  const submit = () => model.command(command('SUBMIT_REQUEST', 'submit-0001', 0, request));
+  const issue = async (key = 'issue-00001') => { const s = await model.read(); return model.command(command('ISSUE_SIMULATED_QUOTE', key, s.revision, { requestRevision: s.request.revision })); };
+  const acceptance = (quote, key, revision) => command('ACCEPT_QUOTE', key, revision, { quoteId: quote.quoteId, quoteRevision: quote.revision, quoteHash: quote.contentHash, acknowledgementHash: quote.acknowledgementHash, accept: true });
+  return { model, request, command, submit, issue, acceptance,
+    setTime(v) { time = v; }, setPrincipal(v) { principal = { ...principal, ...v }; }, setPlan(v) { planner = { ...planner, ...v }; } };
+}
+const customerProjectRejects = (promise, code) => assert.rejects(promise, (error) => error.code === code);
+
+test('Customer project V2 requires trusted context and rejects payload authority', async () => {
+  assert.throws(() => createCustomerProjectPrototype({}), (e) => e.code === 'CUSTOMER_PROJECT_TRUSTED_ADAPTER_REQUIRED');
+  const f = customerProjectFixture();
+  await customerProjectRejects(f.model.command(f.command('SUBMIT_REQUEST', 'forged-0001', 0, { ...f.request, customerId: 'OTHER' })), 'CUSTOMER_PROJECT_FIELDS');
+  await customerProjectRejects(f.model.command({ ...f.command('SUBMIT_REQUEST', 'forged-0002', 0, f.request), authority: true }), 'CUSTOMER_PROJECT_FIELDS');
+  await customerProjectRejects(f.model.command(f.command('START_TASK', 'execute-001', 0, {})), 'CUSTOMER_PROJECT_COMMAND_DISABLED');
+  assert.equal((await f.model.read()).revision, 0);
+  f.setPrincipal({ active: false });
+  await customerProjectRejects(f.submit(), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+});
+
+test('Customer project V2 preserves incomplete requests and requires complete plans', async () => {
+  const f = customerProjectFixture();
+  const r = await f.model.command(f.command('SUBMIT_REQUEST', 'submit-null', 0, { ...f.request, locationRef: null }));
+  assert.equal(r.status, 'NEEDS_CLARIFICATION'); assert.deepEqual(r.missing, ['locationRef']);
+  await customerProjectRejects(f.issue(), 'CUSTOMER_PROJECT_COMPLETE_REQUEST_REQUIRED');
+  await f.model.command(f.command('CLARIFY_REQUEST', 'clarify-001', 1, f.request));
+  f.setPlan({ stages: ['SURVEY', 'COMPLETE'] });
+  await customerProjectRejects(f.issue(), 'HOUSE_STAGE_PLAN_INCOMPLETE');
+  f.setPlan({ stages: [...SMALL_HOUSE_REQUIRED_STAGES], costs: [{ name: 'free', amount: '0' }] });
+  await customerProjectRejects(f.issue(), 'CUSTOMER_PROJECT_COST_BASIS_REQUIRED');
+  f.setPlan({ costs: [{ name: 'too-much', amount: '220001' }] });
+  await customerProjectRejects(f.issue(), 'CUSTOMER_PROJECT_PLAN_EXCEEDS_REQUEST');
+  assert.equal((await f.model.read()).quotes.length, 0);
+});
+
+test('Customer project V2 freezes quote revisions and rejects stale or changed acceptance', async () => {
+  const f = customerProjectFixture(); await f.submit(); const a = (await f.issue()).quote;
+  f.setPlan({ policyRevision: 2, costs: [{ name: 'updated-fixture', amount: '66000' }] });
+  const b = (await f.issue('issue-00002')).quote;
+  assert.equal(b.revision, 2); assert.notEqual(a.contentHash, b.contentHash);
+  const before = await f.model.read();
+  await customerProjectRejects(f.model.command(f.acceptance(a, 'accept-old1', before.revision)), 'QUOTE_SUPERSEDED');
+  await customerProjectRejects(f.model.command({ ...f.acceptance(b, 'accept-bad1', before.revision), data: { ...f.acceptance(b, 'x', 0).data, quoteHash: 'b'.repeat(64) } }), 'QUOTE_HASH_MISMATCH');
+  await customerProjectRejects(f.model.command({ ...f.acceptance(b, 'accept-bad2', before.revision), data: { ...f.acceptance(b, 'x', 0).data, acknowledgementHash: 'b'.repeat(64) } }), 'ACCEPTANCE_INTENT_MISMATCH');
+  b.content.total = '1'; // Returned copies cannot mutate the stored quote.
+  assert.deepEqual(await f.model.read(), before);
+});
+
+test('Customer project V2 acceptance is explicit and expiry uses the host clock', async () => {
+  const f = customerProjectFixture(); await f.submit(); const q = (await f.issue()).quote;
+  const c = f.acceptance(q, 'accept-time', 2);
+  await customerProjectRejects(f.model.command({ ...c, data: { ...c.data, accept: false } }), 'CUSTOMER_PROJECT_EXPLICIT_ACCEPTANCE_REQUIRED');
+  f.setTime(q.content.expiresAt);
+  await customerProjectRejects(f.model.command(c), 'QUOTE_EXPIRED');
+  const s = await f.model.read(); assert.equal(s.project, null); assert.equal(s.revision, 2);
+});
+
+test('Customer project V2 exact retries and new-key accepted no-ops keep one project', async () => {
+  const f = customerProjectFixture(); await f.submit(); const q = (await f.issue()).quote;
+  const c = f.acceptance(q, 'accept-once', 2); const accepted = await f.model.command(c);
+  assert.equal(accepted.status, 'ACCEPTED_SIMULATION_PLAN'); assert.equal(accepted.durable, false);
+  assert.deepEqual(await f.model.command(c), accepted);
+  const baseline = await f.model.read(); f.setTime(q.content.expiresAt + 1);
+  const otherKey = { ...c, idempotencyKey: 'accept-again' };
+  const repeated = await f.model.command(otherKey);
+  assert.equal(repeated.status, 'ALREADY_ACCEPTED'); assert.equal(repeated.projectId, accepted.projectId);
+  assert.deepEqual(await f.model.command(otherKey), repeated);
+  await customerProjectRejects(f.model.command({ ...otherKey, expectedRevision: 3 }), 'IDEMPOTENCY_CONTENT_MISMATCH');
+  await customerProjectRejects(f.model.command({ ...c, idempotencyKey: 'accept-ack2', data: { ...c.data, acknowledgementHash: 'b'.repeat(64) } }), 'ACCEPTANCE_INTENT_MISMATCH');
+  const after = await f.model.read();
+  assert.equal(after.revision, baseline.revision); assert.deepEqual(after.events, baseline.events);
+  assert.deepEqual(after.project, baseline.project); assert.equal(after.commandJournal.length, baseline.commandJournal.length + 1);
+  assert.equal(after.project.status, 'PLANNED_EXECUTION_HELD'); assert.equal(after.project.houseComplete, false);
+  for (const key of ['asset', 'delivery', 'receipt']) assert.equal(after.project[key], null);
+  for (const [k, v] of Object.entries(after.boundaries)) assert.equal(v, k === 'simulationOnly');
+});
+
+test('Customer project V2 changed request supersedes quotes and accepted baseline cannot change', async () => {
+  const f = customerProjectFixture(); await f.submit(); const old = (await f.issue()).quote;
+  await f.model.command(f.command('CLARIFY_REQUEST', 'clarify-new', 2, { ...f.request, quality: 'UPDATED_TEST_QUALITY' }));
+  await customerProjectRejects(f.model.command(f.acceptance(old, 'accept-null', 3)), 'QUOTE_SUPERSEDED');
+  const q = (await f.issue('issue-new01')).quote; await f.model.command(f.acceptance(q, 'accept-new1', 4));
+  await customerProjectRejects(f.model.command(f.command('CLARIFY_REQUEST', 'clarify-end', 5, f.request)), 'CHANGE_ORDER_REQUIRED');
+  await customerProjectRejects(f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'issue-after', 5, { requestRevision: 2 })), 'CHANGE_ORDER_REQUIRED');
+  assert.equal((await f.model.read()).requestRevisions.length, 2);
+});
+
+test('Customer project V2 serializes concurrent creation and acceptance in one prototype instance', async () => {
+  const f = customerProjectFixture();
+  const first = f.command('SUBMIT_REQUEST', 'submit-race', 0, f.request);
+  const results = await Promise.allSettled([f.model.command(first), f.model.command({ ...first, idempotencyKey: 'submit-other' })]);
+  assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(results.find((r) => r.status === 'rejected').reason.code, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  assert.deepEqual(await f.model.command(first), results[0].value);
+  const q = (await f.issue()).quote; const c = f.acceptance(q, 'accept-race', 2);
+  const [a, b] = await Promise.all([f.model.command(c), f.model.command({ ...c, idempotencyKey: 'accept-rac2' })]);
+  assert.equal(a.projectId, b.projectId); assert.equal(b.status, 'ALREADY_ACCEPTED');
+  const state = await f.model.read(); assert.equal(state.revision, 3); assert.equal(state.events.length, 3);
+});
+
+test('Customer project V2 quote replacement and acceptance race on the same revision', async () => {
+  const f = customerProjectFixture(); await f.submit(); const q = (await f.issue()).quote;
+  const results = await Promise.allSettled([
+    f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'issue-race2', 2, { requestRevision: 1 })),
+    f.model.command(f.acceptance(q, 'accept-rac3', 2))
+  ]);
+  assert.equal(results[0].status, 'fulfilled'); assert.equal(results[1].status, 'rejected');
+  assert.equal(results[1].reason.code, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  const s = await f.model.read(); assert.equal(s.project, null); assert.equal(s.quoteHeadRevision, 2);
+});
+
+test('Customer project V2 checks the host customer before read and idempotent replay', async () => {
+  const f = customerProjectFixture(); const submitted = await f.submit();
+  f.setPrincipal({ playerId: 'TEST-PLAYER-B' });
+  await customerProjectRejects(f.submit(), 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  await customerProjectRejects(f.model.read(), 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  f.setPrincipal({ playerId: 'TEST-PLAYER-A', active: false });
+  await customerProjectRejects(f.submit(), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+  f.setPrincipal({ active: true }); assert.deepEqual(await f.submit(), submitted);
+});
+
+test('Customer project V2 adapter failures and invalid inputs never partially accept', async () => {
+  const adapter = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  const f = customerProjectFixture({ planningAdapter: adapter });
+  // V1 needs its existing 65,000-credit rough budget; no bypass is added.
+  await f.model.command(f.command('SUBMIT_REQUEST', 'submit-low1', 0, { ...f.request, budget: { ...f.request.budget, amount: '100' } }));
+  f.setPlan({ costs: [{ name: 'synthetic-small', amount: '50' }] });
+  const q = (await f.issue()).quote; const before = await f.model.read();
+  await customerProjectRejects(f.model.command(f.acceptance(q, 'accept-low1', 2)), 'CUSTOMER_PROJECT_V1_PLANNING_BLOCKED');
+  assert.deepEqual(await f.model.read(), before);
+  await customerProjectRejects(f.model.command({ ...f.command('SUBMIT_REQUEST', 'invalid-num', 2, f.request), expectedRevision: NaN }), 'CUSTOMER_PROJECT_INVALID_NUMBER');
+  assert.throws(() => createCustomerProjectPrototype({ identityAdapter: { resolve() {} }, quotePlanner: { plan() {} }, planningAdapter: { prepare() {} } }), (e) => e.code === 'CUSTOMER_PROJECT_TEST_ADAPTER_REQUIRED');
+});
+
+test('Customer project V2 frozen V1 test adapter only prepares an unassigned plan', async () => {
+  const paths = ['../KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js', '../KGEN-KAIOS/world-viewer/tests/ai-company-runtime-v1.test.mjs', '../world-viewer/ai-company-v1/app.js', '../core/data/canonical.json'];
+  const before = await Promise.all(paths.map((p) => fs.readFile(new URL(p, import.meta.url))));
+  const adapter = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  const f = customerProjectFixture({ planningAdapter: adapter }); await f.submit(); const q = (await f.issue()).quote;
+  await f.model.command(f.acceptance(q, 'accept-plan', 2)); const s = await f.model.read(); const v1 = s.project.planning.snapshot.state;
+  assert.equal(s.project.planning.scope, 'FROZEN_V1_TEST_PLANNING_ONLY');
+  assert.equal(v1.projects.length, 1); assert.equal(v1.projects[0].tasks.length, 7);
+  assert.equal(s.project.desiredStages.length, 12); assert.equal(s.project.status, 'PLANNED_EXECUTION_HELD');
+  assert.equal(v1.finance.opening_cash, 0);
+  for (const key of ['contracts', 'procurement_orders', 'ledger', 'worker_reservations', 'equipment_reservations', 'deliveries']) assert.equal(v1[key].length, 0);
+  assert.ok(v1.projects[0].tasks.every((t) => t.workers.length === 0 && t.progress_percent === 0));
+  const actions = v1.action_log.map((a) => a.command);
+  assert.deepEqual(actions, ['SUBMIT_REQUEST', 'ANALYZE_REQUIREMENTS', 'EVALUATE_FEASIBILITY', 'CREATE_PROPOSAL', 'APPROVE_PROPOSAL', 'CREATE_PROJECT', 'DECOMPOSE_PROJECT']);
+  const after = await Promise.all(paths.map((p) => fs.readFile(new URL(p, import.meta.url))));
+  after.forEach((bytes, i) => assert.deepEqual(bytes, before[i]));
+});
+
+test('Customer project V2 hash binds revision even for identical plans at the same time', async () => {
+  const f = customerProjectFixture(); await f.submit();
+  const a = (await f.issue()).quote, b = (await f.issue('issue-same2')).quote;
+  assert.deepEqual(a.content, b.content); assert.notEqual(a.contentHash, b.contentHash);
+  await customerProjectRejects(f.model.command({ ...f.acceptance(b, 'accept-mix1', 3), data: { ...f.acceptance(b, 'x', 0).data, quoteHash: a.contentHash } }), 'QUOTE_HASH_MISMATCH');
+});
+
+test('Customer project V2 captures command copies and enforces revision and capacity bounds', async () => {
+  const f = customerProjectFixture(); const c = f.command('SUBMIT_REQUEST', 'submit-copy', 0, structuredClone(f.request));
+  const pending = f.model.command(c); c.data.locationRef = 'MUTATED-AFTER-SEND'; await pending;
+  assert.equal((await f.model.read()).request.content.locationRef, 'TEST-HOME-PLOT');
+  await customerProjectRejects(f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'issue-wrong', 0, { requestRevision: 1 })), 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  for (let i = 0; i < 20; i += 1) await f.issue(`issue-bound-${i}`);
+  const before = await f.model.read();
+  await customerProjectRejects(f.issue('issue-bound-last'), 'CUSTOMER_PROJECT_CAPACITY');
+  assert.deepEqual(await f.model.read(), before);
+});
+
+test('Customer project V2 captures invocation identity before queue execution', async () => {
+  const f = customerProjectFixture();
+  const pending = f.submit(); // A is captured synchronously, before the queue runs.
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' });
+  await customerProjectRejects(pending, 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  assert.equal((await f.model.read()).revision, 0);
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A' }); await f.submit();
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' });
+  const forged = f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'queue-other', 1, { requestRevision: 1 }));
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A' });
+  await customerProjectRejects(forged, 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  assert.equal((await f.model.read()).quotes.length, 0);
+});
+
+test('Customer project V2 rejects revocation while a planner is pending', async () => {
+  let active = true, release, entered;
+  const started = new Promise((r) => { entered = r; });
+  const gate = new Promise((r) => { release = r; });
+  const f = customerProjectFixture();
+  const prototype = createCustomerProjectPrototype({
+    identityAdapter: { resolve: () => ({ accountId: 'TEST-A', playerId: 'TEST-P', active, scope: 'SIMULATION_CUSTOMER_CONTEXT' }) },
+    quotePlanner: { plan: async () => { entered(); await gate; return { policyId: 'TEST', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test', amount: '65000' }], conditions: [], assumptions: [], validForMs: 1000, durationHours: 100 }; } }, now: () => 1000
+  });
+  await prototype.command(f.command('SUBMIT_REQUEST', 'revoke-sub1', 0, f.request));
+  const pending = prototype.command(f.command('ISSUE_SIMULATED_QUOTE', 'revoke-quo1', 1, { requestRevision: 1 }));
+  await started; active = false; release();
+  await customerProjectRejects(pending, 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+  active = true; const s = await prototype.read(); assert.equal(s.revision, 1); assert.equal(s.quotes.length, 0);
+});
+
+test('Customer project V2 starts quote validity after asynchronous planning', async () => {
+  const f = customerProjectFixture(); let time = 1000, release, entered;
+  const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const model = createCustomerProjectPrototype({
+    identityAdapter: { resolve: () => ({ accountId: 'CLOCK-A', playerId: 'CLOCK-P', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' }) },
+    quotePlanner: { plan: async () => { entered(); await gate; return { policyId: 'TEST-CLOCK', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test', amount: '65000' }], conditions: [], assumptions: [], validForMs: 100, durationHours: 100 }; } }, now: () => time
+  });
+  await model.command(f.command('SUBMIT_REQUEST', 'clock-sub01', 0, f.request));
+  const pending = model.command(f.command('ISSUE_SIMULATED_QUOTE', 'clock-quote', 1, { requestRevision: 1 }));
+  await started; time = 20000; release(); const q = (await pending).quote;
+  assert.equal(q.content.issuedAt, 20000); assert.equal(q.content.expiresAt, 20100);
+  await model.command(f.acceptance(q, 'clock-acc01', 2));
+});
+
+test('Customer project V2 hashes acknowledgement from the same immutable plan snapshot', async (t) => {
+  const f = customerProjectFixture();
+  const borrowed = { policyId: 'MUTABLE-PLANNER-TEST', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test', amount: '65000' }], conditions: ['ORIGINAL'], assumptions: [], validForMs: 1000, durationHours: 100 };
+  const digest = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+  let mutationTriggered = false;
+  t.mock.method(globalThis.crypto.subtle, 'digest', async (algorithm, bytes) => {
+    if (new TextDecoder().decode(bytes).includes('MUTABLE-PLANNER-TEST')) { borrowed.conditions[0] = 'CHANGED_AFTER_SNAPSHOT'; mutationTriggered = true; }
+    return digest(algorithm, bytes);
+  });
+  const model = createCustomerProjectPrototype({
+    identityAdapter: { resolve: () => ({ accountId: 'PLAN-A', playerId: 'PLAN-P', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' }) },
+    quotePlanner: { plan: async () => borrowed }, now: () => 1000
+  });
+  await model.command(f.command('SUBMIT_REQUEST', 'plan-sub001', 0, f.request));
+  const q = (await model.command(f.command('ISSUE_SIMULATED_QUOTE', 'plan-quote1', 1, { requestRevision: 1 }))).quote;
+  assert.equal(mutationTriggered, true); assert.deepEqual(q.content.plan.conditions, ['ORIGINAL']);
+  const { sha256 } = await import('../core/shared/utils.mjs');
+  assert.equal(q.acknowledgementHash, await sha256({ conditions: q.content.plan.conditions, assumptions: q.content.plan.assumptions, executionHolds: q.content.executionHolds }));
+});
+
+test('Customer project V2 rechecks quote expiry before replacing accepted state', async () => {
+  // Expire separately at the post-planning check and the final pre-commit check.
+  for (const validAcceptanceClockReads of [1, 2]) {
+    const f = customerProjectFixture(); let accepting = false, acceptanceClockReads = 0;
+    const model = createCustomerProjectPrototype({
+      identityAdapter: { resolve: () => ({ accountId: 'EXPIRY-A', playerId: 'EXPIRY-P', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' }) },
+      quotePlanner: { plan: async () => ({ policyId: 'EXPIRY-TEST', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test', amount: '65000' }], conditions: [], assumptions: [], validForMs: 1000, durationHours: 100 }) },
+      now: () => accepting && acceptanceClockReads++ >= validAcceptanceClockReads ? 3000 : 1000
+    });
+    await model.command(f.command('SUBMIT_REQUEST', 'expiry-sub1', 0, f.request));
+    const q = (await model.command(f.command('ISSUE_SIMULATED_QUOTE', 'expiry-quo1', 1, { requestRevision: 1 }))).quote;
+    const before = await model.read(); accepting = true;
+    await customerProjectRejects(model.command(f.acceptance(q, 'expiry-acc1', 2)), 'QUOTE_EXPIRED');
+    assert.deepEqual(await model.read(), before);
+    assert.equal(acceptanceClockReads, validAcceptanceClockReads + 1);
+  }
+});
+
+// Disposable execution fixtures use the existing frozen V1, never the real queue.
+async function customerProjectSubplanFixture({ defaultInspections = false, earlyRework = false, intendedUse = null, alignRework = true } = {}) {
+  const { sha256: hash } = await import('../core/shared/utils.mjs');
+  const { createKaiosAiCompanyRuntimeV1, PROJECT_TEMPLATES } = await import('../KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js');
+  const materials = {};
+  for (const task of PROJECT_TEMPLATES.BASIC_HOUSE_PROJECT.tasks) for (const [name, amount] of Object.entries(task.materials)) materials[name] = (materials[name] ?? 0) + amount;
+  const resourceFixture = { scope: 'LOCAL_TEST_ONLY_V1_SUBPLAN', openingSimulationCredit: '65000', depositRate: 0, materials,
+    inspectionPolicy: earlyRework ? 'SURVEY_REWORK_ONCE_FROM_WORK_SEGMENTS' : 'FINAL_QA_REWORK_ONCE_FROM_WORK_SEGMENTS', reworkRestPolicy: earlyRework ? 'NONE' : 'NEXT_V1_SHIFT_AFTER_MINIMUM_REST' };
+  const defectTaskCode = earlyRework ? 'SURVEY' : 'FINAL_ACCEPTANCE';
+  const fixtureHash = await hash(resourceFixture);
+  const adapter = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  const f = customerProjectFixture({ planningAdapter: adapter });
+  f.setPlan({ bomHash: await hash(materials), durationHours: 1000,
+    assumptions: ['Synthetic subplan resources only; no real balance, worker or title authority', `LOCAL_SUBPLAN_FIXTURE_SHA256:${fixtureHash}`] });
+  await f.submit(); const quote = (await f.issue()).quote;
+  await f.model.command(f.acceptance(quote, 'accept-subplan-fixture', 2));
+  const accepted = await f.model.read();
+  assert.equal(accepted.events.at(-1).command, 'ACCEPT_QUOTE');
+  assert.equal(accepted.acceptance.quoteHash, quote.contentHash);
+  const runtime = createKaiosAiCompanyRuntimeV1({ seed: quote.contentHash, initialCash: Number(resourceFixture.openingSimulationCredit) });
+  const done = (result) => { assert.ok(typeof result.status === 'string' && !['BLOCKED', 'REJECTED', 'NEEDS_CLARIFICATION', 'REWORK_REQUIRED', 'FAILED'].includes(result.status), `${result.status}:${result.reason}`); return result; };
+  try {
+    const request = done(runtime.submitRequest({ customer_life_id: accepted.owner.playerId, customer_type: 'PLAYER', request_text: 'Explicitly accepted local subplan fixture',
+      requested_object: 'HOUSE', requested_location: f.request.locationRef, requested_quantity: f.request.quantity, requested_quality: f.request.quality,
+      requested_deadline: f.request.deadlineHours, requested_budget: Number(f.request.budget.amount), intended_use: intendedUse ?? f.request.intendedUse,
+      civilization_context: 'INDUSTRIAL', rights_context: [f.request.rightsRef], risk_level: 'MEDIUM', priority: 'NORMAL' })).outputs.request;
+    done(runtime.analyzeRequirements(request.request_id)); done(runtime.evaluateFeasibility(request.request_id));
+    const proposal = done(runtime.createProposal(request.request_id)).outputs.proposal; done(runtime.approveProposal(proposal.proposal_id));
+    const projectId = done(runtime.createProject(proposal.proposal_id)).outputs.project.project_id;
+    for (const method of ['decomposeProject', 'calculateDependencies', 'createBOM', 'createWorkforcePlan', 'createEquipmentPlan', 'createSupplyChainPlan']) done(runtime[method](projectId));
+    done(runtime.calculateBudget(projectId, { approved_budget: Number(quote.content.total), funding_source: 'EXPLICIT_QUOTE_BOUND_SYNTHETIC_FIXTURE' }));
+    done(runtime.calculateSchedule(projectId)); done(runtime.createSimulatedContract(projectId, { deposit_rate: resourceFixture.depositRate }));
+    done(runtime.startProcurement(projectId)); done(runtime.start());
+    const orders = runtime.getState().procurement_orders;
+    assert.equal(runtime.receiveMaterial(projectId, orders[0].material_id).reason, 'TRANSPORT_TIME_REQUIRED');
+    done(runtime.advanceTime(Math.max(...orders.map((order) => order.arrival_time)) - runtime.getState().simulation_time));
+    for (const order of orders) done(runtime.receiveMaterial(projectId, order.material_id));
+    done(runtime.calculateSchedule(projectId));
+    const originals = runtime.getState().projects[0].tasks;
+    assert.equal(runtime.startTask(projectId, originals[1].task_id).reason, 'DEPENDENCY_NOT_COMPLETE');
+    function inspect(taskId, result) {
+      if (defaultInspections) return runtime.inspectTask(projectId, taskId);
+      const state = runtime.getState(), task = state.projects[0].tasks.find((t) => t.task_id === taskId);
+      const inspector = state.resource_plans[0].workforce.find((w) => w.skill === 'QA_INSPECTOR');
+      assert.equal(task.remaining_hours, 0);
+      const effectiveHours = task.work_segments.reduce((sum, segment) => sum + segment.effective_hours, 0);
+      assert.ok(Math.abs(effectiveHours - task.duration_hours) < 0.001);
+      return runtime.inspectTask(projectId, taskId, result, { inspector: inspector.worker_id,
+        criteria: ['V1_WORK_SEGMENTS_COMPLETE', resourceFixture.inspectionPolicy], measurements: { remainingHours: task.remaining_hours, effectiveHours },
+        evidence: [`QUOTE_SHA256:${quote.contentHash}`, `FIXTURE_SHA256:${fixtureHash}`],
+        defects: result === 'PASS' ? [] : ['EXPLICIT_SYNTHETIC_FIXTURE_DEFECT'], rework: result === 'PASS' ? [] : ['TWO_HOURS_CORRECTION'] });
+    }
+    function perform(taskId) {
+      let state = runtime.getState(); const task = state.projects[0].tasks.find((t) => t.task_id === taskId), plan = state.resource_plans[0];
+      for (const skill of task.skills) {
+        const before = runtime.getState().projects[0].tasks;
+        const assigned = runtime.assignWorker(projectId, taskId, plan.workforce.find((w) => w.skill === skill).worker_id);
+        if (earlyRework && assigned.reason === 'REST_REQUIREMENT_CONFLICT') {
+          assert.deepEqual(runtime.getState().projects[0].tasks, before);
+          return { status: 'REPLAN_REQUIRED', taskId };
+        }
+        done(assigned);
+      }
+      for (const type of task.equipment) done(runtime.reserveEquipment(projectId, taskId, plan.equipment.find((e) => e.type === type).equipment_id));
+      state = runtime.getState(); const window = state.task_windows[taskId];
+      if (window.start > state.simulation_time) done(runtime.advanceTime(window.start - state.simulation_time));
+      done(runtime.startTask(projectId, taskId));
+      assert.equal(runtime.completeTask(projectId, taskId).reason, 'INSPECTION_APPROVAL_REQUIRED');
+      done(runtime.advanceTime(task.remaining_hours));
+    }
+    for (const task of originals) {
+      const progress = perform(task.task_id);
+      if (progress?.status === 'REPLAN_REQUIRED') return { f, adapter, resourceFixture, snapshot: runtime.exportState(), accepted, blockedTaskId: progress.taskId };
+      if (task.task_code === defectTaskCode && !defaultInspections) {
+        assert.equal(inspect(task.task_id, 'REWORK_REQUIRED').status, 'REWORK_REQUIRED');
+        assert.equal(runtime.deliverProject(projectId).reason, 'MANDATORY_TASKS_INCOMPLETE');
+        if (earlyRework) assert.equal(runtime.startTask(projectId, originals[1].task_id).reason, 'DEPENDENCY_NOT_COMPLETE');
+        if (resourceFixture.reworkRestPolicy !== 'NONE') {
+          const state = runtime.getState(), shift = state.resource_plans[0].workforce.find((w) => w.skill === 'QA_INSPECTOR').shift;
+          const nextShift = alignRework ? Math.ceil((state.simulation_time + shift.minimum_rest_hours) / shift.cycle_hours) * shift.cycle_hours + shift.start
+            : state.simulation_time + shift.minimum_rest_hours;
+          done(runtime.advanceTime(nextShift - state.simulation_time));
+        }
+        const repair = done(runtime.requestRework(projectId, task.task_id, { duration_hours: 2 })).outputs.rework_task;
+        perform(repair.task_id); done(inspect(repair.task_id, 'PASS')); done(runtime.completeTask(projectId, repair.task_id));
+      }
+      done(inspect(task.task_id, 'PASS')); done(runtime.completeTask(projectId, task.task_id));
+    }
+    assert.equal(runtime.deliverProject(projectId).reason, 'MAINTENANCE_PLAN_REQUIRED');
+    done(runtime.scheduleMaintenance(projectId)); done(runtime.deliverProject(projectId));
+    assert.equal(runtime.integrityReport().ok, true);
+    return { f, adapter, resourceFixture, snapshot: runtime.exportState(), accepted };
+  } finally { runtime.destroy(); }
+}
+let customerProjectSubplanBaseline;
+const subplanBaseline = () => customerProjectSubplanBaseline ??= customerProjectSubplanFixture();
+
+test('Customer project subplan binds quote acceptance, rework and pending coordinator delivery without completing the house', async () => {
+  const { f, adapter, resourceFixture, snapshot, accepted } = await subplanBaseline();
+  const result = await adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot });
+  assert.equal(result.coordinatorStatus, 'ACCEPTANCE_PENDING'); assert.equal(result.reworkCompleted, 1);
+  assert.deepEqual(result.missingStages, ['EXCAVATION', 'ROOF', 'INTERIOR', 'INSPECTION', 'REWORK', 'COMPLETE']);
+  assert.equal(result.quoteHash, accepted.acceptance.quoteHash); assert.equal(result.fullHouseStatus, 'HOUSE_STAGE_ADAPTER_REQUIRED');
+  assert.equal(result.houseComplete, false); assert.equal(result.deliveryAcceptance, 'NOT_REQUESTED');
+  assert.equal(result.asset, null); assert.equal(result.delivery, null); assert.equal(result.receipt, null);
+  assert.equal(snapshot.state.finance.project_revenue, 0); assert.equal(snapshot.state.finance.customer_deposits, 0);
+  assert.equal(snapshot.state.deliveries[0].customer_outcome, null); assert.equal(snapshot.state.projects[0].closed_at, null);
+  assert.ok(snapshot.state.projects[0].tasks.every((task) => task.consumed.labor_hours > 0));
+  assert.deepEqual(await f.model.read(), accepted);
+  const restarted = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  assert.deepEqual(await restarted.auditSubplan({ projectSource: f.model, resourceFixture, snapshot: structuredClone(snapshot) }), result);
+});
+
+test('Customer project subplan rejects unaccepted source and unquoted synthetic funding', async () => {
+  const { adapter, resourceFixture, snapshot } = await subplanBaseline(); const f = customerProjectFixture();
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_ACCEPTED_QUOTE_REQUIRED');
+  await f.submit(); const q = (await f.issue()).quote; await f.model.command(f.acceptance(q, 'accept-no-fixture', 2));
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_FIXTURE_UNBOUND');
+  const bound = await subplanBaseline();
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: bound.f.model, resourceFixture: { ...resourceFixture, openingSimulationCredit: '65001' }, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_FIXTURE_UNBOUND');
+});
+
+test('Customer project subplan rejects legacy default PASS even when V1 replay accepts it', async () => {
+  const { f, adapter, resourceFixture, snapshot } = await customerProjectSubplanFixture({ defaultInspections: true });
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_INSPECTION_MISMATCH');
+});
+
+test('Customer project subplan reports early rework scheduler conflict without changing downstream tasks', async () => {
+  const { f, adapter, resourceFixture, snapshot, accepted, blockedTaskId } = await customerProjectSubplanFixture({ earlyRework: true });
+  const result = await adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot });
+  assert.equal(result.executionStatus, 'REPLAN_REQUIRED'); assert.equal(result.executionBlocker, 'REST_REQUIREMENT_CONFLICT');
+  const blocked = snapshot.state.projects[0].tasks.find((task) => task.task_id === blockedTaskId);
+  assert.notEqual(blocked.status, 'COMPLETE'); assert.equal(blocked.progress_percent, 0);
+  assert.equal(snapshot.state.deliveries.length, 0); assert.equal(result.houseComplete, false);
+  assert.equal(result.delivery, null); assert.equal(result.receipt, null); assert.deepEqual(await f.model.read(), accepted);
+});
+
+test('Customer project subplan rejects a replay-valid project for a different intended use', async () => {
+  const { f, adapter, resourceFixture, snapshot } = await customerProjectSubplanFixture({ intendedUse: 'ANOTHER_USE' });
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_REQUEST_MISMATCH');
+});
+
+test('Customer project subplan rejects valid V1 rest that does not meet the quoted next-shift policy', async () => {
+  const { f, adapter, resourceFixture, snapshot } = await customerProjectSubplanFixture({ alignRework: false });
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_REST_MISMATCH');
+});
+
+test('Customer project subplan rejects altered replay evidence and rechecks trusted source identity', async () => {
+  const { f, adapter, resourceFixture, snapshot, accepted } = await subplanBaseline();
+  const corrupt = structuredClone(snapshot); corrupt.state.projects[0].tasks[0].consumed.labor_hours = 0;
+  await assert.rejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot: corrupt }));
+  let reads = 0;
+  const projectSource = { async read() { reads += 1; return reads === 1 ? structuredClone(accepted) : { ...structuredClone(accepted), owner: { ...accepted.owner, playerId: 'OTHER-PLAYER' } }; } };
+  await customerProjectRejects(adapter.auditSubplan({ projectSource, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_SOURCE_CHANGED');
+  assert.deepEqual(await f.model.read(), accepted);
+});
+
+// Intentionally test-file-only schema. Not an applied or deployable migration.
+const CUSTOMER_PROJECT_SQLITE_FIXTURE_SCHEMA = `
+CREATE TABLE customer_project_workspaces(workspace_id TEXT PRIMARY KEY,owner_account_id TEXT NOT NULL REFERENCES accounts(account_id),owner_player_id TEXT NOT NULL UNIQUE REFERENCES players(player_id),revision INTEGER NOT NULL CHECK(revision>0),storage_version INTEGER NOT NULL CHECK(storage_version>0),payload_hash TEXT NOT NULL,payload TEXT NOT NULL);
+CREATE TABLE customer_project_events(workspace_id TEXT NOT NULL REFERENCES customer_project_workspaces(workspace_id),sequence INTEGER NOT NULL CHECK(sequence>0),event_id TEXT NOT NULL UNIQUE,payload TEXT NOT NULL,payload_hash TEXT NOT NULL,PRIMARY KEY(workspace_id,sequence));
+CREATE TABLE customer_project_guards(guard_id TEXT PRIMARY KEY,owner_account_id TEXT NOT NULL,owner_player_id TEXT NOT NULL,expected_storage_version INTEGER NOT NULL,expected_payload_hash TEXT);
+CREATE TRIGGER customer_project_cas BEFORE INSERT ON customer_project_guards BEGIN
+ SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM account_lives WHERE account_id=NEW.owner_account_id AND player_id=NEW.owner_player_id) THEN RAISE(ABORT,'CUSTOMER_PROJECT_BINDING_REQUIRED') END;
+ SELECT CASE WHEN (NEW.expected_storage_version=0 AND EXISTS(SELECT 1 FROM customer_project_workspaces WHERE owner_player_id=NEW.owner_player_id)) OR (NEW.expected_storage_version>0 AND NOT EXISTS(SELECT 1 FROM customer_project_workspaces WHERE owner_player_id=NEW.owner_player_id AND owner_account_id=NEW.owner_account_id AND storage_version=NEW.expected_storage_version AND payload_hash=NEW.expected_payload_hash)) THEN RAISE(ABORT,'CUSTOMER_PROJECT_CAS_CONFLICT') END;
+END;
+CREATE TRIGGER customer_project_binding_insert BEFORE INSERT ON customer_project_workspaces BEGIN SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM account_lives WHERE account_id=NEW.owner_account_id AND player_id=NEW.owner_player_id) THEN RAISE(ABORT,'CUSTOMER_PROJECT_BINDING_REQUIRED') END; END;
+CREATE TRIGGER customer_project_binding_update BEFORE UPDATE ON customer_project_workspaces BEGIN SELECT CASE WHEN NEW.workspace_id!=OLD.workspace_id OR NEW.owner_account_id!=OLD.owner_account_id OR NEW.owner_player_id!=OLD.owner_player_id THEN RAISE(ABORT,'CUSTOMER_PROJECT_IMMUTABLE_OWNER') END; END;
+CREATE TRIGGER customer_project_event_no_update BEFORE UPDATE ON customer_project_events BEGIN SELECT RAISE(ABORT,'CUSTOMER_PROJECT_IMMUTABLE_EVENT'); END;
+CREATE TRIGGER customer_project_event_no_delete BEFORE DELETE ON customer_project_events BEGIN SELECT RAISE(ABORT,'CUSTOMER_PROJECT_IMMUTABLE_EVENT'); END;
+`;
+async function durableCustomerProjectFixture(t) {
+  const { tmpdir } = await import('node:os');
+  const { SQLiteDatabaseAdapter } = await import('../KAIOS/backend/src/adapters/local.mjs');
+  const { createCustomerProjectPersistencePrototype } = await import('../KAIOS/backend/src/service.mjs');
+  const { canonical, hash, stmt } = await import('../KAIOS/backend/src/primitives.mjs');
+  const directory = await fs.mkdtemp(tmpdir() + '/customer-project-local-');
+  const file = directory + '/fixture.sqlite', connections = new Set();
+  const open = () => { const db = new SQLiteDatabaseAdapter(file); connections.add(db); return db; };
+  let db = open(), time = 1000;
+  db.migrate(await fs.readFile(new URL('../KAIOS/backend/deploy/0001.sql', import.meta.url), 'utf8'));
+  db.migrate(await fs.readFile(new URL('../KAIOS/backend/deploy/0002_identity.sql', import.meta.url), 'utf8'));
+  db.migrate(CUSTOMER_PROJECT_SQLITE_FIXTURE_SCHEMA);
+  // Existing-identity fixtures only. No signup, enrollment or formal registry call.
+  for (const suffix of ['A', 'B']) await db.atomic([
+    stmt('INSERT INTO accounts VALUES(?,?,?,?,?,?)', 'TEST-ACCOUNT-' + suffix, 'TEST-LOOKUP-' + suffix, 'TEST-CIPHER-' + suffix, 1, 0, 0),
+    stmt('INSERT INTO players VALUES(?,?,?,?,?)', 'TEST-PLAYER-' + suffix, 'TEST-LIFE-REFERENCE-' + suffix, 0, 0, 2),
+    stmt('INSERT INTO account_lives VALUES(?,?,?)', 'TEST-ACCOUNT-' + suffix, 'TEST-PLAYER-' + suffix, 0)
+  ]);
+  let principal = { accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' };
+  const plan = { policyId: 'TEST-ONLY-SQLITE-PLAN', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test-model', amount: '65000' }], conditions: ['EXECUTION_HELD'], assumptions: ['SYNTHETIC_TEST_INPUTS'], validForMs: 10000, durationHours: 100 };
+  const f = customerProjectFixture();
+  const make = (options = {}) => createCustomerProjectPersistencePrototype({ mode: 'LOCAL_TEST_ONLY', database: options.database ?? db,
+    identityAdapter: options.identityAdapter ?? { resolve: () => structuredClone(principal) },
+    quotePlanner: options.quotePlanner ?? { plan: async () => structuredClone(plan) }, executionEvidenceSource: options.executionEvidenceSource ?? null,
+    now: options.now ?? (() => time) });
+  t.after(async () => { for (const c of connections) c.close(); await fs.rm(directory, { recursive: true, force: true }); });
+  return { ...f, db, open, make, plan, canonical, hash, stmt, file,
+    setPrincipal(values) { principal = { ...principal, ...values }; }, setTime(v) { time = v; },
+    closeAll() { for (const connection of connections) connection.close(); connections.clear(); },
+    reopen() { db.close(); connections.delete(db); db = open(); this.db = db; return db; },
+    async prepare(api = make()) {
+      const submitted = await api.command(f.command('SUBMIT_REQUEST', 'durable-sub1', 0, f.request));
+      const issued = await api.command(f.command('ISSUE_SIMULATED_QUOTE', 'durable-quo1', 1, { requestRevision: 1 }));
+      return { api, submitted, quote: issued.result.quote, acceptance: f.acceptance(issued.result.quote, 'durable-acc1', 2) };
+    },
+    async rows() {
+      const result = {};
+      for (const table of ['customer_project_workspaces', 'customer_project_events', 'customer_project_guards', 'idempotency']) result[table] = await db.all('SELECT * FROM ' + table + ' ORDER BY rowid');
+      return result;
+    }
+  };
+}
+const durableCustomerRejects = (promise, code) => assert.rejects(promise, (error) => (error.code ?? error.message) === code);
+
+test('Customer project durable SQLite restarts with exact acceptance and frozen historical observations', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api, acceptance } = await f.prepare();
+  const result = await api.command(acceptance); const before = await api.read();
+  assert.equal(result.persistence.committed, true); assert.equal(result.result.durable, false);
+  assert.equal(result.result.scope, 'LOCAL_TEST_ONLY_NOT_DURABLE');
+  assert.equal(before.state.project.status, 'PLANNED_EXECUTION_HELD'); assert.equal(before.state.project.houseComplete, false);
+  f.reopen();
+  const restarted = f.make({ quotePlanner: { plan() { throw new Error('LIVE_PLANNER_DURING_REPLAY'); } }, now() { throw new Error('LIVE_CLOCK_DURING_REPLAY'); } });
+  assert.deepEqual(await restarted.read(), before); assert.deepEqual(await restarted.command(acceptance), result);
+  assert.equal((await f.rows()).customer_project_workspaces.length, 1);
+  assert.equal((await f.rows()).customer_project_events.length, 3);
+});
+
+test('Customer project durable SQLite separates storage revision from accepted domain revision', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api, acceptance, quote } = await f.prepare();
+  await api.command(acceptance); const before = await api.read(); f.setTime(quote.content.expiresAt + 1);
+  const second = { ...acceptance, idempotencyKey: 'durable-acc2' };
+  const result = await api.command(second); const after = await api.read();
+  assert.equal(result.result.status, 'ALREADY_ACCEPTED'); assert.equal(after.storageVersion, before.storageVersion + 1);
+  assert.equal(after.state.revision, before.state.revision); assert.deepEqual(after.state.events, before.state.events);
+  assert.deepEqual(await api.command(second), result); assert.deepEqual(await api.read(), after);
+  await durableCustomerRejects(api.command({ ...second, expectedRevision: 3 }), 'IDEMPOTENCY_CONTENT_MISMATCH');
+});
+
+test('Customer project durable SQLite resolves same-key concurrent submissions across connections', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const a = f.make(), b = f.make({ database: f.open() });
+  const command = f.command('SUBMIT_REQUEST', 'same-submit', 0, f.request);
+  const results = await Promise.all([a.command(command), b.command(command)]);
+  assert.deepEqual(results[0], results[1]);
+  const rows = await f.rows(); assert.equal(rows.customer_project_workspaces.length, 1); assert.equal(rows.customer_project_events.length, 1); assert.equal(rows.idempotency.length, 1);
+  assert.equal(rows.customer_project_guards.length, 0);
+});
+
+test('Customer project durable SQLite guards different-key first submits and quote acceptance races', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const a = f.make(), b = f.make({ database: f.open() });
+  const command = f.command('SUBMIT_REQUEST', 'race-subm01', 0, f.request);
+  const first = await Promise.allSettled([a.command(command), b.command({ ...command, idempotencyKey: 'race-subm02' })]);
+  assert.equal(first.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(first.find((r) => r.status === 'rejected').reason.message, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  const quote = (await a.command(f.command('ISSUE_SIMULATED_QUOTE', 'race-quote1', 1, { requestRevision: 1 }))).result.quote;
+  const accept = f.acceptance(quote, 'race-accept', 2);
+  const accepted = await Promise.all([a.command(accept), b.command(accept)]); assert.deepEqual(accepted[0], accepted[1]);
+  const rows = await f.rows(); assert.equal(rows.customer_project_workspaces.length, 1); assert.equal(rows.customer_project_events.length, 3); assert.equal(rows.idempotency.length, 3);
+});
+
+test('Customer project durable SQLite rolls back every failed transaction position', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const before = await f.rows();
+  for (let position = 0; position <= 5; position += 1) {
+    const database = { get: (...args) => f.db.get(...args), atomic: (statements) => f.db.atomic([...statements.slice(0, position), { sql: 'INSERT INTO deliberately_missing_test_table VALUES(1)' }, ...statements.slice(position)]) };
+    const api = f.make({ database });
+    await assert.rejects(api.command(f.command('SUBMIT_REQUEST', `failed-sub-${position}`, 0, f.request)));
+    assert.deepEqual(await f.rows(), before);
+  }
+  const api = f.make(); await api.command(f.command('SUBMIT_REQUEST', 'after-failed', 0, f.request));
+  assert.equal((await api.read()).storageVersion, 1);
+});
+
+test('Customer project durable SQLite recovers a committed response after transport loss', async (t) => {
+  const f = await durableCustomerProjectFixture(t); let committed = 0;
+  const database = { get: (...args) => f.db.get(...args), async atomic(statements) { await f.db.atomic(statements); committed += 1; throw new Error('SIMULATED_LOST_RESPONSE_AFTER_COMMIT'); } };
+  const api = f.make({ database }); const command = f.command('SUBMIT_REQUEST', 'lost-submit', 0, f.request);
+  const result = await api.command(command); assert.equal(committed, 1);
+  f.reopen(); assert.deepEqual(await f.make().command(command), result); assert.equal((await f.rows()).idempotency.length, 1);
+});
+
+test('Customer project durable SQLite uses trusted Account Player binding and isolated event sequences', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const api = f.make();
+  const a = await api.command(f.command('SUBMIT_REQUEST', 'tenant-sub1', 0, f.request));
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B' });
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_BINDING_REQUIRED');
+  await durableCustomerRejects(api.command(f.command('SUBMIT_REQUEST', 'tenant-sub1', 0, f.request)), 'CUSTOMER_PROJECT_BINDING_REQUIRED');
+  f.setPrincipal({ playerId: 'TEST-PLAYER-B' });
+  const b = await api.command(f.command('SUBMIT_REQUEST', 'tenant-sub1', 0, f.request));
+  assert.notEqual(a.result.requestId, b.result.requestId);
+  const events = (await f.rows()).customer_project_events; assert.equal(events.length, 2); assert.deepEqual(events.map((e) => e.sequence), [1, 1]);
+  f.setPrincipal({ active: false }); await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+});
+
+test('Customer project durable SQLite rejects missing cache and unused replay observations', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api } = await f.prepare();
+  const saved = await f.rows();
+  await f.db.atomic([f.stmt('DELETE FROM idempotency WHERE key=?', 'durable-sub1')]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+  const old = saved.idempotency.find((r) => r.key === 'durable-sub1');
+  await f.db.atomic([f.stmt('INSERT INTO idempotency VALUES(?,?,?,?,?,?)', old.scope, old.key, old.request_hash, old.response, old.status, old.created_at)]);
+  const row = saved.customer_project_workspaces[0], envelope = JSON.parse(row.payload);
+  envelope.operations[0].clocks.push(1000);
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=? WHERE workspace_id=?', f.canonical(envelope), await f.hash(envelope), row.workspace_id)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_REPLAY_OBSERVATION');
+});
+
+test('Customer project durable SQLite keeps snapshot reads coherent during another commit', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const writer = f.make({ database: f.open() });
+  const submitted = await writer.command(f.command('SUBMIT_REQUEST', 'coherent-sub', 0, f.request));
+  let interleaved = false;
+  const database = { async get(...args) {
+    const captured = await f.db.get(...args);
+    if (!interleaved) { interleaved = true; await writer.command(f.command('ISSUE_SIMULATED_QUOTE', 'coherent-quo', 1, { requestRevision: 1 })); }
+    return captured;
+  }, atomic: (...args) => f.db.atomic(...args) };
+  const reader = f.make({ database });
+  assert.deepEqual(await reader.command(f.command('SUBMIT_REQUEST', 'coherent-sub', 0, f.request)), submitted);
+  assert.equal(interleaved, true); assert.equal((await reader.read()).storageVersion, 2);
+});
+
+test('Customer project durable SQLite rolls back partial acceptance at every statement', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { acceptance } = await f.prepare(); const before = await f.rows();
+  for (let position = 0; position <= 5; position += 1) {
+    const database = { get: (...args) => f.db.get(...args), atomic: (statements) => f.db.atomic([...statements.slice(0, position), { sql: 'INSERT INTO deliberately_missing_acceptance_table VALUES(1)' }, ...statements.slice(position)]) };
+    await assert.rejects(f.make({ database }).command(acceptance));
+    assert.deepEqual(await f.rows(), before);
+  }
+  const committed = await f.make().command(acceptance); assert.equal(committed.result.status, 'ACCEPTED_SIMULATION_PLAN');
+  assert.equal((await f.make().read()).state.revision, 3);
+});
+
+test('Customer project durable SQLite blocks revoked or switched identities during asynchronous work', async (t) => {
+  const f = await durableCustomerProjectFixture(t); let releasePlan, enteredPlan;
+  const started = new Promise((r) => { enteredPlan = r; }), gate = new Promise((r) => { releasePlan = r; });
+  const api = f.make({ quotePlanner: { async plan() { enteredPlan(); await gate; return structuredClone(f.plan); } } });
+  await api.command(f.command('SUBMIT_REQUEST', 'identity-sub', 0, f.request)); const before = await f.rows();
+  const pending = api.command(f.command('ISSUE_SIMULATED_QUOTE', 'identity-quo', 1, { requestRevision: 1 }));
+  await started; f.setPrincipal({ active: false }); releasePlan();
+  await durableCustomerRejects(pending, 'CUSTOMER_PROJECT_IDENTITY_REQUIRED'); assert.deepEqual(await f.rows(), before);
+  f.setPrincipal({ active: true }); let releaseRead, enteredRead;
+  const readStarted = new Promise((r) => { enteredRead = r; }), readGate = new Promise((r) => { releaseRead = r; });
+  const database = { async get(...args) { const result = await f.db.get(...args); enteredRead(); await readGate; return result; }, atomic: (...args) => f.db.atomic(...args) };
+  const read = f.make({ database }).read(); await readStarted;
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' }); releaseRead();
+  await durableCustomerRejects(read, 'CUSTOMER_PROJECT_WRONG_CUSTOMER'); assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer project durable SQLite rejects extra cache rows and mismatched response payloads', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api } = await f.prepare(); const original = await f.rows();
+  const record = original.idempotency[0];
+  await f.db.atomic([f.stmt('INSERT INTO idempotency VALUES(?,?,?,?,?,?)', record.scope, 'extra-cache-row', record.request_hash, record.response, 200, record.created_at)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+  await f.db.atomic([f.stmt('DELETE FROM idempotency WHERE key=?', 'extra-cache-row'), f.stmt('UPDATE idempotency SET response=? WHERE scope=? AND key=?', '{}', record.scope, record.key)]);
+  await durableCustomerRejects(api.command(f.command('SUBMIT_REQUEST', 'durable-sub1', 0, f.request)), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+});
+
+test('Customer project durable SQLite rejects missing or extra events and protects event immutability', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api } = await f.prepare();
+  const original = await f.rows(); const first = original.customer_project_events[0];
+  await assert.rejects(f.db.atomic([f.stmt('UPDATE customer_project_events SET payload=? WHERE event_id=?', '{}', first.event_id)]), /CUSTOMER_PROJECT_IMMUTABLE_EVENT/);
+  await assert.rejects(f.db.atomic([f.stmt('DELETE FROM customer_project_events WHERE event_id=?', first.event_id)]), /CUSTOMER_PROJECT_IMMUTABLE_EVENT/);
+  await f.db.atomic([f.stmt('INSERT INTO customer_project_events VALUES(?,?,?,?,?)', first.workspace_id, 99, 'TEST-EXTRA-EVENT', '{}', 'a'.repeat(64))]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+  // Fault injection only in this disposable fixture, never an applied migration.
+  f.db.db.exec('DROP TRIGGER customer_project_event_no_delete');
+  await f.db.atomic([f.stmt('DELETE FROM customer_project_events WHERE sequence=99'), f.stmt('DELETE FROM customer_project_events WHERE event_id=?', first.event_id)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+});
+
+test('Customer project durable SQLite rejects unused planner records and changed replay commands', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api } = await f.prepare();
+  const row = (await f.rows()).customer_project_workspaces[0]; const envelope = JSON.parse(row.payload);
+  envelope.operations[0].plan = structuredClone(f.plan);
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=? WHERE workspace_id=?', f.canonical(envelope), await f.hash(envelope), row.workspace_id)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_REPLAY_OBSERVATION');
+  const changed = JSON.parse(row.payload); changed.operations[0].command.data.quality = 'TAMPERED';
+  changed.operations[0].commandHash = await f.hash(changed.operations[0].command);
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=? WHERE workspace_id=?', f.canonical(changed), await f.hash(changed), row.workspace_id)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+});
+
+test('Customer project durable SQLite preserves decision time without claiming commit-before-expiry', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const prepared = await f.prepare();
+  const database = { get: (...args) => f.db.get(...args), async atomic(statements) {
+    // A simulated wait after service validation: durability is later than intent.
+    f.setTime(prepared.quote.content.expiresAt + 1); return f.db.atomic(statements);
+  } };
+  const result = await f.make({ database }).command(prepared.acceptance);
+  assert.equal(result.result.status, 'ACCEPTED_SIMULATION_PLAN');
+  const state = (await f.make().read()).state;
+  assert.ok(state.acceptance.acceptedAt < prepared.quote.content.expiresAt);
+  assert.deepEqual(await f.make().command(prepared.acceptance), result);
+});
+
+test('Customer project durable SQLite returns a same-key winner after speculative planner failure', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const a = f.make();
+  await a.command(f.command('SUBMIT_REQUEST', 'planner-sub1', 0, f.request));
+  let entered, release; const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const b = f.make({ database: f.open(), quotePlanner: { async plan() { entered(); await gate; throw new Error('SPECULATIVE_PLANNER_FAILURE'); } } });
+  const command = f.command('ISSUE_SIMULATED_QUOTE', 'planner-race', 1, { requestRevision: 1 });
+  const loser = b.command(command); await started; const winner = await a.command(command); release();
+  assert.deepEqual(await loser, winner); assert.equal((await f.rows()).idempotency.length, 2);
+});
+
+test('Customer project durable SQLite returns a same-key winner when the losing acceptance expires', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api: a, acceptance, quote } = await f.prepare();
+  let entered, release, first = true; const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const connection = f.open();
+  const database = { async get(...args) { const captured = await connection.get(...args); if (first) { first = false; entered(); await gate; } return captured; }, atomic: (...args) => connection.atomic(...args) };
+  const loser = f.make({ database }).command(acceptance); await started;
+  const winner = await a.command(acceptance); f.setTime(quote.content.expiresAt + 1); release();
+  assert.deepEqual(await loser, winner); assert.equal((await a.read()).state.events.length, 3);
+});
+
+test('Customer project durable SQLite CAS prevents lost response-only acceptance journals', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api, acceptance } = await f.prepare(); await api.command(acceptance);
+  const before = await api.read(); let arrivals = 0, release;
+  const gate = new Promise((r) => { release = r; });
+  const connectionOwner = () => {
+    const db = f.open(); let first = true;
+    return { async get(...args) { const captured = await db.get(...args); if (first) { first = false; if (++arrivals === 2) release(); await gate; } return captured; }, atomic: (...args) => db.atomic(...args) };
+  };
+  const commands = ['journal-noop-a', 'journal-noop-b'].map((idempotencyKey) => ({ ...acceptance, idempotencyKey }));
+  const results = await Promise.allSettled(commands.map((c) => f.make({ database: connectionOwner() }).command(c)));
+  assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
+  const loser = results.findIndex((r) => r.status === 'rejected'); assert.equal(results[loser].reason.message, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  const middle = await api.read(); assert.equal(middle.storageVersion, before.storageVersion + 1); assert.deepEqual(middle.state.events, before.state.events);
+  await api.command(commands[loser]); const after = await api.read();
+  assert.equal(after.storageVersion, before.storageVersion + 2); assert.equal(after.state.revision, before.state.revision); assert.deepEqual(after.state.events, before.state.events);
+  assert.equal((await f.rows()).idempotency.length, 5);
+});
+
+test('Customer project durable SQLite survives a fresh operating-system process', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api, acceptance } = await f.prepare();
+  await api.command(acceptance); const before = await api.read(); f.closeAll();
+  const { execFile } = await import('node:child_process'); const { promisify } = await import('node:util');
+  const script = `
+    import { SQLiteDatabaseAdapter } from ${JSON.stringify(new URL('../KAIOS/backend/src/adapters/local.mjs', import.meta.url).href)};
+    import { createCustomerProjectPersistencePrototype } from ${JSON.stringify(new URL('../KAIOS/backend/src/service.mjs', import.meta.url).href)};
+    const db = new SQLiteDatabaseAdapter(process.argv[1]);
+    try {
+      const api = createCustomerProjectPersistencePrototype({mode:'LOCAL_TEST_ONLY',database:db,
+        identityAdapter:{resolve:()=>({accountId:'TEST-ACCOUNT-A',playerId:'TEST-PLAYER-A',active:true,scope:'SIMULATION_CUSTOMER_CONTEXT'})},
+        quotePlanner:{plan(){throw new Error('NO_LIVE_PLANNER_ON_RESTART')}},now(){throw new Error('NO_LIVE_CLOCK_ON_RESTART')}});
+      process.stdout.write(JSON.stringify(await api.read()));
+    } finally { db.close(); }
+  `;
+  const { stdout } = await promisify(execFile)(process.execPath, ['--input-type=module', '-e', script, f.file], { timeout: 5000, maxBuffer: 1000000 });
+  assert.deepEqual(JSON.parse(stdout), before);
+});
+
+// One immutable evidence checkpoint only. These tests reopen real temporary
+// SQLite files; no production migration, credentials, worker or reviewer exists.
+async function customerCheckpointFixture(t, source = null) {
+  const subplan = source ?? await subplanBaseline();
+  const f = await durableCustomerProjectFixture(t);
+  Object.assign(f.plan, structuredClone(subplan.accepted.contract.acceptedQuote.content.plan));
+  const inputs = { resourceFixture: subplan.resourceFixture, snapshot: subplan.snapshot };
+  const evidenceSource = { read: async () => structuredClone(inputs) };
+  const api = f.make({ executionEvidenceSource: evidenceSource });
+  const { acceptance, quote } = await f.prepare(api); await api.command(acceptance);
+  assert.equal(quote.contentHash, subplan.accepted.acceptance.quoteHash);
+  const accepted = (await api.read()).state;
+  const checkpoint = f.command('CHECKPOINT_SUBPLAN_EVIDENCE', 'checkpoint-local-001', accepted.revision, {
+    projectId: accepted.project.projectId, acceptanceId: accepted.acceptance.acceptanceId, quoteHash: quote.contentHash,
+    snapshotHash: await f.hash(inputs.snapshot), fixtureHash: await f.hash(inputs.resourceFixture)
+  });
+  return { ...f, api, accepted, checkpoint, inputs, evidenceSource };
+}
+
+test('Customer checkpoint retains exact evidence and held parent after real SQLite process reopen', async (t) => {
+  const f = await customerCheckpointFixture(t);
+  const result = await f.api.command(f.checkpoint), before = await f.api.read();
+  assert.equal(result.result.status, 'SUBPLAN_EVIDENCE_CHECKPOINTED');
+  assert.equal(result.persistence.committed, true); assert.equal(result.result.durable, false);
+  assert.deepEqual(before.state.project, f.accepted.project);
+  const evidence = before.state.executionEvidence;
+  assert.deepEqual(evidence.owner, f.accepted.owner); assert.equal(evidence.sourceRevision, 3);
+  assert.equal(evidence.quoteRevision, f.accepted.acceptance.quoteRevision);
+  assert.equal(evidence.authenticatedWorkerReview, false);
+  assert.equal(evidence.audit.coordinatorStatus, 'ACCEPTANCE_PENDING');
+  assert.equal(evidence.audit.houseComplete, false); assert.equal(evidence.audit.fullHouseStatus, 'HOUSE_STAGE_ADAPTER_REQUIRED');
+  for (const key of ['asset', 'delivery', 'receipt']) assert.equal(evidence.audit[key], null);
+  const rows = await f.rows(), envelope = JSON.parse(rows.customer_project_workspaces[0].payload);
+  assert.equal(envelope.version, 2); assert.deepEqual(envelope.operations[3].evidence, f.inputs);
+  assert.ok(Buffer.byteLength(rows.customer_project_workspaces[0].payload) < 512000);
+  assert.equal(rows.customer_project_events.length, 4); assert.equal(rows.idempotency.length, 4);
+  f.closeAll();
+  const { execFile } = await import('node:child_process'); const { promisify } = await import('node:util');
+  const script = `
+    import { SQLiteDatabaseAdapter } from ${JSON.stringify(new URL('../KAIOS/backend/src/adapters/local.mjs', import.meta.url).href)};
+    import { createCustomerProjectPersistencePrototype } from ${JSON.stringify(new URL('../KAIOS/backend/src/service.mjs', import.meta.url).href)};
+    const db = new SQLiteDatabaseAdapter(process.argv[1]);
+    try {
+      const forbidden = () => { throw new Error('LIVE_SOURCE_USED_DURING_RECOVERY'); };
+      const api = createCustomerProjectPersistencePrototype({mode:'LOCAL_TEST_ONLY',database:db,
+        identityAdapter:{resolve:()=>({accountId:'TEST-ACCOUNT-A',playerId:'TEST-PLAYER-A',active:true,scope:'SIMULATION_CUSTOMER_CONTEXT'})},
+        quotePlanner:{plan:forbidden},executionEvidenceSource:{read:forbidden},now:forbidden});
+      process.stdout.write(JSON.stringify({state:await api.read(),result:await api.command(JSON.parse(process.argv[2]))}));
+    } finally { db.close(); }
+  `;
+  const { stdout } = await promisify(execFile)(process.execPath, ['--input-type=module', '-e', script, f.file, JSON.stringify(f.checkpoint)], { timeout: 15000, maxBuffer: 1000000 });
+  assert.deepEqual(JSON.parse(stdout), { state: before, result });
+});
+
+test('Customer checkpoint rejects missing acceptance, stale version and caller authority before evidence reads', async (t) => {
+  const f = await durableCustomerProjectFixture(t); let reads = 0;
+  const api = f.make({ executionEvidenceSource: { read() { reads++; throw new Error('UNEXPECTED_SOURCE_READ'); } } });
+  const { acceptance } = await f.prepare(api);
+  const draft = f.command('CHECKPOINT_SUBPLAN_EVIDENCE', 'checkpoint-missing', 2, { projectId: 'WRONG', acceptanceId: 'WRONG', quoteHash: 'a'.repeat(64), snapshotHash: 'b'.repeat(64), fixtureHash: 'c'.repeat(64) });
+  await durableCustomerRejects(api.command(draft), 'CUSTOMER_PROJECT_CHECKPOINT_BINDING');
+  await api.command(acceptance); const before = await f.rows();
+  await durableCustomerRejects(api.command(draft), 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  await durableCustomerRejects(api.command({ ...draft, expectedRevision: 3 }), 'CUSTOMER_PROJECT_CHECKPOINT_BINDING');
+  await durableCustomerRejects(api.command({ ...draft, expectedRevision: 3, data: { ...draft.data, review: 'PASS' } }), 'CUSTOMER_PROJECT_FIELDS');
+  assert.equal(reads, 0); assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer checkpoint exact retry and new-key duplicate preserve one immutable projection', async (t) => {
+  const f = await customerCheckpointFixture(t), first = await f.api.command(f.checkpoint);
+  const before = await f.rows(); assert.deepEqual(await f.api.command(f.checkpoint), first); assert.deepEqual(await f.rows(), before);
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, data: { ...f.checkpoint.data, snapshotHash: 'a'.repeat(64) } }), 'IDEMPOTENCY_CONTENT_MISMATCH');
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, idempotencyKey: 'checkpoint-stale' }), 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, idempotencyKey: 'checkpoint-change', expectedRevision: 4, data: { ...f.checkpoint.data, snapshotHash: 'a'.repeat(64) } }), 'CUSTOMER_PROJECT_CHECKPOINT_IMMUTABLE');
+  const result = await f.api.command({ ...f.checkpoint, idempotencyKey: 'checkpoint-repeat', expectedRevision: 4 });
+  assert.equal(result.result.status, 'ALREADY_CHECKPOINTED'); assert.equal(result.persistence.storageVersion, 5);
+  const rows = await f.rows(); assert.equal(rows.customer_project_events.length, 4); assert.equal(rows.idempotency.length, 5);
+  const state = (await f.api.read()).state; assert.equal(state.revision, 4); assert.deepEqual(state.project, f.accepted.project);
+  assert.equal(JSON.parse(rows.customer_project_workspaces[0].payload).operations[4].evidence, null);
+});
+
+test('Customer checkpoint fails changed input bytes, forged inspection and cross-customer evidence', async (t) => {
+  const f = await customerCheckpointFixture(t), before = await f.rows();
+  const altered = structuredClone(f.inputs); altered.resourceFixture.openingSimulationCredit = '65001';
+  const api = f.make({ executionEvidenceSource: { read: async () => altered } });
+  await durableCustomerRejects(api.command(f.checkpoint), 'CUSTOMER_PROJECT_EVIDENCE_HASH_MISMATCH');
+  const forged = await customerProjectSubplanFixture({ defaultInspections: true });
+  await durableCustomerRejects(f.make({ executionEvidenceSource: { read: async () => ({ resourceFixture: forged.resourceFixture, snapshot: forged.snapshot }) } }).command({
+    ...f.checkpoint, data: { ...f.checkpoint.data, snapshotHash: await f.hash(forged.snapshot) }
+  }), 'CUSTOMER_PROJECT_SUBPLAN_INSPECTION_MISMATCH');
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' });
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, expectedRevision: 0 }), 'CUSTOMER_PROJECT_CHECKPOINT_BINDING');
+  assert.deepEqual(await f.rows(), before);
+  const b = await f.prepare(f.api); await f.api.command(b.acceptance);
+  const stateB = (await f.api.read()).state, rowsB = await f.rows();
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, data: { ...f.checkpoint.data,
+    projectId: stateB.project.projectId, acceptanceId: stateB.acceptance.acceptanceId, quoteHash: stateB.acceptance.quoteHash
+  } }), 'CUSTOMER_PROJECT_SUBPLAN_SCOPE_MISMATCH');
+  assert.deepEqual(await f.rows(), rowsB);
+});
+
+test('Customer checkpoint source revocation and capacity failure preserve SQLite', async (t) => {
+  const f = await customerCheckpointFixture(t), before = await f.rows();
+  const revoked = f.make({ executionEvidenceSource: { async read() { f.setPrincipal({ active: false }); return f.inputs; } } });
+  await durableCustomerRejects(revoked.command(f.checkpoint), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+  f.setPrincipal({ active: true }); assert.deepEqual(await f.rows(), before);
+  const tooLarge = { ...f.inputs, excess: 'x'.repeat(512000) };
+  await durableCustomerRejects(f.make({ executionEvidenceSource: { read: async () => tooLarge } }).command(f.checkpoint), 'CUSTOMER_PROJECT_PERSISTENCE_CAPACITY');
+  assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer checkpoint atomic rollback and lost acknowledgement retain exact local disk evidence', async (t) => {
+  const f = await customerCheckpointFixture(t), before = await f.rows(); let statementCount = 0;
+  for (let failAt = 0; failAt < 5; failAt++) {
+    const database = { get: (...args) => f.db.get(...args), async atomic(statements) {
+      statementCount = statements.length;
+      const interrupted = [...statements]; interrupted.splice(failAt, 0, { sql: 'SELECT * FROM deliberate_missing_checkpoint_table' });
+      return f.db.atomic(interrupted);
+    } };
+    await assert.rejects(f.make({ database, executionEvidenceSource: f.evidenceSource }).command(f.checkpoint), /deliberate_missing_checkpoint_table/);
+    assert.deepEqual(await f.rows(), before);
+  }
+  assert.equal(statementCount, 5);
+  const database = { get: (...args) => f.db.get(...args), async atomic(statements) { await f.db.atomic(statements); throw new Error('ACK_LOST_AFTER_SQLITE_COMMIT'); } };
+  const result = await f.make({ database, executionEvidenceSource: f.evidenceSource }).command(f.checkpoint);
+  assert.equal(result.persistence.committed, true); assert.equal((await f.rows()).customer_project_events.length, 4);
+});
+
+test('Customer checkpoint independent SQLite connections fence racing keys', async (t) => {
+  const f = await customerCheckpointFixture(t); let arrivals = 0, release;
+  const gate = new Promise((r) => { release = r; });
+  const source = { async read() { if (++arrivals === 2) release(); await gate; return structuredClone(f.inputs); } };
+  const commands = ['checkpoint-race-a', 'checkpoint-race-b'].map((idempotencyKey) => ({ ...f.checkpoint, idempotencyKey }));
+  const results = await Promise.allSettled(commands.map((c) => f.make({ database: f.open(), executionEvidenceSource: source }).command(c)));
+  assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(results.find((r) => r.status === 'rejected').reason.message, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  const rows = await f.rows(); assert.equal(rows.customer_project_events.length, 4); assert.equal(rows.idempotency.length, 4);
+});
+
+test('Customer checkpoint replay rejects changed retained inputs, summaries and journal format', async (t) => {
+  const f = await customerCheckpointFixture(t); await f.api.command(f.checkpoint);
+  const row = (await f.rows()).customer_project_workspaces[0], pristine = JSON.parse(row.payload);
+  for (const mutate of [
+    (p) => { p.operations[3].evidence.snapshot.state.seed = 'changed'; },
+    (p) => { p.state.executionEvidence.audit.houseComplete = true; },
+    (p) => { p.operations[3].evidence.resourceFixture.openingSimulationCredit = '65001'; },
+    (p) => { p.version = 1; },
+    (p) => { delete p.operations[3].evidence; }
+  ]) {
+    const payload = structuredClone(pristine); mutate(payload);
+    await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=?', f.canonical(payload), await f.hash(payload))]);
+    await assert.rejects(f.api.read());
+    await assert.rejects(f.api.command(f.checkpoint));
+  }
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=?', row.payload, row.payload_hash)]);
+  assert.equal((await f.api.read()).state.executionEvidence.audit.houseComplete, false);
+});
+
+test('Customer checkpoint pending evidence read fences switched ownership and preserves SQL rows', async (t) => {
+  const f = await customerCheckpointFixture(t), before = await f.rows();
+  let entered, release; const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const api = f.make({ executionEvidenceSource: { async read() { entered(); await gate; return structuredClone(f.inputs); } } });
+  const pending = api.command(f.checkpoint); await started;
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' }); release();
+  await durableCustomerRejects(pending, 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer checkpoint copies source bytes before asynchronous audit and durable replay', async (t) => {
+  const f = await customerCheckpointFixture(t), supplied = structuredClone(f.inputs); let mutated = false;
+  const api = f.make({ executionEvidenceSource: { async read() {
+    setImmediate(() => { supplied.snapshot.state.seed = 'MUTATED_AFTER_RETURN'; supplied.resourceFixture.openingSimulationCredit = '1'; mutated = true; });
+    return supplied;
+  } } });
+  const result = await api.command(f.checkpoint); assert.equal(mutated, true);
+  const payload = JSON.parse((await f.rows()).customer_project_workspaces[0].payload);
+  assert.deepEqual(payload.operations[3].evidence, f.inputs);
+  f.reopen(); assert.deepEqual(await f.make().command(f.checkpoint), result);
+});
+
+test('Customer checkpoint Company queue prevents revision drift underneath awaited evidence audit', async () => {
+  const base = await subplanBaseline(); let entered, release, reads = 0;
+  const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const f = customerProjectFixture({ executionEvidenceSource: { async read() {
+    reads++; entered(); await gate; return { resourceFixture: base.resourceFixture, snapshot: base.snapshot };
+  } } });
+  f.setPlan(base.accepted.contract.acceptedQuote.content.plan);
+  await f.submit(); const quote = (await f.issue()).quote; await f.model.command(f.acceptance(quote, 'queue-acceptance', 2));
+  const before = await f.model.read(), hash = (await import('../core/shared/utils.mjs')).sha256;
+  const command = f.command('CHECKPOINT_SUBPLAN_EVIDENCE', 'queue-checkpoint-a', 3, {
+    projectId: before.project.projectId, acceptanceId: before.acceptance.acceptanceId, quoteHash: quote.contentHash,
+    snapshotHash: await hash(base.snapshot), fixtureHash: await hash(base.resourceFixture)
+  });
+  const first = f.model.command(command); await started;
+  const second = f.model.command({ ...command, idempotencyKey: 'queue-checkpoint-b' });
+  // Attach the rejection handler before releasing the source. The queued second
+  // command cannot enter the source or mutate revision during the first audit.
+  const rejected = customerProjectRejects(second, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  assert.equal(reads, 1); release();
+  assert.equal((await first).status, 'SUBPLAN_EVIDENCE_CHECKPOINTED'); await rejected;
+  const after = await f.model.read(); assert.equal(after.revision, 4); assert.equal(reads, 1);
+  assert.deepEqual(after.project, before.project); assert.equal(after.executionEvidence.sourceRevision, 3);
+});
+
+test('Customer checkpoint retains a valid replan blocker without asserting construction completion', async (t) => {
+  const subplan = await customerProjectSubplanFixture({ earlyRework: true });
+  const f = await customerCheckpointFixture(t, subplan);
+  await f.api.command(f.checkpoint); f.reopen();
+  const state = (await f.make().read()).state;
+  assert.equal(state.executionEvidence.audit.executionStatus, 'REPLAN_REQUIRED');
+  assert.equal(state.executionEvidence.audit.executionBlocker, 'REST_REQUIREMENT_CONFLICT');
+  assert.equal(state.executionEvidence.audit.houseComplete, false);
+  assert.deepEqual(state.project, f.accepted.project);
 });
