@@ -2,7 +2,7 @@
 
 Task ID: `KAIOS-AI-COMPANY-ORDER-PROJECT-RUNTIME-V1-001`
 
-Status: `APPROVED_SPECIFICATION_PENDING_IMPLEMENTATION`
+Status: `BOUNDED_V1_IMPLEMENTED_PENDING_INDEPENDENT_REVIEW`
 
 Mode: `LOCAL_DETERMINISTIC_SIMULATION`
 
@@ -399,3 +399,50 @@ claim was formally released. It is not interrupted.
 AI Company project-template, failure-scenario and UI research remain queued
 behind the approved one-task-at-a-time life backlog. Cursor may never write the
 authoritative project engine, approve Canonical status, merge or deploy.
+
+## 40. Universal Customer Order Engine V1
+
+The existing `KAIOS_AI_COMPANY_ORDER_AND_PROJECT_RUNTIME_V1` now exposes one
+bounded universal-intake adapter. It does not create a second company, project,
+worker, finance or delivery authority. Natural-language intake is preserved as
+raw evidence and transformed into a separate product requirement containing
+what, why, who, where, when, data, interaction, output, accuracy, safety and
+maintenance fields.
+
+The V1 adapter produces a feasibility classification, data-source discovery
+register, unpriced quote draft, simulated project proposal, dependency-ordered
+DOT-style Work Orders, capability-based simulated worker matches, distinct
+review routes, acceptance plan and append-only hash-linked audit ledger. Worker
+matching requires verified identity, availability, required capability and
+local dry-run authority. Missing implementers or reviewers fail closed as
+`WAITING_FOR_QUALIFIED_WORKER`; no identity or acknowledgement is invented.
+
+Truth classifications are `MEASURED`, `OBSERVED`, `DOCUMENTED`, `CALCULATED`,
+`MODEL_ESTIMATE`, `INFERRED` and `UNKNOWN`. Source, date, license, quality,
+coverage, freshness and uncertainty remain visibly unverified until discovery
+evidence exists. Each unresolved source records `truth_class=UNKNOWN` and keeps
+the intended evidence level separately as `required_truth_class`. A model
+estimate never becomes an observation or measurement.
+
+The first deterministic example is the natural-language request `我要土地公生命
+App`. It remains `PARTIALLY_FEASIBLE`: discovery, research, architecture and a
+local candidate app are planable, while Canonical Life activation, production
+deployment and confirmed subsurface-resource claims remain blocked. Its
+surface-to-50-km record contains no fabricated temperature, pressure, rock or
+treasure measurement. Deep values remain `MODEL_ESTIMATE` or `UNKNOWN` until
+licensed evidence and an approved method exist.
+
+The example's customer acceptance, workers and catalog are simulation fixtures.
+They do not prove a real customer, acceptance, contract, price, revenue,
+payment, employment, dispatch, deployment or Digital Life creation. Formal
+price and payment terms remain `null` until GM commercial review and real
+customer confirmation. Protected actions remain false.
+
+V1 has one executable universal-intake profile: the Land God candidate-app
+dry-run. Any other raw request is retained but returns `RESEARCH_REQUIRED` with
+`NO_BOUNDED_V1_PRODUCT_PROFILE`; it is never silently mapped to Land God or an
+unrelated template. The manufacturing-record builder remains unsigned and
+unsealed even when exact base/head, branch, PR, tests, CI and independent review
+are supplied by a caller. Those values can only advance to
+`EVIDENCE_PENDING_EXTERNAL_VERIFICATION`; an authorized external verifier must
+validate them before any signature or seal workflow.

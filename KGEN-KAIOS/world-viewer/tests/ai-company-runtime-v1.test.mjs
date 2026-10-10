@@ -9,7 +9,11 @@ import {
   REQUIRED_TEMPLATES,
   computeAiCompanyStateHash,
   createAiCompanyDemonstrationFlows,
-  createKaiosAiCompanyRuntimeV1
+  createUniversalCustomerOrderManufacturingRecordV1,
+  createKaiosAiCompanyRuntimeV1,
+  CUSTOMER_TRUTH_CLASSES,
+  runUniversalCustomerOrderDryRunV1,
+  UNIVERSAL_CUSTOMER_ORDER_ENGINE
 } from "../ai-company/ai-company-project-runtime.js";
 
 const RUNTIME_SOURCE = new URL("../ai-company/ai-company-project-runtime.js", import.meta.url);
@@ -742,4 +746,121 @@ test("runtime source has no external execution, wallet connector, or transaction
   assert.match(source, /real_kgen:\s*false/);
   assert.doesNotMatch(viewerSource, /importState\(JSON\.parse/);
   assert.match(viewerSource, /importState\(await file\.text\(\)\)/);
+});
+
+test("universal customer order dry-run preserves raw intent and produces a separate requirement", () => {
+  const result = runUniversalCustomerOrderDryRunV1({ raw_request: "我要土地公生命 App" });
+  assert.equal(UNIVERSAL_CUSTOMER_ORDER_ENGINE.canonical_runtime, AI_COMPANY_RUNTIME_ID);
+  assert.equal(result.customer_order.raw_request, "我要土地公生命 App");
+  assert.notEqual(result.product_requirement.what, result.customer_order.raw_request);
+  assert.equal(result.customer_order.real_customer, false);
+  assert.equal(result.feasibility.status, "PARTIALLY_FEASIBLE");
+  assert.equal(result.canonical_runtime_evidence.integrity_ok, true);
+  assert.equal(result.project_proposal.status, "PROPOSAL_SIMULATION");
+  assert.equal(result.project_proposal.active, false);
+});
+
+test("land-god demo keeps real-world data and the 50-km model evidence-bounded", () => {
+  const result = runUniversalCustomerOrderDryRunV1({ raw_request: "我要土地公生命 App" });
+  assert.equal(result.data_availability.length, 12);
+  assert.equal(result.data_availability.every(({ source, license, status }) => source === null && license === "NOT_VERIFIED" && status === "RESEARCH_REQUIRED"), true);
+  assert.equal(result.data_availability.every(({ truth_class }) => truth_class === "UNKNOWN"), true);
+  assert.equal(result.data_availability.find(({ domain }) => domain === "GROUNDWATER").required_truth_class, "MEASURED");
+  assert.equal(result.data_availability.find(({ domain }) => domain === "LAND_HISTORY").required_truth_class, "DOCUMENTED");
+  assert.deepEqual(result.depth_model.map(({ depth_m }) => depth_m), [0, 100, 1000, 10000, 50000]);
+  assert.equal(result.depth_model.every(({ temperature, pressure, rock_model }) => temperature === null && pressure === null && rock_model === null), true);
+  assert.equal(result.depth_model.every(({ truth_class }) => ["MODEL_ESTIMATE", "UNKNOWN"].includes(truth_class)), true);
+  assert.deepEqual(CUSTOMER_TRUTH_CLASSES, ["MEASURED", "OBSERVED", "DOCUMENTED", "CALCULATED", "MODEL_ESTIMATE", "INFERRED", "UNKNOWN"]);
+  assert.ok(result.product_requirement.safety.includes("NO_TREASURE_CLAIM_WITHOUT_EVIDENCE"));
+});
+
+test("quote and simulated acceptance cannot be mistaken for business or payment", () => {
+  const result = runUniversalCustomerOrderDryRunV1({ raw_request: "我要土地公生命 App", budget_if_known: 5000 });
+  assert.equal(result.quote_draft.status, "DRAFT_GM_REVIEW_REQUIRED");
+  assert.equal(result.quote_draft.customer_budget_if_known, 5000);
+  assert.equal(result.quote_draft.price, null);
+  assert.equal(result.quote_draft.payment_terms, null);
+  assert.equal(result.quote_draft.real_contract, false);
+  assert.equal(result.quote_draft.payment_received, false);
+  assert.equal(result.customer_simulated_acceptance.real_customer_acceptance, false);
+  assert.equal(result.ip_and_confidentiality.confidentiality, "PRIVATE_BY_DEFAULT");
+  assert.equal(result.ip_and_confidentiality.public_repository_authorized, false);
+  assert.equal(result.ip_and_confidentiality.cross_customer_reuse_authorized, false);
+  assert.deepEqual(result.boundaries, {
+    dry_run_only: true, real_customer: false, real_acceptance: false, real_contract: false,
+    payment: false, deployment: false, life_created: false, worker_dispatched: false,
+    external_data_fetched: false, protected_action: false
+  });
+});
+
+test("work decomposition performs capability matching and distinct review routing", () => {
+  const result = runUniversalCustomerOrderDryRunV1({ raw_request: "我要土地公生命 App" });
+  assert.equal(result.work_orders.length, 7);
+  for (const workOrder of result.work_orders) {
+    for (const field of ["work_id", "project_id", "revision", "source", "why_now", "priority", "base_sha", "owner", "scope", "inputs", "expected_output", "acceptance_tests", "dependencies", "protected_actions", "expires_when", "status", "work_type"]) assert.ok(field in workOrder, `${workOrder.work_id}:${field}`);
+    assert.equal(workOrder.status, "SIMULATED_MATCH_NOT_DISPATCHED");
+    assert.ok(workOrder.implementer);
+    assert.ok(workOrder.reviewer);
+    assert.notEqual(workOrder.implementer, workOrder.reviewer);
+  }
+  const independent = result.work_orders.find(({ work_type }) => work_type === "REVIEW");
+  assert.equal(independent.implementer, "SIMULATED-REVIEWER-A");
+  assert.equal(independent.reviewer, "SIMULATED-REVIEWER-B");
+});
+
+test("universal matching fails closed without qualified workers and remains deterministic", () => {
+  const input = { raw_request: "我要土地公生命 App", customer_order_id: "CUSTOMER-ORDER-TEST-001" };
+  const blocked = runUniversalCustomerOrderDryRunV1(input, { worker_catalog: [] });
+  assert.equal(blocked.work_orders.every(({ status, implementer, reviewer }) => status === "WAITING_FOR_QUALIFIED_WORKER" && implementer === null && reviewer === null), true);
+  assert.equal(blocked.audit_ledger.at(-1).status, "BLOCKED");
+  assert.throws(() => runUniversalCustomerOrderDryRunV1(), /RAW_CUSTOMER_REQUEST_REQUIRED/);
+  const first = runUniversalCustomerOrderDryRunV1(input);
+  const second = runUniversalCustomerOrderDryRunV1(input);
+  assert.deepEqual(first, second);
+  assert.equal(first.audit_ledger[0].previous_hash, "0".repeat(64));
+  for (let index = 1; index < first.audit_ledger.length; index += 1) assert.equal(first.audit_ledger[index].previous_hash, first.audit_ledger[index - 1].record_hash);
+});
+
+test("unsupported universal requests are retained and fail closed instead of mapping to Land God", () => {
+  const result = runUniversalCustomerOrderDryRunV1({ raw_request: "我要一個火星晶圓廠模擬系統" });
+  assert.equal(result.customer_order.raw_request, "我要一個火星晶圓廠模擬系統");
+  assert.equal(result.customer_order.status, "DISCOVERY");
+  assert.equal(result.feasibility.status, "RESEARCH_REQUIRED");
+  assert.deepEqual(result.feasibility.reasons, ["NO_BOUNDED_V1_PRODUCT_PROFILE"]);
+  assert.equal(result.product_requirement, null);
+  assert.equal(result.project_proposal, null);
+  assert.deepEqual(result.work_orders, []);
+  for (const raw_request of [
+    "不要土地公生命 App，我要火星晶圓廠",
+    "LAND GODZILLA game",
+    "討論土地公文化，不是要 App"
+  ]) {
+    const negative = runUniversalCustomerOrderDryRunV1({ raw_request });
+    assert.equal(negative.feasibility.status, "RESEARCH_REQUIRED", raw_request);
+    assert.equal(negative.project_proposal, null, raw_request);
+    assert.deepEqual(negative.work_orders, [], raw_request);
+  }
+  const english = runUniversalCustomerOrderDryRunV1({ raw_request: "I want a Land God life application" });
+  assert.equal(english.feasibility.status, "PARTIALLY_FEASIBLE");
+});
+
+test("manufacturing record cannot sign or seal incomplete evidence", () => {
+  const incomplete = createUniversalCustomerOrderManufacturingRecordV1({ base_sha: "abc" });
+  assert.equal(incomplete.manufacturing_status, "INCOMPLETE");
+  assert.equal(incomplete.signature, "NOT_SIGNED");
+  assert.equal(incomplete.seal_status, "INVALID_NOT_AUTHORIZED_OR_EXTERNALLY_VERIFIED");
+  const complete = createUniversalCustomerOrderManufacturingRecordV1({
+    base_sha: "a".repeat(40), head_sha: "b".repeat(40), branch: "codex/example", pr: "https://github.com/klineodyssey/kline-odyssey/pull/539",
+    tests: "PASS", ci: "PASS", reviewed_by: "DISTINCT-REVIEWER", review_result: "PASS"
+  });
+  assert.equal(complete.manufacturing_status, "EVIDENCE_PENDING_EXTERNAL_VERIFICATION");
+  assert.equal(complete.evidence_shape_status, "FORMAT_VALID_NOT_EXTERNALLY_VERIFIED");
+  assert.equal(complete.signature, "NOT_SIGNED");
+  assert.equal(complete.seal_status, "INVALID_NOT_AUTHORIZED_OR_EXTERNALLY_VERIFIED");
+  const forged = createUniversalCustomerOrderManufacturingRecordV1({
+    base_sha: "x", head_sha: "y", branch: "main", pr: "not-a-pr",
+    tests: "PASS", ci: "PASS", reviewed_by: true, review_result: "PASS"
+  });
+  assert.equal(forged.manufacturing_status, "INCOMPLETE");
+  assert.equal(forged.signature, "NOT_SIGNED");
 });
