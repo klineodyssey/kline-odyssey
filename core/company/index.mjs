@@ -77,6 +77,83 @@ export const EMPLOYEE_LOAN_PURPOSES = Object.freeze(["WORK_EQUIPMENT", "ENERGY",
 export const EMPLOYEE_LOAN_DECISIONS = Object.freeze(["READY_FOR_EXACT_APPROVAL", "CONDITIONAL", "DECLINED"]);
 export const ATM_EXPANSION_STATUSES = Object.freeze(["RESEARCH_CANDIDATE", "DEMAND_VERIFIED_CANDIDATE", "READY_FOR_SITE_PROPOSAL"]);
 export const AUTONOMOUS_BUSINESS_WORK_TYPES = Object.freeze(["GATEKEEPER_DUTY", "DEMAND_SCAN", "PLAYER_FRICTION_REPAIR", "ATM_SITE_RESEARCH", "SERVICE_PACKAGE_RESEARCH", "CUSTOMER_PROJECT_QUALIFICATION", "COST_RESEARCH", "SUPPLY_CHAIN_RESEARCH"]);
+export const HUMAN_PERSONA_ALIAS_SCHEMA = "KAIOS_HUMAN_PERSONA_ALIAS_V1";
+const HUMAN_PERSONA_ALIAS_FIELDS = Object.freeze(["schema_version", "aliases", "canonical_worker_id", "account_merge_policy", "creates_additional_human_account", "authority_effect", "evidence"]);
+const HUMAN_CONTROLLER_VERIFICATION_FIELDS = Object.freeze(["status", "authority_granted", "legal_identity_changed", "controller_binding_changed"]);
+
+function normalizeHumanPersonaAlias(value, field = "human persona alias") {
+  invariant(typeof value === "string" && value.trim().length > 0, "HUMAN_PERSONA_ALIAS_INVALID", `${field} must be a non-empty string`);
+  return value.trim().normalize("NFC");
+}
+
+function requireExactHumanMetadataFields(value, allowedFields, entityName) {
+  requireFields(value, allowedFields, entityName);
+  const unknownFields = Object.keys(value).filter((field) => !allowedFields.includes(field));
+  invariant(unknownFields.length === 0, "HUMAN_PERSONA_METADATA_FIELD_FORBIDDEN", `${entityName} contains fields that could broaden alias authority`, { unknown_fields: unknownFields });
+}
+
+export function validateHumanPersonaAliasRecord(record) {
+  requireFields(record, ["worker_id", "human_display_name", "worker_type", "employment_type", "status", "manager", "can_claim_task", "can_create_branch", "can_push_handoff", "can_merge", "can_push_main", "persona_alias", "current_controller_verification"], "HumanPersonaAliasRecord");
+  invariant(record.worker_id === "human-primeforge", "HUMAN_PERSONA_WORKER_ID_INVALID", "AU public persona aliases belong only to the existing Human HR record");
+  invariant(record.worker_type === "Human Operator" && record.employment_type === "HUMAN_OPERATOR" && record.status === "HUMAN_OPERATOR" && record.manager === null, "HUMAN_PERSONA_RECORD_TYPE_INVALID", "AU public persona aliases require the canonical Human Operator record");
+  invariant(record.can_claim_task === false && record.can_create_branch === false && record.can_push_handoff === false && record.can_merge === false && record.can_push_main === false, "HUMAN_PERSONA_WORK_AUTHORITY_FORBIDDEN", "AU public persona aliases cannot turn the Human record into an automated worker or integration authority");
+  requireExactHumanMetadataFields(record.persona_alias, HUMAN_PERSONA_ALIAS_FIELDS, "HumanPersonaAlias");
+  requireArray(record.persona_alias.aliases, "persona_alias.aliases");
+  requireArray(record.persona_alias.evidence, "persona_alias.evidence");
+  invariant(record.persona_alias.schema_version === HUMAN_PERSONA_ALIAS_SCHEMA, "HUMAN_PERSONA_ALIAS_SCHEMA_INVALID", "Human persona alias schema is not supported");
+  invariant(record.persona_alias.canonical_worker_id === record.worker_id, "HUMAN_PERSONA_ALIAS_CANONICAL_ID_MISMATCH", "Human persona aliases must resolve to their existing HR record");
+  invariant(record.persona_alias.account_merge_policy === "RESOLVE_TO_EXISTING_HUMAN_RECORD" && record.persona_alias.creates_additional_human_account === false, "HUMAN_PERSONA_ALIAS_ACCOUNT_CREATION_FORBIDDEN", "A public persona alias cannot create another Human account");
+  invariant(record.persona_alias.authority_effect === "DISPLAY_AND_LOOKUP_ONLY", "HUMAN_PERSONA_ALIAS_AUTHORITY_FORBIDDEN", "A public persona alias cannot grant authority");
+
+  const aliases = record.persona_alias.aliases.map((alias, index) => normalizeHumanPersonaAlias(alias, `persona_alias.aliases[${index}]`));
+  invariant(aliases.length > 0 && new Set(aliases).size === aliases.length, "HUMAN_PERSONA_ALIAS_DUPLICATE", "Human persona aliases must be non-empty and unique");
+  const humanDisplayName = normalizeHumanPersonaAlias(record.human_display_name, "human_display_name");
+  const evidence = record.persona_alias.evidence.map((item, index) => normalizeHumanPersonaAlias(item, `persona_alias.evidence[${index}]`));
+  invariant(evidence.length > 0, "HUMAN_PERSONA_EVIDENCE_REQUIRED", "Human persona aliases require public policy evidence");
+
+  requireExactHumanMetadataFields(record.current_controller_verification, HUMAN_CONTROLLER_VERIFICATION_FIELDS, "CurrentControllerVerification");
+  invariant(record.current_controller_verification.status === "UNCHANGED_NOT_REVERIFIED", "HUMAN_PERSONA_CONTROLLER_STATUS_INVALID", "Alias lookup cannot claim a new controller verification");
+  invariant(record.current_controller_verification.authority_granted === false && record.current_controller_verification.legal_identity_changed === false && record.current_controller_verification.controller_binding_changed === false, "HUMAN_PERSONA_AUTHORITY_FORBIDDEN", "Alias lookup cannot change legal identity, controller binding or authority");
+  return Object.freeze({
+    worker_id: record.worker_id,
+    human_display_name: humanDisplayName,
+    worker_type: record.worker_type,
+    employment_type: record.employment_type,
+    status: record.status,
+    persona_alias: Object.freeze({
+      schema_version: record.persona_alias.schema_version,
+      aliases: Object.freeze([...aliases]),
+      canonical_worker_id: record.persona_alias.canonical_worker_id,
+      account_merge_policy: record.persona_alias.account_merge_policy,
+      creates_additional_human_account: false,
+      authority_effect: record.persona_alias.authority_effect,
+      evidence: Object.freeze([...evidence])
+    }),
+    current_controller_verification: Object.freeze({ ...record.current_controller_verification })
+  });
+}
+
+export function resolveHumanPersonaAlias({ roster, name }) {
+  requireFields(roster, ["employees"], "EmployeeRoster");
+  requireArray(roster.employees, "employees");
+  const requestedAlias = normalizeHumanPersonaAlias(name);
+  const matches = roster.employees.filter((employee) => employee?.persona_alias?.aliases?.some((alias) => normalizeHumanPersonaAlias(alias) === requestedAlias));
+  invariant(matches.length <= 1, "HUMAN_PERSONA_ALIAS_AMBIGUOUS", "A public persona alias cannot resolve to more than one Human record");
+  if (matches.length === 0) {
+    return Object.freeze({ matched: false, requested_alias: requestedAlias, account_created: false, authority_granted: false });
+  }
+
+  const record = validateHumanPersonaAliasRecord(matches[0]);
+  return Object.freeze({
+    matched: true,
+    requested_alias: requestedAlias,
+    canonical_worker_id: record.worker_id,
+    human_display_name: normalizeHumanPersonaAlias(record.human_display_name, "human_display_name"),
+    account_created: false,
+    authority_granted: false,
+    current_controller_verification: Object.freeze({ ...record.current_controller_verification })
+  });
+}
 
 export const HEAVEN_TIME_LAW = Object.freeze({
   law_id: "K18888_HEAVEN_TIME_LAW_V3_7",

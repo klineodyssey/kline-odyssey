@@ -1,5 +1,52 @@
 # KGEN Organization V2.0 WorkQueue
 
+## Human AU public persona alias mapping — 2026-10-11
+
+- `WORK_ID`: `KAIOS-HUMAN-AU-PERSONA-ALIAS-20261011-001`; status:
+  `IMPLEMENTER_ACK_VERIFIED / IMPLEMENTED_LOCAL_QA_PASS / PENDING_EXACT_HEAD_CI_AND_INDEPENDENT_REVIEW`; priority: `P1`.
+- `GENERATED_AT`: `2026-10-11T11:33:43Z`; `BASE_MAIN_SHA`:
+  `bf1b722a2606ea287ff23d401096785600cd8a08`; `TARGET_PR_OR_BRANCH`:
+  `codex/human-au-alias-map`.
+- `PROJECT_OWNER`: `HENGYAO_GM`; `IMPLEMENTER`: `CODEX_DESKTOP_LOCAL_CURRENT_TASK`;
+  `IMPLEMENTER_ACK`: `VERIFIED_CURRENT_TASK_EXECUTION`; `REVIEWER`:
+  `INDEPENDENT_REVIEW_REQUIRED`.
+- `SCOPE`: add one AU public-persona alias dictionary to the existing Human HR
+  record, add fail-closed read/validation logic to the existing company module,
+  and add regression tests to the existing company-cycle test suite. Do not create
+  another Human, HR, Life, Worker, Controller, wallet, or company system.
+- `WHY_NOW`: Human Authority approved six public role aliases and directed a
+  working implementation that preserves legal identity and Controller boundaries.
+- `DEPENDENCIES`: HR notice #559, DOT notice #573, current Workforce roster,
+  current WorkQueue, exact latest main, independent review and exact-head CI.
+- `EXPECTED_OUTPUT`: all six approved aliases resolve to `human-primeforge`,
+  unknown names do not create accounts, and duplicate/authority-changing mappings
+  fail closed.
+- `ACCEPTANCE_TESTS`: roster JSON parses; six aliases resolve to one existing Human
+  record; roster count remains unchanged; unknown alias remains unmatched; duplicate
+  alias and attempted authority grant throw; company-cycle tests pass; diff check
+  passes.
+- `PROTECTED_ACTIONS`: #523 HOLD bypass, Mainnet or policy-protected testnet
+  deployment, Treasury/payroll/tax movement, signer/private-key/secret use,
+  governance/admin execution, KYC, production deployment and push main are not
+  authorized.
+- `EXPIRES_WHEN`: merged, rejected, superseded, or main/head/scope materially
+  changes. `SUPERSEDES`: `NONE`.
+- `CONTACT_AUDIT`: DOT uses issue #573 as a public coordination window; Chengxu
+  uses issue #491 and current PR #578 for scoped continuity; Digital Ant uses issue
+  #577. Public issue access is not a verified Controller binding or Worker ACK.
+  Minimal gap: persist exact message cursor/ACK evidence and separately verify the
+  task-scoped work identity before dispatch; do not mint a Life ID or broaden
+  authority to repair that gap.
+- `TECHNICAL_PRE_REVIEW`: Digital Ant reviewed exact head
+  `565e995a48e11e63a312ff0b831f71de8d9e58b2` and returned
+  `CHANGES_REQUIRED` with P1 schema-closure/Human-invariant and P2 cumulative
+  provenance findings. Controller independence and formal review eligibility were
+  explicitly `NOT_VERIFIED`; this is valid technical defect evidence, not Review
+  PASS. Repair closes alias/controller metadata to exact allowlists, validates the
+  canonical Human Operator boundary, returns a frozen sanitized projection, adds
+  adversarial tests and preserves prior roster provenance. New exact-head CI and
+  eligible independent review remain required.
+
 ## Temporary-worker ordinary-work eligibility — 2026-10-10
 
 - `WORK_ID`: `KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001`; status:

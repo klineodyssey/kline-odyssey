@@ -1,11 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   planAutonomousCompanyEngineeringCycle,
   persistAutonomousCompanyEngineeringCycle,
   restoreAutonomousCompanyEngineeringCycleState,
   readLatestRepositorySnapshot,
   evaluateExactHeadCiGate,
+  resolveHumanPersonaAlias,
+  validateHumanPersonaAliasRecord,
+  HUMAN_PERSONA_ALIAS_SCHEMA,
   AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES,
   AUTONOMOUS_ENGINEERING_SAFE_ACTIONS,
   AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS
@@ -15,6 +19,8 @@ import { assertAppendOnlyChain } from "../core/history/index.mjs";
 
 const MAIN_SHA = "9".repeat(40);
 const HEAD_SHA = "a".repeat(40);
+const employeeRoster = JSON.parse(readFileSync(new URL("../KGEN-KAIOS/workforce/employee_roster.json", import.meta.url), "utf8"));
+const humanPersonaAliases = ["樂天帝", "齊天笑", "笑齊天", "樂天命", "君莫笑", "莫笑君"];
 const acknowledgedWorker = Object.freeze({
   status: "ACTIVE",
   employee_status: "ACTIVE",
@@ -441,4 +447,90 @@ test("public repository reader fails closed on missing, failed, pending, or trun
     () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-09-14T01:05:00Z", required_check_names: ["company-safe-cycle"], fetch_impl: failedRead.fetch }),
     (error) => error.code === "GITHUB_READ_FAILED"
   );
+});
+
+test("all approved AU public names resolve to one existing Human without granting authority", () => {
+  const beforeCount = employeeRoster.employees.length;
+  const human = employeeRoster.employees.find((employee) => employee.worker_id === "human-primeforge");
+  assert.equal(human.persona_alias.schema_version, HUMAN_PERSONA_ALIAS_SCHEMA);
+  assert.deepEqual(human.persona_alias.aliases, humanPersonaAliases);
+
+  for (const alias of humanPersonaAliases) {
+    const result = resolveHumanPersonaAlias({ roster: employeeRoster, name: ` ${alias} ` });
+    assert.equal(result.matched, true);
+    assert.equal(result.canonical_worker_id, "human-primeforge");
+    assert.equal(result.human_display_name, "樂天帝｜KAIOS Human Authority");
+    assert.equal(result.account_created, false);
+    assert.equal(result.authority_granted, false);
+    assert.equal(result.current_controller_verification.status, "UNCHANGED_NOT_REVERIFIED");
+    assert.equal(result.current_controller_verification.legal_identity_changed, false);
+    assert.equal(result.current_controller_verification.controller_binding_changed, false);
+  }
+  assert.equal(employeeRoster.employees.length, beforeCount);
+  assert.equal(employeeRoster.employees.filter((employee) => employee.worker_id === "human-primeforge").length, 1);
+});
+
+test("unknown Human public name remains unmatched and never creates a fallback account", () => {
+  assert.deepEqual(resolveHumanPersonaAlias({ roster: employeeRoster, name: "未登記公開名" }), {
+    matched: false,
+    requested_alias: "未登記公開名",
+    account_created: false,
+    authority_granted: false
+  });
+});
+
+test("Human persona alias lookup fails closed on ambiguous identity or authority changes", () => {
+  const human = employeeRoster.employees.find((employee) => employee.worker_id === "human-primeforge");
+  const duplicate = JSON.parse(JSON.stringify(human));
+  duplicate.worker_id = "duplicate-human";
+  duplicate.persona_alias.canonical_worker_id = "duplicate-human";
+  assert.throws(
+    () => resolveHumanPersonaAlias({ roster: { employees: [human, duplicate] }, name: "樂天帝" }),
+    (error) => error.code === "HUMAN_PERSONA_ALIAS_AMBIGUOUS"
+  );
+
+  const authorityMutation = JSON.parse(JSON.stringify(human));
+  authorityMutation.current_controller_verification.authority_granted = true;
+  assert.throws(
+    () => validateHumanPersonaAliasRecord(authorityMutation),
+    (error) => error.code === "HUMAN_PERSONA_AUTHORITY_FORBIDDEN"
+  );
+});
+
+test("Human persona alias metadata rejects hidden authority fields and returns only a frozen projection", () => {
+  const human = employeeRoster.employees.find((employee) => employee.worker_id === "human-primeforge");
+  for (const field of ["signer_authority", "financial_authority", "admin_authority", "management_authority", "wallet_authority"]) {
+    for (const container of ["persona_alias", "current_controller_verification"]) {
+      const mutation = JSON.parse(JSON.stringify(human));
+      mutation[container][field] = "GRANTED";
+      assert.throws(
+        () => validateHumanPersonaAliasRecord(mutation),
+        (error) => error.code === "HUMAN_PERSONA_METADATA_FIELD_FORBIDDEN"
+      );
+    }
+  }
+
+  const safe = validateHumanPersonaAliasRecord(human);
+  assert.notEqual(safe, human);
+  assert.deepEqual(Object.keys(safe).sort(), ["current_controller_verification", "employment_type", "human_display_name", "persona_alias", "status", "worker_id", "worker_type"]);
+  assert.equal(Object.isFrozen(safe), true);
+  assert.equal(Object.isFrozen(safe.persona_alias), true);
+  assert.equal(Object.isFrozen(safe.persona_alias.aliases), true);
+  assert.equal(Object.isFrozen(safe.current_controller_verification), true);
+});
+
+test("Human persona aliases reject non-Human records and automated-work authority", () => {
+  const human = employeeRoster.employees.find((employee) => employee.worker_id === "human-primeforge");
+  for (const [field, value, code] of [
+    ["worker_type", "AI Worker", "HUMAN_PERSONA_RECORD_TYPE_INVALID"],
+    ["employment_type", "AI_WORKER", "HUMAN_PERSONA_RECORD_TYPE_INVALID"],
+    ["status", "ACTIVE", "HUMAN_PERSONA_RECORD_TYPE_INVALID"],
+    ["manager", "codex-gm-01", "HUMAN_PERSONA_RECORD_TYPE_INVALID"],
+    ["can_claim_task", true, "HUMAN_PERSONA_WORK_AUTHORITY_FORBIDDEN"],
+    ["can_push_main", true, "HUMAN_PERSONA_WORK_AUTHORITY_FORBIDDEN"]
+  ]) {
+    const mutation = JSON.parse(JSON.stringify(human));
+    mutation[field] = value;
+    assert.throws(() => validateHumanPersonaAliasRecord(mutation), (error) => error.code === code);
+  }
 });

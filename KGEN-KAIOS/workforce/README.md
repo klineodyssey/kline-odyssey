@@ -1,14 +1,14 @@
 # KGEN Workforce Governance
 
 **Status:** ACTIVE / FAIL-CLOSED PRECHECK ONLY
-**Version:** 1.2
-**Revision:** 2026-10-10.TEMPORARY_WORKER_ELIGIBILITY
-**Last Updated:** 2026-10-10
+**Version:** 1.3
+**Revision:** 2026-10-11.HUMAN_PUBLIC_PERSONA_ALIAS
+**Last Updated:** 2026-10-11
 **Updated By:** Codex
-**Reviewed By:** INDEPENDENT_SECURITY_REVIEWER
-**Source Commit:** 558326d664730a3750cfe0f11a85767ffeae4985
-**Task ID:** KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001
-**Change Reason:** Separate ordinary temporary-work eligibility from formal Digital Life, employment and payroll while preserving WorkOrder, review and protected financial gates.
+**Reviewed By:** PENDING_INDEPENDENT_REVIEWER
+**Source Commit:** PENDING_DRAFT_PR_HEAD
+**Task ID:** KAIOS-HUMAN-AU-PERSONA-ALIAS-20261011-001
+**Change Reason:** Add one fail-closed public-persona alias mapping to the existing Human HR record without changing legal identity, Controller authority, Worker/Life identity, or protected financial gates.
 **Source Of Truth:** TRUE
 
 ## Purpose
@@ -47,6 +47,12 @@ Life identity is optional for this lane and cannot substitute for work identity.
 The repository-only `validateTemporaryWorkerClaim` function performs schema and consistency prechecks only. The current architecture has no canonical evidence resolver, signature verifier or durable registry lookup, so a passing precheck returns `eligible: false` and `canonical_verification_required: true`. Caller-supplied `VERIFIED` strings or evidence references never establish eligibility.
 
 DOT is the primary dispatcher for ordinary engineering. The General Manager owns HR policy, company management, integration, audit and review routing, and may route overflow to another qualified worker. Dispatch, implementation and independent review must remain distinct whenever the same subject would otherwise approve its own delivery.
+
+## Human Public Persona Alias Rule
+
+`employee_roster.json` keeps one existing Human HR record (`human-primeforge`). Its `persona_alias` (`PERSONA_ALIAS`) dictionary maps approved AU public role names to that record, and `current_controller_verification` (`CURRENT_CONTROLLER_VERIFICATION`) records that alias lookup does not re-verify or change legal identity, Controller binding, or authority. An alias is display-and-lookup metadata only: it cannot create another Human account, Worker/Life identity, permission, wallet authority, or compensation entitlement.
+
+`resolveHumanPersonaAlias` in `core/company/index.mjs` reads this existing roster projection and fails closed if an alias is duplicated across records, if alias/controller metadata contains fields outside its exact allowlist, if the record is not the canonical Human Operator, or if alias metadata attempts to create an account or grant work, signer, wallet, financial, management or administrative authority. Validation returns only a frozen sanitized projection. An unknown name remains unmatched; the resolver never creates a fallback account.
 
 ## Files
 
