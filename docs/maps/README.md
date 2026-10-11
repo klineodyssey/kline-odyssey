@@ -49,6 +49,14 @@ This event is classified as:
 - 掃地出門 / 逐出師門
 - 悟空命運轉折
 
+## AU 歷史主權演化（V10.3 加註）
+
+- **K6888**：歷史舊稱「靈台方寸山」；KAIOS AU 改編敘事中，孫悟空變松樹、插樹為旗後，地名變更為「松樹國」。
+- **K12800**：現行「靈台方寸山」修行主殿，承接 K6888 舊地名與菩提祖師修行場域的後續設定。
+- **K6128**：「斜月三星洞」授法洞府沿用原錨點，不隨主權事件移動。
+- 此為**虛構劇情的地名與主權演變**，不是現實土地權狀；小說《西遊記》原著是悟空變松樹炫技遭逐，插旗主權爭議為 KAIOS 改編。
+- `UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json` 不變；V10.3 使用既有 override，不增加、移除或移動 123 個底圖點位。
+
 ## Previous Complete Base Map
 
 - `UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json`
