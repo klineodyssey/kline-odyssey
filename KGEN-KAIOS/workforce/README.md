@@ -129,3 +129,5 @@ All V3 payroll, game mission and Robo records are Prototype / Simulation / Inter
   evidence and external scheduler/Cloud wiring limits; not employee registration.
 - `tools/worker-notebook.mjs`: local revisioned contact/health notes; no network or authority.
 - `tests/worker-notebook.test.mjs`: restart, race, replay, corruption and privacy checks.
+- `.github/workflows/worker-notebook.yml`: path-scoped, read-only CI for the
+  candidate; no scheduled worker launch, secret use or deployment.
