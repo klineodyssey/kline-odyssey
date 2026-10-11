@@ -418,6 +418,32 @@
     {
       "worker_id": "human-primeforge",
       "display_name": "Father / Human Operator",
+      "human_display_name": "樂天帝｜KAIOS Human Authority",
+      "persona_alias": {
+        "schema_version": "KAIOS_HUMAN_PERSONA_ALIAS_V1",
+        "aliases": [
+          "樂天帝",
+          "齊天笑",
+          "笑齊天",
+          "樂天命",
+          "君莫笑",
+          "莫笑君"
+        ],
+        "canonical_worker_id": "human-primeforge",
+        "account_merge_policy": "RESOLVE_TO_EXISTING_HUMAN_RECORD",
+        "creates_additional_human_account": false,
+        "authority_effect": "DISPLAY_AND_LOOKUP_ONLY",
+        "evidence": [
+          "https://github.com/klineodyssey/kline-odyssey/issues/559#issuecomment-6108492659",
+          "https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6108492975"
+        ]
+      },
+      "current_controller_verification": {
+        "status": "UNCHANGED_NOT_REVERIFIED",
+        "authority_granted": false,
+        "legal_identity_changed": false,
+        "controller_binding_changed": false
+      },
       "worker_type": "Human Operator",
       "employment_type": "HUMAN_OPERATOR",
       "department": "Founder / Human Decision Gate",
