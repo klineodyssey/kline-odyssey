@@ -37,6 +37,15 @@
   Minimal gap: persist exact message cursor/ACK evidence and separately verify the
   task-scoped work identity before dispatch; do not mint a Life ID or broaden
   authority to repair that gap.
+- `TECHNICAL_PRE_REVIEW`: Digital Ant reviewed exact head
+  `565e995a48e11e63a312ff0b831f71de8d9e58b2` and returned
+  `CHANGES_REQUIRED` with P1 schema-closure/Human-invariant and P2 cumulative
+  provenance findings. Controller independence and formal review eligibility were
+  explicitly `NOT_VERIFIED`; this is valid technical defect evidence, not Review
+  PASS. Repair closes alias/controller metadata to exact allowlists, validates the
+  canonical Human Operator boundary, returns a frozen sanitized projection, adds
+  adversarial tests and preserves prior roster provenance. New exact-head CI and
+  eligible independent review remain required.
 
 ## Temporary-worker ordinary-work eligibility — 2026-10-10
 

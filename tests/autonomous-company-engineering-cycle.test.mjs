@@ -496,3 +496,41 @@ test("Human persona alias lookup fails closed on ambiguous identity or authority
     (error) => error.code === "HUMAN_PERSONA_AUTHORITY_FORBIDDEN"
   );
 });
+
+test("Human persona alias metadata rejects hidden authority fields and returns only a frozen projection", () => {
+  const human = employeeRoster.employees.find((employee) => employee.worker_id === "human-primeforge");
+  for (const field of ["signer_authority", "financial_authority", "admin_authority", "management_authority", "wallet_authority"]) {
+    for (const container of ["persona_alias", "current_controller_verification"]) {
+      const mutation = JSON.parse(JSON.stringify(human));
+      mutation[container][field] = "GRANTED";
+      assert.throws(
+        () => validateHumanPersonaAliasRecord(mutation),
+        (error) => error.code === "HUMAN_PERSONA_METADATA_FIELD_FORBIDDEN"
+      );
+    }
+  }
+
+  const safe = validateHumanPersonaAliasRecord(human);
+  assert.notEqual(safe, human);
+  assert.deepEqual(Object.keys(safe).sort(), ["current_controller_verification", "employment_type", "human_display_name", "persona_alias", "status", "worker_id", "worker_type"]);
+  assert.equal(Object.isFrozen(safe), true);
+  assert.equal(Object.isFrozen(safe.persona_alias), true);
+  assert.equal(Object.isFrozen(safe.persona_alias.aliases), true);
+  assert.equal(Object.isFrozen(safe.current_controller_verification), true);
+});
+
+test("Human persona aliases reject non-Human records and automated-work authority", () => {
+  const human = employeeRoster.employees.find((employee) => employee.worker_id === "human-primeforge");
+  for (const [field, value, code] of [
+    ["worker_type", "AI Worker", "HUMAN_PERSONA_RECORD_TYPE_INVALID"],
+    ["employment_type", "AI_WORKER", "HUMAN_PERSONA_RECORD_TYPE_INVALID"],
+    ["status", "ACTIVE", "HUMAN_PERSONA_RECORD_TYPE_INVALID"],
+    ["manager", "codex-gm-01", "HUMAN_PERSONA_RECORD_TYPE_INVALID"],
+    ["can_claim_task", true, "HUMAN_PERSONA_WORK_AUTHORITY_FORBIDDEN"],
+    ["can_push_main", true, "HUMAN_PERSONA_WORK_AUTHORITY_FORBIDDEN"]
+  ]) {
+    const mutation = JSON.parse(JSON.stringify(human));
+    mutation[field] = value;
+    assert.throws(() => validateHumanPersonaAliasRecord(mutation), (error) => error.code === code);
+  }
+});

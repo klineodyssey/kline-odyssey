@@ -52,7 +52,7 @@ DOT is the primary dispatcher for ordinary engineering. The General Manager owns
 
 `employee_roster.json` keeps one existing Human HR record (`human-primeforge`). Its `persona_alias` (`PERSONA_ALIAS`) dictionary maps approved AU public role names to that record, and `current_controller_verification` (`CURRENT_CONTROLLER_VERIFICATION`) records that alias lookup does not re-verify or change legal identity, Controller binding, or authority. An alias is display-and-lookup metadata only: it cannot create another Human account, Worker/Life identity, permission, wallet authority, or compensation entitlement.
 
-`resolveHumanPersonaAlias` in `core/company/index.mjs` reads this existing roster projection and fails closed if an alias is duplicated across records or if alias metadata attempts to create an account or grant authority. An unknown name remains unmatched; the resolver never creates a fallback account.
+`resolveHumanPersonaAlias` in `core/company/index.mjs` reads this existing roster projection and fails closed if an alias is duplicated across records, if alias/controller metadata contains fields outside its exact allowlist, if the record is not the canonical Human Operator, or if alias metadata attempts to create an account or grant work, signer, wallet, financial, management or administrative authority. Validation returns only a frozen sanitized projection. An unknown name remains unmatched; the resolver never creates a fallback account.
 
 ## Files
 
