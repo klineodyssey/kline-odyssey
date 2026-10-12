@@ -9,6 +9,7 @@ on:
     paths:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
+      - "tests/11520-kgen-margin-wallet-foundation.test.mjs"
       - "tests/autonomous-company-engineering-cycle.test.mjs"
       - "tests/universal-exchange-workflow-security.test.mjs"
       - "K線西遊記/temples/11520/**"
@@ -20,6 +21,7 @@ on:
     paths:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
+      - "tests/11520-kgen-margin-wallet-foundation.test.mjs"
       - "tests/autonomous-company-engineering-cycle.test.mjs"
       - "tests/universal-exchange-workflow-security.test.mjs"
       - "K線西遊記/temples/11520/**"

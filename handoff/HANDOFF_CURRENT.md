@@ -23,6 +23,10 @@ STATUS: INITIAL
   delivery credits ten simulated KAIOS freight once and no real salary/payment.
 - Local checks: matrix/foundation `9/9`, game runtime `82/82`, order route/intent
   `83/83`; no skips. Baseline foundation passed before changes.
+- CI intake repair: the existing Universal Exchange job already executes this
+  test, but its push/PR filters omitted the path. Add that one path to both
+  filters so the delivery receives remote validation without a duplicate job
+  or any new schedule/permission.
 - FUNCTIONAL_QA: local module acceptance PASS; remote CI pending.
   VISUAL_QA: no UI change and no new visual acceptance. Parent game delivery
   still requires Chromium and directly inspected screenshots.

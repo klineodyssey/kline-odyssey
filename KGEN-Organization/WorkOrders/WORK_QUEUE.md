@@ -19,7 +19,10 @@
   `LOCAL_QA_PASS / PENDING_REMOTE_CI`.
 - SCOPE: additive acceptance in existing
   `tests/11520-kgen-margin-wallet-foundation.test.mjs`, this queue and
-  `handoff/HANDOFF_CURRENT.md`. No production runtime or other owner's branch edits.
+  `handoff/HANDOFF_CURRENT.md` and the existing Universal Exchange CI path filters.
+  The existing full Node test job now runs when this foundation test changes;
+  no new workflow/job/schedule/permission is added. No production runtime or
+  other owner's branch edits.
 - WHY_NOW: DOT M0 evidence at Issue 573 comment 6129204526 identifies shared
   existing cargo/trading organs and missing integrated acceptance. This bounded
   QA lane can proceed without taking persistence, quote, UI or Navigator ownership.
