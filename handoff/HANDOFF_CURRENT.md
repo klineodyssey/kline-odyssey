@@ -2,6 +2,38 @@
 
 STATUS: INITIAL
 
+## Three-cell cargo / cross-market simulation acceptance
+
+- WORK_ID: `K11520-THREE-CELL-CARGO-MARKET-QA-20261013-001`.
+- Source: direct Human three-cell engineering order; parent Issue 570 and
+  DOT M0 https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6129204526.
+- Base: `bf1b722a2606ea287ff23d401096785600cd8a08`; branch:
+  `codex/cargo-cross-market-acceptance`; implementer: `codex-gm-01`.
+- Exact delivery head is the PR head containing this cumulative handoff.
+- Added nine executable tests to the existing margin-wallet foundation suite.
+  Eight direction combinations exercise BTC/ETH/BNB simultaneously with real
+  existing local cargo custody, JSON restart, replay rejection, three isolated
+  liquidations and actual cargo travel/destination acceptance afterward.
+- Cargo is 1,000 simulated KAIOS; trading collateral is six independently funded
+  simulated KGEN. Exposure notional is not converted to trading lots by this test:
+  explicit fixture lots and directions are supplied separately. FX/fee conversion,
+  cross-venue arbitrage and an automatic strategy scheduler are not implemented.
+- All trading losses leave cargo, freight, unpaid salary and XYZ untouched.
+  Insolvent trading collateral does not prevent separately funded cargo delivery;
+  delivery credits ten simulated KAIOS freight once and no real salary/payment.
+- Local checks: matrix/foundation `9/9`, game runtime `82/82`, order route/intent
+  `83/83`; no skips. Baseline foundation passed before changes.
+- FUNCTIONAL_QA: local module acceptance PASS; remote CI pending.
+  VISUAL_QA: no UI change and no new visual acceptance. Parent game delivery
+  still requires Chromium and directly inspected screenshots.
+- Next: publish Draft PR, read back its head/CI and send source-bound evidence
+  through existing Issue 573. DOT owns subsequent non-overlapping production
+  WorkOrders; Starforge may provide task-scoped read-only feedback. Neither ACK
+  nor formal reviewer/controller identity is inferred.
+- No production file changed, no signer/provider created, no live trade, no
+  Treasury/payment, no change to #523 HOLD. Text signature: 衡曜; cryptographic
+  signature NOT_VERIFIED.
+
 本包為 AI 必讀開機與神經索引基礎包。
 
 ## Universal CI salary fixture engineering handoff
