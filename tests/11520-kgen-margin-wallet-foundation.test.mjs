@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activateMargin,closeMargin,snapshot,pnlForMove,maxAdversePoints,positionRisk,MAX_C_LEVERAGE,normalizeSignedC,signedCFromLegacyMagnitude} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY,bindTempleReturnWalletContinuity} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot,touchedOrCrossed} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
+import {createDigitalAnt,createDeliveryMission,assignDelivery,loadCargo,planCargoHedge,createDigitalAntPersistenceEnvelope,restoreDigitalAntPersistenceEnvelope,tickDigitalAntDelivery,acceptSimulatedAtmDeliveryReceipt} from '../K線西遊記/temples/11520/runtime/digital-ant-logistics-runtime.mjs';
 
 assert.equal(MAX_C_LEVERAGE,100);
 assert.equal(requiredMargin({lots:8}),8);
@@ -295,3 +297,97 @@ const microtasks=async()=>{for(let i=0;i<30;i++)await Promise.resolve()};
   p.handler=null;assert.equal((await s.connect()).status,'CONNECTED','timeout is recoverable');s.dispose();assert.equal(p.listenerCount(),0);
 }
 console.log('11520 read-only EIP-1193 connect/account/chain/disconnect/race/rejection/timeout PASS');
+
+// K11520-CT-XYZ-AUTO-CARGO-COMBAT-20261009-001 / bounded M0 acceptance.
+// Exposure notional, trading lots and cargo principal retain separate units.
+// These explicit fixture orders do not infer a notional-to-lots or FX conversion.
+const cargoMarkets=[['KX','BTCUSDT','BTC'],['KY','ETHUSDT','ETH'],['KZ','BNBUSDT','BNB']];
+for(let directions=0;directions<8;directions++){
+  test(`cargo custody survives three-market LONG/SHORT losses and JSON restart (matrix ${directions})`,t=>{
+    t.mock.method(Date,'now',()=>1000);
+    const ant=createDigitalAnt({lifeId:'SIM-CARGO-QA',capital:100,cargoCapacity:2000});
+    const atm={atmId:'SIM-DESTINATION',x:1,y:1,z:1,online:true};
+    const mission=createDeliveryMission({missionId:'SIM-CARGO-001',amount:1000,unit:'KAIOS',destinationAtmId:atm.atmId,freightOffer:10,demand:1});
+    assert.equal(assignDelivery(ant,mission,[atm]).ok,true);
+    assert.equal(loadCargo(ant).ok,true);
+    const custody=structuredClone(ant);
+    let book=createKgenLedger(6);
+    const signs=cargoMarkets.map((_,i)=>directions&(1<<i)?-1:1);
+    for(const [i,[axis,market,asset]] of cargoMarkets.entries()){
+      const c=signs[i],exposure={asset,notional:10,market,type:c>0?'PAYABLE':'RECEIVABLE'};
+      const originalExposure=structuredClone(exposure);
+      const plan=planCargoHedge({cargoAsset:'KAIOS',cargoAmount:1000,deliveryLiabilityAsset:'KAIOS',variableCostExposure:exposure,marketAvailable:true,authorized:true,operatingRiskReserve:2,maxHedgeRatio:.5,maxOrderLeverage:1});
+      assert.equal(plan.action,'HEDGE_CANDIDATE');
+      assert.equal(plan.hedge.side,c>0?'LONG':'SHORT');
+      assert.equal(plan.hedgeNotional,2);
+      assert.equal(plan.cargoPrincipalAsMargin,false);
+      assert.equal(plan.realOrderCreated,false);
+      assert.deepEqual(exposure,originalExposure,'planning cannot consume the cost exposure');
+      assert.equal(observeSimulationPrice(book,{market,price:99,observedAt:1000,now:1000,productV1:true}).ok,true);
+      const order=placeSimulationOrder(book,{axis,market,c,side:plan.hedge.side,lots:2,triggerPrice:100,now:1001});
+      assert.equal(order.ok,true);
+      assert.equal(observeSimulationPrice(book,{market,price:100,observedAt:1002,now:1002,productV1:true}).events[0].status,'FILLED');
+    }
+    assert.equal(book.free,0);
+    assert.equal(book.lockedMargin,6);
+    assert.deepEqual(ant,custody,'orders cannot move, deliver or debit cargo');
+    book=JSON.parse(JSON.stringify(book));
+    const recovered=restoreDigitalAntPersistenceEnvelope(JSON.parse(JSON.stringify(createDigitalAntPersistenceEnvelope(ant,{revision:1,savedAt:1002}))),{expectedLifeId:ant.lifeId});
+    assert.deepEqual(recovered,custody);
+    for(const [i,[axis,market]] of cargoMarkets.entries()){
+      const before=structuredClone(book);
+      assert.equal(observeSimulationPrice(book,{market,price:100,observedAt:1002,now:1002,productV1:true}).reason,'OUT_OF_ORDER_PRICE');
+      assert.deepEqual(book,before,'restart must not replay a fill');
+      const peers=simulationSnapshot(book).positions.filter(p=>p.market!==market);
+      const outcome=observeSimulationPrice(book,{market,price:signs[i]>0?98:102,observedAt:1003,now:1003,productV1:true});
+      assert.equal(outcome.ok,true);
+      assert.equal(outcome.events.length,1);
+      assert.equal(outcome.events[0].status,'LIQUIDATED');
+      assert.equal(outcome.events[0].axis,axis);
+      assert.equal(outcome.events[0].realizedPnl,-2);
+      assert.deepEqual(simulationSnapshot(book).positions.filter(p=>p.market!==market),peers,'one market cannot settle another');
+      assert.deepEqual(recovered,custody,'market losses cannot change cargo, freight, salary or position');
+    }
+    assert.equal(book.free,0);assert.equal(book.lockedMargin,0);assert.equal(book.realizedPnl,-6);
+    const receipts=simulationSnapshot(book).receipts;
+    assert.equal(receipts.length,6);
+    assert.equal(new Set(receipts.map(r=>r.receiptId)).size,6);
+    assert.ok(receipts.every(r=>r.simulationOnly===true));
+    assert.equal(recovered.cargo.amount,1000);
+    assert.equal(recovered.finance.freight,0);assert.equal(recovered.payroll.paid,0);
+    // Insolvent trading funds do not halt an independently funded cargo mission.
+    let arrived=false;
+    for(let i=0;i<80;i++){
+      arrived=tickDigitalAntDelivery(recovered,{deltaMs:100,speed:.02}).arrived===true;
+      if(arrived)break;
+    }
+    assert.equal(arrived,true);
+    assert.equal(recovered.cargo.amount,1000,'arrival alone does not transfer custody');
+    const beforeAcceptance=structuredClone(recovered);
+    assert.equal(acceptSimulatedAtmDeliveryReceipt(recovered,{destinationAtmId:atm.atmId,now:1004}).reason,'SIMULATION_DESTINATION_ACCEPTANCE_REQUIRED');
+    assert.deepEqual(recovered,beforeAcceptance);
+    const acceptance=acceptSimulatedAtmDeliveryReceipt(recovered,{destinationAtmId:atm.atmId,accepted:true,now:1004});
+    assert.equal(acceptance.ok,true);
+    assert.equal(recovered.cargo.amount,0);
+    assert.equal(recovered.mission.status,'DELIVERED');
+    assert.equal(recovered.finance.freight,10);
+    assert.equal(recovered.payroll.paid,0,'delivery creates no real salary payment');
+    const delivered=structuredClone(recovered);
+    assert.equal(acceptSimulatedAtmDeliveryReceipt(recovered,{destinationAtmId:atm.atmId,accepted:true,now:1005}).replayed,true);
+    assert.deepEqual(recovered,delivered,'duplicate receipt cannot duplicate freight');
+  });
+}
+test('three-market cargo hedge rejects missing market, reserve and stale order data without debiting principal',()=>{
+  for(const [axis,market,asset] of cargoMarkets){
+    const parameters={cargoAsset:'KAIOS',cargoAmount:1000,deliveryLiabilityAsset:'KAIOS',variableCostExposure:{asset,notional:10,market,type:'PAYABLE'},marketAvailable:true,authorized:true,operatingRiskReserve:2};
+    assert.equal(planCargoHedge({...parameters,marketAvailable:false}).reason,'HEDGE_MARKET_UNAVAILABLE');
+    assert.equal(planCargoHedge({...parameters,operatingRiskReserve:0}).reason,'OPERATING_RISK_RESERVE_REQUIRED');
+    const book=createKgenLedger(2);
+    assert.equal(observeSimulationPrice(book,{market,price:99,observedAt:1000,now:1000,productV1:true}).ok,true);
+    const before=structuredClone(book);
+    assert.equal(placeSimulationOrder(book,{axis,market,c:1,lots:2,triggerPrice:100,now:16001}).reason,'STALE_PRICE');
+    assert.deepEqual(book,before);
+    assert.equal(placeSimulationOrder(book,{axis,market,c:1,lots:3,triggerPrice:100,now:1001}).reason,'INSUFFICIENT_FREE_KGEN');
+    assert.deepEqual(book,before);
+  }
+});

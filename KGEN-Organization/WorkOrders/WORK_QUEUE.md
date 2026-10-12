@@ -1,5 +1,54 @@
 # KGEN Organization V2.0 WorkQueue
 
+## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei
+
+- WORK_ID: `K11520-THREE-CELL-CARGO-MARKET-QA-20261013-001`.
+- GENERATED_AT / CREATED_AT: `2026-10-12T17:35:36Z`.
+- BASE_MAIN_SHA: `bf1b722a2606ea287ff23d401096785600cd8a08`.
+- TARGET_PR_OR_BRANCH: `codex/cargo-cross-market-acceptance`.
+- PROJECT_OWNER / OWNER: `HENGYAO_GM`; IMPLEMENTER / CREATED_BY:
+  `codex-gm-01`; REVIEWER: `human-primeforge` under current Human-owner
+  repository policy. DOT / Starforge technical feedback is requested separately;
+  their controller binding and receipt are not inferred.
+- TASK_SOURCE_TYPE: `HUMAN_DIRECT_WORK_ORDER`; TASK_SOURCE_ID:
+  `HUMAN_THREE_CELL_CAPABILITY_BUILD_20261013`; TASK_SOURCE_ACTOR:
+  `human-primeforge`; TASK_SOURCE_FILE: current conversation;
+  TASK_SOURCE_COMMIT: base main above; TASK_SOURCE_REASON: Human requested
+  working cargo, LONG/SHORT and cross-market capabilities with immediate engineering.
+- PRIORITY: `P2`; RISK_LEVEL: `R0_TEST_ONLY`; STATUS:
+  `LOCAL_QA_PASS / PENDING_REMOTE_CI`.
+- SCOPE: additive acceptance in existing
+  `tests/11520-kgen-margin-wallet-foundation.test.mjs`, this queue and
+  `handoff/HANDOFF_CURRENT.md` and the existing Universal Exchange CI path filters.
+  The existing full Node test job now runs when this foundation test changes;
+  no new workflow/job/schedule/permission is added. No production runtime or
+  other owner's branch edits.
+- WHY_NOW: DOT M0 evidence at Issue 573 comment 6129204526 identifies shared
+  existing cargo/trading organs and missing integrated acceptance. This bounded
+  QA lane can proceed without taking persistence, quote, UI or Navigator ownership.
+- DEPENDENCIES: existing `planCargoHedge`, Digital Ant mission/persistence/receipt
+  interfaces and signed-C simulation ledger; parent Issue 570. The parent remains
+  separate and is not marked delivered by these tests.
+- EXPECTED_OUTPUT: runnable simulation acceptance, commit, Draft PR and a
+  source-bound handoff on the existing DOT / Starforge endpoint.
+- ACCEPTANCE_TESTS: eight three-market direction matrices; all trading margin
+  lost while cargo remains deliverable; market-isolated liquidation; JSON restart;
+  duplicate quote and receipt rejection; missing market/reserve, stale quote and
+  insufficient margin preserve state; freight and unpaid salary stay separate.
+  Local results: new matrix suite `9/9`; game runtime `82/82`; order route/intent
+  `83/83`; diff whitespace PASS. No UI changed; no new browser acceptance claimed.
+- PROTECTED_ACTIONS: no live financial decisions/orders, signer, secrets,
+  Mainnet/Testnet execution, Treasury, payroll/payment, deployment, governance or
+  #523 HOLD operations. Broad engineering approval does not supply actual
+  market/account/strategy/value parameters or establish controller identity.
+- EXPIRES_WHEN: delivery, supersession or material base/head/scope change.
+- SUPERSEDES: NONE; complements parent M0 rather than replacing its writer.
+- DIRECT_CHANNEL: existing Issue 573 shared endpoint; ACK: NOT_VERIFIED.
+- Exclusive scoped claim: this isolated GM branch owns only the test block and
+  this handoff; it does not claim parent M1-M5 or any production writer.
+- Accounting: task output recorded; elapsed work and compute consumption are
+  distinct. KUFO consumption, rate and compensation remain UNKNOWN; no pay claimed.
+
 ## Temporary-worker ordinary-work eligibility — 2026-10-10
 
 - `WORK_ID`: `KAIOS-TEMP-WORKER-ELIGIBILITY-20261010-001`; status:
