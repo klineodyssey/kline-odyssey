@@ -26,7 +26,7 @@ export function assessHeartCirculation({
   // Legacy V3.2.6 checks only heart balance after independent cooldown.
   // Never claim this result is a complete simulation of live chain eligibility.
   const legacyBalanceCanCoverReward = heart >= reward;
-  const proposedPolicyCanPreserveFloor = legacyBalanceCanCoverReward && heart - reward >= floor;
+  const proposedPolicyCanPreserveFloor = reward > 0n && legacyBalanceCanCoverReward && heart - reward >= floor;
   const floorGap = heart < floor ? floor - heart : 0n;
   const refillSourceCanCover = floorGap > 0n && brain >= floorGap && allowance >= floorGap;
   const possibleUnreservedRewardCapacity =
