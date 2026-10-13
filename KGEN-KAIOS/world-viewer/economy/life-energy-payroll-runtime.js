@@ -535,7 +535,7 @@ export function createLifeEnergyPayrollRuntime({ seed = DEFAULT_SEED } = {}) {
       if (!Number.isInteger(civilization.demo_quota_used_percent) || civilization.demo_quota_used_percent < 0 || civilization.demo_quota_used_percent > 100) issues.push("INVALID_DEMO_QUOTA");
       if (![null, "HOSTILE", "ALLY"].includes(civilization.faction)) issues.push("INVALID_FACTION");
       if (civilization.reward_pool_total !== 100 || !Number.isInteger(civilization.reward_pool_remaining) || civilization.reward_pool_remaining < 0 || civilization.reward_pool_remaining > 100) issues.push("INVALID_REWARD_POOL");
-      if (!Number.isInteger(civilization.company_energy) || !Number.isInteger(civilization.ally_energy) || civilization.company_energy + civilization.ally_energy + civilization.reward_pool_remaining !== 100) issues.push("REWARD_POOL_IMBALANCE");
+      if (!Number.isInteger(civilization.company_energy) || civilization.company_energy < 0 || !Number.isInteger(civilization.ally_energy) || civilization.ally_energy < 0 || civilization.company_energy + civilization.ally_energy + civilization.reward_pool_remaining !== 100) issues.push("REWARD_POOL_IMBALANCE");
       if (!Array.isArray(civilization.receipts) || new Set(civilization.receipts.map((item) => item.sample_id)).size !== civilization.receipts.length) issues.push("DUPLICATE_CIVILIZATION_RECEIPT");
       else {
         const receiptsValid = civilization.receipts.every((item) => {
@@ -546,7 +546,7 @@ export function createLifeEnergyPayrollRuntime({ seed = DEFAULT_SEED } = {}) {
         if (civilization.receipts.reduce((sum, item) => sum + item.company, 0) !== civilization.company_energy || civilization.receipts.reduce((sum, item) => sum + item.ally, 0) !== civilization.ally_energy) issues.push("CIVILIZATION_RECEIPT_IMBALANCE");
       }
       if (!Number.isInteger(civilization.hostile_hits) || civilization.hostile_hits < 0 || civilization.hostile_hits > 6 || civilization.monster_hp !== 60 - civilization.hostile_hits * 10) issues.push("MONSTER_COMBAT_IMBALANCE");
-      if (civilization.faction === "HOSTILE" && civilization.receipts.length) issues.push("HOSTILE_ALLY_DOUBLE_BENEFIT");
+      if (civilization.faction === "HOSTILE" && Array.isArray(civilization.receipts) && civilization.receipts.length) issues.push("HOSTILE_ALLY_DOUBLE_BENEFIT");
       if (civilization.faction === "ALLY" && civilization.hostile_hits) issues.push("ALLY_HOSTILE_DOUBLE_BENEFIT");
     }
     return { ok: issues.length === 0, issues, credit_supply: accountTotal(candidate), state_hash: candidate.state_hash };

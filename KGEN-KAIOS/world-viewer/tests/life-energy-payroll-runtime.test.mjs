@@ -203,6 +203,10 @@ test("ally samples debit one finite pool once and receipts survive reset, export
   assert.equal(before.company_energy, 24);
   assert.equal(before.ally_energy, 36);
   assert.equal(runtime.integrityReport().ok, true);
+  const beforeReplay = runtime.getState();
+  runtime.replayEvents();
+  assert.equal(runtime.getState().state_hash, beforeReplay.state_hash);
+  assert.deepEqual(runtime.getState().civilization, beforeReplay.civilization);
   const restored = createLifeEnergyPayrollRuntime();
   restored.importState(runtime.exportState());
   assert.deepEqual(restored.getState(), runtime.getState());
