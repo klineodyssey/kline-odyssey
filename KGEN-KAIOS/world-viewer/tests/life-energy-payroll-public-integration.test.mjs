@@ -13,6 +13,8 @@ test("World Viewer exposes all required life-energy views and controls", async (
   assert.match(html, /NO REAL KGEN/);
   assert.match(html, /NO REAL WALLET/);
   assert.match(html, /CREDIT DOES NOT REPLACE FOOD OR ENERGY/);
+  for (const id of ["quota-slider", "quota-percent", "choose-hostile", "choose-ally", "fight-monster", "sample-select", "submit-sample", "civilization-result"]) assert.match(html, new RegExp(`id="${id}"`));
+  assert.match(html, /官方帳號數據：未連接/);
 });
 
 test("browser application imports only the local canonical runtime and bounds imports", async () => {

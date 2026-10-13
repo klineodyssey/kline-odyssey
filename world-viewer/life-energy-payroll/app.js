@@ -2,8 +2,31 @@ import { createLifeEnergyPayrollRuntime } from "../../KGEN-KAIOS/world-viewer/ec
 
 const $ = (id) => document.getElementById(id);
 const MAX_IMPORT_BYTES = 2_000_000;
+const STORAGE_KEY = "kaios-life-energy-payroll-demo-v1";
 let runtime;
 let currentView = "life";
+
+const resultText = {
+  RUNTIME_NOT_RUNNING: "請先按「開始」。",
+  FACTION_ALREADY_LOCKED: "陣營已鎖定；匯出狀態可保留這次試玩紀錄。",
+  ALLY_REQUIRED: "只有合作陣營可提交文明成果。",
+  HOSTILE_REQUIRED: "只有敵對陣營可挑戰怪物。",
+  DUPLICATE_SAMPLE: "這份成果已有收據，不會重複分配能源。",
+  POOL_EXHAUSTED: "示範獎池已用完。",
+  MONSTER_DEFEATED: "怪物已被擊敗；沒有額度能源獎勵。"
+};
+
+function persist() {
+  try { localStorage.setItem(STORAGE_KEY, runtime.exportState()); }
+  catch { $("civilization-result").textContent = "本機儲存不可用；請按「匯出」保存試玩紀錄。"; }
+}
+
+function showActionResult(result, success) {
+  $("civilization-result").textContent = result.status === "BLOCKED"
+    ? (resultText[result.reason] ?? `操作未完成：${result.reason}`)
+    : success;
+  render();
+}
 
 function card(title, rows) {
   const article = document.createElement("article");
@@ -49,6 +72,16 @@ function timeline(events) {
 function render() {
   const state = runtime.getState();
   const integrity = runtime.integrityReport();
+  const civilization = state.civilization;
+  $("quota-percent").textContent = `${civilization.demo_quota_used_percent}%`;
+  $("quota-slider").value = String(civilization.demo_quota_used_percent);
+  $("civilization-faction").textContent = civilization.faction === "ALLY" ? "合作" : civilization.faction === "HOSTILE" ? "敵對" : "尚未選擇";
+  $("civilization-pool").textContent = `${civilization.reward_pool_remaining} / ${civilization.reward_pool_total}`;
+  $("company-energy").textContent = String(civilization.company_energy);
+  $("ally-energy").textContent = String(civilization.ally_energy);
+  $("monster-hp").textContent = `${civilization.monster_hp} / 60`;
+  $("choose-hostile").setAttribute("aria-pressed", String(civilization.faction === "HOSTILE"));
+  $("choose-ally").setAttribute("aria-pressed", String(civilization.faction === "ALLY"));
   $("runtime-status").textContent = state.runtime_status;
   $("simulation-time").textContent = `${state.simulation_time} h`;
   $("credit-supply").textContent = `${integrity.credit_supply} KAIOS_CREDIT`;
@@ -77,6 +110,7 @@ function render() {
   const empty = !content || (content.classList.contains("grid") && !content.children.length) || (content.classList.contains("timeline") && !content.children.length);
   $("empty").hidden = !empty;
   if (content) target.append(content);
+  persist();
 }
 
 function notify(message) {
@@ -115,9 +149,18 @@ function bind() {
   $("pause").addEventListener("click", () => { runtime.pause(); render(); });
   $("resume").addEventListener("click", () => { runtime.resume(); render(); });
   $("advance").addEventListener("click", () => { runtime.advanceTime(1); render(); });
+  $("quota-slider").addEventListener("input", (event) => { $("quota-percent").textContent = `${event.target.value}%`; });
+  $("quota-slider").addEventListener("change", (event) => showActionResult(runtime.setDemoQuotaUsedPercent(Number(event.target.value)), "示範額度已更新；能源增量為 0。"));
+  $("choose-hostile").addEventListener("click", () => showActionResult(runtime.chooseCivilizationFaction("HOSTILE"), "敵對陣營已鎖定。攻擊怪物不分享公司文明能源。"));
+  $("choose-ally").addEventListener("click", () => showActionResult(runtime.chooseCivilizationFaction("ALLY"), "合作陣營已鎖定。可提交下方固定的示範成果。"));
+  $("fight-monster").addEventListener("click", () => showActionResult(runtime.fightCompanyMonster(), "命中怪物 −10 HP；文明能源獎勵為 0。"));
+  $("submit-sample").addEventListener("click", () => {
+    const result = runtime.submitCivilizationSample($("sample-select").value);
+    showActionResult(result, `成果收據已保存：公司 +${result.outputs.company}、盟友 +${result.outputs.ally}，獎池減少 ${result.outputs.award}。`);
+  });
   for (const name of ["payroll", "rejected", "duplicate", "ant", "bee"]) $(name).addEventListener("click", () => scenario(name));
   $("replay").addEventListener("click", () => { runtime.replayEvents(); notify("事件已依相同 seed 與 actions 重播"); });
-  $("reset").addEventListener("click", () => { runtime.resetState(); notify("模擬已重設"); });
+  $("reset").addEventListener("click", () => { runtime.resetState(); $("civilization-result").textContent = "薪資情境已重設；文明陣營、能源與成果收據保留。按「開始」可繼續試玩。"; notify("薪資情境已重設，文明收據保留"); });
   $("export").addEventListener("click", download);
   $("import").addEventListener("change", async (event) => {
     const file = event.target.files?.[0];
@@ -136,6 +179,15 @@ function bind() {
 
 try {
   runtime = createLifeEnergyPayrollRuntime();
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      runtime.importState(saved);
+      $("civilization-result").textContent = "已恢復本機試玩紀錄。陣營與成果收據仍有效。";
+    }
+  } catch {
+    $("civilization-result").textContent = "先前本機狀態無法讀取；已載入新的示範。";
+  }
   bind();
   render();
 } catch (error) {

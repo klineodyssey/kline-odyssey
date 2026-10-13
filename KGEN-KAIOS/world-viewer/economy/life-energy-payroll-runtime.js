@@ -1,6 +1,11 @@
 const SCHEMA_VERSION = "0.1.0";
 const DEFAULT_SEED = "KAIOS-LIFE-ENERGY-PAYROLL-001";
 const CURRENCY = "KAIOS_CREDIT";
+const CIVILIZATION_SAMPLES = Object.freeze({
+  "KDNA-DESIGN-001": { kind: "KDNA", title: "文明設計圖", value: 10 },
+  "KRNA-CODE-001": { kind: "KRNA", title: "可執行器官", value: 20 },
+  "KRNA-QA-001": { kind: "KRNA", title: "驗證紀錄", value: 30 }
+});
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -72,6 +77,20 @@ function initialState(seed) {
     project: null,
     payroll_claims: [],
     payroll_events: [],
+    civilization: {
+      authority: "DEMO_ONLY",
+      official_quota_used_percent: null,
+      demo_quota_used_percent: 0,
+      quota_window: "7_DAY_DEMO",
+      faction: null,
+      reward_pool_total: 100,
+      reward_pool_remaining: 100,
+      company_energy: 0,
+      ally_energy: 0,
+      monster_hp: 60,
+      hostile_hits: 0,
+      receipts: []
+    },
     colony_ledgers: {
       ant: {
         ledger_id: "COLONY-LEDGER-ANT-001",
@@ -106,12 +125,14 @@ function accountTotal(state) {
 }
 
 export function createLifeEnergyPayrollRuntime({ seed = DEFAULT_SEED } = {}) {
-  let state = initialState(seed);
+  let seedValue = seed;
+  let state = initialState(seedValue);
   let actions = [];
   let replaying = false;
+  let civilizationReplayBase = clone(state.civilization);
 
-  function hashableState() {
-    const value = clone(state);
+  function hashableState(source = state) {
+    const value = clone(source);
     delete value.events;
     delete value.state_hash;
     delete value.last_result;
@@ -228,6 +249,66 @@ export function createLifeEnergyPayrollRuntime({ seed = DEFAULT_SEED } = {}) {
     return mutate("ADVANCE_TIME", { inputs: { hours: value } }, () => {
       state.simulation_time += value;
       return { simulation_time: state.simulation_time };
+    });
+  }
+
+  function setDemoQuotaUsedPercent(percent) {
+    recordAction("setDemoQuotaUsedPercent", { percent });
+    const value = Number(percent);
+    if (!Number.isInteger(value) || value < 0 || value > 100) {
+      return blocked("SET_DEMO_QUOTA", "PERCENT_OUT_OF_RANGE", { percent });
+    }
+    return mutate("SET_DEMO_QUOTA", { inputs: { used_percent: value, source: "PLAYER_DEMO" } }, () => {
+      state.civilization.demo_quota_used_percent = value;
+      return { used_percent: value, reward_delta: 0 };
+    });
+  }
+
+  function chooseCivilizationFaction(faction) {
+    recordAction("chooseCivilizationFaction", { faction });
+    const gate = ensureRunning();
+    if (gate) return gate;
+    if (!["HOSTILE", "ALLY"].includes(faction)) return blocked("CHOOSE_FACTION", "INVALID_FACTION", { faction });
+    if (state.civilization.faction) return blocked("CHOOSE_FACTION", "FACTION_ALREADY_LOCKED", { faction });
+    return mutate("CHOOSE_FACTION", { inputs: { faction } }, () => {
+      state.civilization.faction = faction;
+      return { faction, locked: true };
+    });
+  }
+
+  function submitCivilizationSample(sampleId) {
+    recordAction("submitCivilizationSample", { sampleId });
+    const gate = ensureRunning();
+    if (gate) return gate;
+    if (state.civilization.faction !== "ALLY") return blocked("SUBMIT_CIVILIZATION_SAMPLE", "ALLY_REQUIRED", { sampleId });
+    const sample = CIVILIZATION_SAMPLES[sampleId];
+    if (!sample) return blocked("SUBMIT_CIVILIZATION_SAMPLE", "UNKNOWN_SAMPLE", { sampleId });
+    if (state.civilization.receipts.some((receipt) => receipt.sample_id === sampleId)) {
+      return blocked("SUBMIT_CIVILIZATION_SAMPLE", "DUPLICATE_SAMPLE", { sampleId });
+    }
+    const award = Math.min(sample.value, state.civilization.reward_pool_remaining);
+    if (award <= 0) return blocked("SUBMIT_CIVILIZATION_SAMPLE", "POOL_EXHAUSTED", { sampleId });
+    return mutate("SUBMIT_CIVILIZATION_SAMPLE", { inputs: { sample_id: sampleId, evidence_mode: "FIXED_DEMO_FIXTURE" } }, () => {
+      const company = Math.floor(award * 0.4);
+      const ally = award - company;
+      state.civilization.reward_pool_remaining -= award;
+      state.civilization.company_energy += company;
+      state.civilization.ally_energy += ally;
+      state.civilization.receipts.push({ sample_id: sampleId, kind: sample.kind, title: sample.title, award, company, ally });
+      return { sample_id: sampleId, award, company, ally, pool_remaining: state.civilization.reward_pool_remaining };
+    });
+  }
+
+  function fightCompanyMonster() {
+    recordAction("fightCompanyMonster");
+    const gate = ensureRunning();
+    if (gate) return gate;
+    if (state.civilization.faction !== "HOSTILE") return blocked("FIGHT_COMPANY_MONSTER", "HOSTILE_REQUIRED");
+    if (state.civilization.monster_hp <= 0) return blocked("FIGHT_COMPANY_MONSTER", "MONSTER_DEFEATED");
+    return mutate("FIGHT_COMPANY_MONSTER", { actor: "HOSTILE_PLAYER" }, () => {
+      state.civilization.monster_hp = Math.max(0, state.civilization.monster_hp - 10);
+      state.civilization.hostile_hits += 1;
+      return { damage: 10, monster_hp: state.civilization.monster_hp, quota_reward: 0, civilization_reward: 0 };
     });
   }
 
@@ -436,38 +517,69 @@ export function createLifeEnergyPayrollRuntime({ seed = DEFAULT_SEED } = {}) {
     });
   }
 
-  function integrityReport() {
+  function integrityReport(candidate = state) {
     const issues = [];
-    if (accountTotal(state) !== state.credit_supply) issues.push("CREDIT_SUPPLY_IMBALANCE");
-    if (state.ledger.some((entry) => !entry.balanced || entry.amount <= 0 || entry.debit_account === entry.credit_account)) issues.push("INVALID_LEDGER_ENTRY");
-    if (Object.values(state.accounts).some((account) => account.balance < 0)) issues.push("NEGATIVE_CREDIT_BALANCE");
-    if (Object.values(state.physical_resources).some((quantity) => quantity < 0)) issues.push("NEGATIVE_RESOURCE_BALANCE");
-    if (new Set(state.payroll_claims).size !== state.payroll_claims.length) issues.push("DUPLICATE_PAYROLL_CLAIM");
-    const antMass = state.physical_resources.external_ant_food_mass + state.physical_resources.ant_food_mass + state.physical_resources.ant_consumed_mass;
+    if (accountTotal(candidate) !== candidate.credit_supply) issues.push("CREDIT_SUPPLY_IMBALANCE");
+    if (candidate.ledger.some((entry) => !entry.balanced || entry.amount <= 0 || entry.debit_account === entry.credit_account)) issues.push("INVALID_LEDGER_ENTRY");
+    if (Object.values(candidate.accounts).some((account) => account.balance < 0)) issues.push("NEGATIVE_CREDIT_BALANCE");
+    if (Object.values(candidate.physical_resources).some((quantity) => quantity < 0)) issues.push("NEGATIVE_RESOURCE_BALANCE");
+    if (new Set(candidate.payroll_claims).size !== candidate.payroll_claims.length) issues.push("DUPLICATE_PAYROLL_CLAIM");
+    const antMass = candidate.physical_resources.external_ant_food_mass + candidate.physical_resources.ant_food_mass + candidate.physical_resources.ant_consumed_mass;
     if (antMass !== 100) issues.push("ANT_FOOD_MASS_IMBALANCE");
-    const nectarMass = state.physical_resources.meadow_nectar_mass + state.physical_resources.hive_nectar_mass + state.physical_resources.hive_honey_mass + state.physical_resources.hive_processing_byproduct_mass + state.physical_resources.hive_consumed_mass;
+    const nectarMass = candidate.physical_resources.meadow_nectar_mass + candidate.physical_resources.hive_nectar_mass + candidate.physical_resources.hive_honey_mass + candidate.physical_resources.hive_processing_byproduct_mass + candidate.physical_resources.hive_consumed_mass;
     if (nectarMass !== 80) issues.push("HIVE_NECTAR_MASS_IMBALANCE");
-    if (state.worker.life_exists !== true) issues.push("WORKER_LIFE_INVALID");
-    return { ok: issues.length === 0, issues, credit_supply: accountTotal(state), state_hash: state.state_hash };
+    if (candidate.worker.life_exists !== true) issues.push("WORKER_LIFE_INVALID");
+    const civilization = candidate.civilization;
+    if (!civilization || civilization.authority !== "DEMO_ONLY" || civilization.official_quota_used_percent !== null) issues.push("CIVILIZATION_DEMO_BOUNDARY");
+    else {
+      if (!Number.isInteger(civilization.demo_quota_used_percent) || civilization.demo_quota_used_percent < 0 || civilization.demo_quota_used_percent > 100) issues.push("INVALID_DEMO_QUOTA");
+      if (![null, "HOSTILE", "ALLY"].includes(civilization.faction)) issues.push("INVALID_FACTION");
+      if (civilization.reward_pool_total !== 100 || !Number.isInteger(civilization.reward_pool_remaining) || civilization.reward_pool_remaining < 0 || civilization.reward_pool_remaining > 100) issues.push("INVALID_REWARD_POOL");
+      if (!Number.isInteger(civilization.company_energy) || !Number.isInteger(civilization.ally_energy) || civilization.company_energy + civilization.ally_energy + civilization.reward_pool_remaining !== 100) issues.push("REWARD_POOL_IMBALANCE");
+      if (!Array.isArray(civilization.receipts) || new Set(civilization.receipts.map((item) => item.sample_id)).size !== civilization.receipts.length) issues.push("DUPLICATE_CIVILIZATION_RECEIPT");
+      else {
+        const receiptsValid = civilization.receipts.every((item) => {
+          const sample = CIVILIZATION_SAMPLES[item.sample_id];
+          return sample && item.kind === sample.kind && item.title === sample.title && item.award === sample.value && item.company === Math.floor(item.award * 0.4) && item.ally === item.award - item.company;
+        });
+        if (!receiptsValid) issues.push("INVALID_CIVILIZATION_RECEIPT");
+        if (civilization.receipts.reduce((sum, item) => sum + item.company, 0) !== civilization.company_energy || civilization.receipts.reduce((sum, item) => sum + item.ally, 0) !== civilization.ally_energy) issues.push("CIVILIZATION_RECEIPT_IMBALANCE");
+      }
+      if (!Number.isInteger(civilization.hostile_hits) || civilization.hostile_hits < 0 || civilization.hostile_hits > 6 || civilization.monster_hp !== 60 - civilization.hostile_hits * 10) issues.push("MONSTER_COMBAT_IMBALANCE");
+      if (civilization.faction === "HOSTILE" && civilization.receipts.length) issues.push("HOSTILE_ALLY_DOUBLE_BENEFIT");
+      if (civilization.faction === "ALLY" && civilization.hostile_hits) issues.push("ALLY_HOSTILE_DOUBLE_BENEFIT");
+    }
+    return { ok: issues.length === 0, issues, credit_supply: accountTotal(candidate), state_hash: candidate.state_hash };
   }
 
   function exportState() {
-    return JSON.stringify({ schema_version: SCHEMA_VERSION, seed: state.seed, state, actions }, null, 2);
+    return JSON.stringify({ schema_version: SCHEMA_VERSION, seed: state.seed, state, actions, civilization_replay_base: civilizationReplayBase }, null, 2);
   }
 
   function importState(serialized) {
     const envelope = typeof serialized === "string" ? JSON.parse(serialized) : clone(serialized);
     if (envelope.schema_version !== SCHEMA_VERSION || !envelope.state || !Array.isArray(envelope.actions)) throw new Error("INVALID_LIFE_ENERGY_PAYROLL_ENVELOPE");
-    state = clone(envelope.state);
-    actions = clone(envelope.actions);
-    const report = integrityReport();
+    const candidate = clone(envelope.state);
+    const report = integrityReport(candidate);
     if (!report.ok) throw new Error(`INVALID_IMPORTED_STATE:${report.issues.join(",")}`);
+    const existingSamples = new Set(state.civilization.receipts.map((item) => item.sample_id));
+    const incomingSamples = new Set(candidate.civilization.receipts.map((item) => item.sample_id));
+    if ([...existingSamples].some((sampleId) => !incomingSamples.has(sampleId))) throw new Error("IMPORT_WOULD_ERASE_CIVILIZATION_RECEIPTS");
+    const base = envelope.civilization_replay_base ?? initialState(candidate.seed).civilization;
+    if (!base || !Array.isArray(base.receipts) || base.receipts.some((item) => !incomingSamples.has(item.sample_id))) throw new Error("INVALID_CIVILIZATION_REPLAY_BASE");
+    state = candidate;
+    seedValue = candidate.seed;
+    actions = clone(envelope.actions);
+    civilizationReplayBase = clone(base);
     return getState();
   }
 
   function resetState() {
-    recordAction("resetState");
-    state = initialState(seed);
+    const preservedCivilization = clone(state.civilization);
+    state = initialState(seedValue);
+    state.civilization = preservedCivilization;
+    state.state_hash = hash(hashableState());
+    civilizationReplayBase = clone(preservedCivilization);
     actions = [];
     return getState();
   }
@@ -480,12 +592,18 @@ export function createLifeEnergyPayrollRuntime({ seed = DEFAULT_SEED } = {}) {
     if (action.name === "runPayrollDemo") return runPayrollDemo(action.args);
     if (action.name === "runAntColonyScenario") return runAntColonyScenario(action.args);
     if (action.name === "runBeeHiveScenario") return runBeeHiveScenario(action.args);
+    if (action.name === "setDemoQuotaUsedPercent") return setDemoQuotaUsedPercent(action.args.percent);
+    if (action.name === "chooseCivilizationFaction") return chooseCivilizationFaction(action.args.faction);
+    if (action.name === "submitCivilizationSample") return submitCivilizationSample(action.args.sampleId);
+    if (action.name === "fightCompanyMonster") return fightCompanyMonster();
     throw new Error(`UNKNOWN_REPLAY_ACTION:${action.name}`);
   }
 
   function replayEvents() {
     const source = clone(actions.filter((action) => action.name !== "resetState"));
-    state = initialState(seed);
+    state = initialState(seedValue);
+    state.civilization = clone(civilizationReplayBase);
+    state.state_hash = hash(hashableState());
     actions = [];
     replaying = true;
     for (const action of source) dispatchAction(action);
@@ -506,6 +624,10 @@ export function createLifeEnergyPayrollRuntime({ seed = DEFAULT_SEED } = {}) {
     runPayrollDemo,
     runAntColonyScenario,
     runBeeHiveScenario,
+    setDemoQuotaUsedPercent,
+    chooseCivilizationFaction,
+    submitCivilizationSample,
+    fightCompanyMonster,
     integrityReport,
     exportState,
     importState,

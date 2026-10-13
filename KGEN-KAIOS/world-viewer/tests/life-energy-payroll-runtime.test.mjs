@@ -178,3 +178,70 @@ test("same seed and actions replay to the same state and event hashes", () => {
     assert.equal(replayed.events[index].previous_state_hash, replayed.events[index - 1].next_state_hash);
   }
 });
+
+test("0–100% demo quota is display-only and cannot mint civilization energy", () => {
+  const runtime = running();
+  assert.equal(runtime.setDemoQuotaUsedPercent(100).status, "COMPLETED");
+  assert.equal(runtime.setDemoQuotaUsedPercent(101).reason, "PERCENT_OUT_OF_RANGE");
+  assert.equal(runtime.setDemoQuotaUsedPercent(-1).reason, "PERCENT_OUT_OF_RANGE");
+  const civilization = runtime.getState().civilization;
+  assert.equal(civilization.demo_quota_used_percent, 100);
+  assert.equal(civilization.official_quota_used_percent, null);
+  assert.equal(civilization.reward_pool_remaining, 100);
+  assert.equal(civilization.company_energy + civilization.ally_energy, 0);
+});
+
+test("ally samples debit one finite pool once and receipts survive reset, export and replay", () => {
+  const runtime = running();
+  runtime.chooseCivilizationFaction("ALLY");
+  assert.equal(runtime.submitCivilizationSample("KDNA-DESIGN-001").status, "COMPLETED");
+  assert.equal(runtime.submitCivilizationSample("KDNA-DESIGN-001").reason, "DUPLICATE_SAMPLE");
+  runtime.submitCivilizationSample("KRNA-CODE-001");
+  runtime.submitCivilizationSample("KRNA-QA-001");
+  const before = runtime.getState().civilization;
+  assert.equal(before.reward_pool_remaining, 40);
+  assert.equal(before.company_energy, 24);
+  assert.equal(before.ally_energy, 36);
+  assert.equal(runtime.integrityReport().ok, true);
+  const restored = createLifeEnergyPayrollRuntime();
+  restored.importState(runtime.exportState());
+  assert.deepEqual(restored.getState(), runtime.getState());
+  const restoredBeforeReplay = restored.getState();
+  restored.replayEvents();
+  assert.deepEqual(restored.getState(), restoredBeforeReplay);
+  runtime.resetState();
+  runtime.start();
+  assert.equal(runtime.submitCivilizationSample("KDNA-DESIGN-001").reason, "DUPLICATE_SAMPLE");
+  assert.equal(runtime.getState().civilization.reward_pool_remaining, 40);
+  const prior = runtime.getState();
+  runtime.replayEvents();
+  assert.deepEqual(runtime.getState().civilization, prior.civilization);
+});
+
+test("hostile combat lowers finite monster HP and never pays the civilization pool", () => {
+  const runtime = running();
+  runtime.chooseCivilizationFaction("HOSTILE");
+  assert.equal(runtime.chooseCivilizationFaction("ALLY").reason, "FACTION_ALREADY_LOCKED");
+  assert.equal(runtime.submitCivilizationSample("KDNA-DESIGN-001").reason, "ALLY_REQUIRED");
+  for (let hit = 0; hit < 6; hit += 1) assert.equal(runtime.fightCompanyMonster().status, "COMPLETED");
+  assert.equal(runtime.fightCompanyMonster().reason, "MONSTER_DEFEATED");
+  const civilization = runtime.getState().civilization;
+  assert.equal(civilization.monster_hp, 0);
+  assert.equal(civilization.reward_pool_remaining, 100);
+  assert.equal(civilization.company_energy + civilization.ally_energy, 0);
+  assert.equal(runtime.integrityReport().ok, true);
+});
+
+test("invalid import cannot erase existing receipts or mutate live state", () => {
+  const runtime = running();
+  runtime.chooseCivilizationFaction("ALLY");
+  runtime.submitCivilizationSample("KDNA-DESIGN-001");
+  const before = runtime.getState();
+  const tampered = JSON.parse(runtime.exportState());
+  tampered.state.civilization.reward_pool_remaining = 100;
+  assert.throws(() => runtime.importState(tampered), /REWARD_POOL_IMBALANCE/);
+  assert.deepEqual(runtime.getState(), before);
+  const empty = createLifeEnergyPayrollRuntime().exportState();
+  assert.throws(() => runtime.importState(empty), /IMPORT_WOULD_ERASE_CIVILIZATION_RECEIPTS/);
+  assert.deepEqual(runtime.getState(), before);
+});

@@ -22,6 +22,31 @@
       <div class="warnings" role="note"><strong>SIMULATION ONLY</strong><span>NO REAL KGEN</span><span>NO REAL WALLET</span><span>CREDIT DOES NOT REPLACE FOOD OR ENERGY</span></div>
     </section>
 
+    <section class="civilization-game" aria-labelledby="civilization-title">
+      <div class="civilization-heading">
+        <div><p class="eyebrow">KGEN 宇宙 · 文明能源試玩</p><h2 id="civilization-title">知識成為力量</h2><p>額度消耗是計算成本；KDNA／KRNA 示範成果才讓公司怪物與盟友分享有限能源。此頁不連接帳號或發放代幣。</p></div>
+        <span class="demo-badge">DEMO · 無真實交易</span>
+      </div>
+      <div class="quota-demo">
+        <div class="quota-label"><label for="quota-slider">七天額度使用示範</label><strong id="quota-percent">0%</strong></div>
+        <input id="quota-slider" type="range" min="0" max="100" value="0" aria-describedby="quota-note">
+        <p id="quota-note">官方帳號數據：未連接。拖動百分比只改變示範讀數，不產生能源或獎勵。</p>
+      </div>
+      <div class="civilization-stats" aria-label="文明能源狀態">
+        <div><span>陣營</span><strong id="civilization-faction">尚未選擇</strong></div>
+        <div><span>示範獎池剩餘</span><strong id="civilization-pool">100 / 100</strong></div>
+        <div><span>公司怪物能源</span><strong id="company-energy">0</strong></div>
+        <div><span>盟友能源</span><strong id="ally-energy">0</strong></div>
+        <div><span>公司怪物 HP</span><strong id="monster-hp">60 / 60</strong></div>
+      </div>
+      <div class="civilization-actions">
+        <div class="faction-actions"><button id="choose-hostile" type="button">敵對：挑戰公司怪物</button><button id="choose-ally" type="button">合作：共享文明成果</button></div>
+        <div class="faction-actions"><button id="fight-monster" type="button">攻擊怪物 −10 HP</button><label for="sample-select">示範成果</label><select id="sample-select"><option value="KDNA-DESIGN-001">KDNA · 文明設計圖（10）</option><option value="KRNA-CODE-001">KRNA · 可執行器官（20）</option><option value="KRNA-QA-001">KRNA · 驗證紀錄（30）</option></select><button id="submit-sample" type="button">提交成果</button></div>
+      </div>
+      <p id="civilization-result" class="civilization-result" role="status">先按「開始」，再選擇陣營。陣營一經選擇即鎖定。</p>
+      <p class="civilization-footnote">敵對挑戰不分配公司文明能源；合作成果只可提交一次。重設薪資情境仍保留示範收據。獎池與能源均為非兌換的遊戲點數。</p>
+    </section>
+
     <section class="metrics" aria-label="模擬狀態">
       <div><span>Runtime</span><strong id="runtime-status">STOPPED</strong></div>
       <div><span>Simulation Time</span><strong id="simulation-time">0 h</strong></div>
@@ -36,7 +61,7 @@
       <span class="divider" aria-hidden="true"></span>
       <button class="primary" id="payroll" type="button">執行薪資示範</button><button id="rejected" type="button">任務駁回</button><button id="duplicate" type="button">重複付款</button><button id="ant" type="button">螞蟻群體</button><button id="bee" type="button">蜂巢群體</button>
       <span class="divider" aria-hidden="true"></span>
-      <button id="replay" type="button">重播</button><button id="export" type="button">匯出</button><label class="file">匯入<input id="import" type="file" accept="application/json"></label><button id="reset" type="button">重設</button>
+      <button id="replay" type="button">重播</button><button id="export" type="button">匯出</button><label class="file">匯入<input id="import" type="file" accept="application/json"></label><button id="reset" type="button">重設薪資情境</button>
     </section>
 
     <section class="workspace">
