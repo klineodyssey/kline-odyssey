@@ -192,6 +192,25 @@
       "conflicts": [
         "短句「反智y阿ㄧ也成力」原樣保留；含義尚不明，不擅自解碼。"
       ]
+    },
+    {
+      "id": "WJ-20261014-012",
+      "kind": "HUMAN_VISION",
+      "title": "三軸自由組合跟怪、反向打怪與原位硬幹",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "X BTC、Y ETH、Z BNB 是三條獨立的市場戰術軸；玩家可選擇每軸跟怪、反向打怪、硬幹或觀察，也可一次同步全部跟、全部反向或原位硬幹。硬幹指怪物或玩家使用原部位直接攻擊，不因戰鬥而下新金融單。",
+      "krna": "在既有 #570 增補單軸/三軸戰術、逐軸 LONG/SHORT/FLAT 查核、怪物與玩家原倉比較、調倉前單軸/三軸精準預覽與明確確認、UI手機端及實際風控測試；向 DOT #573、GM #584 公開通報並在悟界 #590 留長期索引。實際開發ACK與可玩UI尚未驗證。",
+      "status": "DESIGN_PUBLISHED_NOT_IMPLEMENTED",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/570#issuecomment-6157358604",
+        "https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6157365446",
+        "https://github.com/klineodyssey/kline-odyssey/issues/584#issuecomment-6157366488"
+      ],
+      "conflicts": [
+        "先前只有全域 FOLLOW/DUEL/HARD_FIGHT 分類，未完整指定三軸混合、單軸精準確認與全部同步的交付。",
+        "跟怪可指導航追蹤或市場方向跟隨；市場部位的任何新交易都需獨立預覽與玩家確認。",
+        "市場 ALIGNED 與 FLAT 不可誤算 MARKET_OPPOSED 造成金融 HP 攻擊。"
+      ]
     }
   ]
 }
