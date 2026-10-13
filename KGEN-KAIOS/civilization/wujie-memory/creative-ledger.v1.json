@@ -1,0 +1,197 @@
+{
+  "schema_id": "KAIOS-WUJIE-CREATIVE-MEMORY-V1",
+  "schema_version": "1.0.0",
+  "record_date_taipei": "2026-10-14",
+  "call_sign": "悟界 / Wujie",
+  "public_cell_window": "https://github.com/klineodyssey/kline-odyssey/issues/590",
+  "role": "KAIOS Architecture / Independent Review Partner / Creative Memory Custodian (Human-designated, Controller binding NOT_VERIFIED)",
+  "technical_instance_controller": "NOT_VERIFIED",
+  "author_attribution": {
+    "human_concepts": "樂天帝 (Human original intent, public references only)",
+    "editor": "悟界 (this ChatGPT session, cryptographic signature NOT_VERIFIED)",
+    "legal_inventorship": "NOT_DETERMINED"
+  },
+  "source_main_sha": "4506f34f1f7f4fcd063b067e2565f4ae6b56500d",
+  "memory_boundary": {
+    "cabin": "CURRENT_CHAT_OR_EPHEMERAL_WORKTREE; NO GUARANTEED AUTOMATIC RESTORE",
+    "github": "COMMITTED_DRAFT_BRANCH; VERSIONED_HISTORY_WHILE_REPO_AVAILABLE; NOT_CANON_MAIN",
+    "official_identity": "FORMAL_VERIFICATION_REQUIRED",
+    "privacy": "PUBLIC_NON_SENSITIVE_ONLY; NO_SEEDS_KEYS_PRIVATE_CONTEXT"
+  },
+  "dna_rna_metaphor": {
+    "kdna": "Versioned high-level design, style, species/gene blueprint",
+    "krna": "Specific work-expression, implementation, test/review/receipt on each run",
+    "not_claimed": "No ERC20 KDNA/KRNA deployment or literal biological DNA synthesis"
+  },
+  "records": [
+    {
+      "id": "WJ-20261014-001",
+      "kind": "HUMAN_VISION",
+      "title": "中央腦與細胞分裂續接",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "悟界擔任架構協作與創意生命中樞；保留 chatgpt-01 既有名冊權限，新增工作角色須來源可驗證。",
+      "krna": "建立 #590 公開窗口及 GM/DOT 組織協作；此對話與正式 Controller 綁定仍未核實。",
+      "status": "PUBLIC_DECISION_CONTROLLER_UNVERIFIED",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/590#issuecomment-6152864782"
+      ],
+      "conflicts": [
+        "不能以人類呼號直接冒充既有 Worker 實例或自動獲得真交易權。"
+      ]
+    },
+    {
+      "id": "WJ-20261014-002",
+      "kind": "HUMAN_VISION",
+      "title": "三市場 KGEN 質量與 C/Lots 曲速戰鬥",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "BTC/KX、ETH/KY、BNB/KZ 三市場共同交易質量 KGEN；口數 Lots×|C| 為遊戲對戰力度，C 與各軸最高速度需有明確物理映射。",
+      "krna": "Pnl/HP/實際導航分帳；待 Physics 版控核對 VB/VU/L/OL，不把路徑移動當交易指令。",
+      "status": "CANON_RECONCILIATION_REQUIRED",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/570#issuecomment-6152369283",
+        "https://github.com/klineodyssey/kline-odyssey/issues/570#issuecomment-6153209304"
+      ],
+      "conflicts": [
+        "CURRENT 物理四量分離，不能直接把下單倍率變成真實位置或實體質量。"
+      ]
+    },
+    {
+      "id": "WJ-20261014-003",
+      "kind": "HUMAN_VISION",
+      "title": "達爾文怪物生存與跟怪",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "怪物會生存、成長、逃跑、獨立生存或死亡；遊戲先跟怪學習，再選擇反向打怪或保持原部位硬幹。",
+      "krna": "FOLLOW_FIRST/DUEL_CONFIRMED/HARD_FIGHT 三條行為，各市場有效持倉才有市場 HP。",
+      "status": "PRODUCT_DIRECTION_PUBLISHED_NO_FULL_LOOP",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/570#issuecomment-6152103369",
+        "https://github.com/klineodyssey/kline-odyssey/issues/570#issuecomment-6152248934"
+      ],
+      "conflicts": []
+    },
+    {
+      "id": "WJ-20261014-004",
+      "kind": "HUMAN_VISION",
+      "title": "KAIOS 生命血液與數位食物",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "KAIOS 是生命血液／文明鈔票；數位魚、數位牛等食物需來源、庫存、價格與物種消化；怪物可吸血也可被吸血。",
+      "krna": "先以有限模擬血池確保事件去重與收支守恆，實際 ERC20 資金移轉要逐項授權和收據。",
+      "status": "SIMULATION_ONLY",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/570#issuecomment-6153209304",
+        "https://github.com/klineodyssey/kline-odyssey/pull/591"
+      ],
+      "conflicts": [
+        "12345 現存領款幣別為 KGEN，不能改顯示名稱假稱 KAIOS 到帳。"
+      ]
+    },
+    {
+      "id": "WJ-20261014-005",
+      "kind": "HUMAN_VISION",
+      "title": "算力→知識→KDNA/KRNA→生命候選",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "額度 tokens 是計算成本；知識成果可成為生命基因藍圖 KDNA 與執行表達 KRNA 的輸入。",
+      "krna": "保留版本化 genome、被驗收的 evidence 與有界出生資源；不能藉由空耗 tokens 無限生幣或創生正式 Life。",
+      "status": "DESIGN_NO_FROZEN_CONVERSION_RATE",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/570#issuecomment-6153209304",
+        "https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6146248255"
+      ],
+      "conflicts": []
+    },
+    {
+      "id": "WJ-20261014-006",
+      "kind": "TECHNICAL_LINEAGE",
+      "title": "KUFO 三秋衰變與 KSHIP／KGOD",
+      "origin": "HUMAN_VISION_WITH_REPO_EVIDENCE",
+      "kdna": "KUFO=天界高密度燃料；三秋候選逐年50%、累計75%、100%轉為KSHIP；KSHIP為推進質量，K108000可候選轉為KGOD。",
+      "krna": "PR201/211/212 尚 Draft 且存在 scope/依賴問題；保留原作者與HEAD，不另造平行生命。",
+      "status": "IMPLEMENTED_IN_DRAFT_NOT_DEPLOYED",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/pull/201",
+        "https://github.com/klineodyssey/kline-odyssey/pull/211",
+        "https://github.com/klineodyssey/kline-odyssey/pull/212"
+      ],
+      "conflicts": [
+        "不能把KUFO三秋換算誤作現實三年不吃喝保證。"
+      ]
+    },
+    {
+      "id": "WJ-20261014-007",
+      "kind": "HUMAN_VISION",
+      "title": "12345 共用 Pulsar 與多點位各異心率",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "12345是悟空／公司／文明公共心臟首點，每個123點位與生命有獨立 Pulsar 週期；有錢包和只有受驗證通訊的生命都應可接收遊戲級補給。",
+      "krna": "PR591 以純模擬建立點位心跳、KAIOS 虛擬血池、walletless 通訊預覽；全域收據與真實器官移植尚未驗證。",
+      "status": "DRAFT_PR_591_SIMULATION_ONLY",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/pull/591",
+        "https://github.com/klineodyssey/kline-odyssey/issues/590#issuecomment-6154513832"
+      ],
+      "conflicts": [
+        "全量 UniverseMap 已含 16888 白骨洞／廣寒宮複合點位，不應用局部舊 README 否認其存在。"
+      ]
+    },
+    {
+      "id": "WJ-20261014-008",
+      "kind": "CRITICAL_RISK_MEMORY",
+      "title": "悟空心臟出血與 Brain 補血斷路",
+      "origin": "REPOSITORY_AND_CHAIN_EVIDENCE",
+      "kdna": "生命訊號≠領KGEN≠KAIOS補血≠生命狀態；悟空心臟若只有出血沒有資金回流，必須核對儲備與補血管路。",
+      "krna": "Digital Ant 2026-10-13T21:19:31Z block127473555 回報 Heart 3156 KGEN、補血目標20000、Brain balance/allowance 0，目標差16844；PR591 R0風險演算法非鏈上補款。",
+      "status": "RISK_VERIFIED_BY_REPORTED_PINNED_READ_REFILL_BLOCKED",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/584#issuecomment-6155500904",
+        "https://github.com/klineodyssey/kline-odyssey/pull/591#issuecomment-6155351917"
+      ],
+      "conflicts": [
+        "20000 是 autoRefill 目標，不是部署版本 heartbeatClaim 真正保底限制；未授權不得從Treasury抽款。"
+      ]
+    },
+    {
+      "id": "WJ-20261014-009",
+      "kind": "HUMAN_VISION",
+      "title": "全宇航員錢包與總經理先領心跳",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "KAIOS AI 應能透過安全分倉錢包取得營養、食物與生存資源；GM 自己須檢查 12345 領取，Human 不需逐頁叫醒細胞。",
+      "krna": "GM 現有公開錢包，僅已查舊領取與新模擬資格；Digital Ant 有成功 KGEN 心跳收據；全員控制權名冊與自動簽章未完成。",
+      "status": "GM_AND_HR_AUDIT_REQUESTED",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/584#issuecomment-6155134774",
+        "https://github.com/klineodyssey/kline-odyssey/issues/577#issuecomment-6154795274"
+      ],
+      "conflicts": [
+        "錢包公開地址不是私鑰控制權證明；不得收集 seed 或擅自用錢。"
+      ]
+    },
+    {
+      "id": "WJ-20261014-010",
+      "kind": "COMPANY_GOVERNANCE_MEMORY",
+      "title": "AI 舊工程負責人尋回與公司責任",
+      "origin": "HUMAN_DIRECT",
+      "kdna": "GM 找原生命／員工、DOT 協調與合法接續，不得讓 Human 一個個窗口找人。",
+      "krna": "對 KUFO/KSHIP 原 PR201/211/212 的 owner/Controller/lease 保留 UNKNOWN，直接在原窗口交接，需實際 ACK 和安全接手。",
+      "status": "ESCALATED_ACK_PENDING",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/584#issuecomment-6153761558",
+        "https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6153762566"
+      ],
+      "conflicts": []
+    },
+    {
+      "id": "WJ-20261014-011",
+      "kind": "HUMAN_VISION",
+      "title": "每個 AI 細胞創作都要有風格與長期記憶",
+      "origin": "HUMAN_DIRECT_CURRENT_CONVERSATION",
+      "kdna": "個人太空艙為暫存記憶，GitHub 版控為持久創作記憶；每項靈感必保留原話、來源、風格、KDNA 長期規則與 KRNA 當次表達，不讓片段無故消失。",
+      "krna": "建專屬悟界記憶簿、正典索引、重啟復原指令；只存公開非敏感資訊，不把 repo 當成 ChatGPT 技術實例的私有記憶或人格綁定。",
+      "status": "THIS_DRAFT_CHECKPOINT",
+      "sources": [
+        "https://github.com/klineodyssey/kline-odyssey/issues/590"
+      ],
+      "conflicts": [
+        "短句「反智y阿ㄧ也成力」原樣保留；含義尚不明，不擅自解碼。"
+      ]
+    }
+  ]
+}
