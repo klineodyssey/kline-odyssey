@@ -50,7 +50,7 @@ test('adequate brain balance and existing allowance is only a review hint, never
   assert.equal(s.walletOrPrivateKeyTouched,false);
 });
 test('zero reward never invents a paid-heartbeat capacity',()=>{
-  const s=check({heartbeatRewardKgenWhole:'0'});
+  const s=check({heartbeatRewardKgenWhole:'0', heartKgenWhole:'20001'});
   assert.equal(s.proposedUnreservedHeartbeatCount,'0');
   assert.equal(s.proposedFloorPreservingPayoutPossible,false);
 });
