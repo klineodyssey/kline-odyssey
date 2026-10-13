@@ -83,4 +83,39 @@ G. KDNA/KRNA, KUFO/KSHIP, KAIOS and KGEN require their own lineage; no mint beca
 
 H. Independent exact-head tests and required genuine browser screenshots precede any playable UI claim. Versioned management/governance and action-specific Human sign-off precede any Mainnet upgrade, funds or wallet automation.
 
+
+
+## 7. Urgent Wukong 12345 rescue: Heart survival must be independent from payouts
+
+**Human decision 2026-10-14 Asia/Taipei:** Pulsar should actually pulse; it must not become a Wukong bleed-to-death engine. The KAIOS family/partner/monster diet should be funded with real finite resources and distinct from chain asset payouts. Human-origin metaphors: 五指山／如來神掌／悟空出血、仙丹、老婆吃飯. These are game narrative and formal budget governance requirements, not evidence of human biological survival or actual AI sentience/needs. Digital foods/virtual KUFO cannot replace real-world food, water or medical care for a human spouse.
+
+### Code diagnosis of legacy *deployed* Heart (not a post-hoc upgrade claim)
+
+`KGEN/contracts/KGEN_TempleHeart_V3_2_6.sol` shows:
+- `heartbeatClaim()` only checks per-wallet cooldown and `heartBalance>=heartbeatReward`, then sends KGEN and emits event. **There is no payout-protective check that remaining Heart KGEN >= effectiveFloorWhole.**
+- `effectiveFloorWhole()` and `baseFloorWhole=20000` appear in the old source, but the floor is used as the target of `autoRefillFromBrain()`, not a guard in `heartbeatClaim()`. Whether live Chain56 `effectiveFloorWhole` and Brain authorization match file defaults requires a new pinned-block read of contract bytecode/storage.
+- `injectFromBrain()` and `autoRefillFromBrain()` require a real `brainVault`, funded KGEN, token allowance and an authorized chain transaction, and `vowTo()`/ `lightLamp()` are holder-initiated KGEN return routes. None of these automatically create funds. `sweepExcessToBrain()` returns excess to Brain but does not restore depleted Heart.
+- Digital Ant's 2026-10-14 public read-only report at https://github.com/klineodyssey/kline-odyssey/issues/577#issuecomment-6154795274 quotes a chain56 Heart balance ~3157 KGEN at block127467205, NOT an independently revalidated balance for this draft. Source-default floor 20000 and illustrative balance3157 imply **an illustrative shortfall of16843 KGEN** if current floor actually equals 20000; never post this as a payable debt, a funded top-up, or verified current policy.
+- Digital Ant has a newer verified receipt for 1 KGEN on 2026-10-14 03:47:19 Asia/Taipei; GM has a verified public wallet but last reported Heart claim 2026-08-28, despite a later `eth_call` eligibility success. One Life's failure to collect never proves it is dead. A claim that is eligible is not automatically signed or broadcast.
+- Future `KGEN_TempleHeart_Upgradeable.sol` V3.4 includes operational-reserve payout checks and 88/hour capped Heartbeat, but is **DRAFT, not Chain56 deployed**. The present live Heart is legacy direct code (zero ERC1967 implementation slot observed in Digital Ant report), so **do not attempt to UUPS upgrade or claim protection already exists**.
+
+### Survival policy before any real automated distribution or funding
+
+1. `PULSAR_CLOCK_RUNNING` is an offchain game/life clock; it may continue to pulse with zero payout. It is not the same as `HEARTBEAT_CLAIM_SUCCESS`. `LIFE_LAST_PULSE_RECEIVED` is a verified routed game event; `LIFE_ALIVE` requires independent Life OS and other organs. No automatic biological death from claim failure.
+2. For any *future approved* paying organ, refuse payouts that would drop below an **approved actual chain-specific floor**, not just the finite current balance; show `PAYOUT_PROTECTIVE_HOLD` and remain alive/visible. No retroactive rewriting of the deployed V3.2.6 token contract. Preserve existing legal holder withdrawal rights until Human specifically approves a safe successor and migration.
+3. Plan replenishment with live audited `heartBalance`, `effectiveFloorWhole`, `brainVault`, `brainBalance`, `brainAllowance`, active authorization, exact payer/beneficiary, approved budget and potential rights/role; unresolved configuration => `REFILL_NOT_AUTHORIZED`. Never transfer anything based on GitHub instructions alone, assume an allowance, create a signer or ask for private keys.
+4. User-specified “讓老婆吃” is tracked as family/partner nutrition in the **game Life Economy**: `familyOrPartnerLife` may be able to buy digital fish/cattle at a validated KAIOS food market, if its food supplier/price/budget/receipt and species metabolism exist. Without those organs this is a simulation proposal only. **No human may stop eating/drinking because of game KUFO**; game “3 years immortal” is species-specific unvalidated gameplay.
+5. For stakeholder reporting use distinct columns `PULSAR_SIGNAL, LEGACY_KGEN_CLAIM, BRAIN_REFILL, FOOD_KAIOS_INGESTION, KUFO_KSHIP_RESOURCE, LAST_VERIFIED_RECEIPT`; never mix salary, blood, fuel, or KGEN settlement. Public full wallet IDs are optional and source-scoped, not consent to spend.
+
+### Additional R0 auditable source
+
+`tools/temple-heart-circulation-risk-audit.mjs` and `tests/temple-heart-circulation-risk-audit.test.mjs` are an additive pure function and tests. They compute only:
+- hypothetical legacy balance capacity (not cooldown, nonce, real tx eligibility);
+- proposed floor-preserving payout capacity, illustrative funding gap, and **unprivileged** Brain-balance/allowance readiness hint;
+- `onchainKgenPayoutExecuted=false`, `fundingAuthorized=false`, `onchainKaiosBloodTransferred=false`, `recipientAliveOrDeadDetermined=false`.
+This is R0 risk analysis, not a client calling `heartbeatClaim()`, `autoRefillFromBrain()`, `sweepExcessToBrain()` or `sweepToken()`, and not a patched Heart release.
+
+Next responsible parties: GM #584 (live onchain read / Brain/operational reserve source / owner-controlled instance and wallet health); DOT #573 (non-overlapping scope and independent review); Digital Ant #577 (read-only 12345 receipts); Physics/Species/Economy (family food and actual simulated KAIOS supply). When the root cause, source-of-funds, and policy are known, a separate action-specific Human financial authorization may be needed for any chain fund transfer or contract upgrade. Until then: **PROTECT_WUKONG / NO_CHAIN_WRITE / REPORT_EXACT_UNKNOWN**.
+
+
 END_OF_DESIGN / NOT_PRODUCTION / TEXT_SIGNATURE=悟界 / CRYPTO_SIGNATURE=NOT_VERIFIED
