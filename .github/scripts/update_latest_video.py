@@ -6,6 +6,7 @@ import json
 import re
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -17,6 +18,8 @@ import feedparser
 CHANNEL_ID = "UC2UE0sZXbKnvR-N0Ew6Z6NA"
 RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}"
 CHANNEL_VIDEOS_URL = f"https://www.youtube.com/channel/{CHANNEL_ID}/videos"
+RSS_RETRY_STATUSES = frozenset({500, 502, 503, 504})
+RSS_RETRY_DELAYS = (1, 2)
 
 README_PATH = "README.md"
 
@@ -143,11 +146,28 @@ def _fetch_url(url, urlopen=urllib.request.urlopen):
         raise RuntimeError(f"YouTube request failed for {url}") from exc
 
 
-def _load_feed(feed_parser=feedparser.parse, urlopen=urllib.request.urlopen):
-    """Load RSS, falling back to the verified canonical channel page on RSS 404."""
-    status_code, rss_body = _fetch_url(RSS_URL, urlopen)
+def _load_feed(feed_parser=feedparser.parse, urlopen=urllib.request.urlopen, sleep=time.sleep):
+    """Retry selected transient HTTP errors; verified page fallback remains 404-only."""
+    for attempt in range(len(RSS_RETRY_DELAYS) + 1):
+        status_code, rss_body = _fetch_url(RSS_URL, urlopen)
+        if status_code not in RSS_RETRY_STATUSES:
+            break
+        if attempt == len(RSS_RETRY_DELAYS):
+            raise RuntimeError(
+                f"RSS_TRANSIENT_HTTP_EXHAUSTED: status {status_code} after {attempt + 1} attempts; "
+                "README unchanged"
+            )
+        delay = RSS_RETRY_DELAYS[attempt]
+        print(
+            f"WARNING: RSS_TRANSIENT_HTTP: status {status_code}; "
+            f"attempt {attempt + 1}/3; retrying in {delay}s",
+            file=sys.stderr,
+        )
+        sleep(delay)
 
     if status_code != 404:
+        if not isinstance(status_code, int) or not 200 <= status_code < 300:
+            raise RuntimeError(f"RSS_HTTP_NON_RETRYABLE: status {status_code!r}; README unchanged")
         feed = feed_parser(rss_body)
         feed.status = status_code
         return feed
@@ -361,6 +381,55 @@ def self_test():
         fallback_entries = _validate_feed(fallback_feed)
         assert len(fallback_entries) == 1
         assert fallback_entries[0].title == "Lockup Video"
+
+        # Transient HTTP retry is bounded; error bodies never reach the parser.
+        def retry_case(statuses, expected_delays, expected_error=None, http_error=False):
+            readme.write_text(seed, encoding="utf-8")
+            before = readme.read_bytes()
+            calls, delays, parsed = [], [], []
+            remaining = iter(statuses)
+
+            def open_sequence(request, timeout):
+                assert timeout == 20
+                calls.append(request.full_url)
+                if request.full_url == CHANNEL_VIDEOS_URL:
+                    return FakeResponse(200, lockup_channel.encode("utf-8"))
+                assert request.full_url == RSS_URL
+                status = next(remaining)
+                body = b"valid-feed" if status == 200 else b"untrusted-error-body"
+                if http_error and status >= 400:
+                    raise urllib.error.HTTPError(request.full_url, status, "error", {}, io.BytesIO(body))
+                return FakeResponse(status, body)
+
+            def parse_valid(body):
+                parsed.append(body)
+                assert body == b"valid-feed", "HTTP error body reached parser"
+                return SimpleNamespace(bozo=False, entries=[SimpleNamespace(
+                    title="Recovered Video", link="https://www.youtube.com/watch?v=abcdefghijk"
+                )])
+
+            with contextlib.redirect_stderr(io.StringIO()):
+                try:
+                    feed = _load_feed(parse_valid, open_sequence, delays.append)
+                    update_latest_video(feed, readme)
+                except RuntimeError as exc:
+                    assert expected_error and expected_error in str(exc), str(exc)
+                    assert readme.read_bytes() == before
+                else:
+                    assert expected_error is None, "expected fail-closed HTTP error"
+            assert delays == expected_delays
+            assert calls.count(RSS_URL) == len(statuses)
+            assert calls.count(CHANNEL_VIDEOS_URL) == int(statuses[-1] == 404)
+            assert len(parsed) == int(statuses[-1] == 200)
+
+        retry_case([500, 200], [1])
+        retry_case([502, 503, 200], [1, 2])
+        retry_case([500, 404], [1])
+        retry_case([500, 200], [1], http_error=True)
+        for status in sorted(RSS_RETRY_STATUSES):
+            retry_case([status] * 3, [1, 2], "RSS_TRANSIENT_HTTP_EXHAUSTED")
+        for status in (400, 401, 403, 429, 501):
+            retry_case([status], [], "RSS_HTTP_NON_RETRYABLE")
 
     print("[update-latest-video-self-test] PASS")
 
