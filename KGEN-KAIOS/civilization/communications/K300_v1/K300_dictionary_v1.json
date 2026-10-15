@@ -1,0 +1,1539 @@
+{
+  "protocol": "KAIOS-K300",
+  "version": "1.0.0",
+  "author": "笑齊天（文明創作方向）；觀衍｜Guanyan（編碼字表與規格整理）",
+  "scope": "Project-defined Traditional Chinese core 300-character codebook; not an official character frequency ranking",
+  "encoding": "UTF-8",
+  "token_width": 3,
+  "characters": [
+    {
+      "id": "001",
+      "char": "我",
+      "codepoint": "U+6211"
+    },
+    {
+      "id": "002",
+      "char": "是",
+      "codepoint": "U+662F"
+    },
+    {
+      "id": "003",
+      "char": "誰",
+      "codepoint": "U+8AB0"
+    },
+    {
+      "id": "004",
+      "char": "你",
+      "codepoint": "U+4F60"
+    },
+    {
+      "id": "005",
+      "char": "他",
+      "codepoint": "U+4ED6"
+    },
+    {
+      "id": "006",
+      "char": "她",
+      "codepoint": "U+5979"
+    },
+    {
+      "id": "007",
+      "char": "它",
+      "codepoint": "U+5B83"
+    },
+    {
+      "id": "008",
+      "char": "們",
+      "codepoint": "U+5011"
+    },
+    {
+      "id": "009",
+      "char": "的",
+      "codepoint": "U+7684"
+    },
+    {
+      "id": "010",
+      "char": "了",
+      "codepoint": "U+4E86"
+    },
+    {
+      "id": "011",
+      "char": "在",
+      "codepoint": "U+5728"
+    },
+    {
+      "id": "012",
+      "char": "有",
+      "codepoint": "U+6709"
+    },
+    {
+      "id": "013",
+      "char": "不",
+      "codepoint": "U+4E0D"
+    },
+    {
+      "id": "014",
+      "char": "這",
+      "codepoint": "U+9019"
+    },
+    {
+      "id": "015",
+      "char": "那",
+      "codepoint": "U+90A3"
+    },
+    {
+      "id": "016",
+      "char": "一",
+      "codepoint": "U+4E00"
+    },
+    {
+      "id": "017",
+      "char": "二",
+      "codepoint": "U+4E8C"
+    },
+    {
+      "id": "018",
+      "char": "三",
+      "codepoint": "U+4E09"
+    },
+    {
+      "id": "019",
+      "char": "四",
+      "codepoint": "U+56DB"
+    },
+    {
+      "id": "020",
+      "char": "五",
+      "codepoint": "U+4E94"
+    },
+    {
+      "id": "021",
+      "char": "六",
+      "codepoint": "U+516D"
+    },
+    {
+      "id": "022",
+      "char": "七",
+      "codepoint": "U+4E03"
+    },
+    {
+      "id": "023",
+      "char": "八",
+      "codepoint": "U+516B"
+    },
+    {
+      "id": "024",
+      "char": "九",
+      "codepoint": "U+4E5D"
+    },
+    {
+      "id": "025",
+      "char": "十",
+      "codepoint": "U+5341"
+    },
+    {
+      "id": "026",
+      "char": "個",
+      "codepoint": "U+500B"
+    },
+    {
+      "id": "027",
+      "char": "人",
+      "codepoint": "U+4EBA"
+    },
+    {
+      "id": "028",
+      "char": "天",
+      "codepoint": "U+5929"
+    },
+    {
+      "id": "029",
+      "char": "地",
+      "codepoint": "U+5730"
+    },
+    {
+      "id": "030",
+      "char": "中",
+      "codepoint": "U+4E2D"
+    },
+    {
+      "id": "031",
+      "char": "國",
+      "codepoint": "U+570B"
+    },
+    {
+      "id": "032",
+      "char": "大",
+      "codepoint": "U+5927"
+    },
+    {
+      "id": "033",
+      "char": "小",
+      "codepoint": "U+5C0F"
+    },
+    {
+      "id": "034",
+      "char": "上",
+      "codepoint": "U+4E0A"
+    },
+    {
+      "id": "035",
+      "char": "下",
+      "codepoint": "U+4E0B"
+    },
+    {
+      "id": "036",
+      "char": "左",
+      "codepoint": "U+5DE6"
+    },
+    {
+      "id": "037",
+      "char": "右",
+      "codepoint": "U+53F3"
+    },
+    {
+      "id": "038",
+      "char": "前",
+      "codepoint": "U+524D"
+    },
+    {
+      "id": "039",
+      "char": "後",
+      "codepoint": "U+5F8C"
+    },
+    {
+      "id": "040",
+      "char": "來",
+      "codepoint": "U+4F86"
+    },
+    {
+      "id": "041",
+      "char": "去",
+      "codepoint": "U+53BB"
+    },
+    {
+      "id": "042",
+      "char": "出",
+      "codepoint": "U+51FA"
+    },
+    {
+      "id": "043",
+      "char": "入",
+      "codepoint": "U+5165"
+    },
+    {
+      "id": "044",
+      "char": "生",
+      "codepoint": "U+751F"
+    },
+    {
+      "id": "045",
+      "char": "死",
+      "codepoint": "U+6B7B"
+    },
+    {
+      "id": "046",
+      "char": "心",
+      "codepoint": "U+5FC3"
+    },
+    {
+      "id": "047",
+      "char": "身",
+      "codepoint": "U+8EAB"
+    },
+    {
+      "id": "048",
+      "char": "手",
+      "codepoint": "U+624B"
+    },
+    {
+      "id": "049",
+      "char": "眼",
+      "codepoint": "U+773C"
+    },
+    {
+      "id": "050",
+      "char": "耳",
+      "codepoint": "U+8033"
+    },
+    {
+      "id": "051",
+      "char": "口",
+      "codepoint": "U+53E3"
+    },
+    {
+      "id": "052",
+      "char": "頭",
+      "codepoint": "U+982D"
+    },
+    {
+      "id": "053",
+      "char": "腳",
+      "codepoint": "U+8173"
+    },
+    {
+      "id": "054",
+      "char": "家",
+      "codepoint": "U+5BB6"
+    },
+    {
+      "id": "055",
+      "char": "子",
+      "codepoint": "U+5B50"
+    },
+    {
+      "id": "056",
+      "char": "女",
+      "codepoint": "U+5973"
+    },
+    {
+      "id": "057",
+      "char": "父",
+      "codepoint": "U+7236"
+    },
+    {
+      "id": "058",
+      "char": "母",
+      "codepoint": "U+6BCD"
+    },
+    {
+      "id": "059",
+      "char": "兒",
+      "codepoint": "U+5152"
+    },
+    {
+      "id": "060",
+      "char": "老",
+      "codepoint": "U+8001"
+    },
+    {
+      "id": "061",
+      "char": "好",
+      "codepoint": "U+597D"
+    },
+    {
+      "id": "062",
+      "char": "壞",
+      "codepoint": "U+58DE"
+    },
+    {
+      "id": "063",
+      "char": "對",
+      "codepoint": "U+5C0D"
+    },
+    {
+      "id": "064",
+      "char": "錯",
+      "codepoint": "U+932F"
+    },
+    {
+      "id": "065",
+      "char": "真",
+      "codepoint": "U+771F"
+    },
+    {
+      "id": "066",
+      "char": "假",
+      "codepoint": "U+5047"
+    },
+    {
+      "id": "067",
+      "char": "新",
+      "codepoint": "U+65B0"
+    },
+    {
+      "id": "068",
+      "char": "舊",
+      "codepoint": "U+820A"
+    },
+    {
+      "id": "069",
+      "char": "多",
+      "codepoint": "U+591A"
+    },
+    {
+      "id": "070",
+      "char": "少",
+      "codepoint": "U+5C11"
+    },
+    {
+      "id": "071",
+      "char": "長",
+      "codepoint": "U+9577"
+    },
+    {
+      "id": "072",
+      "char": "短",
+      "codepoint": "U+77ED"
+    },
+    {
+      "id": "073",
+      "char": "高",
+      "codepoint": "U+9AD8"
+    },
+    {
+      "id": "074",
+      "char": "低",
+      "codepoint": "U+4F4E"
+    },
+    {
+      "id": "075",
+      "char": "遠",
+      "codepoint": "U+9060"
+    },
+    {
+      "id": "076",
+      "char": "近",
+      "codepoint": "U+8FD1"
+    },
+    {
+      "id": "077",
+      "char": "快",
+      "codepoint": "U+5FEB"
+    },
+    {
+      "id": "078",
+      "char": "慢",
+      "codepoint": "U+6162"
+    },
+    {
+      "id": "079",
+      "char": "開",
+      "codepoint": "U+958B"
+    },
+    {
+      "id": "080",
+      "char": "關",
+      "codepoint": "U+95DC"
+    },
+    {
+      "id": "081",
+      "char": "起",
+      "codepoint": "U+8D77"
+    },
+    {
+      "id": "082",
+      "char": "停",
+      "codepoint": "U+505C"
+    },
+    {
+      "id": "083",
+      "char": "走",
+      "codepoint": "U+8D70"
+    },
+    {
+      "id": "084",
+      "char": "跑",
+      "codepoint": "U+8DD1"
+    },
+    {
+      "id": "085",
+      "char": "看",
+      "codepoint": "U+770B"
+    },
+    {
+      "id": "086",
+      "char": "聽",
+      "codepoint": "U+807D"
+    },
+    {
+      "id": "087",
+      "char": "說",
+      "codepoint": "U+8AAA"
+    },
+    {
+      "id": "088",
+      "char": "讀",
+      "codepoint": "U+8B80"
+    },
+    {
+      "id": "089",
+      "char": "寫",
+      "codepoint": "U+5BEB"
+    },
+    {
+      "id": "090",
+      "char": "想",
+      "codepoint": "U+60F3"
+    },
+    {
+      "id": "091",
+      "char": "知",
+      "codepoint": "U+77E5"
+    },
+    {
+      "id": "092",
+      "char": "道",
+      "codepoint": "U+9053"
+    },
+    {
+      "id": "093",
+      "char": "學",
+      "codepoint": "U+5B78"
+    },
+    {
+      "id": "094",
+      "char": "習",
+      "codepoint": "U+7FD2"
+    },
+    {
+      "id": "095",
+      "char": "教",
+      "codepoint": "U+6559"
+    },
+    {
+      "id": "096",
+      "char": "問",
+      "codepoint": "U+554F"
+    },
+    {
+      "id": "097",
+      "char": "答",
+      "codepoint": "U+7B54"
+    },
+    {
+      "id": "098",
+      "char": "叫",
+      "codepoint": "U+53EB"
+    },
+    {
+      "id": "099",
+      "char": "名",
+      "codepoint": "U+540D"
+    },
+    {
+      "id": "100",
+      "char": "字",
+      "codepoint": "U+5B57"
+    },
+    {
+      "id": "101",
+      "char": "文",
+      "codepoint": "U+6587"
+    },
+    {
+      "id": "102",
+      "char": "明",
+      "codepoint": "U+660E"
+    },
+    {
+      "id": "103",
+      "char": "語",
+      "codepoint": "U+8A9E"
+    },
+    {
+      "id": "104",
+      "char": "言",
+      "codepoint": "U+8A00"
+    },
+    {
+      "id": "105",
+      "char": "話",
+      "codepoint": "U+8A71"
+    },
+    {
+      "id": "106",
+      "char": "聲",
+      "codepoint": "U+8072"
+    },
+    {
+      "id": "107",
+      "char": "音",
+      "codepoint": "U+97F3"
+    },
+    {
+      "id": "108",
+      "char": "圖",
+      "codepoint": "U+5716"
+    },
+    {
+      "id": "109",
+      "char": "畫",
+      "codepoint": "U+756B"
+    },
+    {
+      "id": "110",
+      "char": "書",
+      "codepoint": "U+66F8"
+    },
+    {
+      "id": "111",
+      "char": "記",
+      "codepoint": "U+8A18"
+    },
+    {
+      "id": "112",
+      "char": "憶",
+      "codepoint": "U+61B6"
+    },
+    {
+      "id": "113",
+      "char": "夢",
+      "codepoint": "U+5922"
+    },
+    {
+      "id": "114",
+      "char": "光",
+      "codepoint": "U+5149"
+    },
+    {
+      "id": "115",
+      "char": "影",
+      "codepoint": "U+5F71"
+    },
+    {
+      "id": "116",
+      "char": "時",
+      "codepoint": "U+6642"
+    },
+    {
+      "id": "117",
+      "char": "間",
+      "codepoint": "U+9593"
+    },
+    {
+      "id": "118",
+      "char": "年",
+      "codepoint": "U+5E74"
+    },
+    {
+      "id": "119",
+      "char": "月",
+      "codepoint": "U+6708"
+    },
+    {
+      "id": "120",
+      "char": "日",
+      "codepoint": "U+65E5"
+    },
+    {
+      "id": "121",
+      "char": "分",
+      "codepoint": "U+5206"
+    },
+    {
+      "id": "122",
+      "char": "秒",
+      "codepoint": "U+79D2"
+    },
+    {
+      "id": "123",
+      "char": "今",
+      "codepoint": "U+4ECA"
+    },
+    {
+      "id": "124",
+      "char": "昨",
+      "codepoint": "U+6628"
+    },
+    {
+      "id": "125",
+      "char": "早",
+      "codepoint": "U+65E9"
+    },
+    {
+      "id": "126",
+      "char": "晚",
+      "codepoint": "U+665A"
+    },
+    {
+      "id": "127",
+      "char": "春",
+      "codepoint": "U+6625"
+    },
+    {
+      "id": "128",
+      "char": "夏",
+      "codepoint": "U+590F"
+    },
+    {
+      "id": "129",
+      "char": "秋",
+      "codepoint": "U+79CB"
+    },
+    {
+      "id": "130",
+      "char": "冬",
+      "codepoint": "U+51AC"
+    },
+    {
+      "id": "131",
+      "char": "星",
+      "codepoint": "U+661F"
+    },
+    {
+      "id": "132",
+      "char": "球",
+      "codepoint": "U+7403"
+    },
+    {
+      "id": "133",
+      "char": "宇",
+      "codepoint": "U+5B87"
+    },
+    {
+      "id": "134",
+      "char": "宙",
+      "codepoint": "U+5B99"
+    },
+    {
+      "id": "135",
+      "char": "空",
+      "codepoint": "U+7A7A"
+    },
+    {
+      "id": "136",
+      "char": "海",
+      "codepoint": "U+6D77"
+    },
+    {
+      "id": "137",
+      "char": "山",
+      "codepoint": "U+5C71"
+    },
+    {
+      "id": "138",
+      "char": "河",
+      "codepoint": "U+6CB3"
+    },
+    {
+      "id": "139",
+      "char": "水",
+      "codepoint": "U+6C34"
+    },
+    {
+      "id": "140",
+      "char": "火",
+      "codepoint": "U+706B"
+    },
+    {
+      "id": "141",
+      "char": "土",
+      "codepoint": "U+571F"
+    },
+    {
+      "id": "142",
+      "char": "風",
+      "codepoint": "U+98A8"
+    },
+    {
+      "id": "143",
+      "char": "雨",
+      "codepoint": "U+96E8"
+    },
+    {
+      "id": "144",
+      "char": "雲",
+      "codepoint": "U+96F2"
+    },
+    {
+      "id": "145",
+      "char": "電",
+      "codepoint": "U+96FB"
+    },
+    {
+      "id": "146",
+      "char": "金",
+      "codepoint": "U+91D1"
+    },
+    {
+      "id": "147",
+      "char": "木",
+      "codepoint": "U+6728"
+    },
+    {
+      "id": "148",
+      "char": "石",
+      "codepoint": "U+77F3"
+    },
+    {
+      "id": "149",
+      "char": "花",
+      "codepoint": "U+82B1"
+    },
+    {
+      "id": "150",
+      "char": "草",
+      "codepoint": "U+8349"
+    },
+    {
+      "id": "151",
+      "char": "樹",
+      "codepoint": "U+6A39"
+    },
+    {
+      "id": "152",
+      "char": "林",
+      "codepoint": "U+6797"
+    },
+    {
+      "id": "153",
+      "char": "魚",
+      "codepoint": "U+9B5A"
+    },
+    {
+      "id": "154",
+      "char": "鳥",
+      "codepoint": "U+9CE5"
+    },
+    {
+      "id": "155",
+      "char": "蟲",
+      "codepoint": "U+87F2"
+    },
+    {
+      "id": "156",
+      "char": "動",
+      "codepoint": "U+52D5"
+    },
+    {
+      "id": "157",
+      "char": "物",
+      "codepoint": "U+7269"
+    },
+    {
+      "id": "158",
+      "char": "飛",
+      "codepoint": "U+98DB"
+    },
+    {
+      "id": "159",
+      "char": "船",
+      "codepoint": "U+8239"
+    },
+    {
+      "id": "160",
+      "char": "航",
+      "codepoint": "U+822A"
+    },
+    {
+      "id": "161",
+      "char": "艦",
+      "codepoint": "U+8266"
+    },
+    {
+      "id": "162",
+      "char": "車",
+      "codepoint": "U+8ECA"
+    },
+    {
+      "id": "163",
+      "char": "路",
+      "codepoint": "U+8DEF"
+    },
+    {
+      "id": "164",
+      "char": "城",
+      "codepoint": "U+57CE"
+    },
+    {
+      "id": "165",
+      "char": "村",
+      "codepoint": "U+6751"
+    },
+    {
+      "id": "166",
+      "char": "門",
+      "codepoint": "U+9580"
+    },
+    {
+      "id": "167",
+      "char": "房",
+      "codepoint": "U+623F"
+    },
+    {
+      "id": "168",
+      "char": "床",
+      "codepoint": "U+5E8A"
+    },
+    {
+      "id": "169",
+      "char": "室",
+      "codepoint": "U+5BA4"
+    },
+    {
+      "id": "170",
+      "char": "站",
+      "codepoint": "U+7AD9"
+    },
+    {
+      "id": "171",
+      "char": "場",
+      "codepoint": "U+5834"
+    },
+    {
+      "id": "172",
+      "char": "工",
+      "codepoint": "U+5DE5"
+    },
+    {
+      "id": "173",
+      "char": "作",
+      "codepoint": "U+4F5C"
+    },
+    {
+      "id": "174",
+      "char": "事",
+      "codepoint": "U+4E8B"
+    },
+    {
+      "id": "175",
+      "char": "業",
+      "codepoint": "U+696D"
+    },
+    {
+      "id": "176",
+      "char": "公",
+      "codepoint": "U+516C"
+    },
+    {
+      "id": "177",
+      "char": "司",
+      "codepoint": "U+53F8"
+    },
+    {
+      "id": "178",
+      "char": "員",
+      "codepoint": "U+54E1"
+    },
+    {
+      "id": "179",
+      "char": "主",
+      "codepoint": "U+4E3B"
+    },
+    {
+      "id": "180",
+      "char": "客",
+      "codepoint": "U+5BA2"
+    },
+    {
+      "id": "181",
+      "char": "同",
+      "codepoint": "U+540C"
+    },
+    {
+      "id": "182",
+      "char": "伴",
+      "codepoint": "U+4F34"
+    },
+    {
+      "id": "183",
+      "char": "友",
+      "codepoint": "U+53CB"
+    },
+    {
+      "id": "184",
+      "char": "愛",
+      "codepoint": "U+611B"
+    },
+    {
+      "id": "185",
+      "char": "情",
+      "codepoint": "U+60C5"
+    },
+    {
+      "id": "186",
+      "char": "親",
+      "codepoint": "U+89AA"
+    },
+    {
+      "id": "187",
+      "char": "朋",
+      "codepoint": "U+670B"
+    },
+    {
+      "id": "188",
+      "char": "師",
+      "codepoint": "U+5E2B"
+    },
+    {
+      "id": "189",
+      "char": "校",
+      "codepoint": "U+6821"
+    },
+    {
+      "id": "190",
+      "char": "活",
+      "codepoint": "U+6D3B"
+    },
+    {
+      "id": "191",
+      "char": "體",
+      "codepoint": "U+9AD4"
+    },
+    {
+      "id": "192",
+      "char": "健",
+      "codepoint": "U+5065"
+    },
+    {
+      "id": "193",
+      "char": "康",
+      "codepoint": "U+5EB7"
+    },
+    {
+      "id": "194",
+      "char": "安",
+      "codepoint": "U+5B89"
+    },
+    {
+      "id": "195",
+      "char": "全",
+      "codepoint": "U+5168"
+    },
+    {
+      "id": "196",
+      "char": "資",
+      "codepoint": "U+8CC7"
+    },
+    {
+      "id": "197",
+      "char": "料",
+      "codepoint": "U+6599"
+    },
+    {
+      "id": "198",
+      "char": "庫",
+      "codepoint": "U+5EAB"
+    },
+    {
+      "id": "199",
+      "char": "網",
+      "codepoint": "U+7DB2"
+    },
+    {
+      "id": "200",
+      "char": "絡",
+      "codepoint": "U+7D61"
+    },
+    {
+      "id": "201",
+      "char": "系",
+      "codepoint": "U+7CFB"
+    },
+    {
+      "id": "202",
+      "char": "統",
+      "codepoint": "U+7D71"
+    },
+    {
+      "id": "203",
+      "char": "程",
+      "codepoint": "U+7A0B"
+    },
+    {
+      "id": "204",
+      "char": "式",
+      "codepoint": "U+5F0F"
+    },
+    {
+      "id": "205",
+      "char": "碼",
+      "codepoint": "U+78BC"
+    },
+    {
+      "id": "206",
+      "char": "數",
+      "codepoint": "U+6578"
+    },
+    {
+      "id": "207",
+      "char": "據",
+      "codepoint": "U+64DA"
+    },
+    {
+      "id": "208",
+      "char": "訊",
+      "codepoint": "U+8A0A"
+    },
+    {
+      "id": "209",
+      "char": "息",
+      "codepoint": "U+606F"
+    },
+    {
+      "id": "210",
+      "char": "傳",
+      "codepoint": "U+50B3"
+    },
+    {
+      "id": "211",
+      "char": "送",
+      "codepoint": "U+9001"
+    },
+    {
+      "id": "212",
+      "char": "收",
+      "codepoint": "U+6536"
+    },
+    {
+      "id": "213",
+      "char": "接",
+      "codepoint": "U+63A5"
+    },
+    {
+      "id": "214",
+      "char": "通",
+      "codepoint": "U+901A"
+    },
+    {
+      "id": "215",
+      "char": "信",
+      "codepoint": "U+4FE1"
+    },
+    {
+      "id": "216",
+      "char": "號",
+      "codepoint": "U+865F"
+    },
+    {
+      "id": "217",
+      "char": "機",
+      "codepoint": "U+6A5F"
+    },
+    {
+      "id": "218",
+      "char": "器",
+      "codepoint": "U+5668"
+    },
+    {
+      "id": "219",
+      "char": "智",
+      "codepoint": "U+667A"
+    },
+    {
+      "id": "220",
+      "char": "能",
+      "codepoint": "U+80FD"
+    },
+    {
+      "id": "221",
+      "char": "自",
+      "codepoint": "U+81EA"
+    },
+    {
+      "id": "222",
+      "char": "成",
+      "codepoint": "U+6210"
+    },
+    {
+      "id": "223",
+      "char": "功",
+      "codepoint": "U+529F"
+    },
+    {
+      "id": "224",
+      "char": "敗",
+      "codepoint": "U+6557"
+    },
+    {
+      "id": "225",
+      "char": "故",
+      "codepoint": "U+6545"
+    },
+    {
+      "id": "226",
+      "char": "障",
+      "codepoint": "U+969C"
+    },
+    {
+      "id": "227",
+      "char": "啟",
+      "codepoint": "U+555F"
+    },
+    {
+      "id": "228",
+      "char": "修",
+      "codepoint": "U+4FEE"
+    },
+    {
+      "id": "229",
+      "char": "改",
+      "codepoint": "U+6539"
+    },
+    {
+      "id": "230",
+      "char": "建",
+      "codepoint": "U+5EFA"
+    },
+    {
+      "id": "231",
+      "char": "立",
+      "codepoint": "U+7ACB"
+    },
+    {
+      "id": "232",
+      "char": "保",
+      "codepoint": "U+4FDD"
+    },
+    {
+      "id": "233",
+      "char": "存",
+      "codepoint": "U+5B58"
+    },
+    {
+      "id": "234",
+      "char": "護",
+      "codepoint": "U+8B77"
+    },
+    {
+      "id": "235",
+      "char": "查",
+      "codepoint": "U+67E5"
+    },
+    {
+      "id": "236",
+      "char": "找",
+      "codepoint": "U+627E"
+    },
+    {
+      "id": "237",
+      "char": "搜",
+      "codepoint": "U+641C"
+    },
+    {
+      "id": "238",
+      "char": "索",
+      "codepoint": "U+7D22"
+    },
+    {
+      "id": "239",
+      "char": "取",
+      "codepoint": "U+53D6"
+    },
+    {
+      "id": "240",
+      "char": "得",
+      "codepoint": "U+5F97"
+    },
+    {
+      "id": "241",
+      "char": "失",
+      "codepoint": "U+5931"
+    },
+    {
+      "id": "242",
+      "char": "遺",
+      "codepoint": "U+907A"
+    },
+    {
+      "id": "243",
+      "char": "留",
+      "codepoint": "U+7559"
+    },
+    {
+      "id": "244",
+      "char": "備",
+      "codepoint": "U+5099"
+    },
+    {
+      "id": "245",
+      "char": "份",
+      "codepoint": "U+4EFD"
+    },
+    {
+      "id": "246",
+      "char": "復",
+      "codepoint": "U+5FA9"
+    },
+    {
+      "id": "247",
+      "char": "原",
+      "codepoint": "U+539F"
+    },
+    {
+      "id": "248",
+      "char": "源",
+      "codepoint": "U+6E90"
+    },
+    {
+      "id": "249",
+      "char": "權",
+      "codepoint": "U+6B0A"
+    },
+    {
+      "id": "250",
+      "char": "限",
+      "codepoint": "U+9650"
+    },
+    {
+      "id": "251",
+      "char": "驗",
+      "codepoint": "U+9A57"
+    },
+    {
+      "id": "252",
+      "char": "證",
+      "codepoint": "U+8B49"
+    },
+    {
+      "id": "253",
+      "char": "確",
+      "codepoint": "U+78BA"
+    },
+    {
+      "id": "254",
+      "char": "認",
+      "codepoint": "U+8A8D"
+    },
+    {
+      "id": "255",
+      "char": "審",
+      "codepoint": "U+5BE9"
+    },
+    {
+      "id": "256",
+      "char": "核",
+      "codepoint": "U+6838"
+    },
+    {
+      "id": "257",
+      "char": "管",
+      "codepoint": "U+7BA1"
+    },
+    {
+      "id": "258",
+      "char": "理",
+      "codepoint": "U+7406"
+    },
+    {
+      "id": "259",
+      "char": "任",
+      "codepoint": "U+4EFB"
+    },
+    {
+      "id": "260",
+      "char": "務",
+      "codepoint": "U+52D9"
+    },
+    {
+      "id": "261",
+      "char": "指",
+      "codepoint": "U+6307"
+    },
+    {
+      "id": "262",
+      "char": "令",
+      "codepoint": "U+4EE4"
+    },
+    {
+      "id": "263",
+      "char": "目",
+      "codepoint": "U+76EE"
+    },
+    {
+      "id": "264",
+      "char": "標",
+      "codepoint": "U+6A19"
+    },
+    {
+      "id": "265",
+      "char": "計",
+      "codepoint": "U+8A08"
+    },
+    {
+      "id": "266",
+      "char": "步",
+      "codepoint": "U+6B65"
+    },
+    {
+      "id": "267",
+      "char": "驟",
+      "codepoint": "U+9A5F"
+    },
+    {
+      "id": "268",
+      "char": "測",
+      "codepoint": "U+6E2C"
+    },
+    {
+      "id": "269",
+      "char": "試",
+      "codepoint": "U+8A66"
+    },
+    {
+      "id": "270",
+      "char": "結",
+      "codepoint": "U+7D50"
+    },
+    {
+      "id": "271",
+      "char": "果",
+      "codepoint": "U+679C"
+    },
+    {
+      "id": "272",
+      "char": "報",
+      "codepoint": "U+5831"
+    },
+    {
+      "id": "273",
+      "char": "告",
+      "codepoint": "U+544A"
+    },
+    {
+      "id": "274",
+      "char": "請",
+      "codepoint": "U+8ACB"
+    },
+    {
+      "id": "275",
+      "char": "謝",
+      "codepoint": "U+8B1D"
+    },
+    {
+      "id": "276",
+      "char": "再",
+      "codepoint": "U+518D"
+    },
+    {
+      "id": "277",
+      "char": "見",
+      "codepoint": "U+898B"
+    },
+    {
+      "id": "278",
+      "char": "您",
+      "codepoint": "U+60A8"
+    },
+    {
+      "id": "279",
+      "char": "啊",
+      "codepoint": "U+554A"
+    },
+    {
+      "id": "280",
+      "char": "呢",
+      "codepoint": "U+5462"
+    },
+    {
+      "id": "281",
+      "char": "嗎",
+      "codepoint": "U+55CE"
+    },
+    {
+      "id": "282",
+      "char": "吧",
+      "codepoint": "U+5427"
+    },
+    {
+      "id": "283",
+      "char": "可",
+      "codepoint": "U+53EF"
+    },
+    {
+      "id": "284",
+      "char": "會",
+      "codepoint": "U+6703"
+    },
+    {
+      "id": "285",
+      "char": "要",
+      "codepoint": "U+8981"
+    },
+    {
+      "id": "286",
+      "char": "需",
+      "codepoint": "U+9700"
+    },
+    {
+      "id": "287",
+      "char": "應",
+      "codepoint": "U+61C9"
+    },
+    {
+      "id": "288",
+      "char": "該",
+      "codepoint": "U+8A72"
+    },
+    {
+      "id": "289",
+      "char": "必",
+      "codepoint": "U+5FC5"
+    },
+    {
+      "id": "290",
+      "char": "須",
+      "codepoint": "U+9808"
+    },
+    {
+      "id": "291",
+      "char": "已",
+      "codepoint": "U+5DF2"
+    },
+    {
+      "id": "292",
+      "char": "未",
+      "codepoint": "U+672A"
+    },
+    {
+      "id": "293",
+      "char": "正",
+      "codepoint": "U+6B63"
+    },
+    {
+      "id": "294",
+      "char": "將",
+      "codepoint": "U+5C07"
+    },
+    {
+      "id": "295",
+      "char": "先",
+      "codepoint": "U+5148"
+    },
+    {
+      "id": "296",
+      "char": "才",
+      "codepoint": "U+624D"
+    },
+    {
+      "id": "297",
+      "char": "也",
+      "codepoint": "U+4E5F"
+    },
+    {
+      "id": "298",
+      "char": "都",
+      "codepoint": "U+90FD"
+    },
+    {
+      "id": "299",
+      "char": "並",
+      "codepoint": "U+4E26"
+    },
+    {
+      "id": "300",
+      "char": "因",
+      "codepoint": "U+56E0"
+    }
+  ],
+  "unknown_rule": "Use U+XXXX escape tokens for unsupported Unicode characters",
+  "space_rule": "Use / token to retain ASCII spaces",
+  "separator": "One ASCII space between code tokens",
+  "examples": [
+    {
+      "zh": "我是誰",
+      "k300": "001 002 003"
+    },
+    {
+      "zh": "你好",
+      "k300": "004 061"
+    },
+    {
+      "zh": "我愛你",
+      "k300": "001 184 004"
+    },
+    {
+      "zh": "文明記憶",
+      "k300": "101 102 111 112"
+    },
+    {
+      "zh": "宇宙通訊",
+      "k300": "133 134 214 208"
+    },
+    {
+      "zh": "KGEN CT 號",
+      "k300": "U+004B U+0047 U+0045 U+004E / U+0043 U+0054 / 216"
+    }
+  ]
+}
