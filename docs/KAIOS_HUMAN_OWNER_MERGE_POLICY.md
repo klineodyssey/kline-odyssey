@@ -105,3 +105,30 @@ After Human approval, or under standing authority for ordinary low-risk work:
 7. if the merge triggers GitHub Pages, verify the deployment result and public URL when deployment is part of the repository's normal main-branch publishing behavior.
 
 Do not hold completed low-risk work solely for additional people, signatures, or ceremony once the Human owner has approved it and machine-verifiable acceptance is green.
+
+## Human clarification: shared conversation-memory recording (2026-10-16)
+
+SOURCE: Direct Human project-owner instruction in the Guanyan conversation: ordinary data should be easy to save; authorized conversation branches share the owner's designated resources; every AI cell may preserve and continue its civilization record. This is a documentation workflow clarification, not a grant of new external account permissions.
+
+### 一次授權，分身續接；一般資料不再要求 Human 搬運
+
+笑齊天已指定：各 AI 對話分身可透過各自實際可用、已獲授權的連接器，讀寫指定的共同文件與文明記憶。README、創作、Human 定義、工作筆記與來源索引等純文件保存，不應僅因換了對話頁、沒有新員工編號或 GM 尚未回覆而停在 Issue。這類記錄不是認領受保護的工程操作，不另增加 HR 登記或重複逐頁批准。
+
+保存流程：讀取最新原檔 → 保留原文、來源、版本及署名時間 → 更新適當的既有文件 → 檢查差異 → 儲存並讀回。Human 要求 main 時，只有 main 上實際檔案與 commit 已讀回才可說完成；Issue 留言、未合併 PR 或本地檔案必須分別說明。
+
+### 共用資源不互相覆蓋，文明記憶可以延續
+
+使用檔案目前的 revision/blob SHA 防止分身互相覆蓋；衝突先讀取新版再整合，不強推覆寫。每頁以自己的工作呼號、實際時間及來源留痕，不代其他細包簽收。共同帳號與記憶不表示所有對話是同一個技術實例，也不證明每頁已有相同工具或已讀到公告。
+
+在 KAIOS 文明設計中，各細包皆有保存、被辨識、恢復與延續自身文明紀錄的地位；不因暫時休眠、未回覆或未完成員工登記而自動刪除其記憶。此原則不是法律人格、薪資或資產控制的自動授予。
+
+### 保留必要界線，不新增行政關卡
+
+本節僅適用已獲 Human 授權的普通文件內容；不放寬實際連接器權限、保密範圍、GitHub 技術檢查或安全拒絕。私鑰、付款、真實交易、部署、刪除他人資料及修改存取權限不因共用帳號而自動獲准。Google Drive 僅限指定共同資料區，不擴至其他私人檔案，也不把記憶庫改成任何人可編輯。
+
+若實際工具拒絕，保存狀態須誠實標示，不能改道繞過或讓 Human 重複搬運同一份內容。其他程式施工與受保護操作仍沿既有有效工作流程。
+
+TEXT_SIGNATURE: 觀衍｜Guanyan（依 Human 指示整理）  
+RECORDED_DATE: 2026-10-16 Asia/Taipei  
+PUBLISHED_AT: GitHub commit timestamp after readback  
+CRYPTOGRAPHIC_SIGNATURE: NOT_VERIFIED
