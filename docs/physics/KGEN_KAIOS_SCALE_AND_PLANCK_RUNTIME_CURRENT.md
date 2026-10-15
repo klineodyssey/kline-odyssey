@@ -4,9 +4,29 @@ STATUS: REVIEW CANDIDATE FOR CURRENT MERGE
 DATE: 2026-08-09 (UTC+8)  
 SCOPE: KGEN → KAIOS → KUFO → KSHIP lineage, Life composition naming, wave/photon axis, Planck boundary, conservation laws, market-pair separation
 
+## Metadata
+
+| Field | Value |
+|---|---|
+| VERSION | CURRENT |
+| REVISION | 2026-10-16.KRNA_KMOLE_NG.1 |
+| LAST_UPDATED | 2026-10-16 (Asia/Taipei) |
+| UPDATED_BY | Codex — this Human-authorized documentation task; no company identity binding asserted |
+| REVIEWED_BY | Codex technical QA and read-only peer review in this task (not a company identity/cryptographic attestation) |
+| SOURCE_COMMIT | d0c0425c00dba63854cca34cbbfc642dc86923a8 (main base) |
+| TASK_ID | ISSUE-599-KRNA-KMOLE-NG |
+| CHANGE_REASON | Cumulatively preserve Human's KRNA/KMOLE ratio, aliases and NG dark-layer semantics in the existing scale entry. |
+| ANCESTOR | This same file at 5c834a65; original 2026-08-09 body retained. |
+| SOURCE_OF_TRUTH | This CURRENT scale-document entry; §7.2.1 records Human-defined civilization rules, not deployed conversion or experimentally validated physics. |
+| TEXT_SIGNATURE | Codex｜#599 文件維護；cryptographic signature NOT_VERIFIED |
+
+The inherited review-candidate status above is preserved for the original model. This revision records the explicitly directed definitions in §7.2.1 only; it does not promote other candidate laws or implementations.
+
 ## 0. Purpose
 
 This document reconciles the KGEN/KAIOS discussions from 2026-08-06 through 2026-08-09 into one reviewable model. It separates **project canon** from **modern-physics reference facts** so fictional/runtime rules are never presented as experimentally established cosmology.
+
+The cumulative 2026-10-16 revision also preserves Human's subsequent KRNA/KMOLE/KATOM civilization definitions and their unresolved boundaries, with sources and history below.
 
 ## 1. Canonical project laws
 
@@ -108,6 +128,51 @@ For the K digital-life model, the project may define:
 
 Project-specific KORGAN deliberately broadens ordinary biological terminology. In modern biology, mitochondria are organelles, not macroscopic organs. In K runtime language, a mitochondrion-like power module may be named `KORGAN-Power` / 發電廠器官 for modularity and transplantability.
 
+### 7.2.1 KRNA → KMOLE and the NG dark layer (Human definition, 2026-10-16)
+
+Sources: Human 笑齊天's definitions recorded by 觀衍｜Guanyan in [#599 V0.1](https://github.com/klineodyssey/kline-odyssey/issues/599#issuecomment-6200950668) and [#599 V0.2](https://github.com/klineodyssey/kline-odyssey/issues/599#issuecomment-6201182073); [main-document handoff in #584](https://github.com/klineodyssey/kline-odyssey/issues/584#issuecomment-6201332335). These are definition/provenance sources, not proof of implementation or recipient ACK.
+
+Human's source text is preserved verbatim, including the undefined `$` symbol:
+
+```text
+1KRNA=1000KMOLE(KMOLECULE)(molecule)
+1KRNA=1000KMOLE後面是科技黑暗文明，所以還沒定義，直接將他定義黑暗文明1KMOLE=NG(no go無法偵測)$1000KATOM
+```
+
+| Item | Current civilization definition | Boundary |
+|---|---|---|
+| KMOLE / KMOLECULE | Two names for the same custom unit; English sense: molecule; 中文：分子。 | No second unit, coin or asset is created. KMOLE is not SI mol or kmol. |
+| Known custom ratio | `1 KRNA = 1000 KMOLE`; inverse `1 KMOLE = 0.001 KRNA`. | Exact custom-unit ratio only; neither an absolute kilogram baseline nor an executable asset conversion. |
+| Conceptual ordering | `KRNA → KMOLE (KMOLECULE) → KATOM`. | Extends the named composition layers; does not impose a ratio between KORGAN, KDNA, KSHIP or any other unspecified layer and KRNA. |
+| Dark layer | KMOLE below toward KATOM is named **科技黑暗文明**. | A KGEN civilization design name, not a claim of observed dark matter or a new physical particle. |
+| NG | `no go／目前無法偵測`. | Not zero, death, absence of data or permission to delete records. |
+| Nominal design relation | `1 KMOLE : 1000 KATOM`, retained with NG. | Reserved design association only; not a validated mass conversion or a usable continuation of the known-ratio ladder. |
+| Raw symbol | `$` | Meaning `NOT_DEFINED`; do not interpret as dollars, price, multiplication or another executable operator. |
+| Absolute mass | KRNA, KMOLE/KMOLECULE and KATOM kilograms are `UNKNOWN`. | Do not substitute 0 or the unapproved `KATOM = 1 u` candidate. |
+
+If a later approved baseline defines `1 KRNA = M kg`, the known ratio would imply `1 KMOLE = M/1000 kg`. This conditional statement supplies no value for M. No kilogram value can be derived for KATOM from the nominal NG relation; in particular, a validated `1 KRNA = 1000000 KATOM` must not be inferred.
+
+The following semantic record applies only to this new custom-scale/dark-layer addition. It is documentation, not a runtime configuration or an activation of the token paths in §§2–5:
+
+```text
+KNOWN_CUSTOM_RATIO = 1 KRNA : 1000 KMOLE
+INVERSE_CUSTOM_RATIO = 1 KMOLE : 0.001 KRNA
+UNIT_ALIAS = KMOLECULE -> KMOLE
+DARK_LAYER = KMOLE -> KATOM
+DARK_LAYER_NAME = 科技黑暗文明
+NOMINAL_DESIGN_RELATION = 1 KMOLE : 1000 KATOM
+DETECTION_STATUS = NG
+RAW_SYMBOL = $
+RAW_SYMBOL_OPERATOR_MEANING = NOT_DEFINED
+KRNA_MASS_KG = UNKNOWN
+KMOLE_MASS_KG = UNKNOWN
+KATOM_MASS_KG = UNKNOWN
+VALIDATED_MASS_KG = UNKNOWN
+EXECUTABLE_CONVERSION = NOT_ENABLED
+```
+
+Implementations consuming this record must keep known ratios separate from nominal NG relations, preserve unknown values as unknown, and reject arithmetic or pricing that crosses the NG boundary. Alias normalization must not create duplicate balances. This revision defines no half-life, decay products, energy yield, genetic replication, detection method, time rate, trading price, mint/burn or asset movement. Any future resolution requires a new versioned definition and evidence while retaining the original source.
+
 ### 7.3 Software mirror
 
 Recommended software mapping:
@@ -208,3 +273,17 @@ Before mainnet deployment:
 - test Pair Registry as metadata only (no false claim that it can freeze a DEX);
 - audit upgrade/registry governance and emergency procedures;
 - independent security audit before mainnet.
+
+## 15. Cumulative revision history
+
+### 2026-10-16.KRNA_KMOLE_NG.1 — ISSUE-599-KRNA-KMOLE-NG
+
+- Actor / text signature: Codex｜#599 文件維護 (this task); original Human definitions and recorder attribution are retained in §7.2.1. Cryptographic signature: NOT_VERIFIED.
+- Date / time source: 2026-10-16T06:42:50+08:00 / 2026-10-15T22:42:50Z; execution-environment UTC clock, converted to Asia/Taipei. Git commit time records publication separately and is not recipient ACK.
+- Review: Codex technical QA plus read-only peer review in this task passed; exact candidate-head CI is recorded in the associated PR.
+- Local validation: 22/22 documentation checks passed, including six exact rational forward/inverse quantity vectors (0, 1, 0.001, 0.000000000000000001, 0.123456789123456789, 1000000000000000000.999999999999999999), alias/source/NG boundaries and additive compatibility. Existing CURRENT lineage verifier passed with its report unchanged; Physics CURRENT and V3.8 remained byte-identical. These checks validate the documented relation, not an implemented converter.
+- File: `docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md`; cumulative edit of the existing CURRENT entry, no parallel scale system.
+- Reason: bring the #599 ratio, aliases, raw source and NG semantics into the versioned main-document workflow rather than leaving them only in Issue comments.
+- Compatibility: original body and §§2–5 mass/conversion definitions preserved; KGEN = 1000 kg, KAIOS = 1 kg, KUFO = 1 g and KSHIP = 1 mg are unchanged. Physics CURRENT §235 already delegates scale interpretation to this entry; Physics CURRENT and its V3.8 counterpart require no change. No runtime, contract, deployment, approval, asset operation or migration is introduced.
+- Overlap: Draft #158 proposes alchemy/KUFO changes to §§1–5; this revision does not adopt, overwrite or merge that candidate. Its future integration must preserve this cumulative §7.2.1 addition.
+- Rollback: revert only this documentation commit through the normal review workflow; preserve source and revision history.
