@@ -1,0 +1,30 @@
+name: Worker notebook candidate
+on:
+  push:
+    paths:
+      - 'tools/worker-notebook.mjs'
+      - 'tests/worker-notebook.test.mjs'
+      - '.github/workflows/worker-notebook.yml'
+  pull_request:
+    paths:
+      - 'tools/worker-notebook.mjs'
+      - 'tests/worker-notebook.test.mjs'
+      - '.github/workflows/worker-notebook.yml'
+permissions:
+  contents: read
+jobs:
+  notebook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax and separate-process recovery tests
+        run: |
+          node --check tools/worker-notebook.mjs
+          node --test tests/worker-notebook.test.mjs
+          git diff --exit-code
