@@ -69,6 +69,16 @@ assert.throws(() => convergeRoutesAtFourUpperDays({
     fourDayConvergence: { completed: true, atCT: 999, atMortalDay: "2102400" } }],
   elapsedMortalDays: 2102401, currentCT: 20000
 }), /disagree on CT/, "completed routes must agree on one convergence CT");
+for (const invalidCT of [NaN, Infinity, -Infinity, true, {}, "   "]) {
+  assert.throws(() => convergeRoutesAtFourUpperDays({
+    routes: originalRoutes, elapsedMortalDays: 2102400, currentCT: invalidCT
+  }), /currentCT must be/, "invalid CT must not create an unreplayable convergence event");
+}
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [{ routeId: "BAD", currentCT: NaN,
+    fourDayConvergence: { completed: true, atCT: NaN, atMortalDay: "2102400" } }],
+  elapsedMortalDays: 2102401, currentCT: 18888
+}), /retain its convergence CT/, "invalid prior CT marker must not be accepted");
 
 const world = JSON.parse(await readFile(new URL("../data/synthetic-world.json", import.meta.url), "utf8"));
 const canonicalBefore = JSON.stringify(world);

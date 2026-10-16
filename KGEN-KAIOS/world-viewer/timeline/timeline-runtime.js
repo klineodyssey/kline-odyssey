@@ -54,6 +54,11 @@ function civilizationDayUnit(label) {
   return CIVILIZATION_DAY_IN_BUDDHA_DAYS[label];
 }
 
+function validCT(value) {
+  return (typeof value === "number" && Number.isFinite(value))
+    || (typeof value === "string" && value.trim().length > 0);
+}
+
 function gcd(a, b) {
   while (b !== 0n) [a, b] = [b, a % b];
   return a;
@@ -88,11 +93,11 @@ export function convergeRoutesAtFourUpperDays({ routes, elapsedMortalDays, curre
     throw new TypeError("routes must contain records with routeId");
   }
   if (new Set(routes.map((route) => route.routeId)).size !== routes.length) throw new TypeError("routeId must be unique");
-  if (currentCT === undefined || currentCT === null || currentCT === "") throw new TypeError("currentCT is required");
+  if (!validCT(currentCT)) throw new TypeError("currentCT must be a finite number or nonempty ID");
   const completedRoutes = routes.filter((route) => route.fourDayConvergence?.completed === true);
   for (const route of completedRoutes) {
     const marker = route.fourDayConvergence;
-    if (marker.atCT === undefined || marker.atCT === null || marker.atCT === "" || route.currentCT !== marker.atCT) {
+    if (!validCT(marker.atCT) || route.currentCT !== marker.atCT) {
       throw new TypeError("completed route must retain its convergence CT");
     }
     if (typeof marker.atMortalDay !== "string" || !/^\d+$/.test(marker.atMortalDay)
