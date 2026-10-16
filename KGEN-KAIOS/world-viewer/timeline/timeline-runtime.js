@@ -27,6 +27,83 @@ export const TIMELINE_ERA_IDS = Object.freeze([
   "INTERSTELLAR_CIVILIZATION"
 ]);
 
+// Human 2026-10-16 seven-label clock. This is a named civilization duration
+// model, not the K18888/K280 365.2422-day KUFO law or the 360-day simulation
+// calendar. One Buddha day is the smallest integral unit in the stated ratios.
+export const CIVILIZATION_DAY_IN_BUDDHA_DAYS = Object.freeze({
+  SHENJUN: 31536000000n,
+  SHENMING: 31536000000n,
+  SHENXIAN: 86400000n,
+  DRAGON_KING: 3600000n,
+  MORTAL: 60000n,
+  DEMON_KING: 1000n,
+  BUDDHA: 1n
+});
+
+const FOUR_UPPER_DAYS_IN_MORTAL_DAYS = 4n * 525600n;
+
+function nonnegativeInteger(value, field) {
+  if (typeof value === "bigint" && value >= 0n) return value;
+  if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return BigInt(value);
+  throw new TypeError(`${field} must be a nonnegative safe integer or bigint`);
+}
+
+function civilizationDayUnit(label) {
+  if (!Object.hasOwn(CIVILIZATION_DAY_IN_BUDDHA_DAYS, label)) throw new RangeError(`Unknown civilization day: ${label}`);
+  return CIVILIZATION_DAY_IN_BUDDHA_DAYS[label];
+}
+
+function gcd(a, b) {
+  while (b !== 0n) [a, b] = [b, a % b];
+  return a;
+}
+
+// Rational output keeps all seven labels exact, including sub-mortal days.
+export function convertCivilizationDays(value, from, to) {
+  const numerator = nonnegativeInteger(value, "value") * civilizationDayUnit(from);
+  const denominator = civilizationDayUnit(to);
+  const factor = gcd(numerator, denominator);
+  return Object.freeze({ numerator: numerator / factor, denominator: denominator / factor });
+}
+
+// The Human's 365-day mortal year is scoped to this clock alone.
+export function mortalYearsToUpperClock(years) {
+  const mortalDays = nonnegativeInteger(years, "years") * 365n;
+  const days = mortalDays / 525600n;
+  const remainingDays = mortalDays % 525600n;
+  const minuteNumerator = remainingDays * 1440n;
+  const minutes = minuteNumerator / 525600n;
+  const minuteRemainder = minuteNumerator % 525600n;
+  return Object.freeze({ days, hours: minutes / 60n, minutes: minutes % 60n,
+    remainingMinuteFraction: Object.freeze({ numerator: minuteRemainder, denominator: 525600n }) });
+}
+
+// Pure, caller-driven convergence candidate: no clock is inferred from a K
+// index, no map point moves, and no live order/game-completion authority exists.
+// The existing route owner must supply both elapsed time and the current CT.
+export function convergeRoutesAtFourUpperDays({ routes, elapsedMortalDays, currentCT } = {}) {
+  const elapsed = nonnegativeInteger(elapsedMortalDays, "elapsedMortalDays");
+  if (!Array.isArray(routes) || routes.some((route) => !route || typeof route !== "object" || !route.routeId)) {
+    throw new TypeError("routes must contain records with routeId");
+  }
+  if (new Set(routes.map((route) => route.routeId)).size !== routes.length) throw new TypeError("routeId must be unique");
+  if (currentCT === undefined || currentCT === null || currentCT === "") throw new TypeError("currentCT is required");
+  if (elapsed < FOUR_UPPER_DAYS_IN_MORTAL_DAYS) return { routes: routes.map((route) => ({ ...route })), events: [] };
+  const priorCTs = routes.filter((route) => route.fourDayConvergence?.completed)
+    .map((route) => route.fourDayConvergence.atCT);
+  if (priorCTs.some((ct) => ct !== priorCTs[0])) throw new TypeError("converged routes disagree on CT");
+  const convergenceCT = priorCTs.length ? priorCTs[0] : currentCT;
+  const events = [];
+  const converged = routes.map((route) => {
+    if (route.fourDayConvergence?.completed) return { ...route };
+    const marker = { completed: true, atCT: convergenceCT, atMortalDay: elapsed.toString() };
+    events.push({ type: "FOUR_UPPER_DAY_CT_CONVERGENCE", routeId: route.routeId, currentCT: convergenceCT,
+      atMortalDay: marker.atMortalDay, simulationOnly: true, autoVictory: false, gameEnded: false });
+    return { ...route, currentCT: convergenceCT, fourDayConvergence: marker };
+  });
+  return { routes: converged, events };
+}
+
 function validateConfig(config) {
   if (!config || JSON.stringify(config.eras?.map(({ era_id: id }) => id)) !== JSON.stringify(TIMELINE_ERA_IDS)) {
     throw new TypeError("Timeline Runtime requires the approved nine-era catalog");

@@ -337,6 +337,18 @@ Sprint 010 adds one shared Technology Runtime beneath the existing Civilization 
 
 Nine vehicle blueprints, nine special ability profiles, fixture-driven Cosmic coordinates and five Space Exploration activities now form a playable synthetic progression. Pocket Time Cloaked UFO V2 reads the shared Technology state and remains the only Timeline transport. Clone and Colony Planning remain proposal-only, and coordinate discovery grants no ownership or sovereignty. The reviewed browser gate reports `189 PASS / 0 FAIL / 0 SKIP`; see `SPRINT_010_COSMIC_TECHNOLOGY_REPORT.md` and `tests/evidence/sprint-010-cosmic-technology/`.
 
+## Seven-label civilization clock candidate
+
+`timeline/timeline-runtime.js` now exports the exact seven-label day converter,
+the 365-day mortal-year to upper-clock converter, and a pure one-shot
+four-upper-day CT-convergence event candidate. Its regression assertions live
+in the existing `tests/nation_timeline_integrity.mjs`. The candidate is
+synthetic and caller-driven: it is not wired to a logged-in 11520 game
+character, does not move a map point, and does not alter KUFO's separate
+365.2422-day law or the 360-day seasonal simulation. See
+`../V8.3/TIME_ENGINE.md` and WorkOrder
+https://github.com/klineodyssey/kline-odyssey/issues/603 for scope and gates.
+
 ## Reproduction and Ecosystem Runtime V1
 
 The public route `world-viewer/ecosystem-v1/` projects the bounded deterministic
