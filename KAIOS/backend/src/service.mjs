@@ -1,4 +1,23 @@
+/*
+KGEN_META
+VERSION: V1
+REVISION: 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1
+STATUS: DRAFT
+LAST_UPDATED: 2026-10-06
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant
+SOURCE_COMMIT: d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f
+TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
+CHANGE_REASON: Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction.
+ANCESTOR: KAIOS/backend/src/service.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
+SOURCE_OF_TRUTH: FALSE
+METADATA_SCOPE: Customer Project candidate revision within the existing owner.
+Existing owner identity and execution boundaries are unchanged. This record is
+not a new Runtime/version authority or approval of production/financial activity.
+*/
+
 import { createIdentity } from "./identity.mjs";
+import { createCustomerProjectPrototype, captureCustomerProjectContext } from "../../../core/company/index.mjs";
 import {
   Problem,
   requireThat,
@@ -997,4 +1016,180 @@ export function createBackend({
     loadSnapshot,
     stage,
   };
+}
+
+/** Local SQLite research only. Never connected to createBackend(), HTTP routes,
+ * signup, migration loading or deploy config. The caller supplies an existing
+ * test DB/binding; this function cannot create a schema or an Account/Life.
+ * Core model responses remain unchanged, including durable:false. Only the
+ * separate persistence envelope attests that a local DB transaction committed.
+ */
+export function createCustomerProjectPersistencePrototype({ mode, database: db, identityAdapter, quotePlanner, executionEvidenceSource = null, now = Date.now } = {}) {
+  requireThat(mode === "LOCAL_TEST_ONLY" && db && ["get", "atomic"].every((k) => typeof db[k] === "function") && typeof quotePlanner?.plan === "function" && typeof now === "function", "CUSTOMER_PROJECT_LOCAL_PERSISTENCE_REQUIRED");
+  const scope = "LOCAL_DATABASE_SIMULATION_PROTOTYPE";
+  const exact = (v, keys) => requireThat(v && Object.getPrototypeOf(v) === Object.prototype && Object.keys(v).length === keys.length && keys.every((k) => Object.hasOwn(v, k)), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+  const current = (owner) => requireThat(canonical(captureCustomerProjectContext(identityAdapter)) === canonical(owner), "CUSTOMER_PROJECT_WRONG_CUSTOMER", 403);
+  const capture = () => captureCustomerProjectContext(identityAdapter);
+  const prefixFor = async (owner) => `customer-project-local:${await hash({ owner, companyId: "AI_ANT_COMPANY_0001", slot: "CUSTOMER_PROJECT_PRIMARY" })}:`;
+  const boundedJson = (value, limit = 512000) => {
+    const text = canonical(value);
+    requireThat(new TextEncoder().encode(text).length <= limit, "CUSTOMER_PROJECT_PERSISTENCE_CAPACITY", 413);
+    return text;
+  };
+  const parse = (text) => {
+    requireThat(typeof text === "string" && new TextEncoder().encode(text).length <= 512000, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    try { return JSON.parse(text); } catch { throw new Problem("CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422); }
+  };
+  function replayOwner(owner) {
+    return { resolve() { current(owner); return { ...owner, active: true, scope: "SIMULATION_CUSTOMER_CONTEXT" }; } };
+  }
+  function makeReplay(owner) {
+    let observation, historical, clockIndex, planUses, evidenceUses;
+    const model = createCustomerProjectPrototype({ identityAdapter: replayOwner(owner), quotePlanner: {
+      async plan(request) {
+        planUses += 1;
+        if (historical) {
+          requireThat(planUses === 1 && observation.plan !== null, "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
+          return structuredClone(observation.plan);
+        }
+        observation.plan = structuredClone(await quotePlanner.plan(request));
+        return structuredClone(observation.plan);
+      }
+    }, executionEvidenceSource: { async read(binding) {
+      evidenceUses += 1;
+      if (historical) {
+        requireThat(evidenceUses === 1 && observation.evidence !== null, "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
+        return structuredClone(observation.evidence);
+      }
+      requireThat(typeof executionEvidenceSource?.read === "function", "CUSTOMER_PROJECT_EVIDENCE_SOURCE_REQUIRED");
+      observation.evidence = structuredClone(await executionEvidenceSource.read(binding));
+      boundedJson(observation.evidence);
+      return structuredClone(observation.evidence);
+    } }, now() {
+      if (historical) {
+        requireThat(clockIndex < observation.clocks.length, "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
+        return observation.clocks[clockIndex++];
+      }
+      const value = now(); observation.clocks.push(value); return value;
+    } });
+    return { model, async run(record, isHistorical) {
+      observation = record; historical = isHistorical; clockIndex = 0; planUses = 0; evidenceUses = 0;
+      const result = await model.command(record.command);
+      requireThat(planUses === (record.plan === null ? 0 : 1) && evidenceUses === (record.evidence == null ? 0 : 1)
+        && (!historical || clockIndex === record.clocks.length), "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
+      return result;
+    } };
+  }
+  // One SQLite statement is one coherent read snapshot across all three stores.
+  // The explicit account_lives join proves the fixture binding, not merely the
+  // existence of a public Player ID. No binding is inserted or changed here.
+  const snapshotSql = `SELECT w.*, a.account_id AS bound_account_id,
+    COALESCE((SELECT json_group_array(json_object('eventId',e.event_id,'sequence',e.sequence,'payload',e.payload,'payloadHash',e.payload_hash)) FROM
+      (SELECT * FROM customer_project_events WHERE workspace_id=w.workspace_id ORDER BY sequence) e),'[]') AS events_json,
+    COALESCE((SELECT json_group_array(json_object('scope',i.scope,'key',i.key,'requestHash',i.request_hash,'response',i.response,'status',i.status,'createdAt',i.created_at))
+      FROM idempotency i WHERE i.scope LIKE ?),'[]') AS journal_json
+    FROM account_lives a LEFT JOIN customer_project_workspaces w ON w.owner_player_id=a.player_id
+    WHERE a.account_id=? AND a.player_id=?`;
+  async function load(owner) {
+    current(owner); const prefix = await prefixFor(owner);
+    const row = await db.get(snapshotSql, [prefix + "%", owner.accountId, owner.playerId]);
+    current(owner); requireThat(row, "CUSTOMER_PROJECT_BINDING_REQUIRED", 403);
+    const events = parse(row.events_json), cached = parse(row.journal_json);
+    requireThat(Array.isArray(events) && events.length <= 128 && Array.isArray(cached) && cached.length <= 256, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    if (row.workspace_id === null) {
+      requireThat(events.length === 0 && cached.length === 0, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+      return { row: null, envelope: null, state: null, prefix, replay: makeReplay(owner) };
+    }
+    requireThat(row.owner_account_id === owner.accountId && row.owner_player_id === owner.playerId, "CUSTOMER_PROJECT_WRONG_CUSTOMER", 403);
+    const envelope = parse(row.payload);
+    exact(envelope, ["format", "version", "owner", "operations", "state", "stateHash"]);
+    requireThat(envelope.format === "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL" && [1, 2].includes(envelope.version) && canonical(envelope.owner) === canonical(owner) && Array.isArray(envelope.operations) && envelope.operations.length > 0 && envelope.operations.length <= 256, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    requireThat(row.payload_hash === await hash(envelope) && row.storage_version === envelope.operations.length && cached.length === envelope.operations.length, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    const replay = makeReplay(owner);
+    for (const operation of envelope.operations) {
+      const checkpoint = operation.command?.type === "CHECKPOINT_SUBPLAN_EVIDENCE";
+      requireThat(!checkpoint || envelope.version === 2, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+      exact(operation, ["command", "commandHash", "clocks", "plan", "modelResultHash", "stateHash", "response", "recordedAt", ...(checkpoint ? ["evidence"] : [])]);
+      requireThat(Array.isArray(operation.clocks) && operation.clocks.length <= 8 && operation.clocks.every((v) => integer(v, Number.MAX_SAFE_INTEGER)) && integer(operation.recordedAt, Number.MAX_SAFE_INTEGER) && operation.commandHash === await hash(operation.command), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+      const result = await replay.run(operation, true);
+      const state = await replay.model.read();
+      requireThat(operation.modelResultHash === await hash(result) && operation.stateHash === await hash(state), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+      const expectedResponse = { scope, persistence: { committed: true, storageVersion: state.commandJournal.length, productionVerified: false }, result };
+      requireThat(canonical(operation.response) === canonical(expectedResponse), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+      const record = cached.find((v) => v.scope === prefix + operation.command.type && v.key === operation.command.idempotencyKey);
+      requireThat(record && record.status === 200 && record.requestHash === operation.commandHash && record.createdAt === operation.recordedAt && canonical(parse(record.response)) === canonical(expectedResponse), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    }
+    const state = await replay.model.read();
+    requireThat(canonical(state) === canonical(envelope.state) && envelope.stateHash === await hash(state) && state.commandJournal.length === envelope.operations.length && state.workspaceId === row.workspace_id && state.revision === row.revision && events.length === state.events.length, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    for (let i = 0; i < events.length; i += 1) {
+      const event = events[i], expected = state.events[i];
+      requireThat(event.eventId === expected.eventId && event.sequence === expected.sequence && event.payloadHash === await hash(expected) && canonical(parse(event.payload)) === canonical(expected), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    }
+    current(owner); return { row, envelope, state, prefix, replay };
+  }
+  function known(loaded, command, commandHash) {
+    const record = loaded.envelope?.operations.find((v) => v.command.type === command.type && v.command.idempotencyKey === command.idempotencyKey);
+    if (!record) return null;
+    requireThat(record.commandHash === commandHash, "IDEMPOTENCY_CONTENT_MISMATCH", 409);
+    return structuredClone(record.response);
+  }
+  async function execute(owner, command) {
+    current(owner); const commandHash = await hash(command); let loaded = await load(owner);
+    const prior = known(loaded, command, commandHash);
+    if (prior) { current(owner); return prior; }
+    try {
+    const operation = { command, commandHash, clocks: [], plan: null, modelResultHash: null, stateHash: null, response: null, recordedAt: null };
+    if (command.type === "CHECKPOINT_SUBPLAN_EVIDENCE") operation.evidence = null;
+    const result = await loaded.replay.run(operation, false), state = await loaded.replay.model.read();
+    const storageVersion = (loaded.row?.storage_version ?? 0) + 1;
+    operation.modelResultHash = await hash(result); operation.stateHash = await hash(state);
+    operation.response = { scope, persistence: { committed: true, storageVersion, productionVerified: false }, result };
+    operation.recordedAt = now(); requireThat(integer(operation.recordedAt, Number.MAX_SAFE_INTEGER), "CUSTOMER_PROJECT_INVALID_CLOCK");
+    const envelope = { format: "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL", version: command.type === "CHECKPOINT_SUBPLAN_EVIDENCE" ? 2 : (loaded.envelope?.version ?? 1), owner,
+      operations: [...(loaded.envelope?.operations ?? []), operation], state, stateHash: operation.stateHash };
+    requireThat(envelope.operations.length <= 256 && state.commandJournal.length === envelope.operations.length, "CUSTOMER_PROJECT_PERSISTENCE_CAPACITY", 413);
+    const payload = boundedJson(envelope), payloadHash = await hash(envelope), guardId = id();
+    const statements = [
+      stmt("INSERT INTO customer_project_guards VALUES(?,?,?,?,?)", guardId, owner.accountId, owner.playerId, loaded.row?.storage_version ?? 0, loaded.row?.payload_hash ?? null),
+      stmt("INSERT INTO customer_project_workspaces VALUES(?,?,?,?,?,?,?) ON CONFLICT(workspace_id) DO UPDATE SET revision=excluded.revision,storage_version=excluded.storage_version,payload_hash=excluded.payload_hash,payload=excluded.payload",
+        state.workspaceId, owner.accountId, owner.playerId, state.revision, storageVersion, payloadHash, payload)
+    ];
+    for (const event of state.events.slice(loaded.state?.events.length ?? 0))
+      statements.push(stmt("INSERT INTO customer_project_events VALUES(?,?,?,?,?)", state.workspaceId, event.sequence, event.eventId, canonical(event), await hash(event)));
+    statements.push(stmt("INSERT INTO idempotency VALUES(?,?,?,?,?,?)", loaded.prefix + command.type, command.idempotencyKey, commandHash, canonical(operation.response), 200, operation.recordedAt),
+      stmt("DELETE FROM customer_project_guards WHERE guard_id=?", guardId));
+    current(owner);
+    // Acceptance is bound to a trusted service decision time, not a promise that
+    // a later SQLite lock wait commits before quote expiry. Historical replay
+    // preserves that original decision; it never obtains fresh approval.
+    if (result.status === "ACCEPTED_SIMULATION_PLAN") {
+      const checkedAt = now(); requireThat(integer(checkedAt, Number.MAX_SAFE_INTEGER) && checkedAt >= state.acceptance.acceptedAt && checkedAt < state.contract.acceptedQuote.content.expiresAt, "QUOTE_EXPIRED", 409);
+    }
+    await db.atomic(statements);
+    current(owner); return structuredClone(operation.response);
+    } catch (error) {
+      // This also recovers a committed response whose transport acknowledgement
+      // was lost, or a speculative planner/expiry error after a same-key winner
+      // committed. This is one verified read, not a mutation or planner retry.
+      current(owner);
+      loaded = await load(owner); const committed = known(loaded, command, commandHash);
+      if (committed) { current(owner); return committed; }
+      if (String(error.message).includes("CUSTOMER_PROJECT_CAS_CONFLICT")) throw new Problem("CUSTOMER_PROJECT_REVISION_CONFLICT", 409);
+      throw error;
+    }
+  }
+  return Object.freeze({ scope,
+    command(input) {
+      let owner, command;
+      try {
+        owner = capture(); boundedJson(input, 16000); command = structuredClone(input);
+        requireThat(typeof command.type === "string" && typeof command.idempotencyKey === "string", "CUSTOMER_PROJECT_INVALID_COMMAND");
+      } catch (error) { return Promise.reject(error); }
+      return execute(owner, command);
+    },
+    read() {
+      let owner; try { owner = capture(); } catch (error) { return Promise.reject(error); }
+      return load(owner).then((loaded) => { current(owner); return { scope, storageVersion: loaded.row?.storage_version ?? 0, state: structuredClone(loaded.state), productionVerified: false }; });
+    }
+  });
 }
