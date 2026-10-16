@@ -460,3 +460,7 @@ The K12345 → K11520 NVIDIA GPU route, landed-cost model, acquisition evidence 
 - Real-trade readiness always fails closed while independent GPU readiness verifiers are not wired.
 
 Lineage: historical PR #178; current-main successor preserves the fail-closed actor and settlement boundary introduced by PR #328.
+
+## K18921 liquidity-status boundary
+
+`core/company/index.mjs` owns the simulation-only `K18921_LIQUIDITY_STATUS` projection consumed by future 11520 liquidity views. It carries cross rates, simulated reserves, TVL, size-slippage scenarios and liquidity health without giving the browser chain-write, custody, transfer or add-liquidity authority. `SIMULATED_NOT_DEPLOYED` is not a live pair or settlement claim. KGEN/WBNB may come only from the existing verified read-only Pancake V2 reserve adapter; BNB/USDT and every KAIOS pair stay unavailable until their own provenance, freshness and deployment evidence exists.
