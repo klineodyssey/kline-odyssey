@@ -36,6 +36,11 @@ assert.ok(atConvergence.routes.every((route) => route.currentCT === 18888 && rou
 assert.deepEqual(atConvergence.routes.map((route) => route.outcomes), [["RELIC"], ["ALLY"]]);
 assert.deepEqual(atConvergence.routes.map((route) => route.birthKPoint), [13888, 144]);
 assert.equal(JSON.stringify(originalRoutes), originalRoutesJson, "candidate must not mutate caller routes");
+atConvergence.routes[0].outcomes.push("NEW");
+assert.deepEqual(originalRoutes[0].outcomes, ["RELIC"], "converged outcomes must not alias caller state");
+atConvergence.routes[0].outcomes.pop();
+beforeConvergence.routes[0].outcomes.push("NEW");
+assert.deepEqual(originalRoutes[0].outcomes, ["RELIC"], "pre-threshold outcomes must not alias caller state");
 const replay = convergeRoutesAtFourUpperDays({ routes: atConvergence.routes, elapsedMortalDays: 2102401, currentCT: 20000 });
 assert.equal(replay.events.length, 0);
 assert.deepEqual(replay.routes, atConvergence.routes, "four-day event must be one-shot and retain the original CT");
@@ -49,7 +54,21 @@ assert.deepEqual(lateRoute.routes[2].outcomes, ["SCROLL"]);
 assert.throws(() => convergeRoutesAtFourUpperDays({
   routes: [...atConvergence.routes, { routeId: "BAD", fourDayConvergence: { completed: true, atCT: 999 } }],
   elapsedMortalDays: 2102401, currentCT: 20000
-}), /disagree on CT/);
+}), /retain its convergence CT/);
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [{ routeId: "BAD", fourDayConvergence: { completed: true, atMortalDay: "2102400" } },
+    { routeId: "NEW" }], elapsedMortalDays: 2102400, currentCT: 18888
+}), /retain its convergence CT/, "missing prior CT must not poison a new convergence event");
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [{ routeId: "BAD", currentCT: 18888,
+    fourDayConvergence: { completed: true, atCT: 18888, atMortalDay: "2102400" } }],
+  elapsedMortalDays: 2102399, currentCT: 18888
+}), /invalid convergence day/, "elapsed clock rollback must not accept a completed marker");
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [...atConvergence.routes, { routeId: "OTHER", currentCT: 999,
+    fourDayConvergence: { completed: true, atCT: 999, atMortalDay: "2102400" } }],
+  elapsedMortalDays: 2102401, currentCT: 20000
+}), /disagree on CT/, "completed routes must agree on one convergence CT");
 
 const world = JSON.parse(await readFile(new URL("../data/synthetic-world.json", import.meta.url), "utf8"));
 const canonicalBefore = JSON.stringify(world);

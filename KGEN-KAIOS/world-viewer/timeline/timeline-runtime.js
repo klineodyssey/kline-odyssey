@@ -1,5 +1,6 @@
 import {
   boundedPush,
+  clone,
   createNotifier,
   loadEnvelope,
   resolveStorage,
@@ -88,18 +89,28 @@ export function convergeRoutesAtFourUpperDays({ routes, elapsedMortalDays, curre
   }
   if (new Set(routes.map((route) => route.routeId)).size !== routes.length) throw new TypeError("routeId must be unique");
   if (currentCT === undefined || currentCT === null || currentCT === "") throw new TypeError("currentCT is required");
-  if (elapsed < FOUR_UPPER_DAYS_IN_MORTAL_DAYS) return { routes: routes.map((route) => ({ ...route })), events: [] };
-  const priorCTs = routes.filter((route) => route.fourDayConvergence?.completed)
-    .map((route) => route.fourDayConvergence.atCT);
+  const completedRoutes = routes.filter((route) => route.fourDayConvergence?.completed === true);
+  for (const route of completedRoutes) {
+    const marker = route.fourDayConvergence;
+    if (marker.atCT === undefined || marker.atCT === null || marker.atCT === "" || route.currentCT !== marker.atCT) {
+      throw new TypeError("completed route must retain its convergence CT");
+    }
+    if (typeof marker.atMortalDay !== "string" || !/^\d+$/.test(marker.atMortalDay)
+      || BigInt(marker.atMortalDay) < FOUR_UPPER_DAYS_IN_MORTAL_DAYS || BigInt(marker.atMortalDay) > elapsed) {
+      throw new TypeError("completed route has an invalid convergence day");
+    }
+  }
+  if (elapsed < FOUR_UPPER_DAYS_IN_MORTAL_DAYS) return { routes: routes.map(clone), events: [] };
+  const priorCTs = completedRoutes.map((route) => route.fourDayConvergence.atCT);
   if (priorCTs.some((ct) => ct !== priorCTs[0])) throw new TypeError("converged routes disagree on CT");
   const convergenceCT = priorCTs.length ? priorCTs[0] : currentCT;
   const events = [];
   const converged = routes.map((route) => {
-    if (route.fourDayConvergence?.completed) return { ...route };
+    if (route.fourDayConvergence?.completed) return clone(route);
     const marker = { completed: true, atCT: convergenceCT, atMortalDay: elapsed.toString() };
     events.push({ type: "FOUR_UPPER_DAY_CT_CONVERGENCE", routeId: route.routeId, currentCT: convergenceCT,
       atMortalDay: marker.atMortalDay, simulationOnly: true, autoVictory: false, gameEnded: false });
-    return { ...route, currentCT: convergenceCT, fourDayConvergence: marker };
+    return { ...clone(route), currentCT: convergenceCT, fourDayConvergence: marker };
   });
   return { routes: converged, events };
 }
