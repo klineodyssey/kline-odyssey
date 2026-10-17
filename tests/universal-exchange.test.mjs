@@ -102,7 +102,8 @@ import {
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence,
   createAtmEmployeeCompensationPlan, createAtmCargoCfoPlan, underwriteEmployeeLoan,
-  createPrepaidPayrollSchedule, createSalaryAdvanceCreditPlan, rankAtmExpansionSites,
+  createPrepaidPayrollSchedule, previewKAIOSWorkforceCycle, previewKGENWorkRewards,
+  previewK8888GameClaim, createSalaryAdvanceCreditPlan, rankAtmExpansionSites,
   createProjectProfitSharingPlan, createAquacultureProjectDraft, createAutonomousBusinessWorkOrder,
   NVIDIA_GPU_11520_ROUTE, GPU_LANDED_COST_FIELDS, GPU_ACQUISITION_EVIDENCE_FIELDS,
   calculateGpuTransportPlan, createGpuAcquisitionPipelineCandidate, validateGpuInventoryUnit,
@@ -351,6 +352,51 @@ test("prepaid payroll distinguishes the 9/5 payment for 10/5 salary from employe
   assert.equal(schedule.employee_debt_if_service_completed, false);
   assert.equal(schedule.expense_recognition, "RATABLY_OVER_VERIFIED_SERVICE_PERIOD");
   assert.equal(schedule.payment_executed, false);
+});
+
+test("KAIOS workforce preview uses fifth-through-fourth without inventing salary", () => {
+  const pending = previewKAIOSWorkforceCycle({ worker_id: "codex-gm-01", payday_date: "2026-10-05", employee_status: "ACTIVE" });
+  assert.equal(pending.period_end, "2026-11-04");
+  assert.equal(pending.next_payday_date, "2026-11-05");
+  assert.equal(pending.salary_amount_atomic, null);
+  assert.equal(pending.salary_status, "PENDING_POLICY");
+  const approved = previewKAIOSWorkforceCycle({ worker_id: "codex-gm-01", payday_date: "2026-12-05", employee_status: "ACTIVE",
+    approved_monthly_amount_atomic: "120000", amount_approval_evidence: { status: "APPROVED", evidence: "TEST_FIXTURE_ONLY" } });
+  assert.equal(approved.period_end, "2027-01-04");
+  assert.equal(approved.salary_amount_atomic, "120000");
+  assert.equal(approved.payment_executed, false);
+  assert.throws(() => previewKAIOSWorkforceCycle({ worker_id: "x", payday_date: "2026-10-06", employee_status: "ACTIVE" }));
+});
+
+test("KGEN work preview requires separate attendance, accepted work and rate approvals", () => {
+  const input = { worker_id: "TEST-WORKER", verified_work_minutes: 90, approved_hourly_rate_atomic: "120",
+    hourly_rate_approval: { status: "APPROVED", evidence: "TEST_FIXTURE" },
+    attendance_evidence: { status: "VERIFIED", evidence: "TEST_ATTENDANCE" },
+    accepted_work_evidence: { status: "ACCEPTED", evidence: "TEST_REVIEW" },
+    approved_cross_day_bonus_atomic: "50", cross_day_approval: { status: "APPROVED", evidence: "TEST_FIXTURE" },
+    cross_day_evidence: { status: "VERIFIED", evidence: "TEST_CROSS_DAY" } };
+  const ready = previewKGENWorkRewards(input);
+  assert.equal(ready.hourly_wage_atomic, "180");
+  assert.equal(ready.cross_day_bonus_atomic, "50");
+  assert.equal(ready.heartbeat_reward_atomic, null);
+  assert.equal(ready.cargo_principal_atomic, null);
+  assert.equal(ready.payment_executed, false);
+  const heartbeatOnly = previewKGENWorkRewards({ ...input, accepted_work_evidence: null });
+  assert.equal(heartbeatOnly.hourly_wage_atomic, null);
+  assert.equal(heartbeatOnly.cross_day_bonus_atomic, null);
+});
+
+test("K8888 game claim preview rejects duplicates and insufficient reserve without payment", () => {
+  const input = { claim_id: "TEST-CLAIM-1", approved_claimable_amount_atomic: "80",
+    entitlement_evidence: { status: "APPROVED", evidence: "TEST_REVIEW" }, reserve_amount_atomic: "100" };
+  const simulated = previewK8888GameClaim(input);
+  assert.equal(simulated.status, "GAME_CLAIM_SIMULATED");
+  assert.equal(simulated.real_payment_status, "NOT_LIVE");
+  assert.equal(simulated.payment_executed, false);
+  assert.equal(simulated.receipt, null);
+  assert.ok(previewK8888GameClaim({ ...input, prior_claim_ids: ["TEST-CLAIM-1"] }).blockers.includes("DUPLICATE_CLAIM"));
+  assert.ok(previewK8888GameClaim({ ...input, reserve_amount_atomic: "50" }).blockers.includes("INSUFFICIENT_VERIFIED_RESERVE"));
+  assert.ok(previewK8888GameClaim({ claim_id: "TEST-CLAIM-2" }).blockers.includes("NO_APPROVED_ENTITLEMENT"));
 });
 
 test("salary advance is separate credit backed only by verified future salary and ATM fees", (t) => {
