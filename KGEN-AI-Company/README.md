@@ -107,3 +107,7 @@ If Human Main has uncommitted files, agents list them and continue from the Code
 - Policy: `KGEN-AI-Company/WORKSPACE_POLICY.md`
 - Setup: `KGEN-AI-Company/WORKTREE_SETUP.md`
 - Recovery: `KGEN-AI-Company/WORKTREE_RECOVERY.md`
+
+## dot external engineering reference
+
+[`docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md`](../docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md) is the Human-requested engineering-reference candidate for dot: Boot-first source reading, bounded cross-project status, canonical file owners and evidence-based continuity. It does not replace this Company Boot, formal WorkQueue, registry or protected authority.
