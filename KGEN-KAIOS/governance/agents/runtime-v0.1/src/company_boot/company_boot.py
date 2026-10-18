@@ -18,6 +18,8 @@ from .validators import (
     validate_common_inputs,
     validate_current_state,
     validate_parent_handoff,
+    validate_workflow_evidence,
+    WorkflowEvidenceError,
 )
 
 
@@ -207,7 +209,35 @@ def build_parser() -> argparse.ArgumentParser:
     close.add_argument("--handoff-output", required=True)
     close.add_argument("--archive-dir", required=True)
     close.set_defaults(func=close_session)
+
+    workflow = sub.add_parser("validate-workflow", help="Read-only receipt consistency; grants no authority")
+    workflow.add_argument("--evidence", required=True)
+    workflow.add_argument("--repository", required=True)
+    workflow.add_argument("--expected-main", required=True, help="Full main SHA independently verified by the operator")
+    workflow.add_argument("--expected-work", required=True)
+    workflow.add_argument("--expected-session", required=True)
+    workflow.add_argument("--expected-workspace", required=True)
+    workflow.add_argument("--previous-evidence", help="Required immutable prior record when appending one checkpoint")
+    workflow.set_defaults(func=validate_workflow)
     return parser
+
+
+def validate_workflow(args: argparse.Namespace) -> int:
+    # stdout only: no write, grant, claim, dispatch, registry or handoff side effect.
+    try:
+        record = load_json(Path(args.evidence))
+        previous = load_json(Path(args.previous_evidence)) if args.previous_evidence else None
+        result = validate_workflow_evidence(
+            record, Path(args.repository), args.expected_main, args.expected_work,
+            args.expected_session, args.expected_workspace, previous,
+        )
+    except (BootFailure, WorkflowEvidenceError) as exc:
+        code = exc.code.value if isinstance(exc, BootFailure) else str(exc)
+        print(json.dumps({"workflow_evidence_status": "FAILED_CLOSED", "failure_code": code,
+                          "scope": "READ_ONLY_RECORD_AND_GIT_CONSISTENCY", "actions_granted": []}))
+        return 2
+    print(json.dumps(result, sort_keys=True))
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
