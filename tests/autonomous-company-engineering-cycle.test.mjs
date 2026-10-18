@@ -6,6 +6,12 @@ import {
   restoreAutonomousCompanyEngineeringCycleState,
   readLatestRepositorySnapshot,
   evaluateExactHeadCiGate,
+  createKaiosAutomatedHandoffV1,
+  serializeKaiosAutomatedHandoffV1,
+  validateKaiosAutomatedHandoffTransition,
+  KAIOS_AUTOMATED_HANDOFF_V1_FIELDS,
+  KAIOS_AUTOMATED_HANDOFF_V1_STATUSES,
+  KAIOS_AUTOMATED_HANDOFF_V1_HUMAN_ESCALATIONS,
   AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES,
   AUTONOMOUS_ENGINEERING_SAFE_ACTIONS,
   AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS
@@ -15,6 +21,27 @@ import { assertAppendOnlyChain } from "../core/history/index.mjs";
 
 const MAIN_SHA = "9".repeat(40);
 const HEAD_SHA = "a".repeat(40);
+const handoff = Object.freeze({
+  WORK_ID: "KAIOS-HANDOFF-001",
+  WORKER_ID: "chatgpt-01",
+  LIFE_ID: null,
+  PROJECT: "KAIOS_AUTOMATED_HANDOFF_V1",
+  BRANCH: "chatgpt-handoff/KAIOS-HANDOFF-001",
+  PR: 489,
+  HEAD: HEAD_SHA,
+  BASE: MAIN_SHA,
+  STATUS: "REVIEW",
+  COMPLETED: ["backend candidate delivered"],
+  BLOCKED: [],
+  TESTS: [{ name: "unit", status: "PASS" }],
+  CI: [{ name: "Universal", status: "PASS", head: HEAD_SHA }],
+  SECURITY: [{ name: "secrets", status: "PASS" }],
+  NEXT_ACTION: "GM reviews exact-head evidence",
+  NEEDS_HUMAN_DECISION: false,
+  HUMAN_DECISION_CATEGORY: null,
+  ARTIFACTS: ["https://github.com/klineodyssey/kline-odyssey/pull/489"],
+  TIMESTAMP: "2026-10-04T00:00:00Z"
+});
 const acknowledgedWorker = Object.freeze({
   status: "ACTIVE",
   employee_status: "ACTIVE",
@@ -135,6 +162,87 @@ function publicGitHubFixtureFetch(overrides = {}) {
   };
   return { fetch, calls };
 }
+
+test("builds the one machine-readable handoff schema and routes review without granting authority", () => {
+  const result = createKaiosAutomatedHandoffV1(handoff);
+  assert.equal(result.SCHEMA, "KAIOS_AUTOMATED_HANDOFF_V1");
+  assert.deepEqual(KAIOS_AUTOMATED_HANDOFF_V1_STATUSES, ["ASSIGN", "WORKING", "REVIEW", "BLOCKED", "DONE"]);
+  assert.deepEqual(KAIOS_AUTOMATED_HANDOFF_V1_FIELDS, [
+    "WORK_ID", "WORKER_ID", "LIFE_ID", "PROJECT", "BRANCH", "PR", "HEAD", "BASE",
+    "STATUS", "COMPLETED", "BLOCKED", "TESTS", "CI", "SECURITY", "NEXT_ACTION",
+    "NEEDS_HUMAN_DECISION", "HUMAN_DECISION_CATEGORY", "ARTIFACTS", "TIMESTAMP"
+  ]);
+  assert.deepEqual(result.ROUTE_TO, ["KAIOS_GENERAL_MANAGER"]);
+  assert.deepEqual(createKaiosAutomatedHandoffV1(handoff, { source: "KAIOS_GENERAL_MANAGER" }).ROUTE_TO, ["ASSIGNED_REVIEWER"]);
+  assert.deepEqual(createKaiosAutomatedHandoffV1(handoff, { source: "ASSIGNED_REVIEWER" }).ROUTE_TO, ["KAIOS_GENERAL_MANAGER"]);
+  assert.ok(Object.values(result.AUTHORITY).every((value) => value === false));
+  assert.match(serializeKaiosAutomatedHandoffV1(handoff), /"SCHEMA": "KAIOS_AUTOMATED_HANDOFF_V1"/);
+});
+
+test("routes only real blockers to Human and never fabricates a Life identity", () => {
+  const blocked = createKaiosAutomatedHandoffV1({
+    ...handoff,
+    STATUS: "BLOCKED",
+    BLOCKED: ["HUMAN_PRODUCT_DECISION_REQUIRED"],
+    NEEDS_HUMAN_DECISION: true,
+    HUMAN_DECISION_CATEGORY: "PRODUCT_RULE_DECISION",
+    NEXT_ACTION: "Human chooses one bounded option"
+  });
+  assert.equal(blocked.LIFE_ID, null);
+  assert.deepEqual(blocked.ROUTE_TO, ["HUMAN_DECISION_INBOX"]);
+  const ciFailure = createKaiosAutomatedHandoffV1({
+    ...handoff,
+    STATUS: "BLOCKED",
+    BLOCKED: ["EXACT_HEAD_CI_FAILED"],
+    CI: [{ name: "Universal", status: "FAIL", head: HEAD_SHA }],
+    NEXT_ACTION: "Worker repairs the exact failing test"
+  });
+  assert.deepEqual(ciFailure.ROUTE_TO, ["KAIOS_GENERAL_MANAGER"]);
+  assert.throws(
+    () => createKaiosAutomatedHandoffV1({ ...handoff, STATUS: "BLOCKED", BLOCKED: [] }),
+    (error) => error.code === "AUTOMATED_HANDOFF_BLOCKER_REQUIRED"
+  );
+  assert.throws(
+    () => createKaiosAutomatedHandoffV1({ ...handoff, STATUS: "DONE", BLOCKED: ["UNRESOLVED"] }),
+    (error) => error.code === "AUTOMATED_HANDOFF_DONE_WITH_BLOCKERS"
+  );
+  assert.throws(
+    () => createKaiosAutomatedHandoffV1({ ...handoff, NEEDS_HUMAN_DECISION: true, HUMAN_DECISION_CATEGORY: "CI_FAILED" }),
+    (error) => error.code === "AUTOMATED_HANDOFF_HUMAN_ESCALATION_INVALID"
+  );
+  assert.ok(KAIOS_AUTOMATED_HANDOFF_V1_HUMAN_ESCALATIONS.includes("PAYROLL_PAYMENT"));
+  assert.deepEqual(createKaiosAutomatedHandoffV1({ ...handoff, STATUS: "WORKING" }).ROUTE_TO, ["KAIOS_GENERAL_MANAGER"]);
+});
+
+test("enforces ASSIGN/WORKING/REVIEW/BLOCKED/DONE transitions", () => {
+  const assign = { ...handoff, STATUS: "ASSIGN", PR: null, COMPLETED: [], TIMESTAMP: "2026-10-04T00:00:00Z" };
+  const working = { ...assign, STATUS: "WORKING", TIMESTAMP: "2026-10-04T00:01:00Z" };
+  const review = { ...handoff, TIMESTAMP: "2026-10-04T00:02:00Z" };
+  const done = { ...handoff, STATUS: "DONE", NEXT_ACTION: "Archive", TIMESTAMP: "2026-10-04T00:03:00Z" };
+  assert.equal(validateKaiosAutomatedHandoffTransition(assign, working), true);
+  assert.equal(validateKaiosAutomatedHandoffTransition(working, review), true);
+  assert.equal(validateKaiosAutomatedHandoffTransition(review, done), true);
+  assert.throws(
+    () => validateKaiosAutomatedHandoffTransition(assign, done),
+    (error) => error.code === "AUTOMATED_HANDOFF_TRANSITION_INVALID"
+  );
+  assert.throws(
+    () => validateKaiosAutomatedHandoffTransition(done, review),
+    (error) => error.code === "AUTOMATED_HANDOFF_TRANSITION_INVALID"
+  );
+  assert.throws(
+    () => validateKaiosAutomatedHandoffTransition(review, structuredClone(review)),
+    (error) => error.code === "AUTOMATED_HANDOFF_REPLAY"
+  );
+  assert.throws(
+    () => createKaiosAutomatedHandoffV1({ ...handoff, HEAD: "not-a-sha" }),
+    (error) => error.code === "AUTOMATED_HANDOFF_GIT_SHA_INVALID"
+  );
+  assert.throws(
+    () => createKaiosAutomatedHandoffV1({ ...handoff, CI: [{ name: "Universal", status: "PASS", head: MAIN_SHA }] }),
+    (error) => error.code === "AUTOMATED_HANDOFF_CI_HEAD_MISMATCH"
+  );
+});
 
 test("selects one current-main R1 task without imposing a universal reviewer", () => {
   const result = cycle();
