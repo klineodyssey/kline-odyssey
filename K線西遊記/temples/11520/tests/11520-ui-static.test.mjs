@@ -22,7 +22,7 @@ test('dodge tries safe alternatives without bypassing midpoint or endpoint colli
 const fixes=read('../runtime/game-ui-product-fixes.mjs');
 const productFixesV23=read('../runtime/game-ui-product-fixes-v23.mjs');
 const controls=read('../runtime/game-controls-v251.mjs');
-const xyzControl=read('../runtime/joystick-xzxy.mjs');
+const xyzControl=read('../runtime/Joystic-xzxyyz.mjs');
 const xyzAuthority=read('../runtime/xyz-input-authority-runtime.mjs');
 const driveLive=read('../runtime/combat-drive-live-runtime.mjs');
 const driveAdapter=read('../runtime/combat-drive-adapter.mjs');
@@ -837,4 +837,15 @@ assert.deepEqual(opened,['KX','KY','KZ']);assert(original.every((card,i)=>card==
 ctx.execution.readOnly=true;delete ctx.S.quotes.ETHUSDT;vm.runInContext('renderAxes()',ctx);assert(current.every(card=>card.querySelector('.pos').textContent==='NOT_REQUESTED'));assert.equal(current[1].querySelector('.q').textContent,'--');
 ctx.__K11520_3D_CONTROL__.mode='YZ';advance(1237);assert.deepEqual(current.filter(card=>card.classList.contains('k11520NormalActive')).map(card=>card.dataset.axis),['KX'],'existing normal owner still follows the current control plane');assert.equal(doc.querySelectorAll('[data-market-card]').length,3);assert(originalBadges.every((badge,i)=>badge===current[i].querySelector('.k11520NormalBadge')));
 
+});
+
+// Human 2026-10-19 canonical 3-plane joystick file name. Keep legacy import working.
+test('XZ XY YZ joystick uses the canonical Joystic-xzxyyz file and preserves old imports',()=>{
+  const canonical=read('../runtime/Joystic-xzxyyz.mjs');
+  const legacy=read('../runtime/joystick-xzxy.mjs');
+  const bootstrap=read('../runtime/game-5d-bootstrap.mjs');
+  assert.match(canonical,/const MODES=\['XZ','XY','YZ'\]/);
+  assert.match(canonical,/install11520JoystickXZXY/);
+  assert.match(legacy,/export \{ install11520JoystickXZXY \} from '\.\/Joystic-xzxyyz\.mjs';/);
+  assert.ok(bootstrap.includes("import('./Joystic-xzxyyz.mjs')"));
 });
