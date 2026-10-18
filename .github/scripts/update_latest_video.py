@@ -169,6 +169,8 @@ def _load_feed(feed_parser=feedparser.parse, urlopen=urllib.request.urlopen, sle
         if not isinstance(status_code, int) or not 200 <= status_code < 300:
             raise RuntimeError(f"RSS_HTTP_NON_RETRYABLE: status {status_code!r}; README unchanged")
         feed = feed_parser(rss_body)
+        if not getattr(feed, "version", ""):
+            raise RuntimeError("RSS_UNRECOGNIZED_FEED: HTTP success body is not a recognized RSS/Atom feed; README unchanged")
         feed.status = status_code
         return feed
 
@@ -404,7 +406,7 @@ def self_test():
             def parse_valid(body):
                 parsed.append(body)
                 assert body == b"valid-feed", "HTTP error body reached parser"
-                return SimpleNamespace(bozo=False, entries=[SimpleNamespace(
+                return SimpleNamespace(version="atom10", bozo=False, entries=[SimpleNamespace(
                     title="Recovered Video", link="https://www.youtube.com/watch?v=abcdefghijk"
                 )])
 
@@ -430,6 +432,58 @@ def self_test():
             retry_case([status] * 3, [1, 2], "RSS_TRANSIENT_HTTP_EXHAUSTED")
         for status in (400, 401, 403, 429, 501):
             retry_case([status], [], "RSS_HTTP_NON_RETRYABLE")
+
+        # Real parser coverage: an HTTP 200 error document may have entries and
+        # bozo=False without being a recognized feed. Never publish that body.
+        valid_atom = (
+            b'<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom">'
+            b'<title>Channel</title><entry><title>Recovered Video</title>'
+            b'<link href="https://www.youtube.com/watch?v=abcdefghijk"/>'
+            b'</entry></feed>'
+        )
+        empty_atom = b'<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"/>'
+        error_with_item = (
+            b'<?xml version="1.0"?><error><item><title>Upstream error</title>'
+            b'<link>https://example.invalid/error</link></item></error>'
+        )
+
+        def real_body_case(body, retry=False, expected_error=None, expected_change=False):
+            readme.write_text(seed, encoding="utf-8")
+            responses = [(200, body)]
+            if retry:
+                responses.insert(0, (500, error_with_item))
+            remaining = iter(responses)
+            calls, delays = [], []
+
+            def open_body(request, timeout):
+                assert request.full_url == RSS_URL
+                assert timeout == 20
+                calls.append(request.full_url)
+                return FakeResponse(*next(remaining))
+
+            with contextlib.redirect_stderr(io.StringIO()):
+                try:
+                    feed = _load_feed(urlopen=open_body, sleep=delays.append)
+                    changed = update_latest_video(feed, readme)
+                except RuntimeError as exc:
+                    assert expected_error and expected_error in str(exc), str(exc)
+                    assert readme.read_bytes() == seed.encode("utf-8")
+                else:
+                    assert expected_error is None
+                    assert changed is expected_change
+                    if not expected_change:
+                        assert readme.read_bytes() == seed.encode("utf-8")
+                    else:
+                        assert "Recovered Video" in readme.read_text(encoding="utf-8")
+                        assert "example.invalid/error" not in readme.read_text(encoding="utf-8")
+            assert len(calls) == len(responses)
+            assert delays == ([1] if retry else [])
+
+        for retry in (False, True):
+            for body in (b'', b'<html><body>Error</body></html>', error_with_item):
+                real_body_case(body, retry, "RSS_UNRECOGNIZED_FEED")
+            real_body_case(empty_atom, retry)
+            real_body_case(valid_atom, retry, expected_change=True)
 
     print("[update-latest-video-self-test] PASS")
 
