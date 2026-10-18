@@ -122,3 +122,12 @@ Related records:
 - `KGEN-KAIOS/bank/8888/robo_registry.json`
 
 All V3 payroll, game mission and Robo records are Prototype / Simulation / Internal Ledger records. They are not banking, investment advice, guaranteed return, KYC / AML service, securities service or autonomous real-money trading.
+
+## Worker secretary candidate (2026-10-11)
+
+- `KGEN-KAIOS/workforce/WORKER_NOTEBOOK.md`: scoped secretary operation, privacy,
+  evidence and external scheduler/Cloud wiring limits; not employee registration.
+- `tools/worker-notebook.mjs`: local revisioned contact/health notes; no network or authority.
+- `tests/worker-notebook.test.mjs`: restart, race, replay, corruption and privacy checks.
+- `.github/workflows/worker-notebook.yml`: path-scoped, read-only CI for the
+  candidate; no scheduled worker launch, secret use or deployment.

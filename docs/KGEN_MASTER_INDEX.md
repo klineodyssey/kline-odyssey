@@ -1003,3 +1003,10 @@ additive migration; `KAIOS/backend/test/identity.test.mjs` holds adversarial tes
 The existing backend model adds explicit unresolved universe/local coordinate frames.
 This candidate does not activate production identity, KYC, financial transactions or
 Universal Market. Boot CURRENT is intentionally unchanged (no Boot-update authority).
+
+### Worker notebook candidate
+
+`KGEN-KAIOS/workforce/WORKER_NOTEBOOK.md` documents the explicitly authorized
+secretary candidate, `tools/worker-notebook.mjs` and
+`tests/worker-notebook.test.mjs`. Existing Boot CURRENT remains unchanged;
+this index does not activate a new company, identity or dispatcher.
