@@ -1,4 +1,5 @@
 import './mobile-action-rail-clearance-runtime.mjs';
+import './natural-land-vegetation-runtime.mjs';
 /* KGEN_META
 VERSION: 2.6.17
 STATUS: ACTIVE
@@ -61,7 +62,7 @@ export const WORLD_FIRST_HUD_POLICY=Object.freeze({
   MANUAL:['wallet','backpack','settings','chat','audio'],
 });
 
-function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}marketOpen=profile==='FULL'}
+function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}marketOpen=false}
 function save(){try{localStorage.setItem(STORE,JSON.stringify({...state,allOn,profile}))}catch{}}
 function syncWorldFirst(){
   const root=document.documentElement;root.dataset.k11520HudProfile=profile;
@@ -86,17 +87,15 @@ function installWorldFirst(){
   for(const type of ['pointerup','pointercancel'])document.addEventListener(type,e=>{if(marketPointers.delete(e.pointerId))scheduleMarketHide()});
   // Key/input activity restarts the idle interval; a held pointer never loses its card.
   for(const type of ['keydown','input','focusin','pointermove'])axes?.addEventListener(type,scheduleMarketHide);
-  document.addEventListener('click',e=>{if(e.target.closest?.('#axes,#kspaceMapViews [data-map-view="K"]'))showMarketCards()});
-  // Reuse the canonical plane/market selection event. Restoring a saved plane
-  // at boot is not user intent to expand HUD; a real control gesture arms it.
-  let hasPlaneInput=false;
-  document.addEventListener('pointerdown',e=>{if(e.target.closest?.('#joy'))hasPlaneInput=true},true);
-  document.addEventListener('k11520:trade-axis-change',()=>{if(hasPlaneInput)showMarketCards()});
+  document.addEventListener('click',e=>{if(e.target.closest?.('#axes,#kspaceMapViews [data-map-view="K"],[data-organ="trade"],#orderFire'))showMarketCards()});
+  // Plane changes are also movement controls. They must not reopen market
+  // cards during exploration; only an explicit trading surface may do that.
   addEventListener('blur',()=>{marketPointers.clear();scheduleMarketHide()});syncWorldFirst();scheduleMarketHide();
 }
 function retireLegacyCleanMode(){if(document.body?.classList.contains('game-clean-mode'))document.body.classList.remove('game-clean-mode');try{if(localStorage.getItem(LEGACY_CLEAN)!=='0')localStorage.setItem(LEGACY_CLEAN,'0')}catch{}}
 function retireLegacyDrawerToggles(){for(const btn of document.querySelectorAll('.hud-drawer-toggle')){btn.hidden=true;btn.setAttribute('aria-hidden','true');btn.tabIndex=-1}for(const el of document.querySelectorAll('.axes,.tele,.monsterHud,.minimapWrap,.sliderDock'))el.classList.remove('hud-collapsed-left','hud-collapsed-right','hud-collapsed-top')}
 function style(){if($('#k11520UiSettingsStyle'))return;const s=document.createElement('style');s.id='k11520UiSettingsStyle';s.textContent=`
+#intro11520{display:none!important;visibility:hidden!important;pointer-events:none!important}
 .hud-drawer-toggle{display:none!important;visibility:hidden!important;pointer-events:none!important}
 #gameModeToggle{position:fixed!important;z-index:7080!important;right:5px!important;left:auto!important;top:auto!important;bottom:278px!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;border-radius:12px!important;display:grid!important;place-items:center!important;font-size:16px!important}
 body:has(#dock.open) #gameModeToggle{visibility:hidden!important;pointer-events:none!important}
