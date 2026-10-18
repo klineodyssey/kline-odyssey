@@ -6,6 +6,14 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### K11520 three-plane joystick filename — 2026-10-19
+
+`K線西遊記/temples/11520/runtime/joystick-xzxyyz.mjs` is the single canonical
+XZ / XY / YZ controller. `K線西遊記/temples/11520/runtime/joystick-xzxy.mjs`
+remains an import compatibility shim. The implementation and axes are unchanged.
+Full file purposes and QA routes: [11520 README](K線西遊記/temples/11520/README.md),
+[repository index](docs/KGEN_MASTER_INDEX.md), [frontend index](docs/KGEN_FRONTEND_INDEX.md).
+
 ### KAIOS Backend / Recovery V1 review candidate
 
 Portable authenticated Player Life sync, immutable backups and a Traditional Chinese

@@ -1,5 +1,29 @@
 # KGEN_FRONTEND_INDEX
 
+## K11520 three-plane joystick filename (2026-10-19)
+
+Human selected `joystick-xzxyyz.mjs` (option A) for PR #615. This migrates
+an existing controller; its implementation, exported install function, saved mode,
+and XZ+Y / XY+Z / YZ+X behavior remain unchanged. The unmerged mixed-case
+`Joystic-xzxyyz.mjs` candidate is removed; it is not a second runtime.
+
+| Repository path | Purpose |
+|---|---|
+| `K線西遊記/temples/11520/runtime/joystick-xzxyyz.mjs` | Single canonical implementation for XZ / XY / YZ joystick input. |
+| `K線西遊記/temples/11520/runtime/joystick-xzxy.mjs` | Legacy import shim exporting the same install function from the canonical module. |
+| `K線西遊記/temples/11520/runtime/game-5d-bootstrap.mjs` | Existing loader imports the canonical lowercase filename. |
+| `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs` | Real new/legacy ESM import identity and existing UI regressions. |
+| `K線西遊記/temples/11520/tests/11520-browser-xzxy.mjs` | Real-browser module compatibility, three-plane input and portrait/landscape evidence. |
+| `K線西遊記/temples/11520/tests/11520-browser-responsive.mjs` | Existing responsive/public QA checks both canonical and legacy source provenance. |
+| `.github/workflows/11520-game-product-qa.yml` | Syntax checks both module paths and runs existing product QA. |
+
+Boot navigation remains `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` →
+`KGEN_MASTER_LIBRARY_INDEX.md` → `docs/KGEN_MASTER_INDEX.md`, with frontend
+registration in `docs/KGEN_FRONTEND_INDEX.md`. Boot CURRENT and its ancestors
+remain unchanged. New combat/camera semantics in #608 are a separate work scope;
+this filename migration does not implement them or authorize financial execution.
+
+
 Generated: 2026-07-05
 Site root: C:\Desktop\kline-odyssey\K線西遊記
 
