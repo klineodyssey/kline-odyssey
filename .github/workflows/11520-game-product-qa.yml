@@ -28,8 +28,13 @@ jobs:
     # every per-script timeout below unchanged; reserve 5 minutes for runner
     # variability and evidence upload rather than skipping assertions.
     timeout-minutes: 25
+    env:
+      K11520_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: "20"
@@ -54,6 +59,7 @@ jobs:
           node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-controls-v251.mjs"
           node --check "K線西遊記/temples/11520/runtime/joystick-xzxy.mjs"
+          node --check "K線西遊記/temples/11520/runtime/joystick-xzxyyz.mjs"
           node --check "K線西遊記/temples/11520/runtime/xyz-input-authority-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/character-status-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/combat-mass-scale-runtime.mjs"

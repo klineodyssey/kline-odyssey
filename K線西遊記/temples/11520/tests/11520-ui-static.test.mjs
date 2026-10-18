@@ -22,7 +22,7 @@ test('dodge tries safe alternatives without bypassing midpoint or endpoint colli
 const fixes=read('../runtime/game-ui-product-fixes.mjs');
 const productFixesV23=read('../runtime/game-ui-product-fixes-v23.mjs');
 const controls=read('../runtime/game-controls-v251.mjs');
-const xyzControl=read('../runtime/Joystic-xzxyyz.mjs');
+const xyzControl=read('../runtime/joystick-xzxyyz.mjs');
 const xyzAuthority=read('../runtime/xyz-input-authority-runtime.mjs');
 const driveLive=read('../runtime/combat-drive-live-runtime.mjs');
 const driveAdapter=read('../runtime/combat-drive-adapter.mjs');
@@ -839,13 +839,17 @@ ctx.__K11520_3D_CONTROL__.mode='YZ';advance(1237);assert.deepEqual(current.filte
 
 });
 
-// Human 2026-10-19 canonical 3-plane joystick file name. Keep legacy import working.
-test('XZ XY YZ joystick uses the canonical Joystic-xzxyyz file and preserves old imports',()=>{
-  const canonical=read('../runtime/Joystic-xzxyyz.mjs');
+// Human explicitly selected this lowercase filename on 2026-10-19.
+test('XZ XY YZ joystick loads the canonical module and preserves old imports',async()=>{
+  const canonical=read('../runtime/joystick-xzxyyz.mjs');
   const legacy=read('../runtime/joystick-xzxy.mjs');
   const bootstrap=read('../runtime/game-5d-bootstrap.mjs');
   assert.match(canonical,/const MODES=\['XZ','XY','YZ'\]/);
   assert.match(canonical,/install11520JoystickXZXY/);
-  assert.match(legacy,/export \{ install11520JoystickXZXY \} from '\.\/Joystic-xzxyyz\.mjs';/);
-  assert.ok(bootstrap.includes("import('./Joystic-xzxyyz.mjs')"));
+  assert.match(legacy,/export \{ install11520JoystickXZXY \} from '\.\/joystick-xzxyyz\.mjs';/);
+  assert.ok(bootstrap.includes("import('./joystick-xzxyyz.mjs')"));
+  const current=await import('../runtime/joystick-xzxyyz.mjs');
+  const previous=await import('../runtime/joystick-xzxy.mjs');
+  assert.equal(typeof current.install11520JoystickXZXY,'function');
+  assert.equal(previous.install11520JoystickXZXY,current.install11520JoystickXZXY,'legacy import must resolve to the same implementation');
 });

@@ -5,7 +5,7 @@ import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../runtime/player-
 
 const OUT='artifacts/11520-visual-qa';
 await fs.mkdir(OUT,{recursive:true});
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 // This controller/FX regression exercises the unlocked Phantom Axe. Use earned
 // local events, not hand-written XP/level; new-guest gates have separate QA.
@@ -32,6 +32,16 @@ try{await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE_TIMER__&&glo
 catch(error){throw new Error(`${error}\n${JSON.stringify({errors,state:await page.evaluate(()=>({drive:!!globalThis.__K11520_COMBAT_DRIVE_TIMER__,control:!!globalThis.__K11520_3D_CONTROL__,character:document.querySelector('#charState')?.textContent}))})}`)}
 await page.evaluate(()=>{clearInterval(globalThis.__K11520_COMBAT_DRIVE_TIMER__);globalThis.__K11520_COMBAT_DRIVE_TIMER__=null});
 await page.waitForTimeout(120);
+
+// Exercise actual HTTP ESM resolution, not just matching import strings.
+const moduleCompatibility=await page.evaluate(async()=>{
+  const canonicalUrl=new URL('./runtime/joystick-xzxyyz.mjs',location.href).href;
+  const legacyUrl=new URL('./runtime/joystick-xzxy.mjs',location.href).href;
+  const responses=await Promise.all([fetch(canonicalUrl),fetch(legacyUrl)]);
+  const current=await import(canonicalUrl),previous=await import(legacyUrl);
+  return {statuses:responses.map(r=>r.status),sameInstall:current.install11520JoystickXZXY===previous.install11520JoystickXZXY};
+});
+assert.deepEqual(moduleCompatibility,{statuses:[200,200],sameInstall:true});
 
 const xyz=async()=>{assert.match(await page.locator('#xyz').textContent(),/LOCAL X .*K.*Y .*K.*Z .*K/);return page.evaluate(()=>({...globalThis.__K11520_WORLD_COORDS__.physical}))};
 const world=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_WORLD_COORDS__||null));
@@ -90,6 +100,21 @@ await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileCont
 await page.locator('#k11520UtilityMaster').click({timeout:2000});await page.waitForTimeout(120);await visible('#gameModeToggle');await page.locator('#gameModeToggle').click({timeout:2000});await page.waitForTimeout(120);await visible('#k11520UiSettings');
 const labels=await page.locator('#k11520UiSettings .row span').allTextContents();assert.ok(labels.includes('聊天'),'settings must retain chat');assert.ok(!labels.includes('錢包')&&!labels.includes('背包'),'wallet/backpack must not be globally collapsible');await page.locator('#k11520UiSettingsClose').click();
 await page.waitForTimeout(120);await page.screenshot({path:`${OUT}/11520-mobile-390x844.png`,fullPage:true});
-await fs.writeFile(`${OUT}/11520-xzxy-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),organ:'XYZ Plane Joystick',mode:(await control()).mode,xyz:await xyz(),world:await world(),controller:await control(),normalMarket:await normal(),mobileControlLayout:layout,quickActions:{attack,order}},null,2));
+// Keep the same real runtime through rotation and use native touch taps to
+// cycle every mode. Existing portrait assertions above verify all nine axes.
+await page.setViewportSize({width:844,height:390});
+await page.waitForTimeout(700);
+const landscapeModes=[];
+for(const [mode,discAxes,railAxis] of [['XZ',['X','Z'],'Y'],['XY',['X','Y'],'Z'],['YZ',['Y','Z'],'X']]){
+  const state=await control();assert.equal(state.mode,mode);assert.deepEqual(state.discAxes,discAxes);assert.equal(state.railAxis,railAxis);
+  await visible('#joy');await visible('#knob img');await visible('#yControl');
+  await assertNoDrift(`landscape ${mode} neutral`);
+  await page.screenshot({path:`${OUT}/11520-landscape-844x390-${mode.toLowerCase()}.png`,fullPage:true});
+  landscapeModes.push({mode,discAxes,railAxis});
+  const p=center(await knobBox());await page.touchscreen.tap(p.x,p.y);await page.waitForTimeout(220);
+}
+assert.equal((await control()).mode,'XZ','native landscape touch must complete XZ→XY→YZ→XZ');
+assert.deepEqual(errors,[],'page errors after module imports/rotation: '+errors.join('\n'));
+await fs.writeFile(`${OUT}/11520-xzxy-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),head:process.env.K11520_SOURCE_SHA||null,organ:'XYZ Plane Joystick',moduleCompatibility,landscapeModes,mode:(await control()).mode,xyz:await xyz(),world:await world(),controller:await control(),normalMarket:await normal(),mobileControlLayout:layout,quickActions:{attack,order}},null,2));
 await browser.close();
 console.log('11520 XZ+Y / XY+Z / YZ+X controller + touch-follow thumb + normal market + mobile control layout browser QA PASS');
