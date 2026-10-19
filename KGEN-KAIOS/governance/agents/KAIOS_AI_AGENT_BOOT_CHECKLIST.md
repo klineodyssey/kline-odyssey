@@ -6,6 +6,23 @@ Cursor Dispatch: NOT_DISPATCHED
 
 ## Boot Inputs
 
+For new work/session entry, the 2026-10-06 Human BOOT-FIRST order takes precedence:
+read `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` first, resolve its full lineage and
+CURRENT/domain Canon, sync Company, then execute the Human prompt. The input list
+below is an inventory, not permission to read AGENTS before Boot. See
+`KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md` for the current receipt contract.
+
+Each new work/session requires PRE_CODE evidence in the existing Company Boot
+schema (`engineeringWorkflowEvidence`) and a successful `validate-workflow`
+consistency check. Append POST_TEST/source-refresh checkpoints only when actually
+observed. Historical missing evidence stays `NOT_RECORDED`; it cannot be backfilled
+as a prior PASS. This additional check grants no actions and does not replace the
+identity, capability, protected-path or high-risk rechecks below.
+
+Rework after tests opens a new sequential cycle with linked PRE_CODE/NOT_RUN;
+POST_TEST must match its latest PRE_CODE and source snapshot. Preserve all prior
+results. The consistency output never grants readiness or execution authority.
+
 Before work, each AI Agent Instance must read or verify:
 
 - `AGENTS.md`
