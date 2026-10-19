@@ -6,9 +6,14 @@
   "required": ["request_id", "customer_life_id", "customer_type", "request_text", "requested_object", "requested_location", "requested_quantity", "requested_quality", "requested_deadline", "requested_budget", "intended_use", "civilization_context", "rights_context", "risk_level", "priority", "created_at", "status", "structured_requirements", "assumptions"],
   "properties": {
     "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "customer_order_id": { "type": "string", "minLength": 1, "maxLength": 128 },
     "customer_life_id": { "type": "string", "minLength": 1, "maxLength": 128 },
     "customer_type": { "enum": ["PLAYER", "AI_LIFE_SIMULATION", "HOUSEHOLD_SIMULATION", "COMPANY_SIMULATION", "CITY_SIMULATION", "PUBLIC_SIMULATION"] },
+    "request_source": { "enum": ["CHAT", "APP", "GAME", "WEB_FORM", "API", "GITHUB_ISSUE", "COMPANY_AI", "SYSTEM_SENSOR"] },
     "request_text": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "desired_outcome": { "type": ["string", "null"], "maxLength": 2000 },
+    "budget_if_known": { "type": ["number", "null"], "minimum": 0 },
+    "deadline_if_known": { "type": ["integer", "null"], "minimum": 0 },
     "requested_object": { "type": "string", "minLength": 1, "maxLength": 128 },
     "requested_location": { "type": ["string", "null"] },
     "requested_quantity": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 },
@@ -29,7 +34,9 @@
         "functional": { "$ref": "#/$defs/list" }, "physical": { "$ref": "#/$defs/list" }, "location": { "$ref": "#/$defs/list" }, "resource": { "$ref": "#/$defs/list" }, "worker": { "$ref": "#/$defs/list" }, "technology": { "$ref": "#/$defs/list" }, "rights": { "$ref": "#/$defs/list" }, "civilization": { "$ref": "#/$defs/list" }, "safety": { "$ref": "#/$defs/list" }, "economic": { "$ref": "#/$defs/list" }, "quality": { "$ref": "#/$defs/list" }, "delivery": { "$ref": "#/$defs/list" }, "maintenance": { "$ref": "#/$defs/list" }
       }, "additionalProperties": false
     },
-    "assumptions": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/assumption" } }
+    "assumptions": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/assumption" } },
+    "open_questions": { "type": "array", "maxItems": 100, "items": { "type": "string" } },
+    "truth_classification": { "enum": ["MEASURED", "OBSERVED", "DOCUMENTED", "CALCULATED", "MODEL_ESTIMATE", "INFERRED", "UNKNOWN"] }
   },
   "additionalProperties": false,
   "$defs": {
