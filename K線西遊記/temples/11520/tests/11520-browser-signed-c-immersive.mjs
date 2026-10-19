@@ -15,7 +15,7 @@ const BASE=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 // Public/live market validation keeps its existing independent browser suite.
 const LOCAL_SIMULATION_QA=['127.0.0.1','localhost'].includes(new URL(BASE).hostname);
 const quoteFixtureRows=[{symbol:'BTCUSDT',price:'65000'},{symbol:'ETHUSDT',price:'3500'},{symbol:'BNBUSDT',price:'600'}];
-let quoteFixtureReady=false;
+let quoteFixtureReady=true;
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
@@ -44,24 +44,73 @@ await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready==
 await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',null,{timeout:5000});
 await page.waitForTimeout(500);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
+const tradeAxis=async()=>page.evaluate(()=>globalThis.__K11520_TRADE_AXIS_API__?.current());
+const switchPlane=async id=>{
+  const b=await page.locator('#joy').boundingBox();assert.ok(b,'joy missing for plane switch');
+  const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width/2,clientY:b.y+b.height/2,buttons:1};
+  await page.dispatchEvent('#joy','pointerdown',p);await page.waitForTimeout(70);await page.dispatchEvent('#joy','pointerup',{...p,buttons:0});await page.waitForTimeout(220);
+  return tradeAxis();
+};
 if(LOCAL_SIMULATION_QA){
-  await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='WAIT',null,{timeout:5000});
-  const simulationMode=await page.evaluate(()=>globalThis.__K11520_EXECUTION__.snapshot().mode);assert.equal(simulationMode,'SIMULATION_WALLET');
-  // Public WAIT remains truthful while explicit SIMULATION can preview.
-  await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
-  const before=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet);
-  await page.locator('#orderFire').click({timeout:2500});
-  await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
-  await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('K11520_DETERMINISTIC_SIMULATION'));
-  assert.equal(await page.locator('#confirmOrder').isDisabled(),false,'WAIT must allow explicit simulation preview');
-  assert.equal(await page.evaluate(()=>globalThis.__K11520_MARKET_K__.status),'WAIT','local source never becomes a fake LIVE public quote');
-  assert.deepEqual(await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet),before,'preview does not debit');
-  await page.screenshot({path:`${OUT}/signed-c-WAIT-simulation-preview-390x844.png`});
-  await page.locator('#cancelOrder').click();
-  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
-  quoteFixtureReady=true;
   await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});
-  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'HARNESS_LOCAL_SIMULATION_QUOTES',base:BASE,realMarketValidation:false,providerCallsIntercepted:'/api/v3/aggTrades',rows:quoteFixtureRows,waitPreviewAllowed:true,simulationSource:'K11520_DETERMINISTIC_SIMULATION',firstValidBatch:'LIVE',simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
+  const simulationMode=await page.evaluate(()=>globalThis.__K11520_EXECUTION__.snapshot().mode);assert.equal(simulationMode,'SIMULATION_WALLET');
+  const raceState=()=>page.evaluate(()=>({ledger:structuredClone(globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot()),journey:structuredClone(globalThis.__K11520_JOURNEY__.snapshot())}));
+  const raceAssets=state=>({...state,ledger:{...state.ledger,observations:Object.fromEntries(Object.entries(state.ledger.observations).map(([market,{at,sequence,...row}])=>[market,row]))}});
+  await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
+  const cancelBefore=await raceState();
+  await page.evaluate(()=>{const fire=document.querySelector('#orderFire'),open=fire.onclick;fire.onclick=function(event){fire.onclick=open;open.call(this,event);document.querySelector('#cancelOrder').click()}});
+  await page.locator('#orderFire').click({timeout:2500});await page.waitForTimeout(120);
+  assert.equal(await page.locator('#confirm').isVisible(),false,'Cancel during awaited preflight must invalidate the request');
+  const cancelAfter=await raceState();assert.deepEqual(raceAssets(cancelAfter),raceAssets(cancelBefore),'preflight Cancel race cannot mutate ledger assets or PREVIEW journey state; fresh provider timestamps may advance');
+
+  const supersedeBefore=await raceState();
+  await page.evaluate(()=>{const fire=document.querySelector('#orderFire'),open=fire.onclick;fire.onclick=function(event){fire.onclick=open;open.call(this,event);globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.applySignedValue(.1);open.call(this,event)}});
+  await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
+  await page.waitForTimeout(120);
+  const supersedePreview=await page.locator('#simulationOrderPreview').textContent();assert.match(supersedePreview,/0\.1C/,'the newest click must win preflight with its own C');assert.doesNotMatch(supersedePreview,/1C \/ 1/,'the superseded request must not paint its stale C');
+  const supersedeAfter=await raceState();assert.deepEqual(raceAssets(supersedeAfter).ledger,raceAssets(supersedeBefore).ledger,'superseding preflight clicks cannot mutate the book before Submit');
+  await page.screenshot({path:`${OUT}/signed-c-preflight-new-click-wins-390x844.png`});await page.locator('#confirmX').click();await page.locator('#confirm').waitFor({state:'hidden',timeout:2500});
+
+  await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.applySignedValue(1));const axisBefore=await raceState(),axisAtRequest=await tradeAxis();
+  await page.evaluate(()=>{const fire=document.querySelector('#orderFire'),open=fire.onclick;fire.onclick=function(event){fire.onclick=open;open.call(this,event);const joy=document.querySelector('#joy'),r=joy.getBoundingClientRect(),p={bubbles:true,cancelable:true,composed:true,pointerId:1199,pointerType:'touch',isPrimary:true,clientX:r.left+r.width/2,clientY:r.top+r.height/2};joy.dispatchEvent(new PointerEvent('pointerdown',{...p,buttons:1,button:0}));joy.dispatchEvent(new PointerEvent('pointerup',{...p,buttons:0,button:0}));globalThis.__K11520_TRADE_AXIS_API__.current()}});
+  await page.locator('#orderFire').click({timeout:2500});await page.waitForTimeout(120);
+  const axisAfter=await raceState(),axisAfterSwitch=await tradeAxis();assert.notEqual(axisAfterSwitch,axisAtRequest,'native plane pointer must change the trading axis during preflight');assert.equal(await page.locator('#confirm').isVisible(),false,'axis-switched preflight must not open a stale confirmation');assert.deepEqual(raceAssets(axisAfter),raceAssets(axisBefore),'axis-switch preflight race cannot mutate ledger assets or PREVIEW journey state; fresh provider timestamps may advance');
+  assert.equal(await switchPlane(1200),'KX');assert.equal(await switchPlane(1201),'KY');
+  const preflightRaceEvidence={sourceCommit:process.env.K11520_SOURCE_SHA||null,base:BASE,viewport:'390x844',nativeBrowser:true,trustedInitialClick:true,exactProductionHandler:true,awaitBoundary:'adapter.preview',cancelInvalidated:true,newClickWinsC:.1,oldClickC:1,axisAtRequest,axisAfterSwitch,axisSwitchInvalidated:true,ledgerUnchanged:true,cancelJourneyUnchanged:true,axisJourneyUnchanged:true,providerTimestampMetadataExcludedFromAssetComparison:true};
+  await fs.writeFile(`${OUT}/signed-c-preflight-races.json`,JSON.stringify(preflightRaceEvidence,null,2));
+  // Establish a warm, saved book through the native UI before the feed fails.
+  await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
+  await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
+  await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.trim().length>0,null,{timeout:5000});
+  const freshPreview=await page.locator('#simulationOrderPreview').textContent(),freshOracle=await page.evaluate(()=>globalThis.__K11520_FREE_ORACLE__);
+  assert.ok(Object.values(freshOracle).every(row=>row.source==='BINANCE_PUBLIC_MARKET_DATA_ONLY'&&row.stale===false&&row.sourceStatus==='REFERENCE_FRESH'),JSON.stringify(freshOracle));assert.match(await page.locator('#feed').textContent(),/SRC BINANCE FREE/);assert.match(freshPreview,/CURRENT PRICE/);
+  assert.equal(await page.locator('#confirmOrder').isDisabled(),false,'fresh complete public set allows simulation preview');
+  const previewWallet=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet);
+  await page.screenshot({path:`${OUT}/signed-c-FRESH-public-preview-390x844.png`});await page.locator('#confirmOrder').click();
+  await page.waitForFunction(()=>{const book=globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot();return book.orders.length>0&&book.positions.some(position=>position.status==='OPEN')&&book.receipts.length>0&&Object.keys(book.observations).length===3},null,{timeout:15000});
+  await page.locator('#sheetClose').click();await page.locator('#sheet').waitFor({state:'hidden',timeout:2500});
+  quoteFixtureReady=false;
+  await page.waitForFunction(()=>{const rows=Object.values(globalThis.__K11520_FREE_ORACLE__||{});return rows.length===3&&rows.every(row=>row.stale===true&&row.sourceStatus!=='REFERENCE_FRESH')},null,{timeout:15000});
+  const abnormalQuality=await page.evaluate(()=>Object.values(globalThis.__K11520_FREE_ORACLE__)[0].sourceStatus);assert.ok(['MARKET_DATA_UNKNOWN','MARKET_DATA_STALE','MARKET_DATA_FAILED'].includes(abnormalQuality));
+  const before=await page.evaluate(()=>({ledger:structuredClone(globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot()),journey:structuredClone(globalThis.__K11520_JOURNEY__.snapshot())}));
+  assert.ok(before.ledger.orders.length&&before.ledger.positions.length&&before.ledger.receipts.length&&Object.keys(before.ledger.observations).length===3,'warm saved-state fixture must cover the full ledger');
+  await page.locator('#orderFire').click({timeout:2500});await page.waitForTimeout(120);
+  assert.equal(await page.locator('#confirm').isVisible(),false,'abnormal feed must not open a price-dependent native preview');
+  assert.notEqual(await page.evaluate(()=>globalThis.__K11520_MARKET_K__.status),'LIVE','abnormal public input never becomes a fake LIVE quote');
+  const blocked=await page.evaluate(()=>({ledger:structuredClone(globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot()),journey:structuredClone(globalThis.__K11520_JOURNEY__.snapshot())}));
+  assert.deepEqual(blocked,before,'native blocked click cannot mutate orders, positions, receipts, observations, wallet, margin or PREVIEW journey state');
+  await page.screenshot({path:`${OUT}/signed-c-WAIT-blocked-390x844.png`});
+  quoteFixtureReady=true;await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});
+  const recovered=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot());
+  const positionAssets=positions=>positions.map(({observedAt,observationSequence,...position})=>position);
+  assert.deepEqual(recovered.wallet,before.ledger.wallet,'source recovery preserves wallet and margin');assert.deepEqual(recovered.orders,before.ledger.orders,'source recovery preserves saved orders');assert.deepEqual(positionAssets(recovered.positions),positionAssets(before.ledger.positions),'source recovery preserves saved position assets while allowing fresh observation metadata');assert.deepEqual(recovered.receipts,before.ledger.receipts,'source recovery creates no settlement receipt');
+  // Restore the original no-open-position harness precondition only after the
+  // recovery invariant is recorded, through the existing explicit local UI.
+  await page.locator('[data-organ="positions"]').evaluate(element=>element.click());await page.locator('[data-sim-close]').click();
+  await page.waitForFunction(()=>!globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions.some(position=>position.status==='OPEN'),null,{timeout:2500});
+  await page.locator('#sheetClose').click();await page.locator('#sheet').waitFor({state:'hidden',timeout:2500});
+  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'HARNESS_LOCAL_SIMULATION_QUOTES',base:BASE,realMarketValidation:false,providerCallsIntercepted:'/api/v3/aggTrades',rows:quoteFixtureRows,abnormalQuality,warmSavedState:true,fullLedgerUnchanged:true,journeyPreviewUnchanged:true,recoverySettlementReceiptsUnchanged:true,previewWallet,freshOracleSource:Object.values(freshOracle)[0].source,firstValidBatch:'LIVE',simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
 }
 // Human 12:43 Market collapse applies to FULL too; explicitly disclose it
 // before measuring the full-information HUD, rather than defeating idle hide.
@@ -69,15 +118,8 @@ if(!await page.locator('#axes').isVisible())await page.locator('#k11520MarketRow
 await page.locator('#axes').waitFor({state:'visible'});
 const normalHud=await page.evaluate(()=>{const visible=sel=>{const el=document.querySelector(sel);if(!el)return false;const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&b.width>0&&b.height>0};return{axes:visible('.axes'),world:visible('.tele'),life:visible('.monsterHud'),map:visible('.minimapWrap'),visual:Math.round(globalThis.visualViewport?.height||innerHeight),css:getComputedStyle(document.documentElement).getPropertyValue('--k11520-visible-vh').trim()}});assert.deepEqual({axes:normalHud.axes,world:normalHud.world,life:normalHud.life,map:normalHud.map},{axes:true,world:true,life:true,map:true},'ordinary HUD must stay visible');assert.equal(normalHud.css,`${normalHud.visual}px`,'ordinary mode must track VisualViewport so browser chrome recovery becomes game space');
 
-const tradeAxis=async()=>page.evaluate(()=>globalThis.__K11520_TRADE_AXIS_API__?.current());
 const initialTradeAxis=await tradeAxis();
 assert.equal(initialTradeAxis,'KY','XZ plane must directly select normal-axis KY for trading');
-const switchPlane=async id=>{
-  const b=await page.locator('#joy').boundingBox();assert.ok(b,'joy missing for plane switch');
-  const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width/2,clientY:b.y+b.height/2,buttons:1};
-  await page.dispatchEvent('#joy','pointerdown',p);await page.waitForTimeout(70);await page.dispatchEvent('#joy','pointerup',{...p,buttons:0});await page.waitForTimeout(220);
-  return tradeAxis();
-};
 
 const centerX=async sel=>{const b=await page.locator(sel).boundingBox();assert.ok(b,sel+' missing');return b.x+b.width/2};
 const yCenter=await centerX('#yControl');
@@ -287,4 +329,4 @@ assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
 await browser.close();
-console.log('11520 signed-C immersive QA PASS: one C renderer; direct canonical side sync; 100C hard cap and index-delta preview; cross-control lot edits preserve signed C; unified invalid-lot policy; rapid sign and axis-switch regressions; centered rail/colors/immersive verified at 390x844');
+console.log('11520 signed-C immersive QA PASS: async preflight Cancel/new-click/axis fencing; one C renderer; direct canonical side sync; 100C hard cap and index-delta preview; cross-control lot edits preserve signed C; unified invalid-lot policy; rapid sign and axis-switch regressions; centered rail/colors/immersive verified at 390x844');

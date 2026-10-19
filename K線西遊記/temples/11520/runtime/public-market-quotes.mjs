@@ -1,15 +1,15 @@
 /* KGEN_META
 VERSION: 1.0.0
-REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+REVISION: 2026-10-09.PUBLIC-SIM-FEED-ADMISSION
 PRODUCT_CONTEXT: V2.9.5
 STATUS: ACTIVE
-LAST_UPDATED: 2026-10-06
-UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
-TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Add explicitly simulation-only deterministic observations while preserving raw public quote state and provenance.
-ANCESTOR: K線西遊記/temples/11520/runtime/public-market-quotes.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
+LAST_UPDATED: 2026-10-09
+UPDATED_BY: Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09
+REVIEWED_BY: PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge
+SOURCE_COMMIT: b39c16e5cc5f2409590d62fa9a53b5ceb3750300
+TASK_ID: K11520-PUBLIC-FREE-SIM-FEED-20261009
+CHANGE_REASON: Classify the complete free BTC/ETH/BNB quote set with exact source/time/failure provenance, strict integer provider sequence, and no invented divergence quorum.
+ANCESTOR: K線西遊記/temples/11520/runtime/public-market-quotes.mjs @ c35320c6f95ea9411fd9e5f3ad295599f029a3ae
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Fetch validated, read-only 11520 public market reference quotes from Binance's market-data-only origin.
 */
@@ -24,14 +24,42 @@ export const PUBLIC_MARKET_QUOTE_SOURCE=Object.freeze({
 });
 
 export const FREE_ORACLE_MAX_AGE_MS=15000;
+export const PUBLIC_MARKET_SYMBOLS=Object.freeze(['BTCUSDT','ETHUSDT','BNBUSDT']);
+export const PUBLIC_QUOTE_QUALITY=Object.freeze({UNKNOWN:'UNKNOWN',FRESH:'FRESH',STALE:'STALE',FAILED:'FAILED'});
 // Public REST references are simulation/world inputs, not authenticated USD
 // settlement reports. Never manufacture provider time from receipt time.
 export function publicObservationStatus(observation,now=Date.now()){
   const age=observation?now-observation.updatedAt:null;
-  const stale=!observation||!Number.isFinite(age)||age<0||age>FREE_ORACLE_MAX_AGE_MS;
+  const unknown=!observation||observation?.quality===PUBLIC_QUOTE_QUALITY.UNKNOWN,failed=Boolean(observation?.failure);
+  const invalid=!unknown&&!failed&&(observation?.source!==PUBLIC_MARKET_QUOTE_SOURCE.id
+    ||!Number.isFinite(Number(observation?.price))||Number(observation?.price)<=0
+    ||!Number.isSafeInteger(observation?.updatedAt)||observation.updatedAt<=0
+    ||!Number.isSafeInteger(observation?.sequence)||observation.sequence<0);
+  const stale=unknown||failed||invalid||!Number.isFinite(age)||age<0||age>FREE_ORACLE_MAX_AGE_MS;
+  const quality=unknown?PUBLIC_QUOTE_QUALITY.UNKNOWN:(failed||invalid)?PUBLIC_QUOTE_QUALITY.FAILED:stale?PUBLIC_QUOTE_QUALITY.STALE:PUBLIC_QUOTE_QUALITY.FRESH;
   return {...observation,age,stale,staleThreshold:FREE_ORACLE_MAX_AGE_MS,
-    sourceStatus:stale?'MARKET DATA STALE':'REFERENCE_FRESH',fallbackStatus:'NONE_FAIL_CLOSED',
-    settlementAuthority:false,quoteCurrency:'USDT',subSecond:false};
+    quality,allowsPriceTransitions:quality===PUBLIC_QUOTE_QUALITY.FRESH,
+    sourceStatus:quality===PUBLIC_QUOTE_QUALITY.FRESH?'REFERENCE_FRESH':quality==='FAILED'?'MARKET_DATA_FAILED':quality==='UNKNOWN'?'MARKET_DATA_UNKNOWN':'MARKET_DATA_STALE',
+    failure:failed?String(observation.failure):invalid?'INVALID_PROVIDER_OBSERVATION':null,fallbackStatus:'NONE_FAIL_CLOSED',
+    divergenceStatus:'NOT_VERIFIED_SINGLE_SOURCE',settlementAuthority:false,quoteCurrency:'USDT',subSecond:false};
+}
+
+export function publicMarketQuoteSetStatus(observations,{symbols=PUBLIC_MARKET_SYMBOLS,now=Date.now()}={}){
+  const expected=normalizeSymbols(symbols),rows=Object.fromEntries(expected.map(market=>[market,publicObservationStatus(observations?.[market],now)]));
+  const qualities=Object.values(rows).map(row=>row.quality);
+  const quality=qualities.includes(PUBLIC_QUOTE_QUALITY.FAILED)?PUBLIC_QUOTE_QUALITY.FAILED:
+    qualities.includes(PUBLIC_QUOTE_QUALITY.UNKNOWN)?PUBLIC_QUOTE_QUALITY.UNKNOWN:
+    qualities.includes(PUBLIC_QUOTE_QUALITY.STALE)?PUBLIC_QUOTE_QUALITY.STALE:PUBLIC_QUOTE_QUALITY.FRESH;
+  return Object.freeze({quality,allowsPriceTransitions:quality===PUBLIC_QUOTE_QUALITY.FRESH,
+    requiredSymbols:Object.freeze(expected),rows:Object.freeze(rows),
+    divergenceStatus:'NOT_VERIFIED_SINGLE_SOURCE',settlementAuthority:false});
+}
+
+export function publicMarketFailureObservations({symbols=PUBLIC_MARKET_SYMBOLS,now=Date.now(),failure='PUBLIC_REFERENCE_UNAVAILABLE'}={}){
+  const receivedAt=Number(now),code=String(failure||'PUBLIC_REFERENCE_UNAVAILABLE');
+  return Object.freeze(Object.fromEntries(normalizeSymbols(symbols).map(market=>[market,publicObservationStatus({
+    market,price:null,updatedAt:null,sequence:null,receivedAt,source:PUBLIC_MARKET_QUOTE_SOURCE.id,failure:code
+  },receivedAt)])));
 }
 export async function fetchPublicMarketObservations({symbols,fetchImpl=globalThis.fetch,now=Date.now,timeoutMs=8000}={}){
   const expected=normalizeSymbols(symbols),controller=new AbortController();

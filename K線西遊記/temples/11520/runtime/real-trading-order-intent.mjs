@@ -1,20 +1,21 @@
 /* KGEN_META
 VERSION: 1.0.0
-REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+REVISION: 2026-10-09.PUBLIC-SIM-FEED-ADMISSION
 PRODUCT_CONTEXT: V2.9.5
 STATUS: CANDIDATE
-LAST_UPDATED: 2026-10-06
-UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
-TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Isolate simulation source and recovery guards across the existing order lifecycle; reject synthetic provenance on REAL paths.
-ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
+LAST_UPDATED: 2026-10-09
+UPDATED_BY: Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09
+REVIEWED_BY: PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge
+SOURCE_COMMIT: b39c16e5cc5f2409590d62fa9a53b5ceb3750300
+TASK_ID: K11520-PUBLIC-FREE-SIM-FEED-20261009
+CHANGE_REASON: Stop every SIMULATION adapter price transition on abnormal public quality and exact-row mismatch while preserving existing positions, margin, receipts and cancel/exploration behavior.
+ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs @ c35320c6f95ea9411fd9e5f3ad295599f029a3ae
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fixed axis/market bindings.
 */
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
-import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
+import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE,PUBLIC_MARKET_SYMBOLS,
+  PUBLIC_MARKET_QUOTE_SOURCE,publicMarketQuoteSetStatus} from './public-market-quotes.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
   observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot} from './kgen-margin-runtime.mjs';
@@ -87,13 +88,49 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   if(!ledger||typeof ledger!=='object')throw new Error('EXISTING_LEDGER_REQUIRED');
   const run=(fn,mutating=false)=>{try{if(mutating)options.beforeMutation?.();const result=fn();if(result.ok&&mutating)options.afterMutation?.();return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){return executionFailure(error)}};
   const fallback=options.simulationFallback===true;
+  let publicMarketQuality=publicMarketQuoteSetStatus(null,{symbols:PUBLIC_MARKET_SYMBOLS});
+  const pinColdSimulationSource=now=>{
+    if(!fallback)return;
+    const book=simulationSnapshot(ledger),draft=structuredClone(ledger);let changed=false;
+    for(const market of PUBLIC_MARKET_SYMBOLS){
+      if(book.observations[market])continue;
+      const active=book.orders.some(order=>order.market===market&&order.status==='PENDING')||book.positions.some(position=>position.market===market&&position.status==='OPEN');
+      if(active)continue;
+      const observation=deterministicSimulationObservation({market,now}),result=observeSimulationPrice(draft,{...observation,observedAt:observation.at,now,productV1:options.productV1===true});
+      if(!result.ok)throw new Error(result.reason||'SIMULATION_SOURCE_PIN_FAILED');
+      changed=true;
+    }
+    if(!changed)return;
+    options.beforeMutation?.();Object.assign(ledger,draft);options.afterMutation?.();
+  };
+  const updatePublicMarketQuality=(observations,{now=Date.now()}={})=>{
+    publicMarketQuality=publicMarketQuoteSetStatus(observations,{symbols:PUBLIC_MARKET_SYMBOLS,now});
+    // A cold local book keeps the pre-existing deterministic source identity so
+    // offline gameplay and persisted source pinning remain inspectable. This
+    // establishes no order, position, margin, PnL or receipt and never advances
+    // an existing observation; the admission gate below still blocks every
+    // price-dependent transition while the public set is abnormal.
+    if(!publicMarketQuality.allowsPriceTransitions)pinColdSimulationSource(now);
+    return publicMarketQuality;
+  };
+  const currentPublicMarketQuality=now=>publicMarketQuoteSetStatus(publicMarketQuality.rows,{symbols:PUBLIC_MARKET_SYMBOLS,now});
+  const priceTransitionBlock=now=>{
+    const state=currentPublicMarketQuality(now);
+    if(state.allowsPriceTransitions)return null;
+    return {ok:false,code:'ORACLE_STALE',reason:`PUBLIC_QUOTE_${state.quality}`,quoteQuality:state.quality,
+      priceTransitions:false,events:[],executionMode:'SIMULATION'};
+  };
   const quote=(market,{now=Date.now(),book=simulationSnapshot(ledger)}={})=>{
     const previous=book.observations[market],pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING'),open=book.positions.filter(p=>p.market===market&&p.status==='OPEN'),active=pending.length>0||open.length>0;
     const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE);
     if((!previous&&active)||(pinned&&previous?.source!==SIMULATION_PRICE_SOURCE))throw new Error('SIMULATION_RECOVERY_REQUIRED');
     if(previous&&(!Number.isFinite(previous.price)||previous.price<=0||!Number.isSafeInteger(previous.at)||previous.at<0))throw new Error(active?'SIMULATION_RECOVERY_REQUIRED':'INVALID_SIMULATION_SOURCE');
-    if(fallback&&(previous?.source===SIMULATION_PRICE_SOURCE||!previous||now-previous.at>15000)){
-      try{return deterministicSimulationObservation({market,previous,now})}catch(error){if(active)throw new Error('SIMULATION_RECOVERY_REQUIRED');throw error}
+    if(previous?.source===SIMULATION_PRICE_SOURCE){
+      // Validate persisted synthetic evidence in every SIMULATION mode. A
+      // nonfallback adapter must not advance it, but it also must not settle a
+      // recovered position from a finite corrupted price/anchor.
+      try{const advanced=deterministicSimulationObservation({market,previous,now});return fallback?advanced:previous}
+      catch(error){if(active)throw new Error('SIMULATION_RECOVERY_REQUIRED');throw error}
     }
     return previous;
   };
@@ -102,9 +139,9 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     if(!selected||selected.source!==SIMULATION_PRICE_SOURCE||selected.at===book.observations[market]?.at)return {ok:true,events:[]};
     return observeSimulationPrice(target,{...selected,observedAt:selected.at,now,productV1:options.productV1===true});
   };
-  const preview=(input,{now=Date.now()}={})=>run(()=>{
+  const preview=(input,{now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
     if(options.productV1)requireV1TradingC(input.c);
-    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
+    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,currentPrice:selected?.price,now}),book=simulationSnapshot(ledger);
     if(!selected||now<selected.at||now-selected.at>15000)throw new Error('STALE_PRICE');
     if(book.orders.some(o=>o.axis===intent.axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===intent.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
     const margin=requiredMargin(intent),available=book.wallet.free;
@@ -115,30 +152,33 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       currentPrice:selected.price,priceObservedAt:selected.at,priceSource:selected.source||'SIMULATION_OBSERVATION',simulationOnly:true,executionMode:'SIMULATION'};
   });
   return Object.freeze({name:'SIMULATION_ADAPTER',mode:'SIMULATION',enabled:true,preview,quote,
-    submit:(input,{now=Date.now()}={})=>run(()=>{
+    updatePublicMarketQuality,publicMarketStatus:({now=Date.now()}={})=>currentPublicMarketQuality(now),
+    submit:(input,{now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
       const checked=preview(input,{now});if(!checked.ok)return checked;
       const draft=structuredClone(ledger),observation=applyQuote(draft,checked.market,now);if(!observation.ok)return observation;
       const result=placeSimulationOrder(draft,checked.intent);
       if(result.ok)Object.assign(ledger,draft);
       return result.ok?{...result,status:'PENDING_TRIGGER'}:result;
     },true),
-    observe:(observation)=>run(()=>{
+    observe:(observation)=>priceTransitionBlock(observation?.now??Date.now())||run(()=>{
+      // Every SIMULATION adapter is bound to the currently admitted public row.
       // Once local fallback is selected, public recovery cannot jump a pending
       // order/open position to another source, including after wallet reload.
-      if(fallback){
-        const book=simulationSnapshot(ledger);quote(observation.market,{now:observation.now??Date.now(),book});
-        if(book.observations[observation.market]?.source===SIMULATION_PRICE_SOURCE)return {ok:true,ignored:true,events:[]};
-      }
+      const expected=currentPublicMarketQuality(observation?.now??Date.now()).rows[observation.market];
+      if(observation.source!==PUBLIC_MARKET_QUOTE_SOURCE.id||expected?.source!==observation.source||
+        expected?.updatedAt!==observation.observedAt||expected?.sequence!==observation.sequence||expected?.price!==observation.price)return {ok:false,reason:'PUBLIC_QUOTE_ADMISSION_MISMATCH'};
+      const book=simulationSnapshot(ledger);quote(observation.market,{now:observation.now??Date.now(),book});
+      if(book.observations[observation.market]?.source===SIMULATION_PRICE_SOURCE)return {ok:true,ignored:true,events:[]};
       if(observation.source===SIMULATION_PRICE_SOURCE)return {ok:false,reason:'SIMULATION_SOURCE_REQUIRES_LOCAL_CLOCK'};
       return observeSimulationPrice(ledger,{...observation,productV1:options.productV1===true});
     },true),
-    tick:({now=Date.now()}={})=>run(()=>{
+    tick:({now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
       if(!fallback)return {ok:true,events:[]};
       const draft=structuredClone(ledger),events=[];
       for(const market of ['BTCUSDT','ETHUSDT','BNBUSDT']){const r=applyQuote(draft,market,now);if(!r.ok)return r;events.push(...r.events)}
       Object.assign(ledger,draft);return {ok:true,events};
     },true),
-    close:(positionId,{now=Date.now()}={})=>run(()=>{
+    close:(positionId,{now=Date.now()}={})=>priceTransitionBlock(now)||run(()=>{
       const draft=structuredClone(ledger),position=simulationSnapshot(draft).positions.find(p=>p.positionId===positionId);
       if(position?.status==='OPEN'){const advanced=applyQuote(draft,position.market,now);if(!advanced.ok)return advanced;
         const settled=advanced.events.find(r=>r.positionId===positionId&&r.kind==='SETTLEMENT');if(settled){Object.assign(ledger,draft);return {ok:true,receipt:settled};}}

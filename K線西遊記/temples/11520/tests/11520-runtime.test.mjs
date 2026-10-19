@@ -4,9 +4,16 @@ import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs
 import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
 import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
+import {PUBLIC_MARKET_QUOTE_SOURCE} from '../runtime/public-market-quotes.mjs';
 import {createJourneyTutorial,JOURNEY_ENCOUNTER_PROFILES,GAME_LOOT_TABLE,GA600_GAME_TRAINING,selectJourneyLoot,selectJourneyEncounter,drainJourneyEvents,serializeWorld} from '../runtime/world-runtime.mjs';
 import {GAMEPLAY_UNLOCKS} from '../runtime/player-life-runtime.mjs';
 import {observeTrainingMarket,createTrainingMemory} from '../runtime/market-life-runtime.mjs';
+
+const runtimePublicRows=(at,prices={BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600},sequence=1)=>Object.fromEntries(Object.entries(prices).map(([market,price])=>[market,{market,price,updatedAt:at,receivedAt:at,sequence,source:PUBLIC_MARKET_QUOTE_SOURCE.id}]));
+function admitRuntimePublicRows(adapter,rows,now){
+  assert.equal(adapter.updatePublicMarketQuality(rows,{now}).quality,'FRESH');
+  for(const row of Object.values(rows))assert.ok(adapter.observe({...row,observedAt:row.updatedAt,now}).ok);
+}
 
 test('training history reload restores only existing growth, never pending predictions or financial authority',()=>{
   const values=new Map(),storage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)};
@@ -126,14 +133,15 @@ test('V1 address profiles recover existing ledger without cross-account receipts
   const ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage});
   const a='0x'+'1'.repeat(40),b='0x'+'2'.repeat(40);store.activate(a);
   const adapter=createExecutionAdapter({ledger,productV1:true,beforeMutation:store.check,afterMutation:store.save});
-  assert.ok(adapter.observe({market:'ETHUSDT',price:100,observedAt:1000,now:1000}).ok);
+  admitRuntimePublicRows(adapter,runtimePublicRows(1000,{BTCUSDT:100000,ETHUSDT:100,BNBUSDT:600},10),1000);
   const input={axis:'KY',market:'ETHUSDT',c:1,lots:1,currentPrice:100,triggerPrice:101};
   assert.equal(adapter.submit({...input,c:5},{now:1001}).ok,false);
   assert.ok(adapter.submit(input,{now:1001}).ok);
-  assert.ok(adapter.observe({market:'ETHUSDT',price:102,observedAt:1002,now:1002}).ok);
+  admitRuntimePublicRows(adapter,runtimePublicRows(1002,{BTCUSDT:100000,ETHUSDT:102,BNBUSDT:600},11),1002);
   assert.equal(adapter.snapshot().positions[0].trader,a);
   const before=adapter.snapshot();
-  assert.equal(adapter.observe({market:'ETHUSDT',price:50,observedAt:1003,now:20000}).ok,false);
+  const staleRows=runtimePublicRows(1003,{BTCUSDT:100000,ETHUSDT:50,BNBUSDT:600},12);assert.equal(adapter.updatePublicMarketQuality(staleRows,{now:20000}).quality,'STALE');
+  assert.equal(adapter.observe({...staleRows.ETHUSDT,observedAt:1003,now:20000}).ok,false);
   assert.deepEqual(adapter.snapshot(),before);assert.equal(adapter.close(before.positions[0].positionId,{now:20000}).ok,false);
   store.activate(b);assert.equal(adapter.snapshot().positions.length,0);assert.equal(adapter.snapshot().wallet.free,100);
   store.activate(a);assert.deepEqual(adapter.snapshot(),before);
@@ -141,7 +149,7 @@ test('V1 address profiles recover existing ledger without cross-account receipts
   const reloaded=createExecutionAdapter({ledger:restoredLedger,productV1:true,beforeMutation:restored.check,afterMutation:restored.save});
   assert.deepEqual(reloaded.snapshot(),before);
   assert.throws(()=>store.check(),/RELOAD_REQUIRED/,'same account stale tab may not overwrite recovered state');
-  assert.ok(reloaded.observe({market:'ETHUSDT',price:103,observedAt:20001,now:20001}).ok);
+  admitRuntimePublicRows(reloaded,runtimePublicRows(20001,{BTCUSDT:100000,ETHUSDT:103,BNBUSDT:600},13),20001);
   assert.ok(reloaded.close(before.positions[0].positionId,{now:20002}).ok);
   assert.equal(reloaded.snapshot().positions[0].status,'CLOSED');
   assert.equal(reloaded.snapshot().wallet.lockedMargin,0);
@@ -264,12 +272,13 @@ test('player level increases boss combat power without changing market leverage 
 
 test('V1 revalidates old high-C pending records; sequence replay cannot fill or liquidate',()=>{
   const ledger=createKgenLedger(100),sim=createExecutionAdapter({ledger});
-  sim.observe({market:'BTCUSDT',price:100,observedAt:1000,now:1000,sequence:10});
+  admitRuntimePublicRows(sim,runtimePublicRows(1000,{BTCUSDT:100,ETHUSDT:4000,BNBUSDT:600},10),1000);
   sim.submit({axis:'KX',market:'BTCUSDT',c:100,lots:1,currentPrice:100,triggerPrice:101},{now:1001});
   const v1=createExecutionAdapter({ledger,productV1:true}),before=v1.snapshot();
-  assert.equal(v1.observe({market:'BTCUSDT',price:102,observedAt:1002,now:1002,sequence:9}).ok,false);
+  const replay=runtimePublicRows(1002,{BTCUSDT:102,ETHUSDT:4000,BNBUSDT:600},9);assert.equal(v1.updatePublicMarketQuality(replay,{now:1002}).quality,'FRESH');
+  assert.equal(v1.observe({...replay.BTCUSDT,observedAt:1002,now:1002}).ok,false);
   assert.deepEqual(v1.snapshot(),before);
-  assert.ok(v1.observe({market:'BTCUSDT',price:102,observedAt:1002,now:1002,sequence:11}).ok);
+  admitRuntimePublicRows(v1,runtimePublicRows(1002,{BTCUSDT:102,ETHUSDT:4000,BNBUSDT:600},11),1002);
   assert.equal(v1.snapshot().orders[0].status,'REJECTED');assert.equal(v1.snapshot().positions.length,0);assert.equal(v1.snapshot().wallet.free,100);
 });
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';

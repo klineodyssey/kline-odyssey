@@ -5,6 +5,79 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
+| REVISION | 2026-10-09.PUBLIC-SIM-FEED-ADMISSION |
+| PRODUCT_CONTEXT | V2.9.5 |
+| STATUS | CANDIDATE |
+| LAST_UPDATED | 2026-10-09 |
+| UPDATED_BY | Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09 |
+| REVIEWED_BY | PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge |
+| SOURCE_COMMIT | b39c16e5cc5f2409590d62fa9a53b5ceb3750300 |
+| TASK_ID | K11520-PUBLIC-FREE-SIM-FEED-20261009 |
+| CHANGE_REASON | Admit only complete fresh free BTC/ETH/BNB public observations to SIMULATION price transitions, expose source/time/stale/failure, and preserve existing assets on abnormal feed state. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ c35320c6f95ea9411fd9e5f3ad295599f029a3ae |
+| SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-09 — V2.9.5 public free-feed admission candidate
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-09 | V2.9.5 / 2026-10-09.PUBLIC-SIM-FEED-ADMISSION | K11520-PUBLIC-FREE-SIM-FEED-20261009 | Codex / delegated implementation / HUMAN_AUTHORIZED_2026_10_09 | PENDING_DIFFERENT_TECHNICAL_REVIEW / required before merge | `K線西遊記/temples/11520/runtime/game-5d-main.mjs`; `K線西遊記/temples/11520/runtime/public-market-quotes.mjs`; `K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs`; `K線西遊記/temples/11520/tests/11520-public-market-quotes.test.mjs`; `K線西遊記/temples/11520/tests/11520-runtime.test.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs`; `tests/11520-real-trading-order-intent.test.mjs`; `tests/11520-order-route.test.mjs`; `K線西遊記/temples/11520/CHANGELOG.md` | Replace abnormal-feed synthetic repricing with a three-market fail-closed admission boundary and label the free provider evidence. | Existing positions, margin, receipts, cancel and exploration remain; Testnet/Mainnet intent and real receipts are unchanged. No paid service, secret, new engine, ledger or settlement authority. | Revert this candidate and source commit `b39c16e5cc5f2409590d62fa9a53b5ceb3750300` to restore `c35320c6f95ea9411fd9e5f3ad295599f029a3ae`. Existing persisted assets need no migration. |
+
+- `UNKNOWN`, `STALE` and `FAILED` quality stop preview, submit, observe,
+  tick, close, fills, liquidation and settlement before ledger mutation. Cancel
+  and non-price gameplay remain available. A complete `FRESH` BTC/ETH/BNB set
+  uses exact Binance public source, provider event time and sequence.
+- Returning public data cannot reprice a position pinned to the existing
+  deterministic simulation source. Divergence is explicitly
+  `NOT_VERIFIED_SINGLE_SOURCE`; no threshold, second endpoint or quorum is
+  invented. The feed remains simulation-only and has no settlement authority.
+- Review hardening applies the same quality and exact-row admission to default
+  and nonfallback SIMULATION adapters, rejects null/string provider sequences,
+  and requires a successful feed-admission preflight before the native confirm
+  modal or `PREVIEW` journey event. Warm-feed browser coverage compares the complete
+  saved orders, positions, receipts, observations, wallet and journey state.
+- Final rereview hardening validates every persisted deterministic-simulation
+  price and anchor before close in both fallback and nonfallback adapters. A
+  finite corrupt cached price, future anchor or invalid anchor now returns
+  `SIMULATION_RECOVERY_REQUIRED` with the complete saved book and existing
+  source evidence unchanged.
+- Candidate-gate hardening keeps the existing deterministic source pinned when
+  an empty local book first encounters `UNKNOWN`, `STALE` or `FAILED` public
+  data, without creating or advancing any order, position, margin, PnL or
+  receipt. The same abnormal admission still blocks every price-dependent
+  operation. Visible feed evidence now uses the compatible compact MARKET DATA
+  quality/market/SRC/TIME/STALE/FAIL line so the existing landscape telemetry
+  owner stays clear of all three parameter rails; full BTC/ETH/BNB evidence
+  remains in the inspection surface and title.
+- Post-review focused checks passed 170/170 runtime, quote, intent, route,
+  provenance, market-binding and margin tests plus 67/67 applicable static tests. The one
+  skipped static case is an unchanged Linux bash-routing fixture unavailable
+  to Windows `spawnSync`; exact-head Linux CI remains required. Pinned-worktree
+  headless Chromium passed the complete 390x844 signed-C suite, including warm
+  `FRESH` to `FAILED`, blocked native preview, full-ledger invariants, source
+  recovery without a new settlement receipt and the existing visible 100C
+  future-only product lock. The same native browser harness now crosses the
+  awaited preflight boundary with Cancel, a newer click and a plane-axis switch;
+  stale requests cannot open confirmation or mutate ledger/journey state, and
+  the newer canonical `0.1C` click wins over the old `1C` request. JSON and a
+  390x844 screenshot are retained in the normal visual-QA artifact. Independent
+  delta source rereview passed; CI, visual and integration gates remain.
+- Focused local checks at source commit `b39c16e5` passed 57/57 quote and intent
+  tests, 10/10 existing provenance/market/margin tests and 2/2 targeted UI
+  tests. A real headless Chrome 390x844 run preserved the game view and exposed
+  exact BTC/ETH/BNB source/time/status/failure in runtime state. Exact-head CI
+  and independent technical review remain required; this is not release or
+  merge approval.
+- Movement calibration is intentionally not part of this candidate. The exact
+  `game-5d-main.mjs` manual/navigation movement action and combat-drive speed
+  owner remain held by Draft PR #523. Player storage #508 and claim #536 are
+  also untouched. Merged #563 contributes only its settlement harness delta.
+
+### Previous checkpoint metadata (historical, preserved verbatim)
+
+| Field | Value |
+|---|---|
+| VERSION | CURRENT |
 | REVISION | 2026-10-07.BNB-LIQUIDATION-STATUS-CONSISTENCY |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
