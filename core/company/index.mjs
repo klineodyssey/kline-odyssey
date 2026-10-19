@@ -1,5 +1,24 @@
+/*
+KGEN_META
+VERSION: CURRENT
+REVISION: 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1
+STATUS: DRAFT
+LAST_UPDATED: 2026-10-06
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant
+SOURCE_COMMIT: d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f
+TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
+CHANGE_REASON: Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction.
+ANCESTOR: core/company/index.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
+SOURCE_OF_TRUTH: FALSE
+METADATA_SCOPE: Customer Project candidate revision within the existing owner.
+Existing owner identity and execution boundaries are unchanged. This record is
+not a new Runtime/version authority or approval of production/financial activity.
+*/
+
 import { requireArray, requireFields, requireId, requireEnum } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
+import { clone as cloneCustomerProject, sha256 as hashCustomerProject, stableStringify as serializeCustomerProject } from "../shared/utils.mjs";
 
 export const COMPANY_FIELDS = Object.freeze([
   "company_id", "founder_life_id", "name", "wallet_address", "treasury_address", "employees", "equity",
@@ -3086,4 +3105,363 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     auto_found: false,
     company_status: company.status
   });
+}
+
+// Local research prototype only. This owner does not authenticate a customer,
+// persist data, register entities, dispatch work or create financial authority.
+export const CUSTOMER_PROJECT_PROTOTYPE_SCOPE = "LOCAL_TEST_ONLY_NOT_DURABLE";
+export const SMALL_HOUSE_REQUIRED_STAGES = Object.freeze([
+  "SURVEY", "DESIGN", "SITE_CLEARING", "EXCAVATION", "FOUNDATION", "STRUCTURE",
+  "ROOF", "UTILITIES", "INTERIOR", "INSPECTION", "REWORK", "COMPLETE"
+]);
+const CUSTOMER_PROJECT_BOUNDARIES = Object.freeze({
+  simulationOnly: true, realLegalEffect: false, payment: false, dispatch: false,
+  procurement: false, registryWrite: false, lifeCreation: false, production: false
+});
+const customerProjectTestAdapters = new WeakSet();
+const cpFail = (ok, code) => invariant(ok, code, code);
+const cpText = (v, max = 200) => typeof v === "string" && v.length > 0 && v.length <= max && !/[<>\x00-\x1f]/.test(v);
+const cpInt = (v, max = Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(v) && v >= 0 && v <= max;
+const cpDigest = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
+const cpAmount = (v) => typeof v === "string" && /^(0|[1-9][0-9]{0,17})$/.test(v);
+function cpJson(value, depth = 0) {
+  cpFail(depth <= 20, "CUSTOMER_PROJECT_INPUT_LIMIT");
+  if (value === null || typeof value === "boolean" || typeof value === "string") return;
+  if (typeof value === "number") { cpFail(Number.isFinite(value), "CUSTOMER_PROJECT_INVALID_NUMBER"); return; }
+  cpFail(value && typeof value === "object" && (Array.isArray(value) || Object.getPrototypeOf(value) === Object.prototype), "CUSTOMER_PROJECT_INVALID_JSON");
+  cpFail(Object.keys(value).length <= 2048, "CUSTOMER_PROJECT_INPUT_LIMIT");
+  for (const key of Object.keys(value)) {
+    cpFail(!["__proto__", "constructor", "prototype"].includes(key), "CUSTOMER_PROJECT_INVALID_JSON");
+    cpJson(value[key], depth + 1);
+  }
+}
+function cpFields(value, fields) {
+  cpFail(value && Object.getPrototypeOf(value) === Object.prototype && Object.keys(value).length === fields.length && fields.every((k) => Object.hasOwn(value, k)), "CUSTOMER_PROJECT_FIELDS");
+}
+function cpStrings(value, min = 0, max = 32) {
+  cpFail(Array.isArray(value) && value.length >= min && value.length <= max && value.every((v) => cpText(v)) && new Set(value).size === value.length, "CUSTOMER_PROJECT_INVALID_LIST");
+}
+function cpRequest(input) {
+  cpFields(input, ["objective", "locationRef", "rightsRef", "quality", "quantity", "budget", "deadlineHours", "intendedUse"]);
+  cpFail(input.objective === "SMALL_HOUSE" && input.quantity === 1, "CUSTOMER_PROJECT_SCOPE");
+  for (const k of ["locationRef", "rightsRef", "quality", "intendedUse"]) cpFail(input[k] === null || cpText(input[k]), "CUSTOMER_PROJECT_INVALID_REQUEST");
+  cpFields(input.budget, ["amount", "unit", "scale"]);
+  cpFail(cpAmount(input.budget.amount) && input.budget.unit === "SIMULATED_CREDIT" && input.budget.scale === 0 && cpInt(input.deadlineHours, 1_000_000), "CUSTOMER_PROJECT_INVALID_REQUEST");
+  return ["locationRef", "rightsRef", "quality", "intendedUse"].filter((k) => input[k] === null)
+    .concat(BigInt(input.budget.amount) === 0n ? ["budget"] : [], input.deadlineHours === 0 ? ["deadlineHours"] : []);
+}
+function cpPlan(plan) {
+  cpFields(plan, ["policyId", "policyRevision", "stages", "bomHash", "costs", "conditions", "assumptions", "validForMs", "durationHours"]);
+  cpFail(cpText(plan.policyId) && cpInt(plan.policyRevision) && plan.policyRevision > 0 && cpDigest(plan.bomHash), "CUSTOMER_PROJECT_INVALID_PLAN");
+  cpFail(serializeCustomerProject(plan.stages) === serializeCustomerProject(SMALL_HOUSE_REQUIRED_STAGES), "HOUSE_STAGE_PLAN_INCOMPLETE");
+  cpStrings(plan.conditions); cpStrings(plan.assumptions);
+  cpFail(cpInt(plan.validForMs, 86_400_000) && plan.validForMs > 0 && cpInt(plan.durationHours, 1_000_000) && plan.durationHours > 0, "CUSTOMER_PROJECT_INVALID_PLAN");
+  cpFail(Array.isArray(plan.costs) && plan.costs.length > 0 && plan.costs.length <= 32, "CUSTOMER_PROJECT_COST_BASIS_REQUIRED");
+  const names = new Set(); let total = 0n;
+  for (const cost of plan.costs) {
+    cpFields(cost, ["name", "amount"]);
+    cpFail(cpText(cost.name) && !names.has(cost.name) && cpAmount(cost.amount), "CUSTOMER_PROJECT_COST_BASIS_REQUIRED");
+    names.add(cost.name); total += BigInt(cost.amount);
+  }
+  cpFail(total > 0n && cpAmount(total.toString()), "CUSTOMER_PROJECT_COST_BASIS_REQUIRED");
+  return total.toString();
+}
+
+// Shared host boundary for local model/persistence prototypes, not authentication.
+export function captureCustomerProjectContext(identityAdapter) {
+  cpFail(typeof identityAdapter?.resolve === "function", "CUSTOMER_PROJECT_TRUSTED_ADAPTER_REQUIRED");
+  const result = identityAdapter.resolve(); cpJson(result);
+  cpFields(result, ["accountId", "playerId", "active", "scope"]);
+  cpFail(cpText(result.accountId, 128) && cpText(result.playerId, 128) && result.active === true && result.scope === "SIMULATION_CUSTOMER_CONTEXT", "CUSTOMER_PROJECT_IDENTITY_REQUIRED");
+  return { accountId: result.accountId, playerId: result.playerId };
+}
+
+/** Trusted composition ports are code supplied by the host, never command data.
+ * identityAdapter.resolve() synchronously snapshots an active SIMULATION_CUSTOMER_CONTEXT. That
+ * context is not an authentication proof; a future backend must authenticate it.
+ * The one-workspace bound is per prototype instance, not a permanent product law
+ * or a cross-process uniqueness guarantee. No persistence/recovery is claimed.
+ */
+export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, planningAdapter = null, executionEvidenceSource = null, now = Date.now } = {}) {
+  cpFail(typeof identityAdapter?.resolve === "function" && typeof quotePlanner?.plan === "function" && typeof now === "function", "CUSTOMER_PROJECT_TRUSTED_ADAPTER_REQUIRED");
+  cpFail(planningAdapter === null || customerProjectTestAdapters.has(planningAdapter), "CUSTOMER_PROJECT_TEST_ADAPTER_REQUIRED");
+  cpFail(executionEvidenceSource === null || typeof executionEvidenceSource.read === "function", "CUSTOMER_PROJECT_EVIDENCE_SOURCE_REQUIRED");
+  let state = { scope: CUSTOMER_PROJECT_PROTOTYPE_SCOPE, boundaries: { ...CUSTOMER_PROJECT_BOUNDARIES }, revision: 0, owner: null,
+    workspaceId: null, request: null, requestRevisions: [], quotes: [], quoteHeadRevision: null,
+    acceptance: null, contract: null, project: null, events: [], commandJournal: [], lastEventHash: null, lastAt: 0 };
+  let queue = Promise.resolve();
+  function customer() {
+    const owner = captureCustomerProjectContext(identityAdapter);
+    cpFail(!state.owner || serializeCustomerProject(owner) === serializeCustomerProject(state.owner), "CUSTOMER_PROJECT_WRONG_CUSTOMER");
+    return owner;
+  }
+  function assertCurrentCustomer(invocationOwner) {
+    cpFail(serializeCustomerProject(customer()) === serializeCustomerProject(invocationOwner), "CUSTOMER_PROJECT_WRONG_CUSTOMER");
+  }
+  function bounded(candidate) {
+    cpFail(candidate.commandJournal.length <= 256 && candidate.events.length <= 128 && candidate.requestRevisions.length <= 20 && candidate.quotes.length <= 20, "CUSTOMER_PROJECT_CAPACITY");
+    cpFail(new TextEncoder().encode(serializeCustomerProject(candidate)).length <= 512000, "CUSTOMER_PROJECT_CAPACITY");
+  }
+  async function execute(command, owner) {
+    assertCurrentCustomer(owner);
+    cpFields(command, ["type", "idempotencyKey", "expectedRevision", "data"]);
+    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE", "CHECKPOINT_SUBPLAN_EVIDENCE"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
+    cpFail(typeof command.idempotencyKey === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(command.idempotencyKey) && cpInt(command.expectedRevision), "CUSTOMER_PROJECT_INVALID_COMMAND");
+    const key = `${command.type}:${command.idempotencyKey}`;
+    const commandHash = await hashCustomerProject(command);
+    const previous = state.commandJournal.find((v) => v.key === key);
+    if (previous) {
+      cpFail(previous.commandHash === commandHash, "IDEMPOTENCY_CONTENT_MISMATCH");
+      assertCurrentCustomer(owner);
+      return cloneCustomerProject(previous.response);
+    }
+    cpFail(state.commandJournal.length < 256, "CUSTOMER_PROJECT_CAPACITY");
+    const draft = cloneCustomerProject(state);
+    const responseBase = { scope: CUSTOMER_PROJECT_PROTOTYPE_SCOPE, simulationOnly: true, durable: false };
+    let quote, acceptanceIntentHash;
+    if (command.type === "ACCEPT_QUOTE") {
+      cpFields(command.data, ["quoteId", "quoteRevision", "quoteHash", "acknowledgementHash", "accept"]);
+      cpFail(command.data.accept === true && cpText(command.data.quoteId) && cpInt(command.data.quoteRevision) && command.data.quoteRevision > 0 && cpDigest(command.data.quoteHash) && cpDigest(command.data.acknowledgementHash), "CUSTOMER_PROJECT_EXPLICIT_ACCEPTANCE_REQUIRED");
+      acceptanceIntentHash = await hashCustomerProject({ owner, ...command.data });
+      if (state.acceptance) {
+        cpFail(command.data.quoteId === state.acceptance.quoteId && command.data.quoteRevision === state.acceptance.quoteRevision && command.data.quoteHash === state.acceptance.quoteHash, "CHANGE_ORDER_REQUIRED");
+        cpFail(acceptanceIntentHash === state.acceptance.intentHash, "ACCEPTANCE_INTENT_MISMATCH");
+        const response = { ...responseBase, status: "ALREADY_ACCEPTED", acceptanceId: state.acceptance.acceptanceId, contractId: state.contract.contractId, projectId: state.project.projectId, revision: state.revision };
+        draft.commandJournal.push({ key, commandHash, response }); bounded(draft); assertCurrentCustomer(owner); state = draft;
+        return cloneCustomerProject(response);
+      }
+    }
+    cpFail(command.expectedRevision === state.revision, "CUSTOMER_PROJECT_REVISION_CONFLICT");
+    let at = now(); cpFail(cpInt(at) && at >= state.lastAt, "CUSTOMER_PROJECT_INVALID_CLOCK");
+    let response;
+    if (command.type === "SUBMIT_REQUEST" || command.type === "CLARIFY_REQUEST") {
+      cpFail(!state.acceptance, "CHANGE_ORDER_REQUIRED");
+      cpFail(command.type !== "SUBMIT_REQUEST" || state.request === null, "WORKSPACE_ALREADY_EXISTS");
+      cpFail(command.type !== "CLARIFY_REQUEST" || state.request !== null, "CUSTOMER_PROJECT_REQUEST_REQUIRED");
+      const missing = cpRequest(command.data);
+      if (!draft.owner) {
+        draft.owner = owner;
+        draft.workspaceId = `CPW-${(await hashCustomerProject({ owner, companyId: "AI_ANT_COMPANY_0001", slot: "CUSTOMER_PROJECT_PRIMARY" })).slice(0, 32)}`;
+      }
+      const request = { requestId: `${draft.workspaceId}-REQUEST`, revision: draft.requestRevisions.length + 1,
+        content: cloneCustomerProject(command.data), status: missing.length ? "NEEDS_CLARIFICATION" : "SUBMITTED", missing };
+      request.contentHash = await hashCustomerProject(request.content);
+      draft.request = request; draft.requestRevisions.push(cloneCustomerProject(request)); draft.quoteHeadRevision = null;
+      response = { ...responseBase, status: request.status, requestId: request.requestId, requestRevision: request.revision, missing };
+    } else if (command.type === "ISSUE_SIMULATED_QUOTE") {
+      cpFields(command.data, ["requestRevision"]);
+      cpFail(!state.acceptance, "CHANGE_ORDER_REQUIRED");
+      cpFail(state.request && command.data.requestRevision === state.request.revision && state.request.missing.length === 0, "CUSTOMER_PROJECT_COMPLETE_REQUEST_REQUIRED");
+      const suppliedPlan = await quotePlanner.plan(cloneCustomerProject(state.request)); cpJson(suppliedPlan);
+      const plan = cloneCustomerProject(suppliedPlan);
+      const total = cpPlan(plan);
+      cpFail(BigInt(total) <= BigInt(state.request.content.budget.amount) && plan.durationHours <= state.request.content.deadlineHours, "CUSTOMER_PROJECT_PLAN_EXCEEDS_REQUEST");
+      const issuedAt = now(); cpFail(cpInt(issuedAt) && issuedAt >= at, "CUSTOMER_PROJECT_INVALID_CLOCK"); at = issuedAt;
+      cpFail(cpInt(at + plan.validForMs), "CUSTOMER_PROJECT_INVALID_CLOCK");
+      const content = { requestId: state.request.requestId, requestRevision: state.request.revision, requestHash: state.request.contentHash,
+        request: cloneCustomerProject(state.request.content), plan: cloneCustomerProject(plan), total, unit: "SIMULATED_CREDIT", scale: 0,
+        issuedAt: at, expiresAt: at + plan.validForMs, executionReadiness: "PLANNABLE_EXECUTION_HELD", executionHolds: ["HOUSE_STAGE_ADAPTER_REQUIRED"], simulationOnly: true };
+      const quoteId = `${state.workspaceId}-QUOTE`, revision = state.quotes.length + 1;
+      quote = { quoteId, revision, content,
+        contentHash: await hashCustomerProject({ quoteId, revision, content }), acknowledgementHash: await hashCustomerProject({ conditions: content.plan.conditions, assumptions: content.plan.assumptions, executionHolds: content.executionHolds }) };
+      draft.quotes.push(quote); draft.quoteHeadRevision = quote.revision;
+      response = { ...responseBase, status: "SIMULATED_QUOTE_ISSUED", quote: cloneCustomerProject(quote) };
+    } else if (command.type === "CHECKPOINT_SUBPLAN_EVIDENCE") {
+      cpFields(command.data, ["projectId", "acceptanceId", "quoteHash", "snapshotHash", "fixtureHash"]);
+      for (const field of ["projectId", "acceptanceId"]) cpFail(cpText(command.data[field]), "CUSTOMER_PROJECT_CHECKPOINT_BINDING");
+      for (const field of ["quoteHash", "snapshotHash", "fixtureHash"]) cpFail(cpDigest(command.data[field]), "CUSTOMER_PROJECT_CHECKPOINT_BINDING");
+      cpFail(state.acceptance && state.project && state.contract && command.data.projectId === state.project.projectId
+        && command.data.acceptanceId === state.acceptance.acceptanceId && command.data.quoteHash === state.acceptance.quoteHash
+        && command.data.quoteHash === state.project.quoteHash, "CUSTOMER_PROJECT_CHECKPOINT_BINDING");
+      const intentHash = await hashCustomerProject({ owner, ...command.data });
+      if (state.executionEvidence) {
+        cpFail(state.executionEvidence.intentHash === intentHash, "CUSTOMER_PROJECT_CHECKPOINT_IMMUTABLE");
+        const response = { ...responseBase, status: "ALREADY_CHECKPOINTED", evidenceId: state.executionEvidence.evidenceId,
+          evidenceHash: await hashCustomerProject(state.executionEvidence), revision: state.revision };
+        draft.commandJournal.push({ key, commandHash, response }); bounded(draft); assertCurrentCustomer(owner); state = draft;
+        return cloneCustomerProject(response);
+      }
+      cpFail(executionEvidenceSource, "CUSTOMER_PROJECT_EVIDENCE_SOURCE_REQUIRED");
+      // Only this code-level source provides bytes. Command data cannot supply
+      // inspection PASS, reviewer identity, audit results or authority flags.
+      const supplied = await executionEvidenceSource.read(cloneCustomerProject(command.data)); cpJson(supplied);
+      const inputs = cloneCustomerProject(supplied); cpFields(inputs, ["resourceFixture", "snapshot"]);
+      cpFail(await hashCustomerProject(inputs.snapshot) === command.data.snapshotHash
+        && await hashCustomerProject(inputs.resourceFixture) === command.data.fixtureHash, "CUSTOMER_PROJECT_EVIDENCE_HASH_MISMATCH");
+      const auditor = await createFrozenV1CustomerProjectTestAdapter({ mode: "LOCAL_TEST_ONLY" });
+      const audit = await auditor.auditSubplan({ projectSource: { read: async () => cloneCustomerProject(state) }, ...inputs });
+      assertCurrentCustomer(owner);
+      draft.executionEvidence = { format: "KAIOS_CUSTOMER_PROJECT_SUBPLAN_CHECKPOINT", version: 1,
+        scope: "LOCAL_TEST_ONLY_V1_SUBPLAN_CHECKPOINT", evidenceId: `${state.workspaceId}-SUBPLAN-${state.revision + 1}`,
+        workspaceId: state.workspaceId, owner: cloneCustomerProject(owner), projectId: state.project.projectId,
+        sourceRevision: state.revision, acceptanceId: state.acceptance.acceptanceId, acceptedAt: state.acceptance.acceptedAt,
+        quoteId: state.acceptance.quoteId, quoteRevision: state.acceptance.quoteRevision, quoteHash: state.acceptance.quoteHash,
+        snapshotHash: command.data.snapshotHash, fixtureHash: command.data.fixtureHash, intentHash,
+        audit, auditHash: await hashCustomerProject(audit), recordedAt: at,
+        authenticatedWorkerReview: false, productionVerified: false };
+      response = { ...responseBase, status: "SUBPLAN_EVIDENCE_CHECKPOINTED", evidenceId: draft.executionEvidence.evidenceId,
+        evidenceHash: await hashCustomerProject(draft.executionEvidence) };
+    } else {
+      quote = state.quotes.find((q) => q.quoteId === command.data.quoteId && q.revision === command.data.quoteRevision);
+      cpFail(quote && quote.revision === state.quoteHeadRevision, "QUOTE_SUPERSEDED");
+      cpFail(quote.contentHash === command.data.quoteHash && quote.contentHash === await hashCustomerProject({ quoteId: quote.quoteId, revision: quote.revision, content: quote.content }), "QUOTE_HASH_MISMATCH");
+      cpFail(quote.acknowledgementHash === command.data.acknowledgementHash, "ACCEPTANCE_INTENT_MISMATCH");
+      cpFail(at < quote.content.expiresAt, "QUOTE_EXPIRED");
+      cpFail(quote.content.requestHash === state.request.contentHash && quote.content.requestRevision === state.request.revision, "QUOTE_REQUEST_CHANGED");
+      draft.acceptance = { acceptanceId: `${state.workspaceId}-ACCEPTANCE`, quoteId: quote.quoteId, quoteRevision: quote.revision, quoteHash: quote.contentHash,
+        acknowledgementHash: quote.acknowledgementHash, customer: owner, acceptedAt: at, intentHash: acceptanceIntentHash };
+      draft.contract = { contractId: `${state.workspaceId}-CONTRACT`, companyRef: "AI_ANT_COMPANY_0001", customer: owner,
+        acceptedQuote: cloneCustomerProject(quote), status: "SIMULATED_SCOPE_SNAPSHOT", realLegalEffect: false, payment: false };
+      const planning = planningAdapter ? await planningAdapter.prepare({ request: cloneCustomerProject(state.request), quote: cloneCustomerProject(quote), owner }) : null;
+      const acceptedAt = now(); cpFail(cpInt(acceptedAt) && acceptedAt >= at, "CUSTOMER_PROJECT_INVALID_CLOCK");
+      cpFail(acceptedAt < quote.content.expiresAt, "QUOTE_EXPIRED"); at = acceptedAt; draft.acceptance.acceptedAt = at;
+      draft.project = { projectId: `${state.workspaceId}-PROJECT`, contractId: draft.contract.contractId, quoteHash: quote.contentHash,
+        status: "PLANNED_EXECUTION_HELD", executionHolds: ["HOUSE_STAGE_ADAPTER_REQUIRED"], desiredStages: [...SMALL_HOUSE_REQUIRED_STAGES],
+        planning, houseComplete: false, asset: null, delivery: null, receipt: null };
+      response = { ...responseBase, status: "ACCEPTED_SIMULATION_PLAN", acceptanceId: draft.acceptance.acceptanceId, contractId: draft.contract.contractId, projectId: draft.project.projectId };
+    }
+    draft.revision += 1; draft.lastAt = at; response.revision = draft.revision;
+    const event = { eventId: `${draft.workspaceId}-EVENT-${draft.revision}`, sequence: draft.revision, actor: owner,
+      command: command.type, commandHash, at, previousHash: state.lastEventHash, resultHash: await hashCustomerProject(response) };
+    event.hash = await hashCustomerProject(event); draft.events.push(event); draft.lastEventHash = event.hash;
+    draft.commandJournal.push({ key, commandHash, response }); bounded(draft); assertCurrentCustomer(owner);
+    if (command.type === "ACCEPT_QUOTE") {
+      const committedAt = now(); cpFail(cpInt(committedAt) && committedAt >= at, "CUSTOMER_PROJECT_INVALID_CLOCK");
+      cpFail(committedAt < quote.content.expiresAt, "QUOTE_EXPIRED");
+    }
+    state = draft;
+    return cloneCustomerProject(response);
+  }
+  return Object.freeze({
+    scope: CUSTOMER_PROJECT_PROTOTYPE_SCOPE,
+    command(input) {
+      let copied, invocationOwner;
+      try { invocationOwner = customer(); cpJson(input); cpFail(new TextEncoder().encode(serializeCustomerProject(input)).length <= 16000, "CUSTOMER_PROJECT_INPUT_LIMIT"); copied = cloneCustomerProject(input); }
+      catch (error) { return Promise.reject(error); }
+      const work = queue.then(() => execute(copied, invocationOwner)); queue = work.catch(() => {}); return work;
+    },
+    read() {
+      let invocationOwner;
+      try { invocationOwner = customer(); } catch (error) { return Promise.reject(error); }
+      return queue.then(() => { assertCurrentCustomer(invocationOwner); return cloneCustomerProject(state); });
+    }
+  });
+}
+
+/** Explicit opt-in test adapter. No caller runtime factory, request dispatcher or
+ * import payload is accepted. The frozen V1 is only asked to prepare a plan. */
+export async function createFrozenV1CustomerProjectTestAdapter({ mode } = {}) {
+  cpFail(mode === "LOCAL_TEST_ONLY", "CUSTOMER_PROJECT_TEST_MODE_REQUIRED");
+  const { createKaiosAiCompanyRuntimeV1 } = await import("../../KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js");
+  const adapter = Object.freeze({ async prepare({ request, quote, owner }) {
+    const input = request.content;
+    cpFail(BigInt(input.budget.amount) <= BigInt(Number.MAX_SAFE_INTEGER), "CUSTOMER_PROJECT_V1_NUMERIC_LIMIT");
+    const runtime = createKaiosAiCompanyRuntimeV1({ seed: quote.contentHash, initialCash: 0 });
+    const replay = createKaiosAiCompanyRuntimeV1({ seed: quote.contentHash, initialCash: 0 });
+    const accepted = (result) => { cpFail(!["BLOCKED", "REJECTED", "NEEDS_CLARIFICATION"].includes(result.status), "CUSTOMER_PROJECT_V1_PLANNING_BLOCKED"); return result; };
+    try {
+      const submitted = accepted(runtime.submitRequest({ customer_life_id: owner.playerId, customer_type: "PLAYER", request_text: "Small house simulation planning only", requested_object: "HOUSE",
+        requested_location: input.locationRef, requested_quantity: 1, requested_quality: input.quality, requested_deadline: input.deadlineHours,
+        requested_budget: Number(input.budget.amount), intended_use: input.intendedUse, civilization_context: "INDUSTRIAL", rights_context: [input.rightsRef], risk_level: "MEDIUM", priority: "NORMAL" }));
+      const requestId = submitted.outputs.request.request_id;
+      accepted(runtime.analyzeRequirements(requestId, { approve_assumptions: false }));
+      accepted(runtime.evaluateFeasibility(requestId));
+      const proposal = accepted(runtime.createProposal(requestId)).outputs.proposal;
+      accepted(runtime.approveProposal(proposal.proposal_id));
+      const project = accepted(runtime.createProject(proposal.proposal_id)).outputs.project;
+      accepted(runtime.decomposeProject(project.project_id));
+      const exported = runtime.exportState(); replay.importState(exported);
+      const state = replay.getState();
+      cpFail(state.projects.length === 1 && state.projects[0].status === "PLANNED" && state.contracts.length === 0 && state.procurement_orders.length === 0 && state.ledger.length === 0 && state.worker_reservations.length === 0 && state.equipment_reservations.length === 0 && state.deliveries.length === 0 && state.projects[0].tasks.every((t) => t.workers.length === 0 && t.progress_percent === 0), "CUSTOMER_PROJECT_V1_SIDE_EFFECT");
+      return { scope: "FROZEN_V1_TEST_PLANNING_ONLY", runtime: state.runtime, projectReference: project.project_id,
+        snapshotHash: await hashCustomerProject(exported), snapshot: exported,
+        coverage: "SEVEN_TASK_DEMO_NOT_TWELVE_STAGE_COMPLETE_HOUSE", execution: "HELD", registryWrites: false };
+    } finally { runtime.destroy(); replay.destroy(); }
+  }, async auditSubplan({ projectSource, resourceFixture, snapshot } = {}) {
+    // projectSource is a trusted host read port, never a caller-supplied identity.
+    // This audits a disposable legacy subplan; it never advances the parent project.
+    cpFail(typeof projectSource?.read === "function", "CUSTOMER_PROJECT_SOURCE_REQUIRED");
+    const fixture = cloneCustomerProject(resourceFixture); cpJson(fixture);
+    cpFields(fixture, ["scope", "openingSimulationCredit", "depositRate", "materials", "inspectionPolicy", "reworkRestPolicy"]);
+    cpFail(fixture.scope === "LOCAL_TEST_ONLY_V1_SUBPLAN" && cpAmount(fixture.openingSimulationCredit) && BigInt(fixture.openingSimulationCredit) <= BigInt(Number.MAX_SAFE_INTEGER)
+      && fixture.depositRate === 0 && ["SURVEY_REWORK_ONCE_FROM_WORK_SEGMENTS", "FINAL_QA_REWORK_ONCE_FROM_WORK_SEGMENTS"].includes(fixture.inspectionPolicy)
+      && fixture.reworkRestPolicy === (fixture.inspectionPolicy.startsWith("SURVEY_") ? "NONE" : "NEXT_V1_SHIFT_AFTER_MINIMUM_REST"), "CUSTOMER_PROJECT_SUBPLAN_FIXTURE_REQUIRED");
+    const accepted = await projectSource.read();
+    const quote = accepted?.contract?.acceptedQuote;
+    cpFail(accepted?.scope === CUSTOMER_PROJECT_PROTOTYPE_SCOPE && accepted.acceptance && quote && accepted.project?.quoteHash === quote.contentHash
+      && accepted.acceptance.quoteHash === quote.contentHash && accepted.acceptance.quoteId === quote.quoteId && accepted.acceptance.quoteRevision === quote.revision,
+    "CUSTOMER_PROJECT_ACCEPTED_QUOTE_REQUIRED");
+    cpFail(quote.contentHash === await hashCustomerProject({ quoteId: quote.quoteId, revision: quote.revision, content: quote.content })
+      && accepted.acceptance.acknowledgementHash === quote.acknowledgementHash, "QUOTE_HASH_MISMATCH");
+    const fixtureHash = await hashCustomerProject(fixture);
+    cpFail(quote.content.plan.assumptions.includes(`LOCAL_SUBPLAN_FIXTURE_SHA256:${fixtureHash}`)
+      && quote.content.plan.bomHash === await hashCustomerProject(fixture.materials)
+      && quote.content.total === fixture.openingSimulationCredit, "CUSTOMER_PROJECT_SUBPLAN_FIXTURE_UNBOUND");
+    const exported = cloneCustomerProject(snapshot);
+    cpFail(exported?.export_status === "NON_AUTHORITATIVE_SIMULATION" && new TextEncoder().encode(serializeCustomerProject(exported)).length <= 2_000_000,
+      "CUSTOMER_PROJECT_SUBPLAN_SNAPSHOT_REQUIRED");
+    const verifier = createKaiosAiCompanyRuntimeV1({ seed: quote.contentHash, initialCash: 0 });
+    try {
+      verifier.importState(exported);
+      const state = verifier.getState(), project = state.projects[0], request = state.requests[0], plan = state.resource_plans[0];
+      cpFail(state.seed === quote.contentHash && state.projects.length === 1 && state.requests.length === 1 && state.resource_plans.length === 1
+        && project.template_id === "BASIC_HOUSE_PROJECT" && state.finance.opening_cash === Number(fixture.openingSimulationCredit)
+        && project.budget?.approved_budget === Number(quote.content.total)
+        && state.simulation_time - project.schedule.planned_start <= quote.content.plan.durationHours, "CUSTOMER_PROJECT_SUBPLAN_SCOPE_MISMATCH");
+      cpFail(request.customer_life_id === accepted.owner.playerId && request.requested_location === quote.content.request.locationRef
+        && request.intended_use === quote.content.request.intendedUse
+        && request.requested_quality === quote.content.request.quality && request.requested_quantity === quote.content.request.quantity
+        && request.requested_deadline === quote.content.request.deadlineHours && request.requested_budget === Number(quote.content.request.budget.amount)
+        && serializeCustomerProject(request.rights_context) === serializeCustomerProject([quote.content.request.rightsRef]), "CUSTOMER_PROJECT_SUBPLAN_REQUEST_MISMATCH");
+      cpFail(serializeCustomerProject(Object.fromEntries(plan.bill_of_materials.map((v) => [v.material_id, v.quantity]))) === serializeCustomerProject(fixture.materials),
+        "CUSTOMER_PROJECT_SUBPLAN_MATERIAL_MISMATCH");
+      cpFail(state.contracts.length === 1 && state.contracts[0].deposit_amount === 0 && state.finance.customer_deposits === 0 && state.finance.project_revenue === 0
+        && !state.action_log.some((a) => ["ACCEPT_PROJECT", "CLOSE_PROJECT", "SUBMIT_CHANGE_ORDER", "APPROVE_CHANGE_ORDER"].includes(a.command))
+        && state.deliveries.every((d) => d.customer_outcome === null), "CUSTOMER_PROJECT_SUBPLAN_ACCEPTANCE_FORBIDDEN");
+      const inspected = new Map(), reworkCompleted = new Set();
+      const defectTaskCode = fixture.inspectionPolicy.startsWith("SURVEY_") ? "SURVEY" : "FINAL_ACCEPTANCE";
+      for (const repair of project.tasks.filter((t) => t.rework_for_task_id && t.actual_start !== null)) {
+        const original = project.tasks.find((t) => t.task_id === repair.rework_for_task_id);
+        cpFail(original?.task_code === defectTaskCode && repair.duration_hours === 2, "CUSTOMER_PROJECT_SUBPLAN_REWORK_MISMATCH");
+        if (fixture.reworkRestPolicy !== "NONE") {
+          const shift = state.workforce_pool.find((w) => w.skill === "QA_INSPECTOR").shift;
+          const nextShift = Math.ceil((original.actual_end + shift.minimum_rest_hours) / shift.cycle_hours) * shift.cycle_hours + shift.start;
+          cpFail(repair.actual_start >= nextShift, "CUSTOMER_PROJECT_SUBPLAN_REST_MISMATCH");
+        }
+      }
+      for (const action of state.action_log) {
+        const task = project.tasks.find((t) => t.task_id === action.args.taskId);
+        if (action.command === "COMPLETE_TASK" && action.result_status === "COMPLETED" && task?.rework_for_task_id) reworkCompleted.add(task.rework_for_task_id);
+        if (action.command !== "INSPECT_TASK") continue;
+        cpFail(task && Object.hasOwn(action.args, "outcome") && action.args.details, "CUSTOMER_PROJECT_SUBPLAN_INSPECTION_REQUIRED");
+        const count = inspected.get(task.task_id) ?? 0;
+        const expected = task.task_code === defectTaskCode && count === 0 ? "REWORK_REQUIRED" : "PASS";
+        const details = action.args.details, hours = task.work_segments.reduce((sum, segment) => sum + segment.effective_hours, 0);
+        cpFail(action.args.outcome === expected && (task.task_code !== defectTaskCode || count === 0 || reworkCompleted.has(task.task_id))
+          && state.workforce_pool.some((w) => w.worker_id === details.inspector && w.skill === "QA_INSPECTOR")
+          && details.measurements?.remainingHours === 0 && details.measurements?.effectiveHours === hours && Math.abs(hours - task.duration_hours) < 0.001
+          && serializeCustomerProject(details.criteria) === serializeCustomerProject(["V1_WORK_SEGMENTS_COMPLETE", fixture.inspectionPolicy])
+          && serializeCustomerProject(details.evidence) === serializeCustomerProject([`QUOTE_SHA256:${quote.contentHash}`, `FIXTURE_SHA256:${fixtureHash}`]),
+        "CUSTOMER_PROJECT_SUBPLAN_INSPECTION_MISMATCH");
+        inspected.set(task.task_id, count + 1);
+      }
+      const completedCodes = [...new Set(project.tasks.filter((t) => t.status === "COMPLETE" && !t.rework_for_task_id).map((t) => t.task_code))];
+      // Do not union the separate fixed-location foundation fixture into this quote.
+      // Legacy FINAL_ACCEPTANCE is internal QA, never the customer's acceptance.
+      const missingStages = SMALL_HOUSE_REQUIRED_STAGES.filter((stage) => !completedCodes.includes(stage));
+      const snapshotHash = await hashCustomerProject(exported);
+      const lastAction = state.action_log.at(-1);
+      const replanRequired = lastAction?.command === "ASSIGN_WORKER" && lastAction.result_status === "BLOCKED" && lastAction.result_reason === "REST_REQUIREMENT_CONFLICT";
+      const current = await projectSource.read();
+      cpFail(serializeCustomerProject({ owner: current.owner, acceptance: current.acceptance, contract: current.contract, project: current.project })
+        === serializeCustomerProject({ owner: accepted.owner, acceptance: accepted.acceptance, contract: accepted.contract, project: accepted.project }),
+      "CUSTOMER_PROJECT_SUBPLAN_SOURCE_CHANGED");
+      return { scope: "LOCAL_TEST_ONLY_V1_SUBPLAN_EVIDENCE", quoteId: quote.quoteId, quoteRevision: quote.revision, quoteHash: quote.contentHash,
+        fixtureHash, snapshotHash, coordinatorStatus: project.status, completedTaskCodes: completedCodes,
+        executionStatus: replanRequired ? "REPLAN_REQUIRED" : project.status, executionBlocker: replanRequired ? "REST_REQUIREMENT_CONFLICT" : null,
+        reworkCompleted: reworkCompleted.size, missingStages, fullHouseStatus: "HOUSE_STAGE_ADAPTER_REQUIRED", houseComplete: false,
+        deliveryAcceptance: "NOT_REQUESTED", asset: null, delivery: null, receipt: null, parentStateChanged: false, productionVerified: false };
+    } finally { verifier.destroy(); }
+  } });
+  customerProjectTestAdapters.add(adapter); return adapter;
 }
