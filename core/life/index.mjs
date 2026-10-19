@@ -521,3 +521,341 @@ export function createContinuityAnchorRegistry({ store, verifyProof, issueIssuer
 
   return Object.freeze({ createAnchor, get, list, history, verifyHistory, verifyChallenge, resumeSameLife, appendCheckpoint, appendHandoff, rotateKey, recover });
 }
+
+export const K4168_TRANSITION_SCHEMA_VERSION = "KAIOS_K4168_TRANSITION_DRAFT_V1";
+export const K4168_TRANSITION_STATUS = "ENGINEERING_DRAFT_ONLY_NOT_REINCARNATION_APPROVAL";
+
+export const K4168_TRANSITION_STAGES = Object.freeze([
+  "DRAFT",
+  "HANDOFF_SAVED",
+  "HASH_VERIFIED",
+  "SUCCESSOR_ACKNOWLEDGED",
+  "LINEAGE_REVIEWED",
+  "WORKER_REVALIDATED",
+  "HOLD_PREDECESSOR_UNAVAILABLE"
+]);
+
+const K4168_DOMAIN = "K4168_TRANSITION_DRAFT";
+const K4168_STREAM = "LIFE";
+const GIT_SHA_PATTERN = /^[0-9a-f]{40}$/;
+
+const K4168_HANDOFF_FIELDS = Object.freeze([
+  "handoff_id", "from_life_id", "from_instance_id", "to_role",
+  "to_instance_id_if_known", "workorder_id", "base_sha", "ending_sha",
+  "files_read", "files_changed", "actions_completed", "actions_not_completed",
+  "tests_run", "test_results", "open_blockers", "known_risks", "incidents",
+  "human_decisions", "forbidden_next_actions", "required_next_actions",
+  "recovery_point", "evidence_paths", "created_at", "signature"
+]);
+
+const K4168_INHERITED_AUTHORITY_FIELDS = Object.freeze([
+  "reviewer", "tLevel", "payroll", "mainnet", "treasury", "signer", "governance"
+]);
+
+function assertSha(value, field, pattern = HASH_PATTERN) {
+  invariant(pattern.test(value ?? ""), "K4168_HASH_REQUIRED", `${field} must be a lowercase hash`);
+}
+
+function assertK4168Boundary(record) {
+  invariant(record.schemaVersion === K4168_TRANSITION_SCHEMA_VERSION, "K4168_SCHEMA_VERSION_INVALID", "Unsupported K4168 transition schema");
+  invariant(record.prototypeStatus === K4168_TRANSITION_STATUS, "K4168_DRAFT_ONLY_REQUIRED", "K4168 transition must remain an engineering draft");
+  invariant(record.runtimeAuthority === false && record.liveIdentityCreation === false, "K4168_RUNTIME_AUTHORITY_FORBIDDEN", "The draft cannot create a Life or runtime authority");
+  invariant(record.sameTechnicalInstance === false, "K4168_SAME_INSTANCE_FORBIDDEN", "Predecessor and successor candidate are not the same technical instance");
+  invariant(record.handoffIsReincarnationApproval === false, "K4168_HANDOFF_APPROVAL_FORBIDDEN", "A handoff is not reincarnation approval");
+  invariant(record.authorityInherited === false, "K4168_AUTHORITY_INHERITANCE_FORBIDDEN", "Authority cannot be inherited through lineage");
+  K4168_INHERITED_AUTHORITY_FIELDS.forEach((field) => invariant(record.inheritedAuthorities?.[field] === false, "K4168_AUTHORITY_INHERITANCE_FORBIDDEN", `${field} authority cannot be inherited`));
+  invariant(record.successorCandidate?.lifeId === null && record.successorCandidate?.workerId === null && record.successorCandidate?.employeeId === null, "K4168_IDENTITY_ISSUANCE_FORBIDDEN", "The draft cannot issue Life, Worker or Employee IDs");
+  invariant(record.successorCandidate.existingWorkerCandidateRef === null || typeof record.successorCandidate.existingWorkerCandidateRef === "string", "K4168_EXISTING_WORKER_REF_INVALID", "An existing Worker candidate reference must be null or a string pending external revalidation");
+  invariant(record.humanCanonicalApproval === "PENDING", "K4168_HUMAN_APPROVAL_PENDING_REQUIRED", "This draft must remain pending Human canonical approval");
+  invariant(record.reincarnationStatus === "PENDING_HUMAN_CANONICAL_DECISION", "K4168_REINCARNATION_PENDING_REQUIRED", "Reincarnation must remain pending Human canonical decision");
+  invariant(record.resumeAuthorized === false, "K4168_RESUME_AUTHORITY_FORBIDDEN", "The engineering draft cannot authorize successor resume");
+}
+
+function validateK4168Record(record) {
+  requireFields(record, [
+    "schemaVersion", "prototypeStatus", "runtimeAuthority", "liveIdentityCreation",
+    "transitionId", "workOrderId", "cause", "baseSha", "endingSha",
+    "predecessor", "successorCandidate", "predecessorAvailability",
+    "sameTechnicalInstance", "handoffIsReincarnationApproval", "authorityInherited",
+    "inheritedAuthorities", "humanCanonicalApproval", "reincarnationStatus",
+    "stage", "sequence", "handoffId", "handoffHash", "ackHash", "lineageDecision",
+    "workerRevalidation", "resumeAuthorized", "createdAt", "updatedAt",
+    "previousRecordHash", "recordHash"
+  ], "K4168TransitionRecord");
+  requireId(record.transitionId, "transitionId");
+  requireId(record.workOrderId, "workOrderId");
+  requireEnum(record.cause, ["PREDECESSOR_THREAD_CAPACITY_EXHAUSTED"], "cause");
+  requireEnum(record.stage, K4168_TRANSITION_STAGES, "stage");
+  requireEnum(record.predecessorAvailability, ["AVAILABLE", "UNAVAILABLE"], "predecessorAvailability");
+  assertSha(record.baseSha, "baseSha", GIT_SHA_PATTERN);
+  if (record.endingSha !== null) assertSha(record.endingSha, "endingSha", GIT_SHA_PATTERN);
+  requireFields(record.predecessor, ["lifeId", "instanceId", "threadId", "authorDisplayName"], "predecessor");
+  requireFields(record.successorCandidate, ["displayName", "lifeId", "workerId", "employeeId", "existingWorkerCandidateRef", "instanceId", "threadId", "relationship"], "successorCandidate");
+  invariant(record.predecessor.lifeId && record.predecessor.instanceId && record.predecessor.threadId, "K4168_PREDECESSOR_REFERENCE_REQUIRED", "Existing predecessor references are required");
+  invariant(record.successorCandidate.displayName && record.successorCandidate.instanceId && record.successorCandidate.threadId, "K4168_SUCCESSOR_CANDIDATE_REFERENCE_REQUIRED", "Successor candidate references are required");
+  invariant(record.successorCandidate.instanceId !== record.predecessor.instanceId && record.successorCandidate.threadId !== record.predecessor.threadId, "K4168_DUPLICATE_IDENTITY", "Successor candidate must use a distinct technical instance and thread");
+  invariant(record.successorCandidate.relationship === "ENGINEERING_AND_KNOWLEDGE_LINEAGE_CANDIDATE", "K4168_LINEAGE_SCOPE_INVALID", "Successor relationship is limited to engineering and knowledge lineage candidacy");
+  invariant(Number.isInteger(record.sequence) && record.sequence >= 0, "K4168_SEQUENCE_INVALID", "Transition sequence must be a non-negative integer");
+  invariant(record.handoffId === null || (typeof record.handoffId === "string" && record.handoffId.length > 0), "K4168_HANDOFF_ID_INVALID", "Handoff ID must be null or non-empty");
+  if (record.handoffHash !== null) assertSha(record.handoffHash, "handoffHash");
+  if (record.ackHash !== null) assertSha(record.ackHash, "ackHash");
+  if (record.previousRecordHash !== null) assertSha(record.previousRecordHash, "previousRecordHash");
+  requireFields(record.workerRevalidation, ["status", "workerId", "evidenceHash"], "workerRevalidation");
+  requireEnum(record.workerRevalidation.status, ["NOT_RUN", "VERIFIED_EXISTING_WORKER"], "workerRevalidation.status");
+  if (record.stage === "DRAFT" || record.stage === "HOLD_PREDECESSOR_UNAVAILABLE") {
+    invariant(record.handoffId === null && record.handoffHash === null && record.ackHash === null, "K4168_STAGE_EVIDENCE_CONFLICT", "Draft or unavailable hold cannot claim handoff/ACK evidence");
+  }
+  if (["HANDOFF_SAVED", "HASH_VERIFIED", "SUCCESSOR_ACKNOWLEDGED", "LINEAGE_REVIEWED", "WORKER_REVALIDATED"].includes(record.stage)) {
+    invariant(record.handoffId !== null && record.handoffHash !== null && record.endingSha !== null, "K4168_HANDOFF_EVIDENCE_REQUIRED", "Post-handoff stages require exact handoff evidence");
+  }
+  if (["SUCCESSOR_ACKNOWLEDGED", "LINEAGE_REVIEWED", "WORKER_REVALIDATED"].includes(record.stage)) {
+    invariant(record.ackHash !== null, "K4168_ACK_EVIDENCE_REQUIRED", "Post-ACK stages require acknowledgement evidence");
+  }
+  if (["LINEAGE_REVIEWED", "WORKER_REVALIDATED"].includes(record.stage)) {
+    invariant(record.lineageDecision === "ENGINEERING_AND_KNOWLEDGE_LINEAGE_CANDIDATE_ONLY", "K4168_LINEAGE_DECISION_REQUIRED", "Post-lineage stages require the bounded lineage decision");
+  }
+  if (record.stage === "WORKER_REVALIDATED") {
+    invariant(record.workerRevalidation.status === "VERIFIED_EXISTING_WORKER" && record.workerRevalidation.workerId === record.successorCandidate.existingWorkerCandidateRef, "K4168_WORKER_REVALIDATION_EVIDENCE_REQUIRED", "Worker-revalidated stage requires exact existing-Worker evidence");
+  } else {
+    invariant(record.workerRevalidation.status === "NOT_RUN", "K4168_PREMATURE_WORKER_REVALIDATION", "Worker evidence cannot appear before the revalidation stage");
+  }
+  assertSha(record.recordHash, "recordHash");
+  assertK4168Boundary(record);
+  assertNoContinuitySecrets(record, "K4168TransitionRecord");
+  return record;
+}
+
+function k4168RecordHashInput(record) {
+  const copy = clone(record);
+  delete copy.recordHash;
+  return copy;
+}
+
+export async function hashK4168TransitionRecord(record) {
+  return sha256(k4168RecordHashInput(record));
+}
+
+export async function hashK4168HandoffPackage(handoffPackage) {
+  requireFields(handoffPackage, K4168_HANDOFF_FIELDS, "K4168HandoffPackage");
+  invariant(typeof handoffPackage.signature === "string" && handoffPackage.signature.trim().length > 0, "K4168_PREDECESSOR_ACK_REQUIRED", "Predecessor acknowledgement/signature is required");
+  ["files_read", "files_changed", "actions_completed", "actions_not_completed", "tests_run", "test_results", "open_blockers", "known_risks", "incidents", "human_decisions", "forbidden_next_actions", "required_next_actions", "evidence_paths"].forEach((field) => requireArray(handoffPackage[field], `handoff.${field}`));
+  invariant(Number.isFinite(Date.parse(handoffPackage.created_at)), "K4168_HANDOFF_TIME_INVALID", "Handoff created_at must be a valid timestamp");
+  assertNoContinuitySecrets(handoffPackage, "K4168HandoffPackage");
+  return sha256(handoffPackage);
+}
+
+export function projectK4168TransitionStatus(record) {
+  validateK4168Record(record);
+  const blockers = [];
+  if (record.predecessorAvailability !== "AVAILABLE") blockers.push("PREDECESSOR_UNAVAILABLE");
+  if (record.stage !== "WORKER_REVALIDATED") blockers.push("WORKER_REVALIDATION_INCOMPLETE");
+  if (record.humanCanonicalApproval !== "APPROVED") blockers.push("HUMAN_CANONICAL_APPROVAL_PENDING");
+  if (record.successorCandidate.lifeId === null) blockers.push("SUCCESSOR_LIFE_ID_NOT_ISSUED");
+  if (record.workerRevalidation.status !== "VERIFIED_EXISTING_WORKER") blockers.push("SUCCESSOR_WORKER_ID_NOT_VERIFIED");
+  return Object.freeze({
+    transitionId: record.transitionId,
+    pointId: "K4168",
+    status: blockers.length === 0 ? "RESUME_READY" : "ENGINEERING_DRAFT_HOLD",
+    stage: record.stage,
+    blockers: Object.freeze(blockers),
+    sameTechnicalInstance: false,
+    authorityInherited: false,
+    reincarnationStatus: record.reincarnationStatus,
+    updatedAt: record.updatedAt
+  });
+}
+
+export function createK4168TransitionGate({ store, verifyPredecessorHandoff, verifySuccessorAcknowledgement, verifyExistingWorker, clock = nowIso }) {
+  invariant(store?.commit && store?.getEntity && store?.history && store?.listEntities, "K4168_STORE_REQUIRED", "K4168 transition gate requires the existing Universe store interface");
+  invariant(typeof verifyPredecessorHandoff === "function", "K4168_PREDECESSOR_VERIFIER_REQUIRED", "K4168 transition gate requires an external predecessor handoff verifier");
+  invariant(typeof verifySuccessorAcknowledgement === "function", "K4168_SUCCESSOR_VERIFIER_REQUIRED", "K4168 transition gate requires an external successor acknowledgement verifier");
+  invariant(typeof verifyExistingWorker === "function", "K4168_WORKER_VERIFIER_REQUIRED", "K4168 transition gate requires an external existing-worker verifier");
+
+  async function finalize(record) {
+    const next = { ...clone(record), recordHash: "" };
+    next.recordHash = await hashK4168TransitionRecord(next);
+    validateK4168Record(next);
+    invariant(await hashK4168TransitionRecord(next) === next.recordHash, "K4168_RECORD_HASH_INVALID", "K4168 transition record hash mismatch");
+    return Object.freeze(next);
+  }
+
+  async function commitVersion(current, patch, eventType, actorId) {
+    const timestamp = clock();
+    const next = await finalize({
+      ...clone(current), ...clone(patch),
+      sequence: current.sequence + 1,
+      createdAt: current.createdAt,
+      updatedAt: timestamp,
+      previousRecordHash: current.recordHash,
+      recordHash: ""
+    });
+    await store.commit({
+      domain: K4168_DOMAIN,
+      stream: K4168_STREAM,
+      id: next.transitionId,
+      entity: clone(next),
+      event_id: `K4168_${next.recordHash.toUpperCase()}`,
+      event_type: eventType,
+      actor_id: actorId,
+      timestamp,
+      payload: { record: clone(next), engineeringDraftOnly: true, noIdentityIssued: true, noAuthorityInherited: true }
+    });
+    return clone(next);
+  }
+
+  async function createDraft(input, actorId = "DOT") {
+    requireFields(input, ["transitionId", "workOrderId", "baseSha", "predecessor", "successorCandidate"], "K4168TransitionDraftInput");
+    invariant(!(await get(input.transitionId)), "K4168_TRANSITION_ALREADY_EXISTS", "K4168 transition already exists");
+    const timestamp = clock();
+    const record = await finalize({
+      schemaVersion: K4168_TRANSITION_SCHEMA_VERSION,
+      prototypeStatus: K4168_TRANSITION_STATUS,
+      runtimeAuthority: false,
+      liveIdentityCreation: false,
+      transitionId: input.transitionId,
+      workOrderId: input.workOrderId,
+      cause: "PREDECESSOR_THREAD_CAPACITY_EXHAUSTED",
+      baseSha: input.baseSha,
+      endingSha: null,
+      predecessor: clone(input.predecessor),
+      successorCandidate: {
+        ...clone(input.successorCandidate),
+        lifeId: null,
+        workerId: null,
+        employeeId: null,
+        existingWorkerCandidateRef: input.successorCandidate.existingWorkerCandidateRef ?? null,
+        relationship: "ENGINEERING_AND_KNOWLEDGE_LINEAGE_CANDIDATE"
+      },
+      predecessorAvailability: "AVAILABLE",
+      sameTechnicalInstance: false,
+      handoffIsReincarnationApproval: false,
+      authorityInherited: false,
+      inheritedAuthorities: Object.fromEntries(K4168_INHERITED_AUTHORITY_FIELDS.map((field) => [field, false])),
+      humanCanonicalApproval: "PENDING",
+      reincarnationStatus: "PENDING_HUMAN_CANONICAL_DECISION",
+      stage: "DRAFT",
+      sequence: 0,
+      handoffId: null,
+      handoffHash: null,
+      ackHash: null,
+      lineageDecision: "NOT_RECORDED",
+      workerRevalidation: { status: "NOT_RUN", workerId: null, evidenceHash: null },
+      resumeAuthorized: false,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      previousRecordHash: null,
+      recordHash: ""
+    });
+    await store.commit({
+      domain: K4168_DOMAIN, stream: K4168_STREAM, id: record.transitionId,
+      entity: clone(record), event_id: `K4168_${record.recordHash.toUpperCase()}`,
+      event_type: "K4168_TRANSITION_DRAFT_CREATED", actor_id: actorId, timestamp,
+      payload: { record: clone(record), engineeringDraftOnly: true, noIdentityIssued: true, noAuthorityInherited: true }
+    });
+    return clone(record);
+  }
+
+  async function get(transitionId) { return store.getEntity(K4168_DOMAIN, transitionId); }
+  async function list() { return store.listEntities(K4168_DOMAIN); }
+  async function history(transitionId) {
+    const events = await store.history(transitionId, K4168_STREAM);
+    return events.filter((event) => event.payload?.record).map((event) => clone(event.payload.record));
+  }
+
+  async function saveHandoff({ transitionId, handoffPackage, endingSha, actorId }) {
+    const current = await get(transitionId);
+    invariant(current?.stage === "DRAFT", "K4168_STAGE_CONFLICT", "Handoff can only be saved from DRAFT");
+    invariant(handoffPackage.from_life_id === current.predecessor.lifeId && handoffPackage.from_instance_id === current.predecessor.instanceId, "K4168_WRONG_PREDECESSOR", "Handoff predecessor does not match the transition");
+    invariant(handoffPackage.to_instance_id_if_known === current.successorCandidate.instanceId, "K4168_WRONG_SUCCESSOR", "Handoff target does not match the successor candidate");
+    invariant(handoffPackage.workorder_id === current.workOrderId && handoffPackage.base_sha === current.baseSha && handoffPackage.ending_sha === endingSha, "K4168_HANDOFF_BINDING_INVALID", "Handoff must bind the exact WorkOrder and Git SHAs");
+    assertSha(endingSha, "endingSha", GIT_SHA_PATTERN);
+    const handoffHash = await hashK4168HandoffPackage(handoffPackage);
+    const predecessorVerified = await verifyPredecessorHandoff({ handoffPackage: clone(handoffPackage), handoffHash, predecessor: clone(current.predecessor) });
+    invariant(predecessorVerified === true, "K4168_PREDECESSOR_ACK_UNVERIFIED", "Predecessor acknowledgement could not be externally verified");
+    return commitVersion(current, { stage: "HANDOFF_SAVED", handoffId: handoffPackage.handoff_id, handoffHash, endingSha }, "K4168_HANDOFF_SAVED", actorId);
+  }
+
+  async function verifyHandoff({ transitionId, handoffPackage, actorId }) {
+    const current = await get(transitionId);
+    invariant(current?.stage === "HANDOFF_SAVED", "K4168_STAGE_CONFLICT", "Handoff hash can only be verified after save");
+    invariant(await hashK4168HandoffPackage(handoffPackage) === current.handoffHash, "K4168_HANDOFF_HASH_MISMATCH", "Handoff package does not match the saved hash");
+    return commitVersion(current, { stage: "HASH_VERIFIED" }, "K4168_HANDOFF_HASH_VERIFIED", actorId);
+  }
+
+  async function acknowledgeSuccessor({ transitionId, acknowledgement, actorId }) {
+    const current = await get(transitionId);
+    invariant(current?.stage === "HASH_VERIFIED", "K4168_STAGE_CONFLICT", "Successor ACK requires a verified handoff hash");
+    requireFields(acknowledgement, ["ack_id", "transition_id", "handoff_id", "acknowledged_by_instance_id", "acknowledged_by_thread_id", "acknowledged_at", "main_sha_at_ack", "handoff_sha256", "staleness_result", "required_next_actions_accepted"], "K4168SuccessorAcknowledgement");
+    invariant(acknowledgement.transition_id === current.transitionId && acknowledgement.handoff_id === current.handoffId && acknowledgement.handoff_sha256 === current.handoffHash, "K4168_ACK_BINDING_INVALID", "ACK must bind the transition, handoff ID and verified handoff hash");
+    invariant(acknowledgement.acknowledged_by_instance_id === current.successorCandidate.instanceId && acknowledgement.acknowledged_by_thread_id === current.successorCandidate.threadId, "K4168_WRONG_SUCCESSOR", "ACK came from the wrong successor candidate");
+    invariant(acknowledgement.main_sha_at_ack === current.endingSha && acknowledgement.staleness_result === "CURRENT", "K4168_STALE_HANDOFF", "ACK must revalidate the exact handoff head as current");
+    invariant(Number.isFinite(Date.parse(acknowledgement.acknowledged_at)), "K4168_ACK_TIME_INVALID", "ACK timestamp must be valid");
+    invariant(acknowledgement.required_next_actions_accepted === true, "K4168_ACK_INCOMPLETE", "Successor must accept the required next actions");
+    const ackHash = await sha256(acknowledgement);
+    const successorVerified = await verifySuccessorAcknowledgement({ acknowledgement: clone(acknowledgement), ackHash, successorCandidate: clone(current.successorCandidate) });
+    invariant(successorVerified === true, "K4168_SUCCESSOR_ACK_UNVERIFIED", "Successor acknowledgement could not be externally verified");
+    return commitVersion(current, { stage: "SUCCESSOR_ACKNOWLEDGED", ackHash }, "K4168_SUCCESSOR_ACKNOWLEDGED", actorId);
+  }
+
+  async function recordLineageDecision({ transitionId, decisionEvidenceHash, actorId }) {
+    const current = await get(transitionId);
+    invariant(current?.stage === "SUCCESSOR_ACKNOWLEDGED", "K4168_STAGE_CONFLICT", "Lineage review requires successor ACK");
+    assertSha(decisionEvidenceHash, "decisionEvidenceHash");
+    return commitVersion(current, {
+      stage: "LINEAGE_REVIEWED",
+      lineageDecision: "ENGINEERING_AND_KNOWLEDGE_LINEAGE_CANDIDATE_ONLY",
+      lineageDecisionEvidenceHash: decisionEvidenceHash
+    }, "K4168_LINEAGE_CANDIDACY_RECORDED", actorId);
+  }
+
+  async function revalidateWorker({ transitionId, existingWorkerId, evidenceHash, actorId }) {
+    const current = await get(transitionId);
+    invariant(current?.stage === "LINEAGE_REVIEWED", "K4168_STAGE_CONFLICT", "Worker revalidation requires completed lineage review");
+    invariant(typeof existingWorkerId === "string" && existingWorkerId.length > 0, "K4168_EXISTING_WORKER_REQUIRED", "Revalidation cannot issue a new Worker ID");
+    assertSha(evidenceHash, "workerRevalidation.evidenceHash");
+    invariant(current.successorCandidate.existingWorkerCandidateRef === existingWorkerId, "K4168_WORKER_BINDING_NOT_CANONICAL", "The successor candidate has no canonical existing-Worker reference to revalidate");
+    const verified = await verifyExistingWorker({ workerId: existingWorkerId, evidenceHash, transition: clone(current) });
+    invariant(verified === true, "K4168_WORKER_REVALIDATION_FAILED", "Existing Worker revalidation failed closed");
+    return commitVersion(current, {
+      stage: "WORKER_REVALIDATED",
+      workerRevalidation: { status: "VERIFIED_EXISTING_WORKER", workerId: existingWorkerId, evidenceHash }
+    }, "K4168_EXISTING_WORKER_REVALIDATED", actorId);
+  }
+
+  async function markPredecessorUnavailable({ transitionId, evidenceHash, actorId }) {
+    const current = await get(transitionId);
+    invariant(current?.stage === "DRAFT", "K4168_STAGE_CONFLICT", "Predecessor unavailable flow starts before handoff save");
+    assertSha(evidenceHash, "predecessorUnavailableEvidenceHash");
+    return commitVersion(current, {
+      stage: "HOLD_PREDECESSOR_UNAVAILABLE",
+      predecessorAvailability: "UNAVAILABLE",
+      predecessorUnavailableEvidenceHash: evidenceHash,
+      safeRecoveryActions: ["READ_ONLY_PROVENANCE_REVIEW", "RECOVER_LAST_VERIFIED_HANDOFF", "HUMAN_CANONICAL_DECISION"]
+    }, "K4168_PREDECESSOR_UNAVAILABLE_HOLD", actorId);
+  }
+
+  async function evaluateResume(transitionId) {
+    const current = await get(transitionId);
+    invariant(current, "K4168_TRANSITION_NOT_FOUND", `K4168 transition not found: ${transitionId}`);
+    return projectK4168TransitionStatus(current);
+  }
+
+  async function verifyHistory(transitionId) {
+    const records = await history(transitionId);
+    invariant(records.length > 0, "K4168_HISTORY_EMPTY", "K4168 transition has no history");
+    for (let index = 0; index < records.length; index += 1) {
+      const record = records[index];
+      validateK4168Record(record);
+      invariant(record.sequence === index, "K4168_HISTORY_SEQUENCE_BROKEN", "K4168 transition sequence is broken");
+      invariant(record.previousRecordHash === (records[index - 1]?.recordHash ?? null), "K4168_HISTORY_HASH_CHAIN_BROKEN", "K4168 transition hash chain is broken");
+      invariant(await hashK4168TransitionRecord(record) === record.recordHash, "K4168_RECORD_HASH_INVALID", "K4168 transition record hash mismatch");
+    }
+    return true;
+  }
+
+  return Object.freeze({
+    createDraft, get, list, history, saveHandoff, verifyHandoff,
+    acknowledgeSuccessor, recordLineageDecision, revalidateWorker,
+    markPredecessorUnavailable, evaluateResume, verifyHistory
+  });
+}
