@@ -221,16 +221,19 @@ function installGuard(){
 }
 function syncStatusFlow(){
   if(hudCollapsed())return;
+  const marketHidden=document.documentElement.dataset.k11520HudProfile&&!document.documentElement.classList.contains('k11520MarketOpen');
+  // A collapsed Market only reserves its header/button row, not hidden cards.
+  const collapsedBottom=marketHidden?Math.max(0,...[$('.top'),$('#k11520MarketRow')].filter(Boolean).map(el=>el.getBoundingClientRect().bottom)):0;
   if(globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches){
-    const bottom=Math.max(128,...[...document.querySelectorAll('#axes .axis')].map(el=>el.getBoundingClientRect().bottom));
-    const value=`${Math.max(136,Math.ceil(bottom+8))}px`;
+    const bottom=marketHidden?collapsedBottom:Math.max(128,...[...document.querySelectorAll('#axes .axis')].map(el=>el.getBoundingClientRect().bottom));
+    const value=`${marketHidden?Math.ceil(bottom+8):Math.max(136,Math.ceil(bottom+8))}px`;
     if(document.documentElement.style.getPropertyValue('--k11520-landscape-status-top')!==value)document.documentElement.style.setProperty('--k11520-landscape-status-top',value);
     return;
   }
   if(innerWidth>MOBILE_MAX)return;
   const cards=[...document.querySelectorAll('#axes .axis')],hud=[$('.tele'),$('.monsterHud')].filter(Boolean);
-  const bottom=Math.max(174,...cards.map(el=>el.getBoundingClientRect().bottom));
-  const top=Math.max(190,Math.ceil(bottom+10));
+  const bottom=marketHidden?collapsedBottom:Math.max(174,...cards.map(el=>el.getBoundingClientRect().bottom));
+  const top=marketHidden?Math.ceil(bottom+10):Math.max(190,Math.ceil(bottom+10));
   const height=Math.max(108,...hud.map(el=>{const r=el.getBoundingClientRect();return Math.ceil(Math.max(r.top,...[...el.children].map(c=>c.getBoundingClientRect().bottom))-r.top+9)}));
   for(const [key,value] of [['--k11520-status-top',`${top}px`],['--k11520-status-height',`${height}px`],['--k11520-map-top',`${top+height+10}px`]]){
     if(document.documentElement.style.getPropertyValue(key)!==value)document.documentElement.style.setProperty(key,value);
