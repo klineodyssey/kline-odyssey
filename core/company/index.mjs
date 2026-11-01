@@ -2049,6 +2049,78 @@ export function createPrepaidPayrollSchedule({
   });
 }
 
+// A read-only workforce projection. It never authorizes an escrow release or a
+// chain payment; the existing createPrepaidPayrollSchedule remains the gate for
+// a separately approved, exact payroll action.
+export function previewKAIOSWorkforceCycle({ worker_id, payday_date, employee_status,
+  approved_monthly_amount_atomic = null, amount_approval_evidence = null }) {
+  invariant(typeof worker_id === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(worker_id),
+    "WORKER_ID_INVALID", "Worker ID must match the existing workforce registry format");
+  invariant(/^\d{4}-\d{2}-05$/.test(payday_date), "PAYDAY_DATE_INVALID", "Payday must be the fifth in YYYY-MM-05 format");
+  const [year, month] = payday_date.split("-").map(Number);
+  const start = new Date(Date.UTC(year, month - 1, 5));
+  invariant(start.toISOString().slice(0, 10) === payday_date, "PAYDAY_DATE_INVALID", "Payday is not a valid calendar date");
+  const next = new Date(Date.UTC(year, month, 5));
+  const end = new Date(next.getTime() - 86_400_000);
+  const amountApproved = amount_approval_evidence?.status === "APPROVED" &&
+    typeof amount_approval_evidence?.evidence === "string" && Boolean(amount_approval_evidence.evidence);
+  const amount = approved_monthly_amount_atomic == null ? null : quoteAmount(approved_monthly_amount_atomic, "approved_monthly_amount_atomic");
+  const salaryKnown = amountApproved && amount != null && amount > 0n;
+  return Object.freeze({
+    worker_id, currency: "KAIOS", payday_date, timezone: "Asia/Taipei",
+    period_start: payday_date, period_end: end.toISOString().slice(0, 10),
+    next_payday_date: next.toISOString().slice(0, 10),
+    employee_status, salary_amount_atomic: salaryKnown ? amount.toString() : null,
+    salary_status: employee_status !== "ACTIVE" ? "EMPLOYMENT_NOT_VERIFIED" : salaryKnown ? "CALCULATED_NOT_PAYABLE" : "PENDING_POLICY",
+    payment_status: "NOT_LIVE", payment_executed: false
+  });
+}
+
+export function previewKGENWorkRewards({ worker_id, approved_hourly_rate_atomic = null,
+  hourly_rate_approval = null, verified_work_minutes = 0, attendance_evidence = null,
+  accepted_work_evidence = null, approved_cross_day_bonus_atomic = null,
+  cross_day_approval = null, cross_day_evidence = null }) {
+  invariant(typeof worker_id === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(worker_id),
+    "WORKER_ID_INVALID", "Worker ID must match the existing workforce registry format");
+  invariant(Number.isSafeInteger(verified_work_minutes) && verified_work_minutes >= 0,
+    "WORK_MINUTES_INVALID", "Verified work minutes must be a non-negative safe integer");
+  const attendanceVerified = attendance_evidence?.status === "VERIFIED" && Boolean(attendance_evidence?.evidence);
+  const workAccepted = accepted_work_evidence?.status === "ACCEPTED" && Boolean(accepted_work_evidence?.evidence);
+  const rateApproved = hourly_rate_approval?.status === "APPROVED" && Boolean(hourly_rate_approval?.evidence);
+  const rate = approved_hourly_rate_atomic == null ? null : quoteAmount(approved_hourly_rate_atomic, "approved_hourly_rate_atomic");
+  const hourlyEligible = attendanceVerified && workAccepted && rateApproved && rate != null && rate > 0n;
+  const bonusApproved = cross_day_approval?.status === "APPROVED" && Boolean(cross_day_approval?.evidence);
+  const bonus = approved_cross_day_bonus_atomic == null ? null : quoteAmount(approved_cross_day_bonus_atomic, "approved_cross_day_bonus_atomic");
+  const crossDayEligible = hourlyEligible && bonusApproved && bonus != null && bonus > 0n &&
+    cross_day_evidence?.status === "VERIFIED" && Boolean(cross_day_evidence?.evidence);
+  return Object.freeze({
+    worker_id, currency: "KGEN", verified_work_minutes,
+    hourly_wage_atomic: hourlyEligible ? (rate * BigInt(verified_work_minutes) / 60n).toString() : null,
+    cross_day_bonus_atomic: crossDayEligible ? bonus.toString() : null,
+    hourly_status: hourlyEligible ? "CALCULATED_NOT_PAYABLE" : "EVIDENCE_OR_POLICY_REQUIRED",
+    cross_day_status: crossDayEligible ? "CALCULATED_NOT_PAYABLE" : "EVIDENCE_OR_POLICY_REQUIRED",
+    heartbeat_reward_atomic: null, task_compensation_atomic: null, cargo_principal_atomic: null,
+    payment_status: "NOT_LIVE", payment_executed: false
+  });
+}
+
+export function previewK8888GameClaim({ claim_id, approved_claimable_amount_atomic = null,
+  entitlement_evidence = null, reserve_amount_atomic = null, prior_claim_ids = [] }) {
+  requireId(claim_id, "claim_id");
+  requireArray(prior_claim_ids, "prior_claim_ids");
+  const amount = approved_claimable_amount_atomic == null ? null : quoteAmount(approved_claimable_amount_atomic, "approved_claimable_amount_atomic");
+  const reserve = reserve_amount_atomic == null ? null : quoteAmount(reserve_amount_atomic, "reserve_amount_atomic");
+  const blockers = [];
+  if (prior_claim_ids.includes(claim_id)) blockers.push("DUPLICATE_CLAIM");
+  if (!(amount > 0n && entitlement_evidence?.status === "APPROVED" && entitlement_evidence?.evidence)) blockers.push("NO_APPROVED_ENTITLEMENT");
+  if (reserve == null || (amount != null && reserve < amount)) blockers.push("INSUFFICIENT_VERIFIED_RESERVE");
+  return Object.freeze({
+    claim_id, status: blockers.length ? "GAME_CLAIM_BLOCKED" : "GAME_CLAIM_SIMULATED",
+    blockers: Object.freeze(blockers), amount_atomic: blockers.length ? null : amount.toString(),
+    real_payment_status: "NOT_LIVE", payment_executed: false, receipt: null
+  });
+}
+
 export function createSalaryAdvanceCreditPlan({
   plan_id, employee_life_id, future_salary_due_date, verified_future_salary_atomic,
   requested_advance_atomic, maximum_advance_bps, service_fee_bps = 0,
