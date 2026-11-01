@@ -13,6 +13,8 @@ let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyL
 const thumbObservers=new WeakMap();
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 const paramsHidden=()=>!!$('.sliderDock')?.classList.contains('k11520HiddenBySettings');
+const onDemand=()=>document.documentElement.dataset.k11520HudMode==='ON_DEMAND';
+const railDisclosed=sel=>!onDemand()||document.documentElement.classList.contains('k11520TradeOpen')||(sel==='#yControl'&&document.documentElement.classList.contains('k11520MovementActive'));
 function installStyle(){
   let s=$('#k11520MobileControlLayout');
   if(!s){s=document.createElement('style');s.id='k11520MobileControlLayout';document.head.appendChild(s)}
@@ -131,6 +133,17 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   #k11520FollowMonster{left:360px;top:54px;width:calc(100vw - 540px)}
   #k11520UiSettings{top:54px!important;max-height:calc(100dvh - 64px);overflow:auto}
 }
+/* V2.9.6 candidate: visibility changes never resize/reanchor the world. */
+html[data-k11520-hud-mode="ON_DEMAND"] :is(.minimapWrap,#k11520MarketRow){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen) :is(.top,.axes,.tele,.monsterHud,.controls,#k11520MonsterGuide,#k11520UtilityMaster,#k11520HudCollapseAll,#k11520CameraReset,#k11520FollowMonster,#walletPanel,#walletToggle,#chatHandle,#gameChat,#gameModeToggle,#aiChatButton,#bgmButton,#backpackButton,#dock){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen) :is(#orderFire,#flat){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy{display:block!important;visibility:visible!important;opacity:0!important;pointer-events:auto!important;background:transparent!important;border-color:transparent!important;box-shadow:none!important;transition:opacity .18s linear;touch-action:none}
+html[data-k11520-hud-mode="ON_DEMAND"].k11520MovementActive #joy{opacity:.72!important;background:#68e4ff0a!important;border-color:#9eeeff66!important}
+html[data-k11520-hud-mode="ON_DEMAND"] :is(#yControl,#cControl,#lotsControl){transition:opacity .18s linear,visibility 0s linear .18s}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen):not(.k11520MovementActive) #yControl,
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen) :is(#cControl,#lotsControl){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"].k11520MovementActive #yControl,html[data-k11520-hud-mode="ON_DEMAND"].k11520TradeOpen :is(#yControl,#cControl,#lotsControl){transition-delay:0s}
+html[data-k11520-hud-mode="ON_DEMAND"] .axes{position:fixed!important}
 `;
   if(s.textContent!==css)s.textContent=css;
 }
@@ -140,7 +153,7 @@ function applyRail(){
   if(innerWidth>MOBILE_MAX&&!landscape)return;
   globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();
   const specs=landscape?[['#yControl','max(182px, calc(env(safe-area-inset-left) + 168px))'],['#cControl','max(232px, calc(env(safe-area-inset-left) + 218px))'],['#lotsControl','max(282px, calc(env(safe-area-inset-left) + 268px))']]:[['#yControl','calc(50% - 21px)'],['#cControl','calc(50% + 29px)'],['#lotsControl','calc(50% + 79px)']];
-  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()||paramsHidden()||document.documentElement.classList.contains('k11520SettingsOpen')){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
+  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()||paramsHidden()||document.documentElement.classList.contains('k11520SettingsOpen')){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity',railDisclosed(sel)?'1':'0'],['visibility',railDisclosed(sel)?'visible':'hidden'],['pointer-events',railDisclosed(sel)?'auto':'none']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
   if(landscape)for(const [sel] of specs){const el=$(sel);setImportant(el,'bottom','max(58px, calc(env(safe-area-inset-bottom) + 50px))');setImportant(el,'height','108px');setImportant(el,'width','44px')}
 }
 function installThumbBounds(){
@@ -220,6 +233,7 @@ function installGuard(){
   timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay));
 }
 function syncStatusFlow(){
+  if(onDemand())return; // Disclosure is an overlay; retain every lower anchor.
   if(hudCollapsed())return;
   if(globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches){
     const bottom=Math.max(128,...[...document.querySelectorAll('#axes .axis')].map(el=>el.getBoundingClientRect().bottom));
@@ -249,4 +263,5 @@ export function install11520MobileControlLayout(){
 // Restore current values through the same rail owner; never replay old geometry
 // or reset the canonical C/lots/XYZ values after a Settings close.
 if(typeof document!=='undefined')document.addEventListener('k11520:settings-context',()=>{applyRail();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
+if(typeof document!=='undefined')for(const type of ['k11520:movement-context','k11520:hud-context'])document.addEventListener(type,()=>{applyRail();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
 export function get11520MobileControlLayout(){return measure()}

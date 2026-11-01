@@ -26,6 +26,8 @@ let state=Object.fromEntries(SURFACES.map(([k])=>[k,true])),allOn=true;
 const HUD_PROFILES=['MINIMAL','STANDARD','FULL'];
 const MARKET_IDLE_MS=15000;
 let profile='MINIMAL',marketOpen=false,marketTimer=0,marketPointers=new Set();
+// V2.9.6 candidate: transient disclosure never changes saved organ preferences.
+let settingsInstalled=false,worldFirstBound=false;
 // Human 2026-10-05 12:43: hide/inert the background right HUD while
 // Settings owns the foreground, including partly covered C/lots/Y rails.
 // Preserve each organ's values/preferences; this owns only interaction.
@@ -55,44 +57,50 @@ function setSettingsOpen(open){
 }
 // Visibility stays in this existing owner; geometry remains in Mobile Control Layout.
 export const WORLD_FIRST_HUD_POLICY=Object.freeze({
-  ALWAYS_VISIBLE:['player/world','movement','combat','map','utility launcher'],
-  CONTEXTUAL:['market cards','camera recenter','target details','missile details','delivery details'],
+  ALWAYS_VISIBLE:['player/world'],
+  CONTEXTUAL:['movement membrane while held','explicit trade context','camera recenter','target details','missile details','delivery details'],
   EVENT_ONLY:['warning','arrival','robbery','insurance','mission complete'],
   MANUAL:['wallet','backpack','settings','chat','audio'],
 });
 
-function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}marketOpen=profile==='FULL'}
+function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}marketOpen=false}
 function save(){try{localStorage.setItem(STORE,JSON.stringify({...state,allOn,profile}))}catch{}}
 function syncWorldFirst(){
-  const root=document.documentElement;root.dataset.k11520HudProfile=profile;
+  const root=document.documentElement;root.dataset.k11520HudProfile=profile;root.dataset.k11520HudMode='ON_DEMAND';
   root.classList.toggle('k11520MarketOpen',marketOpen);
-  const row=$('#k11520MarketRow');if(row){row.hidden=!(allOn&&state.markets);row.setAttribute('aria-expanded',String(marketOpen));row.textContent=marketOpen?'⌃':'📈';row.setAttribute('aria-label',marketOpen?'收合三軸行情':'展開三軸行情');row.title=marketOpen?'收合 Market':'Market';}
+  root.classList.toggle('k11520TradeOpen',marketOpen);
+  const row=$('#k11520MarketRow');if(row){row.hidden=true;row.inert=true;row.tabIndex=-1;row.onclick=null;row.setAttribute('aria-hidden','true')}
+  // CSS plus the capture guard suppress hidden actions. Do not overwrite
+  // financial owners' hidden/inert/disabled flags, including changes made idle.
+  for(const el of document.querySelectorAll('#orderFire,#flat')){
+    el.dataset.k11520ContextSuppressed=marketOpen?'0':'1';
+  }
+  if(globalThis.__K11520_UI_SETTINGS__)globalThis.__K11520_UI_SETTINGS__.tradeOpen=marketOpen;
+  document.dispatchEvent(new CustomEvent('k11520:hud-context',{detail:{tradeOpen:marketOpen}}));
 }
+function hideMarketCards(){clearTimeout(marketTimer);marketPointers.clear();marketOpen=false;syncWorldFirst()}
 function scheduleMarketHide(){
   clearTimeout(marketTimer);if(!marketOpen||marketPointers.size)return;
-  marketTimer=setTimeout(()=>{marketOpen=false;syncWorldFirst()},MARKET_IDLE_MS);
+  marketTimer=setTimeout(hideMarketCards,MARKET_IDLE_MS);
 }
-function showMarketCards(){marketOpen=true;syncWorldFirst();scheduleMarketHide()}
+function showMarketCards(){if($('#k11520UiSettings')?.classList.contains('open'))setSettingsOpen(false);marketOpen=true;syncWorldFirst();scheduleMarketHide()}
 function installWorldFirst(){
-  if($('#k11520MarketRow'))return;
-  const row=document.createElement('button');row.id='k11520MarketRow';row.type='button';
-  row.textContent='📈';row.setAttribute('aria-controls','axes');
-  row.onclick=()=>{marketOpen=!marketOpen;syncWorldFirst();scheduleMarketHide()};document.body.appendChild(row);
+  if(worldFirstBound)return;worldFirstBound=true;
   const panel=$('#k11520UiSettings'),picker=document.createElement('select');picker.id='k11520HudProfile';picker.className='full';picker.setAttribute('aria-label','HUD 顯示模式');
   for(const value of HUD_PROFILES){const opt=document.createElement('option');opt.value=value;opt.textContent={MINIMAL:'MINIMAL · 世界優先',STANDARD:'STANDARD · 狀態資訊',FULL:'FULL HUD · 完整資訊'}[value];picker.appendChild(opt)}
   picker.value=profile;picker.onchange=()=>{profile=picker.value;save();apply()};panel?.appendChild(picker);
+  for(const [id,label,act] of [['k11520ShowTrade','交易／點火資訊',showMarketCards],['k11520HideTrade','返回純場景',hideMarketCards]]){if($('#'+id))continue;const button=document.createElement('button');button.id=id;button.type='button';button.className='btn full';button.textContent=label;button.onclick=act;panel?.appendChild(button)}
   const axes=$('#axes');
-  axes?.addEventListener('pointerdown',e=>{marketPointers.add(e.pointerId);clearTimeout(marketTimer)});
-  for(const type of ['pointerup','pointercancel'])document.addEventListener(type,e=>{if(marketPointers.delete(e.pointerId))scheduleMarketHide()});
+  document.addEventListener('pointerdown',e=>{if(marketOpen&&e.target.closest?.('#axes,#cControl,#lotsControl,#yControl,.controls')){marketPointers.add(e.pointerId);clearTimeout(marketTimer)}},true);
+  for(const type of ['pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(marketPointers.delete(e.pointerId))scheduleMarketHide()},true);
   // Key/input activity restarts the idle interval; a held pointer never loses its card.
   for(const type of ['keydown','input','focusin','pointermove'])axes?.addEventListener(type,scheduleMarketHide);
-  document.addEventListener('click',e=>{if(e.target.closest?.('#axes,#kspaceMapViews [data-map-view="K"]'))showMarketCards()});
-  // Reuse the canonical plane/market selection event. Restoring a saved plane
-  // at boot is not user intent to expand HUD; a real control gesture arms it.
-  let hasPlaneInput=false;
-  document.addEventListener('pointerdown',e=>{if(e.target.closest?.('#joy'))hasPlaneInput=true},true);
-  document.addEventListener('k11520:trade-axis-change',()=>{if(hasPlaneInput)showMarketCards()});
-  addEventListener('blur',()=>{marketPointers.clear();scheduleMarketHide()});syncWorldFirst();scheduleMarketHide();
+  // An explicit stationary hold in the existing joystick requests information,
+  // never a click/order. Plane changes and movement no longer reveal cards.
+  document.addEventListener('k11520:trade-context',e=>{if(e.detail?.open===true&&e.detail?.source==='joystick-hold')showMarketCards();else if(e.detail?.open===false)hideMarketCards()});
+  document.addEventListener('click',e=>{if(!marketOpen&&e.target.closest?.('#orderFire,#flat')){e.preventDefault();e.stopImmediatePropagation()}},true);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hideMarketCards()});
+  addEventListener('blur',hideMarketCards);document.addEventListener('visibilitychange',()=>{if(document.hidden)hideMarketCards()});syncWorldFirst();
 }
 function retireLegacyCleanMode(){if(document.body?.classList.contains('game-clean-mode'))document.body.classList.remove('game-clean-mode');try{if(localStorage.getItem(LEGACY_CLEAN)!=='0')localStorage.setItem(LEGACY_CLEAN,'0')}catch{}}
 function retireLegacyDrawerToggles(){for(const btn of document.querySelectorAll('.hud-drawer-toggle')){btn.hidden=true;btn.setAttribute('aria-hidden','true');btn.tabIndex=-1}for(const el of document.querySelectorAll('.axes,.tele,.monsterHud,.minimapWrap,.sliderDock'))el.classList.remove('hud-collapsed-left','hud-collapsed-right','hud-collapsed-top')}
@@ -120,7 +128,7 @@ document.head.appendChild(s)}
 function targets(sel){try{return [...document.querySelectorAll(sel)]}catch{return[]}}
 function applyOne(key,on){const spec=SURFACES.find(x=>x[0]===key);if(!spec)return;for(const el of targets(spec[2])){const hidden=!on;if(el.classList.contains('k11520HiddenBySettings')!==hidden)el.classList.toggle('k11520HiddenBySettings',hidden);if(key==='chat'&&hidden&&el.id==='gameChat')el.classList.remove('open')}}
 function protectWalletBackpack(){for(const sel of PROTECTED)for(const el of targets(sel)){el.classList.remove('k11520HiddenBySettings');el.removeAttribute('aria-hidden')}const bag=$('#backpackButton');if(bag){bag.dataset.k11520ProtectedOrgan='1';bag.style.removeProperty('display')}const wallet=$('#walletPanel');if(wallet)wallet.dataset.k11520ProtectedOrgan='1'}
-function apply(){retireLegacyCleanMode();retireLegacyDrawerToggles();for(const [k] of SURFACES)applyOne(k,allOn&&state[k]);protectWalletBackpack();syncWorldFirst();syncSettingsContext();const p=$('#k11520UiSettings');if(p)for(const b of p.querySelectorAll('[data-ui-key]')){const k=b.dataset.uiKey,v=String(k==='all'?allOn:state[k]);if(b.getAttribute('aria-checked')!==v)b.setAttribute('aria-checked',v)}globalThis.__K11520_UI_SETTINGS__={organ:'Mobile UI Settings',version:'2.6.17',profile,marketIdleMs:MARKET_IDLE_MS,policy:WORLD_FIRST_HUD_POLICY,allOn,state:{...state},legacyDrawerTogglesRetired:true,protectedOrgans:['wallet','backpack'],chatReplacesY:true,walletHitTargetProtected:true,chatToggleExplicit:true}}
+function apply(){retireLegacyCleanMode();retireLegacyDrawerToggles();for(const [k] of SURFACES)applyOne(k,allOn&&state[k]);protectWalletBackpack();syncWorldFirst();syncSettingsContext();const p=$('#k11520UiSettings');if(p)for(const b of p.querySelectorAll('[data-ui-key]')){const k=b.dataset.uiKey,v=String(k==='all'?allOn:state[k]);if(b.getAttribute('aria-checked')!==v)b.setAttribute('aria-checked',v)}globalThis.__K11520_UI_SETTINGS__={organ:'Mobile UI Settings',version:'2.6.17',profile,tradeOpen:marketOpen,candidateProductVersion:'V2.9.6',marketIdleMs:MARKET_IDLE_MS,policy:WORLD_FIRST_HUD_POLICY,allOn,state:{...state},legacyDrawerTogglesRetired:true,protectedOrgans:['wallet','backpack'],chatReplacesY:true,walletHitTargetProtected:true,chatToggleExplicit:true}}
 function toggleKey(key){if(key==='all')allOn=!allOn;else{state[key]=!state[key];if(state[key])allOn=true}save();apply()}
 async function toggleFullscreen(){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.();else await document.exitFullscreen?.()}catch{}syncFullscreen()}
 function syncFullscreen(){const b=$('#k11520FullscreenSwitch');if(b)b.setAttribute('aria-checked',String(!!document.fullscreenElement))}
@@ -131,5 +139,5 @@ function ensureWallet(){const p=$('#walletPanel'),t=$('#walletToggle'),c=$('#wal
 function ensureBackpack(){const canonical=$('#backpackButton');if(!canonical)return false;canonical.dataset.k11520RealBag='1';canonical.dataset.k11520ProtectedOrgan='1';canonical.classList.add('bagRelocatedV250','bagRelocatedV258');canonical.title='背包 / 活體收納';canonical.setAttribute('aria-label','背包 / 活體收納；開啟後可捕捉附近牛魚蝦雞鴨並保留 LIFE_ID');canonical.style.removeProperty('display');const panel=$('#backpackPanel');if(panel){panel.dataset.k11520CanonicalBackpack='1';const h=panel.querySelector('.bpHead b');if(h&&(h.textContent||'')!=='🎒 花果山背包 · 活體收納')h.textContent='🎒 花果山背包 · 活體收納'}return true}
 function ensureChatToggle(){const handle=$('#chatHandle'),panel=$('#gameChat');if(!handle||!panel)return false;if(handle.dataset.k11520ChatToggle)return true;handle.dataset.k11520ChatToggle='1';handle.setAttribute('aria-controls','gameChat');const sync=()=>{const open=panel.classList.contains('open');handle.setAttribute('aria-expanded',String(open));handle.title=open?'收合聊天':'展開聊天'};handle.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();panel.classList.toggle('open');sync()},{capture:true});sync();return true}
 function criticalNode(n){return n?.nodeType===1&&(n.id==='gameModeToggle'||n.id==='walletPanel'||n.id==='walletToggle'||n.id==='walletConnect'||n.id==='backpackButton'||n.id==='chatHandle'||n.id==='gameChat'||n.classList?.contains('hud-drawer-toggle')||n.querySelector?.('#gameModeToggle,#walletPanel,#walletToggle,#walletConnect,#backpackButton,#chatHandle,#gameChat,.hud-drawer-toggle'))}
-function boot(){if(!settingsEscapeBound){document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#k11520UiSettings')?.classList.contains('open')){e.preventDefault();e.stopImmediatePropagation();setSettingsOpen(false)}},true);settingsEscapeBound=true}style();load();retireLegacyCleanMode();retireLegacyDrawerToggles();installPanel();ensureWallet();ensureBackpack();ensureChatToggle();apply();document.addEventListener('fullscreenchange',syncFullscreen);for(const delay of [120,400,1000,2200])setTimeout(()=>{installPanel();retireLegacyDrawerToggles();ensureWallet();ensureBackpack();ensureChatToggle();apply()},delay);try{globalThis.__K11520_UI_SETTINGS_OBSERVER__?.disconnect()}catch{}let timer=0;const mo=new MutationObserver(mutations=>{if(mutations.some(m=>m.type==='attributes'&&m.target.id==='k11520UiSettings'))syncSettingsContext();const relevant=mutations.some(m=>(m.type==='attributes'&&m.target===document.body&&document.body.classList.contains('game-clean-mode'))||(m.type==='childList'&&[...m.addedNodes,...m.removedNodes].some(criticalNode)));if(!relevant||timer)return;timer=setTimeout(()=>{timer=0;retireLegacyCleanMode();retireLegacyDrawerToggles();installPanel();ensureWallet();ensureBackpack();ensureChatToggle();apply()},100)});mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});globalThis.__K11520_UI_SETTINGS_OBSERVER__=mo;return globalThis.__K11520_UI_SETTINGS__}
+function boot(){if(settingsInstalled)return globalThis.__K11520_UI_SETTINGS__;settingsInstalled=true;if(!settingsEscapeBound){document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#k11520UiSettings')?.classList.contains('open')){e.preventDefault();e.stopImmediatePropagation();setSettingsOpen(false)}},true);settingsEscapeBound=true}style();load();retireLegacyCleanMode();retireLegacyDrawerToggles();installPanel();ensureWallet();ensureBackpack();ensureChatToggle();apply();document.addEventListener('fullscreenchange',syncFullscreen);for(const delay of [120,400,1000,2200])setTimeout(()=>{installPanel();retireLegacyDrawerToggles();ensureWallet();ensureBackpack();ensureChatToggle();apply()},delay);try{globalThis.__K11520_UI_SETTINGS_OBSERVER__?.disconnect()}catch{}let timer=0;const mo=new MutationObserver(mutations=>{if(mutations.some(m=>m.type==='attributes'&&m.target.id==='k11520UiSettings'))syncSettingsContext();const relevant=mutations.some(m=>(m.type==='attributes'&&m.target===document.body&&document.body.classList.contains('game-clean-mode'))||(m.type==='childList'&&[...m.addedNodes,...m.removedNodes].some(criticalNode)));if(!relevant||timer)return;timer=setTimeout(()=>{timer=0;retireLegacyCleanMode();retireLegacyDrawerToggles();installPanel();ensureWallet();ensureBackpack();ensureChatToggle();apply()},100)});mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});globalThis.__K11520_UI_SETTINGS_OBSERVER__=mo;return globalThis.__K11520_UI_SETTINGS__}
 export function install11520MobileUiSettings(){const result=boot();installWorldFirst();return result}

@@ -1,10 +1,12 @@
 /** Legacy Heart/Universe entry bridge: one shared player, no legacy media downloads. */
 import {getKaiosAudio} from './kaios-audio.mjs';
 import {mountAudioControl} from './kaios-audio-ui.mjs';
+import {mountSharedGameEntry} from './kaios-world-registry.mjs';
 export function bindWorldAudio(worldId){
   const audio=getKaiosAudio();audio.setWorld(worldId);globalThis.KAIOS_AUDIO=audio;
   let control;
   function install(){
+    mountSharedGameEntry({container:document.body});
     const app=globalThis.app;if(!app)return;
     // Target only the two known legacy music organs, not arbitrary page media.
     for(const media of [document.getElementById('music-audio'),app._music?.audio,app._musicAudio]){try{media?.pause();media?.removeAttribute('src');media?.load();}catch{}}

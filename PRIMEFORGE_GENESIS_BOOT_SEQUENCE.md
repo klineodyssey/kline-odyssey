@@ -1168,3 +1168,11 @@ PrimeForge 以母機之名，開啟金融生命。
 Where the Market Becomes the Myth.
 
 —— 樂天帝 ⌖
+
+
+## K11520 V2.9.11 shared game navigation
+
+- `K線西遊記/temples/88888/index.html`: Flower Fruit Mountain America entry hosting the existing 11520 game in one shared frame. It uses the same UI/version and canonical player storage identity; it creates no second game engine or wallet.
+- `K線西遊記/temples/11520/index.html`: Taiwan quote entry with an explicit link to that same game.
+- Product status is BETA. KGEN/WBNB and derived USDT values are periodic read-only references, not settlement quotes or a continuous background service.
+- This navigation registration changes no Physics CURRENT, Boot V1.4, UniverseMap, private calibration, financial authority, or player-save schema.

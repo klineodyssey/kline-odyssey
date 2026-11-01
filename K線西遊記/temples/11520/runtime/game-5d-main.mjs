@@ -1,16 +1,16 @@
 /* KGEN_META
 VERSION: 2.9.0
-REVISION: 2026-10-06.MARKET-CARD-NODE-RETENTION
+REVISION: 2026-10-31.READONLY-KGEN-WBNB-REFERENCE
 PRODUCT_CONTEXT: V2.9.5
 STATUS: ACTIVE
-LAST_UPDATED: 2026-10-06
-UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: cf2ffb47c3e71e444935ef6151adc7f9d6208ca4
-TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Retain canonical market-card nodes and their existing presentation decorations during quote and simulation refreshes.
+LAST_UPDATED: 2026-10-31
+UPDATED_BY: Codex / original thread 01a189ef-ecbc-7699-b87b-a4538d57c029 / HUMAN_AUTHORIZED_LOCAL_CANDIDATE
+REVIEWED_BY: PENDING_ORIGINAL_INDEPENDENT_REVIEW; previous header preserved in exact base snapshot
+SOURCE_COMMIT: b7e4a244f5eeb5583d4cf27ae09a0b19a3d09880
+TASK_ID: K11520-KGEN-WBNB-REFERENCE-20261031
+CHANGE_REASON: Add isolated read-only registered-pool WBNB reference without USD conversion, S.quotes/world/SY/Z or trading changes.
 ANCESTOR: K線西遊記/temples/11520/runtime/game-5d-main.mjs @ cf2ffb47c3e71e444935ef6151adc7f9d6208ca4
-SOURCE_OF_TRUTH: TRUE
+SOURCE_OF_TRUTH: LOCAL_CANDIDATE_NOT_CANONICAL
 PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collision-constrained physical body, plane-aware maps, canonical XYZ world/entity navigation and 3D Life visuals. Signed-C rendering is delegated to its canonical runtime; game state exposes one direct canonical trade-side setter.
 */
 import * as THREE from 'three';
@@ -29,7 +29,7 @@ import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
 import {create11520CombatFx} from './combat-fx-runtime.mjs';
 import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D} from './xyz-map-navigation-runtime.mjs';
 import {warpC,resolveCMode} from '../controls/nonlinear-controls.mjs';
-import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs';
+import {fetchPublicMarketObservations,publicObservationStatus,createKgenPoolReference,mountKgenPoolReference,renderKgenPoolReference,createAxisReferenceSelection,mountAxisReferenceControls,renderAxisReferenceControls} from './public-market-quotes.mjs';
 import {createJourneyTutorial} from './world-runtime.mjs';
 import {trainingMonsterSnapshot} from './world-runtime.mjs';
 import {createTrainingMemory} from './market-life-runtime.mjs';
@@ -97,8 +97,37 @@ setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elap
 function playerProgressSnapshot(){const p=playerLife.activePlayer();return {playerId:p.playerId,xp:p.xp,level:p.level,engineXp:p.engineXp,engineLevel:p.engineLevel,nextLevelXp:p.level>=10?null:25*p.level*p.level,nextEngineXp:p.engineLevel>=10?null:20*p.engineLevel*p.engineLevel}}
 const observeWorldFeedback=createWorldFeedbackObserver(emit11520WorldFeedback);
 let quotePending=false,publicQuoteAttempted=false,publicObservations={};
+// Independent reserve reference; no access to S, world, execution or trade setters.
+const kgenPoolReference=createKgenPoolReference();
+const axisReferenceSelection=createAxisReferenceSelection();
+const readAxisReferences=()=>{const view=kgenPoolReference.snapshot();return {pool:view.quote,poolContext:{status:view.status,reason:view.reason,permissionDenied:view.permissionDenied,reading:view.reading,hourlyState:view.hourlyState},observations:publicObservations}};
+function paintKgenReference(){const node=$('[data-kgen-pool-reference]');if(node)renderKgenPoolReference(node,kgenPoolReference.snapshot());const controls=$('[data-axis-reference-controls]');if(controls)renderAxisReferenceControls(controls,axisReferenceSelection,readAxisReferences())}
+function refreshKgenReference(){
+  if(document.visibilityState==='visible'&&$('#sheet').classList.contains('open')&&$('[data-kgen-pool-reference]')){void kgenPoolReference.refresh({trigger:'initial'}).then(paintKgenReference);paintKgenReference()}
+  else kgenPoolReference.pause();
+}
+function mountKgenReference(id){if(id==='assets'||id==='market'){mountKgenPoolReference($('#sheetBody'),kgenPoolReference.snapshot());if(id==='market')mountAxisReferenceControls($('#sheetBody'),axisReferenceSelection,readAxisReferences);refreshKgenReference()}}
+addEventListener('pagehide',()=>kgenPoolReference.pause());
+addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')kgenPoolReference.pause()});
+addEventListener('pageshow',refreshKgenReference);
+
+// Disclosure only: reuse the one accepted A reference client and existing sheet.
+function installKgenReferenceContext(){
+  const root=document.documentElement;if(root.dataset.kgenReferenceContextBound==='1')return;
+  root.dataset.kgenReferenceContextBound='1';let disclosed=false;
+  document.addEventListener('k11520:hud-context',event=>{
+    const open=event.detail?.tradeOpen===true;
+    if(open&&!disclosed){disclosed=true;openOrgan('market');return}
+    if(!open){disclosed=false;const body=$('#sheetBody');
+      if(body?.querySelector('[data-kgen-pool-reference]')&&$('#sheetTitle').textContent===ORGANS.find(x=>x[0]==='market')?.[2]){kgenPoolReference.pause();$('#sheet').classList.remove('open')}
+    }
+  });
+}
+installKgenReferenceContext();
+
 let progressCache=playerLife.gameplayProfile(),progressKey='',musicHoldUntil=0,lastCombatAt=0,explorationMeters=0,lastExplorationPosition={...S.xyz};
 function showJourneyRecovery(){
+  kgenPoolReference.pause();
   if($('#journeyRecover')){$('#sheet').classList.add('open');return}
   $('#sheetTitle').textContent='休整後再出發';$('#sheetBody').innerHTML='<div class="card"><h3>旅人暫時倒下</h3><p>遊戲 HP 已耗盡。休整會退回怪物外圍，不扣 KGEN、KAIOS、XP 或背包，不產生任何交易。</p><button id="journeyRecover" class="btn" style="min-height:44px">休整並退回安全距離</button></div>';
   $('#sheet').classList.add('open');$('#journeyRecover').onclick=()=>{const target=combatSnapshot()?.monsterLocal;if(target){S.xyz={x:target.x,y:Math.max(0,target.y),z:target.z-7};S.intentXYZ={...S.xyz}}S.hp=100;lastExplorationPosition={...S.xyz};explorationMeters=0;cancelNavigation('休整');$('#sheet').classList.remove('open');$('#sheetBody').innerHTML='';toast('已休整 · 用走位與閃避接近怪物')};
@@ -168,8 +197,9 @@ function renderAxes(){
   }
   syncMarketKLabels();
 }
-function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">參考價（非結算 Oracle）：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${execution.readOnly?'NOT_REQUESTED':p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">V1: |C| 0.001–1，0 fee，SIMULATION。免費 REST USDT 參考價不是 USD 結算 Oracle，不假設 USD=USDT。交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
+function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">參考價（非結算 Oracle）：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${execution.readOnly?'NOT_REQUESTED':p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">V1: |C| 0.001–1，0 fee，SIMULATION。免費 REST USDT 參考價不是 USD 結算 Oracle，不假設 USD=USDT。交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open');mountKgenReference('market')}
 async function quotes(){
+  refreshKgenReference();
   if(quotePending)return;quotePending=true;
   try{
     publicObservations=await fetchPublicMarketObservations({symbols:MARKETS});
@@ -183,6 +213,7 @@ async function quotes(){
   finally{quotePending=false;publicQuoteAttempted=true;if(pending&&!isTestnet())paintOrderPreview();renderAxes()}
 }
 function syncMarketKLabels(){
+  paintKgenReference();
   if(!$('#marketKLabelsStyle')){const style=document.createElement('style');style.id='marketKLabelsStyle';style.textContent='.axis:has(.marketKValue) .universeFloorBadge{display:none!important}';document.head.append(style)}
   const market=kMarketSnapshot(world);
   for(const row of market.markets){
@@ -245,7 +276,7 @@ function moveNavigation(){if(!S.navActive||!S.navTarget)return;const dx=S.navTar
 const MAP_RANGE=34;
 function mapView(canvas){return{centerX:S.xyz.x,centerZ:S.xyz.z,range:MAP_RANGE/S.mapZoom,width:canvas.width,height:canvas.height}}
 function drawMap(canvas){const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,view=mapView(canvas);ctx.clearRect(0,0,w,h);ctx.fillStyle='#07151d';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#204355';for(let i=0;i<=8;i++){const x=i*w/8,y=i*h/8;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}for(const o of WORLD_OBJECTS){const p=worldToNorthUpMap(o,view);ctx.fillStyle='#9a6b35';ctx.fillRect(p.px-4,p.py-4,8,8)}for(const m of world.monsters){if(m.state==='DEAD'||!(m.name||m.baseName))continue;const p=worldToNorthUpMap(m,view);ctx.fillStyle=m.sourceManaged?'#f4d77f':'#78d4a8';ctx.beginPath();ctx.arc(p.px,p.py,4,0,Math.PI*2);ctx.fill()}if(S.navTarget){const p=worldToNorthUpMap(S.navTarget,view);ctx.strokeStyle='#68e4ff';ctx.beginPath();ctx.moveTo(w/2,h/2);ctx.lineTo(p.px,p.py);ctx.stroke();ctx.fillStyle='#68e4ff';ctx.beginPath();ctx.arc(p.px,p.py,5,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#65e798';ctx.beginPath();ctx.arc(w/2,h/2,5,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff';ctx.beginPath();ctx.moveTo(w/2,h/2);ctx.lineTo(w/2+Math.sin(S.heading)*14,h/2-Math.cos(S.heading)*14);ctx.stroke()}
-function showEntityInfo(entity){$('#sheetTitle').textContent='世界物件';$('#sheetBody').innerHTML=`<div class="card"><h3>${entity.objectName}</h3><p>OBJECT_TYPE：${entity.objectType}</p><p>LIFE_ID：${entity.lifeId||'NOT_ASSIGNED'}</p><p>X/Y/Z：${fmt(entity.x,2)} / ${fmt(entity.y,2)} / ${fmt(entity.z,2)}</p><p>功能：${entity.functionText}</p><p>互動：${entity.interactionText}</p><button class="btn" id="navToEntity">前往這裡</button></div>`;$('#sheet').classList.add('open');$('#navToEntity').onclick=()=>{cancelNavigation('切換世界目標');S.navTarget=null;document.getElementById('waypointAction')?.remove();setWorldTarget3D({x:entity.x,y:entity.y,z:entity.z},{mode:'WORLD',source:'WORLD_ENTITY'});$('#sheet').classList.remove('open');startWorldNavigation3D()}}
+function showEntityInfo(entity){kgenPoolReference.pause();$('#sheetTitle').textContent='世界物件';$('#sheetBody').innerHTML=`<div class="card"><h3>${entity.objectName}</h3><p>OBJECT_TYPE：${entity.objectType}</p><p>LIFE_ID：${entity.lifeId||'NOT_ASSIGNED'}</p><p>X/Y/Z：${fmt(entity.x,2)} / ${fmt(entity.y,2)} / ${fmt(entity.z,2)}</p><p>功能：${entity.functionText}</p><p>互動：${entity.interactionText}</p><button class="btn" id="navToEntity">前往這裡</button></div>`;$('#sheet').classList.add('open');$('#navToEntity').onclick=()=>{cancelNavigation('切換世界目標');S.navTarget=null;document.getElementById('waypointAction')?.remove();setWorldTarget3D({x:entity.x,y:entity.y,z:entity.z},{mode:'WORLD',source:'WORLD_ENTITY'});$('#sheet').classList.remove('open');startWorldNavigation3D()}}
 function mapTap(canvas,e){const r=canvas.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*canvas.width,py=(e.clientY-r.top)/r.height*canvas.height,entities=collectInspectableEntities({objects:WORLD_OBJECTS,monsters:world.monsters}),hit=inspectMapPoint({px,py,view:mapView(canvas),entities});if(hit.kind==='ENTITY'){showEntityInfo(hit.entity);return}setWaypoint(hit.world.x,hit.world.z)}
 function bindMap(canvas){const pointers=new Map();let pinchBase=null,moved=false;canvas.addEventListener('pointerdown',e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});canvas.setPointerCapture?.(e.pointerId);moved=false;if(pointers.size===2){const a=[...pointers.values()];pinchBase={dist:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),zoom:S.mapZoom}}e.preventDefault()});canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;const p=pointers.get(e.pointerId);if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>4)moved=true;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2&&pinchBase){const a=[...pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);S.mapZoom=Math.max(.65,Math.min(4,pinchBase.zoom*(d/pinchBase.dist)));drawAllMaps()}e.preventDefault()});const end=e=>{const wasPinch=pointers.size>1;if(!wasPinch&&!moved)mapTap(canvas,e);pointers.delete(e.pointerId);if(pointers.size<2)pinchBase=null;e.preventDefault()};canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',e=>pointers.delete(e.pointerId))}
 const mini=$('#minimap');bindMap(mini);let fullMapCanvas=null;function drawAllMaps(){drawMap(mini);if(fullMapCanvas&&document.body.contains(fullMapCanvas))drawMap(fullMapCanvas)}
@@ -345,6 +376,7 @@ function renderCombatTarget(){
   const info=$('#combatKValues');if(info){const tuple=v=>['KX','KY','KZ'].map(a=>formatKCoordinate(v[a])).join(' / ');info.textContent=`Player 相對基準 (%)：${tuple(s.playerK)}\nMonster 模擬相對基準 (%)：${tuple(s.monsterK)}\n模擬相對差 (pp)：${tuple(s.deltaK)}\nLOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}\n局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}\n${s.market.status}`}
 }
 function showCombatTarget(){
+  kgenPoolReference.pause();
   const s=combatSnapshot(),t=s?.target;if(!t)return;
   const vec=(v,keys)=>keys.map(k=>`${k} ${Number(v[k]).toFixed(2)}`).join(' · ');
   $('#sheetTitle').textContent=`TARGET LOCK · ${t.name}（遊戲模擬）`;
@@ -406,7 +438,20 @@ function bindSimulationSheet(){
   $$('[data-sim-cancel]').forEach(b=>b.onclick=async()=>{const r=await executionAction(()=>execution.cancel(b.dataset.simCancel));toast(r.ok?executionLabel()+' 委託取消已確認':r.reason);refreshSimulationSheet()});
   $$('[data-sim-close]').forEach(b=>b.onclick=async()=>{const r=await executionAction(()=>execution.close(b.dataset.simClose));if(r.ok){if(r.receipt)recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes()}else toast(r.reason);refreshSimulationSheet()});
 }
-function refreshSimulationSheet(){const id=$('#sheetBody')?.dataset.simOrgan;if(id&&$('#sheet').classList.contains('open')&&$('#sheetTitle').textContent===ORGANS.find(x=>x[0]===id)?.[2]){const body=$('#sheetBody'),html=simulationOrganHTML(id);if(body.innerHTML===html)return;const scroll=$('#sheet').scrollTop,open=[...body.querySelectorAll('[data-receipt][open]')].map(el=>el.dataset.receipt);body.innerHTML=html;for(const el of body.querySelectorAll('[data-receipt]'))el.open=open.includes(el.dataset.receipt);bindSimulationSheet();$('#sheet').scrollTop=scroll}}
+function refreshSimulationSheet(){
+  const id=$('#sheetBody')?.dataset.simOrgan;
+  if(id&&$('#sheet').classList.contains('open')&&$('#sheetTitle').textContent===ORGANS.find(x=>x[0]===id)?.[2]){
+    const body=$('#sheetBody'),html=simulationOrganHTML(id),scroll=$('#sheet').scrollTop;
+    const references=[body.querySelector('[data-kgen-pool-reference]'),body.querySelector('[data-axis-reference-controls]')].filter(Boolean);
+    const focused=body.ownerDocument.activeElement,restoreFocus=references.some(node=>node.contains(focused));
+    for(const node of references)node.remove();
+    const restore=()=>{for(const node of references)body.appendChild(node);if(restoreFocus)try{focused.focus({preventScroll:true})}catch{}$('#sheet').scrollTop=scroll};
+    if(body.innerHTML===html){restore();return;}
+    const open=[...body.querySelectorAll('[data-receipt][open]')].map(el=>el.dataset.receipt);
+    body.innerHTML=html;for(const el of body.querySelectorAll('[data-receipt]'))el.open=open.includes(el.dataset.receipt);
+    bindSimulationSheet();restore();
+  }
+}
 globalThis.__K11520_SIMULATION_EXCHANGE__=Object.freeze({simulationOnly:true,snapshot:()=>simulationExecution.snapshot()});
 globalThis.__K11520_EXECUTION__=Object.freeze({snapshot:()=>execution.snapshot()});
 // The existing adapter/ledger owns all lifecycle effects. This clock supplies
@@ -441,8 +486,8 @@ $('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm')
 $('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confirmOrder').disabled=true;const input=orderInput();const r=await executionAction(()=>execution.submit(input));if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜委託已建立');openOrgan('orders');renderAxes();hud()};
 async function closePos(){if(execution.readOnly){toast('M1_READ_ONLY · 部位 NOT_REQUESTED；退出請返回原錢包檢視');return}const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=await executionAction(()=>execution.close(p.positionId));if(!r.ok){toast(r.reason);return}if(r.receipt)recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
 
-const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open');$('#rail').innerHTML=RAIL_ORGANS.map(([id,ic,n])=>`<button data-organ="${id}" title="${n}">${ic}</button>`).join('');$$('[data-organ]').forEach(b=>b.onclick=()=>openOrgan(b.dataset.organ));$('#sheetClose').onclick=()=>{$('#sheet').classList.remove('open');fullMapCanvas=null};
-function openOrgan(id){if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h='<div class="mapHint">NORTH_UP。單點空白處先設定 waypoint；點建築/生命先看資料，再選導航。雙指縮放；手動碰 3D 遙桿會停止自動導航。</div><div class="mapStage"><canvas id="fullMap" width="900" height="700"></canvas></div>';else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點左下圓盤中央圖循環 XZ／XY／YZ。圓盤控制所選兩軸；右下縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas)}}
+const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open');$('#rail').innerHTML=RAIL_ORGANS.map(([id,ic,n])=>`<button data-organ="${id}" title="${n}">${ic}</button>`).join('');$$('[data-organ]').forEach(b=>b.onclick=()=>openOrgan(b.dataset.organ));$('#sheetClose').onclick=()=>{kgenPoolReference.pause();$('#sheet').classList.remove('open');fullMapCanvas=null};
+function openOrgan(id){if(id!=='assets'&&id!=='market')kgenPoolReference.pause();if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h='<div class="mapHint">NORTH_UP。單點空白處先設定 waypoint；點建築/生命先看資料，再選導航。雙指縮放；手動碰 3D 遙桿會停止自動導航。</div><div class="mapStage"><canvas id="fullMap" width="900" height="700"></canvas></div>';else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點左下圓盤中央圖循環 XZ／XY／YZ。圓盤控制所選兩軸；右下縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas)}mountKgenReference(id)}
 
 const walletSession=getWalletSession11520();
 let deploymentManifest=null,readOnlyDeployment=null,legacyExecution=null,readOnlyExecution=null,returnExecution=null,testnetGate='CHECKING_DEPLOYMENT',chainRefreshBusy=false;

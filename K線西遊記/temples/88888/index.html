@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05080d">
+<title>88888 花果山美國 🇺🇸 · 共用遊戲</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05080d;color:#eee;font:14px system-ui}#sharedGameFrame{display:block;position:fixed;inset:0;width:100%;height:100%;height:100dvh;border:0}#hostStatus{position:fixed;inset:0;display:grid;place-content:center;padding:24px;text-align:center}#hostStatus[hidden]{display:none}a{color:#68e4ff}</style>
+</head>
+<body>
+<div id="hostStatus" role="status"><p>正在載入共用遊戲…</p><a href="../11520/game-5d.html?world=88888" target="_top">直接開啟同一遊戲</a></div>
+<noscript>需要 JavaScript；<a href="../11520/game-5d.html?world=88888" target="_top">直接開啟同一遊戲</a>。</noscript>
+<script type="module">
+import {portalBase,sharedGameUrl,sharedGamePresentation,sharedGamePortalExit} from '../../../assets/kaios-world-registry.mjs';
+function installSharedGameHost(){
+ if(document.getElementById('sharedGameFrame'))return;
+ const base=portalBase(),presentation=sharedGamePresentation(location),frame=document.createElement('iframe');
+ document.title=`${presentation.title} · ${presentation.version}`;
+ frame.id='sharedGameFrame';frame.title=`${presentation.title} · 共用遊戲`;
+ // One fixed same-origin engine. Never forward host query/hash or create a second runtime.
+ frame.src=sharedGameUrl(base,'88888');
+ frame.addEventListener('load',()=>{
+  const status=document.getElementById('hostStatus');if(status)status.hidden=true;
+  try{const exit=sharedGamePortalExit(frame.contentWindow.location.href,base);if(exit)location.assign(exit)}catch{}
+ });
+ frame.addEventListener('error',()=>{const status=document.getElementById('hostStatus');if(status)status.hidden=false});
+ document.body.appendChild(frame);
+}
+installSharedGameHost();
+</script>
+</body></html>
