@@ -285,10 +285,19 @@ async function walletRoundTripQA(){
   assert.ok(await page.evaluate(()=>__walletFixture.requests.includes('wallet_switchEthereumChain')));await page.waitForFunction(()=>!web3._connectPromise);
   const geometry=()=>page.locator('#core-window,#move-joystick-base,#wheel,#warp-panel,#kgen-v30-wish-btn,#kgen-v30-vow-btn').evaluateAll(es=>es.map(e=>({id:e.id,x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y})));
   const initial=await geometry();
+  const entry=page.locator('#kaiosSharedGameEntry');assert.equal(await entry.count(),1);
+  assert.equal(await entry.evaluate(el=>el.parentElement.id),'universe-nav');
+  assert.equal(await entry.evaluate(el=>getComputedStyle(el).position),'static','shared entry must use the owned menu flow');
   for(const [shortcut,form]of [['#kgen-v30-wish-btn','#kh-wish-text'],['#kgen-v30-vow-btn','#kh-vow-option']]){
+   assert.equal(await page.locator(shortcut).evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return hit===el||el.contains(hit);}),true,'ritual shortcut has an unobstructed native hit target');
    await page.locator(shortcut).tap();assert.equal(await page.locator(form).isVisible(),true);assert.ok((await page.locator('#kh-wallet').textContent()).includes(account));
    await page.screenshot({path:`${OUT}/12345-wallet-${form.slice(1)}.png`});await page.locator('#kgen-heart-toggle').tap();assert.deepEqual(await geometry(),initial);
   }
+  await page.locator('#k12345-more-open').tap();await page.locator('#k12345-more').waitFor({state:'visible'});
+  await entry.scrollIntoViewIfNeeded();assert.equal(await entry.isVisible(),true);
+  assert.equal(await entry.evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return r.width>=44&&r.height>=44&&(hit===el||el.contains(hit));}),true,'shared entry remains reachable in the existing More dialog');
+  assert.equal(await entry.getAttribute('href'),new URL('K線西遊記/temples/88888/index.html',BASE+'/').href);
+  await page.locator('#k12345-more-close').tap();assert.deepEqual(await geometry(),initial,'menu entry does not move original game controls');
   const requests=await page.evaluate(()=>__walletFixture.requests.filter(x=>x==='eth_requestAccounts').length);
   await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));await page.waitForFunction(()=>!KGEN_RUNTIME_CORE.modules.WalletRuntime._resuming);
   assert.equal(await page.evaluate(()=>__walletFixture.requests.filter(x=>x==='eth_requestAccounts').length),requests,'resume cannot prompt');assert.deepEqual(await geometry(),initial);

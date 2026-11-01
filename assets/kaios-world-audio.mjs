@@ -6,7 +6,8 @@ export function bindWorldAudio(worldId){
   const audio=getKaiosAudio();audio.setWorld(worldId);globalThis.KAIOS_AUDIO=audio;
   let control;
   function install(){
-    mountSharedGameEntry({container:document.body});
+    const entryContainer=worldId==='12345'?document.getElementById('universe-nav'):document.body;
+    if(entryContainer)mountSharedGameEntry({container:entryContainer,layout:worldId==='12345'?'flow':'floating'});
     const app=globalThis.app;if(!app)return;
     // Target only the two known legacy music organs, not arbitrary page media.
     for(const media of [document.getElementById('music-audio'),app._music?.audio,app._musicAudio]){try{media?.pause();media?.removeAttribute('src');media?.load();}catch{}}

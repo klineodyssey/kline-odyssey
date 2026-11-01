@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {existsSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {webcrypto} from 'node:crypto';
-import {WORLD_REGISTRY,WORLD_STATUSES,SHARED_GAME_VERSION,findWorld,isPlayable,isNavigable,playableDestination,entryDestination,portalBase,worldUrl,sharedGameUrl,validateWorldRegistry} from '../assets/kaios-world-registry.mjs';
+import vm from 'node:vm';
+import {WORLD_REGISTRY,WORLD_STATUSES,SHARED_GAME_VERSION,findWorld,isPlayable,isNavigable,playableDestination,entryDestination,portalBase,worldUrl,sharedGameUrl,mountSharedGameEntry,validateWorldRegistry} from '../assets/kaios-world-registry.mjs';
 import {readPortalPlayer} from '../assets/kaios-portal.mjs';
 import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../K線西遊記/temples/11520/runtime/player-life-runtime.mjs';
 const root=new URL('../',import.meta.url);
@@ -58,4 +59,33 @@ test('corrupt/tampered save and storage denial preserve data and fail safe to gu
 test('canonical Portal has no hand-coded play statuses/duplicate entry URLs; legacy redirects',()=>{
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8'),legacy=readFileSync(new URL('../K線西遊記/index.html',import.meta.url),'utf8');
  assert.ok(html.includes('assets/kaios-portal.mjs'));assert.ok(html.includes('id="portalAudio"'));assert.ok(!html.includes('temples/'));assert.ok(!html.includes('PLAYABLE'));assert.ok(legacy.includes('location.replace'));assert.ok(legacy.includes('content="0;url=../"'));assert.ok(!legacy.includes('全部神殿可進入'));
+});
+
+function entryDocument(){
+ const nodes=new Map(),doc={getElementById:id=>nodes.get(id)||null,createElement:()=>{const classes=new Set();return {style:{},dataset:{},classList:{add:x=>classes.add(x),remove:x=>classes.delete(x),contains:x=>classes.has(x)},setAttribute(name,value){this[name]=value},addEventListener(){throw new Error('entry does not own a new controller')}}}};
+ const container=()=>({ownerDocument:doc,children:[],append(node){if(node.parentNode)node.parentNode.children.splice(node.parentNode.children.indexOf(node),1);this.children.push(node);node.parentNode=this;nodes.set(node.id,node)}});
+ return {doc,body:container(),menu:container()};
+}
+test('shared game entry moves the same owned link into normal menu flow without fixed hit targets',()=>{
+ const {doc,body,menu}=entryDocument(),base=new URL('https://klineodyssey.github.io/kline-odyssey/');
+ const link=mountSharedGameEntry({container:body,base});assert.equal(link.style.position,'fixed');assert.equal(link.classList.contains('nav-btn'),false);
+ assert.equal(mountSharedGameEntry({container:menu,base,layout:'flow'}),link);
+ for(let i=0;i<4;i++)assert.equal(mountSharedGameEntry({container:menu,base,layout:'flow'}),link);
+ assert.equal(doc.getElementById('kaiosSharedGameEntry'),link);assert.equal(body.children.length,0);assert.deepEqual(menu.children,[link]);
+ assert.equal(link.style.position,'static');for(const field of ['left','right','top','bottom','zIndex'])assert.equal(link.style[field],'auto');
+ assert.equal(link.classList.contains('nav-btn'),true);assert.equal(link.style.minHeight,'44px');assert.equal(link.dataset.kaiosSharedGameLayout,'flow');
+ assert.equal(link.href,new URL('K線西遊記/temples/88888/index.html',base).href);assert.equal(link.target,'_top');assert.ok(link.title.includes(SHARED_GAME_VERSION));
+ assert.equal(mountSharedGameEntry({container:body,base}),link);assert.deepEqual(body.children,[link]);assert.equal(menu.children.length,0);assert.equal(link.style.position,'fixed');assert.equal(link.classList.contains('nav-btn'),false);
+});
+test('invalid shared entry placement does not create or move a link',()=>{
+ const {body,menu}=entryDocument();assert.equal(mountSharedGameEntry({container:body,layout:'unknown'}),null);assert.equal(body.children.length,0);
+ const link=mountSharedGameEntry({container:menu,layout:'flow'});assert.equal(mountSharedGameEntry({container:body,layout:null}),null);assert.equal(link.parentNode,menu);assert.equal(body.children.length,0);assert.equal(mountSharedGameEntry(),null);
+});
+test('world bridge mounts Heart entry in its owned menu and never falls back over ritual controls',()=>{
+ const source=readFileSync(new URL('../assets/kaios-world-audio.mjs',import.meta.url),'utf8'),start=source.indexOf('export function bindWorldAudio(');assert.ok(start>=0);
+ for(const [worldId,hasMenu,expected]of [['12345',true,'flow'],['12345',false,null],['16888',false,'floating']]){
+  const body={},menu={},calls=[],context={document:{readyState:'complete',body,getElementById:id=>id==='universe-nav'&&hasMenu?menu:null},getKaiosAudio:()=>({setWorld(){}}),mountSharedGameEntry:options=>calls.push(options)};
+  vm.createContext(context);new vm.Script(source.slice(start).replace('export function','function')+'\nbindWorldAudio('+JSON.stringify(worldId)+');').runInContext(context);
+  assert.equal(calls.length,expected?1:0);if(expected){assert.equal(calls[0].container,expected==='flow'?menu:body);assert.equal(calls[0].layout,expected);}
+ }
 });

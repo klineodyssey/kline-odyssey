@@ -2,7 +2,7 @@
 export const WORLD_STATUSES=Object.freeze(['PLAYABLE','BETA','UNDER_CONSTRUCTION','RESEARCH','ARCHIVED']);
 export const CANONICAL_PORTAL_URL='https://klineodyssey.github.io/kline-odyssey/';
 const entry=value=>Object.freeze({...value,capabilities:Object.freeze(value.capabilities||[])});
-export const SHARED_GAME_VERSION='V2.9.11 候選';
+export const SHARED_GAME_VERSION='V2.9.11-r1 候選';
 export const WORLD_REGISTRY=Object.freeze([
  entry({worldId:'11520',name:'花果山台灣 🇹🇼',subtitle:'商品報價交易所',status:'BETA',entryUrl:'K線西遊記/temples/11520/index.html',version:'CURRENT',audioTheme:null,description:'商品報價主入口；同一遊戲另由小按鈕開啟。琉璃燈正式供應報價仍待確認。',capabilities:['商品報價','同一遊戲入口'],cta:'進入報價',tone:'jade'}),
  entry({worldId:'88888',canonicalWorldId:'11520',routeOnly:true,name:'花果山美國 🇺🇸',subtitle:'同一套 5D 遊戲 · 共用畫面',status:'BETA',entryUrl:'K線西遊記/temples/88888/index.html',version:SHARED_GAME_VERSION,audioTheme:null,description:'在美國入口開啟同一套遊戲；保留原玩家與存檔。手機與離線驗收仍待完成。',capabilities:['共用遊戲','KGEN / WBNB 參考價'],cta:'開啟遊戲／儀表板',tone:'blue'}),
@@ -49,11 +49,15 @@ export function sharedGamePortalExit(childHref,base=portalBase()){
  }catch{return null}
 }
 /** Shared navigation button for existing world entry bridges; no game or financial actions. */
-export function mountSharedGameEntry({container,base=portalBase()}={}){
+export function mountSharedGameEntry({container,base=portalBase(),layout='floating'}={}){
  const doc=container?.ownerDocument;if(!doc||typeof container.append!=='function')return null;
+ if(!['floating','flow'].includes(layout))return null;
  const destination=worldUrl('88888',base);if(!destination)return null;
  let link=doc.getElementById('kaiosSharedGameEntry');
- if(!link){link=doc.createElement('a');link.id='kaiosSharedGameEntry';link.dataset.kaiosSharedGameEntry='88888';link.textContent='花果山美國 🇺🇸';link.setAttribute('aria-label','開啟花果山美國共用遊戲');Object.assign(link.style,{position:'fixed',left:'max(8px,env(safe-area-inset-left))',bottom:'max(8px,env(safe-area-inset-bottom))',zIndex:'10035',display:'inline-flex',alignItems:'center',minHeight:'44px',padding:'0 12px',border:'1px solid #68e4ff66',borderRadius:'10px',background:'#101923',color:'#e6f5ff',font:'13px system-ui',textDecoration:'none'});container.append(link);}
+ if(!link){link=doc.createElement('a');link.id='kaiosSharedGameEntry';link.dataset.kaiosSharedGameEntry='88888';link.textContent='花果山美國 🇺🇸';link.setAttribute('aria-label','開啟花果山美國共用遊戲');Object.assign(link.style,{display:'inline-flex',alignItems:'center',minHeight:'44px',padding:'0 12px',border:'1px solid #68e4ff66',borderRadius:'10px',background:'#101923',color:'#e6f5ff',font:'13px system-ui',textDecoration:'none'});}
+ if(layout==='flow'){link.classList.add('nav-btn');Object.assign(link.style,{position:'static',left:'auto',right:'auto',top:'auto',bottom:'auto',zIndex:'auto'});}
+ else{link.classList.remove('nav-btn');Object.assign(link.style,{position:'fixed',left:'max(8px,env(safe-area-inset-left))',right:'auto',top:'auto',bottom:'max(8px,env(safe-area-inset-bottom))',zIndex:'10035'});}
+ link.dataset.kaiosSharedGameLayout=layout;if(link.parentNode!==container)container.append(link);
  link.href=destination;link.target='_top';link.title=`花果山美國 · ${SHARED_GAME_VERSION}`;return link;
 }
 export function validateWorldRegistry(registry=WORLD_REGISTRY){
