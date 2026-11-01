@@ -980,11 +980,57 @@ test("12345 integration names only functions present in formal Solidity source",
   assert.ok(source.includes("event WishMade"));
 });
 
+function containsFakeMarketMetrics(source, allowSharedGameLink = false) {
+  // The shared-game navigation path is an identifier, not a displayed metric.
+  // Exempt only an actual HTML anchor attribute, never raw JS, comments or text.
+  // Keep raw-text/RCDATA elements intact; anchor-looking content is not a link.
+  const metricSource = allowSharedGameLink ? source.replace(
+    /<!--[\s\S]*?(?:-->|$)|<plaintext\b(?:[^"'<>]|"[^"]*"|'[^']*')*>[\s\S]*$|<(script|style|textarea|title|xmp|iframe|noembed|noframes|noscript)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>[\s\S]*?(?:<\/\1\s*>|$)|<([a-z][\w:-]*)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/gi,
+    (token, rawTag, tag) => {
+      if (tag?.toLowerCase() !== 'a') return token;
+      return token.replace(/\s+([a-z][\w:-]*)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>`]+))?/gi, (attribute, name, value) =>
+        name.toLowerCase() === 'href' && ['"../88888/index.html"', "'../88888/index.html'"].includes(value)
+          ? attribute.replace(value, '"[shared-game-entry]"') : attribute);
+    }) : source;
+  return /88,?888|模擬掛單|fake tvl/i.test(metricSource);
+}
+
+test("fake-metric guard permits only the exact shared-game href and still rejects displayed fake data", () => {
+  assert.equal(containsFakeMarketMetrics('<a href="../88888/index.html">花果山美國</a>', true), false);
+  assert.equal(containsFakeMarketMetrics("<a href='../88888/index.html'>開啟遊戲</a>", true), false);
+  for (const text of ['88888', '88,888', '模擬掛單', 'fake TVL']) {
+    assert.equal(containsFakeMarketMetrics(`<a href="../88888/index.html">${text}</a>`, true), true, text);
+    assert.equal(containsFakeMarketMetrics(`<span>${text}</span>`, true), true, text);
+  }
+  for (const href of ['../88888/index.html?fake=88,888', '../88888/other.html', 'https://evil.invalid/88888/index.html']) {
+    assert.equal(containsFakeMarketMetrics(`<a href="${href}">開啟遊戲</a>`, true), true, href);
+  }
+  for (const source of ['<a data-href="../88888/index.html">入口</a>', '<span data-price="88888">價格</span>', '<!-- <a href="../88888/index.html">入口</a> -->', '<!-- <a href="../88888/index.html">入口</a>', '<script>const fake = \'<a href="../88888/index.html">入口</a>\';</script>', '<div data-note=\' href="../88888/index.html"\'>資訊</div>']) {
+    assert.equal(containsFakeMarketMetrics(source, true), true, source);
+  }
+  assert.equal(containsFakeMarketMetrics('const fakePrice = 88888;'), true);
+  assert.equal(containsFakeMarketMetrics('const link = \'<a href="../88888/index.html">入口</a>\';'), true);
+  for (const tag of ['iframe', 'noembed', 'noframes', 'noscript', 'plaintext']) {
+    assert.equal(containsFakeMarketMetrics(`<${tag}><a href="../88888/index.html">入口</a></${tag}>`, true), true, tag);
+  }
+});
+
+for (const tag of ['textarea', 'title', 'xmp']) {
+  test(`fake-metric guard preserves anchor-looking text in ${tag}`, () => {
+    const anchor = '<a href="../88888/index.html">入口</a>';
+    assert.equal(containsFakeMarketMetrics(`<${tag}>${anchor}</${tag}>`, true), true);
+    assert.equal(containsFakeMarketMetrics(`<${tag.toUpperCase()} data-note="quoted > value">${anchor}</${tag.toUpperCase()}>`, true), true);
+    assert.equal(containsFakeMarketMetrics(`<${tag}>${anchor}`, true), true);
+  });
+}
+
 test("11520 production shell contains no random market generation or fake metrics", async () => {
   const files = ["../K線西遊記/temples/11520/index.html", "../K線西遊記/temples/11520/app.mjs"];
-  const source = (await Promise.all(files.map((file) => fs.readFile(new URL(file, import.meta.url), "utf8")))).join("\n");
+  const sources = await Promise.all(files.map((file) => fs.readFile(new URL(file, import.meta.url), "utf8")));
+  const source = sources.join("\n");
   assert.ok(!source.includes("Math.random"));
-  assert.ok(!/88,?888|模擬掛單|fake tvl/i.test(source));
+  assert.equal(containsFakeMarketMetrics(sources[0], true), false);
+  assert.equal(containsFakeMarketMetrics(sources[1]), false);
   for (const route of ["HOME", "LIFE", "LIFE FACTORY", "APPS", "COMPANIES", "TOKENS", "JOBS", "SERVICES", "PROPERTY", "FACTORIES", "SPACECRAFT", "PORTFOLIO", "MY LIFE", "MY COMPANY"]) assert.ok(source.includes(route));
   assert.ok(source.includes("createKgenSwapAdapter"));
 });
