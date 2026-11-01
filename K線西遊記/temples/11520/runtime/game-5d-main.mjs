@@ -257,6 +257,7 @@ function bindVertical(sel,fn){
   el.addEventListener('pointermove',e=>{if(e.pointerId===pid)calc(e)});
   for(const type of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(type,e=>{if(e.pointerId===pid)cancel()});
   document.addEventListener('k11520:settings-context',e=>{if(e.detail?.open)cancel()});
+  document.addEventListener('k11520:controls-cancel-input',cancel);
 }
 bindVertical('#lotsControl',t=>{axis().lots=Math.max(1,Math.round(t*100));syncControls()});bindVertical('#cControl',t=>{axis().c=warpC(t);syncControls()});
 

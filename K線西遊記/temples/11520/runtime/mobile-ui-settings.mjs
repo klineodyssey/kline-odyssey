@@ -1,6 +1,12 @@
 import './mobile-action-rail-clearance-runtime.mjs';
+import {SHARED_GAME_VERSION} from '../../../../assets/kaios-world-registry.mjs';
 /* KGEN_META
 VERSION: 2.6.17
+REVISION: 2026-11-01.HUD-R2-PREF1
+ACTUAL_AUTHOR: Codex original technical executor / 01a189ef-ecbc-7699-b87b-a4538d57c029
+SOURCE_COMMIT: a4957c9cfcec952187228d0801e36a38f61d8497
+TASK_ID: K11520-FIRST-VIEW-ZERO-CARDS-NATURE-20261012-001
+CHANGE_REASON: Restore discoverable cockpit HUD while preserving saved master/organ preferences and independent trade confirmation.
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile UI Settings
 PURPOSE: One lower-right settings console owns HUD visibility. Legacy scattered drawer toggles are retired from the visible UI; chat has an explicit expand/collapse handle; wallet and backpack are protected organs; right-rail hit targets stay separated on mobile. Formal filename is version-free.
@@ -25,13 +31,16 @@ const PROTECTED=['#walletPanel','#walletToggle','#walletConnect','#backpackButto
 let state=Object.fromEntries(SURFACES.map(([k])=>[k,true])),allOn=true;
 const HUD_PROFILES=['MINIMAL','STANDARD','FULL'];
 const MARKET_IDLE_MS=15000;
-let profile='MINIMAL',marketOpen=false,marketTimer=0,marketPointers=new Set();
+const UI_REVISION='HUD-R2-PREF1';
+const INFO_KEYS=['hud','markets','status','map'];
+const disclosedSurfaces=new Set();
+let profile='MINIMAL',marketOpen=false,marketTimer=0,marketPointers=new Set(),controlsOpen=false,infoOpen=false;
 // V2.9.6 candidate: transient disclosure never changes saved organ preferences.
 let settingsInstalled=false,worldFirstBound=false;
 // Human 2026-10-05 12:43: hide/inert the background right HUD while
 // Settings owns the foreground, including partly covered C/lots/Y rails.
 // Preserve each organ's values/preferences; this owns only interaction.
-const SETTINGS_BACKGROUND='#k11520UtilityMaster,#cargoInterceptionButton,#homeDeliveryButton,#whiteholeEscortButton,#dock,#gameModeToggle,#walletToggle,#walletPanel,#chatHandle,#gameChat,#bgmButton,#aiChatButton,#aiChatPanel,#backpackButton,#backpackPanel,#k11520HudCollapseAll,#kaiosPortalButton,#playerCourierDetails,#playerBanditPanel,#k11520RealTradePreflight,#cControl,#lotsControl,#yControl,.sliderDock,.controls';
+const SETTINGS_BACKGROUND='#k11520UtilityMaster,#cargoInterceptionButton,#homeDeliveryButton,#whiteholeEscortButton,#dock,#gameModeToggle,#walletToggle,#walletPanel,#chatHandle,#gameChat,#bgmButton,#aiChatButton,#aiChatPanel,#backpackButton,#backpackPanel,#k11520HudCollapseAll,#kaiosPortalButton,#playerCourierDetails,#playerBanditPanel,#k11520RealTradePreflight,#k11520MarketRow,#k11520ControlsClose,#cControl,#lotsControl,#yControl,.sliderDock,.controls';
 const settingsInertBefore=new Map();
 let settingsWasOpen=false,settingsEscapeBound=false;
 function syncSettingsContext(){
@@ -58,38 +67,49 @@ function setSettingsOpen(open){
 // Visibility stays in this existing owner; geometry remains in Mobile Control Layout.
 export const WORLD_FIRST_HUD_POLICY=Object.freeze({
   ALWAYS_VISIBLE:['player/world'],
-  CONTEXTUAL:['movement membrane while held','explicit trade context','camera recenter','target details','missile details','delivery details'],
+  CONTEXTUAL:['faint idle movement outline / stronger while held','explicitly retained movement/lots/C controls','explicit information cards','explicit trade context','camera recenter','target details','missile details','delivery details'],
   EVENT_ONLY:['warning','arrival','robbery','insurance','mission complete'],
   MANUAL:['wallet','backpack','settings','chat','audio'],
 });
 
-function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}marketOpen=false}
+function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}marketOpen=false;disclosedSurfaces.clear();controlsOpen=allOn&&state.params;infoOpen=allOn}
 function save(){try{localStorage.setItem(STORE,JSON.stringify({...state,allOn,profile}))}catch{}}
 function syncWorldFirst(){
   const root=document.documentElement;root.dataset.k11520HudProfile=profile;root.dataset.k11520HudMode='ON_DEMAND';
-  root.classList.toggle('k11520MarketOpen',marketOpen);
+  root.classList.toggle('k11520MarketOpen',marketOpen||infoOpen);
   root.classList.toggle('k11520TradeOpen',marketOpen);
-  const row=$('#k11520MarketRow');if(row){row.hidden=true;row.inert=true;row.tabIndex=-1;row.onclick=null;row.setAttribute('aria-hidden','true')}
+  root.classList.toggle('k11520ControlsOpen',controlsOpen);root.classList.toggle('k11520InfoOpen',infoOpen);
+  const row=$('#k11520MarketRow');if(row){row.hidden=false;row.inert=false;row.tabIndex=0;row.textContent=infoOpen?'資訊×':'ⓘ';row.title=infoOpen?'收合資訊卡；保留操作控制':'資訊卡／操作顯示設定';row.setAttribute('aria-label',row.title);row.setAttribute('aria-expanded',String(infoOpen));row.removeAttribute('aria-hidden');row.onclick=()=>{if(infoOpen)closeInformation();else setSettingsOpen(true)}}
+  const close=$('#k11520ControlsClose');if(close){close.hidden=!controlsOpen;close.setAttribute('aria-expanded',String(controlsOpen));close.title=allOn&&state.params?'收合操作；保留已設定的口數與 C':'操作縱桿已在設定隱藏；可由資訊設定叫回'}
   // CSS plus the capture guard suppress hidden actions. Do not overwrite
   // financial owners' hidden/inert/disabled flags, including changes made idle.
   for(const el of document.querySelectorAll('#orderFire,#flat')){
     el.dataset.k11520ContextSuppressed=marketOpen?'0':'1';
   }
-  if(globalThis.__K11520_UI_SETTINGS__)globalThis.__K11520_UI_SETTINGS__.tradeOpen=marketOpen;
-  document.dispatchEvent(new CustomEvent('k11520:hud-context',{detail:{tradeOpen:marketOpen}}));
+  if(globalThis.__K11520_UI_SETTINGS__)Object.assign(globalThis.__K11520_UI_SETTINGS__,{tradeOpen:marketOpen,controlsOpen,infoOpen});
+  document.dispatchEvent(new CustomEvent('k11520:hud-context',{detail:{tradeOpen:marketOpen,controlsOpen,infoOpen}}));
 }
+function cancelControlInput(){document.dispatchEvent(new CustomEvent('k11520:controls-cancel-input'))}
+function setControlsOpen(open){if(!open){cancelControlInput();hideMarketCards();disclosedSurfaces.delete('params')}controlsOpen=!!open;apply();document.dispatchEvent(new CustomEvent('k11520:controls-context',{detail:{open:controlsOpen}}))}
+function showControls(){if($('#k11520UiSettings')?.classList.contains('open'))setSettingsOpen(false);document.documentElement.classList.remove('k11520HudCollapsed');controlsOpen=true;disclosedSurfaces.add('params');apply()}
+function showInformation(){if($('#k11520UiSettings')?.classList.contains('open'))setSettingsOpen(false);document.documentElement.classList.remove('k11520HudCollapsed');infoOpen=true;for(const key of INFO_KEYS)disclosedSurfaces.add(key);apply()}
+function closeInformation(){hideMarketCards();infoOpen=false;for(const key of INFO_KEYS)disclosedSurfaces.delete(key);apply()}
 function hideMarketCards(){clearTimeout(marketTimer);marketPointers.clear();marketOpen=false;syncWorldFirst()}
 function scheduleMarketHide(){
   clearTimeout(marketTimer);if(!marketOpen||marketPointers.size)return;
   marketTimer=setTimeout(hideMarketCards,MARKET_IDLE_MS);
 }
-function showMarketCards(){if($('#k11520UiSettings')?.classList.contains('open'))setSettingsOpen(false);marketOpen=true;syncWorldFirst();scheduleMarketHide()}
+function showMarketCards(){if($('#k11520UiSettings')?.classList.contains('open'))setSettingsOpen(false);controlsOpen=true;infoOpen=true;marketOpen=true;for(const key of ['params',...INFO_KEYS])disclosedSurfaces.add(key);apply();scheduleMarketHide()}
+function ensureBuildStamp(){let stamp=$('#k11520BuildStamp');if(!stamp){stamp=document.createElement('small');stamp.id='k11520BuildStamp';document.body.appendChild(stamp)}stamp.textContent=`${SHARED_GAME_VERSION} · UI:${UI_REVISION}`;stamp.title='已載入的 UI 來源修訂；不代表 Git／PWA 全部資源已更新';document.documentElement.dataset.k11520UiRevision=UI_REVISION}
 function installWorldFirst(){
   if(worldFirstBound)return;worldFirstBound=true;
   const panel=$('#k11520UiSettings'),picker=document.createElement('select');picker.id='k11520HudProfile';picker.className='full';picker.setAttribute('aria-label','HUD 顯示模式');
   for(const value of HUD_PROFILES){const opt=document.createElement('option');opt.value=value;opt.textContent={MINIMAL:'MINIMAL · 世界優先',STANDARD:'STANDARD · 狀態資訊',FULL:'FULL HUD · 完整資訊'}[value];picker.appendChild(opt)}
-  picker.value=profile;picker.onchange=()=>{profile=picker.value;save();apply()};panel?.appendChild(picker);
-  for(const [id,label,act] of [['k11520ShowTrade','交易／點火資訊',showMarketCards],['k11520HideTrade','返回純場景',hideMarketCards]]){if($('#'+id))continue;const button=document.createElement('button');button.id=id;button.type='button';button.className='btn full';button.textContent=label;button.onclick=act;panel?.appendChild(button)}
+  picker.value=profile;picker.onchange=()=>{profile=picker.value;infoOpen=profile!=='MINIMAL';for(const key of INFO_KEYS)infoOpen?disclosedSurfaces.add(key):disclosedSurfaces.delete(key);save();apply()};panel?.appendChild(picker);
+  for(const [id,label,act] of [['k11520ShowControls','顯示操作：移動／口數／C',showControls],['k11520ShowInformation','顯示資訊：行情／座標／小地圖',showInformation],['k11520ShowTrade','交易／點火資訊（仍須下單確認）',showMarketCards],['k11520HideTrade','收合資訊卡；保留操作',closeInformation]]){if($('#'+id))continue;const button=document.createElement('button');button.id=id;button.type='button';button.className='btn full';button.textContent=label;button.onclick=act;panel?.appendChild(button)}
+  let close=$('#k11520ControlsClose');if(!close){close=document.createElement('button');close.id='k11520ControlsClose';close.type='button';close.textContent='收操作 ×';close.setAttribute('aria-label','收合操作控制；保留口數與 C');document.body.appendChild(close);close.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();cancelControlInput();try{close.setPointerCapture(e.pointerId)}catch{}},{passive:false});close.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();setControlsOpen(false);try{close.releasePointerCapture(e.pointerId)}catch{}},{passive:false});close.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setControlsOpen(false)})}
+  let row=$('#k11520MarketRow');if(!row){row=document.createElement('button');row.id='k11520MarketRow';row.type='button';document.body.appendChild(row)}
+  document.addEventListener('k11520:movement-context',e=>{if(e.detail?.active)setControlsOpen(true)});
   const axes=$('#axes');
   document.addEventListener('pointerdown',e=>{if(marketOpen&&e.target.closest?.('#axes,#cControl,#lotsControl,#yControl,.controls')){marketPointers.add(e.pointerId);clearTimeout(marketTimer)}},true);
   for(const type of ['pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(marketPointers.delete(e.pointerId))scheduleMarketHide()},true);
@@ -99,7 +119,7 @@ function installWorldFirst(){
   // never a click/order. Plane changes and movement no longer reveal cards.
   document.addEventListener('k11520:trade-context',e=>{if(e.detail?.open===true&&e.detail?.source==='joystick-hold')showMarketCards();else if(e.detail?.open===false)hideMarketCards()});
   document.addEventListener('click',e=>{if(!marketOpen&&e.target.closest?.('#orderFire,#flat')){e.preventDefault();e.stopImmediatePropagation()}},true);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')hideMarketCards()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeInformation();setControlsOpen(false)}});
   addEventListener('blur',hideMarketCards);document.addEventListener('visibilitychange',()=>{if(document.hidden)hideMarketCards()});syncWorldFirst();
 }
 function retireLegacyCleanMode(){if(document.body?.classList.contains('game-clean-mode'))document.body.classList.remove('game-clean-mode');try{if(localStorage.getItem(LEGACY_CLEAN)!=='0')localStorage.setItem(LEGACY_CLEAN,'0')}catch{}}
@@ -121,15 +141,20 @@ html.k11520SettingsOpen .sliderDock{display:none!important}
 #k11520UiSettings .sw::after{content:'';position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .12s}
 #k11520UiSettings .sw[aria-checked='true']{background:#0e5a46}#k11520UiSettings .sw[aria-checked='true']::after{transform:translateX(18px)}
 #k11520UiSettings .full{grid-column:1/-1}.k11520HiddenBySettings{display:none!important}
+#k11520ControlsClose{position:fixed;right:max(58px,calc(env(safe-area-inset-right) + 52px));top:68px;bottom:auto;min-width:64px;min-height:44px;z-index:7100;border:1px solid #68e4ff66;border-radius:10px;background:#071018e8;color:#dffaff;touch-action:manipulation}
+#k11520ControlsClose[hidden]{display:none!important}
+#k11520BuildStamp{position:fixed;left:max(6px,env(safe-area-inset-left));top:max(4px,env(safe-area-inset-top));z-index:12001;max-width:calc(100vw - 64px);padding:3px 5px;border-radius:5px;background:#071018f2;color:#dffaff;font:700 10px system-ui,sans-serif;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+#k11520UiSettings{max-height:calc(100dvh - 64px);overflow:auto;top:32px}
+@media(orientation:landscape) and (max-height:600px){#k11520ControlsClose{left:212px;right:auto;top:66px;bottom:auto;width:64px}#k11520UiSettings{top:16px;max-height:calc(100dvh - 32px)}}
 #backpackButton.bagRelocatedV258{position:fixed!important;z-index:7050!important;right:5px!important;bottom:70px!important;width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;margin:0!important;display:grid!important;place-items:center!important}
-@media(max-width:420px){.sliderDock{bottom:222px!important}#k11520UiSettings{top:270px;right:54px;width:220px}#gameChat.open{right:54px!important;max-width:calc(100vw - 66px)!important}}
+@media(max-width:420px){.sliderDock{bottom:222px!important}#k11520UiSettings{top:32px;right:54px;width:220px}#gameChat.open{right:54px!important;max-width:calc(100vw - 66px)!important}}
 `;
 document.head.appendChild(s)}
 function targets(sel){try{return [...document.querySelectorAll(sel)]}catch{return[]}}
 function applyOne(key,on){const spec=SURFACES.find(x=>x[0]===key);if(!spec)return;for(const el of targets(spec[2])){const hidden=!on;if(el.classList.contains('k11520HiddenBySettings')!==hidden)el.classList.toggle('k11520HiddenBySettings',hidden);if(key==='chat'&&hidden&&el.id==='gameChat')el.classList.remove('open')}}
 function protectWalletBackpack(){for(const sel of PROTECTED)for(const el of targets(sel)){el.classList.remove('k11520HiddenBySettings');el.removeAttribute('aria-hidden')}const bag=$('#backpackButton');if(bag){bag.dataset.k11520ProtectedOrgan='1';bag.style.removeProperty('display')}const wallet=$('#walletPanel');if(wallet)wallet.dataset.k11520ProtectedOrgan='1'}
-function apply(){retireLegacyCleanMode();retireLegacyDrawerToggles();for(const [k] of SURFACES)applyOne(k,allOn&&state[k]);protectWalletBackpack();syncWorldFirst();syncSettingsContext();const p=$('#k11520UiSettings');if(p)for(const b of p.querySelectorAll('[data-ui-key]')){const k=b.dataset.uiKey,v=String(k==='all'?allOn:state[k]);if(b.getAttribute('aria-checked')!==v)b.setAttribute('aria-checked',v)}globalThis.__K11520_UI_SETTINGS__={organ:'Mobile UI Settings',version:'2.6.17',profile,tradeOpen:marketOpen,candidateProductVersion:'V2.9.6',marketIdleMs:MARKET_IDLE_MS,policy:WORLD_FIRST_HUD_POLICY,allOn,state:{...state},legacyDrawerTogglesRetired:true,protectedOrgans:['wallet','backpack'],chatReplacesY:true,walletHitTargetProtected:true,chatToggleExplicit:true}}
-function toggleKey(key){if(key==='all')allOn=!allOn;else{state[key]=!state[key];if(state[key])allOn=true}save();apply()}
+function apply(){retireLegacyCleanMode();retireLegacyDrawerToggles();for(const [k] of SURFACES)applyOne(k,allOn&&state[k]||disclosedSurfaces.has(k)&&(k==='params'?controlsOpen:infoOpen));protectWalletBackpack();ensureBuildStamp();syncWorldFirst();syncSettingsContext();const p=$('#k11520UiSettings');if(p)for(const b of p.querySelectorAll('[data-ui-key]')){const k=b.dataset.uiKey,v=String(k==='all'?allOn:state[k]);if(b.getAttribute('aria-checked')!==v)b.setAttribute('aria-checked',v)}globalThis.__K11520_UI_SETTINGS__={organ:'Mobile UI Settings',version:'2.6.17',profile,tradeOpen:marketOpen,controlsOpen,infoOpen,candidateProductVersion:SHARED_GAME_VERSION,uiRevision:UI_REVISION,marketIdleMs:MARKET_IDLE_MS,policy:WORLD_FIRST_HUD_POLICY,allOn,state:{...state},legacyDrawerTogglesRetired:true,protectedOrgans:['wallet','backpack'],chatReplacesY:true,walletHitTargetProtected:true,chatToggleExplicit:true}}
+function toggleKey(key){if(key==='all'){allOn=!allOn;disclosedSurfaces.clear();if(!allOn){cancelControlInput();controlsOpen=false;infoOpen=false;hideMarketCards()}}else{state[key]=!state[key];disclosedSurfaces.delete(key);if(state[key])allOn=true}save();apply()}
 async function toggleFullscreen(){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.();else await document.exitFullscreen?.()}catch{}syncFullscreen()}
 function syncFullscreen(){const b=$('#k11520FullscreenSwitch');if(b)b.setAttribute('aria-checked',String(!!document.fullscreenElement))}
 function makeLauncher(){let old=$('#gameModeToggle');if(!old)return null;if(old.dataset.k11520UiSettings)return old;const launcher=old.cloneNode(true);launcher.removeAttribute('onclick');launcher.dataset.k11520UiSettings='1';launcher.textContent='⚙';launcher.title='介面展開收合設定';launcher.setAttribute('aria-label','介面展開收合設定');old.replaceWith(launcher);return launcher}

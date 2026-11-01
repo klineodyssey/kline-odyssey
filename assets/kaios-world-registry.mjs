@@ -2,7 +2,7 @@
 export const WORLD_STATUSES=Object.freeze(['PLAYABLE','BETA','UNDER_CONSTRUCTION','RESEARCH','ARCHIVED']);
 export const CANONICAL_PORTAL_URL='https://klineodyssey.github.io/kline-odyssey/';
 const entry=value=>Object.freeze({...value,capabilities:Object.freeze(value.capabilities||[])});
-export const SHARED_GAME_VERSION='V2.9.11-r1 候選';
+export const SHARED_GAME_VERSION='V2.9.11';
 export const WORLD_REGISTRY=Object.freeze([
  entry({worldId:'11520',name:'花果山台灣 🇹🇼',subtitle:'商品報價交易所',status:'BETA',entryUrl:'K線西遊記/temples/11520/index.html',version:'CURRENT',audioTheme:null,description:'商品報價主入口；同一遊戲另由小按鈕開啟。琉璃燈正式供應報價仍待確認。',capabilities:['商品報價','同一遊戲入口'],cta:'進入報價',tone:'jade'}),
  entry({worldId:'88888',canonicalWorldId:'11520',routeOnly:true,name:'花果山美國 🇺🇸',subtitle:'同一套 5D 遊戲 · 共用畫面',status:'BETA',entryUrl:'K線西遊記/temples/88888/index.html',version:SHARED_GAME_VERSION,audioTheme:null,description:'在美國入口開啟同一套遊戲；保留原玩家與存檔。手機與離線驗收仍待完成。',capabilities:['共用遊戲','KGEN / WBNB 參考價'],cta:'開啟遊戲／儀表板',tone:'blue'}),

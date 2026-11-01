@@ -14,7 +14,7 @@ const thumbObservers=new WeakMap();
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 const paramsHidden=()=>!!$('.sliderDock')?.classList.contains('k11520HiddenBySettings');
 const onDemand=()=>document.documentElement.dataset.k11520HudMode==='ON_DEMAND';
-const railDisclosed=sel=>!onDemand()||document.documentElement.classList.contains('k11520TradeOpen')||(sel==='#yControl'&&document.documentElement.classList.contains('k11520MovementActive'));
+const railDisclosed=sel=>!onDemand()||document.documentElement.classList.contains('k11520ControlsOpen')||document.documentElement.classList.contains('k11520TradeOpen')||(sel==='#yControl'&&document.documentElement.classList.contains('k11520MovementActive'));
 function installStyle(){
   let s=$('#k11520MobileControlLayout');
   if(!s){s=document.createElement('style');s.id='k11520MobileControlLayout';document.head.appendChild(s)}
@@ -95,7 +95,7 @@ function installStyle(){
 #k11520HudProfile{min-height:44px;background:#102332;color:#dffaff;border:1px solid #68e4ff66;border-radius:8px}
 #k11520PlaneLabel{overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%}
 html[data-k11520-hud-profile]:not(.k11520MarketOpen) .axes{display:none!important}
-html[data-k11520-hud-profile="MINIMAL"] .tele,html[data-k11520-hud-profile="MINIMAL"] .monsterHud{display:none!important}
+html[data-k11520-hud-profile="MINIMAL"]:not(.k11520InfoOpen) .tele,html[data-k11520-hud-profile="MINIMAL"]:not(.k11520InfoOpen) .monsterHud{display:none!important}
 /* Expanded Market owns the full available row. Camera controls live in their
    own compact context cluster instead of consuming a fourth market column. */
 html[data-k11520-hud-profile] .axes{top:116px!important;left:6px!important;right:6px!important;z-index:610!important}
@@ -125,7 +125,7 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   html[data-k11520-hud-profile] #k11520MonsterGuide{top:auto!important;bottom:8px!important;transform:none!important}
   html[data-k11520-hud-profile="MINIMAL"].k11520MarketOpen #k11520MonsterGuide{top:auto!important}
   html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:66px!important;bottom:auto!important;left:6px!important}
-  html[data-k11520-hud-profile="MINIMAL"] .top>.pill{display:none!important}
+  html[data-k11520-hud-profile="MINIMAL"]:not(.k11520InfoOpen) .top>.pill{display:none!important}
   html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:auto!important;bottom:8px!important;left:346px!important;right:180px!important}
   #k11520CameraReset{left:160px;top:66px;bottom:auto}
   #k11520CameraZoomStatus{left:160px;right:auto;top:114px;bottom:auto;width:126px;max-width:126px;transform:translateY(6px)}
@@ -134,15 +134,21 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   #k11520UiSettings{top:54px!important;max-height:calc(100dvh - 64px);overflow:auto}
 }
 /* V2.9.6 candidate: visibility changes never resize/reanchor the world. */
-html[data-k11520-hud-mode="ON_DEMAND"] :is(.minimapWrap,#k11520MarketRow){display:none!important;visibility:hidden!important;pointer-events:none!important}
-html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen) :is(.top,.axes,.tele,.monsterHud,.controls,#k11520MonsterGuide,#k11520UtilityMaster,#k11520HudCollapseAll,#k11520CameraReset,#k11520FollowMonster,#walletPanel,#walletToggle,#chatHandle,#gameChat,#gameModeToggle,#aiChatButton,#bgmButton,#backpackButton,#dock){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :is(.top,.axes,.tele,.monsterHud,.minimapWrap,.controls,#k11520MonsterGuide,#k11520UtilityMaster,#k11520HudCollapseAll,#k11520CameraReset,#k11520FollowMonster,#walletPanel,#walletToggle,#chatHandle,#gameChat,#gameModeToggle,#aiChatButton,#bgmButton,#backpackButton,#dock){display:none!important;visibility:hidden!important;pointer-events:none!important}
+/* Explicit information restores original status/map cards even in the compact
+   utility context; individual preferences and foreground Settings still win. */
+html[data-k11520-hud-mode="ON_DEMAND"].k11520InfoOpen:not(.k11520HudCollapsed):not(.k11520SettingsOpen) :is(.tele,.monsterHud,.minimapWrap):not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen) :is(#orderFire,#flat){display:none!important;visibility:hidden!important;pointer-events:none!important}
-html[data-k11520-hud-mode="ON_DEMAND"] #joy{display:block!important;visibility:visible!important;opacity:0!important;pointer-events:auto!important;background:transparent!important;border-color:transparent!important;box-shadow:none!important;transition:opacity .18s linear;touch-action:none}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy{display:block!important;visibility:visible!important;opacity:.28!important;pointer-events:auto!important;background:transparent!important;border:1px solid #9eeeff88!important;box-shadow:none!important;transition:opacity .18s linear;touch-action:none}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520MovementActive) #joy>*{opacity:.3!important}
 html[data-k11520-hud-mode="ON_DEMAND"].k11520MovementActive #joy{opacity:.72!important;background:#68e4ff0a!important;border-color:#9eeeff66!important}
 html[data-k11520-hud-mode="ON_DEMAND"] :is(#yControl,#cControl,#lotsControl){transition:opacity .18s linear,visibility 0s linear .18s}
-html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen):not(.k11520MovementActive) #yControl,
-html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen) :is(#cControl,#lotsControl){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
-html[data-k11520-hud-mode="ON_DEMAND"].k11520MovementActive #yControl,html[data-k11520-hud-mode="ON_DEMAND"].k11520TradeOpen :is(#yControl,#cControl,#lotsControl){transition-delay:0s}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen):not(.k11520MovementActive) #yControl,
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) :is(#cControl,#lotsControl){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"].k11520MovementActive #yControl,html[data-k11520-hud-mode="ON_DEMAND"].k11520ControlsOpen :is(#yControl,#cControl,#lotsControl),html[data-k11520-hud-mode="ON_DEMAND"].k11520TradeOpen :is(#yControl,#cControl,#lotsControl){transition-delay:0s}
+html[data-k11520-hud-mode="ON_DEMAND"] #k11520MarketRow{display:block!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:68px!important;right:max(6px,env(safe-area-inset-right))!important;bottom:auto!important;left:auto!important;min-width:44px!important;z-index:7100!important}
+html.k11520SettingsOpen[data-k11520-hud-mode="ON_DEMAND"] #k11520MarketRow{visibility:hidden!important;pointer-events:none!important}
+@media(orientation:landscape) and (max-height:600px){html[data-k11520-hud-mode="ON_DEMAND"] #k11520MarketRow{top:6px!important}}
 html[data-k11520-hud-mode="ON_DEMAND"] .axes{position:fixed!important}
 `;
   if(s.textContent!==css)s.textContent=css;
