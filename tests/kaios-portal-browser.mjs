@@ -230,6 +230,11 @@ async function verifyFundingPanel(){
       await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('');
       assert.equal(await page.locator('#funding-mode').inputValue(),'fixed');
       await page.locator('#funding-mode').selectOption('cap');
+      for(const field of ['file','case','beneficiary','amount']){
+        assert.equal(await page.locator(`#funding-${field}-field`).isVisible(),false,`shared cap hides unrelated ${field} field`);
+        assert.equal(await page.locator(`#funding-${field}`).isDisabled(),true);
+      }
+      assert.equal(await page.locator('#funding-amount-help').isVisible(),false);
       row.sharedCap=[];
       for(const role of ['mother','jade']){
         await page.locator('#funding-role').selectOption(role);
@@ -253,6 +258,10 @@ async function verifyFundingPanel(){
       await page.locator('#funding-ack').check();
       await page.locator('#funding-mode').selectOption('fixed');
       assert.equal(await page.locator('#funding-ack').isChecked(),false,'mode changes invalidate the previous shared-cap acknowledgment');
+      for(const field of ['file','case','beneficiary','amount']){
+        assert.equal(await page.locator(`#funding-${field}-field`).isVisible(),true,`fixed allocation restores ${field} field`);
+        assert.equal(await page.locator(`#funding-${field}`).isDisabled(),false);
+      }
       await noWalletAuthority('changed back to fixed allocation');
       // Exercise the real seven-floor controller in the same isolated context.
       // No game character, wallet provider, eligibility source or RPC is supplied.

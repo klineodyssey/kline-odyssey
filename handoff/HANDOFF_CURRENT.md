@@ -786,3 +786,20 @@ Only existing HTML/tests/README/index/handoff owners changed; no Boot/new files,
 chain writes, signing, funds, deployment, quota reset or HOLD changes. Next: same
 CI and direct image review on one temporary QA branch, then converge to main
 and close that branch after verified publication.
+
+
+### Shared-cap mobile visual correction — 2026-11-03T22:29:52+00:00 / 2026-11-04T06:29:52+08:00
+
+First source d545049d passed isolated Portal CI41729670213. Artifact13276585169
+SHA256 bac41cdeeeb1c0bfb138a3ca0be2b1d19c12987695fd691a41c0e2b110c39671
+passed SHA/CRC and all183 path/containment checks. Helper directly reviewed16
+fixed/pause images; root reviewed the four new cap viewport images. Root found
+that irrelevant disabled case fields occupied the shared-cap first screen,
+so this source was not approved for final cap visual usability/publication.
+The existing labels and amount help now hide for cap/pause and restore for
+fixed mode; disabled-state protections remain. Browser assertions explicitly
+check real visibility/disable/restore. Financial/core parameter code is unchanged.
+Updated actual HTML SHA256 006ef4f9256f460789db0fd1045b113d6a8b26cde6d4465f67621296ddc252dd. Full token-surface tests rerun65/65 PASS,
+0 FAIL/SKIP, duration_ms19184.6392; syntax/diff PASS. The same single QA branch
+will carry the correction to the same isolated CI; corrected screenshots and
+direct review are still required. No local browser, real wallet or chain writes.

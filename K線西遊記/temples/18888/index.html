@@ -54,6 +54,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 .funding-panel p { line-height:1.6; overflow-wrap:anywhere; }
 .funding-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 .funding-fields label { display:flex; flex-direction:column; gap:6px; font-size:13px; min-width:0; }
+.funding-fields label[hidden] { display:none; }
 .funding-panel input:not([type=checkbox]), .funding-panel select { box-sizing:border-box; width:100%; background:#090710; color:#fff; border:1px solid #735589; border-radius:10px; padding:11px; font:inherit; }
 .funding-actions { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; }
 .funding-panel button, .funding-actions a { border:1px solid #a376c3; border-radius:12px; padding:12px 16px; background:#281a39; color:#fff; font:inherit; cursor:pointer; text-decoration:none; }
@@ -223,10 +224,10 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     <p class="funding-muted">此區與上方原型展示數字分開。BSC 主網 56；金額單位 KAIOS，不是 BNB。調額、Mother 提案、玉帝獨立批准、到期執行、實際撥款分別核定；連接或交易雜湊不代表已入帳。</p>
     <div class="funding-fields">
       <label>本次流程<select id="funding-mode"><option value="fixed">固定配額 · 原案撥款</option><option value="cap">共享一千萬調額 · 不需原案檔</option></select></label>
-      <label>本機原案報告或 JSON（只在此瀏覽器讀取，不上傳）<input id="funding-file" type="file" accept=".json,.md,.txt"></label>
-      <label>原案選擇<select id="funding-case"><option value="">手動新草案，須先核正式批准與既領紀錄</option></select></label>
-      <label>受益人完整地址<input id="funding-beneficiary" spellcheck="false" autocomplete="off" placeholder="0x…（完整42字元）"></label>
-      <label>本筆 KAIOS 金額<input id="funding-amount" inputmode="decimal" autocomplete="off" value="1080000" aria-describedby="funding-amount-help"></label>
+      <label id="funding-file-field">本機原案報告或 JSON（只在此瀏覽器讀取，不上傳）<input id="funding-file" type="file" accept=".json,.md,.txt"></label>
+      <label id="funding-case-field">原案選擇<select id="funding-case"><option value="">手動新草案，須先核正式批准與既領紀錄</option></select></label>
+      <label id="funding-beneficiary-field">受益人完整地址<input id="funding-beneficiary" spellcheck="false" autocomplete="off" placeholder="0x…（完整42字元）"></label>
+      <label id="funding-amount-field">本筆 KAIOS 金額<input id="funding-amount" inputmode="decimal" autocomplete="off" value="1080000" aria-describedby="funding-amount-help"></label>
     </div>
     <p id="funding-mode-help" class="funding-muted">固定配額需原案受益人及金額。共享調額只處理模組每筆／每日各10,000,000 KAIOS，不建立配額、不付款、不保留個人額度；觀音暫停獨立於此選項。</p>
     <p id="funding-amount-help" class="funding-muted">最多18位小數，不使用浮點換算。原案載入後地址與金額固定，不因查不到紀錄就改金額／ID重發。此版用途固定為一次性生命初始資源，非月薪、非衡曜88 KAIOS；executableAt=0的配額建立後沒有第二次一小時等待，任何人可呼叫已到期配額撥款。</p>
@@ -1366,7 +1367,11 @@ el('receipt').onclick = () => run(async () => {
 for (const name of ['beneficiary','amount','wallet']) el(name).addEventListener('input', invalidate);
 function syncFundingMode() {
   const pause = el('role').value === 'guanyin', cap = !pause && el('mode').value === 'cap';
-  for (const name of ['file','case','beneficiary','amount']) el(name).disabled = pause || cap;
+  for (const name of ['file','case','beneficiary','amount']) {
+    el(name).disabled = pause || cap;
+    el(name + '-field').hidden = pause || cap;
+  }
+  el('amount-help').hidden = pause || cap;
   el('ack-text').textContent = pause ? '我已核對正式觀音帳戶及銀行暫停權限，了解這筆只會緊急暫停銀行，不會付款、提款或解除暫停；仍由本人在錢包確認。' : cap ? '我已核對共享模組每筆／每日各10,000,000 KAIOS與原治理提案，了解調額會重設當期共享用量，不代表個人額度、個案批准或付款；仍由本人在錢包確認。本勾選不是合約授權。' : fundingAcknowledgment;
   el('prepare').textContent = pause ? '只讀核對觀音權限並預覽暫停' : cap ? '只讀核對並預覽共享一千萬調額' : '讀查並預覽下一步';
   el('summary').textContent = pause ? '已選觀音緊急暫停；不需要填入收款人或金額。請在錢包選擇正式觀音帳戶，再讀查權限。' : cap ? '已選共享一千萬調額；不需原案檔、受益人或個案金額。每筆／每日限額各10,000,000 KAIOS，僅處理治理，不會付款。' : '流程或角色已變更，舊預覽與勾選作廢；請在錢包選擇對應帳戶後重新預覽。';
