@@ -464,3 +464,54 @@ static!important，避免core廣義nav規則覆蓋；不改原browser assert、�
 入口、不動角色／合約／交易路徑或MOVE／WARP語意。13項既有Portal離線測試PASS，
 隔離瀏覽器及直橫圖待此次修正後再驗。Cloud亦可分工，但尚未核實建立成功；
 先讀既有任務清單，不能把未回ID的舊建立請求視為確定失敗並盲目建立第二份。
+
+### 接續查核、資料入口與自領要求 — 2026-11-04T01:17:44+08:00
+
+- 共用入口修正工程來源 `b3c5b992662f0722b9e59d59ba59e05dbb1d9248` 的完整
+  Portal workflow41677713685已SUCCESS，原relative/static斷言保留且通過；
+  artifact13251022947 ZIP SHA256
+  `a36aa65f2757d02bf706e2aeea85673b2fc984305457d531f1fb7142bd143665`。
+  已直接檢視12345直橫More、底部工具及wallet fixture畫面，原共享入口在選單中、
+  原MOVE／WARP／祭祀操作位置保留。這是上述來源與限定UI狀態的驗證；report仍
+  保留WalletConnect舊SDK的process-is-not-defined錯誤，真人MetaMask／WC QR／
+  主網簽署未認證，不把workflow成功擴稱支付流程已在真人裝置打通。
+- 123點盤點沿既有 `docs/KGEN_TEMPLE_GAMEPLAY_MAP.md` 累積：全123唯一PointID、
+  108個數值座標，完整保留同座標不同點；16個現存temple入口對到21個ID，僅為
+  檔案存在。原文保留，完整123列均明示Functional／Visual NOT_VERIFIED，不把
+  入口數或Portal分類當完成數。另記legacy 5D動態卡片15條錯誤相對路徑，待原owner修。
+- 原三筆固定配額最新只讀鏈上證據：UTC2026-11-03T16:53:06.463Z，BSC block
+  131468181，hash `0x8aab6a31ed9886bd31816b3a50ab34a259873e0fcad5a9337cf4446b220e1047`；
+  同高度hash再讀相符。兩限額仍各6010.928961748633879781 KAIOS，銀行正常未暫停，
+  原共享10M cap proposal與原三案proposal／allocation未建立、原payment IDs未用。
+  這僅限原ID，不能擴稱全量跨ID未付；available並非扣除所有未付承諾的淨額。
+- 原三案最小私人JSON已從原package完整物件輸出，沒有整份checkpoint或秘密。
+  18333 bytes，SHA256 `3c76a6cdf70f14c96fbf3443aca597cc29044648459b17e4d0f389bc8a7a47a8`；
+  main實際inline controller選檔與逐案選擇離線3/3通過，原地址／金額／allocation、
+  payment、治理proposal ID及calldata全部精確相符，表單鎖定原地址金額。
+  實際wallet requests／簽名／交易仍0。私人檔留原本機資料夾，不公開受益人映射。
+- Human更正優先實作：普通玩家領獎採分層水龍頭，治理只事先設定規則與可信資格
+  來源，不能逐位玩家、逐樓層找Mother／Jade手簽。沿phase2既有Allocation及Bank
+  的防重付款邏輯，補claim時讀資格；不把DISPLAY_ONLY PlayerLife或未部署mock當
+  正式資格。原三筆固定配額與玩家一般領獎分開。Human要求先試通，再按實際成功
+  步驟寫定稿SOP；文件／模擬測試不冒稱真人錢包或水龍頭正式上鏈成功。
+- 原本機 `kaios` 資料夾已盤點284檔、86857668 bytes：34份文字／設定完整讀取或
+  解析；247張圖中244張PNG逐檔CRC及尺寸核對無錯、3份ZIP各成員CRC全過。
+  與本次UI相關圖已直接檢視，不宣稱247張歷史圖逐張人工驗收。保留的舊corrupt
+  checkpoint本身仍有JSON截斷錯誤；目前正式checkpoint及sidecar相符，歷史完整
+  保留且已累積68份工程回執。外層根欄位與早期snapshot是歷史，接續先讀
+  current_continuity最新receipt／下一步，不沿用舊頁未綁排程或舊main標記。
+- 舊手機操作線索已在原checkpoint實讀：BscScan Add Custom ABI → Custom Write
+  propose表單 → Connect a Wallet視窗。這些圖片紀錄證明填表／連線介面曾出現，
+  不證已簽署或成功提交。新頁沿原交易包查實際狀態，不讓Human重新拼ABI／calldata。
+- 資料位置索引續作已定位不同類型：正式程式以remote main及當前整合工作樹為準；
+  長期未同步的 `C:/Desktop/kline-odyssey` checkout仍停舊HEAD，不能覆蓋main。
+  `C:/Desktop/kline-odyssey-current` 是另一個獨立Git根及自身4個worktree，不因名稱
+  current就升為權威；部分backend／earthworm／fungi候選有獨立工作，Owner尚待核。
+  私有continuity／付款原案／排程與程式工作樹分開保存；後續沿原索引補實際位置，
+  不搬移或刪除未知來源工作，不假稱所有AI已同步或在同一個目錄寫檔。
+- 擴大Desktop查找後，本機原宇宙電梯成果也已找到於
+  `C:/Desktop/KAIOS_R0_ISOLATED_20261020`。原6971-byte ZIP hash與Drive原包完全
+  相符；另V1.1交付包734096 bytes也核對原hash。下一頁先讀其FINAL_WORKLOG最新
+  continuity，再讀delivery內HANDOFF與README，不能只看最早R0三檔。交付紀錄的
+  Writer／Controller／DOT ACK未綁、無GitHub提交部署等界限保留；歷史測試數本輪
+  未重跑，私人Drive URL不轉為公共共享權限。

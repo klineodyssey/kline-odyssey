@@ -1434,6 +1434,11 @@ runner instead of the moving ubuntu-latest image.
 
 ### Shared Hengyao successor handoff
 
+The 123-point playability inventory and per-PointID acceptance criteria are
+maintained cumulatively in [the existing gameplay map](docs/KGEN_TEMPLE_GAMEPLAY_MAP.md).
+The table preserves all 123 IDs, including shared coordinates; an existing URL
+is not a completed gameplay acceptance result.
+
 The cumulative public record for the2026-11-03 release, LINE/account routing,
 separate follow-up work and verified branch closeout is the existing
 [handoff/HANDOFF_CURRENT.md](handoff/HANDOFF_CURRENT.md). Discussion/recovery

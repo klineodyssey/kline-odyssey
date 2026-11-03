@@ -748,3 +748,25 @@ module/controller with offline RPC and wallet mocks. The complete phase2
 source candidate previously passed57 bank integration tests; that is separate
 from testing this smaller main-branch interface. No Mainnet transaction or
 phone-wallet visual acceptance is implied by either suite.
+
+### Player floor rewards: self-service faucet requirement
+
+Human confirmed that ordinary player floor rewards must work as a rule-based
+faucet: the player requests a claim, the contract verifies authoritative
+character/floor/task eligibility and the unclaimed entitlement, then the
+existing Bank pays the canonical beneficiary. Governance configures policy and
+its trusted qualification source; it must not manually propose/approve every
+player and every floor. This is separate from the original three fixed grants.
+
+The existing phase2 Allocation candidate already has bounded `claimFloor`
+payments and stable character/floor replay protection. Its manual governance
+qualification setters do not yet meet this automatic eligibility requirement.
+Candidate work therefore reuses that owner and Bank rather than creating a
+second pool, token, identity registry or Runtime. The current main frontend
+still verifies the deployed Allocation version and pins; this requirement is
+not a declaration that the new floor source is configured or deployed.
+
+Human requested an executed-flow check before a final operator SOP. The original
+three-case local import has been verified against the actual inline frontend;
+live signatures, receipts and the player-faucet activation remain separate
+acceptance steps. No Mainnet transaction is implied by the documentation.
