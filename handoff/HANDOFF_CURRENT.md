@@ -828,3 +828,29 @@ wallet validation, limit activation or the three payments. Next: fast-forward
 publish this bounded source to remote main under existing Human approval, verify
 Pages bytes, close the one temporary QA branch, then hand Human the original
 CAP_PROPOSE action through the published shared-cap mode.
+
+
+### Shared-cap published closeout — 2026-11-03T22:42:11+00:00 / 2026-11-04T06:42:11+08:00
+
+Accepted source eee4adf2 plus its QA receipt was fast-forward published as main
+4498920723942b01f09fde5f2fe355b14a9be940. Pages41732734471 SUCCESS; public
+18888 HTTP200 bytes exactly match accepted HTML SHA256
+006ef4f9256f460789db0fd1045b113d6a8b26cde6d4465f67621296ddc252dd.
+No open QA PR; only this worktree held the QA branch. After main containment
+and tracked-clean checks, root detached here at published main, deleted remote
+codex/kaios-shared-cap-qa with exact eee4adf2 lease, then normally deleted its
+local branch. No other checkout/worktree or untracked artifact was removed.
+This final receipt is the only additional documentation change after deployment.
+
+The published frontend is ready for Human-operated shared-cap review. From the
+existing18888 funding panel choose「共享一千萬調額」then王母, connect the lawful
+holder's own BSC56 wallet and read/preview the original CAP_PROPOSE; review and
+confirm only in that wallet. No private case file or beneficiary is needed.
+Reconcile the exact receipt before proceeding; then the lawful玉帝 approval,
+canonical proposal ETA and explicit execution/readback are separate steps.
+Proposal/approval is not cap activation, and cap activation is not payment.
+Original three fixed grants remain independent of new player eligibility;
+no actual agent transaction, payment, contract deployment or quota reset occurred.
+Player faucet candidate still NOT_DEPLOYED / formal source NOT_CONFIGURED.
+The same cloud shared memory will carry the verified source and this closeout;
+DOT's actual read/write or ACK remains unconfirmed. No duplicate memory file.
