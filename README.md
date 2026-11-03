@@ -1469,3 +1469,16 @@ and landscape states in isolated CI without a wallet, RPC or external service.
 Functional test results and direct screenshot review remain separate checks.
 The phase2 contract source is not activated or copied into main by this page;
 its three-path integration/Boot registration is a separately reviewed step.
+
+
+### 18888 standalone shared-limit operation
+
+The same funding panel now offers fixed allocation or「共享一千萬調額」. The
+shared-limit mode needs no beneficiary, case file or individual allocation and
+retains the original approved cap proposal ID/calldata. It uses the same wallet,
+durable pending key, Web Lock, role/runtime checks and receipt owner; it never
+creates an allocation or labels governance confirmation as payment. Original
+fixed cases and Guanyin pause remain available. The existing token-surface
+regression passes65/65; mobile visual verification uses the existing isolated
+Portal CI before publication. Wallet connection/signing and actual limit
+activation still require the lawful Human holder and canonical chain results.

@@ -740,3 +740,49 @@ next action is original CAP_PROPOSE by lawful Human holder, not an agent send.
 Root is checking the existing UI owner for a minimal cap-only preview option to
 avoid requiring a private three-case file on the phone; no dummy case, new
 Runtime/bootstrap or financial execution is authorized by that investigation.
+
+
+### Human phone reboot save point — 2026-11-03T22:11:21+00:00 / 2026-11-04T06:11:21+08:00
+
+Human requested saving before restarting the phone, not cancellation of the
+engineering task. Actual worktree: C:/Users/mydg0/AppData/Local/Temp/hengyao-main-integration;
+HEAD 2f2c77a3f8e287f4874b5cc67f841e6f5a26226f (detached, remote main at this source). Navigation publication and
+branch cleanup are complete as recorded above. Existing untracked artifacts remain.
+
+Saved root WIP: tests/kaios-portal-browser.mjs adds31 lines for SHARED_CAP offline
+Mother/Jade UI, exact original cap descriptor, blank case fields, no private file,
+no send authority and mode invalidation; node --check PASS, actual new browser
+execution NOT_RUN. Current browser test SHA256 344b7059e9a9bf3a5f1c1dcd4ba012e022bf3d7fe31a92194c3ccd1f6bc3e99b.
+The cap-only implementation owner is /root/handoff_audit for existing18888 HTML
+and token-surface test. At this save point the owner explicitly reports neither
+file modified yet; production HTML/test remain hashes2f03d58d…8fdde and6c07c19b…3f62d.
+Do not claim the independent cap mode is already implemented or tested.
+
+Next: owner finishes the bounded SHARED_CAP reader/derive/wallet/UI/source-test
+change; root reviews/runs it and the existing isolated browser CI, then publishes
+only verified changes. Original proposal ID/data/calldata pins are retained in
+the actual original packet and owner handoff. No transaction/signing/deployment,
+quota reset, new Runtime/bootstrap or secret access. Shared cloud memory uses the
+same existing 知蘭（DOT）與語音助理共同記憶 ID/link, not a second reboot file.
+
+
+### Shared-cap source ready for isolated mobile QA — 2026-11-03T22:18:19+00:00 / 2026-11-04T06:18:19+08:00
+
+Base remote main2f2c77a3; root resumed the already-authorized Human task after
+phone-reboot saving. Existing18888 now has fixed/cap modes; SHARED_CAP has no
+beneficiary/case/allocation/payment fields and keeps the exact original cap
+proposal/calldata. Same provider, pending key, lock and receipt owner; only
+CAP_PROPOSE/APPROVE/EXECUTE, pinned runtime/linkage/role checks, no lowering higher
+caps or erasing current-day spent. Original fixed-case and Guanyin flows remain.
+Independent original-packet comparison verified all three case IDs/amounts/
+purpose/payment IDs and allocation/governance/payout bytes, without publishing
+private mappings. Source owner complete;65/65 actual inline-source tests PASS.
+HTML SHA256 fbd5ed7ccdb80554bb956890ca2a2311af10bb99b44b85fe6f2b4e8c182a6a53;
+test SHA256 5f848aaf3cf84150c1679e5d4acc9a6a09109124bc1a5fd084ed71ba71f2c081.
+Root added browser coverage for actual empty-case cap drafts and original cap
+parameter equality, retaining existing fixed/pause/seven-floor/legacy asserts.
+Syntax/diff PASS; new cap screenshots NOT_RUN until existing isolated Portal CI.
+Only existing HTML/tests/README/index/handoff owners changed; no Boot/new files,
+chain writes, signing, funds, deployment, quota reset or HOLD changes. Next: same
+CI and direct image review on one temporary QA branch, then converge to main
+and close that branch after verified publication.

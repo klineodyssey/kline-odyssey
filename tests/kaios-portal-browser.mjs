@@ -193,6 +193,7 @@ async function verifyFundingPanel(){
       await noWalletAuthority('initial');
       assert.deepEqual(await page.locator('#funding-role option').evaluateAll(options=>options.map(option=>option.value)),Object.keys(roles));
       for(const [value,name] of Object.entries(roles)){
+        if(value==='guanyin'){await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('');}
         await page.locator('#funding-role').selectOption(value);
         assert.match(await page.locator('#funding-role-status').textContent(),new RegExp(`本次選擇：${name}`));
         assert.equal(await page.locator('#funding-ack').isChecked(),false,'role change clears acknowledgment');
@@ -200,7 +201,7 @@ async function verifyFundingPanel(){
         const geometry=await noOverflow(value);row.roles.push({value,name,sendDisabled:true,geometry});
         if(value!=='guanyin')await capture(value,value==='mother');
       }
-      await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('');
+      assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');assert.equal(await page.locator('#funding-amount').inputValue(),'');
       await page.locator('#funding-prepare').click();
       await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('OFFLINE_DRAFT_NOT_CHAIN_VERIFIED'));
       const pauseDraft=JSON.parse(await page.locator('#funding-preview').textContent());
@@ -223,6 +224,36 @@ async function verifyFundingPanel(){
       const fundingDraft=JSON.parse(await page.locator('#funding-preview').textContent());
       assert.equal(fundingDraft.beneficiary.toLowerCase(),beneficiary);assert.equal(fundingDraft.amountKaios,'1080000');
       await noWalletAuthority('offline Mother draft');row.longAddress=await noOverflow('long address and exact IDs');await capture('mother-long-address');
+      // The shared cap is the same original governance action, without a case,
+      // beneficiary or uploaded private packet. The real controller must work
+      // with blank case fields and must never imply that a preview paid anyone.
+      await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('');
+      assert.equal(await page.locator('#funding-mode').inputValue(),'fixed');
+      await page.locator('#funding-mode').selectOption('cap');
+      row.sharedCap=[];
+      for(const role of ['mother','jade']){
+        await page.locator('#funding-role').selectOption(role);
+        assert.equal(await page.locator('#funding-ack').isChecked(),false);
+        await page.locator('#funding-prepare').click();
+        await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('"type": "SHARED_CAP"'));
+        const capDraft=JSON.parse(await page.locator('#funding-preview').textContent());
+        assert.equal(capDraft.status,'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED');assert.equal(capDraft.chainId,56);
+        for(const key of ['beneficiary','amountKaios','amountWei','allocationId','paymentId','allocation','payout'])assert.equal(Object.hasOwn(capDraft,key),false,`shared cap has no individual case field ${key}`);
+        assert.deepEqual(capDraft.cap,fundingDraft.cap,'standalone cap keeps the exact original fixed-case cap ID/hash/calldata');
+        assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');assert.equal(await page.locator('#funding-amount').inputValue(),'');
+        assert.equal(await page.locator('#funding-case').inputValue(),'');assert.equal(await page.locator('#funding-file').evaluate(input=>input.files.length),0);
+        assert.match(await page.locator('#funding-summary').textContent(),/調額/);
+        assert.doesNotMatch(await page.locator('#funding-summary').textContent(),/undefined/);
+        assert.match(await page.locator('#funding-ack-text').textContent(),/共享|調額/);
+        await page.locator('#funding-ack').check();await noWalletAuthority(`offline shared cap ${role}`);
+        row.sharedCap.push({role,type:capDraft.type,proposalId:capDraft.cap.proposalId,noCaseRequired:true,sendDisabled:true,geometry:await noOverflow(`shared cap ${role}`)});
+        await capture(`shared-cap-${role}`,true);
+        await page.locator('#funding-ack').uncheck();
+      }
+      await page.locator('#funding-ack').check();
+      await page.locator('#funding-mode').selectOption('fixed');
+      assert.equal(await page.locator('#funding-ack').isChecked(),false,'mode changes invalidate the previous shared-cap acknowledgment');
+      await noWalletAuthority('changed back to fixed allocation');
       // Exercise the real seven-floor controller in the same isolated context.
       // No game character, wallet provider, eligibility source or RPC is supplied.
       const seven=page.locator('#seven-floor-panel');
@@ -294,6 +325,7 @@ async function verifyFundingPanel(){
     finally{await context.close();}
   }
   report.checks.push('actual 18888 module boot and three role choices; no wallet connection or send; offline Guanyin draft without case/address/amount; acknowledgment and role selection grant no authority; long address/ID wrapping in portrait and landscape');
+  report.checks.push('standalone shared-cap Mother/Jade offline drafts require no beneficiary or private file, retain exact original cap ID/hash/calldata, have no individual payout fields, and never grant unconnected send authority; mode changes clear acknowledgment; portrait/landscape captures');
   report.checks.push('actual seven-floor inline controller; all seven caps and 44px touch targets; one-wei excess rejected; skip clears acknowledgment; all18 basement levels remain disabled; unknown funds/no payment; portrait and landscape screenshots with no wallet or RPC');
 }
 try{

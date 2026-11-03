@@ -498,3 +498,15 @@ This source is a non-active candidate: NOT_DEPLOYED/null release pins,
 unconfigured production qualification mapping, no new main contract source,
 no signer, no automatic claim and no Mainnet transaction. A local PlayerLife
 or selected floor remains display context, not entitlement.
+
+
+### Shared cap mode in the same18888 funding owner
+
+`K線西遊記/temples/18888/index.html#funding-controller` also owns SHARED_CAP:
+no beneficiary/case/payment fields, identical original shared-cap proposal
+parameters, and the same pending key/lock/receipt path as fixed funding and
+pause. Existing `KGEN-KAIOS/tests/token-surface.security.test.mjs` covers the
+new canonical flow/role/epoch/runtime/receipt boundaries (65/65 overall). Existing
+`tests/kaios-portal-browser.mjs --funding-only` adds Mother/Jade shared-cap drafts
+with empty case fields, no file/RPC/writes, and portrait/landscape images. No
+new frontend file, Runtime, bootstrap or public beneficiary mapping is added.

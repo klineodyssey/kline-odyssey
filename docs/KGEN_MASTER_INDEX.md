@@ -1071,3 +1071,14 @@ tested fingerprints and bounded Boot-registration proposal remain in the
 existing phase2 `KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md`.
 Do not infer that this index entry imports them, authorizes Boot changes,
 configures production eligibility or deploys a contract.
+
+
+### Existing18888 shared-limit owner extension
+
+The existing18888 inline funding owner now includes `buildSharedCapPlan`,
+`deriveSharedCapStep` and `SharedCapWallet`, using the same governance encoder,
+provider capability, pending storage and lock/receipt implementation. SHARED_CAP
+has only shared governance data and accepts only CAP_PROPOSE/CAP_APPROVE/
+CAP_EXECUTE intents. No new contract/source path, authority or deployment is
+introduced. Existing fixed-case IDs and calldata were independently checked
+against all three original cases; current65-test offline regression passes.

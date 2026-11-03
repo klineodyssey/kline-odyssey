@@ -74,7 +74,7 @@ async function inlineBankApi() {
   const context = { ...ethers.utils, window: {}, navigator: {}, structuredClone };
   vm.runInNewContext(adapter + `\nglobalThis.bankTestApi = {
     FUNDING_FORMAL,FUNDING_RUNTIME_PINS,FUNDING_IMPLEMENTATION_SLOT,FUNDING_STORAGE_KEY,FUNDING_LOCK_KEY,
-    buildLifeResourcePlan,deriveFundingStep,HumanFundingWallet,
+    buildLifeResourcePlan,deriveFundingStep,HumanFundingWallet,buildSharedCapPlan,deriveSharedCapStep,SharedCapWallet,
     buildBankPausePlan,deriveBankPauseStep,HumanBankPauseWallet,readFundingRuntimePins,
     SEVEN_FLOORS,SEVEN_FLOOR_RELEASE,sevenFloorRuntimePins,projectSevenFloorPlayerContext,
     validateSevenFloorAmount,buildSevenFloorPlan,deriveSevenFloorStep,SevenFloorClaimWallet,
@@ -417,7 +417,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   await t.test("actual funding controller discards stale prepare success and failure after form changes", async () => {
     const { readFileSync } = await import("node:fs");
     const { runInNewContext } = await import("node:vm");
-    const { buildBankPausePlan } = await inlineBankApi();
+    const { buildBankPausePlan, buildSharedCapPlan } = await inlineBankApi();
     const html = readFileSync(new URL("../../K線西遊記/temples/18888/index.html", import.meta.url), "utf8");
     const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
     assert.ok(source, "test the real existing inline funding controller");
@@ -443,7 +443,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         }
         return nodes.get(name);
       };
-      node("beneficiary").value = beneficiary; node("amount").value = "1080000"; node("role").value = "mother";
+      node("beneficiary").value = beneficiary; node("amount").value = "1080000"; node("role").value = "mother"; node("mode").value = "fixed";
       // Match the retained HTML's inert native anchors before the controller boots.
       for (const name of ["native-metamask", "native-trust"]) {
         node(name).setAttribute("aria-disabled", "true"); node(name).tabIndex = -1;
@@ -467,7 +467,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             snapshot: { account: state.account, chainId: state.chainId, codeOk: true, identityErrors: [],
               roles: { proposer: state.account === formal.mother, approver: state.account === formal.jade, pauser: state.pauser },
               ...options.snapshotOverride },
-            step: { ready: allowed, kind: pause ? "BANK_PAUSE" : "ALLOCATION_PROPOSE",
+            step: { ready: allowed, kind: pause ? "BANK_PAUSE" : nextPlan?.type === "SHARED_CAP" ? "CAP_PROPOSE" : "ALLOCATION_PROPOSE",
               blockers: allowed ? [] : ["GUANYIN_PAUSER_REQUIRED"], to: pause ? formal.bank : formal.governance } };
         }
         async request(candidate) { requests.push(candidate); if (this.nextSend) await this.nextSend.promise; return { hash: transactionHash }; }
@@ -477,6 +477,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       class FakePauseWallet extends FakeWallet {
         async prepare() { return super.prepare(buildBankPausePlan()); }
       }
+      class FakeCapWallet extends FakeWallet { async prepare(plan = buildSharedCapPlan()) { return super.prepare(plan); } }
       const window = { ethereum: provider, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
         localStorage: storage(), addEventListener() {}, dispatchEvent() {} };
       const context = { window, document: { getElementById: (id) => node(id.replace(/^funding-/, "")),
@@ -484,7 +485,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         Event: class { constructor(type) { this.type = type; } },
         CustomEvent: class { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }, URL,
         Option: class { constructor(textContent, value) { this.textContent = textContent; this.value = value; } },
-        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan,
+        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, SharedCapWallet: FakeCapWallet,
         HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet };
       runInNewContext(controller + "\nglobalThis.uiProbe = { preview: () => preview, setCases: (cases) => { importedCases = cases; } };", context);
       node("wallet").value = "0";
@@ -544,6 +545,38 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(ui.probe.preview(), null, change); assert.equal(ui.node("send").disabled, true, change);
       await ui.node("send").onclick(); assert.equal(ui.requests.length, 0, change);
     }
+    for (const role of ["mother", "jade"]) {
+      const cap = await mount({ account: formal[role] });
+      cap.node("role").value = role; cap.node("role").emit("change");
+      cap.node("beneficiary").value = ""; cap.node("amount").value = "";
+      cap.node("ack").checked = true;
+      cap.node("mode").value = "cap"; cap.node("mode").emit("change");
+      assert.equal(cap.node("ack").checked, false); assert.equal(cap.node("send").disabled, true);
+      await cap.node("prepare").onclick();
+      equalInline(cap.probe.preview().plan, buildSharedCapPlan());
+      assert.equal(cap.node("beneficiary").disabled, true); assert.equal(cap.node("file").disabled, true);
+      assert.doesNotMatch(cap.node("summary").textContent, /undefined|本案：|已付款|入帳/);
+      assert.equal(cap.requests.length, 0, "role/mode/prepare never requests a transaction");
+      cap.node("ack").checked = true; cap.node("ack").emit("change");
+      assert.equal(cap.node("send").disabled, false);
+      cap.node("mode").value = "fixed"; cap.node("mode").emit("change");
+      assert.equal(cap.probe.preview(), null); assert.equal(cap.node("ack").checked, false);
+      assert.equal(cap.node("beneficiary").disabled, false);
+      assert.equal(cap.wallets.length, 2, "switching back reuses the original fixed wallet session");
+      await cap.node("send").onclick(); assert.equal(cap.requests.length, 0);
+      cap.node("mode").value = "cap"; cap.node("mode").emit("change");
+      const wait = deferred(); cap.wallets[1].next = wait;
+      const preparing = cap.node("prepare").onclick();
+      cap.node("mode").value = "fixed"; cap.node("mode").emit("change");
+      wait.resolve(); await preparing;
+      assert.equal(cap.probe.preview(), null, "late cap response cannot replace the fixed form");
+      cap.node("role").value = "guanyin"; cap.node("role").emit("change");
+      cap.node("mode").value = "cap"; cap.node("mode").emit("change");
+      await cap.node("prepare").onclick();
+      assert.equal(cap.probe.preview().plan.type, "BANK_PAUSE", "Guanyin always takes priority over cap mode");
+      assert.equal(cap.node("send").disabled, true, "Mother/Jade cannot acquire Guanyin authority by choosing pause");
+    }
+
     const unprivileged = await mount({ forceReady: true });
     unprivileged.node("role").value = "guanyin"; unprivileged.node("role").emit("change");
     await unprivileged.node("prepare").onclick();
@@ -595,6 +628,143 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   });
 });
 
+
+test("shared cap: beneficiary-free governance preserves original bytes, accounting and receipt locks", async (t) => {
+  const api = await inlineBankApi(), { Interface } = await import("ethers"), { createHash } = await import("node:crypto");
+  const F = api.FUNDING_FORMAL, plan = api.buildSharedCapPlan(), bank = new Interface(api.bankAbi), gov = new Interface(api.governanceAbi), alloc = new Interface(api.allocationAbi);
+  const zero = "0x" + "0".repeat(40), tag = "0x1234", timestamp = 1_700_000_000, hash = "0x" + "11".repeat(32), blockHash = "0x" + "22".repeat(32);
+  const absent = () => ({ target: zero, value: "0", dataHash: "0x" + "0".repeat(64), executableAt: "0", proposer: zero, approver: zero, executed: false, cancelled: false });
+  const snapshot = () => ({ chainId: 56, account: F.mother, timestamp: String(timestamp), codeOk: true, token: F.kaios, decimals: 18,
+    identityErrors: [], roles: { proposer: true, approver: false, moduleAdmin: true, allocationGovernance: true },
+    module: { module: F.allocation, versionHash: F.versionHash, active: true, perTransactionLimit: "1", epochLimit: "1", epochSpent: "0", epochIndex: String(Math.floor(timestamp / 86400)) },
+    health: { healthy: true, paused: false, available: "0" }, capProposal: absent() });
+  const storage = () => { const map = new Map(); return { getItem: k => map.get(k) ?? null, setItem: (k,v) => map.set(k,v), removeItem: k => map.delete(k) }; };
+  const make = (options = {}) => {
+    const calls = [], listeners = new Map(), records = options.storage ?? storage(); let current = snapshot(), receipt = null, now = timestamp * 1000;
+    const provider = { on: (event, listener) => listeners.set(event, listener), request: async ({method, params = []}) => {
+      calls.push({method, params});
+      if (method === "eth_sendTransaction") { if (options.rejected) throw Object.assign(Error("rejected"), {code:4001}); return hash; }
+      if (method === "eth_chainId") return "0x38";
+      if (method === "eth_getTransactionReceipt") return receipt;
+      if (method === "eth_getTransactionByHash") { const tx = calls.find(c => c.method === "eth_sendTransaction")?.params[0]; return tx ? {...tx,input:tx.data} : null; }
+      if (method === "eth_getBlockByNumber") return {number:tag,hash:options.noncanonical ? id("wrong block") : blockHash};
+      throw Error(`No external RPC in cap wallet test: ${method}`);
+    }};
+    const wallet = new api.SharedCapWallet({provider,storage:records,now:()=>now,locks:{request:async(_key,_opts,fn)=>fn({})}});
+    wallet.inspect = async () => structuredClone(current);
+    return {wallet,provider,calls,listeners,storage:records,state:()=>current,change:s=>{current=s;},expire:()=>{now+=120001;},sends:()=>calls.filter(c=>c.method==="eth_sendTransaction"),
+      confirm(mode="exact") {
+        current.capProposal = {...absent(),target:plan.cap.target,dataHash:plan.cap.dataHash,proposer:F.mother,approver:F.jade,executed:true};
+        current.module.perTransactionLimit = F.capWei; current.module.epochLimit = mode === "cap" ? "1" : F.capWei;
+        if (mode === "pin") current.identityErrors = ["ALLOCATION_RUNTIME_HASH_MISMATCH"];
+        if (mode === "code") current.codeOk = false;
+        if (mode === "linkage") current.roles.allocationGovernance = false;
+        if (mode === "module") current.module.versionHash = id("changed module version");
+        if (mode === "proposer") current.capProposal.proposer = F.jade;
+        if (mode === "value") current.capProposal.value = "1";
+        const kind = wallet.readPending().kind, name = kind.endsWith("PROPOSE") ? "GovernanceProposalCreated" : kind.endsWith("APPROVE") ? "GovernanceProposalApproved" : "GovernanceProposalExecuted";
+        const args = name === "GovernanceProposalCreated" ? [plan.cap.proposalId,plan.cap.target,plan.cap.dataHash,timestamp+3600,F.mother] : name === "GovernanceProposalApproved" ? [plan.cap.proposalId,F.jade] : [plan.cap.proposalId,plan.cap.target,mode === "hash" ? id("wrong data") : plan.cap.dataHash];
+        const log = {address:mode === "emitter" ? F.bank : F.governance,...gov.encodeEventLog(gov.getEvent(name),args)};
+        receipt = {status:"0x1",transactionHash:hash,blockNumber:tag,blockHash,logs:mode === "status" ? [] : [log]};
+      }};
+  };
+  await t.test("original shared cap ID and inner/propose bytes are independently pinned with no case fields", () => {
+    assert.equal(plan.type,"SHARED_CAP"); assert.equal(plan.chainId,56); assert.ok(Object.isFrozen(plan.cap));
+    for (const key of ["beneficiary","amountKaios","amountWei","allocationId","paymentId","allocation","payout"]) assert.equal(Object.hasOwn(plan,key),false,key);
+    assert.equal(plan.cap.proposalId,"0x04b32971499320d4618243fca4b1ed68e18d19181b45550922b248e9c00d37eb");
+    assert.equal(plan.cap.dataHash,"0xa0c986f3a7ccd75216e4e5fb626a54aa38121d0684769deeef60d6676c33fa9a");
+    const digest = data => createHash("sha256").update(Buffer.from(data.slice(2),"hex")).digest("hex");
+    assert.equal(digest(plan.cap.data),"3139db4a62146c1772e02fcad3b2601d57833d57a121226cc3e3ff8dd9331840");
+    assert.equal(digest(api.deriveSharedCapStep(plan,snapshot()).data),"f6b8337dfca0f65de86017bae0d83c92c7b5b81e5bd38ee4d955826619391584");
+    for (const beneficiary of [F.mother,F.jade,F.guanyin]) equalInline(api.buildLifeResourcePlan({beneficiary,amount:"1080000"}).cap,plan.cap);
+  });
+  await t.test("real fixed-block inspector reads shared governance and three pins, never individual cases", async () => {
+    const calls = [], token = new Interface(["function decimals() view returns(uint8)"]);
+    const provider = { request:async({method,params=[]})=>{
+      calls.push({method,params});
+      if (method === "eth_chainId") return "0x38";
+      if (method === "eth_accounts") return [F.mother];
+      if (method === "eth_getBlockByNumber") return {number:tag,timestamp:"0x"+timestamp.toString(16)};
+      if (method === "eth_getStorageAt") { assert.equal(params[1],api.FUNDING_IMPLEMENTATION_SLOT); assert.equal(params[2],tag); const pin = Object.values(api.FUNDING_RUNTIME_PINS).find(p=>p.proxy.toLowerCase()===params[0].toLowerCase()); assert.ok(pin); return "0x"+pin.implementation.slice(2).padStart(64,"0"); }
+      if (method === "eth_getCode") { assert.equal(params[1],tag); return "0x6000"; }
+      if (method === "eth_call") {
+        assert.equal(params[1],tag); const address = params[0].to.toLowerCase();
+        const iface = address===F.bank.toLowerCase()?bank:address===F.governance.toLowerCase()?gov:address===F.allocation.toLowerCase()?alloc:token;
+        const parsed = iface.parseTransaction({data:params[0].data}); assert.ok(parsed);
+        assert.ok(!["allocation","modulePaymentConsumed","createAllocation","executeAllocation"].includes(parsed.name),`forbidden individual-case selector ${parsed.name}`);
+        if (parsed.name === "proposal") assert.equal(parsed.args[0],plan.cap.proposalId,"only the shared cap proposal can be read");
+        const values = {kaios:[F.kaios],decimals:[18],module:[[F.allocation,F.versionHash,1,1,0,Math.floor(timestamp/86400),true]],bankHealth:[0,0,0,0,0,true,false],
+          proposal:[[zero,0,"0x"+"0".repeat(64),0,zero,zero,false,false]],hasRole:[true],bank:[F.bank],governanceDelay:[3600]};
+        assert.ok(Object.hasOwn(values,parsed.name),parsed.name); return iface.encodeFunctionResult(parsed.name,values[parsed.name]);
+      }
+      throw Error(`Forbidden shared inspector RPC: ${method}`);
+    }};
+    const wallet = new api.SharedCapWallet({provider,storage:storage()}); const state = await wallet.inspect(plan);
+    assert.equal(calls.filter(c=>c.method==="eth_getStorageAt").length,3);
+    assert.equal(calls.filter(c=>c.method==="eth_call" && c.params[0].data.startsWith(gov.getFunction("proposal").selector)).length,1);
+    assert.ok(state.identityErrors.length>=3,"synthetic runtime bytes must fail the actual reviewed pins");
+    assert.equal(api.deriveSharedCapStep(plan,state).ready,false);
+    for (const key of ["allocationProposal","allocation","paymentConsumed"]) assert.equal(Object.hasOwn(state,key),false,key);
+    assert.equal(calls.some(c=>/send|sign/i.test(c.method)),false);
+  });
+  await t.test("unknown identity, accounting, roles, cap lowering and current UTC spend fail closed", () => {
+    assert.equal(api.deriveSharedCapStep(plan,snapshot()).kind,"CAP_PROPOSE");
+    for (const mutate of [s=>{s.chainId=1;},s=>{s.account=F.guanyin;},s=>{s.codeOk=false;},s=>{s.token=F.bank;},s=>{s.decimals=6;},
+      s=>{s.identityErrors=["PIN_MISMATCH"];},s=>{delete s.identityErrors;},s=>{s.roles.proposer=false;},s=>{s.roles.moduleAdmin=false;},s=>{s.roles.allocationGovernance=false;},
+      s=>{s.health.paused=true;},s=>{s.health.healthy=false;},s=>{s.module.active=false;},s=>{s.module.versionHash=id("wrong version");},
+      s=>{s.module.perTransactionLimit=String(BigInt(F.capWei)+1n);},s=>{s.module.epochSpent="1";},s=>{delete s.module.epochSpent;},s=>{delete s.capProposal;},s=>{delete s.capProposal.cancelled;}]) {
+      const state=snapshot();mutate(state);assert.equal(api.deriveSharedCapStep(plan,state).ready,false);
+    }
+    const old=snapshot();old.module.epochSpent="1";old.module.epochIndex=String(Math.floor(timestamp/86400)-1);
+    assert.equal(api.deriveSharedCapStep(plan,old).ready,true,"old UTC epoch does not erase current-day spending");
+    const done=snapshot();done.module.perTransactionLimit=done.module.epochLimit=F.capWei;
+    const step=api.deriveSharedCapStep(plan,done);assert.equal(step.kind,"CAP_ALREADY_CONFIGURED");assert.equal(step.ready,false);
+    assert.equal(api.deriveSharedCapStep({...plan,beneficiary:F.mother},snapshot()).ready,false);
+  });
+  await t.test("only exact distinct Jade approval and chain ETA advance the original proposal", () => {
+    const state=snapshot();state.capProposal={...absent(),target:plan.cap.target,dataHash:plan.cap.dataHash,proposer:F.mother,executableAt:String(timestamp+3600)};
+    assert.equal(api.deriveSharedCapStep(plan,state).ready,false);
+    state.account=F.jade;state.roles.approver=true;assert.equal(api.deriveSharedCapStep(plan,state).kind,"CAP_APPROVE");
+    state.capProposal.approver=F.jade;assert.equal(api.deriveSharedCapStep(plan,state).kind,"WAIT_ETA");
+    state.capProposal.executableAt=String(timestamp);assert.equal(api.deriveSharedCapStep(plan,state).kind,"CAP_EXECUTE");
+    for(const patch of [{dataHash:id("wrong")},{proposer:F.jade},{approver:F.mother},{cancelled:true},{executed:true},{target:F.allocation}]) {
+      assert.equal(api.deriveSharedCapStep(plan,{...state,capProposal:{...state.capProposal,...patch}}).ready,false,JSON.stringify(patch));
+    }
+  });
+  await t.test("fresh state, generation, expiry, locks and wallet refusal never bypass one explicit send", async () => {
+    for(const mutate of [m=>{m.state().account=F.jade;},m=>{m.state().chainId=1;},m=>{m.state().module.epochSpent="1";},m=>{m.state().identityErrors=["PIN_CHANGED"];},m=>m.wallet.invalidate(),m=>m.expire(),m=>m.listeners.get("accountsChanged")([F.jade])]) {
+      const m=make(),preview=await m.wallet.prepare();assert.equal(preview.step.ready,true);mutate(m);await assert.rejects(m.wallet.request(preview));assert.equal(m.sends().length,0);assert.equal(m.wallet.readPending(),null);
+    }
+    const held=make();held.wallet.locks={request:async(_key,_opts,fn)=>fn(null)};await assert.rejects(held.wallet.request(await held.wallet.prepare()));assert.equal(held.sends().length,0);
+    const rejected=make({rejected:true});await assert.rejects(rejected.wallet.request(await rejected.wallet.prepare()));assert.equal(rejected.sends().length,1);assert.equal(rejected.wallet.readPending(),null);
+    const exact=make(),preview=await exact.wallet.prepare();await Promise.allSettled([exact.wallet.request(preview),exact.wallet.request(preview)]);assert.equal(exact.sends().length,1);
+    assert.equal(exact.wallet.readPending().flowType,"SHARED_CAP");
+    equalInline(exact.sends()[0].params[0],{from:F.mother,to:F.governance,data:api.deriveSharedCapStep(plan,snapshot()).data,value:"0x0",chainId:"0x38"});
+  });
+  await t.test("all four flows and unknown pending types remain isolated before provider reads", async () => {
+    const flows=[[api.SharedCapWallet,plan,"CAP_PROPOSE"],[api.HumanFundingWallet,api.buildLifeResourcePlan({beneficiary:F.mother,amount:"1"}),"CAP_PROPOSE"],
+      [api.HumanBankPauseWallet,api.buildBankPausePlan(),"BANK_PAUSE"],[api.SevenFloorClaimWallet,api.buildSevenFloorPlan({characterId:id("CAP-ISOLATION"),floor:1,amount:"1"}),"FLOOR_CLAIM"]];
+    for(const[Owner,ownerPlan,kind]of flows)for(const[Other]of flows)if(Owner!==Other){
+      const records=storage(),raw=JSON.stringify({plan:ownerPlan,kind});records.setItem(api.FUNDING_STORAGE_KEY,raw);
+      const wallet=new Other({storage:records,locks:{request:async(_k,_o,fn)=>fn({})},provider:{request(){throw Error("NO_RPC");}}});
+      await assert.rejects(wallet.reconcile(hash),/PENDING_OTHER_FLOW/);assert.equal(records.getItem(api.FUNDING_STORAGE_KEY),raw);
+    }
+    for(const pending of [{plan:{...plan,type:"UNKNOWN"},kind:"CAP_PROPOSE"},{plan,kind:"PAYOUT"},{plan,kind:"CAP_PROPOSE",transaction:{}}]) {
+      const m=make();m.storage.setItem(api.FUNDING_STORAGE_KEY,JSON.stringify(pending));await assert.rejects(m.wallet.reconcile(hash),/UNKNOWN_TRANSACTION_FLOW|PENDING_TRANSACTION_INVALID/);assert.equal(m.calls.length,0);assert.ok(m.wallet.readPending());
+    }
+  });
+  await t.test("exact canonical governance receipts confirm only cap steps; failed pins and effects retain pending", async () => {
+    for(const kind of ["CAP_PROPOSE","CAP_APPROVE","CAP_EXECUTE"])for(const mode of ["exact","status","hash","emitter","pin","code","linkage","module","proposer","value","cap","canonical"]) {
+      if ((mode==="hash"||mode==="cap") && kind!=="CAP_EXECUTE") continue;
+      const m=make({noncanonical:mode==="canonical"}),state=m.state();
+      if(kind!=="CAP_PROPOSE") {state.capProposal={...absent(),target:plan.cap.target,dataHash:plan.cap.dataHash,proposer:F.mother,executableAt:String(timestamp)};state.account=F.jade;state.roles.approver=true;}
+      if(kind==="CAP_EXECUTE")state.capProposal.approver=F.jade;
+      const preview=await m.wallet.prepare();assert.equal(preview.step.kind,kind);await m.wallet.request(preview);m.confirm(mode);
+      const result=await m.wallet.reconcile(hash);assert.equal(result.status,mode==="exact"?"CONFIRMED":"MISMATCH",`${kind}/${mode}`);
+      assert.notEqual(result.status,"VERIFIED_PAID");assert.equal(m.wallet.readPending()===null,mode==="exact");assert.equal(m.sends().length,1);
+    }
+  });
+});
 
 test("bank pause wallet: only verified Guanyin can request one pause and receipts never imply payment", async (t) => {
   const { Interface } = await import("ethers");
