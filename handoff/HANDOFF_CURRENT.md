@@ -803,3 +803,28 @@ Updated actual HTML SHA256 006ef4f9256f460789db0fd1045b113d6a8b26cde6d4465f67621
 0 FAIL/SKIP, duration_ms19184.6392; syntax/diff PASS. The same single QA branch
 will carry the correction to the same isolated CI; corrected screenshots and
 direct review are still required. No local browser, real wallet or chain writes.
+
+
+### Shared-cap corrected mobile acceptance — 2026-11-03T22:39:38+00:00 / 2026-11-04T06:39:38+08:00
+
+Source eee4adf238bb6723c40a5e7345ab365f0917d530 passed existing Portal CI
+41731321788 (portal126249137343, all steps SUCCESS). Artifact13276822328,
+27,632,152 bytes, SHA256 b0bfd3d8ce31dcd27e4503a4ebad749ffd638a2a79012729a8c97487cc474b76,
+passed SHA/CRC and all183 path/containment checks into existing private visual-qa.
+Root directly reviewed all8 corrected shared-cap images (Mother/Jade × portrait/
+landscape × viewport/panel); helper newly reviewed all16 fixed/pause images.
+Captured-state VISUAL_QA PASS: unrelated case fields are hidden for cap/pause,
+fixed mode restores them, public role/long IDs wrap, title/ACK/send remain clear,
+and unconnected acknowledgment never enables sending. Panel images are exact
+browser captures, not altered mockups. Existing navigation and seven-floor CI
+assertions remain. Financial core was independently reviewed with no blocker;
+complete source regression65/65 PASS after the presentation correction.
+
+HTML006ef4f9256f460789db0fd1045b113d6a8b26cde6d4465f67621296ddc252dd
+is the accepted code payload. Governance uses only the original shared cap ID/
+calldata and lawful Human wallet confirmation; no agent chain write or actual
+payment occurred. This closes frontend/mobile engineering, not real-world
+wallet validation, limit activation or the three payments. Next: fast-forward
+publish this bounded source to remote main under existing Human approval, verify
+Pages bytes, close the one temporary QA branch, then hand Human the original
+CAP_PROPOSE action through the published shared-cap mode.
