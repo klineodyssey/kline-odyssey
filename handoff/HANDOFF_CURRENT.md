@@ -677,3 +677,37 @@ claim/payment flow over additional prose. Ordinary player self-claim still lacks
 a compatible formal character/controller/floor/task source; the historical
 Eligibility proxy alone does not expose that interface. Original fixed cases
 remain independent, with fresh chain preflight required before Human wallet action.
+
+
+### Navigation convergence and DOT shared-memory boundary — 2026-11-03T21:57:00+00:00 / 2026-11-04T05:57:00+08:00
+
+- Human-authorized root continuation, not a heartbeat publication. Integration
+  tree is C:/Users/mydg0/AppData/Local/Temp/hengyao-main-integration; code source
+  0b29fd9372a5d67d46373155b3f0262f80adbd96 descends from remote main a90b10cb.
+  Mandatory Boot/Physics/Map/AGENTS fingerprints remain unchanged; codex-gm-01
+  ACTIVE/T5 and acknowledgments pass; active_claims=[]; Cursor cost pause and
+  protected HOLD states remain. The original dirty checkout/local main is untouched.
+- Navigation source changes exactly the existing hub and its two existing tests.
+  Node14/14 (480 URL cases) and isolated Portal CI41724227464 PASS. All60 actual
+  card document clicks return the expected URL/HTTP200. Artifact13273742478
+  SHA256 c3d425d4beb094880b0a60014cb148cb1035b59e9742800fc7a7ce085d805fbf;
+  all175 members pass CRC/path checks. Helper reviewed8/8 new images; root directly
+  reviewed the two Pages viewport images. Captured navigation visual states PASS,
+  not15/123 gameplay completion or a real-wallet/chain result.
+- Human confirmed DOT's current page name is 織嵐. The one existing native Doc is
+  now titled「織嵐（DOT）與語音助理共同記憶」with the same fixed document ID/link
+  recorded above, and its entry is linked from the existing central memory index.
+  Scoped edits and delivery-boundary note were read back. Do not create another
+  copy or infer that other pages already read it. Public GitHub comment6615763848
+  was sent and read back; direct chat delivery remains NOT_SENT because the
+  accessible app-thread list has no identified 織嵐 destination. Human will tell
+  DOT to read/write the same Doc; no fake ACK, app takeover or instant sync claim.
+- Existing isolated R0 elevator fix received independent source/ZIP comparison
+  and45/45 Node PASS; its protected integration status is unchanged. AutoLP
+  remains architecture-only/HOLD (3 specific and263 full tests previously PASS).
+  No money, deployment, signing, quota reset or new external worker was used.
+- Code is ready for fast-forward publication under existing Human approval.
+  Next: publish this bounded navigation result to remote main, verify Pages bytes,
+  then close only codex/kaios-navigation-qa with an exact remote-head check.
+  Real fixed-case funding still requires Human's original CAP_PROPOSE wallet
+  confirmation; ordinary player faucet still lacks the formal source/deployment.

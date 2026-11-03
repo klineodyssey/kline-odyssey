@@ -254,3 +254,27 @@ Human 的最高整合目標是讓正式地圖 **123 個 PointID 全部可到達�
 | `P_28100000p0_木星_R117` | 木星 | 28100000 | 無同座標 temple 入口 | NOT_VERIFIED | NOT_VERIFIED |
 | `P_87654321p0_天堂_R118` | 天堂 | 87654321 | 無同座標 temple 入口 | NOT_VERIFIED | NOT_VERIFIED |
 | `P_87654321p0_天庭_Rjson` | 天庭 | 87654321 | 無同座標 temple 入口 | NOT_VERIFIED | NOT_VERIFIED |
+
+
+### Legacy card navigation verified — 2026-11-03
+
+The earlier 15/15 broken-relative-path observation above describes the preserved
+pre-fix snapshot. Source `0b29fd9372a5d67d46373155b3f0262f80adbd96` corrects the
+existing `K線西遊記/modules/universe-runtime/temple-hub.js` owner to resolve
+those shared cards through the existing temple root. It does not alter NODES,
+formal PointIDs, coordinates or gameplay rules.
+
+Existing Node tests pass14/14, including480 canonical URL resolutions. Existing
+isolated Portal CI41724227464 passes all steps. The browser exercised15 cards
+in4 contexts (local/Pages-prefix ×390x844/844x390):60/60 clicks reached the exact
+canonical document URL with HTTP200 and valid hit targets. Destination scripts
+were disabled by test-response CSP; zero network writes were recorded. The helper
+directly reviewed all8 new images and root reviewed both Pages viewport images.
+Captured navigation states pass visual QA; long-panel fixed-HUD capture strips
+are retained and are not substituted for actual viewport placement evidence.
+
+Artifact13273742478 (25,700,751 bytes) SHA256:
+`c3d425d4beb094880b0a60014cb148cb1035b59e9742800fc7a7ce085d805fbf`.
+All175 ZIP members passed CRC and path checks. This closes the specified legacy
+card document-navigation defect only. None of the123 PointID gameplay rows is
+promoted to functional/visual PASS by this result.
