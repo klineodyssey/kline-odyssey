@@ -655,6 +655,8 @@ html.kgen-v30 #k12345-ai-dialog #kgen-ai-body { position:static!important;inset:
 #k12345-more header { position:sticky;top:-16px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#081723;padding:8px 0;z-index:1; }
 #k12345-more-close { color:#dff;background:#173747;border:1px solid #7aa;border-radius:8px;padding:8px; }
 #k12345-more-content { display:grid;gap:16px; }
+/* The shared entry belongs to this menu flow, including under core nav rules. */
+#universe-nav > #kaiosSharedGameEntry[data-kaios-shared-game-layout="flow"] { position:static!important; }
 html.k12345-composed {
  --kgen-v10-dock-h:0px;
 }

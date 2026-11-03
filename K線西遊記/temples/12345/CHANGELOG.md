@@ -1,3 +1,9 @@
+# 2026-11-04｜Shared game menu entry
+
+- Keep the existing runtime/gameplay version and transaction paths.
+- The shared game link marked `flow` stays in the original universe menu; the responsive presentation owner prevents the broad core nav rule from overriding its static positioning.
+- Retain the original browser assertions for menu reachability, 44px targets, ritual shortcuts and unchanged game-control geometry. Browser and screenshot verification accompany this change.
+
 # 2026-10-02｜Mobile land / utility presentation
 
 - Preserve V10.50.0 gameplay and V3.2.6-compatible transactions; UI build `20261002-MOBILE-LAND-UTILITY`.

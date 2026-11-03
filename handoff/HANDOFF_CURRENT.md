@@ -449,3 +449,18 @@ committer time 為 `2026-11-03T23:57:34+08:00`，不得以較早整理標記冒�
   可公開原包索引：https://github.com/klineodyssey/kline-odyssey/issues/608#issuecomment-6292423126
   原03_DOT工程交接文件可讀且含原檔連結；R0 ZIP本身沒有NEXT_HANDOFF.txt，
   該檔名是後續封存包的索引描述，不能要求讀者在原三檔R0包中尋找它。
+
+### Human整體遊戲目標與主線續作 — 2026-11-04T00:46:03+08:00
+
+Human明確指定最主要目標：正式Universe Map的123個點全部可玩。以正式Point ID
+逐項驗收，不把同座標點刪掉、不把網址存在或一張圖片當可玩。共用遊戲系統先
+完成可到達、可操作、可核對任務／互動結果及返回／保存，再逐批補齊各點內容。
+不因此新造123個獨立Runtime或長期分支，不憑空新增鏈上發幣、付費或資金權限。
+正式盤點沿既有 `docs/KGEN_TEMPLE_GAMEPLAY_MAP.md` 累積，沒有宣稱123點已完成。
+
+目前先清除共用入口驗收阻擋：沿12345當前Architecture的responsive presentation
+owner `modules/kgen-12345-ui.css`，只對已有flow屬性的shared entry補窄範圍
+static!important，避免core廣義nav規則覆蓋；不改原browser assert、不增加另一個
+入口、不動角色／合約／交易路徑或MOVE／WARP語意。13項既有Portal離線測試PASS，
+隔離瀏覽器及直橫圖待此次修正後再驗。Cloud亦可分工，但尚未核實建立成功；
+先讀既有任務清單，不能把未回ID的舊建立請求視為確定失敗並盲目建立第二份。
