@@ -221,3 +221,79 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 - Coverage proof: both invocations use mobile-HUD blob 9e0b65aa8b2795297f6f4e9a01018ef5db518042, Node20, Playwright1.51.1, default Chromium, fresh 390x844 context and loopback4173. Neither overrides the two environment variables read by this script. Game's extra installed packages are not referenced by the script/runtime asset paths. Game retains a stricter 90-second bound, exit-code propagation, mandatory 3rail/collapsed screenshots and always-upload. Push log brackets its mobile-HUD completion at 45.691 seconds after the preceding character PASS, including process transition overhead. Artifact 11367756681 contains both mandatory images and the signed-C provenance showing actual WAIT rejection followed by local-fixture LIVE; it is not public-market verification.
 - Parent-approved scheduling correction removes only that duplicate local PR/push invocation, closes the Responsive-only workflow trigger gap in Game, and emits exact HEAD/tree/script-hash evidence ownership. Standalone local dispatch still executes mobile-HUD; public behavior and all assertions/budgets are unchanged. The emitted reference is explicitly NOT a PASS. Release still independently requires successful matching Game/product-qa and its mandatory screenshots.
 - Event-routing regression covers PR, push, local dispatch, public dispatch and post-deploy; independent source review found no blocker. Local 190/190 aggregate, 441/441 root and 59/59 UI/Portal tests PASS. This scheduling-only correction is not yet published or browser-validated; root review/resource authorization remains required. No runtime or public release changed.
+
+
+## 衡曜總工程師接續：正式發布與共同記憶 — 2026-11-03
+
+SOURCE_TYPE: HUMAN_CONVERSATION / VERIFIED_REPOSITORY_AND_PUBLIC_HTTP
+RECORDED_AT: 2026-11-03T23:52:17+08:00
+TEXT_SIGNATURE: Codex｜衡曜總工程師接續工程紀錄
+CRYPTOGRAPHIC_SIGNATURE_STATUS: NOT_VERIFIED
+
+本段保留前面全部歷史；就本次接續工作的優先順序與完成狀態，以本段為準。
+Human 已明確授權完成後收斂主分支、確認官網、清理已結案分支，以及把共同決策
+存進既有公開窗口和共同文件。公開主窗口沿 Issue #584，現職務為總工程師，
+不回復舊 GM 職稱；悟界 GM 路由沿 #590。新頁恢復時應完成既有 mandatory Boot
+讀取，再讀本檔最新段及 #584 最新 checkpoint。這是可查閱的共同記錄，並不代表
+所有對話頁已自動讀取、收到通知或被喚醒。
+
+### 已完成並發布
+
+- 程式提交：`f4891b4f3ffc118d35cce4079394a4f654a2fd86`，已直接推 main；
+  沒有新開長期工程分支，也沒有整批合併舊 phase2/canon/Boot 分支。
+- Pages：`https://github.com/klineodyssey/kline-odyssey/actions/runs/41665494632`
+  SUCCESS。UTC15:45:15公開讀回前後 build-info 都是此提交；18888 HTML、
+  11520 game-5d.html、sw.js、既有 ethers asset 均HTTP200且與提交檔案逐位元組一致。
+- 正式入口：`https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/18888/index.html#funding-panel`。
+  同一既有頁內接固定配額、王母提案、玉帝批准、觀音 Bank.pause()，保留V0.2
+  organ/temple-hub；不用抄calldata、不新增未發布ABI或adapter依賴。角色選項不授權；
+  真帳戶、BSC56、角色與runtime pins必須核對，帳/鏈/角色變更作廢預覽及ACK。
+- 每次本人確認只請求一筆錢包交易；觀音只有緊急暫停，回執 BANK_PAUSED 與
+  VERIFIED_PAID 分開。原三筆各108萬KAIOS固定配額優先，遊戲後置；不新增
+  玩家/任務/樓層門檻，不把10M共享調額誤拆成每人一份，不把發布頁面當成已撥款。
+  原案固定配額不以角色在地下為阻擋；七層遊戲候選的地上限制不能擴成所有生命
+  資源的領款禁令。價格B4、玩家位置、修煉境界、固定配額與各層獎勵分開判定。
+- 11520既有PWA連網重新驗證程式資源，離線只讀自己的當前快取；啟動/回到前景/
+  恢復網路會檢查worker更新，不強制重載，不刪玩家、錢包、localStorage或IndexedDB。
+  已開啟頁面或離線裝置不保證立刻換版；手機真人錢包及PWA生命週期未完成實機驗收。
+- 本機驗證：main版token/wallet24、PWA7、portal/audio36全部PASS；phase2候選
+  57項銀行整合PASS是另一份來源，不可冒充main真錢包驗收。Portal CI的offline
+  human-wallet/PWA亦31/31 PASS，編譯27 contracts；Exchange與Pages成功。
+- 全瀏覽器QA仍非PASS：Portal shared-entry position relative/static失配；
+  Game有7個父版同樣失敗的UI-static案例及後續缺Playwright證據；Responsive六尺寸
+  assertion失敗，具體selector尚待定位。不得以Pages成功覆蓋這些未完成驗收。
+- 分支清理：592→466，126個head已是main祖先、沒有open PR head/base、
+  沒有worktree使用的分支已逐批atomic/expected-SHA核對刪除。保留36個正式/恢復/
+  使用中祖先ref與430個非祖先ref。沒有把未合併工作當成結案，main保持完整。
+
+### 後續工作與責任邊界
+
+| 工作 | 已知結果／下一步 | 狀態 |
+|---|---|---|
+| 固定配額 | 本人用正式角色錢包逐步核對提案、批准、ETA、配額與付款回執；原私人交易包不公開 | 頁面已發布；未宣稱付款完成 |
+| LINE官方帳號 | README既有入口 https://lin.ee/b8X18F7 已HTTP轉址核對，公開ID `@068oxyfz`；名稱由Human稱KGENCOC | 公開入口已核對，未登入或接管管理後台 |
+| LINE按鈕與掃碼 | 目標為掃官方帳號QR進LINE，再用清楚的圖文選單／卡片；第一版入口可為進入遊戲、玩家資料、領款進度、教學、公告、客服 | 已授權需求；待既有後台/API管理連線，尚未設定或群發 |
+| 會員／信箱驗證 | LINE Login/LIFF需正式設定；伺服器驗token、玩家綁定與信箱驗證另接，不靠暱稱或按鈕假驗證；錢包授權另算 | 尚未接通，不公開密碼/token/私人個資 |
+| 蝦皮＋LINE AI客服 | Qiscus官方資料證實LINE、Shopee、AI客服能力；台灣店適用性、權限和方案仍待核實。FAQ與訂單查詢分開，不能宣稱能自動退款/改單 | 研究完成，未連帳號或購買服務 |
+| 影片 | 現有TikTok/YouTube導回官網；Runway/HeyGen為按需求使用候選，尚未確認連線；不要求所有AI常駐 | 待具體影片產出需求 |
+| Google Play | 可評估把PWA包Android/TWA；須測試、審核及代幣功能申報，並非已上架或保證通過 | 官網後續工作，未送審 |
+| 地下18層與九境界 | Human補充地下也會修煉升等、每層九境界；地下發幣額度/條件尚未正式指定，不擅填。不以地上七層現程式限制否定其世界觀 | 記錄需求，未改Runtime／合約 |
+| 價格樓層 | KGEN正式token `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be`；BSC block131453677 UTC15:04:15兩池儲備換算約0.00042158715USDT/KGEN，依既有priceFloor公式為B4 | 當時池價參考；不是玩家位置、獎勵資格或保證成交價 |
+
+### 協作與恢復
+
+Codex接續頁負責目前工程實作、測試、main與官網核對；DOT的計畫與進度沿既有
+公開窗口對接。Cursor目前OFFLINE、active_claims=[]，隊列11 RELEASED、
+1 PREPARATION_ONLY、8 QUEUED；成本決策暫停仍有效，沒有新的派工或喚醒。
+歷史R2 claim已過期、無匹配分支/PR交付，另有HTTP403啟動失敗；不得把QUEUED
+或名叫Wake的manual workflow當成已接單。需要協作時，交付要具備task ID、
+基準SHA、檔案範圍、驗收與明確收到/開始/完成回覆，並把結果連回本共同記錄。
+
+本機維持主要工作環境。Cloud建立請求未回task ID，Human改成本機為主後停止
+等待；未向確認的雲端任務送出原碼包，不宣稱完成搬遷。原本機每小時heartbeat
+仍指舊故障頁，沒有將被平台拒絕的舊自動化換頁重試，也沒有把本接續頁綁定
+成全天候排程。後續需另核實宿主可用狀態，不能承諾永不中斷。
+
+公開記錄只包含可公開的決策、來源、完成證據與待辦；私人交易包、收款身分映射、
+機密、憑證與完整本機checkpoint不在此文件。新工作先讀remote main及本段，
+不要用久未同步的筆電main覆蓋正式版本，也不要另開同功能檔案或第二套記憶入口。

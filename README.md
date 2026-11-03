@@ -1431,3 +1431,12 @@ Regression owners: `KGEN-KAIOS/tests/token-surface.security.test.mjs` and
 `K線西遊記/temples/11520/tests/11520-pwa-bgm.test.mjs`. Portal QA also runs these
 offline tests. Existing pinned Playwright QA uses its supported Ubuntu22.04
 runner instead of the moving ubuntu-latest image.
+
+### Shared Hengyao successor handoff
+
+The cumulative public record for the2026-11-03 release, LINE/account routing,
+separate follow-up work and verified branch closeout is the existing
+[handoff/HANDOFF_CURRENT.md](handoff/HANDOFF_CURRENT.md). Discussion/recovery
+uses the existing [Hengyao chief-engineer window #584](https://github.com/klineodyssey/kline-odyssey/issues/584).
+Future workers must read the latest record; publication is not proof that
+another agent has read it, acknowledged it or been scheduled to wake.
