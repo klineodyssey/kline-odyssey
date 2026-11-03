@@ -1049,3 +1049,25 @@ The11520 installed-page update remains owned by `game-5d.html` and `sw.js` in
 See `docs/KGEN_FRONTEND_INDEX.md` and `KGEN-KAIOS/README.md` for the exact paths
 and authority/cache boundaries. These are cumulative updates to existing
 owners; no additional Runtime or bootstrap is introduced.
+
+## 18888 existing-owner seven-floor candidate integration
+
+`K線西遊記/temples/18888/index.html#funding-controller` cumulatively includes
+the seven-floor self-claim candidate in the existing inline owner. A local
+controller scope keeps it separate from the original fixed-case form while
+sharing the established wallet provider, pending key and Web Lock. The
+release is still NOT_DEPLOYED; no formal qualification source or live payment
+authority is introduced by this frontend integration.
+
+`KGEN-KAIOS/tests/token-surface.security.test.mjs` remains the real inline
+adapter/controller regression owner. `tests/kaios-portal-browser.mjs` remains
+the isolated CI screenshot owner, now also checking seven floor choices,
+amount boundaries, skip behavior and all18 disabled underground claim levels.
+No new program path or Boot entry is created by these existing-owner edits.
+
+The phase2 Allocation candidate and its two local contract dependencies are
+not yet registered main sources. Their exact proposed integration paths,
+tested fingerprints and bounded Boot-registration proposal remain in the
+existing phase2 `KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md`.
+Do not infer that this index entry imports them, authorizes Boot changes,
+configures production eligibility or deploys a contract.

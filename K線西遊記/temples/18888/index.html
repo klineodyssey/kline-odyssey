@@ -65,6 +65,51 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 .funding-ack { display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.6; }
 .funding-ack input { margin-top:5px; flex-shrink:0; }
 @media(max-width:640px) { .funding-fields { grid-template-columns:1fr; } .funding-panel { padding:14px; } .funding-actions button { flex:1 1 180px; } }
+
+#seven-floor-pool { white-space:pre-line; }
+.seven-palace { scroll-margin-top:64px; scroll-margin-bottom:48px; position:relative; border:1px solid #a98b624f; border-radius:24px; padding:24px; margin:8px 0 22px; background:radial-gradient(ellipse at 95% 0,#5b346449,transparent 58%),linear-gradient(145deg,#171221,#0d0b14); color:#eee8f5; overflow:hidden; }
+.seven-palace * { box-sizing:border-box; }
+.seven-eyebrow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:#d4b77d; font:600 11px/1.5 var(--kgen-mono,monospace); letter-spacing:.08em; }
+.seven-badge { border:1px solid #d4a85466; padding:4px 9px; border-radius:999px; color:#f0c97e; letter-spacing:0; }
+.seven-palace h1 { margin:13px 0 8px; font-size:clamp(23px,4vw,34px); line-height:1.25; letter-spacing:.02em; }
+.seven-intro { margin:0 0 18px; color:#c2b7d0; font-size:13px; line-height:1.7; max-width:68ch; }
+.seven-levels { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; margin:18px 0 9px; }
+.seven-levels button { min-width:0; border:1px solid #5c456b; border-radius:12px; background:#21172e; color:#c7b5d8; padding:12px 4px; font:inherit; cursor:pointer; }
+.seven-levels button[aria-pressed=true] { border-color:#e5c17d; color:#fff0c6; background:linear-gradient(150deg,#654b33,#3c2d48); box-shadow:inset 0 0 0 1px #e5c17d44; }
+.seven-levels strong { display:block; font-size:14px; margin-bottom:5px; }
+.seven-levels span { display:block; font-size:10px; overflow-wrap:anywhere; }
+.seven-basement { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; color:#aca0b9; margin:10px 0 20px; }
+.seven-palace select { border:1px solid #5d486d; border-radius:8px; background:#14101b; color:#ddd2e6; padding:8px; font:inherit; max-width:100%; }
+.seven-layout { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:18px; }
+.seven-claim-card { border:1px solid #93704b55; background:#100d18b3; border-radius:18px; padding:20px; min-width:0; }
+.seven-label { color:#bbadc7; font-size:12px; }
+.seven-maximum { margin:7px 0 2px; font-size:clamp(30px,5vw,43px); line-height:1.25; font-weight:850; letter-spacing:-.04em; color:#efd39b; overflow-wrap:anywhere; }
+.seven-maximum small { font-size:13px; letter-spacing:0; color:#bfa67d; }
+.seven-position { color:#b4a5c1; font:11px/1.7 var(--kgen-mono,monospace); margin:6px 0 18px; overflow-wrap:anywhere; }
+.seven-amount-label { display:block; font-size:12px; color:#ddd1e6; margin:16px 0 7px; }
+.seven-input-wrap { display:flex; gap:8px; }
+.seven-input-wrap input { width:100%; min-width:0; border:1px solid #806991; background:#08060d; color:#fff3d5; border-radius:10px; padding:13px 11px; font:600 17px/1.3 var(--kgen-mono,monospace); }
+.seven-palace button { min-width:44px; min-height:44px; touch-action:manipulation; }
+.seven-small-button { flex-shrink:0; padding:10px 12px; background:#30203f; border:1px solid #76548e; border-radius:10px; color:#ead9f6; cursor:pointer; font:inherit; font-size:12px; }
+.seven-palace button:disabled { opacity:.42; cursor:not-allowed; }
+.seven-note { color:#aa9bb7; font-size:11px; line-height:1.7; margin:9px 0; }
+.seven-state-list { margin:0; display:grid; gap:0; }
+.seven-state-list div { padding:10px 0; border-bottom:1px solid #9e83b521; min-width:0; }
+.seven-state-list dt { color:#a999b8; font-size:11px; margin:0 0 5px; }
+.seven-state-list dd { margin:0; color:#e3daeb; font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+.seven-state-list .seven-unverified { color:#e5bc82; }
+.seven-actions { display:flex; gap:8px; flex-wrap:wrap; margin:15px 0 12px; }
+.seven-actions button,.seven-wallet-link { min-height:44px; border:1px solid #79618d; border-radius:11px; background:#261b34; color:#eadcf7; padding:11px 13px; font:inherit; font-size:12px; font-weight:600; line-height:1.4; cursor:pointer; text-decoration:none; text-align:center; }
+.seven-confirm { width:100%; margin-top:12px; border:1px solid #ebc87d; border-radius:12px; padding:15px; background:linear-gradient(120deg,#eed39a,#cda45e); color:#261c12; font:inherit; font-size:15px; font-weight:800; line-height:1.4; cursor:pointer; }
+.seven-ack { display:flex; align-items:flex-start; gap:9px; font-size:11px; line-height:1.7; color:#c6b7d2; }
+.seven-ack input { flex-shrink:0; margin-top:4px; }
+.seven-status { border-left:3px solid #c5a361; background:#d5b66d0b; padding:11px 12px; color:#decaab; font-size:12px; line-height:1.7; margin:17px 0 10px; overflow-wrap:anywhere; }
+.seven-result { min-width:0; color:#bdb0c8; font-size:12px; line-height:1.7; overflow-wrap:anywhere; }
+.seven-result a { color:#efd39b; }
+.seven-palace details { margin-top:13px; font-size:11px; color:#b4a4c2; }
+.seven-palace pre { max-height:330px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; background:#08060c; border-radius:10px; padding:12px; font-size:10px; line-height:1.7; }
+.seven-divider { margin:18px 0 0; padding-top:14px; border-top:1px solid #aa8bb12b; font-size:11px; line-height:1.7; color:#aa9bb6; }
+@media(max-width:640px) { .seven-palace { padding:17px 13px; border-radius:17px; } .seven-layout { grid-template-columns:1fr; gap:12px; } .seven-levels { grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; } .seven-levels button { border-radius:9px; padding:10px 2px; } .seven-levels strong { font-size:12px; } .seven-levels span { font-size:9px; } .seven-claim-card { padding:16px; } .seven-actions>* { flex:1 1 140px; } }
 </style>
 </head>
 <body>
@@ -88,6 +133,52 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 <div class="kgen-wrap">
 
   <!-- Hero -->
+  <!-- Seven-floor entitlement is separate from the three original fixed allocations. -->
+  <section class="seven-palace" id="seven-floor-panel" aria-labelledby="seven-floor-title">
+    <div class="seven-eyebrow"><span>LINGXIAO · 18888</span><span class="seven-badge">本機工程候選 · 未接通真付款</span><span>BSC / 56</span></div>
+    <h1 id="seven-floor-title">凌霄寶殿七層自助領取</h1>
+    <p class="seven-intro">到達合格樓層，完成本層任務，選擇這次想領的金額。資格與已領紀錄依同一角色保存，換生命錢包不會重置；少領一次，該層也不會再生第二次資格。</p>
+    <nav class="seven-levels" id="seven-floor-levels" aria-label="地上七層位置預覽">
+      <button type="button" data-floor="1" aria-pressed="true"><strong>一層</strong><span>1.08</span></button>
+      <button type="button" data-floor="2" aria-pressed="false"><strong>二層</strong><span>10.8</span></button>
+      <button type="button" data-floor="3" aria-pressed="false"><strong>三層</strong><span>108</span></button>
+      <button type="button" data-floor="4" aria-pressed="false"><strong>四層</strong><span>1,080</span></button>
+      <button type="button" data-floor="5" aria-pressed="false"><strong>五層</strong><span>10,800</span></button>
+      <button type="button" data-floor="6" aria-pressed="false"><strong>六層</strong><span>108,000</span></button>
+      <button type="button" data-floor="7" aria-pressed="false"><strong>七層</strong><span>1,080,000</span></button>
+    </nav>
+    <div class="seven-basement"><label for="seven-floor-basement">地下十八層</label><select id="seven-floor-basement"><option value="">輪迴區 · 不可領取</option></select><span>選擇樓層只預覽位置，不會取得資格。</span></div>
+    <div class="seven-layout">
+      <div class="seven-claim-card">
+        <div class="seven-label" id="seven-floor-cap-label">地上一層 · 最高可領</div>
+        <div class="seven-maximum"><span id="seven-floor-cap">1.08</span> <small>KAIOS</small></div>
+        <div class="seven-position">凌霄寶殿位置刻度 <span id="seven-floor-position">1.8888</span><br>位置與金額分開；本次不更動其他星體地圖。</div>
+        <p class="seven-note" id="seven-floor-range">本層刻度 1 ≤ K &lt; 10；10 屬於下一層。選層預覽不會取得領取資格。</p>
+        <label class="seven-amount-label" for="seven-floor-amount">本次自選領取金額（KAIOS）</label>
+        <div class="seven-input-wrap"><input id="seven-floor-amount" inputmode="decimal" autocomplete="off" value="1.08" aria-describedby="seven-floor-amount-help"><button type="button" class="seven-small-button" id="seven-floor-max">填入上限</button></div>
+        <p class="seven-note" id="seven-floor-amount-help">大於0、不超過本層上限，最多18位小數。也可以本次不領；未成功付款不會標成已領。</p>
+        <div class="seven-actions"><a class="seven-wallet-link" href="#funding-panel">連接既有／手機錢包</a><button type="button" id="seven-floor-prepare">唯讀檢查資格與費用</button><button type="button" id="seven-floor-skip">這次不領</button></div>
+        <label class="seven-ack"><input type="checkbox" id="seven-floor-ack">我已核對角色、合格樓層、本次金額、綁定收款地址及費用，將由我本人在合法錢包確認。此勾選不會取代任務驗證或合約授權。</label>
+        <button type="button" class="seven-confirm" id="seven-floor-send" disabled>確認領取 · 目前未接通</button>
+      </div>
+      <dl class="seven-state-list" aria-label="正式資格與錢包狀態">
+        <div><dt>角色 · 正式遊戲接點</dt><dd id="seven-floor-character" class="seven-unverified">尚未收到原遊戲角色資料，不建立假角色／新LifeID。</dd></div>
+        <div><dt>操作帳戶 · 鏈別</dt><dd id="seven-floor-account">尚未連接錢包 · 必須為BSC主網56</dd></div>
+        <div><dt>正式綁定生命錢包</dt><dd id="seven-floor-beneficiary">未讀查；不接受在此輸入任意收款地址</dd></div>
+        <div><dt>目前樓層 · 本層任務</dt><dd id="seven-floor-task">未經正式狀態驗證；畫面選層不代表任務完成</dd></div>
+        <div><dt>同一角色本層已領狀態</dt><dd id="seven-floor-claimed">未知；不能以本機記錄宣稱鏈上未領</dd></div>
+        <div><dt>資金預檢 · 銀行保留額 · 共享限額</dt><dd id="seven-floor-pool">資金狀態未知，不能據此領取；尚未讀查正式銀行餘額、保留額與共享限額</dd></div>
+        <div><dt>必要費用（BNB）</dt><dd id="seven-floor-fee">尚未估算；領取交易value為0，仍須BNB網路費</dd></div>
+      </dl>
+    </div>
+    <p class="seven-status" id="seven-floor-status" role="status" aria-live="polite">LOCAL_CANDIDATE_NOT_MAINNET_CONNECTED：舊版executeAllocation只支付預建固定配額。七層角色資格、選額付款與防重接點尚未部署核驗，確認領取保持停用；不會以輸入框冒充可付款後台。</p>
+    <div class="seven-result" id="seven-floor-result" role="status" aria-live="polite">目前未送出領取交易，未付款。</div>
+    <div class="seven-actions"><button type="button" id="seven-floor-receipt">唯讀核對本次原交易結果</button></div>
+    <details><summary>展開精確內容、資格缺項與核對證據</summary><pre id="seven-floor-preview">尚未讀查。先由原遊戲傳入同一角色，再連接自己的既有錢包。</pre></details>
+    <p class="seven-divider">儲備兌換是另一個流程：沿既有KGEN符合課稅條件交易的0.1%銀行儲備路徑與1,000 KAIOS兌1 KGEN條件核對。啟用、資格、餘額、最低儲備等限制仍有效；直接存入不會自動發幣。原高翠蘭、知蘭、豬八戒三筆108萬個案保持獨立，不因本表新建或重發。</p>
+    <noscript>此操作畫面需要JavaScript；未啟用時不會連接錢包或送出任何交易。</noscript>
+  </section>
+
   <div class="bank-hero">
     <div style="font-size:26px;font-weight:950;color:#c084fc;">靈霄寶殿神明銀行</div>
     <div style="color:var(--kgen-muted);font-size:13px;margin-top:4px;">Divine Bank V0.1 · 18888 · Treasury / Reward / Reserve 系統</div>
@@ -401,17 +492,70 @@ const json = (value) => JSON.stringify(value, (_, item) => typeof item === "bigi
 const FUNDING_STORAGE_KEY = "kaios18888.humanFunding.pending.v1";
 const FUNDING_LOCK_KEY = "kaios18888.humanFunding.request.v1";
 
-// Unsupported historical intents retain their existing durable lock.
+// Seven-floor source candidate. Never infer deployment/authority from this UI.
+const SEVEN_FLOORS = Object.freeze([
+  [1, "1.8888", "1.08"], [2, "18.888", "10.8"], [3, "188.88", "108"],
+  [4, "1888.8", "1080"], [5, "18888", "10800"], [6, "188880", "108000"],
+  [7, "1888800", "1080000"],
+].map(([floor, position, maxKaios]) => Object.freeze({ floor, position, maxKaios,
+  scaleStart: String(10 ** (floor - 1)), scaleEnd: String(10 ** floor) })));
+const SEVEN_FLOOR_RELEASE = Object.freeze({ status: "NOT_DEPLOYED", version: "1.1.0", implementation: null, runtimeHash: null, moduleVersionHash: null });
+// A reviewed module upgrade replaces only this module's implementation pin.
+// Reusing the historical 1.0 pin would permanently reject the 1.1 deployment.
+// This resolver is read-only; candidate source never constitutes a deployment.
+function sevenFloorRuntimePins(release = SEVEN_FLOOR_RELEASE) {
+  if (release?.status !== "DEPLOYED_AND_REVIEWED") throw new Error("SEVEN_FLOOR_RELEASE_NOT_REVIEWED");
+  const nonzeroHash = value => typeof value === "string" && /^0x[0-9a-f]{64}$/i.test(value) && !/^0x0{64}$/i.test(value);
+  let implementation;
+  try { implementation = getAddress(release.implementation); } catch { throw new Error("SEVEN_FLOOR_RELEASE_PIN_UNKNOWN"); }
+  if (same(implementation, ZERO) || release.version !== "1.1.0"
+    || !nonzeroHash(release.runtimeHash) || !nonzeroHash(release.moduleVersionHash)) throw new Error("SEVEN_FLOOR_RELEASE_PIN_UNKNOWN");
+  return freeze({
+    bank: FUNDING_RUNTIME_PINS.bank,
+    governance: FUNDING_RUNTIME_PINS.governance,
+    allocation: { proxy: FUNDING_FORMAL.allocation, implementation, runtimeHash: release.runtimeHash.toLowerCase() },
+  });
+}
+// Read-only projection of the original PlayerLife snapshot, not a second store,
+// identity registry, task oracle or validator for the full PlayerLife domain.
+function projectSevenFloorPlayerContext(snapshot, coordinates = null) {
+  const p = snapshot?.player;
+  if (snapshot?.scope !== "LOCAL_CANDIDATE_NOT_ECONOMIC_AUTHORITY" || snapshot.status !== "READY"
+    || !Number.isSafeInteger(snapshot.revision) || snapshot.revision < 0 || typeof snapshot.persistent !== "boolean"
+    || !/^KAIOS-P-[0-9a-f]{32}$/.test(p?.playerId || "")
+    || typeof p.displayName !== "string" || !p.displayName || p.displayName.length > 32 || /[<>\x00-\x1f]/.test(p.displayName)
+    || !["11520", "12345", "16888"].includes(p.lastWorld)) throw new Error("PLAYER_LIFE_CONTEXT_UNAVAILABLE");
+  const physical = coordinates?.physical;
+  const hasPhysical = coordinates?.distanceUnit === "METERS" && physical && ["x", "y", "z"].every(axis => Number.isFinite(physical[axis]));
+  return freeze({ source: "KAIOS_PLAYER_LIFE_V1", scope: "DISPLAY_ONLY_NOT_ENTITLEMENT", playerId: p.playerId,
+    displayName: p.displayName, revision: snapshot.revision, persistent: snapshot.persistent, worldId: p.lastWorld,
+    physicalPosition: hasPhysical ? { x: physical.x, y: physical.y, z: physical.z, unit: "METERS" } : null,
+    financialCharacterId: null, taskEvidenceHash: null, floorQualification: null });
+}
+const floorInterface = new Interface([
+  "function version() view returns(string)",
+  "function characterBinding(bytes32) view returns(address controller,address beneficiary,int8 currentFloor)",
+  "function floorClaim(bytes32,uint8) view returns(bytes32 taskEvidenceHash,uint64 executableAt,bool claimed,uint256 amount)",
+  "function claimFloor(bytes32,uint8,uint256)",
+  "event FloorClaimed(bytes32 indexed characterId,uint8 indexed floor,address indexed beneficiary,uint256 amount,bytes32 paymentId)",
+]);
+const isFloorPlan = plan => plan?.type === "SEVEN_FLOOR_CLAIM";
 const isPausePlan = plan => plan?.type === "BANK_PAUSE";
 const planFlowType = plan => {
-  if (plan?.type === "SEVEN_FLOOR_CLAIM") throw new Error("PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL");
+  if (isFloorPlan(plan)) return "SEVEN_FLOOR_CLAIM";
   if (isPausePlan(plan)) return "BANK_PAUSE";
+  // Existing persisted fixed allocations deliberately have no type field.
   if (plan && typeof plan === "object" && !Object.hasOwn(plan, "type")) return "FIXED_ALLOCATION";
   throw new Error("UNKNOWN_TRANSACTION_FLOW");
 };
-const canonicalPlan = plan => planFlowType(plan) === "BANK_PAUSE"
-  ? buildBankPausePlan() : buildLifeResourcePlan({ beneficiary: plan.beneficiary, amount: plan.amountKaios });
-const deriveStep = (plan, snapshot) => isPausePlan(plan) ? deriveBankPauseStep(plan, snapshot) : deriveFundingStep(plan, snapshot);
+const canonicalPlan = plan => {
+  const flow = planFlowType(plan);
+  if (flow === "BANK_PAUSE") return buildBankPausePlan();
+  if (flow === "SEVEN_FLOOR_CLAIM") return buildSevenFloorPlan({ characterId: plan.characterId, floor: plan.floor, amount: plan.amountKaios });
+  return buildLifeResourcePlan({ beneficiary: plan.beneficiary, amount: plan.amountKaios });
+};
+const deriveStep = (plan, snapshot) => isPausePlan(plan) ? deriveBankPauseStep(plan, snapshot)
+  : isFloorPlan(plan) ? deriveSevenFloorStep(plan, snapshot) : deriveFundingStep(plan, snapshot);
 
 function buildBankPausePlan() {
   return freeze({ type: "BANK_PAUSE", chainId: 56,
@@ -450,6 +594,132 @@ async function inspectBankPause(provider) {
   const [role, paused] = await Promise.all([call("hasRole", [id("PAUSER_ROLE"), account]), call("paused")]);
   return { chainId: 56, account, blockNumber: tag, timestamp: String(BI(block.timestamp)), codeOk: pins.ok,
     identityErrors: pins.identityErrors, runtimePins: pins.evidence, roles: { pauser: role[0] }, paused: paused[0] };
+}
+
+// Amount validation does not require or manufacture a financial character.
+// It can inform the player before the separate authoritative eligibility read.
+function validateSevenFloorAmount({ floor, amount }) {
+  if (!Number.isInteger(floor) || floor < 1 || floor > 7) throw new Error(floor < 0 ? "UNDERGROUND_NO_CLAIM" : "INVALID_FLOOR");
+  if (typeof amount !== "string" || !/^(0|[1-9]\d*)(\.\d{1,18})?$/.test(amount)) throw new Error("AMOUNT_DECIMAL_STRING_REQUIRED");
+  const amountWei = String(parseUnits(amount, 18)), row = SEVEN_FLOORS[floor - 1];
+  if (BI(amountWei) <= 0n || BI(amountWei) > BI(parseUnits(row.maxKaios, 18))) throw new Error("FLOOR_AMOUNT_EXCEEDED_OR_ZERO");
+  return freeze({ floor, amountKaios: amount, amountWei, maxKaios: row.maxKaios });
+}
+
+function buildSevenFloorPlan({ characterId, floor, amount }) {
+  if (typeof characterId !== "string" || !/^0x[0-9a-f]{64}$/i.test(characterId) || /^0x0{64}$/i.test(characterId)) throw new Error("CHARACTER_UNBOUND");
+  const { amountWei } = validateSevenFloorAmount({ floor, amount }), row = SEVEN_FLOORS[floor - 1];
+  characterId = characterId.toLowerCase();
+  const paymentId = keccak256(coder.encode(["bytes32", "bytes32", "bytes32", "uint8"], [id("KAIOS.CIVILIZATION.FLOOR_CLAIM.ONCE"), FUNDING_FORMAL.moduleId, characterId, floor]));
+  return freeze({ type: "SEVEN_FLOOR_CLAIM", chainId: 56, characterId, floor, position: row.position, amountKaios: amount, amountWei, paymentId,
+    payout: { to: FUNDING_FORMAL.allocation, data: floorInterface.encodeFunctionData("claimFloor", [characterId, floor, amountWei]) } });
+}
+
+function sevenFloorFundingPrecheck(plan, s) {
+  const result = { status: "UNKNOWN", known: false, enough: false, amountWei: null,
+    balance: null, reserve: null, available: null, healthy: null, isPaused: null,
+    perTransactionLimit: null, epochLimit: null, epochSpent: null, epochIndex: null,
+    effectiveEpochSpent: null, epochRemaining: null, currentEpoch: null,
+    blockNumber: s?.blockNumber ?? null, timestamp: null,
+    poolSufficient: null, perTransactionSufficient: null, epochSufficient: null,
+    reasons: s?.fundingReadErrors == null ? [] : Array.isArray(s.fundingReadErrors) ? [...s.fundingReadErrors] : ["FUNDING_READ_STATUS_INVALID"],
+    warning: "固定區塊的資金／共享限額預檢；available 不代表已扣除所有待付款、其他承諾或全部負債。" };
+  const uint = value => {
+    if (!((typeof value === "string" && /^\d+$/.test(value)) || (typeof value === "bigint" && value >= 0n))) throw Error("UNKNOWN_UINT");
+    return BI(value);
+  };
+  try {
+    result.amountWei = String(uint(plan.amountWei));
+    result.timestamp = String(uint(s.timestamp));
+    if (typeof s.blockNumber !== "string" || !/^0x[0-9a-f]+$/i.test(s.blockNumber)) throw Error("UNKNOWN_BLOCK");
+    const h = s.health, m = s.module;
+    if (!h || typeof h.healthy !== "boolean" || typeof h.paused !== "boolean") throw Error("UNKNOWN_HEALTH");
+    result.balance = String(uint(h.balance)); result.reserve = String(uint(h.reserve)); result.available = String(uint(h.available));
+    result.healthy = h.healthy; result.isPaused = h.paused;
+    if (!m) throw Error("UNKNOWN_MODULE");
+    for (const key of ["perTransactionLimit", "epochLimit", "epochSpent", "epochIndex"]) result[key] = String(uint(m[key]));
+    const currentEpoch = uint(result.timestamp) / 86400n;
+    if (uint(result.epochIndex) > currentEpoch) throw Error("FUTURE_MODULE_EPOCH");
+    result.currentEpoch = String(currentEpoch);
+    const spent = uint(result.epochIndex) === currentEpoch ? uint(result.epochSpent) : 0n;
+    result.effectiveEpochSpent = String(spent);
+    result.epochRemaining = String(uint(result.epochLimit) > spent ? uint(result.epochLimit) - spent : 0n);
+    if (result.reasons.length) throw Error("FUNDING_READ_FAILED");
+    result.known = true;
+    result.poolSufficient = uint(result.amountWei) <= uint(result.available);
+    result.perTransactionSufficient = uint(result.amountWei) <= uint(result.perTransactionLimit);
+    result.epochSufficient = uint(result.amountWei) <= uint(result.epochRemaining);
+    if (!result.healthy || result.isPaused) result.reasons.push("BANK_UNHEALTHY_OR_PAUSED");
+    if (!result.poolSufficient) result.reasons.push("AVAILABLE_FUNDS_INSUFFICIENT");
+    if (!result.perTransactionSufficient || !result.epochSufficient) result.reasons.push("MODULE_PAYMENT_LIMIT_EXCEEDED");
+    if (!result.perTransactionSufficient) result.reasons.push("PER_TRANSACTION_LIMIT_EXCEEDED");
+    if (!result.epochSufficient) result.reasons.push("DAILY_LIMIT_EXCEEDED");
+    result.enough = result.reasons.length === 0;
+    result.status = result.enough ? "SUFFICIENT" : (!result.healthy || result.isPaused) ? "BLOCKED" : "INSUFFICIENT";
+  } catch {
+    result.status = "UNKNOWN"; result.known = false; result.enough = false;
+    result.reasons.push("FUNDING_STATE_UNKNOWN");
+  }
+  return freeze(result);
+}
+
+function deriveSevenFloorStep(plan, s) {
+  const blockers = [];
+  const fundingPrecheck = sevenFloorFundingPrecheck(plan, s);
+  try {
+    if (json(plan) !== json(canonicalPlan(plan))) blockers.push("PLAN_CHANGED");
+    if (Number(s.chainId) !== 56) blockers.push("CHAIN_ID_MISMATCH");
+    if (s.releaseVerified !== true) blockers.push("SEVEN_FLOOR_NOT_DEPLOYED");
+    if (s.codeOk !== true || !same(s.token, FUNDING_FORMAL.kaios) || Number(s.decimals) !== 18) blockers.push("CONTRACT_IDENTITY_MISMATCH");
+    blockers.push(...(s.identityErrors || []));
+    const b = s.binding, f = s.floor, m = s.module;
+    if (!b || same(b.controller, ZERO) || same(b.beneficiary, ZERO)) blockers.push("CHARACTER_UNBOUND");
+    if (!same(b?.controller, s.account)) blockers.push("NOT_CHARACTER_CONTROLLER");
+    if (Number(b?.currentFloor) !== plan.floor) blockers.push(Number(b?.currentFloor) < 0 ? "UNDERGROUND_NO_CLAIM" : "CHARACTER_NOT_AT_SELECTED_FLOOR");
+    if (!f || !/^0x[0-9a-f]{64}$/i.test(f.taskEvidenceHash || "") || /^0x0{64}$/i.test(f.taskEvidenceHash || "")) blockers.push("TASK_NOT_AUTHORIZED");
+    if (typeof f?.claimed !== "boolean" || typeof s.paymentConsumed !== "boolean") blockers.push("CLAIM_STATE_UNKNOWN");
+    if (f?.claimed || s.paymentConsumed) blockers.push("FLOOR_ALREADY_CLAIMED");
+    if (f && BI(s.timestamp) < BI(f.executableAt)) blockers.push("FLOOR_CLAIM_NOT_READY");
+    blockers.push(...fundingPrecheck.reasons);
+    if (!m || !same(m.module, FUNDING_FORMAL.allocation) || m.active !== true || !same(m.versionHash, s.expectedModuleVersionHash)) blockers.push("MODULE_IDENTITY_MISMATCH");
+    const stateHash = id(json([b, f, s.paymentConsumed]));
+    return { kind: "FLOOR_CLAIM", ready: blockers.length === 0, blockers, to: plan.payout.to, data: plan.payout.data, proposalId: null, stateHash,
+      beneficiary: b?.beneficiary ?? null, fundingPrecheck, label: "玩家確認本角色本層一次領取；少領亦消耗資格" };
+  } catch { return { kind: "FLOOR_CLAIM", ready: false, blockers: [...blockers, "FLOOR_STATE_UNKNOWN"], fundingPrecheck, to: null, data: null, proposalId: null }; }
+}
+
+async function inspectSevenFloor(provider, plan) {
+  const rpc = (method, params = []) => provider.request({ method, params });
+  const [chain, accounts, block] = await Promise.all([rpc("eth_chainId"), rpc("eth_accounts"), rpc("eth_getBlockByNumber", ["latest", false])]);
+  if (Number(BI(chain)) !== 56) throw new Error("CHAIN_ID_MISMATCH");
+  if (!accounts?.[0] || !block?.number || !block?.timestamp) throw new Error("ACCOUNT_OR_BLOCK_UNKNOWN");
+  const tag = block.number, F = FUNDING_FORMAL;
+  const call = async (to, iface, method, args = []) => iface.decodeFunctionResult(method, await rpc("eth_call", [{ to, data: iface.encodeFunctionData(method, args) }, tag]));
+  const reviewedRelease = SEVEN_FLOOR_RELEASE.status === "DEPLOYED_AND_REVIEWED";
+  const pins = await readFundingRuntimePins(rpc, tag, reviewedRelease ? sevenFloorRuntimePins() : FUNDING_RUNTIME_PINS);
+  const fundingReadErrors = [];
+  const fundingRead = async (reason, read) => { try { return await read(); } catch { fundingReadErrors.push(reason); return null; } };
+  const [token, decimals, module, health, version] = await Promise.all([call(F.bank, bankInterface, "kaios"), call(F.kaios, tokenInterface, "decimals"),
+    fundingRead("MODULE_CONFIG_READ_FAILED", () => call(F.bank, bankInterface, "module", [F.moduleId])),
+    fundingRead("BANK_HEALTH_READ_FAILED", () => call(F.bank, bankInterface, "bankHealth")), call(F.allocation, floorInterface, "version")]);
+  const tuple = (value, names) => Object.fromEntries(names.map((name, i) => [name, typeof value[i] === "boolean" ? value[i] : String(value[i])]));
+  const state = { chainId: 56, account: getAddress(accounts[0]), blockNumber: tag, timestamp: String(BI(block.timestamp)), currentContractVersion: String(version[0]),
+    token: String(token[0]), decimals: Number(decimals[0]), codeOk: pins.ok, releaseVerified: false, identityErrors: pins.identityErrors,
+    expectedModuleVersionHash: SEVEN_FLOOR_RELEASE.moduleVersionHash,
+    module: module ? tuple(module[0], ["module", "versionHash", "perTransactionLimit", "epochLimit", "epochSpent", "epochIndex", "active"]) : null,
+    health: health ? { balance: String(health[0]), reserve: String(health[1]), available: String(health[2]),
+      accountedInflow: String(health[3]), totalOutflow: String(health[4]), healthy: health[5], isPaused: health[6], paused: health[6] } : null,
+    fundingReadErrors: fundingReadErrors.sort(), binding: null, floor: null, paymentConsumed: null };
+  state.fundingPrecheck = sevenFloorFundingPrecheck(plan, state);
+  // The deployed1.0 module has no character/task API. Do not call a new selector or
+  // offer signatures merely because candidate source and an input field exist.
+  state.releaseVerified = reviewedRelease && pins.ok && String(version[0]) === SEVEN_FLOOR_RELEASE.version;
+  if (!state.releaseVerified) return state;
+  const [binding, claim, consumed] = await Promise.all([call(F.allocation, floorInterface, "characterBinding", [plan.characterId]), call(F.allocation, floorInterface, "floorClaim", [plan.characterId, plan.floor]), call(F.bank, bankInterface, "modulePaymentConsumed", [plan.paymentId])]);
+  state.binding = tuple(binding, ["controller", "beneficiary", "currentFloor"]);
+  state.floor = tuple(claim, ["taskEvidenceHash", "executableAt", "claimed", "amount"]);
+  state.paymentConsumed = consumed[0];
+  return state;
 }
 
 async function readFundingRuntimePins(rpc, blockTag, expectedPins = FUNDING_RUNTIME_PINS) {
@@ -598,8 +868,8 @@ class HumanFundingWallet {
   invalidatePreview() { this.invalidate(); }
   async connect() { return this.provider.request({ method: "eth_requestAccounts" }); }
   async inspect(plan) {
-    if (planFlowType(plan) !== this.flowType) throw new Error("TRANSACTION_FLOW_MISMATCH");
     if (isPausePlan(plan)) return inspectBankPause(this.provider);
+    if (isFloorPlan(plan)) return inspectSevenFloor(this.provider, plan);
     const rpc = (method, params = []) => this.provider.request({ method, params });
     const [chain, accounts, block] = await Promise.all([rpc("eth_chainId"), rpc("eth_accounts"), rpc("eth_getBlockByNumber", ["latest", false])]);
     if (Number(BI(chain)) !== 56) throw new Error("CHAIN_ID_MISMATCH");
@@ -638,9 +908,22 @@ class HumanFundingWallet {
     if (planFlowType(canonical) !== this.flowType) throw new Error("TRANSACTION_FLOW_MISMATCH");
     if (json(plan) !== json(canonical)) throw new Error("PLAN_CHANGED");
     const snapshot = await this.inspect(canonical), step = deriveStep(canonical, snapshot);
-    const fee = null;
+    let fee = null;
+    if (isFloorPlan(canonical) && step.ready) {
+      try { fee = await this.estimateFloorFee(canonical, snapshot); }
+      catch (error) { step.ready = false; step.blockers.push(error?.message === "BNB_GAS_INSUFFICIENT" ? "BNB_GAS_INSUFFICIENT" : "FEE_OR_GAS_BALANCE_UNKNOWN"); }
+    }
     const preview = freeze({ step, snapshot, fee, account: snapshot.account, plan: canonical, preparedAt: this.now(), previewId: `${this.generation}:${++this.sequence}`, generation: this.generation });
     this.previews.set(preview.previewId, preview); return preview;
+  }
+  async estimateFloorFee(plan, snapshot) {
+    const tx = { from: snapshot.account, to: plan.payout.to, value: "0x0", data: plan.payout.data };
+    const rpc = (method, params) => this.provider.request({ method, params });
+    const [gas, gasPrice, nativeBalance] = await Promise.all([rpc("eth_estimateGas", [tx]), rpc("eth_gasPrice", []), rpc("eth_getBalance", [snapshot.account, snapshot.blockNumber])]);
+    if (BI(gas) <= 0n || BI(gasPrice) <= 0n) throw new Error("FEE_UNKNOWN");
+    const estimatedWei = BI(gas) * BI(gasPrice);
+    if (BI(nativeBalance) < estimatedWei) throw new Error("BNB_GAS_INSUFFICIENT");
+    return { asset: "BNB", gas: String(BI(gas)), gasPriceWei: String(BI(gasPrice)), estimatedWei: String(estimatedWei), warning: "預估值，實付費用以本人錢包確認與鏈上回執為準。" };
   }
   async request(preview) {
     if (this.busy) throw new Error("REQUEST_ALREADY_IN_PROGRESS");
@@ -667,8 +950,15 @@ class HumanFundingWallet {
       const snapshot = await this.inspect(preview.plan), step = deriveStep(preview.plan, snapshot);
       const signature = value => json([value.kind, value.to, value.data, value.proposalId, value.ready, value.blockers, value.stateHash ?? null]);
       if (!same(snapshot.account, preview.account) || signature(step) !== signature(preview.step) || !step.ready || preview.generation !== this.generation || this.now() - preview.preparedAt > 120000 || this.now() < preview.preparedAt) throw new Error("FRESH_STATE_OR_ACCOUNT_CHANGED");
+      if (isFloorPlan(preview.plan)) {
+        await this.estimateFloorFee(preview.plan, snapshot);
+        // Fee estimation is asynchronous: binding/account/chain/form may change.
+        const finalSnapshot = await this.inspect(preview.plan), finalStep = deriveStep(preview.plan, finalSnapshot);
+        if (!same(finalSnapshot.account, preview.account) || signature(finalStep) !== signature(preview.step) || !finalStep.ready
+          || preview.generation !== this.generation || this.now() - preview.preparedAt > 120000 || this.now() < preview.preparedAt) throw new Error("FRESH_STATE_OR_ACCOUNT_CHANGED");
+      }
       const transaction = { from: snapshot.account, to: step.to, chainId: "0x38", value: "0x0", data: step.data };
-      saved = { version: 1, flowType: this.flowType, intentId: preview.previewId, state: "AWAITING_HUMAN_WALLET", chainId: 56, transaction, plan: preview.plan, kind: step.kind, proposalId: step.proposalId, createdAt: this.now() };
+      saved = { version: 1, flowType: this.flowType, intentId: preview.previewId, state: "AWAITING_HUMAN_WALLET", chainId: 56, transaction, plan: preview.plan, kind: step.kind, proposalId: step.proposalId, createdAt: this.now(), ...(isFloorPlan(preview.plan) ? { expectedBeneficiary: step.beneficiary } : {}) };
       const raw = json(saved); this.storage.setItem(FUNDING_STORAGE_KEY, raw);
       if (this.storage.getItem(FUNDING_STORAGE_KEY) !== raw) throw new Error("PENDING_STORAGE_READBACK_FAILED");
       this.previews.clear();
@@ -704,7 +994,8 @@ class HumanFundingWallet {
     if (!pending) throw new Error("NO_PENDING_INTENT");
     const pendingFlow = planFlowType(pending.plan);
     if (pendingFlow !== this.flowType || (pending.flowType != null && pending.flowType !== pendingFlow)) throw new Error("PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL");
-    const allowedKinds = pendingFlow === "BANK_PAUSE" ? ["BANK_PAUSE"] : ["CAP_PROPOSE", "CAP_APPROVE", "CAP_EXECUTE", "ALLOCATION_PROPOSE", "ALLOCATION_APPROVE", "ALLOCATION_EXECUTE", "PAYOUT"];
+    const allowedKinds = pendingFlow === "BANK_PAUSE" ? ["BANK_PAUSE"] : pendingFlow === "SEVEN_FLOOR_CLAIM" ? ["FLOOR_CLAIM"]
+      : ["CAP_PROPOSE", "CAP_APPROVE", "CAP_EXECUTE", "ALLOCATION_PROPOSE", "ALLOCATION_APPROVE", "ALLOCATION_EXECUTE", "PAYOUT"];
     if (!allowedKinds.includes(pending.kind) || json(pending.plan) !== json(canonicalPlan(pending.plan))) throw new Error("PENDING_TRANSACTION_INVALID_RETAIN_LOCK");
     if (pendingFlow === "BANK_PAUSE" && (!same(pending.transaction?.from, FUNDING_FORMAL.guanyin)
       || !same(pending.transaction?.to, pending.plan.pause.to) || !same(pending.transaction?.data, pending.plan.pause.data)
@@ -744,6 +1035,15 @@ class HumanFundingWallet {
       } catch { /* Unknown state retains the pending intent. */ }
       verified = pausedEvent && pins.ok && isPaused;
       status = verified ? "BANK_PAUSED" : "MISMATCH";
+    } else if (pending.kind === "FLOOR_CLAIM") {
+      const p = pending.plan, beneficiary = pending.expectedBeneficiary;
+      if (!isFloorPlan(p) || json(p) !== json(canonicalPlan(p)) || !beneficiary) return { status: "MISMATCH", hash };
+      const transfer = events(FUNDING_FORMAL.kaios, tokenInterface).some(e => e?.name === "Transfer" && same(e.args[0], FUNDING_FORMAL.bank) && same(e.args[1], beneficiary) && BI(e.args[2]) === BI(p.amountWei));
+      const claimed = events(FUNDING_FORMAL.allocation, floorInterface).some(e => e?.name === "FloorClaimed" && same(e.args[0], p.characterId) && Number(e.args[1]) === p.floor && same(e.args[2], beneficiary) && BI(e.args[3]) === BI(p.amountWei) && same(e.args[4], p.paymentId));
+      const payment = events(FUNDING_FORMAL.bank, bankInterface).some(e => e?.name === "ModulePaymentExecuted" && same(e.args[0], FUNDING_FORMAL.moduleId) && same(e.args[1], p.paymentId) && same(e.args[2], beneficiary) && BI(e.args[3]) === BI(p.amountWei));
+      const snapshot = await this.inspect(p);
+      verified = transfer && claimed && payment && snapshot.releaseVerified === true && snapshot.floor?.claimed === true && BI(snapshot.floor.amount) === BI(p.amountWei) && snapshot.paymentConsumed === true;
+      status = verified ? "VERIFIED_PAID" : "MISMATCH";
     } else if (pending.kind === "PAYOUT") {
       const p = pending.plan;
       const transfer = events(FUNDING_FORMAL.kaios, tokenInterface).some(e => e?.name === "Transfer" && same(e.args[0], FUNDING_FORMAL.bank) && same(e.args[1], p.beneficiary) && BI(e.args[2]) === BI(p.amountWei));
@@ -785,6 +1085,14 @@ class HumanFundingWallet {
     }
     return { status, hash, kind: pending.kind };
   }
+}
+
+// Same wallet, durable pending key, lock and receipt path as the original flow.
+// This is not a second wallet, authority provider, or background payment runner.
+class SevenFloorClaimWallet extends HumanFundingWallet {
+  constructor(options) { super(options); this.flowType = "SEVEN_FLOOR_CLAIM"; }
+  invalidatePreview() { this.generation++; this.previews.clear(); }
+  async prepare(input) { return super.prepare(buildSevenFloorPlan(input)); }
 }
 
 // Same provider capability, storage key, Web Lock and receipt reconciler. The
@@ -1047,6 +1355,238 @@ function configureNativeLinks() {
 }
 configureNativeLinks(); showRole();
 window.addEventListener('pagehide', () => { connectionGeneration++; invalidate(); });
+// END HUMAN FUNDING CONTROLLER
+
+// BEGIN SEVEN FLOOR CONTROLLER
+(function(){
+const node = name => document.getElementById('seven-floor-' + name);
+const pretty = value => JSON.stringify(value, (_, item) => typeof item === 'bigint' ? item.toString() : item, 2);
+const same = (a,b) => typeof a === 'string' && typeof b === 'string' && a.toLowerCase() === b.toLowerCase();
+const zeroHash = '0x' + '0'.repeat(64);
+const displayUnits = value => {
+  try {
+    const raw = BigInt(String(value)); if (raw < 0n) return '未知';
+    const digits = raw.toString().padStart(19, '0');
+    const whole = digits.slice(0,-18).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const fraction = digits.slice(-18).replace(/0+$/, '');
+    return whole + (fraction ? '.' + fraction : '');
+  } catch { return '未知'; }
+};
+let selectedFloor = 1, character = null, wallet = null, preview = null, previewWallet = null, previewInput = null, generation = 0, busy = false;
+let localPlayerContext = null;
+const levelButtons = [...node('levels').querySelectorAll('[data-floor]')];
+const reasons = {
+  SEVEN_FLOOR_NOT_DEPLOYED:'七層領取接點尚未部署核驗，現有主網不能按此新流程付款。',
+  WALLET_NOT_CONNECTED:'請先由你本人透過下方既有連接功能連接錢包；不需要私鑰或額外建立錢包。',
+  CONTRACT_UPGRADE_AND_GOVERNANCE_REQUIRED:'需合法持有人審查新增合約接點、治理與部署證據；此頁不會代送升級。',
+  CHARACTER_UNBOUND:'尚未收到原遊戲的正式角色，或角色尚未完成合約控制者／生命錢包綁定。',
+  PLAYER_LIFE_CONTEXT_UNAVAILABLE:'原PlayerLife資料尚不可讀或不是有效展示上下文，未建立新角色或付款資格。',
+  TASK_NOT_AUTHORIZED:'本層任務尚未有正式授權證據，完成畫面或勾選不會取得資格。',
+  FLOOR_NOT_ELIGIBLE:'目前不在本層正式合格位置；選層按鈕只供預覽。',
+  FLOOR_ALREADY_CLAIMED:'同一角色本層已領過；少領或更換生命錢包不會再生資格。',
+  ALREADY_CLAIMED:'同一角色本層已領過；不能重領。',
+  UNDERGROUND_NO_CLAIM:'地下十八層是輪迴區，不開放本項領取。',
+  CHAIN_ID_MISMATCH:'請由你本人在錢包切至BSC主網56。',
+  CONTROLLER_MISMATCH:'目前連接帳戶不是這個角色的正式控制者。',
+  AMOUNT_DECIMAL_STRING_REQUIRED:'金額需為一般數字字串，最多18位小數，不能輸入逗號或科學記號。',
+  AMOUNT_OUTSIDE_FLOOR_CAP:'金額需大於0，且不超過本層上限。',
+  FLOOR_AMOUNT_EXCEEDED_OR_ZERO:'金額需大於0，且不超過本層上限。',
+  NOT_CHARACTER_CONTROLLER:'目前帳戶不是本角色正式控制者。',
+  CHARACTER_NOT_AT_SELECTED_FLOOR:'角色目前不在所選地上樓層；選層預覽不會改變正式位置。',
+  FEE_OR_GAS_BALANCE_UNKNOWN:'必要BNB費用或費用餘額未通過，停止送單。',
+  BNB_GAS_INSUFFICIENT:'本人錢包的BNB不足以支付本次預估網路費，停止送單；這不是KAIOS獎勵池不足。',
+  PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL:'待核對的是另一個原案流程，請回原操作區核對，不能當成本層已領。',
+  AVAILABLE_FUNDS_INSUFFICIENT:'銀行可用資金不足，無法領取；不能拿LP或尚未到帳收益補作可用額。',
+  MODULE_PAYMENT_LIMIT_EXCEEDED:'本次金額超過模組共享的單筆或當日剩餘額度，停止送單。',
+  PER_TRANSACTION_LIMIT_EXCEEDED:'本次金額超過模組共享單筆上限，停止送單。',
+  DAILY_LIMIT_EXCEEDED:'本次金額超過模組UTC當日剩餘額度，停止送單。',
+  FUNDING_STATE_UNKNOWN:'銀行資金或共享限額未能完整核實，不能推定足額，停止送單。',
+  BANK_HEALTH_READ_FAILED:'正式Bank.bankHealth讀取失敗；餘額、保留額與可用額未知，停止送單。',
+  MODULE_CONFIG_READ_FAILED:'正式Bank.module讀取失敗；單筆及當日剩餘額度未知，停止送單。',
+  FUNDING_READ_STATUS_INVALID:'資金讀查狀態無效，停止送單並重新唯讀檢查。',
+  BANK_UNHEALTHY_OR_PAUSED:'銀行目前暫停或健康檢查未通過，停止送單。',
+  PENDING_INTENT_RECONCILE_FIRST:'已有待確認操作，請先對帳原交易，不要重按或另建ID。',
+  WEB_LOCKS_REQUIRED_NO_SEND:'目前瀏覽器缺少安全跨分頁鎖，不送交易。',
+  PREVIEW_INVALID_OR_EXPIRED:'預覽已作廢或過期，請重新唯讀檢查。',
+  FRESH_STATE_OR_ACCOUNT_CHANGED:'送交前狀態或帳戶有變，請重新檢查；本次不續送。',
+  NO_PENDING_INTENT:'此瀏覽器沒有本次待確認領取意圖，不能用任意交易雜湊冒充。',
+};
+const explain = value => reasons[value] || String(value);
+const setStatus = text => { node('status').textContent = text; };
+function refreshAmount() {
+  try {
+    const amount = validateSevenFloorAmount({floor:selectedFloor,amount:node('amount').value.trim()});
+    node('amount').setAttribute('aria-invalid','false');
+    node('amount-help').textContent = `本次選額 ${amount.amountKaios} KAIOS，上限 ${amount.maxKaios}；少領仍消耗本層一次資格。這只檢查金額，不表示角色已合格或已付款。`;
+    return true;
+  } catch (error) {
+    node('amount').setAttribute('aria-invalid','true');
+    node('amount-help').textContent = node('amount').value.trim() === '' && selectedFloor > 0
+      ? '目前未選金額，可以這次不領；不會送出交易或標記已領。'
+      : explain(error.message);
+    return false;
+  }
+}
+function refreshSend() {
+  const amountValid = refreshAmount();
+  const ready = !busy && amountValid && preview?.step?.ready === true && previewWallet === wallet && node('ack').checked;
+  node('send').disabled = !ready;
+  node('send').textContent = preview?.step?.ready ? '確認領取 · 由我到錢包核對' : '確認領取 · 目前未接通或資格未通過';
+  node('prepare').disabled = busy || !amountValid;
+  node('receipt').disabled = busy;
+}
+function clearSnapshot() {
+  node('beneficiary').textContent = '未讀查；地址只能來自角色正式綁定，不能在此自行改填';
+  node('task').textContent = selectedFloor < 0 ? '地下輪迴區，本項不得領取' : '尚未核對本層任務與所在樓層';
+  node('claimed').textContent = '未知；仍須核對角色本層正式紀錄';
+  node('pool').textContent = '資金預檢未知或已作廢，不能據此領取；請重新讀查正式銀行餘額、保留額及共享限額，不使用舊原型、LP或交易量作可用額。';
+  node('fee').textContent = '尚未估算；交易value為0，仍需BNB網路費';
+}
+function invalidate(clear = true) {
+  if (clear) wallet?.invalidatePreview?.();
+  generation++; preview = null; previewWallet = null; previewInput = null; node('ack').checked = false;
+  if (clear) clearSnapshot();
+  refreshSend();
+}
+function renderFloor() {
+  const row = SEVEN_FLOORS.find(item => item.floor === selectedFloor);
+  const above = Boolean(row);
+  node('cap-label').textContent = above ? `地上第${selectedFloor}層 · 最高可領` : `地下第${Math.abs(selectedFloor)}層 · 輪迴區`;
+  node('cap').textContent = above ? row.maxKaios.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '不可領取';
+  node('position').textContent = above ? row.position : '本項不開放領取';
+  node('range').textContent = above ? `本層刻度 ${row.scaleStart} ≤ K < ${row.scaleEnd}；上界屬於下一層。選層預覽不會取得領取資格。` : '地下十八層為輪迴區，本項不可領取。';
+  node('amount').disabled = node('max').disabled = !above;
+  node('amount').value = above ? row.maxKaios : '';
+  for (const button of levelButtons) button.setAttribute('aria-pressed', String(Number(button.dataset.floor) === selectedFloor));
+  if (above) node('basement').value = '';
+  invalidate();
+  setStatus(above ? '此為樓層位置預覽，不會取得資格。原遊戲角色／任務接點與新增主網領取接點仍須接通核驗。' : '地下十八層為輪迴區，不開放本項領取。升到合格地上層後仍須完成該層任務並核資格。');
+}
+for (let floor = -1; floor >= -18; floor--) node('basement').append(new Option(`地下${-floor}層 · 不可領取`, String(floor)));
+for (const button of levelButtons) button.addEventListener('click', () => { selectedFloor = Number(button.dataset.floor); renderFloor(); });
+node('basement').addEventListener('change', () => { if (node('basement').value) { selectedFloor = Number(node('basement').value); renderFloor(); } });
+node('max').onclick = () => { const row = SEVEN_FLOORS.find(item => item.floor === selectedFloor); if (row) { node('amount').value = row.maxKaios; invalidate(); } };
+node('skip').onclick = () => { node('amount').value = ''; invalidate(); setStatus('這次不領。沒有送出交易，也不會因略過或刷新就偽造已領紀錄；是否仍具資格以正式角色紀錄為準。'); };
+node('amount').addEventListener('input', () => invalidate());
+node('ack').addEventListener('change', refreshSend);
+function currentInput() {
+  if (!character) throw Error('CHARACTER_UNBOUND');
+  if (!Number.isInteger(selectedFloor) || selectedFloor < 1 || selectedFloor > 7) throw Error('UNDERGROUND_NO_CLAIM');
+  return { characterId:character.characterId, floor:selectedFloor, amount:node('amount').value.trim() };
+}
+async function run(action) {
+  if (busy) return;
+  busy = true; refreshSend();
+  let actionGeneration = generation, actionWallet = wallet;
+  try {
+    const pending = action(); actionGeneration = generation; actionWallet = wallet; await pending;
+  } catch (error) {
+    if (actionGeneration === generation && actionWallet === wallet) {
+      invalidate();
+      const code = error?.message;
+      setStatus(Number(error?.code) === 4001 ? '你已在錢包拒絕本次操作，沒有自動重送。' : reasons[code] || '本次讀查／操作未通過。未核實前不會標成已領，也不會自動重送；請保留原交易並核對正式接點。');
+    }
+  } finally { busy = false; refreshSend(); }
+}
+function readPlayerContext(snapshot, coordinates) {
+  // Original local progress is display-only. Never hash it into a new chain ID,
+  // convert XP into floor eligibility, or treat local wallet signatures as grants.
+  character = null; localPlayerContext = null; invalidate();
+  try {
+    localPlayerContext = projectSevenFloorPlayerContext(snapshot, coordinates);
+    node('character').textContent = `${localPlayerContext.displayName} · 原PlayerLife ${localPlayerContext.playerId} · 僅展示，尚未對應正式領取角色`;
+    node('preview').textContent = pretty(localPlayerContext);
+    setStatus('已沿原PlayerLife讀到同一玩家與版本，未建立新LifeID。正式角色映射、樓層與任務授權仍未核實，不會因此開放領款。');
+  } catch {
+    node('character').textContent = '原PlayerLife資料不可讀；不新增角色、不推定資格。';
+    node('preview').textContent = 'PLAYER_LIFE_CONTEXT_UNAVAILABLE';
+  }
+}
+window.addEventListener('kaios18888:playerLife', event => readPlayerContext(event.detail?.snapshot, event.detail?.coordinates));
+window.addEventListener('kaios18888:character', event => {
+  const detail = event.detail;
+  const matchesPlayer = !localPlayerContext || detail?.sourcePlayerId === localPlayerContext.playerId;
+  character = matchesPlayer && detail && /^0x[0-9a-fA-F]{64}$/.test(detail.characterId || '') && !same(detail.characterId,zeroHash)
+    ? Object.freeze({characterId:detail.characterId, displayName:typeof detail.displayName === 'string' ? detail.displayName.slice(0,80) : '原遊戲角色'}) : null;
+  invalidate();
+  node('character').textContent = character ? `${character.displayName} · 已收到角色接點；資格仍須正式合約驗證` : '未收到有效原遊戲角色資料，不建立假角色／新LifeID。';
+  node('preview').textContent = character ? pretty({status:'CHARACTER_CONTEXT_NOT_ENTITLEMENT',character}) : '角色接點未接通。';
+});
+window.addEventListener('kaios18888:wallet', event => {
+  const provider = event.detail?.provider;
+  invalidate(); wallet = null;
+  if (!provider?.request) { node('account').textContent = '錢包已斷開，請由你本人重新連接'; return; }
+  wallet = new SevenFloorClaimWallet({provider,storage:window.localStorage,locks:navigator.locks});
+  node('account').textContent = `${event.detail.account || '已連接既有錢包，帳戶待唯讀核對'} · chainId=${event.detail.chainId ?? '待查'}（必須為56）`;
+  provider.on?.('accountsChanged', accounts => { invalidate(); node('account').textContent = `${accounts?.[0] || '錢包未連接'} · 帳戶已變，須重讀鏈別及資格`; setStatus('帳戶已變，舊領取預覽作廢。換址不會重置同一角色已領狀態。'); });
+  provider.on?.('chainChanged', chain => { invalidate(); node('account').textContent = `鏈別已變為${chain}；須重新核對帳戶與BSC56`; setStatus('鏈別已變，舊預覽作廢，不自動切鏈或送單。'); });
+  provider.on?.('disconnect', () => { wallet = null; invalidate(); node('account').textContent = '錢包已斷開'; });
+  setStatus('已沿既有連線接點接上你的錢包，尚未請求領取。請唯讀核對角色資格；未部署的新接點不會啟用付款。');
+});
+node('prepare').onclick = () => run(async () => {
+  invalidate();
+  const input = currentInput();
+  buildSevenFloorPlan(input);
+  if (!wallet) throw Error('WALLET_NOT_CONNECTED');
+  const preparingWallet = wallet, preparingGeneration = generation;
+  setStatus('正在唯讀核對角色、所在樓層、任務、已領、銀行狀態與必要費用；尚未送出交易。');
+  const candidate = await preparingWallet.prepare(input);
+  if (preparingWallet !== wallet || preparingGeneration !== generation || pretty(currentInput()) !== pretty(input)) return;
+  preview = candidate; previewWallet = preparingWallet; previewInput = pretty(input);
+  const snapshot = candidate.snapshot || {}, binding = snapshot.binding || {}, record = snapshot.floor || {};
+  node('account').textContent = `${snapshot.account || '帳戶未知'} · chainId=${snapshot.chainId ?? '未知'}`;
+  node('beneficiary').textContent = binding.beneficiary || '綁定地址未知，不能領取';
+  const authorized = typeof record.taskEvidenceHash === 'string' && /^0x[0-9a-fA-F]{64}$/.test(record.taskEvidenceHash) && !same(record.taskEvidenceHash,zeroHash);
+  node('task').textContent = `正式所在層：${binding.currentFloor ?? '未知'}；任務：${authorized ? '觀察到正式授權證據（仍受其餘條件限制）' : '未核實任務授權'}；可執行時間：${record.executableAt ?? '未知'}`;
+  node('claimed').textContent = record.claimed === true ? `此角色本層已領${displayUnits(record.amount)} KAIOS，不可因換址重領` : record.claimed === false ? '本次固定區塊觀測為未領；仍需正式資格與所有付款條件通過' : '正式已領狀態未知，不開放領取';
+  const funding = candidate.step?.fundingPrecheck;
+  const fundingStatus = funding?.known !== true ? '未知，停止送單' : funding.status === 'SUFFICIENT' && funding.enough === true ? '本次資金與共享限額足額' : funding.status === 'BLOCKED' ? '銀行健康或暫停狀態阻擋' : '本次資金或共享限額不足';
+  const fundingReasons = funding?.reasons?.length ? funding.reasons.map(explain).join('；') : funding?.known === true ? '資金檢查通過，仍須角色資格、正式接點及BNB費用全部通過。' : explain('FUNDING_STATE_UNKNOWN');
+  node('pool').textContent = `資金預檢：${fundingStatus}；本次領取：${candidate.step?.ready === true ? '可交本人錢包確認，尚未付款' : '未通過，不能送單'}。
+本次選額：${displayUnits(funding?.amountWei)} KAIOS；銀行餘額：${displayUnits(funding?.balance)}；合約保留額：${displayUnits(funding?.reserve)}；銀行可用額：${displayUnits(funding?.available)} KAIOS。
+共享單筆上限：${displayUnits(funding?.perTransactionLimit)}；UTC當日上限：${displayUnits(funding?.epochLimit)}；本日有效已用：${displayUnits(funding?.effectiveEpochSpent)}；當日剩餘：${displayUnits(funding?.epochRemaining)} KAIOS。
+觀測區塊：${funding?.blockNumber ?? '未知'}；區塊時間戳：${funding?.timestamp ?? '未知'}；UTC日序：${funding?.currentEpoch ?? '未知'}。
+${fundingReasons}
+固定區塊預檢不保證到送出時仍足額；送出前會重新讀查。可用額只按Bank.bankHealth的保留額計算，不代表已扣除所有待付款、其他承諾或全部負債。`;
+  node('fee').textContent = candidate.fee ? `預估${displayUnits(candidate.fee.estimatedWei)} BNB；實際費用以本人錢包確認及交易回執為準。` : candidate.step?.blockers?.includes('BNB_GAS_INSUFFICIENT') ? explain('BNB_GAS_INSUFFICIENT') : '尚無有效費用估算；未接通或資格未通過時不估送單為成功';
+  node('preview').textContent = pretty(candidate);
+  const blockers = candidate.step?.blockers || [];
+  setStatus(candidate.step?.ready ? '唯讀條件通過，尚未付款。核對精確內容後勾選，再按「確認領取」由你本人確認單筆錢包交易。' : `目前未開放本次領取：${blockers.length ? blockers.map(explain).join('；') : '正式接點、角色、任務或費用尚未核實'}。未送交易、未付款。`);
+});
+node('send').onclick = () => run(async () => {
+  const candidate = preview, requestingWallet = previewWallet;
+  if (!candidate || !candidate.step?.ready || !node('ack').checked || !requestingWallet || requestingWallet !== wallet || previewInput !== pretty(currentInput())) throw Error('PREVIEW_INVALID_OR_EXPIRED');
+  invalidate(false);
+  const sendingGeneration = generation;
+  setStatus('僅將這一筆領取交給你的錢包。請本人核對角色、地址、金額與費用；程式不會代簽或自動送下一筆。');
+  const result = await requestingWallet.request(candidate);
+  if (sendingGeneration !== generation || requestingWallet !== wallet) return;
+  node('preview').textContent = pretty(result);
+  node('result').textContent = `錢包回傳：${result.status || '待核對'}。僅取得交易雜湊不代表成功或入帳。`;
+  if (/^0x[0-9a-fA-F]{64}$/.test(result.hash || '')) {
+    const link = document.createElement('a'); link.href = `https://bscscan.com/tx/${result.hash}`; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = ` 查看原交易 ${result.hash}`; node('result').append(link);
+  }
+  setStatus('處理中／尚未核實：保留原交易，按下方唯讀核對結果。不要再按領取或另建ID重送。');
+});
+node('receipt').onclick = () => run(async () => {
+  if (!wallet) throw Error('NO_PENDING_INTENT');
+  const reconcilingWallet = wallet, receiptGeneration = generation;
+  const result = await reconcilingWallet.reconcile();
+  if (receiptGeneration !== generation || reconcilingWallet !== wallet) return;
+  invalidate(false); node('preview').textContent = pretty(result);
+  const names = {VERIFIED_PAID:'本次精確領取交易、付款事件及狀態已核對通過，仍須獨立對帳',PENDING:'原交易仍待確認，不可重送',REVERTED:'原交易執行失敗，未標為已領；先查原因',MISMATCH:'原交易／事件／狀態不符，停止重送',CONFIRMED:'原交易已確認；尚不能僅憑此狀態宣稱本案付款'};
+  node('result').textContent = `${names[result.status] || '尚未核實付款成功'}。${result.hash ? `原交易：${result.hash}` : ''}`;
+  if (result.status === 'VERIFIED_PAID') node('claimed').textContent = '本次精確領取付款證據已核對通過；保留原交易，重新讀查角色本層正式狀態作對帳。';
+  setStatus(result.status === 'VERIFIED_PAID' ? '本錢包RPC的精確付款證據核對通過，請保留原交易作正式對帳；不因按鈕或動畫宣稱入帳。' : '唯讀核對完成。待確認、失敗與不符皆不自動重送；未知狀態不當作未領資格。');
+});
+window.addEventListener('pagehide', () => invalidate());
+if (typeof window.__K11520_PLAYER_LIFE__?.snapshot === 'function') {
+  try { readPlayerContext(window.__K11520_PLAYER_LIFE__.snapshot(), window.__K11520_WORLD_COORDS__); } catch { readPlayerContext(null, null); }
+}
+window.dispatchEvent(new Event('kaios18888:requestCharacter'));
+refreshSend();
+})();
+// END SEVEN FLOOR CONTROLLER
 
 </script>
 

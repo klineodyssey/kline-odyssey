@@ -770,3 +770,38 @@ Human requested an executed-flow check before a final operator SOP. The original
 three-case local import has been verified against the actual inline frontend;
 live signatures, receipts and the player-faucet activation remain separate
 acceptance steps. No Mainnet transaction is implied by the documentation.
+
+### Successor inline seven-floor frontend integration — 2026-11-03
+
+The existing main18888 inline owner now includes the candidate seven-floor
+wallet path and a locally scoped UI controller. Exact per-floor amounts,
+same-character replay protection, fixed-block balance/reserve/module-limit
+preflight, fee checks, fresh pre-send reads and exact payment receipts remain
+separate gates. Neither floor selection nor acknowledgment grants authority.
+The original three fixed allocations, Mother/Jade governance steps and
+independently verified Guanyin Bank.pause flow remain in the same owner.
+
+The actual inline browser adapter/controllers are exercised in the existing
+`tests/token-surface.security.test.mjs`: **57/57 PASS,0 fail,exit0** after this
+integration. The existing isolated Portal browser harness also covers the
+seven-floor unconnected, above-cap and underground states in both mobile
+orientations; direct visual acceptance is pending that run and image review.
+The main page imports no unpublished phase2 adapter or ABI URL. Release status
+remains NOT_DEPLOYED with null new implementation/runtime/module-version pins.
+
+The retained phase2 source has since replaced mandatory per-player setters
+with a governance-configured, readable/code-hash-pinned qualification-source
+candidate. Governance may rotate a validated source without resetting claims;
+ordinary qualified players self-claim without per-player governance approval.
+Its71/71 offline integration result belongs to those pinned phase2 source
+bytes, not automatically to main or a production oracle. The production game
+identity/task/location source remains NOT_CONFIGURED. No mock, local PlayerLife
+projection or client-provided character event can supply that authority.
+
+Only Allocation, its existing module base and Bank interface are needed as
+new main contract paths. Their full phase2 source and precise Boot/index
+registration proposal remain in the existing phase2 bank runbook; none has
+been copied into main pending bounded Boot-registration authority. No Bank
+copy, new Runtime, bootstrap, package replacement, deployment or real payment
+is included in this existing-file frontend change. Underground growth remains
+available independently of the disabled underground micro-claim path.

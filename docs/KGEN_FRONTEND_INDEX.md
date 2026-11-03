@@ -478,3 +478,23 @@ No new program file, Runtime, Boot entry, financial authority or player-save
 schema is created. Public source delivery and a pending wallet hash do not
 constitute payment. Native wallet phone opening remains a separate acceptance
 step; local previews cannot redirect users to an older published page.
+
+### Seven-floor candidate in the same18888 owner
+
+The existing `K線西遊記/temples/18888/index.html#funding-controller` contains
+the seven-floor plan/read/preflight/receipt logic inline and a locally scoped
+seven-floor controller. There is no external phase2 adapter import or new
+global bootstrap. The original fixed-case controller, wallet configuration,
+Guanyin role checks and shared pending/lock protocol remain in that owner.
+
+`KGEN-KAIOS/tests/token-surface.security.test.mjs` exercises its actual
+vendored-browser adapter and UI handler bodies. The existing isolated
+`tests/kaios-portal-browser.mjs --funding-only` additionally checks the seven
+exact caps,44px floor buttons, one-wei excessive input, skipped claims and
+all18 underground exclusions, and saves portrait/landscape screenshots.
+Screenshot generation alone is not direct visual acceptance.
+
+This source is a non-active candidate: NOT_DEPLOYED/null release pins,
+unconfigured production qualification mapping, no new main contract source,
+no signer, no automatic claim and no Mainnet transaction. A local PlayerLife
+or selected floor remains display context, not entitlement.

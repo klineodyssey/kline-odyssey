@@ -152,6 +152,66 @@ async function verifyFundingPanel(){
       const fundingDraft=JSON.parse(await page.locator('#funding-preview').textContent());
       assert.equal(fundingDraft.beneficiary.toLowerCase(),beneficiary);assert.equal(fundingDraft.amountKaios,'1080000');
       await noWalletAuthority('offline Mother draft');row.longAddress=await noOverflow('long address and exact IDs');await capture('mother-long-address');
+      // Exercise the real seven-floor controller in the same isolated context.
+      // No game character, wallet provider, eligibility source or RPC is supplied.
+      const seven=page.locator('#seven-floor-panel');
+      await seven.waitFor({state:'visible'});
+      assert.equal(await page.locator('#seven-floor-levels button[data-floor]').count(),7);
+      assert.equal(await page.locator('#seven-floor-basement option').count(),19);
+      const captureSeven=async name=>{
+        await seven.evaluate(el=>el.scrollIntoView({block:'start',behavior:'instant'}));
+        const heading=await page.locator('#seven-floor-title').boundingBox(),hud=await page.locator('.kgen-hud').boundingBox();
+        assert.ok(heading&&hud&&heading.y>=hud.y+hud.height,`${name}: seven-floor title must remain below the fixed HUD`);
+        const geometry=await seven.evaluate(el=>{
+          const r=el.getBoundingClientRect();
+          return{viewport:innerWidth,document:document.documentElement.scrollWidth,left:r.left,right:r.right,
+            panelWidth:el.clientWidth,panelScroll:el.scrollWidth,
+            textOverflow:[...el.querySelectorAll('p,pre,dd')].filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+1).map(node=>node.id)};
+        });
+        assert.ok(geometry.document<=geometry.viewport+1&&geometry.panelScroll<=geometry.panelWidth+1&&geometry.left>=-1&&geometry.right<=geometry.viewport+1,`${name}: seven-floor horizontal overflow ${JSON.stringify(geometry)}`);
+        assert.deepEqual(geometry.textOverflow,[],`${name}: seven-floor text must wrap`);
+        const file=`seven-floor-${width}x${height}-${name}`;
+        await shot(page,`${file}-viewport`);row.screenshots.push(`${file}-viewport.png`);
+        await seven.screenshot({path:`${OUT}/${file}-panel.png`});row.screenshots.push(`${file}-panel.png`);
+        return geometry;
+      };
+      const caps=['1.08','10.8','108','1080','10800','108000','1080000'];
+      row.sevenFloors=[];
+      for(let floor=1;floor<=7;floor++){
+        const button=page.locator(`#seven-floor-levels button[data-floor="${floor}"]`);
+        await button.click();
+        assert.equal(await button.getAttribute('aria-pressed'),'true');
+        assert.equal(await page.locator('#seven-floor-amount').inputValue(),caps[floor-1]);
+        assert.equal(await page.locator('#seven-floor-send').isDisabled(),true,'a selected floor never grants payment authority');
+        const box=await button.boundingBox();
+        assert.ok(box&&box.width>=44&&box.height>=44,`floor ${floor}: minimum 44px touch target`);
+        row.sevenFloors.push({floor,cap:caps[floor-1],sendDisabled:true,width:box.width,height:box.height});
+      }
+      assert.match(await page.locator('#seven-floor-cap').textContent(),/1,080,000/);
+      row.sevenFloorSelected=await captureSeven('floor-seven-unconnected');
+      await page.locator('#seven-floor-amount').fill('1080000.000000000000000001');
+      assert.equal(await page.locator('#seven-floor-amount').getAttribute('aria-invalid'),'true');
+      assert.equal(await page.locator('#seven-floor-prepare').isDisabled(),true);
+      assert.equal(await page.locator('#seven-floor-send').isDisabled(),true);
+      row.sevenFloorInvalid=await captureSeven('above-cap');
+      await page.locator('#seven-floor-max').click();
+      assert.equal(await page.locator('#seven-floor-amount').inputValue(),'1080000');
+      await page.locator('#seven-floor-ack').check();
+      assert.equal(await page.locator('#seven-floor-send').isDisabled(),true,'acknowledgment cannot grant an unconnected character eligibility');
+      await page.locator('#seven-floor-skip').click();
+      assert.equal(await page.locator('#seven-floor-amount').inputValue(),'');
+      assert.equal(await page.locator('#seven-floor-ack').isChecked(),false);
+      assert.equal(await page.locator('#seven-floor-send').isDisabled(),true);
+      for(let floor=-1;floor>=-18;floor--){
+        await page.locator('#seven-floor-basement').selectOption(String(floor));
+        assert.equal(await page.locator('#seven-floor-amount').isDisabled(),true);
+        assert.equal(await page.locator('#seven-floor-prepare').isDisabled(),true);
+        assert.equal(await page.locator('#seven-floor-send').isDisabled(),true);
+      }
+      assert.match(await page.locator('#seven-floor-cap-label').textContent(),/18/);
+      row.sevenFloorBasement=await captureSeven('basement-eighteen');
+      assert.match(await page.locator('#seven-floor-pool').textContent(),/未知|作廢/);
+      assert.match(await page.locator('#seven-floor-result').textContent(),/未付款/);
       assert.deepEqual(row.runtimeErrors,[],'18888 has no JavaScript/import errors');assert.deepEqual(row.failedScripts,[],'all actual scripts/import dependencies load');
       assert.deepEqual(row.rpcMethods,[],'offline drafts never attempt RPC');assert.deepEqual(row.networkWrites,[],'offline UI never sends a request body');
       assert.deepEqual(row.externalRequests,[],'offline funding UI never fetches wallet, relay or chain endpoints');
@@ -160,6 +220,7 @@ async function verifyFundingPanel(){
     finally{await context.close();}
   }
   report.checks.push('actual 18888 module boot and three role choices; no wallet connection or send; offline Guanyin draft without case/address/amount; acknowledgment and role selection grant no authority; long address/ID wrapping in portrait and landscape');
+  report.checks.push('actual seven-floor inline controller; all seven caps and 44px touch targets; one-wei excess rejected; skip clears acknowledgment; all18 basement levels remain disabled; unknown funds/no payment; portrait and landscape screenshots with no wallet or RPC');
 }
 try{
   if(FUNDING_ONLY)await verifyFundingPanel();

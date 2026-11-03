@@ -1445,3 +1445,27 @@ separate follow-up work and verified branch closeout is the existing
 uses the existing [Hengyao chief-engineer window #584](https://github.com/klineodyssey/kline-odyssey/issues/584).
 Future workers must read the latest record; publication is not proof that
 another agent has read it, acknowledged it or been scheduled to wake.
+
+### 18888 seven-floor candidate in the existing wallet page
+
+The same `K線西遊記/temples/18888/index.html#funding-controller` now owns the
+seven-floor preview, exact amount validation, balance/reserve/shared-limit
+preflight and self-claim wallet/receipt path. Its local controller scope shares
+the existing wallet events, durable pending intent and browser lock with the
+original fixed allocations and independent Guanyin pause flow. It introduces
+no additional frontend adapter, ABI directory, bootstrap or Runtime.
+
+The release remains `NOT_DEPLOYED` with null candidate deployment pins.
+Selecting a floor, changing a name or supplying local PlayerLife progress
+does not grant financial eligibility. Missing authoritative character/task
+data, unknown or insufficient funds, unavailable locks and unverified release
+evidence stop before a wallet transaction. Underground progression remains
+separate; the underground micro-claim path is disabled.
+
+The existing `KGEN-KAIOS/tests/token-surface.security.test.mjs` executes the
+actual inline adapter and controllers, including the vendored browser ethers.
+The existing `tests/kaios-portal-browser.mjs --funding-only` captures portrait
+and landscape states in isolated CI without a wallet, RPC or external service.
+Functional test results and direct screenshot review remain separate checks.
+The phase2 contract source is not activated or copied into main by this page;
+its three-path integration/Boot registration is a separately reviewed step.

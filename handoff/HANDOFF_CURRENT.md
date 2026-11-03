@@ -515,3 +515,116 @@ static!important，避免core廣義nav規則覆蓋；不改原browser assert、�
   continuity，再讀delivery內HANDOFF與README，不能只看最早R0三檔。交付紀錄的
   Writer／Controller／DOT ACK未綁、無GitHub提交部署等界限保留；歷史測試數本輪
   未重跑，私人Drive URL不轉為公共共享權限。
+
+## KAIOS heartbeat — 2026-11-03T18:39:05Z / 2026-11-04T02:39:05+08:00
+
+- 本輪只完成既有七層領取餘額預檢的一項本機修正及驗證；未 commit、push、
+  合併、外發、部署、簽署或操作實資金，也未修改排程、checkpoint、guardian 或雜湊側檔。
+- 正式 main 與 remote main 同為 `7d474e7ff1e600c9161cba75842a0673d95643e8`；
+  本機候選仍位於 `C:/Desktop/kline-odyssey-phase2`，來源 HEAD 為
+  `832766197ea355be080deedde2980ccf007eb60d`，不能把其既有五檔工作誤稱 main 已上線。
+  Boot → Physics CURRENT → Universe Map → AGENTS 已依序讀取；Registry active_claims
+  為空、Cursor 為 OFFLINE／成本暫停，未新增 worker、claim 或解除既有 HOLD。
+  既有子工作 adapter owner 已因容量錯誤停止，其測試 owner 已完成，沒有同檔並行修改。
+- 實際程式變更僅為既有
+  `KGEN-KAIOS/frontend-adapter/lingxiao18888BankAdapter.mjs` 的 health 解碼保留
+  ABI 原欄位 `isPaused`，同時沿用既有 `paused` alias；避免預檢快照遺失原始暫停狀態。
+  Adapter SHA256：`4e50c4369c89e2f756119f8c4d942c227aacd24ca6adc5c7f6ac1194659c6901`。
+  此處 handoff 僅附加本輪結果，前人紀錄保留。
+- 驗證：adapter `node --check`、候選 `git diff --check` PASS；既有 integration test
+  以 `seven floor (controller|runtime pins|amounts|wallet)` 篩選，**31/31 PASS，0 FAIL**。
+  覆蓋不足／未知資金不送簽、固定區塊讀取失敗、1 wei 邊界、UTC 日額重置、
+  預覽後可用額下降及實際 controller 顯示。測試檔本輪未改，SHA256：
+  `8d56ab69aac8d7cb26fdbb4cdada44a5ed805c9b9d133cae9c80924cfee614e9`。
+  Ganache 提示原生 uWS 不匹配並使用其 Node fallback；測試 exit 0。
+- 未完成：新增預檢後的完整整合回歸尚未重跑；先前 64/64 成績屬預檢增補前，
+  不移用作本次完整驗收。可信資格來源未正式設定，候選未部署，玩家仍不能真領款。
+  本輪沒有清除官網視覺或其他既有 release HOLD，也沒有發布 legacy 卡片的本機修改。
+- 唯一 next step：在同一 phase2 候選、固定上述來源與檔案狀態，重跑完整
+  `KGEN-KAIOS/tests/lingxiao-bank-system.integration.test.mjs`，讀回實際結果後再準備最小主幹整合。
+
+## KAIOS heartbeat — 2026-11-03T19:41:36Z / 2026-11-04T03:41:36+08:00
+
+- 本輪完成上一回執指定的完整離線整合回歸；實際變更檔案僅本
+  `handoff/HANDOFF_CURRENT.md` 的附加回執，未修改程式、測試、Registry、Queue、
+  排程、checkpoint、guardian、雜湊側檔或既有編譯產物。未 commit、push、
+  合併、外發、操作瀏覽器、部署正式合約或操作實資金。
+- 來源：實際整合工作目錄為 `C:/Users/mydg0/AppData/Local/Temp/hengyao-main-integration`，
+  HEAD 與讀回的 remote main 均為 `7d474e7ff1e600c9161cba75842a0673d95643e8`；
+  被測既有候選位於 `C:/Desktop/kline-odyssey-phase2`，分支
+  `codex/kaios-civilization-phase2`，HEAD `832766197ea355be080deedde2980ccf007eb60d`。
+  候選既有五檔未提交變更均保留，不對舊 main 施工或將整個 phase2 當正式主幹。
+- 已依序重讀 Boot V1.4 → Physics CURRENT → Universe Map → AGENTS；四檔 hash
+  與上輪一致。GitHub #584 增量讀回仍以 comment `6609837676` 為最新有效交接，
+  未見新指示；不以其較舊的 UI／喚醒狀態覆蓋本機較新、具來源的實測紀錄。
+  main Registry 的 codex-gm-01 為 ACTIVE/T5、ack 齊全、無 suspension、
+  active_claims=[]；正式 Queue／claim／ownership 只讀複核無此 adapter/test 的
+  並行 owner。Cursor 成本暫停保留；phase2 自帶 Registry 是舊快照，不作現行派工依據。
+  Registry 舊 workspace 索引未當作新工作權限，亦未自行重綁；現有部署與發布 HOLD 保留。
+- 實際驗證指令：
+  `node --test KGEN-KAIOS/tests/lingxiao-bank-system.integration.test.mjs`。
+  結果 **71/71 PASS，0 FAIL、0 CANCELLED、0 SKIPPED，exit 0**；
+  duration_ms=`278027.2029`。這是餘額預檢增補與 isPaused 修正後的完整本檔回歸，
+  包含可信資格來源、玩家自領、防重與銀行資金限制，以及原固定配額、薪資、
+  8888／11520、延遲治理和 UUPS 邊界。全程使用本機 Ganache／離線 RPC fixture；
+  不代表主網、真人錢包、正式資格來源或全站全部測試驗收。Ganache 原生 uWS
+  不匹配時使用既有 Node fallback，未安裝、下載或修改套件。
+- 測試來源 SHA256（測試後讀回與本輪開始一致）：Allocation
+  `b4b280c1d658ef87f3e8e2575e04c334025da175b7154b369f1886ffd233b5ba`；adapter
+  `4e50c4369c89e2f756119f8c4d942c227aacd24ca6adc5c7f6ac1194659c6901`；test
+  `8d56ab69aac8d7cb26fdbb4cdada44a5ed805c9b9d133cae9c80924cfee614e9`。
+  既有 Allocation artifact 仍為
+  `07034d7be335e5bb207002208f29f80171a643fb417b74426b5be09c7a09ecac`，
+  新候選在記憶體編譯，未用新 artifact 冒充已部署版本；候選 `git diff --check` PASS。
+- 狀態：`FUNCTIONAL_QA=PASS_OFFLINE_FULL_INTEGRATION_FILE`；
+  `VISUAL_QA=NOT_RUN_FOR_CURRENT_FAUCET`。可信資格來源仍未正式設定，候選未部署、
+  未合併主幹，不能宣稱玩家已可真領款；原三筆實資金撥款也未執行。
+- 唯一 next step：沿既有 runbook 核對此候選最小主幹整合相依檔清單與必要的
+  Boot／索引登錄影響，形成可審閱的整合範圍；不直接整包合併 phase2，
+  不在 heartbeat 中修改受保護 Boot 或執行合併／發布。
+
+## Human-resumed18888 source integration — 2026-11-03
+
+- This is the resumed Human conversation, not a heartbeat publication action.
+  Human asked to continue writing the program and deliver a working result.
+  Base remote main remains `7d474e7ff1e600c9161cba75842a0673d95643e8`.
+- The existing18888 page now contains the seven-floor CSS/DOM, canonical
+  candidate adapter and locally scoped controller inside its original inline
+  funding module. It imports no phase2 adapter/ABI URL and creates no global
+  bootstrap. Original fixed-case controller/functions, Guanyin pause, native
+  wallet rules, WalletConnect shim/SRI and64px/48px scroll margin are retained.
+  Mobile floor buttons have44px minimum targets and wrap into4+3 columns.
+- Source review confirmed that the inline candidate adapter, after removing
+  exports, is text-identical to the retained phase2 adapter portion. Actual
+  integrated page SHA256:
+  `c598a0d40bb54b2ade0a38c90a29d391c9b1ad268fd9274f9f609f1365ee7aa0`.
+  Existing token-surface test SHA256:
+  `6c07c19b0f4fb592caca1ae1486a47b80169dd6987475580efc84a546763f62d`.
+- Integrated-main functional result: **57/57 PASS,0 FAIL,exit0**,17850ms
+  approximately; the actual browser-vendored ethers and inline component bodies
+  are executed. An initial new cross-flow test omitted its lock fixture; the
+  fixture was corrected and the whole suite rerun, without weakening production
+  locks. Earlier53/53 and focused29/29 are intermediate results, not new totals.
+- The existing isolated Portal browser harness now covers all seven caps,
+  44px targets, one-wei excessive amounts, skipping, all18 disabled basement
+  levels and unknown-funding/unpaid state, with portrait/landscape screenshots.
+  Syntax and diff checks PASS. `VISUAL_QA=NOT_RUN_FOR_THIS_SOURCE` pending the
+  existing CI job and direct image review; no disabled local browser is used.
+- Only existing frontend/test/index/README owners are changed. New contracts
+  remain outside main: the required closure is Allocation, its existing module
+  base and Bank interface (three paths). The exact pinned sources and bounded
+  active-Boot registration proposal are preserved in the existing phase2 bank
+  runbook; its new cumulative section does not authorize Boot modification.
+  The existing archive Bank is text-identical to the phase2 Bank after LF
+  normalization and can supply an explicitly historical isolated fixture;
+  no new Bank copy or replacement package/compiler is required.
+- Release remains NOT_DEPLOYED with null candidate pins. The formal game
+  identity/task/location source is NOT_CONFIGURED; selected floor and local
+  PlayerLife are not payment authority. No actual grant, cap change, deployment,
+  governance execution or wallet transaction occurred.
+- Next: run the same existing isolated CI against this bounded source, directly
+  review its mobile images and repair any regression. Use one short-lived QA
+  branch for review and close it after convergence; do not bulk merge phase2 or
+  publish unrelated legacy-card edits. Before adding the three missing contract
+  paths, obtain the explicit bounded Boot-registration authority required by
+  AGENTS; do not infer it from generic merge approval.

@@ -58,20 +58,27 @@ test("Genesis inscription binds the Organ Registry rather than one permanent Fur
 // The actual inline 18888 funding adapter/controller are the sole product owners.
 // Execute their complete component bodies with real ethers and offline providers;
 // no test reimplementation, external RPC, wallet signer or real funds is used.
-import { id } from "ethers";
+import { AbiCoder, id, keccak256, parseUnits } from "ethers";
 const BANK_CONTROLLER_MARKER = "// BEGIN HUMAN FUNDING CONTROLLER";
+const BANK_CONTROLLER_END = "// END HUMAN FUNDING CONTROLLER";
+const SEVEN_CONTROLLER_MARKER = "// BEGIN SEVEN FLOOR CONTROLLER";
+const SEVEN_CONTROLLER_END = "// END SEVEN FLOOR CONTROLLER";
 const BANK_TEST_ETHER = 10n ** 18n;
 async function inlineBankApi() {
-  const ethers = await import("ethers"), vm = await import("node:vm");
+  const vm = await import("node:vm"), { createRequire } = await import("node:module");
+  const ethers = createRequire(import.meta.url)(path.resolve(root, "../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js"));
   const html = fs.readFileSync(path.resolve(root, "../K線西遊記/temples/18888/index.html"), "utf8");
   const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(source?.includes(BANK_CONTROLLER_MARKER), "execute the real retained inline component");
   const adapter = source.split(BANK_CONTROLLER_MARKER)[0].replace(/^import[^\n]+\r?\n/gm, "");
-  const context = { ...ethers, window: {}, navigator: {}, structuredClone };
+  const context = { ...ethers.utils, window: {}, navigator: {}, structuredClone };
   vm.runInNewContext(adapter + `\nglobalThis.bankTestApi = {
     FUNDING_FORMAL,FUNDING_RUNTIME_PINS,FUNDING_IMPLEMENTATION_SLOT,FUNDING_STORAGE_KEY,FUNDING_LOCK_KEY,
     buildLifeResourcePlan,deriveFundingStep,HumanFundingWallet,
-    buildBankPausePlan,deriveBankPauseStep,HumanBankPauseWallet,readFundingRuntimePins
+    buildBankPausePlan,deriveBankPauseStep,HumanBankPauseWallet,readFundingRuntimePins,
+    SEVEN_FLOORS,SEVEN_FLOOR_RELEASE,sevenFloorRuntimePins,projectSevenFloorPlayerContext,
+    validateSevenFloorAmount,buildSevenFloorPlan,deriveSevenFloorStep,SevenFloorClaimWallet,
+    bankAbi,allocationAbi,governanceAbi,floorInterface
   };`, context, { filename: "actual-18888-inline-adapter.mjs" });
   return context.bankTestApi;
 }
@@ -415,7 +422,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
     assert.ok(source, "test the real existing inline funding controller");
     assert.ok(source.includes(BANK_CONTROLLER_MARKER));
-    const controller = source.split(BANK_CONTROLLER_MARKER)[1];
+    const controller = source.split(BANK_CONTROLLER_MARKER)[1].split(BANK_CONTROLLER_END)[0];
     const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
     const mount = async (options = {}) => {
       const nodes = new Map(), providerListeners = new Map(), requests = [], wallets = [];
@@ -741,5 +748,723 @@ test("bank pause wallet: only verified Guanyin can request one pause and receipt
       assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY) === null, mode === "exact", mode);
       assert.equal(m.sends().length, 1, "receipt inspection cannot send a second transaction");
     }
+  });
+});
+
+
+// Values cross a VM realm; compare their data without weakening product guards.
+const equalInline = (actual, expected, message) => assert.deepEqual(structuredClone(actual), structuredClone(expected), message);
+
+test("seven floor inline inspection: fixed-block funding and unavailable release never grant payment", async (t) => {
+  const api = await inlineBankApi(), { Interface } = await import("ethers");
+  const F = api.FUNDING_FORMAL, pins = api.FUNDING_RUNTIME_PINS, tag = "0x1234", timestamp = 1_700_000_000;
+  const bank = new Interface(api.bankAbi), floor = api.floorInterface;
+  const token = new Interface(["function decimals() view returns(uint8)"]);
+  const plan = api.buildSevenFloorPlan({ characterId: id("INLINE-INSPECT-FIXTURE"), floor: 1, amount: "1.08" });
+  await t.test("actual inspector preserves complete Bank ABI fields and never reads unreviewed character selectors", async () => {
+    for (const fault of [null, "health", "module"]) {
+      const calls = [];
+      const provider = { request: async ({ method, params = [] }) => {
+        calls.push({ method, params });
+        if (method === "eth_chainId") return "0x38";
+        if (method === "eth_accounts") return [F.mother];
+        if (method === "eth_getBlockByNumber") return { number: tag, timestamp: `0x${timestamp.toString(16)}` };
+        if (method === "eth_getStorageAt") {
+          assert.equal(params[1], api.FUNDING_IMPLEMENTATION_SLOT); assert.equal(params[2], tag);
+          const pin = Object.values(pins).find(pin => pin.proxy.toLowerCase() === params[0].toLowerCase()); assert.ok(pin);
+          return `0x${pin.implementation.slice(2).padStart(64, "0")}`;
+        }
+        if (method === "eth_getCode") { assert.equal(params[1], tag); return "0x6000"; }
+        if (method === "eth_call") {
+          assert.equal(params[1], tag);
+          const iface = params[0].to.toLowerCase() === F.bank.toLowerCase() ? bank
+            : params[0].to.toLowerCase() === F.allocation.toLowerCase() ? floor : token;
+          const parsed = iface.parseTransaction({ data: params[0].data });
+          const values = { kaios: [F.kaios], decimals: [18], version: ["1.0.0"],
+            module: [[F.allocation, F.versionHash, F.capWei, F.capWei, 0, Math.floor(timestamp / 86400), true]],
+            bankHealth: [11n * BANK_TEST_ETHER, BANK_TEST_ETHER, 10n * BANK_TEST_ETHER, 12n * BANK_TEST_ETHER, BANK_TEST_ETHER, true, false] };
+          assert.ok(Object.hasOwn(values, parsed.name), `unreviewed selector ${parsed.name} must not be called`);
+          if (fault === "health" && parsed.name === "bankHealth" || fault === "module" && parsed.name === "module") throw Error("OFFLINE_READ_FAILED");
+          return iface.encodeFunctionResult(parsed.name, values[parsed.name]);
+        }
+        throw Error(`No wallet or external RPC allowed: ${method}`);
+      } };
+      const wallet = new api.SevenFloorClaimWallet({ provider, storage: {} });
+      const snapshot = await wallet.inspect(plan), step = api.deriveSevenFloorStep(plan, snapshot);
+      assert.equal(snapshot.releaseVerified, false); assert.equal(snapshot.binding, null); assert.equal(snapshot.floor, null);
+      assert.equal(snapshot.codeOk, false, "synthetic bytes do not pass the formal historical pins");
+      assert.equal(step.ready, false); assert.ok(step.blockers.includes("SEVEN_FLOOR_NOT_DEPLOYED"));
+      assert.equal(step.fundingPrecheck.status, fault ? "UNKNOWN" : "SUFFICIENT");
+      if (!fault) {
+        assert.equal(snapshot.health.balance, String(11n * BANK_TEST_ETHER)); assert.equal(snapshot.health.reserve, String(BANK_TEST_ETHER));
+        assert.equal(snapshot.health.available, String(10n * BANK_TEST_ETHER)); assert.equal(snapshot.health.isPaused, false); assert.equal(snapshot.health.paused, false);
+        assert.equal(snapshot.health.accountedInflow, String(12n * BANK_TEST_ETHER)); assert.equal(snapshot.health.totalOutflow, String(BANK_TEST_ETHER));
+      }
+      assert.equal(calls.some(call => call.method === "eth_sendTransaction"), false);
+    }
+  });
+  await t.test("only complete reviewed metadata can resolve a future Allocation pin; production stays undeployed", () => {
+    assert.equal(api.SEVEN_FLOOR_RELEASE.status, "NOT_DEPLOYED");
+    for (const field of ["implementation", "runtimeHash", "moduleVersionHash"]) assert.equal(api.SEVEN_FLOOR_RELEASE[field], null);
+    assert.throws(() => api.sevenFloorRuntimePins(), /NOT_REVIEWED/);
+    const release = { status: "DEPLOYED_AND_REVIEWED", version: "1.1.0", implementation: `0x${"44".repeat(20)}`,
+      runtimeHash: id("SYNTHETIC-RUNTIME"), moduleVersionHash: id("SYNTHETIC-MODULE") };
+    const resolved = api.sevenFloorRuntimePins(release);
+    assert.equal(resolved.bank, pins.bank); assert.equal(resolved.governance, pins.governance); assert.equal(resolved.allocation.proxy, F.allocation);
+    for (const change of [{ status: "DEPLOYED" }, { version: "1.0.0" }, { implementation: null }, { runtimeHash: null }, { moduleVersionHash: null }]) {
+      assert.throws(() => api.sevenFloorRuntimePins({ ...release, ...change }), /SEVEN_FLOOR_RELEASE_/);
+    }
+  });
+  await t.test("all three flows reject another flow's pending receipt before any provider request", async () => {
+    const flows = [[api.HumanFundingWallet, api.buildLifeResourcePlan({ beneficiary: F.mother, amount: "1" }), "PAYOUT"],
+      [api.HumanBankPauseWallet, api.buildBankPausePlan(), "BANK_PAUSE"], [api.SevenFloorClaimWallet, plan, "FLOOR_CLAIM"]];
+    for (const [Owner, ownerPlan, kind] of flows) {
+      const raw = JSON.stringify({ plan: ownerPlan, kind }), storage = { getItem: () => raw, setItem() {}, removeItem() { throw Error("retain pending lock"); } };
+      for (const [Other] of flows) if (Owner !== Other) {
+        const wallet = new Other({ storage, locks: { request: async (_name, _options, callback) => callback({}) },
+          provider: { request() { throw Error("NO_PROVIDER_REQUEST"); } } });
+        await assert.rejects(wallet.reconcile(`0x${"11".repeat(32)}`), /PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL/);
+        assert.equal(storage.getItem(api.FUNDING_STORAGE_KEY), raw);
+      }
+    }
+  });
+});
+
+test("seven floor controller: actual handlers reject stale context and preserve exact user intent", async (t) => {
+  const fs = await import("node:fs/promises");
+  const vm = await import("node:vm");
+  const { FUNDING_FORMAL, SEVEN_FLOORS, validateSevenFloorAmount, buildSevenFloorPlan, deriveSevenFloorStep, projectSevenFloorPlayerContext } = await inlineBankApi();
+  const html = await fs.readFile(new URL("../../K線西遊記/temples/18888/index.html", import.meta.url), "utf8");
+  const source = html.split(SEVEN_CONTROLLER_MARKER)[1]?.split(SEVEN_CONTROLLER_END)[0];
+  assert.ok(source, "test the actual scoped controller from the sole inline owner");
+  const controller = `0x${"22".repeat(20)}`;
+  const beneficiary = `0x${"33".repeat(20)}`;
+  const transactionHash = `0x${"11".repeat(32)}`;
+  const roleA = id("EXISTING-GAME-CHARACTER-A"), roleB = id("EXISTING-GAME-CHARACTER-B");
+  const deferred = () => {
+    let resolve, reject;
+    const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
+    return { promise, resolve, reject };
+  };
+  const candidate = (input, ready = true) => ({ plan: buildSevenFloorPlan(input),
+    step: { ready, blockers: ready ? [] : ["SEVEN_FLOOR_NOT_DEPLOYED"] },
+    snapshot: { chainId: 56, account: controller, blockNumber: "0x100",
+      binding: { controller, beneficiary, currentFloor: input.floor },
+      floor: { taskEvidenceHash: id("FORMAL-TASK-EVIDENCE"), claimed: false, executableAt: "0", amount: "0" },
+      // Explicit synthetic fixture wei, never a substituted production reserve.
+      health: { healthy: true, paused: false, balance: String(11_000_000n * BANK_TEST_ETHER), reserve: String(1_000_000n * BANK_TEST_ETHER), available: String(10_000_000n * BANK_TEST_ETHER) } }, fee: null });
+
+  function harness() {
+    const nodes = new Map(), events = new Map(), requests = [], preparations = [], instances = [];
+    const waiting = { prepare: null, send: null, receipt: null };
+    let liveRequests = 0;
+    const buttons = [];
+    class Element {
+      constructor(value = "") { this.value = value; this.checked = false; this.disabled = false;
+        this.dataset = {}; this.listeners = new Map(); this.children = []; this.attrs = {}; this.textContent = ""; }
+      addEventListener(name, listener) { this.listeners.set(name, listener); }
+      append(child) { this.children.push(child); }
+      setAttribute(name, value) { this.attrs[name] = value; }
+      querySelectorAll() { return buttons; }
+    }
+    for (let index = 0; index < 7; index++) {
+      const button = new Element(); button.dataset.floor = String(index + 1); buttons.push(button);
+    }
+    const element = name => {
+      const key = name.startsWith("seven-floor-") ? name : `seven-floor-${name}`;
+      if (!nodes.has(key)) nodes.set(key, new Element());
+      return nodes.get(key);
+    };
+    element("amount").value = "1.08";
+    element("result").textContent = "目前未送出領取交易，未付款。";
+    element("claimed").textContent = "未知；不能以本機記錄宣稱鏈上未領";
+    class FakeWallet {
+      constructor(options) { this.provider = options.provider; this.invalidations = 0; instances.push(this); }
+      invalidatePreview() { this.invalidations++; }
+      async prepare(input) {
+        preparations.push(structuredClone(input));
+        return waiting.prepare ? await waiting.prepare.promise : candidate(input);
+      }
+      async request(preview) {
+        requests.push(preview);
+        return waiting.send ? await waiting.send.promise : { hash: transactionHash, status: "SUBMITTED_UNCONFIRMED" };
+      }
+      async reconcile() {
+        return waiting.receipt ? await waiting.receipt.promise : { hash: transactionHash, status: "PENDING" };
+      }
+    }
+    const context = {
+      document: { getElementById: element, createElement: () => new Element() },
+      window: { localStorage: {}, addEventListener: (name, listener) => events.set(name, listener),
+        dispatchEvent: event => events.get(event.type)?.(event) },
+      navigator: { locks: {} },
+      Option: class { constructor(text, value) { this.text = text; this.value = value; } },
+      Event: class { constructor(type) { this.type = type; } },
+      SEVEN_FLOORS, validateSevenFloorAmount, buildSevenFloorPlan, projectSevenFloorPlayerContext, SevenFloorClaimWallet: FakeWallet,
+    };
+    vm.runInNewContext(source, context, { filename: "actual-seven-floor-controller.mjs" });
+    const emit = (name, detail) => events.get(name)?.({ detail });
+    const role = (characterId = roleA) => emit("kaios18888:character", { characterId, displayName: "既有角色" });
+    const connect = () => {
+      const listeners = new Map();
+      const provider = { request: () => { liveRequests++; throw Error("NO_LIVE_PROVIDER_ALLOWED"); },
+        on: (name, listener) => listeners.set(name, listener) };
+      emit("kaios18888:wallet", { provider, account: controller, chainId: 56 });
+      return { provider, listeners };
+    };
+    const choose = floor => {
+      if (floor > 0) buttons[floor - 1].listeners.get("click")();
+      else { element("basement").value = String(floor); element("basement").listeners.get("change")(); }
+    };
+    const click = name => element(name).onclick();
+    const acknowledge = () => { element("ack").checked = true; element("ack").listeners.get("change")(); };
+    const edit = (value, event = true) => {
+      element("amount").value = value;
+      if (event) element("amount").listeners.get("input")();
+    };
+    return { element, buttons, waiting, role, connect, choose, click, acknowledge, edit, emit,
+      requests, preparations, instances, liveRequests: () => liveRequests };
+  }
+
+  await t.test("first screen is explicitly unconnected; seven caps and every basement remain distinct", async () => {
+    assert.match(html, /LOCAL_CANDIDATE_NOT_MAINNET_CONNECTED/);
+    assert.match(html, /尚未收到原遊戲角色資料/);
+    assert.ok(html.indexOf('id="seven-floor-panel"') < html.indexOf('class="bank-hero"'));
+    const ui = harness();
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.element("send").disabled, true);
+    assert.equal(ui.element("basement").children.length, 18);
+    for (const row of SEVEN_FLOORS) {
+      ui.choose(row.floor);
+      assert.equal(ui.element("amount").value, row.maxKaios);
+      assert.equal(ui.element("position").textContent, row.position);
+      assert.equal(ui.buttons[row.floor - 1].attrs["aria-pressed"], "true");
+    }
+    for (let floor = -1; floor >= -18; floor--) {
+      ui.choose(floor);
+      assert.equal(ui.element("amount").disabled, true);
+      assert.equal(ui.element("max").disabled, true);
+      assert.equal(ui.element("send").disabled, true);
+      await ui.click("prepare");
+    }
+    assert.equal(ui.preparations.length, 0);
+    assert.equal(ui.liveRequests(), 0);
+  });
+
+  await t.test("missing and zero character context never invent eligibility or ask for a LifeID", async () => {
+    const ui = harness(); ui.connect();
+    await ui.click("prepare");
+    ui.role(`0x${"00".repeat(32)}`); await ui.click("prepare");
+    assert.equal(ui.preparations.length, 0);
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.element("send").disabled, true);
+    assert.match(ui.element("character").textContent, /未收到有效原遊戲角色/);
+    assert.equal(ui.liveRequests(), 0);
+  });
+
+  await t.test("funding precheck UI: actual handlers show exact funding, block insufficient or unknown, and clear stale pool values", async () => {
+    const input = { characterId: roleA, floor: 1, amount: "1.08" }, moduleVersion = id("SYNTHETIC-UI-FUNDING-MODULE");
+    for (const scenario of ["sufficient", "insufficient", "unknown"]) {
+      const ui = harness(); ui.role(); ui.connect();
+      const prepared = candidate(input);
+      Object.assign(prepared.snapshot, { timestamp: "1700000000", releaseVerified: true, codeOk: true, token: FUNDING_FORMAL.kaios,
+        decimals: 18, identityErrors: [], expectedModuleVersionHash: moduleVersion, paymentConsumed: false,
+        module: { module: FUNDING_FORMAL.allocation, versionHash: moduleVersion, active: true, perTransactionLimit: String(3n * BANK_TEST_ETHER),
+          epochLimit: String(10n * BANK_TEST_ETHER), epochSpent: String(BANK_TEST_ETHER), epochIndex: String(Math.floor(1700000000 / 86400)) },
+        health: { healthy: true, paused: false, isPaused: false, balance: String(11n * BANK_TEST_ETHER), reserve: String(BANK_TEST_ETHER),
+          available: String(10n * BANK_TEST_ETHER), accountedInflow: String(11n * BANK_TEST_ETHER), totalOutflow: "0" } });
+      if (scenario === "insufficient") Object.assign(prepared.snapshot.health, { balance: String(BANK_TEST_ETHER), available: "0" });
+      if (scenario === "unknown") prepared.snapshot.health = null;
+      prepared.step = deriveSevenFloorStep(prepared.plan, prepared.snapshot);
+      ui.waiting.prepare = deferred(); const pending = ui.click("prepare"); ui.waiting.prepare.resolve(prepared); await pending;
+      const text = ui.element("pool").textContent;
+      if (scenario === "sufficient") {
+        for (const [label, amount] of [["銀行餘額", "11"], ["合約保留額", "1"], ["銀行可用額", "10"], ["共享單筆上限", "3"], ["UTC當日上限", "10"], ["本日有效已用", "1"], ["當日剩餘", "9"]]) {
+          assert.match(text, new RegExp(`${label}：${amount}(?:\\.0+)?(?:；| KAIOS|$)`), label);
+        }
+        assert.match(text, /本次資金與共享限額足額/); assert.match(text, /尚未付款/);
+        assert.match(text, /觀測區塊：0x100/); assert.match(text, /區塊時間戳：1700000000/);
+        ui.acknowledge(); assert.equal(ui.element("send").disabled, false, "the isolated ready fixture can offer only explicit confirmation");
+      } else {
+        ui.acknowledge(); assert.equal(ui.element("send").disabled, true);
+        if (scenario === "insufficient") { assert.match(text, /本次資金或共享限額不足/); assert.match(text, /銀行可用資金不足/); }
+        else { assert.match(text, /未知，停止送單/); assert.match(text, /銀行餘額：未知/); assert.match(text, /合約保留額：未知/); }
+      }
+      assert.equal(ui.element("result").textContent, "目前未送出領取交易，未付款。");
+      ui.edit("0.5"); assert.match(ui.element("pool").textContent, /未知或已作廢/);
+      assert.doesNotMatch(ui.element("pool").textContent, /銀行餘額：11/); assert.equal(ui.element("send").disabled, true);
+      assert.equal(ui.requests.length, 0); assert.equal(ui.liveRequests(), 0);
+    }
+  });
+  await t.test("late prepare cannot restore readiness after form, floor, character or wallet changes", async () => {
+    for (const change of [
+      ui => ui.edit("0.5"), ui => ui.choose(2), ui => ui.role(roleB), ui => ui.connect(),
+    ]) {
+      const ui = harness(); ui.role(); ui.connect(); ui.waiting.prepare = deferred();
+      const pending = ui.click("prepare");
+      change(ui);
+      ui.waiting.prepare.resolve(candidate({ characterId: roleA, floor: 1, amount: "1.08" }));
+      await pending; ui.acknowledge();
+      assert.equal(ui.element("send").disabled, true);
+      assert.equal(ui.requests.length, 0);
+      assert.equal(ui.liveRequests(), 0);
+    }
+  });
+
+  await t.test("silent amount edits are rejected; one fresh explicit confirmation requests only once", async () => {
+    const ui = harness(); ui.role(); const connected = ui.connect();
+    await ui.click("prepare"); ui.acknowledge();
+    assert.equal(ui.element("send").disabled, false);
+    ui.edit("0.5", false); await ui.click("send");
+    assert.equal(ui.requests.length, 0);
+    await ui.click("prepare"); ui.acknowledge(); await ui.click("send");
+    assert.equal(ui.requests.length, 1);
+    assert.equal(ui.requests[0].plan.amountKaios, "0.5");
+    assert.equal(ui.element("ack").checked, false);
+    assert.equal(ui.element("send").disabled, true);
+    assert.match(ui.element("result").textContent, /不代表成功或入帳/);
+    await ui.click("prepare"); ui.acknowledge();
+    connected.listeners.get("chainChanged")("0x1");
+    assert.equal(ui.element("send").disabled, true);
+    assert.ok(ui.instances[0].invalidations > 0, "invalidate the actual wallet preview capability too");
+    assert.equal(ui.liveRequests(), 0);
+  });
+
+  await t.test("skip and unchecked acknowledgment cannot request or mark a floor paid", async () => {
+    const ui = harness(); ui.role(); ui.connect();
+    await ui.click("prepare");
+    assert.equal(ui.element("send").disabled, true);
+    await ui.click("send"); // Exercise the handler too, beyond the disabled button.
+    assert.equal(ui.requests.length, 0);
+    await ui.click("prepare"); ui.acknowledge();
+    assert.equal(ui.element("send").disabled, false);
+    ui.element("ack").checked = false; ui.element("ack").listeners.get("change")();
+    assert.equal(ui.element("send").disabled, true);
+    await ui.click("send"); assert.equal(ui.requests.length, 0);
+    await ui.click("prepare"); ui.acknowledge();
+    const beforeResult = ui.element("result").textContent;
+    const beforePrepares = ui.preparations.length;
+    ui.click("skip");
+    assert.equal(ui.element("amount").value, "");
+    assert.equal(ui.element("ack").checked, false);
+    assert.equal(ui.element("send").disabled, true);
+    assert.equal(ui.element("result").textContent, beforeResult);
+    assert.equal(ui.preparations.length, beforePrepares);
+    assert.match(ui.element("status").textContent, /這次不領/);
+    await ui.click("send");
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.liveRequests(), 0);
+  });
+
+  await t.test("invalid player amounts stop before wallet preparation or sending", async () => {
+    for (const amount of ["", "0", "-1", "1e0", "1,000", "1.080000000000000001", "0.0000000000000000001"]) {
+      const ui = harness(); ui.role(); ui.connect(); ui.edit(amount);
+      assert.equal(ui.element("amount").attrs["aria-invalid"], "true", amount);
+      assert.equal(ui.element("prepare").disabled, true, amount);
+      await ui.click("prepare"); ui.acknowledge(); await ui.click("send");
+      assert.equal(ui.preparations.length, 0, amount);
+      assert.equal(ui.requests.length, 0, amount);
+      assert.equal(ui.element("send").disabled, true, amount);
+      assert.equal(ui.element("result").textContent, "目前未送出領取交易，未付款。", amount);
+      assert.equal(ui.liveRequests(), 0, amount);
+    }
+  });
+
+  await t.test("late wallet send return cannot overwrite a new role, floor or wallet context", async () => {
+    for (const change of [ui => ui.choose(2), ui => ui.role(roleB), ui => ui.connect()]) {
+      const ui = harness(); ui.role(); ui.connect();
+      await ui.click("prepare"); ui.acknowledge(); ui.waiting.send = deferred();
+      const pending = ui.click("send");
+      change(ui);
+      const kept = { result: ui.element("result").textContent, status: ui.element("status").textContent,
+        preview: ui.element("preview").textContent, claimed: ui.element("claimed").textContent };
+      ui.waiting.send.resolve({ hash: transactionHash, status: "SUBMITTED_UNCONFIRMED" }); await pending;
+      for (const [field, text] of Object.entries(kept)) assert.equal(ui.element(field).textContent, text, field);
+      assert.equal(ui.element("send").disabled, true);
+      assert.equal(ui.requests.length, 1, "one old mock request, never a retry in the new context");
+      assert.equal(ui.liveRequests(), 0);
+    }
+  });
+
+  await t.test("late paid receipt cannot mark a different role, floor or wallet as paid", async () => {
+    for (const change of [ui => ui.choose(2), ui => ui.role(roleB), ui => ui.connect()]) {
+      const ui = harness(); ui.role(); ui.connect(); ui.waiting.receipt = deferred();
+      const pending = ui.click("receipt");
+      change(ui);
+      const kept = { result: ui.element("result").textContent, status: ui.element("status").textContent,
+        preview: ui.element("preview").textContent, claimed: ui.element("claimed").textContent };
+      ui.waiting.receipt.resolve({ hash: transactionHash, status: "VERIFIED_PAID" }); await pending;
+      for (const [field, text] of Object.entries(kept)) assert.equal(ui.element(field).textContent, text, field);
+      assert.equal(ui.requests.length, 0);
+      assert.equal(ui.element("send").disabled, true);
+      assert.equal(ui.liveRequests(), 0);
+    }
+  });
+  await t.test("original PlayerLife display context cannot prepare a claim without a separate matching financial character", async () => {
+    const ui = harness(); ui.connect();
+    const playerId = `KAIOS-P-${"ab".repeat(16)}`;
+    const snapshot = { scope: "LOCAL_CANDIDATE_NOT_ECONOMIC_AUTHORITY", status: "READY", revision: 1, persistent: true,
+      player: { playerId, displayName: "原玩家", lastWorld: "11520", xp: 1_000_000, level: 7, dailyTaskComplete: true } };
+    ui.emit("kaios18888:playerLife", { snapshot, coordinates: { distanceUnit: "METERS", physical: { x: 18888, y: 7, z: 0 } } });
+    assert.match(ui.element("character").textContent, /僅展示/);
+    await ui.click("prepare"); assert.equal(ui.preparations.length, 0);
+    ui.emit("kaios18888:character", { characterId: roleA, sourcePlayerId: "DIFFERENT-PLAYER", displayName: "錯誤映射" });
+    await ui.click("prepare"); assert.equal(ui.preparations.length, 0);
+    assert.equal(ui.requests.length, 0); assert.equal(ui.element("send").disabled, true);
+    ui.emit("kaios18888:character", { characterId: roleA, sourcePlayerId: playerId, displayName: "正式角色接點" });
+    await ui.click("prepare"); assert.equal(ui.preparations.length, 1, "matching context may reach only the offline formal-state seam");
+    assert.equal(ui.requests.length, 0); assert.equal(ui.liveRequests(), 0);
+  });
+});
+
+// Human-operated funding UI checks are deliberately offline: no RPC, signer,
+// private key, real applicant address, or chain mutation is used here.
+
+test("seven floor player context: original PlayerLife is a display projection, never financial identity or eligibility", async (t) => {
+  const { projectSevenFloorPlayerContext } = await inlineBankApi();
+  const snapshot = () => ({ scope: "LOCAL_CANDIDATE_NOT_ECONOMIC_AUTHORITY", revision: 7, status: "READY", persistent: true,
+    player: { playerId: `KAIOS-P-${"ab".repeat(16)}`, displayName: "原遊戲角色", lastWorld: "11520",
+      lastXYZ: { x: 18888, y: 7, z: 0 }, walletLinks: [{ chainId: 56, address: "0x1000000000000000000000000000000000000001" }],
+      xp: 1_000_000, level: 7, dailyTaskComplete: true } });
+  await t.test("wallet rotation and display-name changes retain the original local player ID without deriving a financial key", () => {
+    const source = snapshot(); const before = JSON.stringify(source);
+    const original = projectSevenFloorPlayerContext(source);
+    assert.equal(JSON.stringify(source), before, "projection never mutates original PlayerLife state");
+    assert.equal(original.scope, "DISPLAY_ONLY_NOT_ENTITLEMENT");
+    assert.equal(original.source, "KAIOS_PLAYER_LIFE_V1");
+    assert.equal(original.playerId, source.player.playerId);
+    assert.equal(original.displayName, "原遊戲角色");
+    assert.equal(original.revision, 7); assert.equal(original.persistent, true);
+    assert.equal(original.worldId, "11520"); assert.equal(original.physicalPosition, null);
+    source.player.displayName = "改名後"; source.player.walletLinks = [{ chainId: 56, address: "0x2000000000000000000000000000000000000002" }];
+    const rotated = projectSevenFloorPlayerContext(source);
+    assert.equal(rotated.playerId, original.playerId); assert.equal(rotated.displayName, "改名後");
+    for (const value of [original, rotated]) {
+      assert.equal(value.financialCharacterId, null); assert.equal(value.taskEvidenceHash, null);
+      assert.equal(value.floorQualification, null); assert.equal("walletLinks" in value, false);
+    }
+  });
+  await t.test("physical coordinates are display-only; matching palace position, XP and daily tasks grant nothing", () => {
+    const source = snapshot();
+    source.player.financialCharacterId = id("LOCAL-UNTRUSTED-CHARACTER");
+    source.player.taskEvidenceHash = id("LOCAL-UNTRUSTED-TASK"); source.player.floorQualification = 7;
+    const physical = { x: 18888, y: 1, z: 0 };
+    const projected = projectSevenFloorPlayerContext(source, { distanceUnit: "METERS", physical, intent: { x: 1888800, y: 7, z: 0 } });
+    equalInline(projected.physicalPosition, { ...physical, unit: "METERS" });
+    assert.equal(projected.financialCharacterId, null); assert.equal(projected.taskEvidenceHash, null);
+    assert.equal(projected.floorQualification, null);
+    for (const coordinates of [null, { distanceUnit: "METERS", intent: physical }, { distanceUnit: "K_INDEX", physical },
+      { distanceUnit: "METERS", physical: { ...physical, x: NaN } },
+      { distanceUnit: "METERS", physical: { ...physical, y: Infinity } }, { distanceUnit: "METERS", physical: { ...physical, z: "0" } }]) {
+      assert.equal(projectSevenFloorPlayerContext(source, coordinates).physicalPosition, null);
+    }
+    source.persistent = false;
+    assert.equal(projectSevenFloorPlayerContext(source).persistent, false, "memory-only source is not promoted to durable financial evidence");
+  });
+  await t.test("wrong source, missing player, non-ready state and unsafe revision are rejected", () => {
+    for (const invalid of [null, {}, { ...snapshot(), scope: "MAINNET_VERIFIED" }, { ...snapshot(), status: "LOADING" },
+      { ...snapshot(), player: null }, { ...snapshot(), revision: -1 }, { ...snapshot(), revision: 0.5 },
+      { ...snapshot(), revision: Number.MAX_SAFE_INTEGER + 1 }, { ...snapshot(), revision: "7" },
+      { ...snapshot(), persistent: "true" }, { ...snapshot(), player: { ...snapshot().player, lastWorld: "18888" } },
+      { ...snapshot(), player: { ...snapshot().player, playerId: "KAIOS-P-ABCDEF" } },
+      { ...snapshot(), player: { ...snapshot().player, displayName: 42 } },
+    ]) assert.throws(() => projectSevenFloorPlayerContext(invalid));
+  });
+});
+
+test("seven floor amounts: every exact cap, scale interval and 18-decimal boundary remains separate from eligibility", async () => {
+  const { SEVEN_FLOORS, validateSevenFloorAmount, buildSevenFloorPlan } =
+    await inlineBankApi();
+  for (const row of SEVEN_FLOORS) {
+    assert.equal(row.scaleStart, String(10 ** (row.floor - 1)));
+    assert.equal(row.scaleEnd, String(10 ** row.floor));
+    const smallest = validateSevenFloorAmount({ floor: row.floor, amount: "0.000000000000000001" });
+    assert.equal(smallest.amountWei, "1"); assert.equal(smallest.floor, row.floor);
+    assert.equal(smallest.maxKaios, row.maxKaios); assert.ok(Object.isFrozen(smallest));
+    const maximum = validateSevenFloorAmount({ floor: row.floor, amount: row.maxKaios });
+    assert.equal(maximum.amountWei, String(parseUnits(row.maxKaios, 18)));
+    assert.equal(maximum.amountKaios, row.maxKaios);
+    const excessive = String(parseUnits(row.maxKaios, 18) + 1n).padStart(19, "0");
+    const excessiveAmount = `${excessive.slice(0, -18)}.${excessive.slice(-18)}`;
+    assert.throws(() => validateSevenFloorAmount({ floor: row.floor, amount: excessiveAmount }));
+    assert.throws(() => buildSevenFloorPlan({ floor: row.floor, amount: row.maxKaios }), /CHARACTER_UNBOUND/,
+      "valid presentation amount cannot invent a financial character or entitlement");
+  }
+  for (const amount of ["", "0", "-1", "1e0", "1,000", "01", "0.0000000000000000001", 1]) {
+    assert.throws(() => validateSevenFloorAmount({ floor: 1, amount }), undefined, String(amount));
+  }
+  for (const floor of [-18, -1, 0, 8, 1.5, "1"]) assert.throws(() => validateSevenFloorAmount({ floor, amount: "1" }));
+});
+
+test("seven floor wallet: exact plans, fail-closed previews, asynchronous guards and canonical payment receipts", async (t) => {
+  const { Interface } = await import("ethers");
+  const { FUNDING_FORMAL: formal, FUNDING_LOCK_KEY, FUNDING_STORAGE_KEY, SEVEN_FLOORS, SEVEN_FLOOR_RELEASE,
+    buildSevenFloorPlan, deriveSevenFloorStep, SevenFloorClaimWallet, HumanFundingWallet, buildLifeResourcePlan } = await inlineBankApi();
+  const sevenFloorPaymentId = (characterId, floor) => keccak256(AbiCoder.defaultAbiCoder().encode(
+    ["bytes32", "bytes32", "bytes32", "uint8"],
+    [id("KAIOS.CIVILIZATION.FLOOR_CLAIM.ONCE"), formal.moduleId, characterId, floor]));
+  const controller = "0x1000000000000000000000000000000000000001";
+  const receiver = "0x2000000000000000000000000000000000000002";
+  const alternate = "0x3000000000000000000000000000000000000003";
+  const characterId = id("CANONICAL-GAME-CHARACTER:OFFLINE-FIXTURE");
+  const zero = "0x0000000000000000000000000000000000000000";
+  const timestamp = 1_700_000_000;
+  const hash = `0x${"11".repeat(32)}`, blockHash = `0x${"22".repeat(32)}`;
+  const input = { characterId, floor: 1, amount: "1.08" };
+  const plan = buildSevenFloorPlan(input);
+  const snapshot = () => ({ chainId: 56, account: controller, timestamp: String(timestamp), blockNumber: "0x100",
+    releaseVerified: true, codeOk: true, token: formal.kaios, decimals: 18, identityErrors: [],
+    expectedModuleVersionHash: id("SEVEN-FLOOR:REVIEWED-OFFLINE-FIXTURE"),
+    binding: { controller, beneficiary: receiver, currentFloor: "1" },
+    floor: { taskEvidenceHash: id("VERIFIED-TASK:OFFLINE-FIXTURE"), executableAt: "0", claimed: false, amount: "0" },
+    paymentConsumed: false,
+    module: { module: formal.allocation, versionHash: id("SEVEN-FLOOR:REVIEWED-OFFLINE-FIXTURE"), active: true,
+      perTransactionLimit: formal.capWei, epochLimit: formal.capWei, epochSpent: "0", epochIndex: String(Math.floor(timestamp / 86400)) },
+    // Complete synthetic Bank health; actual inspect must preserve real values.
+    health: { healthy: true, paused: false, balance: String(11_000_000n * BANK_TEST_ETHER), reserve: String(1_000_000n * BANK_TEST_ETHER), available: formal.capWei,
+      accountedInflow: String(11_000_000n * BANK_TEST_ETHER), totalOutflow: "0", isPaused: false },
+  });
+  const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; };
+  const eventInterface = new Interface([
+    "event Transfer(address indexed from,address indexed to,uint256 value)",
+    "event FloorClaimed(bytes32 indexed characterId,uint8 indexed floor,address indexed beneficiary,uint256 amount,bytes32 paymentId)",
+    "event ModulePaymentExecuted(bytes32 indexed moduleId,bytes32 indexed paymentId,address indexed beneficiary,uint256 amount)",
+  ]);
+  const eventLog = (address, name, values) => ({ address, ...eventInterface.encodeEventLog(eventInterface.getEvent(name), values) });
+  const paymentLogs = () => [
+    eventLog(formal.kaios, "Transfer", [formal.bank, receiver, plan.amountWei]),
+    eventLog(formal.allocation, "FloorClaimed", [characterId, 1, receiver, plan.amountWei, plan.paymentId]),
+    eventLog(formal.bank, "ModulePaymentExecuted", [formal.moduleId, plan.paymentId, receiver, plan.amountWei]),
+  ];
+  const mock = (options = {}) => {
+    const calls = [], listeners = new Map(), records = new Map(), lockCalls = [];
+    let current = snapshot(), feeGate = null, receipt = null, receiptHook = null, time = timestamp * 1000;
+    const storage = { getItem: key => records.get(key) ?? null, setItem: (key, value) => records.set(key, value), removeItem: key => records.delete(key) };
+    const provider = { on: (name, listener) => listeners.set(name, listener), request: async ({ method, params }) => {
+      calls.push({ method, params });
+      if (method === "eth_chainId") return current.chainId === 56 ? "0x38" : "0x1";
+      if (method === "eth_accounts" || method === "eth_requestAccounts") return [current.account];
+      if (method === "eth_estimateGas") { if (options.failGas) throw Error("OFFLINE_FEE_UNAVAILABLE"); if (feeGate) { feeGate.entered.resolve(); await feeGate.release.promise; } return "0x5208"; }
+      if (method === "eth_gasPrice") return "0x3b9aca00";
+      if (method === "eth_getBalance") return options.lowGas ? "0x0" : "0xde0b6b3a7640000";
+      if (method === "eth_sendTransaction") return hash;
+      if (method === "eth_getTransactionReceipt") { receiptHook?.(); return receipt; }
+      if (method === "eth_getTransactionByHash") {
+        const sent = calls.find(call => call.method === "eth_sendTransaction")?.params[0];
+        return sent ? { ...sent, input: sent.data, chainId: "0x38", blockNumber: "0x100", blockHash } : null;
+      }
+      if (method === "eth_getBlockByNumber") return { number: "0x100", hash: options.noncanonical ? `0x${"33".repeat(32)}` : blockHash };
+      throw new Error(`Unexpected offline request: ${method}`);
+    } };
+    const locks = options.noLocks ? {} : { request: async (name, lockOptions, callback) => {
+      lockCalls.push({ name, lockOptions }); return callback(options.lockUnavailable ? null : { name });
+    } };
+    const wallet = new SevenFloorClaimWallet({ provider, storage, now: () => time, locks });
+    wallet.inspect = async () => structuredClone(current);
+    return { wallet, provider, storage, calls, listeners, lockCalls, state: () => current,
+      mutate: fn => fn(current), setTime: next => { time = next; },
+      pauseFee: () => { feeGate = { entered: deferred(), release: deferred() }; return feeGate; },
+      confirm: (logs = paymentLogs()) => { receipt = { transactionHash: hash, status: "0x1", blockNumber: "0x100", blockHash, logs };
+        current.floor.claimed = true; current.floor.amount = plan.amountWei; current.paymentConsumed = true; },
+      onReceipt: fn => { receiptHook = fn; },
+      sends: () => calls.filter(call => call.method === "eth_sendTransaction"),
+    };
+  };
+  await t.test("seven exact plans retain character/floor payment identity across amount changes", () => {
+    assert.equal(SEVEN_FLOOR_RELEASE.status, "NOT_DEPLOYED", "a source candidate must not silently become a mainnet release");
+    equalInline(SEVEN_FLOORS.map(row => [row.position, row.maxKaios]), [
+      ["1.8888", "1.08"], ["18.888", "10.8"], ["188.88", "108"], ["1888.8", "1080"],
+      ["18888", "10800"], ["188880", "108000"], ["1888800", "1080000"],
+    ]);
+    for (const row of SEVEN_FLOORS) {
+      const maximum = buildSevenFloorPlan({ characterId, floor: row.floor, amount: row.maxKaios });
+      const smaller = buildSevenFloorPlan({ characterId, floor: row.floor, amount: "0.000000000000000001" });
+      assert.equal(maximum.amountWei, String(parseUnits(row.maxKaios, 18)));
+      assert.equal(maximum.paymentId, smaller.paymentId, "lesser amount cannot create a second entitlement ID");
+      assert.equal(maximum.paymentId, sevenFloorPaymentId(characterId, row.floor));
+      assert.throws(() => buildSevenFloorPlan({ characterId, floor: row.floor, amount: String(Number(row.maxKaios) + 1) }));
+    }
+    for (const floor of [-18, -1, 0, 8, 1.5, "1"]) assert.throws(() => buildSevenFloorPlan({ characterId, floor, amount: "1" }));
+    for (const amount of ["0", "-1", "1e0", "1.080000000000000001", "1.0000000000000000001", 1]) assert.throws(() => buildSevenFloorPlan({ ...input, amount }));
+  });
+  await t.test("undeployed, binding, task, amount, pool, module and pause states are fail-closed", () => {
+    assert.equal(deriveSevenFloorStep(plan, snapshot()).ready, true);
+    for (const change of [s => { s.releaseVerified = false; }, s => { s.chainId = 1; },
+      s => { s.account = alternate; }, s => { s.binding.beneficiary = zero; },
+      s => { s.binding.currentFloor = "-18"; }, s => { s.binding.currentFloor = "2"; },
+      s => { s.floor.taskEvidenceHash = `0x${"00".repeat(32)}`; }, s => { s.floor.claimed = true; },
+      s => { s.floor.executableAt = String(timestamp + 1); }, s => { s.paymentConsumed = true; },
+      s => { s.health.available = "1"; }, s => { s.health.paused = true; }, s => { s.health.healthy = false; },
+      s => { s.module.perTransactionLimit = "1"; }, s => { s.module.epochLimit = "1"; },
+      s => { s.module.epochSpent = formal.capWei; }, s => { s.module.active = false; },
+      s => { s.module.versionHash = id("WRONG-MODULE-VERSION"); }, s => { s.identityErrors.push("RUNTIME_UNKNOWN"); },
+    ]) { const state = snapshot(); change(state); assert.equal(deriveSevenFloorStep(plan, state).ready, false); }
+    assert.equal(deriveSevenFloorStep({ ...plan, position: "18888" }, snapshot()).ready, false);
+  });
+  await t.test("funding precheck: exact Bank, per-transaction and daily one-wei boundaries stay independent", () => {
+    const amount = BigInt(plan.amountWei), reserve = 420_000_000_000_000_000n, spent = 15n;
+    const exact = () => { const state = snapshot(); Object.assign(state.health, { balance: String(amount + reserve), reserve: String(reserve), available: String(amount) });
+      Object.assign(state.module, { perTransactionLimit: String(amount), epochLimit: String(amount + spent), epochSpent: String(spent) }); return state; };
+    const state = exact(), step = deriveSevenFloorStep(plan, state), check = step.fundingPrecheck;
+    assert.equal(step.ready, true); assert.equal(check.status, "SUFFICIENT"); assert.equal(check.known, true); assert.equal(check.enough, true);
+    for (const [field, value] of Object.entries({ amountWei: amount, balance: amount + reserve, reserve, available: amount,
+      perTransactionLimit: amount, epochLimit: amount + spent, epochSpent: spent, effectiveEpochSpent: spent, epochRemaining: amount })) assert.equal(BigInt(check[field]), value, field);
+    assert.equal(check.blockNumber, state.blockNumber); assert.equal(String(check.timestamp), state.timestamp);
+    assert.equal(check.poolSufficient, true); assert.equal(check.perTransactionSufficient, true); assert.equal(check.epochSufficient, true);
+    for (const [label, mutate, field, reason, blocker] of [
+      ["Bank", s => { s.health.available = String(amount - 1n); s.health.balance = String(amount - 1n + reserve); }, "poolSufficient", "AVAILABLE_FUNDS_INSUFFICIENT", "AVAILABLE_FUNDS_INSUFFICIENT"],
+      ["per transaction", s => { s.module.perTransactionLimit = String(amount - 1n); }, "perTransactionSufficient", "PER_TRANSACTION_LIMIT_EXCEEDED", "MODULE_PAYMENT_LIMIT_EXCEEDED"],
+      ["daily", s => { s.module.epochLimit = String(amount + spent - 1n); }, "epochSufficient", "DAILY_LIMIT_EXCEEDED", "MODULE_PAYMENT_LIMIT_EXCEEDED"],
+    ]) {
+      const changed = exact(); mutate(changed); const denied = deriveSevenFloorStep(plan, changed), precheck = denied.fundingPrecheck;
+      assert.equal(denied.ready, false, label); assert.equal(precheck.status, "INSUFFICIENT", label);
+      assert.equal(precheck.known, true, label); assert.equal(precheck.enough, false, label); assert.equal(precheck[field], false, label);
+      assert.ok(precheck.reasons.includes(reason), label); assert.ok(denied.blockers.includes(blocker), label);
+    }
+  });
+  await t.test("funding precheck: UTC rollover preserves raw spent but resets only effective daily use", () => {
+    const amount = BigInt(plan.amountWei), epoch = Math.floor(timestamp / 86400), state = snapshot();
+    state.timestamp = String(epoch * 86400 + 86399);
+    Object.assign(state.module, { epochIndex: String(epoch), epochSpent: String(amount + 1n), epochLimit: String(amount) });
+    const sameDay = deriveSevenFloorStep(plan, state).fundingPrecheck;
+    assert.equal(sameDay.status, "INSUFFICIENT"); assert.equal(BigInt(sameDay.effectiveEpochSpent), amount + 1n); assert.equal(BigInt(sameDay.epochRemaining), 0n);
+    state.timestamp = String((epoch + 1) * 86400);
+    const before = structuredClone(state), nextDay = deriveSevenFloorStep(plan, state).fundingPrecheck;
+    assert.equal(nextDay.status, "SUFFICIENT"); assert.equal(nextDay.enough, true); assert.equal(BigInt(nextDay.currentEpoch), BigInt(epoch + 1));
+    assert.equal(BigInt(nextDay.epochIndex), BigInt(epoch)); assert.equal(BigInt(nextDay.epochSpent), amount + 1n);
+    assert.equal(BigInt(nextDay.effectiveEpochSpent), 0n); assert.equal(BigInt(nextDay.epochRemaining), amount);
+    equalInline(state, before, "a read-only precheck never rewrites the module's recorded epoch or use");
+  });
+  await t.test("funding precheck: missing or malformed funding stays unknown; Bank pause stays blocked", () => {
+    for (const [label, mutate, missingFields] of [
+      ["missing health", s => { s.health = null; }, ["balance", "reserve", "available"]],
+      ["missing balance", s => { delete s.health.balance; }, ["balance"]],
+      ["malformed reserve", s => { s.health.reserve = "1.5"; }, ["reserve"]],
+      ["negative available", s => { s.health.available = "-1"; }, ["available"]],
+      ["NaN balance", s => { s.health.balance = "NaN"; }, ["balance"]],
+      ["missing module", s => { s.module = null; }, ["perTransactionLimit", "epochLimit", "epochSpent", "epochIndex"]],
+      ["missing transaction limit", s => { delete s.module.perTransactionLimit; }, ["perTransactionLimit"]],
+      ["malformed daily limit", s => { s.module.epochLimit = "Infinity"; }, ["epochLimit"]],
+      ["negative spent", s => { s.module.epochSpent = "-1"; }, ["epochSpent"]],
+      ["missing epoch", s => { s.module.epochIndex = null; }, ["epochIndex"]],
+      ["invalid timestamp", s => { s.timestamp = "NaN"; }, ["timestamp", "currentEpoch"]],
+    ]) {
+      const state = snapshot(); mutate(state); const result = deriveSevenFloorStep(plan, state), check = result.fundingPrecheck;
+      assert.equal(result.ready, false, label); assert.equal(check.status, "UNKNOWN", label); assert.equal(check.known, false, label); assert.equal(check.enough, false, label);
+      for (const field of missingFields) assert.equal(check[field], null, `${label}: ${field} must remain unknown rather than become zero`);
+    }
+    for (const mutate of [s => { s.health.paused = true; s.health.isPaused = true; }, s => { s.health.healthy = false; }]) {
+      const state = snapshot(); mutate(state); const result = deriveSevenFloorStep(plan, state);
+      assert.equal(result.ready, false); assert.equal(result.fundingPrecheck.status, "BLOCKED");
+    }
+    const inactive = snapshot(); inactive.module.active = false;
+    const result = deriveSevenFloorStep(plan, inactive);
+    assert.equal(result.ready, false); assert.equal(result.fundingPrecheck.status, "SUFFICIENT", "pool sufficiency is not module identity, qualification or payment authority");
+  });
+  await t.test("funding precheck: insufficient and unknown previews cannot send or persist pending intent", async () => {
+    for (const mutate of [
+      s => { s.health.balance = s.health.reserve; s.health.available = "0"; },
+      s => { s.module.perTransactionLimit = String(BigInt(plan.amountWei) - 1n); },
+      s => { s.module.epochSpent = s.module.epochLimit; },
+      s => { s.health = null; }, s => { s.module = null; },
+    ]) {
+      const m = mock(); m.mutate(mutate); const preview = await m.wallet.prepare(input);
+      assert.equal(preview.step.ready, false); await assert.rejects(m.wallet.request(preview));
+      assert.equal(m.sends().length, 0); assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), null);
+      assert.equal(m.calls.some(call => call.method === "eth_estimateGas"), false, "blocked funding does not proceed to a fee request");
+    }
+  });
+  await t.test("funding precheck: loss of available funds before or during fee recheck causes zero sends", async () => {
+    for (const phase of ["before request", "during fee estimation"]) {
+      const m = mock(), preview = await m.wallet.prepare(input);
+      assert.equal(preview.step.ready, true);
+      const gate = phase === "during fee estimation" ? m.pauseFee() : null;
+      const dropFunds = () => m.mutate(s => { s.health.balance = s.health.reserve; s.health.available = "0"; });
+      if (!gate) dropFunds();
+      const request = m.wallet.request(preview);
+      if (gate) { await gate.entered.promise; dropFunds(); gate.release.resolve(); }
+      await assert.rejects(request, /FRESH_STATE_OR_ACCOUNT_CHANGED/);
+      assert.equal(m.sends().length, 0, phase); assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), null, phase);
+    }
+  });
+  await t.test("prepare quotes BNB only; one explicit request uses original shared lock and durable intent", async () => {
+    const m = mock(); const preview = await m.wallet.prepare(input);
+    assert.equal(preview.step.ready, true); assert.equal(preview.fee.estimatedWei, "21000000000000");
+    assert.equal(preview.fee.asset, "BNB"); assert.equal(m.sends().length, 0);
+    assert.equal(m.calls.some(call => call.method === "eth_requestAccounts"), false);
+    const result = await m.wallet.request(preview);
+    assert.equal(result.status, "SUBMITTED_UNCONFIRMED"); assert.equal(m.sends().length, 1);
+    const pending = JSON.parse(m.storage.getItem(FUNDING_STORAGE_KEY));
+    assert.equal(pending.kind, "FLOOR_CLAIM"); assert.equal(pending.expectedBeneficiary, receiver);
+    assert.equal(pending.plan.paymentId, plan.paymentId); assert.equal(pending.hash, hash);
+    assert.equal(m.lockCalls[0].name, FUNDING_LOCK_KEY);
+    await assert.rejects(m.wallet.request(preview)); assert.equal(m.sends().length, 1);
+    const low = mock({ lowGas: true }); const noFee = await low.wallet.prepare(input);
+    assert.equal(noFee.step.ready, false); assert.ok(noFee.step.blockers.includes("BNB_GAS_INSUFFICIENT"));
+    assert.equal(noFee.step.blockers.includes("FEE_OR_GAS_BALANCE_UNKNOWN"), false, "known BNB shortage is not an unknown fee");
+    await assert.rejects(low.wallet.request(noFee)); assert.equal(low.sends().length, 0);
+    const unknownFee = mock({ failGas: true }), unknownPreview = await unknownFee.wallet.prepare(input);
+    assert.equal(unknownPreview.step.ready, false); assert.ok(unknownPreview.step.blockers.includes("FEE_OR_GAS_BALANCE_UNKNOWN"));
+    await assert.rejects(unknownFee.wallet.request(unknownPreview)); assert.equal(unknownFee.sends().length, 0);
+  });
+  await t.test("account, chain, form invalidation, beneficiary and expiry changes during fees stop all sends", async () => {
+    for (const change of [
+      m => { m.mutate(s => { s.account = alternate; }); m.listeners.get("accountsChanged")([alternate]); },
+      m => { m.mutate(s => { s.chainId = 1; }); m.listeners.get("chainChanged")("0x1"); },
+      m => { m.wallet.invalidatePreview(); },
+      m => { m.mutate(s => { s.binding.beneficiary = alternate; }); },
+      m => { m.setTime(timestamp * 1000 + 120001); },
+    ]) {
+      const m = mock(); const preview = await m.wallet.prepare(input); const gate = m.pauseFee();
+      const request = m.wallet.request(preview); await gate.entered.promise; change(m); gate.release.resolve();
+      await assert.rejects(request, /FRESH_STATE_OR_ACCOUNT_CHANGED/); assert.equal(m.sends().length, 0);
+      assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), null, "no intent can be installed from a stale fee request");
+    }
+  });
+  await t.test("canonical three-event receipt and claimed/consumed state are required, not status1 alone", async () => {
+    for (const invalid of ["status-only", "wrong-beneficiary", "wrong-payment", "noncanonical", "state-unknown"]) {
+      const m = mock({ noncanonical: invalid === "noncanonical" }); await m.wallet.request(await m.wallet.prepare(input));
+      let logs = paymentLogs();
+      if (invalid === "status-only") logs = [];
+      if (invalid === "wrong-beneficiary") logs[0] = eventLog(formal.kaios, "Transfer", [formal.bank, alternate, plan.amountWei]);
+      if (invalid === "wrong-payment") logs[2] = eventLog(formal.bank, "ModulePaymentExecuted", [formal.moduleId, id("WRONG-ID"), receiver, plan.amountWei]);
+      m.confirm(logs); if (invalid === "state-unknown") m.mutate(s => { s.paymentConsumed = false; });
+      assert.equal((await m.wallet.reconcile(hash)).status, "MISMATCH", invalid);
+      assert.notEqual(m.storage.getItem(FUNDING_STORAGE_KEY), null);
+    }
+    const m = mock(); await m.wallet.request(await m.wallet.prepare(input)); m.confirm();
+    assert.equal((await m.wallet.reconcile(hash)).status, "VERIFIED_PAID");
+    assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), null);
+    assert.ok(m.lockCalls.every(call => call.name === FUNDING_LOCK_KEY), "request and reconciliation use the same original cross-tab mutex");
+  });
+  await t.test("reconcile A never clears a newer pending B; unavailable lock yields zero sends", async () => {
+    const m = mock(); await m.wallet.request(await m.wallet.prepare(input)); m.confirm();
+    const pendingA = JSON.parse(m.storage.getItem(FUNDING_STORAGE_KEY));
+    const pendingB = { ...pendingA, intentId: "NEWER-PENDING-B", hash: `0x${"44".repeat(32)}` };
+    const rawB = JSON.stringify(pendingB); m.onReceipt(() => m.storage.setItem(FUNDING_STORAGE_KEY, rawB));
+    await assert.rejects(m.wallet.reconcile(hash), /PENDING_CHANGED_RETAIN_LOCK/);
+    assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), rawB);
+    for (const options of [{ noLocks: true }, { lockUnavailable: true }]) {
+      const locked = mock(options); const preview = await locked.wallet.prepare(input);
+      await assert.rejects(locked.wallet.request(preview), /WEB_LOCKS_REQUIRED_NO_SEND|ANOTHER_TAB_REQUEST_IN_PROGRESS/);
+      assert.equal(locked.sends().length, 0); assert.equal(locked.storage.getItem(FUNDING_STORAGE_KEY), null);
+    }
+  });
+  await t.test("shared pending receipt cannot cross between old fixed cases and seven-floor player flow", async () => {
+    const m = mock(); await m.wallet.request(await m.wallet.prepare(input));
+    const floorPending = m.storage.getItem(FUNDING_STORAGE_KEY);
+    const legacyWallet = new HumanFundingWallet({ provider: m.provider, storage: m.storage,
+      locks: { request: async (_name, _options, callback) => callback({}) } });
+    const beforeLegacy = m.calls.length;
+    await assert.rejects(legacyWallet.reconcile(hash), /PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL/);
+    assert.equal(m.calls.length, beforeLegacy, "wrong-panel reconciliation stops before any provider request");
+    assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), floorPending);
+    const fixedPlan = buildLifeResourcePlan({ beneficiary: receiver, amount: "1080000" });
+    const fixedPending = JSON.stringify({ ...JSON.parse(floorPending), plan: fixedPlan, kind: "PAYOUT" });
+    m.storage.setItem(FUNDING_STORAGE_KEY, fixedPending);
+    const beforeFloor = m.calls.length;
+    await assert.rejects(m.wallet.reconcile(hash), /PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL/);
+    assert.equal(m.calls.length, beforeFloor);
+    assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), fixedPending);
   });
 });
