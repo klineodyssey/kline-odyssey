@@ -50,7 +50,7 @@ export function moveElevatorZ(position,targetZ,radiusMeters){
  try{
   const next=validatePositiveSphere({x:p.x,y:p.y,z:finite(targetZ,'Z_TARGET')},radiusMeters);
   return Object.freeze({ok:true,position:next,blocked:false});
- }catch(e){if(e instanceof RangeError&&/^OUTSIDE_(POSITIVE_UNIVERSE_Z|SPHERE_CROSS_SECTION)/.test(e.message))return Object.freeze({ok:false,position:p,blocked:true,reason:e.message});throw e}
+ }catch(e){if(e instanceof RangeError&&/^OUTSIDE_(POSITIVE_SPHERE_CHART|SPHERE_CROSS_SECTION)/.test(e.message))return Object.freeze({ok:false,position:p,blocked:true,reason:e.message});throw e}
 }
 // Explicit conversion to pre-existing Three.js local control (XZ floor, Y up).
 // This is a signed LOCAL movement vector, not a mirror-universe position.
