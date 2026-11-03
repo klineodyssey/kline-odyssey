@@ -420,3 +420,32 @@ committer time 為 `2026-11-03T23:57:34+08:00`，不得以較早整理標記冒�
 9. 驗收與下一階段：先離線測試caps、pause、重入、假token/pair、操縱／過期
    報價、滑價／期限、重複事件、失敗與custody不變量；設計缺項補齊後才進原型，
    部署與資金操作仍需獨立的具體批准與技術驗證。
+
+### 截圖驗收與原包尋回結果 — 2026-11-04T00:38:57+08:00
+
+- 已發布工程來源 `aeadf2f887621daf2a491d161c6f6b9208f77c77`；公開build-info前後
+  均為該提交，18888 HTML HTTP200且逐位元組吻合，SHA256
+  `16921b8a79e276097e16b3e51d788e39ddb221a32e622548931a23ce32fb439b`。
+- Portal run41675320996的18888離線專項FUNCTIONAL_QA PASS；artifact13250611730
+  ZIP SHA256 `74e912e200a3a8bb13bf28cd24dff028af180df6c1b7ac5de8d8a86ef2c162ea`。
+  390×844及844×390共16張圖均已直接檢視：先前標題遮擋已消除；實際viewport中的
+  確認勾選、完整確認文字與disabled送單鈕均在HUD與底status之間可見，長地址／
+  十六進位參數換行正常。這些截圖涵蓋的離線UI狀態VISUAL_QA PASS；長面板截圖
+  含fixed HUD取景效果，關鍵可見性以另外保存的實際viewport與命中證據核對。
+  不擴稱真人錢包、連線後角色讀查、主網簽送、PWA實機或全站視覺驗收已通過。
+- 完整Portal workflow仍FAIL：原assert `shared entry must use the owned menu flow`
+  得到relative、預期static。已只讀定位 `assets/kaios-world-registry.mjs` 的flow
+  inline static被12345 `kgen-12345-core.css` 的nav-btn relative!important覆蓋。
+  relative仍在flow，不能憑此聲稱真的遮擋或斷言已過期。下一個工程步驟：沿既有
+  12345 UI owner只修帶flow屬性的共享入口CSS優先權，保留原assert，跑原隔離CI
+  確認More入口／44px命中區／祭祀快捷鍵與原控制位置，保存直橫圖；本輪未動12345。
+- 宇宙電梯原R0 ZIP已透過既有Drive連接實際取得並在記憶體核對：6971 bytes，
+  SHA256 `42501aab5ede179d9b9dedff8c8eeff818ade0fe504d2248bc4b1272223bc37a`。
+  原檔包含README、universe-elevator-r0.mjs、universe-elevator-r0.test.mjs；
+  README明示隔離模擬、非GitHub正式提交、無遠端部署。樓梯證明為測試字串，
+  arrivalVerified由本機注入；跨設備持久化、正式身份、十八層映射與產品接線尚未
+  完成。本輪未執行原包程式／測試、未寫入repo、未改Drive分享權限；私人檔案
+  的查閱沿原案授權，不把它轉成公開副本。
+  可公開原包索引：https://github.com/klineodyssey/kline-odyssey/issues/608#issuecomment-6292423126
+  原03_DOT工程交接文件可讀且含原檔連結；R0 ZIP本身沒有NEXT_HANDOFF.txt，
+  該檔名是後續封存包的索引描述，不能要求讀者在原三檔R0包中尋找它。
