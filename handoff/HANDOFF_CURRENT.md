@@ -628,3 +628,52 @@ static!important，避免core廣義nav規則覆蓋；不改原browser assert、�
   publish unrelated legacy-card edits. Before adding the three missing contract
   paths, obtain the explicit bounded Boot-registration authority required by
   AGENTS; do not infer it from generic merge approval.
+
+### Direct mobile image review and correction — 2026-11-03T20:49:54Z
+
+Existing Portal CI run `41714551468` succeeded for QA source
+`120f54fef4d190d8137729113e5395d7f844ce84`. Artifact `13270081938`
+SHA256 `7f3d2ec278421893d48bbdc705d0981f8cfafe7da4b5ddf613004c870cf8398d`
+was downloaded into the existing private visual-qa evidence folder; all167 ZIP
+members passed CRC/path validation. Root directly reviewed all12 seven-floor
+images; the helper directly reviewed all16 fixed-case/pause images, with no
+fixed-case/pause regression. Source/code review found no blocking logic defect.
+
+The new seven-floor viewport images exposed a visibility defect: its unopened
+payment notice was above the title and hidden by the fixed HUD in captured
+mobile states. Thus the old source is not granted a full visual PASS merely
+because its browser assertions passed. The notice was moved below the title,
+with the clearer text「領取尚未開放 · 尚未接通付款」; the browser harness now
+explicitly requires this notice to remain below the HUD and inside the viewport.
+Long locator-only panel captures include unrelated fixed HUD/status strips;
+actual viewport captures remain the evidence for their on-screen placement.
+
+Correction source is `2f64f460` on the single short-lived
+`codex/kaios-faucet-qa` branch. Page SHA256 is
+`e3e48b57b00916f91c5dd6755cc97a9dbe847c92d8806b23db4b7957cd533d50`;
+wallet logic and57-test source are unchanged. Syntax and diff checks PASS.
+The same existing CI was dispatched as run `41716163769`; corrected images and
+direct review are pending. Main remains unchanged. Continue that existing run,
+do not start a duplicate or treat its completion as already observed.
+
+### Verified correction and shared voice memory — 2026-11-03
+
+Run41716163769 failed the retained title/HUD assertion after the notice moved.
+The title margin was corrected without weakening the assertion. Source
+`1b5a2040da49c4fa4fd523af131f6478b141e670` passed existing Portal CI
+`41716974248`; artifact13270198795 SHA256
+`67aadc98311c187b8e8d35f26632c9b23b147e547720bf7e403b905880a92397` was
+downloaded and CRC/path checked. Root directly reviewed12 seven-floor images;
+the helper directly reviewed16 funding/pause images. Captured-state functional
+and visual QA PASS; phone wallet and real payment remain unverified. Page SHA256
+`2f03d58d997138421af353b992f3fae210ceaef3991cadb5922976f8c288fdde`.
+
+Human requested one cross-page「語音助理共同記憶」for all related voice pages.
+Created, populated and read back exact2607-character content at
+https://docs.google.com/document/d/14fKS_LHf1k5hb71yQn4YbMAdANfiEHeL1D6nGFJmGto
+in the existing ChatGPT Drive folder, preserving account permissions. Other
+pages are not claimed already read/synced. Human then prioritized a real
+claim/payment flow over additional prose. Ordinary player self-claim still lacks
+a compatible formal character/controller/floor/task source; the historical
+Eligibility proxy alone does not expose that interface. Original fixed cases
+remain independent, with fresh chain preflight required before Human wallet action.
