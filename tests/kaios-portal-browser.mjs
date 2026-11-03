@@ -161,7 +161,7 @@ async function verifyFundingPanel(){
       const captureSeven=async name=>{
         await seven.evaluate(el=>el.scrollIntoView({block:'start',behavior:'instant'}));
         const heading=await page.locator('#seven-floor-title').boundingBox(),hud=await page.locator('.kgen-hud').boundingBox();
-        assert.ok(heading&&hud&&heading.y>=hud.y+hud.height,`${name}: seven-floor title must remain below the fixed HUD`);
+        assert.ok(heading&&hud&&heading.y>=hud.y+hud.height,`${name}: seven-floor title must remain below the fixed HUD ${JSON.stringify({heading,hud})}`);
         const release=await page.locator('#seven-floor-panel .seven-badge').boundingBox();
         assert.ok(release&&release.y>=hud.y+hud.height&&release.y+release.height<=height,`${name}: unopened-payment notice must be visible below the fixed HUD`);
         const geometry=await seven.evaluate(el=>{
@@ -170,6 +170,7 @@ async function verifyFundingPanel(){
             panelWidth:el.clientWidth,panelScroll:el.scrollWidth,
             textOverflow:[...el.querySelectorAll('p,pre,dd')].filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+1).map(node=>node.id)};
         });
+        Object.assign(geometry,{headingTop:heading.y,noticeTop:release.y,noticeBottom:release.y+release.height,hudBottom:hud.y+hud.height});
         assert.ok(geometry.document<=geometry.viewport+1&&geometry.panelScroll<=geometry.panelWidth+1&&geometry.left>=-1&&geometry.right<=geometry.viewport+1,`${name}: seven-floor horizontal overflow ${JSON.stringify(geometry)}`);
         assert.deepEqual(geometry.textOverflow,[],`${name}: seven-floor text must wrap`);
         const file=`seven-floor-${width}x${height}-${name}`;
