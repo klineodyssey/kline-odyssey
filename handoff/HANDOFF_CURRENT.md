@@ -373,3 +373,50 @@ committer time 為 `2026-11-03T23:57:34+08:00`，不得以較早整理標記冒�
   main尚未找到R0模組整合證據。原成果與Human兩個名稱的對應仍須核對，不另建
   平行電梯、Runtime或版本檔。下一步沿原成果包與NEXT_HANDOFF核實來源和接點。
   原交付入口：https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6292410828
+
+### 接續工程實際回執 — 2026-11-04T00:32:09+08:00
+
+- main `939614d9ef2d179bb5cda6b97f6ecfa43cb68deb` 已推；Pages run41673884854
+  SUCCESS。公開build-info讀回該提交，白皮書既有SVG鏡像與正式root圖示hash均為
+  `f762aa7d69c715632932eb3e388e4442e12ea9a0b932332e6fed6c4c54ac23ee`；
+  既有256PNG逐位元組核對一致。此為圖示一致性發布，不是外部平台提交。
+- 同來源Portal run41673885130的18888離線UI專項FUNCTIONAL_QA PASS，兩尺寸、
+  三角色、離線草案、零wallet/RPC/網路寫入均核對；12張截圖已下載並逐張直接看圖。
+  artifact13248384197 ZIP SHA256
+  `a8907c702c063a6e88a689e835135610fbd8668b79dbf3e99b023439d0fc8ef2`。
+  VISUAL_QA發現頂部fixed HUD遮住面板標題，不報整體PASS；本輪在既有18888 CSS
+  加64px捲動留白，測試改用實際#funding-panel與scrollIntoView，並增加勾選／送單
+  控制於HUD和底部status bar之間完整可見及中心命中檢查。修正後截圖仍待重驗。
+  Portal其後仍因既有shared-entry relative/static assertion失敗，不能把專項PASS
+  當成整條workflow PASS。修正後24項既有token/wallet離線測試全部PASS。
+- 既有 `kaios` 每小時heartbeat已透過正式automation_update更新至已核實的本機
+  接續thread `01a1a18a-b4b1-7242-8574-f9478f21c5ed`；保留原名稱、頻率及ACTIVE，
+  prompt完整讀回相符。每輪最多10分鐘、第7分鐘起保存、同技術失敗最多兩次。
+  工作限本機工程／離線驗證，禁止私鑰秘密、資金／鏈上操作、commit／push／合併
+  或外發；與其他agent撞檔則只讀。此為重新限定的工程工作，沒有複製舊資金自動
+  執行prompt、沒有手改TOML或另建排程。下一次絕對喚醒時間工具未回傳，實際
+  喚醒尚未驗證；ACTIVE不等於永續運作或舊政策阻擋已解除。
+
+### AutoLP藍圖提綱：沿既有正文待整合，不是已核定的執行規格
+
+正文owner沿GEN-008第五章；這份交接提綱保留尚未定案的參數，不替代CURRENT、
+正式白皮書或其同步出版流程。本輪不建立另一份白皮書／Runtime，也不啟動上鏈。
+
+1. 目的與資金分線：KGEN既有AutoLP稅收與KAIOS／18888流動性服務分別建帳；
+   不混入私人、薪資或客戶資金，不把候選分成比例寫成核定值。
+2. 觸發與預算：定義可用淨餘額、最低批量、冷卻時間、單筆／每日硬上限及
+   保留額；數值待定即不執行，不在Token transfer過程自動呼叫AMM。
+3. 路徑與報價：固定鏈／token／factory／pair／router allowlist，核對精度、儲備、
+   報價時間與偏離；設定非零minimum amounts、最低LP、滑價與deadline。
+4. LP保管與退出：明訂LP接收地址、所有權、鎖定、移除及剩餘資產歸屬；不預設
+   給操作者，不把只有safeTransfer／rescue的舊Splitter冒充安全LP vault。
+5. 權限與暫停：各角色、參數治理與延遲、生效範圍及救援限制須獨立定義；
+   不因銀行或AI角色而取得加池／資金執行權限。
+6. 操縱與MEV：定義交易量、價格偏離、獨立參考或時間窗口與陳舊資料阻擋；
+   不承諾消除MEV或保證成交。
+7. 失敗與防重：單筆交易原子回滾，跨交易先對帳再恢復，不盲重試；記錄gas、
+   實際投入、剩餘資產及LP mint，處理稅費與取整。
+8. 會計與結果：LP部位是資產，不是天然收入；核對費用與已實現結果，不承諾回報。
+9. 驗收與下一階段：先離線測試caps、pause、重入、假token/pair、操縱／過期
+   報價、滑價／期限、重複事件、失敗與custody不變量；設計缺項補齊後才進原型，
+   部署與資金操作仍需獨立的具體批准與技術驗證。

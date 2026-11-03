@@ -48,6 +48,7 @@ async function clickRoute(page,selector,expected,visibleSelector,label){
 }
 async function verifyFundingPanel(){
   const route=new URL('K線西遊記/temples/18888/index.html',BASE+'/'),origin=route.origin;
+  route.hash='funding-panel';
   const roles={mother:'王母',jade:'玉帝',guanyin:'觀音'};
   for(const [width,height] of [[390,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
@@ -58,7 +59,9 @@ async function verifyFundingPanel(){
     const capture=async(name,viewport=false)=>{
       const prefix=`funding-${width}x${height}-${name}`;
       if(viewport){
-        await page.locator('#funding-panel').evaluate(el=>scrollTo(0,Math.max(0,el.getBoundingClientRect().top+scrollY-12)));
+        await page.locator('#funding-panel').evaluate(el=>el.scrollIntoView({block:'start',behavior:'instant'}));
+        const heading=await page.locator('#funding-title').boundingBox(),hud=await page.locator('.kgen-hud').boundingBox();
+        assert.ok(heading&&hud&&heading.y>=hud.y+hud.height,`${name}: funding title must remain below the fixed HUD`);
         const file=`${prefix}-viewport.png`;await shot(page,file.replace(/\.png$/,''));row.screenshots.push(file);
       }
       const file=`${prefix}-panel.png`;
@@ -78,6 +81,18 @@ async function verifyFundingPanel(){
       assert.equal(await page.locator('#funding-send').isDisabled(),true,`${label}: no connected/verified wallet means no send authority`);
       assert.match(await page.locator('#funding-role-status').textContent(),/尚未通過本次角色讀查/);
       assert.match(await page.locator('#funding-role-status').textContent(),/選擇角色不會授予權限/);
+    };
+    const visibleAction=async(selector,name)=>{
+      const locator=page.locator(selector);
+      await locator.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+      const geometry=await locator.evaluate(el=>{
+        const r=el.getBoundingClientRect(),top=document.querySelector('.kgen-hud').getBoundingClientRect().bottom,bottom=document.querySelector('.kgen-status-bar').getBoundingClientRect().top;
+        const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+        return{top:r.top,bottom:r.bottom,hudBottom:top,statusTop:bottom,hit:hit===el||el.contains(hit)};
+      });
+      assert.ok(geometry.top>=geometry.hudBottom&&geometry.bottom<=geometry.statusTop&&geometry.hit,`${name}: action must be visible and unobscured ${JSON.stringify(geometry)}`);
+      const file=`funding-${width}x${height}-${name}-viewport.png`;await shot(page,file.replace(/\.png$/,''));row.screenshots.push(file);
+      return geometry;
     };
     page.on('pageerror',error=>{const text=String(error.stack||error);row.runtimeErrors.push(text);report.runtimeErrors.push(text);});
     page.on('response',response=>{if(response.request().resourceType()==='script'&&response.status()>=400)row.failedScripts.push({url:response.url(),status:response.status()});});
@@ -126,6 +141,8 @@ async function verifyFundingPanel(){
       await page.locator('#funding-panel details > summary').click();
       row.pauseDraft={status:pauseDraft.status,type:pauseDraft.type,chainId:pauseDraft.chainId,noCaseRequired:true,sendDisabled:true,geometry:await noOverflow('offline Guanyin draft')};
       await capture('guanyin-offline',true);
+      row.pauseDraft.acknowledgment=await visibleAction('.funding-ack','guanyin-ack');
+      row.pauseDraft.send=await visibleAction('#funding-send','guanyin-send');
       // A synthetic public fixture address exercises the actual inline plan
       // and long address/hash wrapping; no original case or personal file.
       const beneficiary='0x1111111111111111111111111111111111111111';
