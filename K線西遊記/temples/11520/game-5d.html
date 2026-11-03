@@ -116,7 +116,20 @@ SOURCE_OF_TRUTH: TRUE
 <div class="assetTag">3D Life：GLTF / procedural low-poly；primitive 只允許 FALLBACK</div><div class="toast" id="toast"></div>
 <script type="module" src="./runtime/game-5d-bootstrap.mjs?v=271"></script>
 <script>
-if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}))}
+if('serviceWorker' in navigator){
+ addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).then(registration=>{
+  let checking=false;
+  const checkForUpdate=async()=>{
+   if(checking||navigator.onLine===false)return;
+   checking=true;
+   try{await registration.update()}catch{}finally{checking=false}
+  };
+  checkForUpdate();
+  addEventListener('online',checkForUpdate);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate()});
+  // The next navigation uses the update; never reload a live game or wallet confirmation.
+ }).catch(()=>{}))
+}
 </script>
 </body>
 </html>

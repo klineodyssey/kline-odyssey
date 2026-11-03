@@ -1035,3 +1035,17 @@ Universal Market. Boot CURRENT is intentionally unchanged (no Boot-update author
 - `K線西遊記/temples/11520/index.html`: Taiwan quote entry with an explicit link to that same game.
 - Product status is BETA. KGEN/WBNB and derived USDT values are periodic read-only references, not settlement quotes or a continuous background service.
 - This navigation registration changes no Physics CURRENT, Boot V1.4, UniverseMap, private calibration, financial authority, or player-save schema.
+
+## 2026-11-03 existing frontend owner convergence
+
+The18888 fixed allocation and Guanyin emergency-pause interface is owned by
+`K線西遊記/temples/18888/index.html#funding-controller`; its offline regressions
+are in the existing `KGEN-KAIOS/tests/token-surface.security.test.mjs`. It reuses
+formal deployed proxies and holder wallet confirmations, without publishing a
+new contract or activating the seven-floor candidate.
+
+The11520 installed-page update remains owned by `game-5d.html` and `sw.js` in
+`K線西遊記/temples/11520/`, with existing `tests/11520-pwa-bgm.test.mjs`.
+See `docs/KGEN_FRONTEND_INDEX.md` and `KGEN-KAIOS/README.md` for the exact paths
+and authority/cache boundaries. These are cumulative updates to existing
+owners; no additional Runtime or bootstrap is introduced.

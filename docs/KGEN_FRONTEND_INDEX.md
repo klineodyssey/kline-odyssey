@@ -463,3 +463,18 @@ Specification and provenance: `docs/KAIOS_WORLD_PORTAL.md`,
 - `K線西遊記/temples/11520/index.html`: Taiwan quote entry with an explicit link to that same game.
 - Product status is BETA. KGEN/WBNB and derived USDT values are periodic read-only references, not settlement quotes or a continuous background service.
 - This navigation registration changes no Physics CURRENT, Boot V1.4, UniverseMap, private calibration, financial authority, or player-save schema.
+
+## 18888 wallet flow and11520 cache ownership — 2026-11-03
+
+| Existing owner | Purpose |
+|---|---|
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\18888\index.html` | Fixed KAIOS allocation wallet controls and independently verified Guanyin Bank.pause; inline minimal ABI/plan/receipt owner, retaining existing V0.2 organ/temple-hub. |
+| `C:\Desktop\kline-odyssey\KGEN-KAIOS\tests\token-surface.security.test.mjs` | Existing token checks plus real inline18888 wallet/role/runtime-pin/receipt and controller regressions; offline, no signer. |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\11520\sw.js` | Scoped network-first code revalidation and current-cache-only offline fallback; only its own shell caches are retired. |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\11520\game-5d.html` | Existing installed-app entry; checks worker updates on startup, online and foreground without forcing reload. |
+| `C:\Desktop\kline-odyssey\K線西遊記\temples\11520\tests\11520-pwa-bgm.test.mjs` | Existing PWA/BGM owner expanded with real worker lifecycle/network/cache isolation tests. |
+
+No new program file, Runtime, Boot entry, financial authority or player-save
+schema is created. Public source delivery and a pending wallet hash do not
+constitute payment. Native wallet phone opening remains a separate acceptance
+step; local previews cannot redirect users to an older published page.

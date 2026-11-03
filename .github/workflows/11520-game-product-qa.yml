@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   product-qa:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Full mobile + settlement + Player Life passed on 0610eef3, but the
     # aggregate reached 20 minutes during artifact/post-job cleanup. Keep
     # every per-script timeout below unchanged; reserve 5 minutes for runner
@@ -269,7 +269,7 @@ jobs:
   simulation-regression:
     needs: product-qa
     if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7

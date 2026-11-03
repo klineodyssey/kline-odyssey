@@ -31,7 +31,7 @@ jobs:
     # Serialize existing QA runners; failures remain failures and do not
     # suppress later coverage. Reuse each existing harness and artifact route.
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
@@ -90,7 +90,7 @@ jobs:
   world-first:
     needs: contextual-hud
     if: ${{ !cancelled() && github.event_name != 'workflow_run' && inputs.production != true }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
@@ -126,7 +126,7 @@ jobs:
     # Keep the direct HUD dependency when public QA intentionally skips world-first.
     needs: [contextual-hud, world-first]
     if: ${{ !cancelled() && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -193,7 +193,7 @@ jobs:
     needs: responsive
     # Preserve the original responsive-success gate, not newly added ancestors.
     if: ${{ !cancelled() && needs.responsive.result == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.production == true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 18
     steps:
       - name: Resolve trusted public M1 source
@@ -328,7 +328,7 @@ jobs:
   public-input-diagnostics:
     # Bounded facing follow-up only; never an always-on duplicate lane.
     if: github.event_name == 'pull_request' && github.head_ref == 'dot/11520-facing-standoff-20261005'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 12
     env:
       K11520_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}

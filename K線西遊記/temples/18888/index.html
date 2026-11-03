@@ -11,7 +11,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>18888 靈霄寶殿神明銀行｜KGEN Divine Bank V0.1</title>
+<title>18888 靈霄寶殿神明銀行｜角色錢包與固定配額</title>
 <link rel="stylesheet" href="../../modules/kgen-game-core.css">
 <style>
 :root { --accent: #c084fc; --accent2: rgba(192,132,252,.14); }
@@ -49,6 +49,22 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 .tax-node .tn-pct { font-size: 18px; font-weight: 950; color: var(--kgen-gold); font-family: var(--kgen-mono); }
 .tax-node .tn-name { font-size: 11px; color: var(--kgen-text); margin-top: 2px; }
 .tax-arrow { color: var(--kgen-gold-dim); font-size: 18px; flex-shrink: 0; }
+.funding-panel { border:1px solid #c084fc88; border-radius:18px; padding:20px; margin:18px 0; background:#100b1b; }
+.funding-panel h2 { margin:0 0 8px; color:#e6c3ff; }
+.funding-panel p { line-height:1.6; overflow-wrap:anywhere; }
+.funding-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.funding-fields label { display:flex; flex-direction:column; gap:6px; font-size:13px; min-width:0; }
+.funding-panel input:not([type=checkbox]), .funding-panel select { box-sizing:border-box; width:100%; background:#090710; color:#fff; border:1px solid #735589; border-radius:10px; padding:11px; font:inherit; }
+.funding-actions { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; }
+.funding-panel button, .funding-actions a { border:1px solid #a376c3; border-radius:12px; padding:12px 16px; background:#281a39; color:#fff; font:inherit; cursor:pointer; text-decoration:none; }
+.funding-actions a[aria-disabled=true] { opacity:.45; cursor:not-allowed; }
+.funding-panel button:disabled { opacity:.45; cursor:not-allowed; }
+#funding-send { background:#e4bdff; color:#180b23; font-weight:900; }
+.funding-panel pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#08060e; border-radius:10px; padding:12px; font-size:12px; line-height:1.55; max-height:420px; overflow:auto; }
+.funding-muted { color:#c3afcc; font-size:12px; }
+.funding-ack { display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.6; }
+.funding-ack input { margin-top:5px; flex-shrink:0; }
+@media(max-width:640px) { .funding-fields { grid-template-columns:1fr; } .funding-panel { padding:14px; } .funding-actions button { flex:1 1 180px; } }
 </style>
 </head>
 <body>
@@ -57,7 +73,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 <header class="kgen-hud">
   <div>
     <div class="kgen-hud-title">🏦 18888 靈霄寶殿神明銀行</div>
-    <div class="kgen-hud-ver" id="kgen-status-text">Divine Bank V0.1 | Prototype</div>
+    <div class="kgen-hud-ver" id="kgen-status-text">Divine Bank V0.2 | 角色錢包與原型展示</div>
   </div>
   <nav class="kgen-hud-nav">
     <a href="../../index.html">🌌 星系</a>
@@ -105,6 +121,42 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       </div>
     </div>
   </div>
+
+  <!-- Human-operated fixed allocation and emergency pause; prototype values are not account balances. -->
+  <section class="funding-panel" id="funding-panel" aria-labelledby="funding-title">
+    <h2 id="funding-title">KAIOS 生命資源 · 錢包確認作業</h2>
+    <p>輸入受益人與金額 → 讀查下一步 → 核對內容 → 由你在既有錢包確認。<strong>每次只送交一筆，不會自動連續簽署或撥款。</strong></p>
+    <p class="funding-muted">此區與上方原型展示數字分開。BSC 主網 56；金額單位 KAIOS，不是 BNB。調額、Mother 提案、玉帝獨立批准、到期執行、實際撥款分別核定；連接或交易雜湊不代表已入帳。</p>
+    <div class="funding-fields">
+      <label>本機原案報告或 JSON（只在此瀏覽器讀取，不上傳）<input id="funding-file" type="file" accept=".json,.md,.txt"></label>
+      <label>原案選擇<select id="funding-case"><option value="">手動新草案，須先核正式批准與既領紀錄</option></select></label>
+      <label>受益人完整地址<input id="funding-beneficiary" spellcheck="false" autocomplete="off" placeholder="0x…（完整42字元）"></label>
+      <label>本筆 KAIOS 金額<input id="funding-amount" inputmode="decimal" autocomplete="off" value="1080000" aria-describedby="funding-amount-help"></label>
+    </div>
+    <p id="funding-amount-help" class="funding-muted">最多18位小數，不使用浮點換算。原案載入後地址與金額固定，不因查不到紀錄就改金額／ID重發。此版用途固定為一次性生命初始資源，非月薪、非衡曜88 KAIOS；executableAt=0的配額建立後沒有第二次一小時等待，任何人可呼叫已到期配額撥款。</p>
+    <div class="funding-fields">
+      <label>本次操作角色<select id="funding-role"><option value="mother">王母 · 提出調額／配額提案</option><option value="jade">玉帝 · 批准原提案</option><option value="guanyin">觀音 · 緊急暫停銀行</option></select></label>
+      <label>筆電／錢包內建瀏覽器的既有錢包<select id="funding-wallet"><option value="">正在偵測既有錢包…</option></select></label>
+      <label>唯讀核對既有交易雜湊<input id="funding-txhash" spellcheck="false" autocomplete="off" placeholder="0x…（64位交易雜湊）"></label>
+    </div>
+    <div class="funding-actions">
+      <button type="button" id="funding-connect">連接所選既有錢包</button>
+      <button type="button" id="funding-mobile">手機錢包 · WalletConnect QR</button>
+      <button type="button" id="funding-prepare">讀查並預覽下一步</button>
+      <button type="button" id="funding-receipt">只讀核對回執</button>
+    </div>
+    <div class="funding-actions"><a id="funding-native-metamask" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 MetaMask 開啟此頁</a><a id="funding-native-trust" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 Trust Wallet 開啟此頁</a></div>
+    <p id="funding-native-help" class="funding-muted">筆電可連接既有錢包，手機可用 WalletConnect 或在原生錢包開啟此正式 HTTPS 頁。</p>
+    <p id="funding-connection" class="funding-muted">尚未連接。程式不要求、讀取或保存私鑰與助記詞。手機連線沿用原12345的公開WalletConnect設定；服務／網域允許狀態仍須實際連線確認，localhost不是手機可直接訪問的筆電網址。</p>
+    <p id="funding-role-status" class="funding-muted" aria-live="polite">選擇角色只表示本次操作意圖；仍須在錢包選擇正確帳戶，並讀查鏈上權限。</p>
+    <p id="funding-status" role="status" aria-live="polite">先讀查，不會在載入頁面時請求帳戶或送出交易。</p>
+    <p id="funding-summary">下一步：先連接你的既有錢包，再讀查；目前沒有送出任何交易。</p>
+    <details><summary>展開精確參數、固定ID及唯讀查核結果</summary><pre id="funding-preview" aria-label="本次未簽署內容">尚無預覽。</pre></details>
+    <label class="funding-ack"><input type="checkbox" id="funding-ack"><span id="funding-ack-text">我已核對本案的正式用途／付款批准、收款地址、金額、既領及跨ID防重、銀行其他承諾；了解available不等於已扣除全部負債，調額會重設當期共享用量，建立到期配額會開啟可執行付款路徑。本勾選不是合約授權或獨立驗收證明。</span></label>
+    <div class="funding-actions"><button type="button" id="funding-send" disabled>先連接並預覽；由我本人到錢包確認</button></div>
+    <p class="funding-muted">若錢包拒絕、狀態不明、帳戶／鏈別改變，停止自動重試。已有待確認意圖／交易須先對帳，不用重按按鈕。治理延遲到期不會自動執行。手機原生錢包及主網簽送尚未由工程測試驗收。</p>
+    <noscript>此作業介面需要JavaScript；未啟用時不會送出任何交易。</noscript>
+  </section>
 
   <!-- 稅率流向圖 -->
   <div class="kgen-section-head"><h2>💱 KGEN 稅率流向圖（0.30% 永久鎖定）</h2></div>
@@ -267,6 +319,736 @@ STATUS: PROTOTYPE — 前端原型，不改合約
   <div class="kgen-status-dot"></div>
   <span id="kgen-status-bottom">18888 靈霄寶殿神明銀行 V0.2 · Production</span>
 </div>
+
+<script src="../12345/assets/ethers-5.7.2.umd.min.js"></script>
+<script type="importmap">
+{"imports":{"ethers":"data:text/javascript,export const Contract=globalThis.ethers.Contract;export const Interface=globalThis.ethers.utils.Interface;export const getAddress=globalThis.ethers.utils.getAddress;export const id=globalThis.ethers.utils.id;export const keccak256=globalThis.ethers.utils.keccak256;export const AbiCoder=globalThis.ethers.utils.AbiCoder;export const parseUnits=globalThis.ethers.utils.parseUnits;"}}
+</script>
+<script type="module" id="funding-controller">
+import { Interface, getAddress, id, keccak256, AbiCoder, parseUnits } from "ethers";
+
+// BEGIN HUMAN FUNDING ADAPTER
+// Compiler ABI subset: LingxiaoCelestialBank18888_Upgradeable; source SHA256 b7372e25fa92e3868577773ea005fcb96d43c99a50270c364f00031a9229344e
+const bankAbi = [
+  "function configureModule(bytes32 moduleId, address moduleAddress, bytes32 versionHash, uint256 perTransactionLimit, uint256 epochLimit, bool active)",
+  "function pause()",
+  "function hasRole(bytes32 role, address account) view returns (bool)",
+  "function paused() view returns (bool)",
+  "function kaios() view returns (address)",
+  "function module(bytes32 moduleId) view returns ((address module, bytes32 versionHash, uint256 perTransactionLimit, uint256 epochLimit, uint256 epochSpent, uint64 epochIndex, bool active))",
+  "function bankHealth() view returns (uint256 balance, uint256 reserve, uint256 available, uint256 accountedInflow, uint256 totalOutflow, bool healthy, bool isPaused)",
+  "function modulePaymentConsumed(bytes32 paymentId) view returns (bool)",
+  "event BankPaused(address indexed account)",
+  "event ModulePaymentExecuted(bytes32 indexed moduleId, bytes32 indexed paymentId, address indexed beneficiary, uint256 amount)"
+];
+
+// Compiler ABI subset: CivilizationAllocation_Upgradeable; source SHA256 448db9b205ad21f41a049ab0142a1a4b3fc07e812967f2ab47da93f38a70ff13
+const allocationAbi = [
+  "function createAllocation(bytes32 allocationId, address beneficiary, uint256 amount, uint64 executableAt, bytes32 purposeHash)",
+  "function executeAllocation(bytes32 allocationId)",
+  "function allocation(bytes32 allocationId) view returns ((address beneficiary, uint256 amount, uint64 executableAt, bytes32 purposeHash, bool executed, bool cancelled))",
+  "function hasRole(bytes32 role, address account) view returns (bool)",
+  "function bank() view returns (address)",
+  "event AllocationExecuted(bytes32 indexed allocationId, address indexed beneficiary, uint256 amount, address triggeredBy)"
+];
+
+// Compiler ABI subset: BankGovernance_Upgradeable; source SHA256 c27ea950b0f28cec1c78b6f45dc79fdf743188c61c19bc1baa30c050382ba14d
+const governanceAbi = [
+  "function propose(bytes32 proposalId, address target, uint256 value, bytes data)",
+  "function approve(bytes32 proposalId)",
+  "function execute(bytes32 proposalId, bytes data) returns (bytes result)",
+  "function proposal(bytes32 proposalId) view returns ((address target, uint256 value, bytes32 dataHash, uint64 executableAt, address proposer, address approver, bool executed, bool cancelled))",
+  "function hasRole(bytes32 role, address account) view returns (bool)",
+  "function bank() view returns (address)",
+  "function governanceDelay() view returns (uint64)",
+  "event GovernanceProposalCreated(bytes32 indexed proposalId, address indexed target, bytes32 indexed dataHash, uint64 executableAt, address proposer)",
+  "event GovernanceProposalApproved(bytes32 indexed proposalId, address indexed approver)",
+  "event GovernanceProposalExecuted(bytes32 indexed proposalId, address indexed target, bytes32 indexed dataHash)"
+];
+
+// No keys, signer or background transaction runner: only an explicit Human wallet request.
+const FUNDING_FORMAL = Object.freeze({
+  chainId: 56,
+  kaios: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+  bank: "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+  governance: "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+  allocation: "0x75A55Af6967932C4A1c896dB81Dd6F31e531c299",
+  mother: "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+  jade: "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+  guanyin: "0xebeeac6d09d2d28db8010b0923442c9eb2b702fe",
+  moduleId: "0x98cb067844ea2b60572a9eb95ae1e64a6bf8f03bcf8c9e11ae16130de56bca63",
+  versionHash: "0x80213095feaa7e3711b303bf27082fc84ac492d751251c351d1b20330f5612d8",
+  capWei: "10000000000000000000000000",
+});
+// Historical artifact-to-runtime receipts are expected pins, not a live-chain PASS.
+const FUNDING_RUNTIME_PINS = Object.freeze({
+  bank: Object.freeze({ proxy: FUNDING_FORMAL.bank, implementation: "0x8125045039fe969490d57185233b7d64a494a829", runtimeHash: "0x8a085f9381f4e471d05ff9ca40a8bd46c116b2298ce6e73a8f9ab329e885c29a" }),
+  governance: Object.freeze({ proxy: FUNDING_FORMAL.governance, implementation: "0x9d919e66ae2746d41d978e3d51df594b2e5f5582", runtimeHash: "0xbd53433b3e3025500b3488205e7d3db0be8637a26fe668960634b33e8f3bac20" }),
+  allocation: Object.freeze({ proxy: FUNDING_FORMAL.allocation, implementation: "0x216d69a413354cbab7ddddc4fcfe2b3e0468197d", runtimeHash: "0xa0242fba34c814dff10650e3601c6ff2ec05989982780f88e7d4686b77c8154f" }),
+});
+// OpenZeppelin ERC1967Utils.IMPLEMENTATION_SLOT (existing OZ 5.0.2 source).
+const FUNDING_IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
+const ZERO = "0x0000000000000000000000000000000000000000";
+const BI = (value) => BigInt(String(value));
+const same = (a, b) => typeof a === "string" && typeof b === "string" && a.toLowerCase() === b.toLowerCase();
+const bankInterface = new Interface(bankAbi);
+const allocationInterface = new Interface(allocationAbi);
+const governanceInterface = new Interface(governanceAbi);
+const tokenInterface = new Interface(["function decimals() view returns(uint8)", "event Transfer(address indexed from,address indexed to,uint256 value)"]);
+const coder = new AbiCoder();
+const freeze = (value) => { if (value && typeof value === "object") { Object.values(value).forEach(freeze); Object.freeze(value); } return value; };
+const json = (value) => JSON.stringify(value, (_, item) => typeof item === "bigint" ? item.toString() : item);
+const FUNDING_STORAGE_KEY = "kaios18888.humanFunding.pending.v1";
+const FUNDING_LOCK_KEY = "kaios18888.humanFunding.request.v1";
+
+// Unsupported historical intents retain their existing durable lock.
+const isPausePlan = plan => plan?.type === "BANK_PAUSE";
+const planFlowType = plan => {
+  if (plan?.type === "SEVEN_FLOOR_CLAIM") throw new Error("PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL");
+  if (isPausePlan(plan)) return "BANK_PAUSE";
+  if (plan && typeof plan === "object" && !Object.hasOwn(plan, "type")) return "FIXED_ALLOCATION";
+  throw new Error("UNKNOWN_TRANSACTION_FLOW");
+};
+const canonicalPlan = plan => planFlowType(plan) === "BANK_PAUSE"
+  ? buildBankPausePlan() : buildLifeResourcePlan({ beneficiary: plan.beneficiary, amount: plan.amountKaios });
+const deriveStep = (plan, snapshot) => isPausePlan(plan) ? deriveBankPauseStep(plan, snapshot) : deriveFundingStep(plan, snapshot);
+
+function buildBankPausePlan() {
+  return freeze({ type: "BANK_PAUSE", chainId: 56,
+    pause: { to: FUNDING_FORMAL.bank, data: bankInterface.encodeFunctionData("pause", []) } });
+}
+
+function deriveBankPauseStep(plan, s) {
+  const blockers = [];
+  try {
+    if (json(plan) !== json(buildBankPausePlan())) blockers.push("PLAN_CHANGED");
+    if (Number(s.chainId) !== 56) blockers.push("CHAIN_ID_MISMATCH");
+    if (!same(s.account, FUNDING_FORMAL.guanyin)) blockers.push("GUANYIN_ACCOUNT_REQUIRED");
+    if (s.codeOk !== true) blockers.push("BANK_RUNTIME_IDENTITY_MISMATCH");
+    blockers.push(...(s.identityErrors || []));
+    if (s.roles?.pauser !== true) blockers.push("GUANYIN_PAUSER_ROLE_REQUIRED");
+    if (typeof s.paused !== "boolean") blockers.push("BANK_PAUSE_STATE_UNKNOWN");
+    const alreadyPaused = s.paused === true && blockers.length === 0;
+    return { kind: alreadyPaused ? "BANK_ALREADY_PAUSED" : "BANK_PAUSE", ready: !alreadyPaused && blockers.length === 0,
+      blockers, to: plan.pause.to, data: plan.pause.data, proposalId: null,
+      stateHash: id(json([s.account, s.paused, s.roles?.pauser, s.runtimePins?.bank?.implementation ?? null, s.runtimePins?.bank?.runtimeHash ?? null])),
+      label: alreadyPaused ? "銀行已暫停；不重送，不代表付款" : "觀音本人確認暫停銀行；不撥款、不解除暫停" };
+  } catch {
+    return { kind: "BANK_PAUSE", ready: false, blockers: [...blockers, "BANK_PAUSE_STATE_UNKNOWN"], to: null, data: null, proposalId: null };
+  }
+}
+
+async function inspectBankPause(provider) {
+  const rpc = (method, params = []) => provider.request({ method, params });
+  const [chain, accounts, block] = await Promise.all([rpc("eth_chainId"), rpc("eth_accounts"), rpc("eth_getBlockByNumber", ["latest", false])]);
+  if (Number(BI(chain)) !== 56) throw new Error("CHAIN_ID_MISMATCH");
+  if (!accounts?.[0] || !block?.number || !block?.timestamp) throw new Error("ACCOUNT_OR_BLOCK_UNKNOWN");
+  const tag = block.number, account = getAddress(accounts[0]);
+  const pins = await readBankRuntimePin(rpc, tag);
+  const call = async (method, args = []) => bankInterface.decodeFunctionResult(method,
+    await rpc("eth_call", [{ to: FUNDING_FORMAL.bank, data: bankInterface.encodeFunctionData(method, args) }, tag]));
+  const [role, paused] = await Promise.all([call("hasRole", [id("PAUSER_ROLE"), account]), call("paused")]);
+  return { chainId: 56, account, blockNumber: tag, timestamp: String(BI(block.timestamp)), codeOk: pins.ok,
+    identityErrors: pins.identityErrors, runtimePins: pins.evidence, roles: { pauser: role[0] }, paused: paused[0] };
+}
+
+async function readFundingRuntimePins(rpc, blockTag, expectedPins = FUNDING_RUNTIME_PINS) {
+  const identityErrors = [], evidence = { blockTag };
+  // Every slot and runtime must be read at the inspect snapshot's same fixed block.
+  if (typeof rpc !== "function" || typeof blockTag !== "string" || !/^0x[0-9a-f]+$/i.test(blockTag)) {
+    return { ok: false, identityErrors: ["RUNTIME_PIN_FIXED_BLOCK_REQUIRED"], evidence };
+  }
+  // Keep the formal proxies fixed even when a reviewed implementation changes.
+  // Missing/malformed pins cannot turn an empty set of reads into a false PASS.
+  const names = Object.keys(FUNDING_RUNTIME_PINS);
+  if (!expectedPins || Object.keys(expectedPins).length !== names.length || names.some(name => {
+    const pin = expectedPins[name];
+    try {
+      return !pin || !same(pin.proxy, FUNDING_RUNTIME_PINS[name].proxy)
+        || same(getAddress(pin.implementation), ZERO)
+        || typeof pin.runtimeHash !== "string" || !/^0x[0-9a-f]{64}$/i.test(pin.runtimeHash) || /^0x0{64}$/i.test(pin.runtimeHash);
+    } catch { return true; }
+  })) return { ok: false, identityErrors: ["RUNTIME_PIN_CONFIGURATION_INVALID"], evidence };
+  await Promise.all(Object.entries(expectedPins).map(async ([name, pin]) => {
+    const result = await readSingleRuntimePin(rpc, blockTag, name, pin);
+    evidence[name] = result.observed;
+    identityErrors.push(...result.identityErrors);
+  }));
+  identityErrors.sort();
+  return { ok: identityErrors.length === 0, identityErrors, evidence };
+}
+
+// The full funding reader still requires all three formal pins. Emergency pause
+// shares this primitive but verifies only Bank; an unrelated Allocation upgrade
+// must not remove the lawful holder's emergency capability.
+async function readSingleRuntimePin(rpc, blockTag, name, pin) {
+  const prefix = name.toUpperCase(), identityErrors = [];
+  const observed = { proxy: pin.proxy, implementation: null, expectedImplementation: pin.implementation, runtimeHash: null, expectedRuntimeHash: pin.runtimeHash };
+  try {
+    const slot = await rpc("eth_getStorageAt", [pin.proxy, FUNDING_IMPLEMENTATION_SLOT, blockTag]);
+    if (typeof slot !== "string" || !/^0x0{24}[0-9a-f]{40}$/i.test(slot)) throw new Error("INVALID_IMPLEMENTATION_SLOT");
+    observed.implementation = getAddress(`0x${slot.slice(-40)}`);
+    if (same(observed.implementation, ZERO)) throw new Error("EMPTY_IMPLEMENTATION_SLOT");
+    if (!same(observed.implementation, pin.implementation)) identityErrors.push(`${prefix}_IMPLEMENTATION_PIN_MISMATCH`);
+    const runtime = await rpc("eth_getCode", [observed.implementation, blockTag]);
+    if (typeof runtime !== "string" || !/^0x(?:[0-9a-f]{2})+$/i.test(runtime)) throw new Error("EMPTY_OR_MALFORMED_RUNTIME");
+    observed.runtimeHash = keccak256(runtime);
+    if (!same(observed.runtimeHash, pin.runtimeHash)) identityErrors.push(`${prefix}_RUNTIME_PIN_MISMATCH`);
+  } catch { identityErrors.push(`${prefix}_RUNTIME_PIN_UNKNOWN`); }
+  return { observed, identityErrors };
+}
+
+async function readBankRuntimePin(rpc, blockTag) {
+  const evidence = { blockTag };
+  if (typeof rpc !== "function" || typeof blockTag !== "string" || !/^0x[0-9a-f]+$/i.test(blockTag)) {
+    return { ok: false, identityErrors: ["RUNTIME_PIN_FIXED_BLOCK_REQUIRED"], evidence };
+  }
+  const result = await readSingleRuntimePin(rpc, blockTag, "bank", FUNDING_RUNTIME_PINS.bank);
+  evidence.bank = result.observed;
+  return { ok: result.identityErrors.length === 0, identityErrors: result.identityErrors, evidence };
+}
+
+function buildLifeResourcePlan({ beneficiary, amount }) {
+  beneficiary = getAddress(beneficiary);
+  if (same(beneficiary, ZERO)) throw new Error("ZERO_BENEFICIARY");
+  if (typeof amount !== "string" || !/^(0|[1-9]\d*)(\.\d{1,18})?$/.test(amount)) throw new Error("AMOUNT_DECIMAL_STRING_REQUIRED");
+  const amountWei = String(parseUnits(amount, 18));
+  if (BI(amountWei) <= 0n || BI(amountWei) > BI(FUNDING_FORMAL.capWei)) throw new Error("AMOUNT_OUTSIDE_REVIEWED_CAP");
+  const purposeText = `KAIOS one-time initial life resource; chainId=56; token=${FUNDING_FORMAL.kaios.toLowerCase()}; beneficiary=${beneficiary.toLowerCase()}; amountWei=${amountWei}; not monthly salary; excludes Hengyao 88 KAIOS.`;
+  const purposeHash = id(purposeText);
+  const allocationId = keccak256(coder.encode(["string", "uint256", "address", "address", "uint256", "bytes32"], ["KAIOS.INITIAL_LIFE_RESOURCE.ONCE", 56, FUNDING_FORMAL.allocation, beneficiary, amountWei, purposeHash]));
+  const proposal = (target, data) => {
+    const dataHash = keccak256(data);
+    const proposalId = keccak256(coder.encode(["string", "uint256", "address", "address", "uint256", "bytes32"], ["KAIOS.GOVERNANCE.REVIEW", 56, FUNDING_FORMAL.governance, target, 0, dataHash]));
+    return { proposalId, target, data, dataHash };
+  };
+  return freeze({ chainId: 56, beneficiary, amountKaios: amount, amountWei, purposeText, purposeHash, allocationId,
+    paymentId: keccak256(coder.encode(["bytes32", "bytes32"], [FUNDING_FORMAL.moduleId, allocationId])),
+    cap: proposal(FUNDING_FORMAL.bank, bankInterface.encodeFunctionData("configureModule", [FUNDING_FORMAL.moduleId, FUNDING_FORMAL.allocation, FUNDING_FORMAL.versionHash, FUNDING_FORMAL.capWei, FUNDING_FORMAL.capWei, true])),
+    allocation: proposal(FUNDING_FORMAL.allocation, allocationInterface.encodeFunctionData("createAllocation", [allocationId, beneficiary, amountWei, 0, purposeHash])),
+    payout: { to: FUNDING_FORMAL.allocation, data: allocationInterface.encodeFunctionData("executeAllocation", [allocationId]) },
+    warnings: ["10M is a shared module limit; configure resets UTC epochSpent, not a personal reserve.", "Creating executableAt=0 allocation enables permissionless payout immediately after governance execution.", "An unused ID is not a complete cross-ID entitlement/history check; available funds are not net of every pending liability."] });
+}
+
+function deriveFundingStep(plan, s) {
+  const blockers = [];
+  const result = (kind, label, to = null, data = null, proposalId = null, warning = "") => ({ kind, label, to, data, proposalId, blockers: [...blockers], warning, ready: blockers.length === 0 && !["BLOCKED", "DONE", "WAIT_ETA"].includes(kind) });
+  try {
+    if (json(plan) !== json(buildLifeResourcePlan({ beneficiary: plan.beneficiary, amount: plan.amountKaios }))) blockers.push("PLAN_CHANGED");
+    if (Number(s.chainId) !== 56) blockers.push("CHAIN_ID_MISMATCH");
+    if (!s.account || (!same(s.account, FUNDING_FORMAL.mother) && !same(s.account, FUNDING_FORMAL.jade))) blockers.push("ACCOUNT_NOT_REVIEWED_HOLDER");
+    if (s.codeOk !== true || !same(s.token, FUNDING_FORMAL.kaios) || Number(s.decimals) !== 18) blockers.push("CONTRACT_IDENTITY_MISMATCH");
+    blockers.push(...(s.identityErrors || []));
+    const m = s.module, h = s.health, a = s.allocation;
+    if (!a || typeof a.beneficiary !== "string" || typeof a.executed !== "boolean" || typeof a.cancelled !== "boolean" || typeof s.paymentConsumed !== "boolean") blockers.push("ALLOCATION_OR_PAYMENT_STATE_UNKNOWN");
+    if (!same(m.module, FUNDING_FORMAL.allocation) || !same(m.versionHash, FUNDING_FORMAL.versionHash) || m.active !== true) blockers.push("MODULE_IDENTITY_MISMATCH");
+    if (h.healthy !== true || h.paused !== false) blockers.push("BANK_UNHEALTHY_OR_PAUSED");
+    if (s.roles?.moduleAdmin !== true) blockers.push("GOVERNANCE_MODULE_ADMIN_MISSING");
+    if (BI(m.perTransactionLimit) > BI(FUNDING_FORMAL.capWei) || BI(m.epochLimit) > BI(FUNDING_FORMAL.capWei)) blockers.push("HIGHER_EXISTING_CAP_DO_NOT_LOWER");
+    const present = a && !same(a.beneficiary, ZERO);
+    if (present && (!same(a.beneficiary, plan.beneficiary) || BI(a.amount) !== BI(plan.amountWei) || !same(a.purposeHash, plan.purposeHash) || BI(a.executableAt) !== 0n)) blockers.push("ALLOCATION_IDENTITY_MISMATCH");
+    if (a?.cancelled) blockers.push("ALLOCATION_CANCELLED");
+    if (blockers.length) return result("BLOCKED", "Stop: review blockers");
+    if (a?.executed || s.paymentConsumed) {
+      if (present && a.executed === true && s.paymentConsumed === true) return result("DONE", "Executed/consumed state observed; verify the exact receipt before claiming payment");
+      blockers.push("PAYMENT_STATE_INCONSISTENT"); return result("BLOCKED", "Stop: consumed/executed mismatch");
+    }
+    if (BI(h.available) < BI(plan.amountWei)) blockers.push("AVAILABLE_FUNDS_INSUFFICIENT");
+    const needsCap = BI(m.perTransactionLimit) !== BI(FUNDING_FORMAL.capWei) || BI(m.epochLimit) !== BI(FUNDING_FORMAL.capWei);
+    if (needsCap && BI(m.epochIndex) === BI(s.timestamp) / 86400n && BI(m.epochSpent) > 0n) blockers.push("CAP_RESET_WOULD_ERASE_CURRENT_DAY_SPEND");
+    if (blockers.length) return result("BLOCKED", "Stop: accounting review required");
+    const nextGovernance = (candidate, stored, prefix) => {
+      const proposalId = candidate.proposalId;
+      if (!stored) { blockers.push("PROPOSAL_STATE_UNKNOWN"); return result("BLOCKED", "Read proposal state"); }
+      if (same(stored.target, ZERO)) {
+        if (!same(s.account, FUNDING_FORMAL.mother) || s.roles.proposer !== true) blockers.push("MOTHER_PROPOSER_REQUIRED");
+        return result(`${prefix}_PROPOSE`, "Propose only; no limit change or payment yet", FUNDING_FORMAL.governance, governanceInterface.encodeFunctionData("propose", [proposalId, candidate.target, 0, candidate.data]), proposalId);
+      }
+      if (!same(stored.target, candidate.target) || BI(stored.value) !== 0n || !same(stored.dataHash, candidate.dataHash) || !same(stored.proposer, FUNDING_FORMAL.mother)) blockers.push("PROPOSAL_IDENTITY_OR_HASH_MISMATCH");
+      if (stored.cancelled || stored.executed) blockers.push("PROPOSAL_CLOSED_OR_EFFECT_MISMATCH");
+      if (blockers.length) return result("BLOCKED", "Stop: proposal collision", null, null, proposalId);
+      if (same(stored.approver, ZERO)) {
+        if (!same(s.account, FUNDING_FORMAL.jade) || s.roles.approver !== true || same(s.account, stored.proposer)) blockers.push("DISTINCT_JADE_APPROVER_REQUIRED");
+        return result(`${prefix}_APPROVE`, "Approve this exact proposal only", FUNDING_FORMAL.governance, governanceInterface.encodeFunctionData("approve", [proposalId]), proposalId);
+      }
+      if (!same(stored.approver, FUNDING_FORMAL.jade) || same(stored.approver, stored.proposer)) { blockers.push("APPROVER_IDENTITY_MISMATCH"); return result("BLOCKED", "Stop: approval identity mismatch"); }
+      if (BI(s.timestamp) < BI(stored.executableAt)) return result("WAIT_ETA", `Wait for chain ETA ${stored.executableAt}; no automatic execution`, null, null, proposalId);
+      return result(`${prefix}_EXECUTE`, "Execute this separately reviewed proposal", FUNDING_FORMAL.governance, governanceInterface.encodeFunctionData("execute", [proposalId, candidate.data]), proposalId, needsCap ? plan.warnings[0] : plan.warnings[1]);
+    };
+    if (needsCap) return nextGovernance(plan.cap, s.capProposal, "CAP");
+    if (!present) return nextGovernance(plan.allocation, s.allocationProposal, "ALLOCATION");
+    const spent = BI(m.epochIndex) === BI(s.timestamp) / 86400n ? BI(m.epochSpent) : 0n;
+    if (BI(plan.amountWei) > BI(m.perTransactionLimit) || spent + BI(plan.amountWei) > BI(m.epochLimit)) blockers.push("MODULE_PAYMENT_LIMIT_EXCEEDED");
+    if (BI(s.timestamp) < BI(a.executableAt)) blockers.push("ALLOCATION_NOT_READY");
+    return result("PAYOUT", "Request this one allocation payout in your wallet", plan.payout.to, plan.payout.data, null, plan.warnings[1]);
+  } catch (error) { blockers.push(`UNKNOWN_STATE:${error.message}`); return result("BLOCKED", "Stop: incomplete or invalid state"); }
+}
+
+class HumanFundingWallet {
+  constructor({ provider, storage, now = () => Date.now(), locks }) {
+    if (!provider?.request) throw new Error("EIP1193_PROVIDER_REQUIRED");
+    this.provider = provider; this.storage = storage; this.now = now; this.previews = new Map(); this.sequence = 0; this.busy = false; this.generation = 0;
+    this.flowType = "FIXED_ALLOCATION";
+    this.locks = locks ?? (typeof navigator !== "undefined" ? navigator.locks : null);
+    this.requireBrowserLock = typeof window !== "undefined" || locks !== undefined;
+    const invalidate = () => this.invalidate();
+    provider.on?.("accountsChanged", invalidate); provider.on?.("chainChanged", invalidate); provider.on?.("disconnect", invalidate);
+  }
+  invalidate() { this.generation++; this.previews.clear(); }
+  invalidatePreview() { this.invalidate(); }
+  async connect() { return this.provider.request({ method: "eth_requestAccounts" }); }
+  async inspect(plan) {
+    if (planFlowType(plan) !== this.flowType) throw new Error("TRANSACTION_FLOW_MISMATCH");
+    if (isPausePlan(plan)) return inspectBankPause(this.provider);
+    const rpc = (method, params = []) => this.provider.request({ method, params });
+    const [chain, accounts, block] = await Promise.all([rpc("eth_chainId"), rpc("eth_accounts"), rpc("eth_getBlockByNumber", ["latest", false])]);
+    if (Number(BI(chain)) !== 56) throw new Error("CHAIN_ID_MISMATCH");
+    const account = accounts[0] ? getAddress(accounts[0]) : null;
+    if (!account) throw new Error("CONNECT_EXISTING_HOLDER_EXPLICITLY");
+    if (!block?.number || !block?.timestamp) throw new Error("BLOCK_STATE_UNKNOWN");
+    const tag = block.number;
+    const call = async (to, iface, method, args = []) => iface.decodeFunctionResult(method, await rpc("eth_call", [{ to, data: iface.encodeFunctionData(method, args) }, tag]));
+    const runtimePins = await readFundingRuntimePins(rpc, tag);
+    const F = FUNDING_FORMAL;
+    const [codes, token, decimals, mod, health, cap, allocationProposal, allocation, consumed, proposer, approver, moduleAdmin, allocationGovernance, allocationBank, governanceBank, delay] = await Promise.all([
+      Promise.all([F.bank, F.governance, F.allocation, F.kaios].map(address => rpc("eth_getCode", [address, tag]))),
+      call(F.bank, bankInterface, "kaios"), call(F.kaios, tokenInterface, "decimals"), call(F.bank, bankInterface, "module", [F.moduleId]), call(F.bank, bankInterface, "bankHealth"),
+      call(F.governance, governanceInterface, "proposal", [plan.cap.proposalId]), call(F.governance, governanceInterface, "proposal", [plan.allocation.proposalId]), call(F.allocation, allocationInterface, "allocation", [plan.allocationId]), call(F.bank, bankInterface, "modulePaymentConsumed", [plan.paymentId]),
+      call(F.governance, governanceInterface, "hasRole", [id("PROPOSER_ROLE"), account]), call(F.governance, governanceInterface, "hasRole", [id("APPROVER_ROLE"), account]), call(F.bank, bankInterface, "hasRole", [id("MODULE_ADMIN_ROLE"), F.governance]),
+      call(F.allocation, allocationInterface, "hasRole", [id("GOVERNANCE_ROLE"), F.governance]), call(F.allocation, allocationInterface, "bank"), call(F.governance, governanceInterface, "bank"), call(F.governance, governanceInterface, "governanceDelay"),
+    ]);
+    const strings = (tuple, names) => Object.fromEntries(names.map((name, index) => [name, typeof tuple[index] === "boolean" ? tuple[index] : String(tuple[index])]));
+    const proposal = value => strings(value[0], ["target", "value", "dataHash", "executableAt", "proposer", "approver", "executed", "cancelled"]);
+    const identityErrors = [...runtimePins.identityErrors];
+    if (!allocationGovernance[0] || !same(String(allocationBank[0]), F.bank) || !same(String(governanceBank[0]), F.bank) || BI(delay[0]) < 3600n) identityErrors.push("BANK_GOVERNANCE_LINKAGE_MISMATCH");
+    return { chainId: 56, account, blockNumber: tag, timestamp: String(BI(block.timestamp)), codeOk: codes.every(code => typeof code === "string" && code !== "0x" && code.length > 2), token: String(token[0]), decimals: Number(String(decimals[0])),
+      module: strings(mod[0], ["module", "versionHash", "perTransactionLimit", "epochLimit", "epochSpent", "epochIndex", "active"]), health: { healthy: health[5], paused: health[6], available: String(health[2]) },
+      roles: { proposer: proposer[0], approver: approver[0], moduleAdmin: moduleAdmin[0], allocationGovernance: allocationGovernance[0] }, identityErrors, runtimePins: runtimePins.evidence,
+      capProposal: proposal(cap), allocationProposal: proposal(allocationProposal), allocation: strings(allocation[0], ["beneficiary", "amount", "executableAt", "purposeHash", "executed", "cancelled"]), paymentConsumed: consumed[0] };
+  }
+  readPending() {
+    if (!this.storage?.getItem || !this.storage?.setItem || !this.storage?.removeItem) throw new Error("DURABLE_STORAGE_REQUIRED");
+    const raw = this.storage.getItem(FUNDING_STORAGE_KEY);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { throw new Error("PENDING_STORAGE_CORRUPT_DO_NOT_RESEND"); }
+  }
+  async prepare(plan) {
+    if (this.readPending()) throw new Error("PENDING_INTENT_RECONCILE_FIRST");
+    const canonical = canonicalPlan(plan);
+    if (planFlowType(canonical) !== this.flowType) throw new Error("TRANSACTION_FLOW_MISMATCH");
+    if (json(plan) !== json(canonical)) throw new Error("PLAN_CHANGED");
+    const snapshot = await this.inspect(canonical), step = deriveStep(canonical, snapshot);
+    const fee = null;
+    const preview = freeze({ step, snapshot, fee, account: snapshot.account, plan: canonical, preparedAt: this.now(), previewId: `${this.generation}:${++this.sequence}`, generation: this.generation });
+    this.previews.set(preview.previewId, preview); return preview;
+  }
+  async request(preview) {
+    if (this.busy) throw new Error("REQUEST_ALREADY_IN_PROGRESS");
+    // localStorage is a durable receipt, not an atomic cross-tab mutex.
+    if (this.requireBrowserLock || this.locks) {
+      if (typeof this.locks?.request !== "function") throw new Error("WEB_LOCKS_REQUIRED_NO_SEND");
+      return this.locks.request(FUNDING_LOCK_KEY, { mode: "exclusive", ifAvailable: true }, (lock) => {
+        if (!lock) throw new Error("ANOTHER_TAB_REQUEST_IN_PROGRESS");
+        return this.#requestLocked(preview);
+      });
+    }
+    // Only the no-window offline test environment may omit a lock manager.
+    return this.#requestLocked(preview);
+  }
+  async #requestLocked(preview) {
+    if (this.busy) throw new Error("REQUEST_ALREADY_IN_PROGRESS");
+    if (this.previews.get(preview?.previewId) !== preview || preview.generation !== this.generation || this.now() - preview.preparedAt > 120000 || this.now() < preview.preparedAt) throw new Error("PREVIEW_INVALID_OR_EXPIRED");
+    if (!preview.step.ready) throw new Error("STEP_NOT_READY");
+    if (planFlowType(preview.plan) !== this.flowType || json(preview.plan) !== json(canonicalPlan(preview.plan))) throw new Error("TRANSACTION_FLOW_MISMATCH");
+    this.busy = true;
+    let saved = null;
+    try {
+      if (this.readPending()) throw new Error("PENDING_INTENT_RECONCILE_FIRST");
+      const snapshot = await this.inspect(preview.plan), step = deriveStep(preview.plan, snapshot);
+      const signature = value => json([value.kind, value.to, value.data, value.proposalId, value.ready, value.blockers, value.stateHash ?? null]);
+      if (!same(snapshot.account, preview.account) || signature(step) !== signature(preview.step) || !step.ready || preview.generation !== this.generation || this.now() - preview.preparedAt > 120000 || this.now() < preview.preparedAt) throw new Error("FRESH_STATE_OR_ACCOUNT_CHANGED");
+      const transaction = { from: snapshot.account, to: step.to, chainId: "0x38", value: "0x0", data: step.data };
+      saved = { version: 1, flowType: this.flowType, intentId: preview.previewId, state: "AWAITING_HUMAN_WALLET", chainId: 56, transaction, plan: preview.plan, kind: step.kind, proposalId: step.proposalId, createdAt: this.now() };
+      const raw = json(saved); this.storage.setItem(FUNDING_STORAGE_KEY, raw);
+      if (this.storage.getItem(FUNDING_STORAGE_KEY) !== raw) throw new Error("PENDING_STORAGE_READBACK_FAILED");
+      this.previews.clear();
+      const hash = await this.provider.request({ method: "eth_sendTransaction", params: [transaction] });
+      if (!/^0x[0-9a-fA-F]{64}$/.test(hash)) throw new Error("WALLET_RESULT_UNKNOWN_DO_NOT_RESEND");
+      saved = { ...saved, state: "SUBMITTED_UNCONFIRMED", hash };
+      const recorded = json(saved); this.storage.setItem(FUNDING_STORAGE_KEY, recorded);
+      if (this.storage.getItem(FUNDING_STORAGE_KEY) !== recorded) throw new Error(`SUBMITTED_STORAGE_FAILED:${hash}`);
+      return { hash, status: "SUBMITTED_UNCONFIRMED", kind: step.kind };
+    } catch (error) {
+      if (Number(error.code) === 4001 && saved) {
+        const current = this.readPending();
+        if (current?.intentId === saved.intentId && !current.hash) {
+          this.storage.removeItem(FUNDING_STORAGE_KEY);
+          if (this.storage.getItem(FUNDING_STORAGE_KEY) != null) throw new Error("REJECTION_STORAGE_CLEAR_FAILED_DO_NOT_RETRY");
+        }
+      }
+      throw error;
+    } finally { this.busy = false; }
+  }
+  async reconcile(hash) {
+    if (this.requireBrowserLock || this.locks) {
+      if (typeof this.locks?.request !== "function") throw new Error("WEB_LOCKS_REQUIRED_NO_SEND");
+      return this.locks.request(FUNDING_LOCK_KEY, { mode: "exclusive", ifAvailable: true }, lock => {
+        if (!lock) throw new Error("ANOTHER_TAB_REQUEST_IN_PROGRESS");
+        return this.#reconcileLocked(hash);
+      });
+    }
+    return this.#reconcileLocked(hash);
+  }
+  async #reconcileLocked(hash) {
+    const pending = this.readPending();
+    if (!pending) throw new Error("NO_PENDING_INTENT");
+    const pendingFlow = planFlowType(pending.plan);
+    if (pendingFlow !== this.flowType || (pending.flowType != null && pending.flowType !== pendingFlow)) throw new Error("PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL");
+    const allowedKinds = pendingFlow === "BANK_PAUSE" ? ["BANK_PAUSE"] : ["CAP_PROPOSE", "CAP_APPROVE", "CAP_EXECUTE", "ALLOCATION_PROPOSE", "ALLOCATION_APPROVE", "ALLOCATION_EXECUTE", "PAYOUT"];
+    if (!allowedKinds.includes(pending.kind) || json(pending.plan) !== json(canonicalPlan(pending.plan))) throw new Error("PENDING_TRANSACTION_INVALID_RETAIN_LOCK");
+    if (pendingFlow === "BANK_PAUSE" && (!same(pending.transaction?.from, FUNDING_FORMAL.guanyin)
+      || !same(pending.transaction?.to, pending.plan.pause.to) || !same(pending.transaction?.data, pending.plan.pause.data)
+      || pending.transaction?.value !== "0x0" || pending.transaction?.chainId !== "0x38")) throw new Error("PENDING_TRANSACTION_INVALID_RETAIN_LOCK");
+    hash = hash || pending.hash;
+    if (!/^0x[0-9a-fA-F]{64}$/.test(hash || "")) throw new Error("TRANSACTION_HASH_REQUIRED_NO_AUTORETRY");
+    if (pending.hash && !same(hash, pending.hash)) throw new Error("HASH_MISMATCH");
+    const rpc = (method, params) => this.provider.request({ method, params });
+    if (Number(BI(await rpc("eth_chainId", []))) !== 56) throw new Error("CHAIN_ID_MISMATCH");
+    const [receipt, tx] = await Promise.all([rpc("eth_getTransactionReceipt", [hash]), rpc("eth_getTransactionByHash", [hash])]);
+    if (!tx) return { status: "PENDING", hash };
+    const expected = pending.transaction;
+    if (!same(tx.from, expected.from) || !same(tx.to, expected.to) || BI(tx.value) !== 0n || !same(tx.input ?? tx.data, expected.data) || (tx.chainId != null && Number(BI(tx.chainId)) !== 56)) return { status: "MISMATCH", hash };
+    if (!receipt) return { status: "PENDING", hash };
+    if (!same(receipt.transactionHash, hash)) return { status: "MISMATCH", hash };
+    if (receipt.blockNumber == null || !/^0x[0-9a-fA-F]{64}$/.test(receipt.blockHash || "")) return { status: "MISMATCH", hash };
+    try {
+      const canonical = await rpc("eth_getBlockByNumber", [receipt.blockNumber, false]);
+      if (!canonical || !same(canonical.hash, receipt.blockHash)
+        || (tx.blockHash != null && !same(tx.blockHash, receipt.blockHash))
+        || (tx.blockNumber != null && BI(tx.blockNumber) !== BI(receipt.blockNumber))) return { status: "MISMATCH", hash };
+    } catch { return { status: "MISMATCH", hash, warning: "Canonical receipt block could not be verified; lock retained." }; }
+    if (BI(receipt.status) === 0n) return { status: "REVERTED", hash, warning: "Lock retained; inspect state and explicitly reconcile before any new request." };
+    if (BI(receipt.status) !== 1n) return { status: "MISMATCH", hash };
+    const events = (address, iface) => (receipt.logs || []).filter(log => same(log.address, address)).flatMap(log => { try { return [iface.parseLog(log)]; } catch { return []; } });
+    let verified = false, status = "CONFIRMED";
+    if (pending.kind === "BANK_PAUSE") {
+      // Verify the historical pause at its canonical receipt block, not against
+      // a later unpause. Allocation/Governance changes cannot affect this check.
+      const pausedEvent = events(FUNDING_FORMAL.bank, bankInterface).some(e => e?.name === "BankPaused"
+        && same(e.args[0], FUNDING_FORMAL.guanyin) && same(e.args[0], expected.from));
+      const pins = await readBankRuntimePin(rpc, receipt.blockNumber);
+      let isPaused = false;
+      try {
+        const result = await rpc("eth_call", [{ to: FUNDING_FORMAL.bank, data: bankInterface.encodeFunctionData("paused", []) }, receipt.blockNumber]);
+        isPaused = bankInterface.decodeFunctionResult("paused", result)[0] === true;
+      } catch { /* Unknown state retains the pending intent. */ }
+      verified = pausedEvent && pins.ok && isPaused;
+      status = verified ? "BANK_PAUSED" : "MISMATCH";
+    } else if (pending.kind === "PAYOUT") {
+      const p = pending.plan;
+      const transfer = events(FUNDING_FORMAL.kaios, tokenInterface).some(e => e?.name === "Transfer" && same(e.args[0], FUNDING_FORMAL.bank) && same(e.args[1], p.beneficiary) && BI(e.args[2]) === BI(p.amountWei));
+      const allocation = events(FUNDING_FORMAL.allocation, allocationInterface).some(e => e?.name === "AllocationExecuted" && same(e.args[0], p.allocationId) && same(e.args[1], p.beneficiary) && BI(e.args[2]) === BI(p.amountWei));
+      const payment = events(FUNDING_FORMAL.bank, bankInterface).some(e => e?.name === "ModulePaymentExecuted" && same(e.args[0], FUNDING_FORMAL.moduleId) && same(e.args[1], p.paymentId) && same(e.args[2], p.beneficiary) && BI(e.args[3]) === BI(p.amountWei));
+      const snapshot = await this.inspect(p);
+      verified = transfer && allocation && payment && deriveFundingStep(p, snapshot).kind === "DONE";
+      status = verified ? "VERIFIED_PAID" : "MISMATCH";
+    } else {
+      const name = pending.kind.endsWith("PROPOSE") ? "GovernanceProposalCreated" : pending.kind.endsWith("APPROVE") ? "GovernanceProposalApproved" : "GovernanceProposalExecuted";
+      const snapshot = await this.inspect(pending.plan);
+      const observed = pending.kind.startsWith("CAP") ? snapshot.capProposal : snapshot.allocationProposal;
+      const candidate = pending.kind.startsWith("CAP") ? pending.plan.cap : pending.plan.allocation;
+      verified = events(FUNDING_FORMAL.governance, governanceInterface).some(e => {
+        if (e?.name !== name || !same(e.args[0], pending.proposalId)) return false;
+        if (name === "GovernanceProposalApproved") return same(e.args[1], FUNDING_FORMAL.jade);
+        return same(e.args[1], candidate.target) && same(e.args[2], candidate.dataHash)
+          && (name !== "GovernanceProposalCreated" || same(e.args[4], FUNDING_FORMAL.mother));
+      });
+      verified = verified && same(observed.target, candidate.target) && same(observed.dataHash, candidate.dataHash) && !observed.cancelled;
+      if (pending.kind.endsWith("APPROVE")) verified = verified && same(observed.approver, FUNDING_FORMAL.jade);
+      if (pending.kind.endsWith("EXECUTE")) verified = verified && observed.executed;
+      if (pending.kind === "CAP_EXECUTE") {
+        const m = snapshot.module;
+        verified = verified && same(m.module, FUNDING_FORMAL.allocation) && same(m.versionHash, FUNDING_FORMAL.versionHash) && m.active === true
+          && BI(m.perTransactionLimit) === BI(FUNDING_FORMAL.capWei) && BI(m.epochLimit) === BI(FUNDING_FORMAL.capWei);
+      }
+      if (pending.kind === "ALLOCATION_EXECUTE") {
+        const a = snapshot.allocation, p = pending.plan;
+        verified = verified && same(a.beneficiary, p.beneficiary) && BI(a.amount) === BI(p.amountWei)
+          && same(a.purposeHash, p.purposeHash) && BI(a.executableAt) === 0n && a.cancelled === false;
+      }
+      status = verified ? "CONFIRMED" : "MISMATCH";
+    }
+    if (verified) {
+      if (json(this.readPending()) !== json(pending)) throw new Error("PENDING_CHANGED_RETAIN_LOCK");
+      this.storage.removeItem(FUNDING_STORAGE_KEY);
+      if (this.storage.getItem(FUNDING_STORAGE_KEY) != null) throw new Error("STORAGE_CLEAR_FAILED");
+    }
+    return { status, hash, kind: pending.kind };
+  }
+}
+
+// Same provider capability, storage key, Web Lock and receipt reconciler. The
+// class exposes only the fixed Bank.pause() intent; no unpause or asset method.
+class HumanBankPauseWallet extends HumanFundingWallet {
+  constructor(options) { super(options); this.flowType = "BANK_PAUSE"; }
+  async prepare(plan = buildBankPausePlan()) { return super.prepare(plan); }
+}
+
+
+// BEGIN HUMAN FUNDING CONTROLLER
+
+const el = id => document.getElementById('funding-' + id);
+const pretty = value => JSON.stringify(value, (_, item) => typeof item === 'bigint' ? item.toString() : item, 2);
+const providers = [];
+let wallet = null, preview = null, previewWallet = null, previewRole = null, busy = false, importedCases = [], formGeneration = 0, connectionGeneration = 0, connectedProvider = null, connectedAccount = null, connectedChain = null;
+const roleChoices = {
+  mother: {name:'王母', address:FUNDING_FORMAL.mother, permission:'proposer'},
+  jade: {name:'玉帝', address:FUNDING_FORMAL.jade, permission:'approver'},
+  guanyin: {name:'觀音', address:FUNDING_FORMAL.guanyin, permission:'pauser'},
+};
+const fundingAcknowledgment = el('ack-text').textContent;
+const sameAddress = (a, b) => typeof a === 'string' && typeof b === 'string' && a.toLowerCase() === b.toLowerCase();
+function roleMatches(candidate) {
+  const role = roleChoices[el('role').value], snapshot = candidate?.snapshot;
+  return Boolean(role && snapshot && sameAddress(candidate.account, role.address) && sameAddress(snapshot.account, candidate.account) && Number(snapshot.chainId) === 56 && snapshot.roles?.[role.permission] === true
+    && snapshot.codeOk === true && Array.isArray(snapshot.identityErrors) && snapshot.identityErrors.length === 0
+    && (el('role').value === 'guanyin' ? candidate.plan?.type === 'BANK_PAUSE' : !candidate.plan?.type));
+}
+function showRole(snapshot = null) {
+  const role = roleChoices[el('role').value];
+  if (!role) { el('role-status').textContent = '角色選項不正確，請重新選擇。'; return; }
+  const account = snapshot?.account || connectedAccount, chain = snapshot?.chainId ?? connectedChain;
+  const verified = snapshot && roleMatches({snapshot, account:snapshot.account, plan:el('role').value === 'guanyin' ? buildBankPausePlan() : {}});
+  el('role-status').textContent = `本次選擇：${role.name}；預期帳戶：${role.address}。實際帳戶：${account || '尚未連接'}；網路：${chain ?? '尚未讀取'}（須為56）。${verified ? '正式帳戶與鏈上角色讀查通過。' : '尚未通過本次角色讀查；請在錢包選正確帳戶後重新預覽。'}選擇角色不會授予權限。`;
+}
+const walletSessions = new WeakMap(), observedProviders = new WeakSet();
+function makeWallet(provider) {
+  let sessions = walletSessions.get(provider);
+  if (!sessions) { sessions = {}; walletSessions.set(provider, sessions); }
+  const key = el('role').value === 'guanyin' ? 'pause' : 'funding';
+  return sessions[key] ||= new (key === 'pause' ? HumanBankPauseWallet : HumanFundingWallet)({provider, storage:window.localStorage});
+}
+const status = text => { el('status').textContent = text; };
+const stageNames = {BLOCKED:'先處理查核缺項', DONE:'觀察到已執行狀態，仍須核對原回執', CAP_PROPOSE:'王母：提出一份共享調額提案（每筆／每日各10,000,000 KAIOS）', CAP_APPROVE:'玉帝：批准原調額提案', WAIT_ETA:'等待鏈上治理時間，不送交易', CAP_EXECUTE:'執行已批准的10,000,000 KAIOS共享調額', ALLOCATION_PROPOSE:'王母：提出本案配額提案', ALLOCATION_APPROVE:'玉帝：批准本案配額提案', ALLOCATION_EXECUTE:'執行本案配額建立（並非已付款）', PAYOUT:'執行本案撥款', BANK_PAUSE:'觀音：緊急暫停銀行', BANK_ALREADY_PAUSED:'銀行已暫停，無需再送暫停交易'};
+const reasons = {CHAIN_ID_MISMATCH:'請在錢包自行切至BSC主網56。', ACCOUNT_NOT_REVIEWED_HOLDER:'本版只接受原Mother或玉帝帳戶。', MOTHER_PROPOSER_REQUIRED:'此步需切至Mother提案帳戶。', DISTINCT_JADE_APPROVER_REQUIRED:'此步需不同於提案人的玉帝批准帳戶。', CAP_RESET_WOULD_ERASE_CURRENT_DAY_SPEND:'當日已有共享用量；調額會歸零，必須先完成用量影響審查。', HIGHER_EXISTING_CAP_DO_NOT_LOWER:'現有限額較候選更高，停止以免降低其他業務額度。', PENDING_INTENT_RECONCILE_FIRST:'已有待確認意圖，請先核對原交易回執，勿重送。', PREVIEW_INVALID_OR_EXPIRED:'預覽已過期或作廢，請重新讀查。', FRESH_STATE_OR_ACCOUNT_CHANGED:'送交前重查發現狀態或帳戶變動，請重新讀查。', WEB_LOCKS_REQUIRED_NO_SEND:'此瀏覽器缺少安全跨分頁鎖；本版不送交易。', ANOTHER_TAB_REQUEST_IN_PROGRESS:'另一分頁正在處理錢包請求，請勿重送。', NO_PENDING_INTENT:'本瀏覽器沒有待核對的送單意圖，不能用任意雜湊代替。', AVAILABLE_FUNDS_INSUFFICIENT:'目前可用額不足；仍須另外核對全部既有負債。', AMOUNT_DECIMAL_STRING_REQUIRED:'請輸入一般數字，最多18位小數，不含逗號或科學記號。', AMOUNT_OUTSIDE_REVIEWED_CAP:'金額須大於0且不超過本版10,000,000 KAIOS候選上限。'};
+Object.assign(reasons, {GUANYIN_PAUSER_REQUIRED:'請在錢包選擇正式觀音帳戶，並核對銀行PAUSER_ROLE。', ACCOUNT_NOT_REVIEWED_PAUSER:'請在錢包選擇正式觀音帳戶。', PAUSER_ROLE_MISSING:'目前帳戶未通過鏈上暫停權限核對。', PENDING_FLOW_MISMATCH:'待確認交易屬於另一操作流程；請選回原角色與流程核對，勿重送。'});
+Object.assign(reasons, {GUANYIN_ACCOUNT_REQUIRED:'請在錢包選擇正式觀音帳戶。', GUANYIN_PAUSER_ROLE_REQUIRED:'目前帳戶未通過銀行暫停權限核對。', BANK_RUNTIME_IDENTITY_MISMATCH:'銀行合約版本尚未通過正式地址與程式指紋核對，停止操作。', BANK_PAUSE_STATE_UNKNOWN:'目前無法確認銀行暫停狀態，請保留原交易紀錄。', PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL:'待確認意圖屬於另一流程；防重鎖保留，請回原流程核對原交易，勿重送。', TRANSACTION_FLOW_MISMATCH:'目前操作流程與原預覽不符，請重新讀查。'});
+const invalidate = () => { formGeneration++; wallet?.invalidate?.(); preview = null; previewWallet = null; previewRole = null; el('ack').checked = false; el('send').disabled = true; el('send').textContent = '先連接並預覽；由我本人到錢包確認'; showRole(); };
+const refreshSend = () => { el('send').disabled = busy || !preview?.step?.ready || previewRole !== el('role').value || !roleMatches(preview) || !el('ack').checked; };
+const errorText = error => Number(error?.code) === 4001 ? '你已在錢包拒絕本次請求；沒有自動重送。' : reasons[error?.message] || `檢查未通過：${error?.message || String(error)}。未確認前請勿重送。`;
+function addProvider(provider, name) {
+  if (!provider?.request || providers.some(item => item.provider === provider)) return;
+  providers.push({provider, name});
+  const option = document.createElement('option'); option.value = String(providers.length - 1); option.textContent = name;
+  if (providers.length === 1) el('wallet').replaceChildren();
+  el('wallet').append(option);
+}
+window.addEventListener('eip6963:announceProvider', event => addProvider(event.detail?.provider, String(event.detail?.info?.name || '既有錢包')));
+window.dispatchEvent(new Event('eip6963:requestProvider'));
+for (const provider of window.ethereum?.providers || []) addProvider(provider, provider.isMetaMask ? 'MetaMask' : provider.isOkxWallet ? 'OKX Wallet' : '既有注入錢包');
+addProvider(window.okxwallet, 'OKX Wallet');
+addProvider(window.ethereum, window.ethereum?.isMetaMask ? 'MetaMask' : '既有瀏覽器錢包');
+if (!providers.length) { el('wallet').options[0].textContent = '未偵測到注入錢包，可選手機 WalletConnect'; el('wallet').options[0].value = ''; }
+
+async function useProvider(provider, name) {
+  invalidate();
+  const attempt = ++connectionGeneration, connectingGeneration = formGeneration;
+  connectedProvider = provider; connectedAccount = null; connectedChain = null;
+  const connectingWallet = makeWallet(provider); wallet = connectingWallet;
+  if (!observedProviders.has(provider)) {
+    observedProviders.add(provider);
+    provider.on?.('accountsChanged', accounts => {
+      if (connectedProvider !== provider) return;
+      connectedAccount = accounts?.[0] || null; invalidate();
+      el('connection').textContent = `實際帳戶：${connectedAccount || '已中斷連接'}；chainId=${connectedChain ?? '待確認'}。請重新讀查。`;
+      status('錢包帳戶已變更；舊預覽作廢，請重新讀查。');
+    });
+    provider.on?.('chainChanged', chain => {
+      if (connectedProvider !== provider) return;
+      try { connectedChain = Number(BigInt(chain)); } catch { connectedChain = null; }
+      invalidate(); el('connection').textContent = `實際帳戶：${connectedAccount || '待確認'}；chainId=${connectedChain ?? '未知'}（必須為56）。`;
+      status('錢包鏈別已變更；舊預覽作廢，請自行切至BSC56後重新讀查。');
+    });
+    provider.on?.('disconnect', () => {
+      if (connectedProvider !== provider) return;
+      connectionGeneration++; connectedAccount = null; connectedChain = null; invalidate();
+      el('connection').textContent = '錢包已中斷；請重新連接並預覽。'; status('連線已中斷，舊預覽作廢；不會自動重連或送單。');
+    });
+  }
+  const account = await connectingWallet.connect();
+  const [accounts, chainHex] = await Promise.all([provider.request({method:'eth_accounts'}), provider.request({method:'eth_chainId'})]);
+  const chain = Number(BigInt(chainHex));
+  if (attempt !== connectionGeneration || connectingGeneration !== formGeneration || wallet !== connectingWallet || connectedProvider !== provider) return;
+  connectedAccount = accounts?.[0] || null; connectedChain = chain;
+  el('connection').textContent = `${name} · ${accounts?.[0] || account?.account || account || '帳戶待確認'} · chainId=${chain}（必須為56）`;
+  showRole(); status('僅已連接帳戶，尚未提案、調額、暫停或付款。請讀查並核對下一步。');
+  window.dispatchEvent(new CustomEvent('kaios18888:wallet', {detail:{provider,account:accounts?.[0] || null,chainId:chain}}));
+}
+async function run(action) {
+  if (busy) return;
+  busy = true; refreshSend();
+  let actionGeneration = formGeneration, actionWallet = wallet;
+  try {
+    const pending = action();
+    // Async handlers run their synchronous invalidation before yielding here.
+    actionGeneration = formGeneration; actionWallet = wallet;
+    await pending;
+  } catch (error) {
+    if (actionGeneration === formGeneration && actionWallet === wallet) { invalidate(); status(errorText(error)); }
+  }
+  finally { busy = false; refreshSend(); }
+}
+el('connect').onclick = () => run(async () => {
+  const selected = providers[Number(el('wallet').value)];
+  if (!selected || el('wallet').value === '') throw Error('未選到既有錢包。可使用手機WalletConnect，不要匯入私鑰。');
+  await useProvider(selected.provider, selected.name);
+});
+el('mobile').onclick = () => run(async () => {
+  if (!window.WalletConnectEthereumProvider && !window['@walletconnect/ethereum-provider']) {
+    // This UMD build reads NODE_ENV without bundler substitution. This is a
+    // public browser-only compatibility literal, never the host environment.
+    if (typeof window.process === 'undefined') window.process = Object.freeze({env:Object.freeze({NODE_ENV:'production'})});
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js';
+      script.integrity = 'sha384-Fuh8lPTDFjBwwB4D6KOigvxCgDcPV9rAbE7m0OcFJ5IISKrEqq76h7EANVG5Vy6S';
+      script.crossOrigin = 'anonymous';
+      script.onload = resolve; script.onerror = () => reject(Error('原WalletConnect套件載入失敗；未連接、未送交易。'));
+      document.head.append(script);
+    });
+  }
+  const sdk = window.WalletConnectEthereumProvider || window['@walletconnect/ethereum-provider'];
+  const factory = sdk?.init ? sdk : sdk?.EthereumProvider?.init ? sdk.EthereumProvider : sdk?.default;
+  if (!factory?.init) throw Error('原WalletConnect套件入口不可用；不會改用私鑰或自動換路。');
+  const provider = await factory.init({projectId:'ed256d3118a9c971d550ed5ee522b4d9', chains:[56], showQrModal:true, qrModalOptions:{themeMode:'dark'}});
+  status('正在建立手機錢包連線，僅請求連接帳戶；尚未請求簽署或交易。請在你的手機核對網站與帳戶。');
+  await provider.enable();
+  await useProvider(provider, 'WalletConnect（原12345設定；由你的手機錢包確認）');
+});
+function formPlan() {
+  if (!roleChoices[el('role').value]) throw Error('請選擇本次操作角色。');
+  if (el('role').value === 'guanyin') return buildBankPausePlan();
+  const plan = buildLifeResourcePlan({beneficiary:el('beneficiary').value.trim(), amount:el('amount').value.trim()});
+  const original = importedCases[Number(el('case').value)];
+  if (el('case').value !== '' && original) {
+    if (original.allocationId !== plan.allocationId || original.purposeHash !== plan.purposeHash || original.beneficiary.toLowerCase() !== plan.beneficiary.toLowerCase()) throw Error('原案欄位或固定ID不符，停止；不可改金額另發。');
+  }
+  return plan;
+}
+el('prepare').onclick = () => run(async () => {
+  invalidate();
+  const plan = formPlan();
+  if (!wallet) {
+    el('preview').textContent = pretty({status:'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED', ...plan});
+    el('summary').textContent = plan.type === 'BANK_PAUSE' ? '離線暫停草案：只準備正式銀行的暫停操作，尚未連接、讀查角色或送單。' : `離線草案：${plan.beneficiary}，${plan.amountKaios} KAIOS。尚未連接錢包、讀取鏈上狀態或送單。固定原案ID與參數可展開核對。`;
+    status('草案已產生；下一步由你連接既有錢包再重新讀查，才會判斷可執行的治理或撥款步驟。');
+    return;
+  }
+  const preparingGeneration = formGeneration, preparingWallet = wallet, preparingRole = el('role').value;
+  const candidate = await preparingWallet.prepare(plan);
+  if (preparingGeneration !== formGeneration || preparingWallet !== wallet || preparingRole !== el('role').value) return;
+  preview = candidate;
+  previewWallet = preparingWallet;
+  previewRole = preparingRole;
+  connectedAccount = candidate.account; connectedChain = candidate.snapshot.chainId; showRole(candidate.snapshot);
+  el('preview').textContent = pretty({beneficiary:plan.beneficiary, amountKaios:plan.amountKaios, amountWei:plan.amountWei, allocationId:plan.allocationId, purposeHash:plan.purposeHash, warning:plan.warnings, ...candidate});
+  const stepName = stageNames[candidate.step.kind] || candidate.step.kind;
+  const blocked = candidate.step.blockers.map(code => reasons[code] || code).join('；');
+  const subject = plan.type === 'BANK_PAUSE' ? '本次為銀行緊急暫停，不會撥款或解除暫停' : `本案：${plan.beneficiary}，${plan.amountKaios} KAIOS`;
+  const roleWarning = roleMatches(candidate) ? '' : '所選角色與實際帳戶／權限尚未核對通過，請切換錢包帳戶再預覽。';
+  el('summary').textContent = `${subject}。下一步：${stepName}。操作帳戶：${candidate.account}。BSC主網56；本次交易BNB金額為0（仍需BNB手續費）。${candidate.step.to ? `交易目標：${candidate.step.to}。` : ''}${blocked ? `尚缺：${blocked}` : ''}${roleWarning}${candidate.step.kind === 'WAIT_ETA' ? `鏈上等待條件：${candidate.step.label}` : ''}`;
+  const ready = candidate.step?.ready && roleMatches(candidate);
+  el('send').textContent = ready ? `交錢包確認：${stepName}` : '目前不可送交錢包；請先處理上列條件';
+  status(ready ? '預覽已產生，尚未簽署。核對本次操作後勾選，再由你按一次交給錢包。' : '唯讀檢查完成；等待、阻擋或已執行狀態不會自動送單。');
+});
+el('send').onclick = () => run(async () => {
+  if (!preview || !preview.step?.ready || !el('ack').checked || previewRole !== el('role').value || !roleMatches(preview)) throw Error('請先讀查並核對本次操作及角色。');
+  const candidate = preview;
+  const requestingWallet = previewWallet, requestingRole = previewRole, requestingGeneration = formGeneration;
+  if (!requestingWallet || requestingWallet !== wallet || pretty(formPlan()) !== pretty(candidate.plan)) throw Error('目前表單或錢包與預覽不符，請重新讀查；本次未送交錢包。');
+  preview = null; previewWallet = null; previewRole = null; el('ack').checked = false;
+  status('只將這一筆交給你的錢包。請本人核對並決定是否簽署；不會自動送下一筆。');
+  const result = await requestingWallet.request(candidate);
+  if (requestingGeneration !== formGeneration || requestingWallet !== wallet || requestingRole !== el('role').value) return;
+  const hash = typeof result === 'string' ? result : result?.hash || result?.transactionHash;
+  if (hash) el('txhash').value = hash;
+  el('preview').textContent = pretty(result);
+  el('summary').textContent = `本次僅收到錢包交易雜湊：${hash || '未知'}；尚未核實${candidate.plan.type === 'BANK_PAUSE' ? '銀行已暫停' : '成功或入帳'}。請保留原雜湊，先核回執，不要重按。`;
+  status('錢包已回傳結果；這不等於付款完成。請按「只讀核對回執」，再重新讀查下一步。');
+});
+el('receipt').onclick = () => run(async () => {
+  if (!wallet) throw Error('請先連接原錢包以讀查待確認意圖與回執。');
+  const reconcilingWallet = wallet, reconcilingGeneration = formGeneration, reconcilingRole = el('role').value;
+  const hash = el('txhash').value.trim();
+  if (hash && !/^0x[0-9a-fA-F]{64}$/.test(hash)) throw Error('交易雜湊格式不正確。');
+  const result = await reconcilingWallet.reconcile(hash || undefined);
+  if (reconcilingGeneration !== formGeneration || reconcilingWallet !== wallet || reconcilingRole !== el('role').value) return;
+  el('preview').textContent = pretty(result);
+  invalidate();
+  const receiptNames = {PENDING:'尚未確認，請保留原交易等待核查', REVERTED:'交易失敗，保留防重鎖，先查原因', MISMATCH:'回執／事件／狀態不符，停止重送', CONFIRMED:'本次治理步驟已核對，不代表本案已付款', VERIFIED_PAID:'本錢包RPC核對本案付款事件及狀態通過，仍須獨立對帳', BANK_PAUSED:'已核對銀行暫停事件及狀態；本次未撥款'};
+  el('summary').textContent = `${receiptNames[result.status] || result.status}。原交易：${result.hash || hash}。`;
+  status('已完成本次唯讀回執檢查；請依詳細結果區分待確認、失敗、治理成功與本案Transfer核對，不以雜湊或餘額冒充付款。');
+});
+for (const name of ['beneficiary','amount','wallet']) el(name).addEventListener('input', invalidate);
+el('role').addEventListener('change', () => {
+  connectionGeneration++; invalidate();
+  if (connectedProvider) wallet = makeWallet(connectedProvider);
+  const pause = el('role').value === 'guanyin';
+  el('ack-text').textContent = pause ? '我已核對正式觀音帳戶及銀行暫停權限，了解這筆只會緊急暫停銀行，不會付款、提款或解除暫停；仍由本人在錢包確認。' : fundingAcknowledgment;
+  el('prepare').textContent = pause ? '只讀核對觀音權限並預覽暫停' : '讀查並預覽下一步';
+  el('summary').textContent = pause ? '已選觀音緊急暫停；不需要填入收款人或金額。請在錢包選擇正式觀音帳戶，再讀查權限。' : '角色已變更，舊預覽與勾選作廢；請在錢包選擇對應帳戶後重新預覽。';
+  showRole(); status('角色選項只表達本次操作意圖，不會切換錢包帳戶、授權或送交易。');
+});
+el('ack').addEventListener('change', refreshSend);
+el('case').addEventListener('change', () => {
+  invalidate();
+  const chosen = el('case').value === '' ? null : importedCases[Number(el('case').value)];
+  el('beneficiary').readOnly = el('amount').readOnly = Boolean(chosen);
+  if (chosen) { el('beneficiary').value = chosen.beneficiary; el('amount').value = chosen.amountKaios; }
+});
+el('file').addEventListener('change', () => run(async () => {
+  invalidate();
+  const file = el('file').files?.[0];
+  if (!file || file.size > 5 * 1024 * 1024) throw Error('請選擇5MiB以內的既有原案報告或JSON；不需要私鑰檔。');
+  const source = await file.text();
+  let data;
+  try { data = JSON.parse(source); } catch {
+    const block = source.match(/```json\s*([\s\S]*?)```/i);
+    if (!block) throw Error('未找到原案JSON。請用原R7報告或原checkpoint，不要選環境變數／私鑰檔。');
+    data = JSON.parse(block[1]);
+  }
+  const pack = data.current_continuity?.financial_transaction_package_current?.package || data.package || data;
+  if (!Array.isArray(pack.cases) || !pack.cases.length || pack.cases.length > 20) throw Error('未找到原交易包cases；不會推測地址或新建案件。');
+  const checked = pack.cases.map(row => {
+    const plan = buildLifeResourcePlan({beneficiary:row.beneficiary, amount:String(row.amountKaios)});
+    if (plan.allocationId !== row.allocationId || plan.purposeHash !== row.purposeHash) throw Error('載入原案的金額／受益人／穩定ID不符；整批停止。');
+    return {name:typeof row.name === 'string' ? row.name.slice(0,40) : '原案', beneficiary:plan.beneficiary, amountKaios:plan.amountKaios, allocationId:plan.allocationId, purposeHash:plan.purposeHash};
+  });
+  const ids = new Set(checked.map(row => row.allocationId));
+  if (ids.size !== checked.length) throw Error('原案含重複ID，停止載入。');
+  importedCases = checked;
+  el('case').replaceChildren(new Option('手動新草案，須另核正式批准與防重', ''));
+  checked.forEach((row, index) => el('case').append(new Option(`${row.name} · ${row.beneficiary} · ${row.amountKaios} KAIOS`, String(index))));
+  el('beneficiary').readOnly = el('amount').readOnly = false;
+  status(`已在本機記憶體核對${checked.length}個原案；未上傳、未簽署、未建立配額。請選擇其中一案。`);
+}));
+function configureNativeLinks() {
+  for (const id of ['native-metamask','native-trust']) el(id).addEventListener('click', event => {
+    if (el(id).getAttribute('aria-disabled') === 'true') { event.preventDefault(); status('此按鈕需要已發布的正式HTTPS頁。本機請連接既有錢包或使用WalletConnect。'); }
+  });
+  if (!window.location?.href) return;
+  const url = new URL(window.location.href);
+  if (url.origin !== 'https://klineodyssey.github.io' || decodeURIComponent(url.pathname) !== '/kline-odyssey/K線西遊記/temples/18888/index.html') return;
+  // Open this exact published page only; never transmit case data or caller query strings.
+  url.search = ''; url.hash = 'funding-panel';
+  const links = { 'native-metamask':`https://link.metamask.io/dapp/${url.href.replace(/^https:\/\//, '')}`, 'native-trust':`https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(url.href)}` };
+  for (const [id, href] of Object.entries(links)) { el(id).setAttribute('href', href); el(id).setAttribute('aria-disabled', 'false'); el(id).setAttribute('tabindex', '0'); }
+  el('native-help').textContent = '原生開啟只會把此正式網頁交給你的錢包；開啟後仍需選角色、連接帳戶及預覽，再本人確認交易。';
+}
+configureNativeLinks(); showRole();
+window.addEventListener('pagehide', () => { connectionGeneration++; invalidate(); });
+
+</script>
 
 <script src="../../modules/kgen-game-core.js"></script>
 <script src="../../modules/universe-runtime/organ-economy.js"></script>

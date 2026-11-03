@@ -720,3 +720,31 @@ KAIOS V10 does not modify:
 - `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md`
 - `docs/physics/final-whitepaper/`
 - `KGEN/contracts/KGEN_Token_V7_5_2.sol`
+
+## 18888 fixed allocation wallet interface — 2026-11-03
+
+The active frontend owner is `K線西遊記/temples/18888/index.html`, using its
+existing `script#funding-controller`. The fixed allocation plan, exact minimal
+Bank/Governance/Allocation ABIs, formal deployment pins, durable pending intent
+and receipt reconciliation live in that same owner. No additional Runtime,
+bootstrap, ABI directory or contract implementation is introduced.
+
+- Mother/Jade actions retain the existing fixed allocation IDs and governance
+  delay. A 10M cap is a shared module limit, not a separate allowance per case.
+- Role, account, chain and form changes invalidate previews and ACKs. Late
+  asynchronous results cannot restore a different context; one confirmation
+  submits one exact transaction to the Human's wallet.
+- Guanyin only requests Bank.pause(). It checks the formal Bank runtime and
+  PAUSER_ROLE independently of unrelated Allocation upgrades. Its success is
+  BANK_PAUSED, never VERIFIED_PAID; no unpause/withdrawal/upgrade action is added.
+- Shared pending intent and Web Lock retain cross-flow replay protection. Old
+  seven-floor pending entries are refused and retained for their original
+  panel, rather than being reinterpreted as fixed funding.
+- Original private case packages remain local imports; no private beneficiary
+  map, key, seed or checkpoint is embedded in the public page.
+
+The existing token-surface security test also executes the real inline wallet
+module/controller with offline RPC and wallet mocks. The complete phase2
+source candidate previously passed57 bank integration tests; that is separate
+from testing this smaller main-branch interface. No Mainnet transaction or
+phone-wallet visual acceptance is implied by either suite.

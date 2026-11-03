@@ -1407,3 +1407,27 @@ V3.6 verifies the first `heartbeatClaim()` and first 1 KGEN reward from one succ
 - `K線西遊記/temples/11520/index.html`: Taiwan quote entry with an explicit link to that same game.
 - Product status is BETA. KGEN/WBNB and derived USDT values are periodic read-only references, not settlement quotes or a continuous background service.
 - This navigation registration changes no Physics CURRENT, Boot V1.4, UniverseMap, private calibration, financial authority, or player-save schema.
+
+## 18888 Human wallet controls and 11520 installed-page updates — 2026-11-03
+
+The existing `K線西遊記/temples/18888/index.html#funding-panel` now contains the
+fixed one-time KAIOS allocation wallet flow: Mother proposes, Jade approves,
+and Guanyin can separately request an emergency Bank pause. The selected role
+is an intent only; actual BSC56 accounts, on-chain roles and contract runtime
+pins determine readiness. Every transaction still needs the holder's explicit
+wallet confirmation. Source publication does not change caps or transfer funds.
+
+The page reuses the existing vendored ethers asset and contains the minimal
+interfaces in its existing module, so it has no unpublished ABI/adapter URL
+dependency. The game/seven-floor candidate is not activated by this release.
+
+The existing11520 PWA revalidates application code online and uses only its own
+current cache offline. Startup, reconnection and returning to the foreground
+check the service-worker update without forcing a page reload or deleting
+player/wallet data. Installed shortcuts and already-open pages can still need
+a safe reopen after deployment; no universal instant-update claim is made.
+
+Regression owners: `KGEN-KAIOS/tests/token-surface.security.test.mjs` and
+`K線西遊記/temples/11520/tests/11520-pwa-bgm.test.mjs`. Portal QA also runs these
+offline tests. Existing pinned Playwright QA uses its supported Ubuntu22.04
+runner instead of the moving ubuntu-latest image.
