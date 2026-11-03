@@ -317,3 +317,59 @@ Human明確補充：可領到108萬等高額初始資源的是具有既有背景
 對話提及地下-8、-18及小數精度，尚未形成地下各層可領範圍、額度、頻率或
 任務表。18位小數精度也不是發放資格，不能因金額小就說零或擅訂地下禁領線。
 這些未定項留待沿既有角色／領取系統定義，不另建第二套身份、存檔或Runtime。
+
+### Human後續決策與工程核對 — 2026-11-04
+
+SOURCE_TYPE: HUMAN_CONVERSATION / REPOSITORY_AUDIT
+RECORDED_AT: 2026-11-04T00:21:46+08:00
+TEXT_SIGNATURE: Codex｜衡曜總工程師接續工程紀錄
+
+本段累積補充，不刪除上述歷史。前段 `23:56:00` 是整理用時間標記，並非可核實的
+逐字語音時間；該段發布提交 `1b24845c6140df0b5ba5341b91d7685fe7d70933` 的 Git
+committer time 為 `2026-11-03T23:57:34+08:00`，不得以較早整理標記冒充語音時間。
+
+- Human後續明確同意停用地下逐層微額遊戲領取；地下18層的修煉、成長與每層
+  九境界設定保留。此決策取代前段「地下微額發放仍待定」的待辦，不影響原三筆
+  已批准固定配額，也不替任何角色新增額度、收款人或鏈上發放權限。地下成長、
+  報價樓層與領款資格仍分開；本次沒有變更 Runtime CURRENT 或領款合約。
+- 天然資源／生命值可按正式角色背景分級；牛魔王、白骨精與三國人物均是創作
+  範例，並非新增付款名單。有名角色不一律最高額，普通自建角色不靠取名領滿。
+- Human要求介面先實作、抓手機直向與橫向 runtime 截圖、由工程自行查看並修正，
+  接近定稿才交給Human。沿既有 Portal browser harness 增加18888離線UI專項，
+  使用CI隔離瀏覽器、既有artifact位置；不得把邏輯測試或產圖當成已完成看圖驗收。
+  此次準備的專項沒有真人錢包、鏈上讀寫或付款；FUNCTIONAL_QA與VISUAL_QA分列。
+- KGEN圖示沿既有 `kgen32.svg` 與 `assets/kgen/kgen-logo.svg` 同一正式SVG；白皮書
+  既有鏡像修正為逐位元組一致。README與兩份既有OfficialLinks的token圖示統一指向
+  `assets/kgen/kgen-logo-256.png`。根目錄 `logo.png` 海報保留；沒有另畫Logo，沒有
+  向BscScan、CMC或其他平台送審。白皮書正文及PDF沒有因此改版。
+- AutoLP先沿 `KGEN-Genesis/GEN-008_Finance/KGEN_Finance_V1.0.md` 第五章盤點與
+  設計；固定0.30%稅與其中0.05%AutoLP不變，原Token不得重部署。現行Token只轉
+  KGEN給autoLPWallet，沒有swap或addLiquidity。KAIOS／18888流動性是另一條候選
+  資金線；Draft #199的60/35/5與70/30不是已批准參數。正式executor、投入門檻、
+  caps、配對資產、LP保管退出、價格防護與暫停仍須完成設計及離線驗證；本次未上鏈。
+- 琉璃燈報價是DOT原案，與AutoLP分開。#573 comment6436140064轉述
+  `K11520-QUOTE-RECEIPT-LOCAL-20261027` R1 LIMITED PASS 56/56，但只為未存檔
+  typed MOCK，費用／總額null、付款與可靠提交未配置、Browser/Visual未驗。
+  main `assets/kaios-world-registry.mjs` 仍標正式供應報價待確認；原Writer／Reviewer
+  與成果尚待找回，不把source fingerprint當commit或把轉述當重新驗收。
+- 公開共同窗口 #584 已有實際留言及讀回：
+  https://github.com/klineodyssey/kline-odyssey/issues/584#issuecomment-6608789829
+  MESSAGE_ID=`HENGYAO-SUCCESSOR-SHARED-HANDOFF-20261103160103`。
+  送達讀回與他人ACK分開；尚未核實DOT已讀或接單。
+- 自動排程仍待正式工具核對與更新；原heartbeat目標是舊頁，ACTIVE標記不代表已
+  喚醒本接續頁。窄範圍本機工程prompt已擬，尚未生效；不複製被平台阻擋的資金
+  自主操作指令、不手改TOML繞過審查、不承諾永不中斷。
+- 宇宙電梯另列既有專案查核：Human稱「空間大樓、時間大樓」。CURRENT V3.8
+  PART61與PART92已有尺度／電梯定義；PART92的Elevator=Scale Switching是現行
+  校正，不把舊C／槓桿敘述當最新規格。CT三時態與K6888九境界時鐘有定義，但
+  不等於兩棟大樓工程已完成，也不能將時間比例直接轉為空間樓層。
+  DOT #573 comment6286007773（2026-10-20）有「宇宙金融大樓／輪迴／蟲洞飛碟」
+  架構交接，parent `KAIOS-MULTICIV-MARKET-LIFE-20261017-001`（#608）；
+  comment6292410828署名悟界，宣告原包 `KAIOS_Universe_Elevator_R0_20261020.zip`
+  與 `universe-elevator-r0.mjs`／測試／README，狀態為
+  `LOCAL_SANDBOX_R0_COMPLETED / GITHUB_NOT_PUSHED`。
+  comment6337806387（2026-10-22）說R0/V1.1/R1/R0scene已保存，正式接線、六站、
+  R1視覺與Owner／有效Writer交接仍待核。上述為公開交接紀錄，不是本輪重驗原包；
+  main尚未找到R0模組整合證據。原成果與Human兩個名稱的對應仍須核對，不另建
+  平行電梯、Runtime或版本檔。下一步沿原成果包與NEXT_HANDOFF核實來源和接點。
+  原交付入口：https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6292410828

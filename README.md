@@ -103,7 +103,7 @@ by `K線西遊記/temples/11520/tests/11520-browser-settlement.mjs`.
 
 
 <div style="text-align:center; margin:18px 0 22px 0;">
-  <img src="https://klineodyssey.github.io/kline-odyssey/logo.png"
+  <img src="https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png"
        alt="KGEN Genesis Logo"
        style="width:140px;height:140px;border-radius:28px;display:block;margin:0 auto 14px auto;">
 

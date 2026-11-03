@@ -66,6 +66,7 @@ jobs:
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" || true' EXIT
           sleep 2
+          node tests/kaios-portal-browser.mjs --funding-only
           node tests/kaios-portal-browser.mjs
           node tests/kaios-world-audio-browser.mjs
           node 'K線西遊記/temples/11520/tests/11520-browser-audio-world.mjs'

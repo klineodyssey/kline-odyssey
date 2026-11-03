@@ -5,8 +5,16 @@ import {chromium} from 'playwright';
 import {worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
 const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const OUT='artifacts/kaios-portal-qa';
+const FUNDING_ONLY=process.argv.includes('--funding-only');
+if(FUNDING_ONLY){
+  assert.equal(process.env.GITHUB_ACTIONS,'true','--funding-only runs only in the isolated GitHub Actions browser job');
+  const base=new URL(BASE);
+  assert.ok(['127.0.0.1','localhost','[::1]'].includes(base.hostname),'funding UI QA requires the CI loopback static server');
+  assert.equal(base.username,'');assert.equal(base.password,'');assert.equal(base.search,'');assert.equal(base.hash,'');
+}
 await fs.mkdir(OUT,{recursive:true});
 const report={head:process.env.KAIOS_SOURCE_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),trackedDirty:!!execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),functional:'RUNNING',visual:'SCREENSHOTS_REQUIRE_DIRECT_REVIEW',checks:[],profiles:[],navigations:[],runtimeErrors:[],errors:[]};
+if(FUNDING_ONLY)Object.assign(report,{mode:'UI_ONLY_NO_REAL_WALLET',realWallet:'NOT_TESTED',chainReads:0,transactionRequests:0});
 const browser=await chromium.launch({headless:true,args:['--autoplay-policy=user-gesture-required']});
 const shot=(page,name)=>page.screenshot({path:`${OUT}/${name}.png`});
 const audio=page=>page.evaluate(async()=>{const {getKaiosAudio}=await import('./assets/kaios-audio.mjs');return getKaiosAudio().snapshot();});
@@ -38,7 +46,107 @@ async function clickRoute(page,selector,expected,visibleSelector,label){
   }catch(error){report.navigations.push({label,href,expected,actual:page.url(),failures,failed:true});throw error;}
   finally{page.off('requestfailed',failed);}
 }
+async function verifyFundingPanel(){
+  const route=new URL('K線西遊記/temples/18888/index.html',BASE+'/'),origin=route.origin;
+  const roles={mother:'王母',jade:'玉帝',guanyin:'觀音'};
+  for(const [width,height] of [[390,844],[844,390]]){
+    const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
+    context.setDefaultTimeout(10000);context.setDefaultNavigationTimeout(20000);
+    const row={width,height,mode:'UI_ONLY_NO_REAL_WALLET',roles:[],screenshots:[],runtimeErrors:[],failedScripts:[],externalRequests:[],rpcMethods:[],networkWrites:[]};
+    report.profiles.push(row);
+    const page=await context.newPage();
+    const capture=async(name,viewport=false)=>{
+      const prefix=`funding-${width}x${height}-${name}`;
+      if(viewport){
+        await page.locator('#funding-panel').evaluate(el=>scrollTo(0,Math.max(0,el.getBoundingClientRect().top+scrollY-12)));
+        const file=`${prefix}-viewport.png`;await shot(page,file.replace(/\.png$/,''));row.screenshots.push(file);
+      }
+      const file=`${prefix}-panel.png`;
+      await page.locator('#funding-panel').screenshot({path:`${OUT}/${file}`});row.screenshots.push(file);
+    };
+    const noOverflow=async label=>{
+      const geometry=await page.locator('#funding-panel').evaluate(el=>{
+        const rect=el.getBoundingClientRect(),root=document.documentElement;
+        return{viewport:innerWidth,document:root.scrollWidth,panelWidth:el.clientWidth,panelScroll:el.scrollWidth,left:rect.left,right:rect.right,textOverflow:[...el.querySelectorAll('p,pre')].filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+1).map(node=>({id:node.id,width:node.clientWidth,scroll:node.scrollWidth}))};
+      });
+      assert.ok(geometry.document<=geometry.viewport+1,`${label}: page horizontal overflow ${JSON.stringify(geometry)}`);
+      assert.ok(geometry.panelScroll<=geometry.panelWidth+1&&geometry.left>=-1&&geometry.right<=geometry.viewport+1,`${label}: funding panel horizontal overflow ${JSON.stringify(geometry)}`);
+      assert.deepEqual(geometry.textOverflow,[],`${label}: visible funding text/IDs must wrap without horizontal scrolling`);
+      return geometry;
+    };
+    const noWalletAuthority=async label=>{
+      assert.equal(await page.locator('#funding-send').isDisabled(),true,`${label}: no connected/verified wallet means no send authority`);
+      assert.match(await page.locator('#funding-role-status').textContent(),/尚未通過本次角色讀查/);
+      assert.match(await page.locator('#funding-role-status').textContent(),/選擇角色不會授予權限/);
+    };
+    page.on('pageerror',error=>{const text=String(error.stack||error);row.runtimeErrors.push(text);report.runtimeErrors.push(text);});
+    page.on('response',response=>{if(response.request().resourceType()==='script'&&response.status()>=400)row.failedScripts.push({url:response.url(),status:response.status()});});
+    page.on('requestfailed',request=>{if(request.resourceType()==='script')row.failedScripts.push({url:request.url(),error:request.failure()?.errorText||'UNKNOWN'});});
+    // Only this job's own static files may be fetched. No wallet, RPC, relay,
+    // credentials or persistent browser profile is provided to this context.
+    await context.route('**/*',async intercepted=>{
+      const request=intercepted.request(),url=new URL(request.url());
+      if(!['GET','HEAD'].includes(request.method())){
+        row.networkWrites.push({origin:url.origin,method:request.method()});
+        try{const payload=request.postDataJSON();for(const item of Array.isArray(payload)?payload:[payload])if(typeof item?.method==='string')row.rpcMethods.push(item.method);}catch{}
+        await intercepted.abort('blockedbyclient');return;
+      }
+      if(['http:','https:'].includes(url.protocol)&&url.origin!==origin){row.externalRequests.push({origin:url.origin,type:request.resourceType()});await intercepted.abort('blockedbyclient');return;}
+      await intercepted.continue();
+    });
+    try{
+      const response=await page.goto(route.href,{waitUntil:'load'});assert.ok(response?.ok(),'18888 static page loads');
+      await page.locator('#funding-panel').waitFor({state:'visible'});
+      // This text is written by the real inline module only after its imports
+      // and event handlers have initialized; an unexecuted HTML shell fails.
+      await page.waitForFunction(()=>document.getElementById('funding-role-status')?.textContent.includes('本次選擇：王母'));
+      assert.equal(await page.evaluate(()=>Boolean(window.ethereum||window.okxwallet||window.WalletConnectEthereumProvider||window['@walletconnect/ethereum-provider'])),false,'isolated context has no wallet provider or loaded WalletConnect SDK');
+      assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');
+      assert.equal(await page.locator('#funding-case').inputValue(),'');
+      assert.equal(await page.locator('#funding-ack').isChecked(),false);
+      await noWalletAuthority('initial');
+      assert.deepEqual(await page.locator('#funding-role option').evaluateAll(options=>options.map(option=>option.value)),Object.keys(roles));
+      for(const [value,name] of Object.entries(roles)){
+        await page.locator('#funding-role').selectOption(value);
+        assert.match(await page.locator('#funding-role-status').textContent(),new RegExp(`本次選擇：${name}`));
+        assert.equal(await page.locator('#funding-ack').isChecked(),false,'role change clears acknowledgment');
+        await page.locator('#funding-ack').check();await noWalletAuthority(value);await page.locator('#funding-ack').uncheck();
+        const geometry=await noOverflow(value);row.roles.push({value,name,sendDisabled:true,geometry});
+        if(value!=='guanyin')await capture(value,value==='mother');
+      }
+      await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('');
+      await page.locator('#funding-prepare').click();
+      await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('OFFLINE_DRAFT_NOT_CHAIN_VERIFIED'));
+      const pauseDraft=JSON.parse(await page.locator('#funding-preview').textContent());
+      assert.equal(pauseDraft.status,'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED');assert.equal(pauseDraft.type,'BANK_PAUSE');assert.equal(pauseDraft.chainId,56);
+      assert.match(pauseDraft.pause.to,/^0x[0-9a-fA-F]{40}$/);assert.match(pauseDraft.pause.data,/^0x[0-9a-fA-F]{8}$/);
+      assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');assert.equal(await page.locator('#funding-amount').inputValue(),'');assert.equal(await page.locator('#funding-case').inputValue(),'');
+      assert.match(await page.locator('#funding-summary').textContent(),/離線暫停草案/);
+      await page.locator('#funding-ack').check();await noWalletAuthority('offline Guanyin draft');await page.locator('#funding-ack').uncheck();
+      await page.locator('#funding-panel details > summary').click();
+      row.pauseDraft={status:pauseDraft.status,type:pauseDraft.type,chainId:pauseDraft.chainId,noCaseRequired:true,sendDisabled:true,geometry:await noOverflow('offline Guanyin draft')};
+      await capture('guanyin-offline',true);
+      // A synthetic public fixture address exercises the actual inline plan
+      // and long address/hash wrapping; no original case or personal file.
+      const beneficiary='0x1111111111111111111111111111111111111111';
+      await page.locator('#funding-role').selectOption('mother');await page.locator('#funding-beneficiary').fill(beneficiary);await page.locator('#funding-amount').fill('1080000');
+      await page.locator('#funding-prepare').click();
+      await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('OFFLINE_DRAFT_NOT_CHAIN_VERIFIED')&&document.getElementById('funding-preview')?.textContent.includes('allocationId'));
+      const fundingDraft=JSON.parse(await page.locator('#funding-preview').textContent());
+      assert.equal(fundingDraft.beneficiary.toLowerCase(),beneficiary);assert.equal(fundingDraft.amountKaios,'1080000');
+      await noWalletAuthority('offline Mother draft');row.longAddress=await noOverflow('long address and exact IDs');await capture('mother-long-address');
+      assert.deepEqual(row.runtimeErrors,[],'18888 has no JavaScript/import errors');assert.deepEqual(row.failedScripts,[],'all actual scripts/import dependencies load');
+      assert.deepEqual(row.rpcMethods,[],'offline drafts never attempt RPC');assert.deepEqual(row.networkWrites,[],'offline UI never sends a request body');
+      assert.deepEqual(row.externalRequests,[],'offline funding UI never fetches wallet, relay or chain endpoints');
+      row.functional='PASS';
+    }catch(error){row.functional='FAIL';row.error=String(error.stack||error);await page.screenshot({path:`${OUT}/funding-${width}x${height}-FAIL.png`,fullPage:true}).catch(()=>{});throw error;}
+    finally{await context.close();}
+  }
+  report.checks.push('actual 18888 module boot and three role choices; no wallet connection or send; offline Guanyin draft without case/address/amount; acknowledgment and role selection grant no authority; long address/ID wrapping in portrait and landscape');
+}
 try{
+  if(FUNDING_ONLY)await verifyFundingPanel();
+  else{
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();
     await page.addInitScript(()=>{globalThis.__audioAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const a=this.context.createAnalyser();connect.call(this,a);__audioAnalysers.push(a);}return result;};});
@@ -143,6 +251,7 @@ try{
   await page.reload({waitUntil:'networkidle'});assert.ok(await page.locator('#primaryPlay').isVisible());assert.equal(await page.evaluate(()=>localStorage.getItem('KAIOS_PLAYER_LIFE_V1')),'{corrupt');
   report.checks.push('legacy compatibility redirect, corrupt profile remains intact and play available');
   await context.close();
+  }
   report.functional='PASS';
 }catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));throw error;}
-finally{await fs.writeFile(`${OUT}/portal-browser-report.json`,JSON.stringify(report,null,2));await browser.close();console.log(JSON.stringify(report));}
+finally{await fs.writeFile(`${OUT}/${FUNDING_ONLY?'funding-browser-report':'portal-browser-report'}.json`,JSON.stringify(report,null,2));await browser.close();console.log(JSON.stringify(report));}

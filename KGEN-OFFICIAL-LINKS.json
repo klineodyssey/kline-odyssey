@@ -249,12 +249,12 @@
       "notes": "Public cooperation contact email."
     },
     "logo": {
-      "url": "https://klineodyssey.github.io/kline-odyssey/logo.png",
+      "url": "https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png",
       "status": "VERIFIED",
-      "verified_at": "2026-07-11",
+      "verified_at": "2026-11-04",
       "verified_by": "Codex",
-      "source": "README.md; repo root logo.png",
-      "notes": "Official logo asset."
+      "source": "README.md; canonical kgen32.svg; assets/kgen/kgen-logo-256.png",
+      "notes": "Official KGEN token icon derived from canonical kgen32.svg."
     },
     "official": {
       "url": "https://klineodyssey.github.io/kline-odyssey/official/",
