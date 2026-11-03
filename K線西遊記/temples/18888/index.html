@@ -71,6 +71,8 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 .seven-palace * { box-sizing:border-box; }
 .seven-eyebrow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:#d4b77d; font:600 11px/1.5 var(--kgen-mono,monospace); letter-spacing:.08em; }
 .seven-badge { border:1px solid #d4a85466; padding:4px 9px; border-radius:999px; color:#f0c97e; letter-spacing:0; }
+.seven-release { margin:0 0 12px; font-size:11px; line-height:1.5; }
+.seven-release .seven-badge { display:inline-block; }
 .seven-palace h1 { margin:13px 0 8px; font-size:clamp(23px,4vw,34px); line-height:1.25; letter-spacing:.02em; }
 .seven-intro { margin:0 0 18px; color:#c2b7d0; font-size:13px; line-height:1.7; max-width:68ch; }
 .seven-levels { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; margin:18px 0 9px; }
@@ -135,8 +137,9 @@ STATUS: PROTOTYPE — 前端原型，不改合約
   <!-- Hero -->
   <!-- Seven-floor entitlement is separate from the three original fixed allocations. -->
   <section class="seven-palace" id="seven-floor-panel" aria-labelledby="seven-floor-title">
-    <div class="seven-eyebrow"><span>LINGXIAO · 18888</span><span class="seven-badge">本機工程候選 · 未接通真付款</span><span>BSC / 56</span></div>
+    <div class="seven-eyebrow"><span>LINGXIAO · 18888</span><span>BSC / 56</span></div>
     <h1 id="seven-floor-title">凌霄寶殿七層自助領取</h1>
+    <p class="seven-release"><span class="seven-badge">領取尚未開放 · 尚未接通付款</span></p>
     <p class="seven-intro">到達合格樓層，完成本層任務，選擇這次想領的金額。資格與已領紀錄依同一角色保存，換生命錢包不會重置；少領一次，該層也不會再生第二次資格。</p>
     <nav class="seven-levels" id="seven-floor-levels" aria-label="地上七層位置預覽">
       <button type="button" data-floor="1" aria-pressed="true"><strong>一層</strong><span>1.08</span></button>

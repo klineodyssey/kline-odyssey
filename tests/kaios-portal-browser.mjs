@@ -162,6 +162,8 @@ async function verifyFundingPanel(){
         await seven.evaluate(el=>el.scrollIntoView({block:'start',behavior:'instant'}));
         const heading=await page.locator('#seven-floor-title').boundingBox(),hud=await page.locator('.kgen-hud').boundingBox();
         assert.ok(heading&&hud&&heading.y>=hud.y+hud.height,`${name}: seven-floor title must remain below the fixed HUD`);
+        const release=await page.locator('#seven-floor-panel .seven-badge').boundingBox();
+        assert.ok(release&&release.y>=hud.y+hud.height&&release.y+release.height<=height,`${name}: unopened-payment notice must be visible below the fixed HUD`);
         const geometry=await seven.evaluate(el=>{
           const r=el.getBoundingClientRect();
           return{viewport:innerWidth,document:document.documentElement.scrollWidth,left:r.left,right:r.right,
