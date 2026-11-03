@@ -32,7 +32,9 @@ Shared HUD, navigation, quests, NPC for all temple shells.
     Object.keys(KGEN_5D.NODES).forEach(function(id){
       if (id === String(excludeId)) return;
       var n = KGEN_5D.NODES[id];
-      html += '<a href="' + n.url + '" class="kgen-card kgen-entry-card" style="border-color:' + n.color + '55">' +
+      // Core node URLs are temple-relative; the legacy game shares the same ROOT.
+      var href = n.url.indexOf('../') === 0 ? ROOT + 'temples/' + n.url.slice(3) : n.url;
+      html += '<a href="' + href + '" class="kgen-card kgen-entry-card" style="border-color:' + n.color + '55">' +
         '<div class="kgen-entry-id" style="color:' + n.color + '">' + id + '</div>' +
         '<div class="kgen-entry-name">' + n.name + '</div>' +
         '<div class="kgen-entry-sub">' + (n.label || n.gameplay || '') + '</div></a>';

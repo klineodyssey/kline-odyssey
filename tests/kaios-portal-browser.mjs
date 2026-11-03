@@ -46,6 +46,77 @@ async function clickRoute(page,selector,expected,visibleSelector,label){
   }catch(error){report.navigations.push({label,href,expected,actual:page.url(),failures,failed:true});throw error;}
   finally{page.off('requestfailed',failed);}
 }
+async function verifyLegacyCards(){
+  // Exercise the real core/hub links in CI. Destination pages are inspected as
+  // documents only: their unrelated game, wallet and chain scripts do not run.
+  const staticRoot=new URL(BASE+'/'),origin=staticRoot.origin;
+  report.legacyCards=[];
+  for(const [layout,base] of [['local',staticRoot],['pages-prefix',new URL('kline-odyssey/',staticRoot)]]){
+    for(const [width,height] of [[390,844],[844,390]]){
+      const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
+      context.setDefaultTimeout(10000);context.setDefaultNavigationTimeout(20000);
+      const page=await context.newPage(),destinations=new Set();
+      const row={layout,width,height,mode:'LEGACY_CARD_DOCUMENT_NAVIGATION_ONLY',cards:[],screenshots:[],externalRequests:[],networkWrites:[],runtimeErrors:[]};
+      report.legacyCards.push(row);
+      page.on('pageerror',error=>row.runtimeErrors.push(String(error.stack||error)));
+      await context.route('**/*',async intercepted=>{
+        const request=intercepted.request(),url=new URL(request.url());
+        if(!['GET','HEAD'].includes(request.method())){row.networkWrites.push({origin:url.origin,method:request.method()});await intercepted.abort('blockedbyclient');return;}
+        if(url.origin!==origin){row.externalRequests.push({origin:url.origin,type:request.resourceType()});await intercepted.abort('blockedbyclient');return;}
+        const upstream=new URL(url.href);
+        if(layout==='pages-prefix'&&url.pathname.startsWith(base.pathname)){
+          upstream.pathname=staticRoot.pathname+url.pathname.slice(base.pathname.length);
+        }
+        const destination=request.isNavigationRequest()&&request.frame()===page.mainFrame()&&destinations.has(url.pathname);
+        if(destination||layout==='pages-prefix'){
+          const response=await intercepted.fetch({url:upstream.href});
+          const headers={...response.headers()};
+          if(destination)headers['content-security-policy']="script-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'";
+          await intercepted.fulfill({response,headers});return;
+        }
+        await intercepted.continue();
+      });
+      const legacy=new URL('K線西遊記/game/kline-5d/index.html',base),selector='#universe-nodes a.kgen-entry-card';
+      try{
+        const response=await page.goto(legacy.href,{waitUntil:'load'});assert.ok(response?.ok(),'legacy 5D document loads');
+        await page.waitForFunction(()=>window.KGEN_TempleHub&&document.querySelectorAll('#universe-nodes a.kgen-entry-card').length===15);
+        assert.equal(await page.evaluate(()=>Boolean(window.ethereum||window.okxwallet||window.WalletConnectEthereumProvider)),false);
+        const ids=await page.evaluate(()=>Object.keys(window.KGEN_5D.NODES));assert.equal(ids.length,15);
+        const cards=await page.locator(selector).evaluateAll(links=>links.map(link=>({id:link.querySelector('.kgen-entry-id').textContent,href:link.href})));
+        assert.deepEqual(cards.map(card=>card.id),ids,'all fifteen real registry cards render once');
+        for(const card of cards){
+          const target=new URL(`K線西遊記/temples/${card.id}/index.html`,base);
+          assertExactRoute(card.href,target.href,`legacy ${layout} card ${card.id}`);destinations.add(target.pathname);
+        }
+        await page.locator(selector).first().evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+        const name=`legacy-cards-${layout}-${width}x${height}`;
+        await shot(page,`${name}-viewport`);row.screenshots.push(`${name}-viewport.png`);
+        await page.locator('#universe-nodes').screenshot({path:`${OUT}/${name}-panel.png`});row.screenshots.push(`${name}-panel.png`);
+        for(let index=0;index<cards.length;index++){
+          const card=cards[index],link=page.locator(selector).nth(index);
+          await link.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+          const geometry=await link.evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{width:r.width,height:r.height,hit:hit===el||el.contains(hit)};});
+          assert.ok(geometry.width>=44&&geometry.height>=44&&geometry.hit,`legacy ${card.id}: visible touch target`);
+          const [destinationResponse]=await Promise.all([
+            page.waitForResponse(response=>response.request().isNavigationRequest()&&response.request().frame()===page.mainFrame()&&response.url()===card.href),
+            page.waitForURL(card.href,{waitUntil:'domcontentloaded'}),link.click(),
+          ]);
+          assert.ok(destinationResponse.ok(),`legacy ${card.id}: destination HTTP ${destinationResponse.status()}`);
+          assert.match(destinationResponse.headers()['content-type']||'',/text\/html/);
+          assertExactRoute(page.url(),card.href,`legacy ${card.id}: actual document navigation`);
+          row.cards.push({...card,actual:page.url(),httpStatus:destinationResponse.status(),geometry,destinationScripts:'BLOCKED_BY_QA_CSP'});
+          await page.goBack({waitUntil:'domcontentloaded'});assertExactRoute(page.url(),legacy.href,'return to legacy cards');
+          await page.waitForFunction(()=>document.querySelectorAll('#universe-nodes a.kgen-entry-card').length===15);
+        }
+        assert.equal(row.cards.length,15);assert.deepEqual(row.networkWrites,[],'legacy navigation never sends a request body');
+        assert.deepEqual(row.runtimeErrors,[],'real legacy core/hub boot without JavaScript errors');
+        row.functional='PASS';
+      }catch(error){row.functional='FAIL';row.error=String(error.stack||error);throw error;}
+      finally{await context.close();}
+    }
+  }
+  report.checks.push('fifteen legacy core/hub cards: canonical URLs, actual document clicks/HTTP200/back at local and simulated Pages prefix in portrait/landscape; destination scripts disabled; no claim of playable temples or completion of all123 points');
+}
 async function verifyFundingPanel(){
   const route=new URL('K線西遊記/temples/18888/index.html',BASE+'/'),origin=route.origin;
   route.hash='funding-panel';
@@ -226,7 +297,7 @@ async function verifyFundingPanel(){
   report.checks.push('actual seven-floor inline controller; all seven caps and 44px touch targets; one-wei excess rejected; skip clears acknowledgment; all18 basement levels remain disabled; unknown funds/no payment; portrait and landscape screenshots with no wallet or RPC');
 }
 try{
-  if(FUNDING_ONLY)await verifyFundingPanel();
+  if(FUNDING_ONLY){await verifyFundingPanel();await verifyLegacyCards();}
   else{
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();

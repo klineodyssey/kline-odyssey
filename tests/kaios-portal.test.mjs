@@ -89,3 +89,31 @@ test('world bridge mounts Heart entry in its owned menu and never falls back ove
   assert.equal(calls.length,expected?1:0);if(expected){assert.equal(calls[0].container,expected==='flow'?menu:body);assert.equal(calls[0].layout,expected);}
  }
 });
+
+test('real shared temple cards keep canonical destinations from temple and legacy game pages',()=>{
+ const context={};context.window=context;vm.createContext(context);
+ for(const module of ['kgen-game-core.js','universe-runtime/temple-hub.js']){
+  vm.runInContext(readFileSync(new URL(`../K線西遊記/modules/${module}`,import.meta.url),'utf8'),context,{filename:module});
+ }
+ const nodes=context.KGEN_5D.NODES,ids=Object.keys(nodes),before=JSON.stringify(nodes);
+ assert.equal(ids.length,15);
+ const cards=excludeId=>{
+  const container={innerHTML:''};context.KGEN_TempleHub.renderEntryCards(container,excludeId);
+  return [...container.innerHTML.matchAll(/<a href="([^"]+)" class="kgen-card kgen-entry-card"/g)].map(match=>match[1]);
+ };
+ for(const base of ['http://localhost:8080/','https://klineodyssey.github.io/kline-odyssey/']){
+  const templePage=new URL('K線西遊記/temples/18888/index.html',base);
+  for(const entry of [...ids.map(id=>`K線西遊記/temples/${id}/index.html`),'K線西遊記/game/kline-5d/index.html']){
+   const page=new URL(entry,base),hrefs=cards('5d');assert.equal(hrefs.length,15);
+   hrefs.forEach((href,index)=>{
+    const id=ids[index],destination=new URL(href,page),canonical=new URL(`K線西遊記/temples/${id}/index.html`,base);
+    assert.equal(destination.href,canonical.href,`${entry} card ${id}`);
+    assert.equal(destination.href,new URL(nodes[id].url,templePage).href,'retain the original temple destination');
+    assert.ok(existsSync(new URL(`K線西遊記/temples/${id}/index.html`,root)),`destination file ${id}`);
+   });
+  }
+  const remaining=ids.filter(id=>id!=='18888'),hrefs=cards('18888');assert.equal(hrefs.length,14);
+  hrefs.forEach((href,index)=>assert.equal(new URL(href,templePage).href,new URL(nodes[remaining[index]].url,templePage).href));
+ }
+ assert.equal(JSON.stringify(nodes),before,'rendering must not rewrite the shared node registry');
+});
