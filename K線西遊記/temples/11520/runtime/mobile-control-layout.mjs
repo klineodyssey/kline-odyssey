@@ -1,10 +1,15 @@
+// LOCAL_CANDIDATE_REVISION: HUD-FLOW2-TAP-J1; latestHumanretainfaintoutlineandremoveoutervisualsquareonly; actualauthorCodex originaltechnicalexecutor01a189ef-ecbc-7699-b87b-a4538d57c029.
 import './market-origin-wallet-layout-runtime.mjs';
 import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
 VERSION: 1.3.17
-REVISION: 2026-10-05.BOUNDED-EXPANDED-LANDSCAPE-CONTEXT
+REVISION: 2026-11-02.HUD-FLOW1-TAP-J1
+ACTUAL_AUTHOR: Codex original technical executor / 01a189ef-ecbc-7699-b87b-a4538d57c029
+SOURCE_COMMIT: f887ac0405d2f3f774d348b1b77395933d806571
+TASK_ID: K11520-FIRST-VIEW-ZERO-CARDS-NATURE-20261012-001
+CHANGE_REASON: Reuse measured HUD flow, retain accepted faint idle/press feedback, remove outer visual border without deleting the touch container, and compose only with separately pinned central tap usability; world/control values and financial/storage logic unchanged.
 PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, and keep expanded KX/KY/KZ market cards equally wide and readable. Raid/courier action geometry is owned by the existing Market/Wallet utility rail. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
 */
 const $=s=>document.querySelector(s);
@@ -139,7 +144,7 @@ html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen
    utility context; individual preferences and foreground Settings still win. */
 html[data-k11520-hud-mode="ON_DEMAND"].k11520InfoOpen:not(.k11520HudCollapsed):not(.k11520SettingsOpen) :is(.tele,.monsterHud,.minimapWrap):not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen) :is(#orderFire,#flat){display:none!important;visibility:hidden!important;pointer-events:none!important}
-html[data-k11520-hud-mode="ON_DEMAND"] #joy{display:block!important;visibility:visible!important;opacity:.28!important;pointer-events:auto!important;background:transparent!important;border:1px solid #9eeeff88!important;box-shadow:none!important;transition:opacity .18s linear;touch-action:none}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy{display:block!important;visibility:visible!important;opacity:.28!important;pointer-events:auto!important;background:transparent!important;border:0!important;box-shadow:none!important;transition:opacity .18s linear;touch-action:none}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520MovementActive) #joy>*{opacity:.3!important}
 html[data-k11520-hud-mode="ON_DEMAND"].k11520MovementActive #joy{opacity:.72!important;background:#68e4ff0a!important;border-color:#9eeeff66!important}
 html[data-k11520-hud-mode="ON_DEMAND"] :is(#yControl,#cControl,#lotsControl){transition:opacity .18s linear,visibility 0s linear .18s}
@@ -150,6 +155,17 @@ html[data-k11520-hud-mode="ON_DEMAND"] #k11520MarketRow{display:block!important;
 html.k11520SettingsOpen[data-k11520-hud-mode="ON_DEMAND"] #k11520MarketRow{visibility:hidden!important;pointer-events:none!important}
 @media(orientation:landscape) and (max-height:600px){html[data-k11520-hud-mode="ON_DEMAND"] #k11520MarketRow{top:6px!important}}
 html[data-k11520-hud-mode="ON_DEMAND"] .axes{position:fixed!important}
+html[data-k11520-hud-mode="ON_DEMAND"] .top .brand{transform:translateY(var(--k11520-brand-offset,0px))!important}
+html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!important}
+@media(orientation:landscape) and (max-height:600px){html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,54px)!important}}
+#k11520BuildStamp::after{content:' · L:FLOW2/TAP-J1'}
+@media(max-width:600px) and (orientation:portrait){
+  html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{top:var(--k11520-guide-top,346px)!important;bottom:auto!important}
+  html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520InfoOpen,.k11520TradeOpen) .minimapWrap{top:var(--k11520-map-top,400px)!important;bottom:auto!important}
+}
+@media(orientation:landscape) and (max-height:600px){
+  html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{top:var(--k11520-landscape-guide-top,252px)!important;bottom:auto!important}
+}
 `;
   if(s.textContent!==css)s.textContent=css;
 }
@@ -213,7 +229,7 @@ function installMasterCollapse(){
   const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightOrgans()};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
-function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwner='mobile-control-layout';applyRail();installThumbBounds();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();syncStatusFlow();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
+function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwner='mobile-control-layout';document.documentElement.dataset.k11520LayoutRevision='HUD-FLOW1-TAP-J1';applyRail();installThumbBounds();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();syncStatusFlow();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
@@ -238,23 +254,39 @@ function installGuard(){
   const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#chatHandle'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();applyRightOrgans();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
   timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay));
 }
+function syncHeaderFlow(){
+  const root=document.documentElement,landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches;
+  if(hudCollapsed()||root.classList.contains('k11520SettingsOpen')||(innerWidth>MOBILE_MAX&&!landscape))return;
+  const box=el=>{if(!el||el.hidden)return null;const style=getComputedStyle(el);if(style.display==='none'||style.visibility==='hidden')return null;const r=el.getBoundingClientRect();return Number.isFinite(r.top)&&Number.isFinite(r.bottom)&&r.height>0?r:null};
+  const stamp=box($('#k11520BuildStamp')),brand=$('.brand'),title=$('.brand .hqLine')||brand,at=box(title);if(!stamp||!box(brand)||!at)return;
+  const put=(key,n)=>{const value=n+'px';if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value)};
+  const previous=parseFloat(root.style.getPropertyValue('--k11520-brand-offset'))||0,baseTop=at.top-previous;
+  put('--k11520-brand-offset',Math.max(0,Math.ceil(stamp.bottom+4-baseTop)));
+  const contentBottom=Math.max(box($('.top'))?.bottom||0,box(brand)?.bottom||0,box(title)?.bottom||0);
+  put('--k11520-market-top',Math.max(landscape?54:116,Math.ceil(contentBottom+8)));
+}
 function syncStatusFlow(){
-  if(onDemand())return; // Disclosure is an overlay; retain every lower anchor.
-  if(hudCollapsed())return;
-  if(globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches){
-    const bottom=Math.max(128,...[...document.querySelectorAll('#axes .axis')].map(el=>el.getBoundingClientRect().bottom));
-    const value=`${Math.max(136,Math.ceil(bottom+8))}px`;
-    if(document.documentElement.style.getPropertyValue('--k11520-landscape-status-top')!==value)document.documentElement.style.setProperty('--k11520-landscape-status-top',value);
-    return;
+  syncHeaderFlow();
+  const root=document.documentElement;
+  if(hudCollapsed()||root.classList.contains('k11520SettingsOpen'))return;
+  if(onDemand()&&!root.classList.contains('k11520InfoOpen')&&!root.classList.contains('k11520TradeOpen'))return;
+  const landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches;
+  if(innerWidth>MOBILE_MAX&&!landscape)return;
+  const visibleRect=el=>{if(!el||el.hidden)return null;const s=getComputedStyle(el);if(s.display==='none'||s.visibility==='hidden')return null;const r=el.getBoundingClientRect();return Number.isFinite(r.bottom)&&r.height>0?r:null};
+  const put=(key,n)=>{const value=`${n}px`;if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value)};
+  const market=visibleRect($('.axes')),hud=[$('.tele'),$('.monsterHud')].filter(el=>visibleRect(el));
+  const bottom=Math.max(landscape?128:174,market?.bottom||0),top=Math.max(landscape?136:190,Math.ceil(bottom+(landscape?8:10)));
+  if(landscape)put('--k11520-landscape-status-top',top);
+  else{
+    const height=Math.max(108,...hud.map(el=>{const r=el.getBoundingClientRect();return Math.ceil(Math.max(r.top,...[...el.children].map(c=>c.getBoundingClientRect().bottom))-r.top+9)}));
+    put('--k11520-status-top',top);put('--k11520-status-height',height);
   }
-  if(innerWidth>MOBILE_MAX)return;
-  const cards=[...document.querySelectorAll('#axes .axis')],hud=[$('.tele'),$('.monsterHud')].filter(Boolean);
-  const bottom=Math.max(174,...cards.map(el=>el.getBoundingClientRect().bottom));
-  const top=Math.max(190,Math.ceil(bottom+10));
-  const height=Math.max(108,...hud.map(el=>{const r=el.getBoundingClientRect();return Math.ceil(Math.max(r.top,...[...el.children].map(c=>c.getBoundingClientRect().bottom))-r.top+9)}));
-  for(const [key,value] of [['--k11520-status-top',`${top}px`],['--k11520-status-height',`${height}px`],['--k11520-map-top',`${top+height+10}px`]]){
-    if(document.documentElement.style.getPropertyValue(key)!==value)document.documentElement.style.setProperty(key,value);
-  }
+  // Read the resulting HUD bounds, including its actual border/padding. Only
+  // overlay variables change; canvas and movement/C/lots anchors stay fixed.
+  const statusBottom=Math.max(top,...hud.map(el=>visibleRect(el)?.bottom||top)),guideTop=Math.ceil(statusBottom+8);
+  put(landscape?'--k11520-landscape-guide-top':'--k11520-guide-top',guideTop);
+  const guide=visibleRect($('#k11520MonsterGuide')),guideHeight=Math.max(44,guide?.height||0);
+  if(!landscape)put('--k11520-map-top',Math.ceil(guideTop+guideHeight+10));
 }
 export function install11520MobileControlLayout(){
   apply();
@@ -262,12 +294,12 @@ export function install11520MobileControlLayout(){
   booted=true;installGuard();addEventListener('resize',apply,{passive:true});
   if(typeof ResizeObserver==='function'){
     flowObserver=new ResizeObserver(()=>{syncStatusFlow();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
-    for(const el of [$('.axes'),$('.tele'),$('.monsterHud')].filter(Boolean))flowObserver.observe(el);
+    for(const el of [$('.axes'),$('.tele'),$('.monsterHud'),$('#k11520MonsterGuide'),$('#k11520BuildStamp'),$('.top'),$('.brand')].filter(Boolean))flowObserver.observe(el);
   }
   return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__;
 }
 // Restore current values through the same rail owner; never replay old geometry
 // or reset the canonical C/lots/XYZ values after a Settings close.
-if(typeof document!=='undefined')document.addEventListener('k11520:settings-context',()=>{applyRail();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
-if(typeof document!=='undefined')for(const type of ['k11520:movement-context','k11520:hud-context'])document.addEventListener(type,()=>{applyRail();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
+if(typeof document!=='undefined')document.addEventListener('k11520:settings-context',()=>{applyRail();syncStatusFlow();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
+if(typeof document!=='undefined')for(const type of ['k11520:movement-context','k11520:hud-context'])document.addEventListener(type,()=>{applyRail();syncStatusFlow();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
 export function get11520MobileControlLayout(){return measure()}

@@ -1,3 +1,4 @@
+// LOCAL_CANDIDATE_REVISION: JOY-TAP-JITTER1; actual author Codex original technical executor 01a189ef-ecbc-7699-b87b-a4538d57c029; base f887ac0; no public version change.
 /* KGEN_META
 VERSION: 2.8.1
 STATUS: ACTIVE
@@ -15,7 +16,7 @@ let mode='XZ',centerTap=null,imageGuard=null,auxGuard=null,xzApprovedSrc=null,di
 let disc={active:false,h:0,v:0};
 let rail={active:false,value:0};
 // V2.9.6 candidate: extend this owner; no second input controller.
-let installStarted=false,lifecycleBound=false,hasInteracted=false,holdTimer=0,holdConsumed=false,discStart=null,lastMembrane=null;
+let installStarted=false,lifecycleBound=false,holdTimer=0,holdConsumed=false,discStart=null,lastMembrane=null;
 const TRADE_HOLD_MS=650;
 // Same .02 intent threshold used by the existing movement consumer; an
 // inactive radial dead zone alone is insufficient for a diagonal vector.
@@ -45,7 +46,7 @@ function ensureKnobImage(){const knob=$('#knob');if(!knob)return false;let img=k
 function ensureUfoAsset(){const host=$('#cThumb');if(!host)return false;let img=host.querySelector('img');if(!img){img=document.createElement('img');img.className='v260ControlImg';img.draggable=false;host.replaceChildren(img)}if(img.getAttribute('src')!==UFO)img.setAttribute('src',UFO);img.alt='C 曲速 UFO control';img.draggable=false;return true}
 function vector(){const v={x:0,y:0,z:0},a=planeAxes();v[a.discH.toLowerCase()]=disc.h;v[a.discV.toLowerCase()]=disc.v;v[a.rail.toLowerCase()]=rail.value;return v}
 function exposeMotion(){const a=planeAxes(),motion=mode==='XZ'?'GROUND':'FLIGHT',state={organ:'XYZ Plane Joystick',version:'2.8.1',mode,persistent:true,discAxes:[a.discH,a.discV],railAxis:a.rail,motion,disc:{...disc},rail:{...rail},vector:vector(),assets:{XZ:xzApprovedSrc?'approved-embedded-kgen-genesis':KGEN_FALLBACK,XY:FAIRY,YZ:'human-approved-heart',warp:UFO},neutralSwitch:true,unboundedCoordinateIntent:true,thumbVisual:'FIXED_BASE_CLAMPED_FOLLOW_SPRING_RETURN'};document.documentElement.dataset.k11520JoyPlane=mode;document.documentElement.dataset.k11520MotionMode=motion;globalThis.__K11520_3D_CONTROL__=state;globalThis.__K11520_JOYSTICK_XZXY__=state;globalThis.__K11520_JOYSTICK_PLANE__=state}
-function render(){ensureLabels();ensureKnobImage();ensureUfoAsset();const a=planeAxes(),label=$('#k11520PlaneLabel'),top=$('#k11520DirTop'),bottom=$('#k11520DirBottom'),left=$('#k11520DirLeft'),right=$('#k11520DirRight');if(label)label.textContent=`${mode} 平面 · 圓盤 ${a.discH}${a.discV}／縱桿 ${a.rail} · 再點中央切面／中央長按交易資訊`;if(left)left.textContent=`${a.discH}−`;if(right)right.textContent=`${a.discH}+`;if(top)top.textContent=`${a.discV}+`;if(bottom)bottom.textContent=`${a.discV}−`;const y=$('#yControl');if(y){const lab=y.querySelector('label');if(lab)lab.textContent=`${a.rail} 縱搖桿`}exposeMotion();syncMembrane()}
+function render(){ensureLabels();ensureKnobImage();ensureUfoAsset();const a=planeAxes(),label=$('#k11520PlaneLabel'),top=$('#k11520DirTop'),bottom=$('#k11520DirBottom'),left=$('#k11520DirLeft'),right=$('#k11520DirRight');if(label)label.textContent=`${mode} 平面 · 圓盤 ${a.discH}${a.discV}／縱桿 ${a.rail} · 輕點中央切面／中央長按交易資訊`;if(left)left.textContent=`${a.discH}−`;if(right)right.textContent=`${a.discH}+`;if(top)top.textContent=`${a.discV}+`;if(bottom)bottom.textContent=`${a.discV}−`;const y=$('#yControl');if(y){const lab=y.querySelector('label');if(lab)lab.textContent=`${a.rail} 縱搖桿`}exposeMotion();syncMembrane()}
 function installImageGuard(){const knob=$('#knob');if(!knob)return false;try{imageGuard?.disconnect()}catch{}let repairing=false;imageGuard=new MutationObserver(()=>{if(repairing)return;const img=knob.querySelector('img'),expected=expectedImage();if(!img||img.getAttribute('src')!==expected.src||img.alt!==expected.alt||img.dataset.k11520XzxyMode!==mode){repairing=true;ensureKnobImage();queueMicrotask(()=>{repairing=false})}});imageGuard.observe(knob,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','style','class','data-k11520-xzxy-mode']});globalThis.__K11520_XZXY_IMAGE_GUARD__=imageGuard;return true}
 function installAuxGuard(){const c=$('#cThumb');if(!c)return false;try{auxGuard?.disconnect()}catch{}let repairing=false;auxGuard=new MutationObserver(()=>{if(repairing)return;const img=c.querySelector('img');if(!img||img.getAttribute('src')!==UFO){repairing=true;ensureUfoAsset();queueMicrotask(()=>{repairing=false})}});auxGuard.observe(c,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','class']});globalThis.__K11520_XZXY_AUX_GUARD__=auxGuard;return true}
 function flash(text){const t=$('#toast');if(!t)return;t.textContent=text;t.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>t.classList.remove('show'),1000)}
@@ -59,20 +60,20 @@ function inKnob(x,y){const k=$('#knob');if(!k)return false;const r=k.getBounding
 function toggle(){clearDisc();clearRail();resetKnobVisual();mode=MODES[(MODES.indexOf(mode)+1)%MODES.length];saveMode();render();installImageGuard();requestAnimationFrame(()=>{if(discPid===null){resetKnobVisual();render()}});const a=planeAxes();flash(`${mode} 模式：圓盤 ${a.discH}${a.discV}／縱桿 ${a.rail}`)}
 function cancelDisc(){const previous=discPid;discPid=null;clearTimeout(holdTimer);holdTimer=0;discStart=null;centerTap=null;holdConsumed=false;clearDisc();resetKnobVisual();if(previous!==null)try{const joy=$('#joy');if(joy?.hasPointerCapture?.(previous))joy.releasePointerCapture(previous)}catch{}syncMembrane()}
 function bindDisc(){
-  const joy=$('#joy');if(!joy||joy.dataset.k11520PlaneBound)return false;joy.dataset.k11520PlaneBound='1';joy.setAttribute('aria-label','移動區：按住顯示透明控制；再點中央切面；中央長按開啟交易資訊，不會下單');
+  const joy=$('#joy');if(!joy||joy.dataset.k11520PlaneBound)return false;joy.dataset.k11520PlaneBound='1';joy.dataset.k11520UiRevision='JOY-TAP-JITTER1';joy.setAttribute('aria-label','移動圓盤：拖曳移動；輕點中央切換 XZ／XY／YZ；中央長按開啟交易資訊，不會下單');
   const blocked=()=>document.documentElement.classList.contains('k11520SettingsOpen');
   joy.addEventListener('pointerdown',e=>{
     if(e.__k11520PlaneProxy)return;
     if(blocked()||(discPid!==null&&discPid!==e.pointerId)||e.button>0){e.preventDefault();e.stopImmediatePropagation();return}
     if(discPid===e.pointerId)return;
-    const switchAllowed=hasInteracted;hasInteracted=true;discPid=e.pointerId;holdConsumed=false;
+    const centralEligible=inKnob(e.clientX,e.clientY);discPid=e.pointerId;holdConsumed=false;
     try{joy.setPointerCapture?.(discPid)}catch{}discFrom(e,true);syncMembrane();
-    if(inKnob(e.clientX,e.clientY)){
-      discStart={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now()};centerTap=switchAllowed?{...discStart}:null;
+    if(centralEligible){
+      discStart={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now()};centerTap={...discStart};
       if(neutralDisc()&&railPid===null){const owner=discPid;holdTimer=setTimeout(()=>{if(discPid!==owner||!discStart||railPid!==null||!neutralDisc())return;holdConsumed=true;centerTap=null;clearDisc();resetKnobVisual();document.dispatchEvent(new CustomEvent('k11520:trade-context',{detail:{open:true,source:'joystick-hold'}}))},TRADE_HOLD_MS)}
     }
   },{capture:true,passive:false});
-  joy.addEventListener('pointermove',e=>{if(e.__k11520PlaneProxy||e.pointerId!==discPid||blocked())return;if(!holdConsumed)discFrom(e,true);if(discStart&&(Math.hypot(e.clientX-discStart.x,e.clientY-discStart.y)>8||!neutralDisc())){clearTimeout(holdTimer);discStart=null;centerTap=null}},{capture:true,passive:true});
+  joy.addEventListener('pointermove',e=>{if(e.__k11520PlaneProxy||e.pointerId!==discPid||blocked())return;if(!holdConsumed)discFrom(e,true);if(discStart){const dragged=Math.hypot(e.clientX-discStart.x,e.clientY-discStart.y)>8;if(dragged||!neutralDisc()){clearTimeout(holdTimer);holdTimer=0}if(dragged){discStart=null;centerTap=null}}},{capture:true,passive:true});
   const end=e=>{if(e.__k11520PlaneProxy||e.pointerId!==discPid)return;const tap=centerTap,isTap=e.type==='pointerup'&&!holdConsumed&&railPid===null&&!!tap&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<=8&&performance.now()-tap.t<420;cancelDisc();if(isTap){e.preventDefault();toggle()}};
   for(const type of ['pointerup','pointercancel','lostpointercapture'])joy.addEventListener(type,end,{capture:true,passive:false});return true;
 }
