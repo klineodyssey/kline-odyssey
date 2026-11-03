@@ -711,3 +711,32 @@ remain independent, with fresh chain preflight required before Human wallet acti
   then close only codex/kaios-navigation-qa with an exact remote-head check.
   Real fixed-case funding still requires Human's original CAP_PROPOSE wallet
   confirmation; ordinary player faucet still lacks the formal source/deployment.
+
+
+### Published navigation receipt and confirmed DOT spelling — 2026-11-03T22:03:51+00:00 / 2026-11-04T06:03:51+08:00
+
+Source main35a7cd0e7348bc5b634539baf801c37c7219535a was fast-forward published
+under existing Human approval. Pages41726428467 SUCCESS; public HTTP200 hub
+SHA25664a420a46f68168eb2362f3b0f484e1cf0e616186de073f24aae1381a3fc7f04
+and18888 SHA2562f03d58d997138421af353b992f3fae210ceaef3991cadb5922976f8c288fdde
+are byte-identical to the checked source. No open navigation PR existed; the
+single owning worktree was detached at published main. Remote navigation QA
+branch was deleted with exact-head lease0b29fd93; local QA branch was normally
+deleted after containment verification. Original checkout/local main and
+untracked artifacts remain untouched.
+
+Human then clarified DOT spelling by words:「知」as知道 and「蘭」as蘭花.
+The earlier「織嵐」record is preserved ASR history, not the current name.
+The same cloud Doc is now「知蘭（DOT）與語音助理共同記憶」; body title,
+DOT section, central-index labels and current results were scoped-updated and
+read back. Same ID/link and permissions; no duplicate memory. Human clarified
+that 知蘭 uses a DOT-specific window and will tell her there to read/write this
+same document. Accessible ChatGPT active/archive title searches did not locate
+that destination; no private-chat delivery or actual DOT ACK is claimed.
+
+This closeout changes only this existing handoff. Latest verified navigation
+and source results are already in the same cloud memory. Remaining real-funds
+next action is original CAP_PROPOSE by lawful Human holder, not an agent send.
+Root is checking the existing UI owner for a minimal cap-only preview option to
+avoid requiring a private three-case file on the phone; no dummy case, new
+Runtime/bootstrap or financial execution is authorized by that investigation.
