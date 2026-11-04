@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>K6888 松樹國｜E0–E7 修練學院</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;background:#061b18;color:#f2f8ef}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#14583c,#061b18 70%);min-height:100vh}
+main{max-width:780px;margin:auto;padding:24px clamp(12px,4vw,30px) 60px}
+h1{font-size:clamp(23px,5vw,38px);margin:6px 0}p{line-height:1.65}.eyebrow{font-weight:bold;letter-spacing:.15em;color:#cceca7;font-size:12px}
+nav,section{margin:16px 0;background:#0c2b26dd;border:1px solid #5b967066;border-radius:16px;padding:16px}
+.row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}.pill{display:inline-block;padding:5px 9px;background:#294f3b;color:#e9ffcb;border-radius:50px;font-size:12px}
+.level{font-weight:850;font-size:clamp(26px,7vw,42px);color:#f3da8a}progress{width:100%;height:18px;accent-color:#dfc26a}
+.pills{display:flex;gap:7px;flex-wrap:wrap}.pill.pending{background:#51452b;color:#ffe0a0}.pill.lock{background:#3b3440;color:#ecd4ea}
+.question{font-size:clamp(21px,6vw,31px);margin:12px 0 20px;font-weight:750}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+button{color:#f8f6f0;background:#155446;border:1px solid #478b6a;border-radius:11px;padding:12px;min-height:48px;font:inherit;cursor:pointer}
+button:hover,button:focus-visible{outline:2px solid #eedb9a;background:#21694e}button.active{background:#876f36;border-color:#f2d381}button.primary{font-weight:bold;background:#c7a757;color:#12261e;border:0}button.primary:disabled{opacity:.45;cursor:not-allowed}
+button.mini{font-size:12px;min-height:32px;padding:8px;background:#264035}.hint{font-size:13px;color:#cadacf}.status{min-height:38px;color:#f9e2a1;font-weight:600}
+@media (max-width:430px){.choices{grid-template-columns:1fr 1fr}.choices button{font-size:13px;padding:8px;min-height:47px}}
+@media (max-height:430px) and (orientation:landscape){main{max-width:940px;padding-top:6px}.hero{display:none}nav,section{margin:7px 0;padding:10px}.question{margin:4px 0 8px;font-size:19px}.choices{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.choices button{min-height:34px;padding:6px;font-size:12px}}
+</style></head>
+<body><main>
+<header class="hero"><div class="eyebrow">KAIOS · K6888 · P_6888p0_松樹國_R26</div><h1>🌲 松樹國 · 語言修練學院</h1><p>一圖一生命，一地一文明。從 E0 修練佛開始，理解不同文明的封閉指令，逐級挑戰 E7 神君。</p></header>
+<nav aria-label="修煉狀態"><div class="row"><div><div class="eyebrow">當前遊戲境界</div><div class="level" id="rank">E0 · 修練佛</div></div><div class="pill" id="count">0 / 14</div></div><progress id="progress" max="14" value="0"></progress><p id="description" class="hint"></p><div class="pills" id="trackList"></div></nav>
+<section aria-label="試煉任務"><div class="row"><strong id="challengeName">入門挑戰</strong><span id="channel" class="pill">K1</span></div><div class="question" id="phrase">準備開始…</div><p class="hint">這句話代表哪一種遊戲意圖？（只辨識固定片語，不是真正聽懂任意人話）</p><div id="choices" class="choices"></div><p class="status" role="status" id="status" aria-live="polite"></p><div class="row"><button id="submit" class="primary" disabled>提交修煉答案</button><button id="reset" class="mini">重置本機修煉</button></div></section>
+<section><strong>文明語言研習備註</strong><p class="hint">K1、K2、K3、K4、K7 的正式語言定義尚待 Human 核定，這裡只做固定指令練習；K5 火星五位數字典未核定，不能冒充 K300 三位數字典；K6 未在本次指定清單。E 等級只屬本地遊戲，沒有跨物種理解、預言、發薪、真實生命 ID、地圖主權或交易權限。</p></section>
+</main><script type="module">
+import {createStudent,validateStudent,studentRank,nextTrial,answerTrial,createGraduationRecord,E_STAGES,INTENTS,ORDERED_CHANNELS,channelStatus} from './levels.mjs';
+const $=id=>document.getElementById(id);const storageKey='kaios.k6888.elevation.v1';
+const labels={FOLLOW:'跟隨',GUARD:'守護',HARD_FIGHT:'迎戰',ROAM:'自由活動',STAY:'待命',ALERT:'警戒',FOOD:'食物',HELP:'求援'};
+let state;try{state=JSON.parse(localStorage.getItem(storageKey)||'null');validateStudent(state)}catch{state=createStudent()};let selected=null;
+function render(){const rank=studentRank(state),trial=nextTrial(state);$('rank').textContent=`${rank.id} · ${rank.title}`;$('count').textContent=`${state.completed.length} / 14`;$('progress').value=state.completed.length;$('description').textContent=rank.description;$('trackList').replaceChildren();
+ for(const code of ORDERED_CHANNELS){const b=document.createElement('span');b.className='pill '+(code==='K5'?'lock':'pending');b.textContent=code+(code==='K5'?'｜待字典':'｜候選');b.title=channelStatus(code).status;$('trackList').append(b)};
+ $('choices').replaceChildren();$('submit').disabled=true;selected=null;
+ if(!trial){$('challengeName').textContent='完成 14 關';$('channel').textContent='E7';$('phrase').textContent='🏅 神君 · 本機修煉通關';$('status').textContent='這是遊戲試煉結果，不表示已具備 K5、真正語音或正式生命資格。';console.info('K6888_GAME_RECORD',createGraduationRecord(state));return;}
+ $('challengeName').textContent=`${trial.rank} · 第 ${state.completed.length+1} 關 · ${trial.language}`;$('channel').textContent=trial.channel;$('phrase').textContent=trial.phrase;$('status').textContent='請選擇語意，再提交修煉答案。';
+ for(const intent of INTENTS){const b=document.createElement('button');b.textContent=`${labels[intent]} (${intent})`;b.dataset.intent=intent;b.addEventListener('click',()=>{selected=intent;for(const x of $('choices').children)x.classList.toggle('active',x.dataset.intent===intent);$('submit').disabled=false});$('choices').append(b)}
+}
+$('submit').addEventListener('click',()=>{const trial=nextTrial(state);if(!trial||!selected)return;const r=answerTrial(state,{trialId:trial.id,intent:selected});state=r.student;localStorage.setItem(storageKey,JSON.stringify(state));render();$('status').textContent=r.status==='TRIAL_RETRY'?'尚未理解，請再試一次。':r.rankUp?`修煉成功！晉升 ${r.rank.id} · ${r.rank.title}`:'答對，下一關繼續！'});
+$('reset').addEventListener('click',()=>{if(!confirm('確定清除這台裝置的松樹國修煉紀錄？'))return;state=createStudent();localStorage.removeItem(storageKey);render()});render();
+</script></body></html>
