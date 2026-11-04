@@ -1,5 +1,14 @@
 # HANDOFF_CURRENT
 
+## Human voice / seven-clock assignment — 2026-10-16
+
+- Intake/claim: 衡曜 GM accepts the two bounded scopes; exact formal WorkOrders are [voice #602](https://github.com/klineodyssey/kline-odyssey/issues/602) and [time #603](https://github.com/klineodyssey/kline-odyssey/issues/603). DOT has not source-bound ACKed this issue; publication is not recipient wake.
+- Base `origin/main` at intake: `e545462ba0419c7569521f7fa5e0cecbc9980283`. Isolated candidate branch: `codex/kaios-seven-clock-convergence-20261017`; exact head and PR are read back and linked in #603 after publication. Voice branch/PR: `NOT_CREATED`.
+- Voice: existing 11520 XYZ map navigation has `start/stop`; game-5d-main has separate private navigation. No verified interface from this dot voice entry to the same Human logged-in game session or atomic controller/state readback. First milestone stays spoken Stop -> same character stopped -> state proof, not generic speech recognition. #523's Navigator HOLD applies only to its reconstruction path.
+- Seven-clock: exact conversion and one-shot synthetic CT route event candidate are in existing `KGEN-KAIOS/world-viewer/timeline/timeline-runtime.js`, with assertions in existing `tests/nation_timeline_integrity.mjs`; scope note in V8.3 Time Engine and World Viewer README. Local test passed. This is **not** wired to live 11520 gameplay, not a Physics CURRENT promotion, and not a completed four-route playable convergence. K280/K18888 365.2422 and 360-day simulation remain distinct.
+- Next: exact-head review/CI; full cumulative Physics lineage gate and game event/controller integration; Chromium functional+visual screenshots if UI/game presentation changes. No real trade, wallet signer, Treasury, payroll, deployment or #523 release. Preserve K-point map labels and route outcomes. Maintain exact head, status and blocker in #602/#603 and this handoff; do not mark main saved until merge commit readback.
+- Source: direct Human assignment in this task. Recorded `2026-10-16T18:41:36Z` / `2026-10-17 02:41:36 Asia/Taipei`. TEXT_SIGNATURE: 衡曜｜KAIOS General Manager. CRYPTOGRAPHIC_SIGNATURE_STATUS: NOT_VERIFIED.
+
 STATUS: INITIAL
 
 ## Three-cell cargo / cross-market simulation acceptance

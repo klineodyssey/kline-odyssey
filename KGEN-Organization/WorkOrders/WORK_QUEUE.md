@@ -1,5 +1,12 @@
 # KGEN Organization V2.0 WorkQueue
 
+## Human 2026-10-16 voice and seven-clock engineering intake
+
+- `KAIOS-DOT-VOICE-SAME-SESSION-STOP-20261016`: [formal WorkOrder #602](https://github.com/klineodyssey/kline-odyssey/issues/602), status `PARTIAL_READY / INTERFACE_BLOCKED`. Project owner Human; GM owns supported-interface audit; DOT game implementation requires direct claim. Branch/PR `NOT_CREATED`. First acceptance is spoken Stop -> **same logged-in** game character stopped -> actual state readback. Existing 11520 stop functions are evidence, not proof of the dot voice channel or session binding. #523 Navigator HOLD stays scoped to its own writer/path. No protected execution.
+- `KAIOS-SEVEN-CLOCK-FOUR-DAY-CT-20261016`: [formal WorkOrder #603](https://github.com/klineodyssey/kline-odyssey/issues/603), status `LOCAL_CANDIDATE / QA_PENDING`. Project owner Human; implementer 衡曜/codex-gm-01; reviewer `PENDING_VERIFIED_IDENTITY`. Branch `codex/kaios-seven-clock-convergence-20261017` is based on `e545462ba0419c7569521f7fa5e0cecbc9980283`; exact candidate commit/PR are recorded in #603 after publication. Existing Timeline organ gets exact seven-label conversion and one-shot synthetic CT route event; not yet wired to the game or promoted to Physics CURRENT. Historical [Draft #159](https://github.com/klineodyssey/kline-odyssey/pull/159) is reference-only, not a merge base.
+- Next: verify actual dot interface and same-session binding for #602; for #603 obtain exact-head review/CI, cumulative Physics lineage plan, and actual game-event connection before claiming complete. The Issue URLs are durable records; this queue entry is a branch candidate until its commit is read back on main.
+- Recorded at `2026-10-16T18:41:36Z` / `2026-10-17 02:41:36 Asia/Taipei`; source: direct Human assignment in this task, dot draft did not ACK for GM. Text signature: 衡曜｜KAIOS General Manager. Cryptographic signature: `NOT_VERIFIED`. GitHub publication does not prove DOT wake or ACK.
+
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei
 
 - WORK_ID: `K11520-THREE-CELL-CARGO-MARKET-QA-20261013-001`.

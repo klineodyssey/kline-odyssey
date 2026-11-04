@@ -4,6 +4,81 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createBuildingRuntime } from "../building/building-runtime.js";
 import { createCivilizationRuntime } from "../civilization/civilization-runtime.js";
 import { createLifeRuntime } from "../life/life-runtime.js";
+import { convertCivilizationDays, convergeRoutesAtFourUpperDays, mortalYearsToUpperClock } from "../timeline/timeline-runtime.js";
+
+for (const [label, expected] of Object.entries({
+  SHENMING: 1n, SHENXIAN: 365n, DRAGON_KING: 8760n, MORTAL: 525600n,
+  DEMON_KING: 31536000n, BUDDHA: 31536000000n
+})) {
+  assert.deepEqual(convertCivilizationDays(1, "SHENJUN", label), { numerator: expected, denominator: 1n });
+}
+assert.deepEqual(convertCivilizationDays(1, "MORTAL", "DEMON_KING"), { numerator: 60n, denominator: 1n });
+assert.deepEqual(convertCivilizationDays(1, "BUDDHA", "MORTAL"), { numerator: 1n, denominator: 60000n });
+assert.deepEqual(mortalYearsToUpperClock(5000), {
+  days: 3n, hours: 11n, minutes: 20n, remainingMinuteFraction: { numerator: 0n, denominator: 525600n }
+});
+assert.equal(mortalYearsToUpperClock(5760).days, 4n);
+assert.throws(() => convertCivilizationDays(1.5, "MORTAL", "SHENJUN"), TypeError);
+assert.throws(() => convertCivilizationDays(1, "UNKNOWN", "MORTAL"), RangeError);
+
+const originalRoutes = [
+  { routeId: "EAST", selectedDynasty: "TANG", timeLayer: "MORTAL", lifespanYears: 80, birthKPoint: 13888, outcomes: ["RELIC"] },
+  { routeId: "WEST", selectedDynasty: "HAN", timeLayer: "SHENXIAN", lifespanYears: 900, birthKPoint: 144, outcomes: ["ALLY"] }
+];
+const originalRoutesJson = JSON.stringify(originalRoutes);
+const beforeConvergence = convergeRoutesAtFourUpperDays({ routes: originalRoutes, elapsedMortalDays: 2102399, currentCT: 11520 });
+assert.equal(beforeConvergence.events.length, 0);
+assert.deepEqual(beforeConvergence.routes, originalRoutes);
+const atConvergence = convergeRoutesAtFourUpperDays({ routes: originalRoutes, elapsedMortalDays: 2102400, currentCT: 18888 });
+assert.equal(atConvergence.events.length, 2);
+assert.ok(atConvergence.events.every((event) => event.currentCT === 18888 && !event.autoVictory && !event.gameEnded));
+assert.ok(atConvergence.routes.every((route) => route.currentCT === 18888 && route.fourDayConvergence.completed));
+assert.deepEqual(atConvergence.routes.map((route) => route.outcomes), [["RELIC"], ["ALLY"]]);
+assert.deepEqual(atConvergence.routes.map((route) => route.birthKPoint), [13888, 144]);
+assert.equal(JSON.stringify(originalRoutes), originalRoutesJson, "candidate must not mutate caller routes");
+atConvergence.routes[0].outcomes.push("NEW");
+assert.deepEqual(originalRoutes[0].outcomes, ["RELIC"], "converged outcomes must not alias caller state");
+atConvergence.routes[0].outcomes.pop();
+beforeConvergence.routes[0].outcomes.push("NEW");
+assert.deepEqual(originalRoutes[0].outcomes, ["RELIC"], "pre-threshold outcomes must not alias caller state");
+const replay = convergeRoutesAtFourUpperDays({ routes: atConvergence.routes, elapsedMortalDays: 2102401, currentCT: 20000 });
+assert.equal(replay.events.length, 0);
+assert.deepEqual(replay.routes, atConvergence.routes, "four-day event must be one-shot and retain the original CT");
+const lateRoute = convergeRoutesAtFourUpperDays({
+  routes: [...atConvergence.routes, { routeId: "NORTH", outcomes: ["SCROLL"], birthKPoint: 123456 }],
+  elapsedMortalDays: 2102401, currentCT: 20000
+});
+assert.equal(lateRoute.events.length, 1);
+assert.equal(lateRoute.events[0].currentCT, 18888, "a late route joins the original CT, not a new boundary");
+assert.deepEqual(lateRoute.routes[2].outcomes, ["SCROLL"]);
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [...atConvergence.routes, { routeId: "BAD", fourDayConvergence: { completed: true, atCT: 999 } }],
+  elapsedMortalDays: 2102401, currentCT: 20000
+}), /retain its convergence CT/);
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [{ routeId: "BAD", fourDayConvergence: { completed: true, atMortalDay: "2102400" } },
+    { routeId: "NEW" }], elapsedMortalDays: 2102400, currentCT: 18888
+}), /retain its convergence CT/, "missing prior CT must not poison a new convergence event");
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [{ routeId: "BAD", currentCT: 18888,
+    fourDayConvergence: { completed: true, atCT: 18888, atMortalDay: "2102400" } }],
+  elapsedMortalDays: 2102399, currentCT: 18888
+}), /invalid convergence day/, "elapsed clock rollback must not accept a completed marker");
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [...atConvergence.routes, { routeId: "OTHER", currentCT: 999,
+    fourDayConvergence: { completed: true, atCT: 999, atMortalDay: "2102400" } }],
+  elapsedMortalDays: 2102401, currentCT: 20000
+}), /disagree on CT/, "completed routes must agree on one convergence CT");
+for (const invalidCT of [NaN, Infinity, -Infinity, true, {}, "   "]) {
+  assert.throws(() => convergeRoutesAtFourUpperDays({
+    routes: originalRoutes, elapsedMortalDays: 2102400, currentCT: invalidCT
+  }), /currentCT must be/, "invalid CT must not create an unreplayable convergence event");
+}
+assert.throws(() => convergeRoutesAtFourUpperDays({
+  routes: [{ routeId: "BAD", currentCT: NaN,
+    fourDayConvergence: { completed: true, atCT: NaN, atMortalDay: "2102400" } }],
+  elapsedMortalDays: 2102401, currentCT: 18888
+}), /retain its convergence CT/, "invalid prior CT marker must not be accepted");
 
 const world = JSON.parse(await readFile(new URL("../data/synthetic-world.json", import.meta.url), "utf8"));
 const canonicalBefore = JSON.stringify(world);
