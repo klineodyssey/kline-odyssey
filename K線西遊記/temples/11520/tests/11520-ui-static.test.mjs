@@ -757,6 +757,38 @@ test('offline toast visual gate cannot pass without actual preview and history o
 });
 
 
+test('M1 legacy recovery reports a known terminal history rejection instead of polling it to timeout',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('async function waitForM1LegacyRecovery('),fn=source.slice(start,source.indexOf('async function bootM1ReadOnlyPage(',start));
+ const account='0x1111111111111111111111111111111111111111',deploymentContext='97:0x2222222222222222222222222222222222222222';
+ let polls=0;
+ const snapshot={mode:'BSC_TESTNET',exitOnly:true,deploymentContext,status:'ORDER_REJECTED',error:'RECOVERY_HISTORY_REQUIRES_INDEXER',account:null,wallet:null};
+ const context={__K11520_EXECUTION__:{snapshot:()=>snapshot}};
+ runInNewContext(fn+'globalThis.wait=waitForM1LegacyRecovery;',context);
+ const page={waitForFunction:async(predicate,arg,options)=>{assert.equal(options.timeout,150000);polls++;return predicate(arg)}};
+ await assert.rejects(context.wait(page,account,deploymentContext),/M1_RETURN_LEGACY_RECOVERY_HISTORY_REQUIRES_INDEXER/);
+ assert.equal(polls,1,'the known terminal rejection stays a failure on its first observation');
+});
+
+test('M1 legacy recovery retains its success criteria and does not reject transient or unrelated states',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('async function waitForM1LegacyRecovery('),fn=source.slice(start,source.indexOf('async function bootM1ReadOnlyPage(',start));
+ const account='0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',deploymentContext='97:0x2222222222222222222222222222222222222222';
+ const blocked={exitOnly:true,deploymentContext,status:'ORDER_REJECTED',error:'RECOVERY_HISTORY_REQUIRES_INDEXER',account:null,wallet:null};
+ const ready={...blocked,status:'READY',error:null,account:account.toUpperCase(),wallet:{principalWei:'1'}};
+ let snapshot;
+ const context={__K11520_EXECUTION__:{snapshot:()=>snapshot}};
+ runInNewContext(fn+'globalThis.wait=waitForM1LegacyRecovery;',context);
+ const page={waitForFunction:async(predicate,arg,options)=>{assert.equal(options.timeout,150000);return predicate(arg)}};
+ for(const state of [undefined,{...blocked,exitOnly:false},{...blocked,deploymentContext:'97:other'},{...blocked,status:'CONNECTING'},{...blocked,error:'RECEIPT_TIMEOUT'},{...ready,exitOnly:false},{...ready,account:'0x'+'3'.repeat(40)}]){
+  snapshot=state;assert.equal(Boolean(await context.wait(page,account,deploymentContext)),false,'pending, transient or unrelated state is not accepted');
+ }
+ snapshot=ready;assert.equal(await context.wait(page,account,deploymentContext),true,'same-account wallet and exit-only mode remain required');
+ assert.ok(source.includes("await waitForM1LegacyRecovery(page,state.account,'97:'+manifest.addresses.brainProxy.toLowerCase())"));
+ assert.ok(source.includes("assert.equal(legacy.wallet.principalWei,await readLegacy('principalOf'))"));
+ assert.ok(source.includes("assert.equal(legacy.wallet.availableWei,await readLegacy('availablePrincipal'))"));
+});
+
 test('simulation component revisions expose complete provenance and recorded executable bytes',async()=>{
  const {createHash}=await import('node:crypto'),hash=text=>createHash('sha256').update(text).digest('hex');
  const revision='2026-10-06.SIMULATION-ORDER-PLAYABILITY',sourceCommit='0ad0cffe33d23d1104baa963fedef25ad149a0ac';
