@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>K12682｜聚寶盆引擎 R0 遊戲原型</title><style>
+:root{color-scheme:dark;font-family:system-ui,"Noto Sans TC",sans-serif;background:#0b1522;color:#f4f5fa}body{margin:0 auto;max-width:760px;padding:24px 16px}h1{font-size:clamp(1.5rem,5vw,2.2rem)}.panel{background:#172638;border:1px solid #3b506a;border-radius:14px;padding:18px;margin:16px 0}button,select,input{font:inherit;color:inherit;background:#21354b;border:1px solid #6984a0;border-radius:9px;padding:10px}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.notice{border-left:4px solid #ffd27c;padding:12px;background:#2a2a35}dl{display:grid;grid-template-columns:auto 1fr;gap:8px 20px}dd{margin:0;text-align:right;font-weight:700}label{display:block;margin:12px 0}p{line-height:1.6}small{color:#c9d2dd}a{color:#9dd7ff}#log{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto}#status{min-height:2em}</style></head><body>
+<h1>聚寶盆引擎｜K12682 阿斗起飛</h1><p>萬獸生命公司・文明建設需求 #632｜遊戲內概念原型</p>
+<p class="notice"><strong>純本機模擬：</strong>這不是實際物質複製或鏈上鑄造。沒有 KAIOS/KGEN 付款、錢包簽署或真實資產。狀態僅存於此瀏覽器。</p>
+<section class="panel"><h2>材料與產物</h2><label>選擇複製目標 <select id="item"><option value="稻米">稻米</option><option value="麥粒">麥粒</option><option value="鑽石">鑽石</option></select></label>
+<p>世界觀設定：一份原物質樣本，加上聚寶盆反物質核心、KDNA 與 KRNA 設定，產出額外一份相同物件。KI9、KSPA 尚待正式 Physics 規則核對，暫不實扣。此為<strong>遊戲創生事件</strong>，不對應現實反物質反應。</p>
+<dl><dt>可用模擬能量</dt><dd id="energy">—</dd><dt>稻米</dt><dd id="rice">—</dd><dt>麥粒</dt><dd id="wheat">—</dd><dt>鑽石</dt><dd id="diamond">—</dd><dt>創生事件</dt><dd id="count">—</dd></dl>
+<button id="produce">啟動聚寶盆：複製一份</button> <button id="reset">重設示範資料</button><p id="status" role="status"></p>
+</section><section class="panel"><h2>創生紀錄</h2><p><small>單機展示紀錄，不等於正式生命錢包或交易所帳本。</small></p><div id="log"></div></section>
+<p><a href="https://github.com/klineodyssey/kline-odyssey/issues/632">需求工單 #632</a> · <a href="https://github.com/klineodyssey/kline-odyssey/issues/628">工程供需看板 #628</a></p>
+<script>
+(()=>{"use strict";const KEY="kaios-treasure-basin-r0-demo";const initial=()=>({version:1,energy:5,items:{"稻米":1,"麥粒":1,"鑽石":1},events:[]});function valid(x){return x&&x.version===1&&Number.isSafeInteger(x.energy)&&x.energy>=0&&x.items&&["稻米","麥粒","鑽石"].every(k=>Number.isSafeInteger(x.items[k])&&x.items[k]>=0)&&Array.isArray(x.events)&&x.events.length<=100;}let state;try{const x=JSON.parse(localStorage.getItem(KEY));state=valid(x)?x:initial();}catch{state=initial();}
+const el=id=>document.getElementById(id);
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));return true;}catch{return false;}}
+function render(message=""){el("energy").textContent=state.energy+" 單位（示範）";el("rice").textContent=state.items["稻米"];el("wheat").textContent=state.items["麥粒"];el("diamond").textContent=state.items["鑽石"];el("count").textContent=state.events.length;el("produce").disabled=state.energy<1||!Number.isSafeInteger(state.items[el("item").value])||state.items[el("item").value]<1;el("status").textContent=message||"選擇已有樣本並啟動。每次消耗 1 單位模擬能量。";el("log").textContent=state.events.slice(-10).reverse().map(x=>x.id+" ｜ "+x.item+" +1 ｜ 剩餘能量 "+x.energy).join("\n")||"尚無事件。";}
+el("produce").addEventListener("click",()=>{const item=el("item").value;if(!Object.hasOwn(state.items,item)||state.energy<1||state.items[item]<1){render("無原始樣本或能量不足。");return;}if(state.events.length>=100){render("示範紀錄達上限，請重設。");return;}const next=structuredClone(state);next.energy-=1;next.items[item]+=1;next.events.push({id:"DEMO-"+String(next.events.length+1).padStart(3,"0"),item,energy:next.energy});state=next;const ok=save();render(ok?"已執行一次遊戲創生，增加 "+item+" 1 份。":"已執行本機模擬，但瀏覽器拒絕保存。");});el("item").addEventListener("change",()=>render());el("reset").addEventListener("click",()=>{state=initial();const ok=save();render(ok?"已重設示範資料。":"已重設，儲存失敗。");});render();
+})();
+</script></body></html>
