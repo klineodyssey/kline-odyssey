@@ -17,6 +17,7 @@ import { lstatSync, readFileSync, realpathSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { CANDIDATE_APP_STATE_SCHEMA, CANDIDATE_APP_RNA_CONTRACT } from "../../../core/apps/index.mjs";
 
 const CANONICAL_REGISTRY_PATH = "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_REGISTRY.json";
 const CANONICAL_SCHEMA_PATH = "KAIOS/software-life/KAIOS_SOFTWARE_ORGAN_COMPATIBILITY_SCHEMA.json";
@@ -1610,6 +1611,159 @@ export const validateSoftwareOrganTransplant = (record, options = {}) => {
   }
 
   return { ok: errors.length === 0, errors };
+};
+
+// Additive local research contract. This is deliberately NOT a new branch of
+// the formal transplant schema or an admission path into its immutable epoch.
+const CANDIDATE_DONORS = Object.freeze({
+  NAVIGATION: ["K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs", "LOCATION_ORGAN"],
+  GAME: ["K線西遊記/temples/11520/runtime/world-runtime.mjs", "PROCESSING_ORGAN"],
+  AUDIO: ["assets/kaios-audio.mjs", "OUTPUT_ORGAN"]
+});
+const CANDIDATE_PERMISSIONS = ["LOCAL_SIMULATION", "HOST_GESTURE_AUDIO"];
+const candidateObject = (properties) => ({ type: "object", required: Object.keys(properties), properties, additionalProperties: false });
+const candidateArray = (items) => ({ type: "array", items, uniqueItems: true });
+const candidateRef = (name) => ({ $ref: `#/$defs/${name}` });
+
+// These are artifact compatibility digests, not signatures granting identity or
+// rights. Null identity slots prevent candidate artifact IDs becoming Life IDs.
+export const computeCandidateOrganSignature = (donor, contract) => computeOrganCompatibilitySignature({
+  organ_id: donor.candidate_artifact_id, organ_type: donor.organ_type, owner_life_id: null,
+  genome_contract: { genome_id: null, state_schema_hash: contract.dna_hash, event_schema_hash: contract.rna_hash,
+    source: contract.sources.find((source) => source.path === donor.source_path), contract_version: donor.contract_version },
+  input_interface: donor.input_interface, output_interface: donor.output_interface,
+  resource_cost: contract.resource_budget, energy_cost: null, transplantable: false,
+  required_host_capabilities: contract.permissions, forbidden_hosts: [], dependency_list: donor.dependencies
+}, contract.security_boundary);
+
+export const validateSoftwareCompositionCandidate = (contract, host) => {
+  const errors = [];
+  const fail = (code, path, message) => push(errors, code, path, message);
+  const result = (decision = "REJECTED") => ({ ok: errors.length === 0 && decision === "COMPATIBLE_CANDIDATE",
+    decision, authority: "CANDIDATE_ONLY", formal_admission: "NOT_ADMITTED",
+    formal_authority_epoch: TRUSTED_AUTHORITY_COMMIT, registered_life_created: false,
+    certified: false, listed: false, errors,
+    contract_hash: errors.length === 0 ? computeReplayStateHash(contract) : null });
+  // The inherited formal schema helper predates poison-key handling. Keep its
+  // admission behavior untouched and reject such keys before candidate-only
+  // schema traversal (including a parsed JSON own __proto__ key).
+  const seen = new Set(); let nodes = 0;
+  const safeJson = (value, depth = 0) => {
+    if (++nodes > 10000 || depth > 24) return false;
+    if (value === null || typeof value === "string" || typeof value === "boolean") return true;
+    if (typeof value === "number") return Number.isFinite(value);
+    if (typeof value !== "object" || seen.has(value)) return false;
+    if (!Array.isArray(value) && ![Object.prototype, null].includes(Object.getPrototypeOf(value))) return false;
+    seen.add(value);
+    const valid = Object.keys(value).every((key) => !["__proto__", "constructor", "prototype"].includes(key) && safeJson(value[key], depth + 1));
+    seen.delete(value); return valid;
+  };
+  if (!safeJson(contract)) { fail("CANDIDATE_JSON_INVALID", "$", "Only bounded plain JSON without prototype keys is accepted"); return result(); }
+  // All schemas/registries come from this validator's own repository. There is
+  // no caller schema, root or Registry override for the candidate entry point.
+  const governance = loadCanonicalGovernance(CANONICAL_REPOSITORY_ROOT, errors);
+  if (!governance.schema || errors.length) return result();
+  const manifest = readCanonicalJson(CANONICAL_REPOSITORY_ROOT, "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_MANIFEST_SCHEMA.json", errors);
+  const crosswalk = readCanonicalJson(CANONICAL_REPOSITORY_ROOT, "KAIOS/software-life/KAIOS_SOFTWARE_LIFE_TAXONOMY_CROSSWALK.json", errors);
+  if (!manifest || !crosswalk || errors.length) return result();
+  const schema = { ...candidateObject({
+    candidate_id: { type: "string", pattern: "^CANDIDATE-[A-Z0-9-]+$" },
+    schema_version: { const: "1.0.0" }, version: { const: "0.1.0" }, status: { const: "CANDIDATE_ONLY" },
+    source_commit: candidateRef("repositoryCommit"), taxonomy: manifest.$defs.taxonomyBinding,
+    dna_hash: candidateRef("sha256"), rna_hash: candidateRef("sha256"),
+    api_version: { type: "string", pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    coordinate_space: { type: "string", minLength: 1 }, permissions: candidateArray({ enum: CANDIDATE_PERMISSIONS }),
+    resource_budget: candidateObject({ steps: candidateRef("quantity"), step_distance: candidateRef("quantity") }),
+    security_boundary: candidateRef("securityBoundary"),
+    sources: { ...candidateArray(candidateObject({ path: candidateRef("repositoryPath"),
+      git_blob: { type: "string", pattern: "^[a-f0-9]{40}$" }, sha256: candidateRef("sha256") })), minItems: 3 },
+    donors: { ...candidateArray(candidateObject({ candidate_artifact_id: { type: "string", pattern: "^CANDIDATE-[A-Z0-9-]+$" },
+      role: { enum: Object.keys(CANDIDATE_DONORS) }, source_path: candidateRef("repositoryPath"),
+      organ_type: governance.schema.$defs.organ.properties.organ_type, contract_version: { const: "1.0.0" },
+      input_interface: { type: "array", minItems: 1, items: candidateRef("interface") },
+      output_interface: { type: "array", minItems: 1, items: candidateRef("interface") },
+      dependencies: candidateArray({ enum: Object.keys(CANDIDATE_DONORS) }), compatibility_signature: candidateRef("sha256") })), minItems: 3 }
+  }), $defs: governance.schema.$defs };
+  for (const error of validateJsonSchema202012(contract, schema).errors) fail("CANDIDATE_SCHEMA_INVALID", error.path, error.message);
+  if (errors.length) return result();
+  if (contract.dna_hash !== computeReplayStateHash(CANDIDATE_APP_STATE_SCHEMA)) fail("CANDIDATE_DNA_MISMATCH", "dna_hash", "Use the existing App candidate state contract");
+  if (contract.rna_hash !== computeReplayStateHash(CANDIDATE_APP_RNA_CONTRACT)) fail("CANDIDATE_RNA_MISMATCH", "rna_hash", "Use the existing App candidate command/port translation contract");
+  for (const [key, expected] of [["levels_12", crosswalk.canonical_levels_12], ["levels_19", crosswalk.extension_19.map(({ layer }) => layer)]]) {
+    if (canonicalJson(Object.keys(contract.taxonomy[key]).sort()) !== canonicalJson([...expected].sort())) fail("CANDIDATE_TAXONOMY_MISMATCH", `taxonomy.${key}`, "Reuse the exact existing 12/19 crosswalk");
+    if (Object.values(contract.taxonomy[key]).some((value) => !value.startsWith("CANDIDATE:"))) fail("CANDIDATE_TAXONOMY_IDENTITY_CLAIM", `taxonomy.${key}`, "Bindings are candidate descriptions, not admitted Species identities");
+  }
+  const softwareLayers = Object.fromEntries(crosswalk.extension_19.map(({ layer, software_binding }) => [layer, `CANDIDATE:${software_binding}`]));
+  const applicationClass = crosswalk.application_bindings.find(({ life_type }) => life_type === "APPLICATION")?.twelve_level_class;
+  const candidateLevels12 = { domain: softwareLayers.Domain, kingdom: softwareLayers.Kingdom, phylum: softwareLayers.Phylum,
+    class: `CANDIDATE:${applicationClass}`, order: softwareLayers.Order, family: softwareLayers.Family, genus: softwareLayers.Genus,
+    species: softwareLayers.Species, cell: softwareLayers.Cell, organ: softwareLayers.Organ,
+    runtime: softwareLayers.Expression, civilization: "CANDIDATE:KAIOS_SIMULATION" };
+  if (canonicalJson(contract.taxonomy.levels_12) !== canonicalJson(candidateLevels12)
+    || canonicalJson(contract.taxonomy.levels_19) !== canonicalJson(softwareLayers)) {
+    fail("CANDIDATE_TAXONOMY_BINDING_INVALID", "taxonomy", "Use the existing software crosswalk and APPLICATION class, as candidate descriptions only");
+  }
+  if (canonicalJson([...contract.permissions].sort()) !== canonicalJson([...CANDIDATE_PERMISSIONS].sort())) fail("CANDIDATE_PERMISSION_INVALID", "permissions", "Both bounded permissions must be declared");
+  const { steps, step_distance: distance } = contract.resource_budget;
+  if (!Number.isSafeInteger(steps.value) || steps.value < 1 || steps.value > 64 || steps.unit !== "event"
+    || distance.value <= 0 || distance.value > 1 || distance.unit !== "meter") fail("CANDIDATE_RESOURCE_INVALID", "resource_budget", "At most 64 events and one local meter per move");
+  if (!commitReachableFromHead(CANONICAL_REPOSITORY_ROOT, contract.source_commit)) fail("CANDIDATE_SOURCE_COMMIT_INVALID", "source_commit", "Sources must be reachable immutable Git evidence");
+  const sources = new Map(contract.sources.map((source) => [source.path, source]));
+  if (sources.size !== contract.sources.length) fail("CANDIDATE_SOURCE_DUPLICATE", "sources", "Each path has one source binding");
+  const sourceImports = new Map();
+  for (const source of contract.sources) {
+    const blob = gitRegularFileBlob(CANONICAL_REPOSITORY_ROOT, contract.source_commit, source.path);
+    const file = repositoryFile(CANONICAL_REPOSITORY_ROOT, source.path);
+    if (!blob || !file) { fail("CANDIDATE_SOURCE_MISSING", source.path, "Source must be a regular tracked repository file"); continue; }
+    const objectId = git(CANONICAL_REPOSITORY_ROOT, ["rev-parse", `${contract.source_commit}:${source.path}`]).trim();
+    if (source.git_blob !== objectId || computeContentHash(blob) !== source.sha256 || computeContentHash(readFileSync(file)) !== source.sha256) {
+      fail("CANDIDATE_SOURCE_HASH_MISMATCH", source.path, "Commit, Git blob, SHA-256 and executed working bytes must agree");
+    }
+    // Bounded audit of these existing ESM donors, not a general JS loader. No
+    // imports are executed here. Unexpected module syntax requires review.
+    const imports = [...blob.toString("utf8").matchAll(/\b(?:import|export)\s+(?:[^;]*?\s+from\s*)?["']([^"']+)["']/g)].map((match) => match[1]);
+    const dependencies = [];
+    for (const imported of imports) {
+      if (!imported.startsWith(".")) { fail("CANDIDATE_EXTERNAL_DEPENDENCY", source.path, "Only source-bound local ESM dependencies are admitted"); continue; }
+      const path = relative(CANONICAL_REPOSITORY_ROOT, resolve(CANONICAL_REPOSITORY_ROOT, dirname(source.path), imported)).replaceAll("\\", "/");
+      dependencies.push(path);
+      if (!sources.has(path)) fail("CANDIDATE_DEPENDENCY_MISSING", path, "Bind every imported module to the same source commit");
+    }
+    if (/\bimport\s*\(/.test(blob.toString("utf8"))) fail("CANDIDATE_DYNAMIC_IMPORT_REQUIRES_REVIEW", source.path, "Dynamic loading is outside the audited candidate closure");
+    sourceImports.set(source.path, dependencies);
+  }
+  const donors = new Map(contract.donors.map((donor) => [donor.role, donor]));
+  if (donors.size !== 3 || contract.donors.length !== 3 || new Set(contract.donors.map((donor) => donor.candidate_artifact_id)).size !== 3) fail("CANDIDATE_DONOR_SET_INVALID", "donors", "Exactly one existing Navigation, Game and Audio artifact is required");
+  const expectedDependencies = { NAVIGATION: [], GAME: ["NAVIGATION"], AUDIO: ["GAME"] };
+  for (const donor of contract.donors) {
+    const [path, type] = CANDIDATE_DONORS[donor.role];
+    if (donor.source_path !== path || donor.organ_type !== type || !sources.has(path)) fail("CANDIDATE_DONOR_INVALID", donor.role, "Reuse the current organ owner and type");
+    if (canonicalJson(donor.dependencies) !== canonicalJson(expectedDependencies[donor.role])) fail("CANDIDATE_DEPENDENCY_INVALID", donor.role, "Candidate flow is Navigation → world collision → Audio intent");
+    if (donor.compatibility_signature !== computeCandidateOrganSignature(donor, contract)) fail("CANDIDATE_SIGNATURE_INVALID", donor.role, "The source-bound contract digest changed");
+    for (const [direction, interfaces] of [["INPUT", donor.input_interface], ["OUTPUT", donor.output_interface]]) {
+      if (interfaces.length !== 1 || interfaces.some((entry) => entry.interface_id !== `CANDIDATE-${donor.role}-${direction}`
+        || entry.cardinality !== "ONE" || entry.required !== true || entry.direction !== direction || entry.protocol !== "IN_PROCESS_CALL"
+        || entry.contract_hash !== computeReplayStateHash(CANDIDATE_APP_RNA_CONTRACT.ports[donor.role][direction.toLowerCase()])
+        || entry.data_classification !== "CANDIDATE_ONLY" || entry.adapter_organ_id != null)) {
+        fail("CANDIDATE_INTERFACE_INVALID", donor.role, "The prototype accepts only declared in-process candidate data; no undeclared adapters");
+      }
+    }
+  }
+  const reached = new Set();
+  const visit = (path) => { if (reached.has(path)) return; reached.add(path); (sourceImports.get(path) ?? []).forEach(visit); };
+  Object.values(CANDIDATE_DONORS).forEach(([path]) => visit(path));
+  if ([...sources.keys()].some((path) => !reached.has(path))) fail("CANDIDATE_UNRELATED_SOURCE", "sources", "Unrelated evidence cannot stand in for donor dependencies");
+  if (!host || !Array.isArray(host.permissions) || !Array.isArray(host.available_dependencies)) fail("CANDIDATE_HOST_INVALID", "host", "An explicit bounded host contract is required");
+  else {
+    if (contract.permissions.some((permission) => !host.permissions.includes(permission))) fail("CANDIDATE_HOST_PERMISSION_MISSING", "host.permissions", "The candidate cannot expand host permission");
+    if (Object.keys(CANDIDATE_DONORS).some((role) => !host.available_dependencies.includes(role))) fail("CANDIDATE_HOST_DEPENDENCY_MISSING", "host.available_dependencies", "Every required donor must be available");
+    if (!Number.isSafeInteger(host.max_steps) || host.max_steps < steps.value || !Number.isFinite(host.max_step_meters) || host.max_step_meters < distance.value) fail("CANDIDATE_HOST_CAPACITY_MISSING", "host", "Explicit host capacity must cover the candidate budget");
+  }
+  if (errors.length) return result();
+  if (contract.api_version !== "1.0.0" || host.api_version !== contract.api_version || contract.coordinate_space !== "LOCAL_METERS" || host.coordinate_space !== contract.coordinate_space) {
+    fail("CANDIDATE_ADAPTER_REQUIRED", "host", "Version/frame mismatch requires a separately source-bound reviewed adapter; none is executed");
+    return result("ADAPTER_REQUIRED");
+  }
+  return result("COMPATIBLE_CANDIDATE");
 };
 
 const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
