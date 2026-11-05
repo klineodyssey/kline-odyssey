@@ -6561,6 +6561,7 @@ Physics Runtime 文件是 KGEN 程式生命的思想器官。
 AI Life App 上架 11520 必須接受思想器官與生命規格考核。
 現行尺度：1 KGEN=1000kg、1 KAIOS=1kg、1 KUFO=1g、1 KSHIP=1mg。
 金融 +K/-K 與物理 XYZ 推進方向分離。
+K11520 C = Warp Factor（曲速因子／曲速引擎轉換率），不是物理光速常數 c；現行遊戲曲速校準 1 C = 0.001 K/s。依現行 1 K = 22.761724301279 km 尺度，真空光速尺度約等於 13,171,000 C；超過此尺度只表示 KAIOS Spacetime-Warp / Warp-Bubble 模擬區域，不宣稱現實物體局部速度可超越光速。
 1 K18888 Heaven Day = 1 K280 Year。
 KUFO half-life = 1 K280 Year。
 KUFO 是天界高密度衰變燃料，不是 UFO。
