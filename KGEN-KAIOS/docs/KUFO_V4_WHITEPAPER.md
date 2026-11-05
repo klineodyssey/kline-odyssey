@@ -8,6 +8,8 @@
 
 KUFO 仙丹是由 KAIOS 煉化產生的新候選代幣，承載文明世界中的質量與能量敘事。它與既有 KAIOS 分工不同；本版完整定義即時煉丹、出生標識、年度轉化及 KSHIP 接續關係。遊戲中的仙丹、反物質與能量均為系統表徵，不構成真實物質生成、健康或延壽功效。
 
+仙丹的公開幣名與代號固定為 KUFO，不加版本尾碼。正式合約、檔案、模組及 ABI／產品入口也使用無版本的穩定名稱，如 KUFO.sol、KAIOSAlchemyFurnace.sol；不得以 V4、V5 另開正式產品。版本資訊只留在來源標頭、Git 提交、文件修訂及稽核沿革。既有帶版本的檔案是候選歷史來源，不是最終正式入口。若 main 已有同名舊制檔案，先盤點依賴、相容性及歷史保存，再遷移到唯一正式入口，不可直接覆蓋或讓兩套同時自稱 CURRENT。
+
 > KAIOS → K18911 煉丹爐 → K168888 筋斗雲出料 → K511111 KUFO → KSHIP
 
 K18911、K168888 與 K511111 是世界座標與功能點，正式部署時另綁定實際鏈上合約地址。KSHIP 沿用程式庫中的正式代號；口語中的反物質或其他音譯，不構成另發新幣或更名決議。
@@ -152,12 +154,12 @@ KAIOS 銷毀紀錄是上游依據。煉丹爐建立 proofId，出料器只能消
 
 沿用既有 Product 05 與 review/kufo-annual-cohort-core-20261106 候選核心，確認原負責者與工作權限後續作。保留既有 V1、原 PR 與研究歷史，不重開同功能產品，不覆蓋舊分支，也不將下游 #211／#212 當作重複案件關閉。
 
-| 既有位置 | 需完成的改動 |
+| 正式穩定位置 | 需完成的改動 |
 | --- | --- |
-| contracts/KUFOV4.sol | 保留年界三分期、終身上限與證明守恆；補入精確星座設定、不可變出生屬性及可轉讓的有界帳。 |
-| contracts/KAIOSAlchemyFurnaceV4.sol | 維持 KGEN 餘額證明與 1:1000 即時產出；確認所有下游失敗原子回復。 |
-| contracts/KUFOOutputJindouyun168888V4.sol | 維持固定受益人、固定數量與一次性 proof；完成目前登錄器綁定測試。 |
-| runtime/kufo-v4-policy.mjs | 與合約共用明確年界／生肖／星座規格；僅做投影，不另建權威帳本。 |
+| contracts/KUFO.sol | 來源 contracts/KUFOV4.sol；保留年界三分期、終身上限與證明守恆，補精確星座及可轉讓的有界帳。 |
+| contracts/KAIOSAlchemyFurnace.sol | 來源 KAIOSAlchemyFurnaceV4.sol；維持 KGEN 餘額證明、1:1000 即時產出及失敗原子回復。 |
+| contracts/KUFOOutputJindouyun168888.sol | 來源 KUFOOutputJindouyun168888V4.sol；維持固定受益人、數量與一次 proof，驗證登錄綁定。 |
+| runtime/kufo-policy.mjs | 來源 runtime/kufo-v4-policy.mjs；共用年界／生肖／星座規格，僅做投影，不另建權威帳本。 |
 | 既有 KSHIP／Converter | 沿用正式代號與 proof ABI；驗證新增分組或分批入口仍只轉換已到期份額。 |
 | tests 與 reports | 擴充既有年度、轉讓、星座、尾差、灰塵、長期休眠、gas 與來源相容性測試。 |
 
