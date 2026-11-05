@@ -29,10 +29,11 @@ export function quoteSettlementPoints({entry,mark,side,lots,c}={}){
  if(!Number.isInteger(speed)||speed<1||speed>MAX_C)throw new RangeError('C_OUT_OF_RANGE');
  if(side!=='LONG'&&side!=='SHORT')throw new RangeError('INVALID_SIDE');
  const {exponent,scale}=entryPriceScale(e);
+ const entryAlpha=e/scale, markAlpha=m/scale;
  const priceDelta=m-e, marketDeltaK=priceDelta/scale;
  const rawPnlK=(side==='LONG'?1:-1)*marketDeltaK*l*speed;
  if(!Number.isFinite(rawPnlK))throw new RangeError('PNL_OVERFLOW');
- return Object.freeze({entry:e,mark:m,entryExponent:exponent,entryScale:scale,priceDelta,marketDeltaK,lots:l,c:speed,side,rawPnlK,unit:'GAME_SETTLEMENT_K',simulationOnly:true});
+ return Object.freeze({entry:e,mark:m,entryExponent:exponent,entryScale:scale,entryAlpha,markAlpha,alphaDelta:marketDeltaK,priceDelta,marketDeltaK,lots:l,c:speed,side,rawPnlK,unit:'GAME_SETTLEMENT_K',simulationOnly:true});
 }
 /** Candidate limited-loss rule. Deficit is explicitly returned: never erase systemic risk.
  * This does not authorize an actual wallet payout.
