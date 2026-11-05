@@ -2,6 +2,47 @@
 
 Guidance for AI agents working in the KLINE Odyssey repository.
 
+## BOOT-FIRST engineering entry order (Human order, 2026-10-06)
+
+Applies to every **new KAIOS work item and new Cloud, worktree or session**.
+Source: Human 沈英明, `Sentinel_b9c9a6cfa0a08191b922a26478c6d8fa`,
+2026-10-06T00:28:15Z. This explicit entry-order decision supersedes the older
+light-boot and stable-Boot-first ordering below. It does not rewrite Canon or
+either protected Boot file.
+
+1. The first repository document read is
+   `/PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`. Resolve its full path and lineage
+   indexes, then the stable `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md`, CURRENT Physics,
+   current Universe Map and its inherited base, Signed Math, Safety, Authority,
+   Life and applicable domain Canon. CURRENT governs; old Neural pointers do not
+   select an obsolete Physics version. Resolve case/alias drift through tracked
+   indexes and record it. Never infer absence from keyword search alone.
+2. Sync Company before executing the Human prompt: current main, existing Company
+   runtime, worker registry, active work, handoffs, queue, PRs, CI, P0/P1 issues,
+   owners, closeout, outages and current Human decisions. Avoid duplicate work,
+   stale branches and a second Worker runtime. A wait or issue on another track
+   is not a blanket stop for independently authorized work.
+3. Follow `READ_CANON -> LINEAGE -> EXISTING_RUNTIME -> ACTIVE_WORK -> DESIGN ->
+   CODE -> TEST`. Before code, record only the first five completed stages.
+   Append actual CODE/TEST evidence later; never invent future results.
+   Rework after testing opens the next numbered cycle with a linked PRE_CODE
+   checkpoint and `NOT_RUN`; its POST_TEST must bind that cycle's latest PRE_CODE.
+   Earlier passes or failures remain immutable and cannot imply current readiness.
+4. Retain per-work/session evidence with `BOOT_FILE`, `BOOT_BLOB`, `LATEST_MAIN`,
+   `COMPANY_SYNC`, `DOMAIN_CANON_READ` and `CANON_CONFLICT`, bound to actual Git
+   source blobs. Use the existing [Worker Boot SOP](KGEN-KAIOS/workforce/WORKER_BOOT_SOP.md)
+   and Company Boot CLI `validate-workflow`; recheck current main before coding
+   and publication, and append a fresh checkpoint when sources change.
+
+Old records remain historical. Missing old receipts mean `NOT_RECORDED`, never a
+backdated PASS. Chat memory cannot replace source reads. The checker establishes
+record/Git consistency only; it cannot prove authenticated authorship, cognitive
+reading, Human consent, or grant permission. It supplements existing identity,
+registration, protected-path, financial and release gates. A separately verified,
+bounded Human external-maintainer exception remains scoped to its own order; no
+name-based exemption, Life/Worker ID, trust level, payroll or treasury right is
+created here.
+
 ## Project overview
 
 KLINE Odyssey is a static Web3 × finance narrative site (GitHub Pages) with Python market-data pipelines and optional on-chain KGEN contracts. There is no `package.json`, Docker, or database.
@@ -116,6 +157,9 @@ These rules apply to every future AI / agent / runtime change in this repository
 ## KGEN AI work system rules
 
 This section is mandatory for every AI / agent / runtime working in this repository. It supersedes older AGENTS instructions if there is a conflict.
+
+The 2026-10-06 BOOT-FIRST entry order above supersedes this section's historical
+read-order clauses. Its registration and safety boundaries remain applicable.
 
 ### Mandatory read order
 
