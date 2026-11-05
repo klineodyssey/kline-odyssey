@@ -42,3 +42,31 @@ test('invalid position inputs fail closed',()=>{
   {entry:80000,mark:81000,side:'BUY',lots:1,c:1}
  ])assert.throws(()=>quoteSettlementPoints(args));
 });
+
+test('Human confirmed: entry floor locks alpha throughout the open position',()=>{
+ const cases=[
+  {entry:80000,mark:81000,floor:4,entryAlpha:8,markAlpha:8.1,delta:0.1,pnl:1000},
+  {entry:80000,mark:110000,floor:4,entryAlpha:8,markAlpha:11,delta:3,pnl:30000},
+  {entry:80000,mark:510000,floor:4,entryAlpha:8,markAlpha:51,delta:43,pnl:430000},
+  {entry:110000,mark:120000,floor:5,entryAlpha:1.1,markAlpha:1.2,delta:0.1,pnl:1000},
+  {entry:110000,mark:510000,floor:5,entryAlpha:1.1,markAlpha:5.1,delta:4,pnl:40000},
+  {entry:0.00042,mark:0.00052,floor:-4,entryAlpha:4.2,markAlpha:5.2,delta:1,pnl:10000}
+ ];
+ const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`expected ${b}, got ${a}`);
+ for(const x of cases){
+  const v=quoteSettlementPoints({entry:x.entry,mark:x.mark,side:'LONG',lots:100,c:100});
+  assert.equal(v.entryExponent,x.floor);
+  near(v.entryAlpha,x.entryAlpha);
+  near(v.markAlpha,x.markAlpha);
+  near(v.alphaDelta,x.delta);
+  near(v.rawPnlK,x.pnl);
+ }
+});
+test('new order uses new entry floor; short positions invert the same locked alpha delta',()=>{
+ const newOrder=quoteSettlementPoints({entry:110000,mark:510000,side:'SHORT',lots:100,c:100});
+ assert.equal(newOrder.entryExponent,5);
+ assert.equal(newOrder.rawPnlK,-40000);
+ const oldOrder=quoteSettlementPoints({entry:80000,mark:510000,side:'SHORT',lots:100,c:100});
+ assert.equal(oldOrder.entryExponent,4);
+ assert.equal(oldOrder.rawPnlK,-430000);
+});
