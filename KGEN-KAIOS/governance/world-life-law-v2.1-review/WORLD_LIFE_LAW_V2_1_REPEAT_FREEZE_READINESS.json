@@ -1,0 +1,99 @@
+{
+    "schema_version":  "1.0.0",
+    "artifact_id":  "WORLD-LIFE-LAW-V2.1-REPEAT-FREEZE-READINESS-001",
+    "status":  "READY_FOR_HUMAN_FREEZE_DECISION",
+    "reviewed_main_sha":  "e4bcd8da90309a9557ce2f8eaba83ef0f8d990d4",
+    "runtime_authority":  false,
+    "freeze":  "NOT_APPROVED",
+    "architecture_review":  {
+                                "law_count":  {
+                                                  "pass":  23,
+                                                  "total":  23
+                                              },
+                                "law_pairs":  {
+                                                  "pass":  253,
+                                                  "total":  253,
+                                                  "conflicts":  0
+                                              },
+                                "baseline_gates":  {
+                                                       "pass":  18,
+                                                       "total":  18,
+                                                       "clarification_required":  0,
+                                                       "missing":  0
+                                                   },
+                                "life_activity_gates":  {
+                                                            "pass":  5,
+                                                            "total":  5
+                                                        },
+                                "p0_remaining":  0,
+                                "p1_remaining":  0,
+                                "clarifications_remaining":  0
+                            },
+    "required_invariants":  {
+                                "dead_terminal":  true,
+                                "dream_mind_sub_activity":  true,
+                                "predecessor_sealed":  true,
+                                "life_os_body_asset_ownership":  false,
+                                "profession_automatic_authority":  false,
+                                "company_facet_automatic_authority":  false,
+                                "reincarnation_new_identity_chain":  true,
+                                "source_classification_versioned_and_pinned":  true
+                            },
+    "integrity":  {
+                      "source_hash_verification":  "PASS",
+                      "frozen_manifest":  {
+                                              "version":  "LIFE-OS-V1.1",
+                                              "revision":  "2026-07-23.1",
+                                              "manifest_path":  "KGEN-KAIOS/life/life_os_architecture_baseline_v1_1.json",
+                                              "pass":  13,
+                                              "total":  13,
+                                              "status":  "PASS",
+                                              "historical_v1_0":  "13_OF_13_PASS_AT_FROZEN_COMMIT",
+                                              "readme_sha256":  "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60",
+                                              "other_artifacts":  "12_OF_12_PASS"
+                                          }
+                  },
+    "validation":  {
+                       "repository_json":  {
+                                               "pass":  497,
+                                               "total":  497,
+                                               "fail":  0
+                                           },
+                       "jsonl":  {
+                                     "files":  14,
+                                     "records":  75,
+                                     "fail":  0
+                                 },
+                       "markdown_links":  "PASS",
+                       "utf8":  "PASS",
+                       "corruption_scan":  "PASS",
+                       "git_diff_check":  "PASS",
+                       "secret_scan":  {
+                                           "status":  "PASS",
+                                           "hits":  0
+                                       },
+                       "protected_path_scan":  {
+                                                   "status":  "PASS",
+                                                   "violations":  0
+                                               }
+                   },
+    "source_hashes":  {
+                          "cumulative_amendment_candidate":  "9aae03be8a4df0b0200fcce67668c27223bbaf3e4164c6ef4799518a1f9d62de",
+                          "classification_candidate":  "4073960848af8c120f026abc6ef80ecc9fb1bf3dcf182d485cbafcfed5027b70",
+                          "conflict_matrix":  "cde72c6ea67a7c398cf7022cdf6b1cdbdc933c4642c7a4bc1f974a4a372124cc",
+                          "baseline_evidence":  "c5cbc1f428521f5b831d9b0ecbe9053f0d244f25c0d0fc79a5b19532cbc28396",
+                          "repeat_review":  "4aecc249742ec57356dfd87ffaaade464d93077e8c6b2c4aab9531a20573660d",
+                          "life_os_v1_1_manifest":  "b6b846259ef328b5c8e9be452979ad77fc48ddb897d8f8a75c6d6401c30d1d11",
+                          "life_os_v1_1_lineage":  "ad8791806daded0e9092f84d14e0183da6ac16a2e2d894c037b569c6525577b5",
+                          "frz_hash_001_resolution":  "21721d45998443a2234cf177a669a0f591b5d7be112419fb816247221d7d18fd"
+                      },
+    "missing_items":  [
+
+                      ],
+    "freeze_blockers":  [
+                            "EXPLICIT_HUMAN_FREEZE_DECISION_NOT_PRESENT"
+                        ],
+    "frz_hash_001_resolution":  "NEW_BASELINE_VERSION_CREATED",
+    "recommended_human_decision":  "REVIEW_PR_48_THEN_ISSUE_SEPARATE_EXPLICIT_FREEZE_DECISION_IF_INTENDED",
+    "draft_only":  true
+}

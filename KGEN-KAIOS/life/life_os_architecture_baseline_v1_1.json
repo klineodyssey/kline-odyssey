@@ -1,0 +1,133 @@
+{
+  "metadata": {
+    "title": "KAIOS Life OS Architecture Baseline",
+    "version": "LIFE-OS-V1.1",
+    "revision": "2026-07-23.1",
+    "status": "ARCHITECTURE_BASELINE_FROZEN_CANDIDATE",
+    "last_updated": "2026-07-23",
+    "updated_by": "Codex / codex-gm-01",
+    "human_decision_id": "FRZ-HASH-001-OPTION-D",
+    "canonical_file": "KGEN-KAIOS/life/life_os_architecture_baseline_v1_1.json",
+    "source_of_truth": false,
+    "activation": "PENDING_HUMAN_MERGE_DECISION"
+  },
+  "lineage": {
+    "parent_baseline": "LIFE-OS-V1.0",
+    "parent_revision": "2026-07-16.1",
+    "parent_manifest": "KGEN-KAIOS/life/life_os_architecture_baseline.json",
+    "parent_manifest_sha256": "23f4f6bcac9230478d79b1c4eb0fa468288412353772bc83560fedf333740f63",
+    "parent_baseline_preserved": true,
+    "source_commit": "e9fb9b462eb105ac1d455471a71753bc79c5d8c2",
+    "related_pr": 38,
+    "reason": "APPEND_ONLY_NAVIGATION_UPDATE"
+  },
+  "change_authority": {
+    "decision": "OPTION_D_APPROVED",
+    "classification": "LEGITIMATE_POST_FREEZE_DOCUMENT_UPDATE",
+    "semantic_change": false,
+    "runtime_authority_change": false,
+    "freeze_authority_change": false,
+    "world_life_law_freeze": "NOT_APPROVED",
+    "runtime_authority": false,
+    "old_manifest_rewritten": false
+  },
+  "verification_policy": {
+    "hash_algorithm": "SHA-256",
+    "content_mode": "EXACT_GIT_BLOB_BYTES",
+    "encoding": "UTF-8",
+    "byte_order_mark": "FORBIDDEN",
+    "line_endings": "LF_ONLY",
+    "manifest_self_hash_included": false,
+    "readme_hash_scope": "INCLUDED",
+    "readme_markdown_links_required_valid": true,
+    "readme_wals_references_required": 3
+  },
+  "frozen_invariants": [
+    "SHARED_CONTRACT_NOT_SHARED_IMPLEMENTATION",
+    "IMMUTABLE_VERSIONED_SPECIES_OS",
+    "ONE_INDIVIDUAL_LIFE_OS_PER_LIFE_IDENTITY",
+    "ORDERED_VERSIONED_IDEMPOTENT_EVIDENCE_BEARING_MUTATIONS",
+    "NO_UPPER_LAYER_DIRECT_LIFE_STATE_MUTATION",
+    "NO_SECRET_KYC_PRIVATE_GPS_WALLET_OR_SALARY_EVENT_DATA",
+    "DEATH_TERMINAL_FOR_ONE_IDENTITY",
+    "NO_UNREVIEWED_CROSS_SPECIES_SECRET_OR_PRIVATE_MEMORY_TRANSFER",
+    "PROTECTED_RUNTIME_AND_EXISTING_BASELINES_UNCHANGED"
+  ],
+  "frozen_files": [
+    {
+      "path": "KGEN-KAIOS/life/README.md",
+      "sha256": "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60"
+    },
+    {
+      "path": "KGEN-KAIOS/life/LIFE_OPERATING_SYSTEM.md",
+      "sha256": "8cf21fbffc8865a5be5cf4dd79b8d7d877f11b481f76d08ba1af35ec69ea2846"
+    },
+    {
+      "path": "KGEN-KAIOS/life/life_operating_system.json",
+      "sha256": "ec6010c1aa32eda036576d64bcea59d073a8ec713bd61f8a7289555da17c57dc"
+    },
+    {
+      "path": "KGEN-KAIOS/life/LIFE_STATE_MACHINE.md",
+      "sha256": "42d12d81cd5077fe8248f39f36fa7844b7043b5157eab554aadd0078d9415950"
+    },
+    {
+      "path": "KGEN-KAIOS/life/LIFE_API.md",
+      "sha256": "77047ec71717a085fe4607407479e5f75b65e8adcd9028977b52391475b2ce69"
+    },
+    {
+      "path": "KGEN-KAIOS/life/LIFE_EVENT_CONTRACT.md",
+      "sha256": "c4e0069f72b31c1832be6225b78c75b4b09bca490c8bd3b8609bd4a454a0fb88"
+    },
+    {
+      "path": "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_REVIEW.md",
+      "sha256": "eb627d946f7c8a948534543e9e5f841bd6cf8610ff9e208fd9c87f7c0a563a44"
+    },
+    {
+      "path": "KGEN-KAIOS/life/life_os_architecture_review.json",
+      "sha256": "3c165cf23922aee655f8f991bcfee8a3baf9407bcab73384f15a4cb042f1630b"
+    },
+    {
+      "path": "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_RESOLUTION.md",
+      "sha256": "f7705b789081431ebdc995b74d2e10c08c0eaca1d1ba30edd2de392e365f75f8"
+    },
+    {
+      "path": "KGEN-KAIOS/life/life_os_architecture_resolution.json",
+      "sha256": "0d8c8b64349906ccc812862d62439a57add65d6c90907adb0ad6effb6f175b4e"
+    },
+    {
+      "path": "KGEN-KAIOS/life/ADR/ADR-LIFE-001-SPECIES-SCOPED-LIFE-OS.md",
+      "sha256": "abad0e83189bb7c7dac6d843d1e3f0a612934c863005cb3dfaa128b72e2ce291"
+    },
+    {
+      "path": "KGEN-KAIOS/life/LIFE_OS_ARCHITECTURE_BASELINE.md",
+      "sha256": "fef4253c5557a9fec73c4ca334cb3493d6ca4e6306743037f8c0ed00355e9bdc"
+    },
+    {
+      "path": "KGEN-KAIOS/life/life_os_architecture_evolution_log.jsonl",
+      "sha256": "45c20e77b73ec7af567d1abe6a0699dc40ef6615e01d30ac0c8ee5488cdf55ef"
+    }
+  ],
+  "verification": {
+    "members": 13,
+    "pass": 13,
+    "fail": 0,
+    "other_frozen_artifacts_pass": 12,
+    "readme_pass": true,
+    "historical_baseline_verifiable": true,
+    "new_baseline_verifiable": true,
+    "protected_path_violations": 0,
+    "runtime_current_modified": false,
+    "universe_map_current_modified": false,
+    "genesis_modified": false,
+    "token_contract_modified": false
+  },
+  "gates": {
+    "world_life_law_freeze_approved": false,
+    "runtime_authority": false,
+    "implementation_started": false,
+    "scheduler_started": false,
+    "cursor_dispatch_started": false,
+    "production_started": false,
+    "real_kgen_authorized": false
+  }
+}
