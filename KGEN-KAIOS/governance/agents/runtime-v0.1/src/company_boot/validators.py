@@ -54,6 +54,44 @@ CURRENT_STATE_REQUIRED = CURRENT_STATE_FIELDS - {"source_type", "conflicting_cur
 PARENT_HANDOFF_FIELDS = {"handoff_id", "from_life_id", "from_instance_id", "ending_sha"}
 SESSION_LOCK_FIELDS = {"lock_id", "workorder_id", "holder_instance_id", "scope", "acquired_at", "heartbeat_at", "expires_at", "status"}
 
+HANDOFF_MESSAGE_FIELDS = {
+    "MESSAGE_ID", "CORRELATION_ID", "IDEMPOTENCY_KEY",
+    "FROM_SELF_NAME", "FROM_LIFE_ID", "FROM_WORKER_ID", "FROM_INSTANCE_ID",
+    "TO_SELF_NAME", "TO_LIFE_ID", "TO_WORKER_ID", "TO_INSTANCE_ID",
+    "CREATED_AT", "REPOSITORY", "BASE_SHA", "HEAD_SHA", "PAYLOAD",
+    "PAYLOAD_SHA256", "MESSAGE_SHA256", "REPLY_TO", "ACK_STATUS",
+    "DECISION_STATUS", "DELIVERY_STATUS", "SIGNATURE_TYPE", "SAFETY_BOUNDARY",
+}
+HANDOFF_EVENT_FIELDS = {
+    "EVENT_ID", "MESSAGE_ID", "CORRELATION_ID", "STATUS",
+    "ACTOR_SELF_NAME", "ACTOR_LIFE_ID", "ACTOR_WORKER_ID", "ACTOR_INSTANCE_ID",
+    "CREATED_AT", "MESSAGE_SHA256", "PREVIOUS_EVENT_SHA256", "EVENT_SHA256",
+}
+INSTANCE_RECORD_FIELDS = {"INSTANCE_ID", "SELF_NAME", "LIFE_ID", "WORKER_ID", "STATUS"}
+HANDOFF_SAFETY_FIELDS = {
+    "MERGE", "PUSH_MAIN", "DEPLOYMENT", "PAYMENT", "TOKEN_TRANSFER",
+    "TREASURY_ACTION", "GOVERNANCE_EXECUTION", "MAINNET_TRANSACTION",
+    "CHAIN_WRITE", "PRIVATE_KEY_REQUEST", "PRIVATE_KEY_OUTPUT",
+    "PRIVATE_KEY_STORAGE", "CONTROLLER_OR_SIGNER_IMPERSONATION",
+    "SELF_REVIEW", "PUBLIC_AUTO_POST",
+}
+HANDOFF_TRANSITIONS = {
+    "CREATED": {"QUEUED", "FAILED_CLOSED"},
+    "QUEUED": {"DELIVERED", "FAILED_CLOSED"},
+    "DELIVERED": {"ACKNOWLEDGED", "FAILED_CLOSED"},
+    "ACKNOWLEDGED": {"ANSWERED", "FAILED_CLOSED"},
+    "ANSWERED": {"REVIEWED", "FAILED_CLOSED"},
+    "REVIEWED": set(),
+    "FAILED_CLOSED": set(),
+}
+HANDOFF_SIGNATURE_TYPES = {
+    "REPOSITORY_HASH_BOUND_OFFCHAIN",
+    "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC",
+    "UNSIGNED_CANDIDATE",
+}
+GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
 
 def load_json(path: Path) -> dict[str, Any]:
     try:
@@ -94,6 +132,168 @@ def now_utc() -> datetime:
 def contains_secret(value: Any) -> bool:
     text = canonical_json(value) if not isinstance(value, str) else value
     return any(pattern.search(text) for pattern in SECRET_PATTERNS)
+
+
+def _handoff_failure(code: FailureCode, message: str, terminal: Stage = Stage.FAILED) -> BootFailure:
+    return BootFailure(code, Stage.HANDOFF_LOADED, message, terminal)
+
+
+def _validate_instance_registry(instance_registry: dict[str, Any]) -> None:
+    if not isinstance(instance_registry, dict):
+        raise _handoff_failure(FailureCode.MISSING_VERIFIED_REPLY_TARGET, "instance registry must be an object")
+    for instance_id, record in instance_registry.items():
+        if not isinstance(record, dict) or set(record) != INSTANCE_RECORD_FIELDS:
+            raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "instance registry record schema mismatch")
+        if record["INSTANCE_ID"] != instance_id or record["STATUS"] != "ACTIVE":
+            raise _handoff_failure(FailureCode.MISSING_VERIFIED_REPLY_TARGET, "instance is missing or inactive")
+
+
+def _require_handoff_actor(message: dict[str, Any], instance_registry: dict[str, Any], prefix: str) -> dict[str, Any]:
+    instance_id = message[f"{prefix}_INSTANCE_ID"]
+    actor = instance_registry.get(instance_id)
+    if not actor:
+        raise _handoff_failure(FailureCode.MISSING_VERIFIED_REPLY_TARGET, f"verified {prefix.lower()} instance not found")
+    expected = {
+        "SELF_NAME": message[f"{prefix}_SELF_NAME"],
+        "LIFE_ID": message[f"{prefix}_LIFE_ID"],
+        "WORKER_ID": message[f"{prefix}_WORKER_ID"],
+        "INSTANCE_ID": instance_id,
+    }
+    if any(actor[key] != value for key, value in expected.items()):
+        raise _handoff_failure(FailureCode.HANDOFF_ACTOR_MISMATCH, f"{prefix.lower()} identity does not match verified instance")
+    return actor
+
+
+def handoff_message_hash(message: dict[str, Any]) -> str:
+    content = dict(message)
+    content.pop("MESSAGE_SHA256", None)
+    return sha256_text(canonical_json(content))
+
+
+def handoff_event_hash(event: dict[str, Any]) -> str:
+    content = dict(event)
+    content.pop("EVENT_SHA256", None)
+    return sha256_text(canonical_json(content))
+
+
+def validate_handoff_message(
+    message: dict[str, Any],
+    instance_registry: dict[str, Any],
+    seen_messages: dict[str, str] | None = None,
+    seen_idempotency_keys: dict[str, str] | None = None,
+) -> str:
+    """Validate one immutable, hash-bound off-chain handoff envelope.
+
+    Delivery is allowed only when both instances are present in an independently
+    supplied active instance registry. The function never discovers, creates or
+    promotes an identity by itself.
+    """
+    if not isinstance(message, dict) or set(message) != HANDOFF_MESSAGE_FIELDS:
+        raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "handoff message fields are missing or unknown")
+    if contains_secret(message):
+        raise _handoff_failure(FailureCode.SECRET_IN_OUTPUT, "handoff message contains secret-like content")
+    if not isinstance(message["PAYLOAD"], dict):
+        raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "handoff payload must be an object")
+    _validate_instance_registry(instance_registry)
+    if not all(isinstance(message[field], str) and message[field] for field in (
+        "MESSAGE_ID", "CORRELATION_ID", "IDEMPOTENCY_KEY", "FROM_SELF_NAME", "FROM_LIFE_ID",
+        "FROM_WORKER_ID", "FROM_INSTANCE_ID", "TO_SELF_NAME", "TO_LIFE_ID", "TO_WORKER_ID",
+        "TO_INSTANCE_ID", "CREATED_AT", "REPOSITORY", "BASE_SHA", "HEAD_SHA", "PAYLOAD_SHA256",
+        "MESSAGE_SHA256", "ACK_STATUS", "DECISION_STATUS", "DELIVERY_STATUS", "SIGNATURE_TYPE",
+    )):
+        raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "handoff message contains empty identity or integrity field")
+    try:
+        parse_time(message["CREATED_AT"])
+    except ValueError as exc:
+        raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "handoff created_at is invalid") from exc
+    if not GIT_SHA_RE.fullmatch(message["BASE_SHA"]) or not GIT_SHA_RE.fullmatch(message["HEAD_SHA"]):
+        raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "base/head SHA must be lowercase 40-hex Git object IDs")
+    if not SHA256_RE.fullmatch(message["PAYLOAD_SHA256"]) or not SHA256_RE.fullmatch(message["MESSAGE_SHA256"]):
+        raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "payload/message SHA-256 must be lowercase 64-hex")
+    if message["PAYLOAD_SHA256"] != sha256_text(canonical_json(message["PAYLOAD"])):
+        raise _handoff_failure(FailureCode.HANDOFF_PAYLOAD_HASH_MISMATCH, "payload hash mismatch", Stage.CONFLICTED)
+    if message["MESSAGE_SHA256"] != handoff_message_hash(message):
+        raise _handoff_failure(FailureCode.HANDOFF_PAYLOAD_HASH_MISMATCH, "message hash mismatch", Stage.CONFLICTED)
+    if message["ACK_STATUS"] != "NOT_ACKNOWLEDGED" or message["DECISION_STATUS"] != "PENDING" or message["DELIVERY_STATUS"] != "CREATED":
+        raise _handoff_failure(FailureCode.HANDOFF_TRANSITION_INVALID, "immutable envelope must begin CREATED/PENDING/NOT_ACKNOWLEDGED")
+    if message["SIGNATURE_TYPE"] not in HANDOFF_SIGNATURE_TYPES:
+        raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "unsupported signature type")
+    safety = message["SAFETY_BOUNDARY"]
+    if not isinstance(safety, dict) or set(safety) != HANDOFF_SAFETY_FIELDS or any(value is not False for value in safety.values()):
+        raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "handoff safety boundary must explicitly deny every protected action")
+    if message["FROM_INSTANCE_ID"] == message["TO_INSTANCE_ID"]:
+        raise _handoff_failure(FailureCode.HANDOFF_ACTOR_MISMATCH, "sender and recipient instances must be distinct")
+    _require_handoff_actor(message, instance_registry, "FROM")
+    _require_handoff_actor(message, instance_registry, "TO")
+    seen_messages = seen_messages or {}
+    seen_idempotency_keys = seen_idempotency_keys or {}
+    prior_message_hash = seen_messages.get(message["MESSAGE_ID"])
+    prior_idempotency_hash = seen_idempotency_keys.get(message["IDEMPOTENCY_KEY"])
+    if prior_message_hash is not None or prior_idempotency_hash is not None:
+        if prior_message_hash == message["MESSAGE_SHA256"] and prior_idempotency_hash == message["MESSAGE_SHA256"]:
+            return "IDEMPOTENT_NOOP"
+        raise _handoff_failure(FailureCode.HANDOFF_REPLAY_CONFLICT, "message or idempotency key replayed with different content", Stage.CONFLICTED)
+    reply_to = message["REPLY_TO"]
+    if reply_to is not None and (not isinstance(reply_to, str) or reply_to not in seen_messages):
+        raise _handoff_failure(FailureCode.HANDOFF_REPLAY_CONFLICT, "reply_to does not resolve to a known message", Stage.CONFLICTED)
+    return "VALIDATED_CREATED"
+
+
+def validate_handoff_audit(
+    message: dict[str, Any],
+    events: list[dict[str, Any]],
+    instance_registry: dict[str, Any],
+) -> str:
+    """Validate an append-only, recipient-ACKed handoff transition chain."""
+    validate_handoff_message(message, instance_registry)
+    if not isinstance(events, list) or not events:
+        raise _handoff_failure(FailureCode.HANDOFF_TRANSITION_INVALID, "handoff audit trail is empty")
+    previous_status: str | None = None
+    previous_hash: str | None = None
+    event_ids: set[str] = set()
+    for event in events:
+        if not isinstance(event, dict) or set(event) != HANDOFF_EVENT_FIELDS:
+            raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "handoff event fields are missing or unknown")
+        if contains_secret(event):
+            raise _handoff_failure(FailureCode.SECRET_IN_OUTPUT, "handoff event contains secret-like content")
+        if event["EVENT_ID"] in event_ids:
+            raise _handoff_failure(FailureCode.HANDOFF_REPLAY_CONFLICT, "duplicate event ID", Stage.CONFLICTED)
+        event_ids.add(event["EVENT_ID"])
+        if event["MESSAGE_ID"] != message["MESSAGE_ID"] or event["CORRELATION_ID"] != message["CORRELATION_ID"]:
+            raise _handoff_failure(FailureCode.HANDOFF_ACTOR_MISMATCH, "event lineage does not match message")
+        if event["MESSAGE_SHA256"] != message["MESSAGE_SHA256"]:
+            raise _handoff_failure(FailureCode.HANDOFF_PAYLOAD_HASH_MISMATCH, "event message hash mismatch", Stage.CONFLICTED)
+        if event["PREVIOUS_EVENT_SHA256"] != previous_hash:
+            raise _handoff_failure(FailureCode.HANDOFF_REPLAY_CONFLICT, "event hash chain is broken", Stage.CONFLICTED)
+        if event["EVENT_SHA256"] != handoff_event_hash(event):
+            raise _handoff_failure(FailureCode.HANDOFF_PAYLOAD_HASH_MISMATCH, "event hash mismatch", Stage.CONFLICTED)
+        try:
+            parse_time(event["CREATED_AT"])
+        except ValueError as exc:
+            raise _handoff_failure(FailureCode.HANDOFF_SCHEMA_MISMATCH, "event timestamp is invalid") from exc
+        actor = instance_registry.get(event["ACTOR_INSTANCE_ID"])
+        if (
+            not actor
+            or actor["INSTANCE_ID"] != event["ACTOR_INSTANCE_ID"]
+            or any(actor[key] != event[f"ACTOR_{key}"] for key in ("SELF_NAME", "LIFE_ID", "WORKER_ID"))
+        ):
+            raise _handoff_failure(FailureCode.HANDOFF_ACTOR_MISMATCH, "event actor does not match verified instance")
+        status = event["STATUS"]
+        if previous_status is None:
+            if status != "CREATED" or event["ACTOR_INSTANCE_ID"] != message["FROM_INSTANCE_ID"]:
+                raise _handoff_failure(FailureCode.HANDOFF_TRANSITION_INVALID, "first event must be sender-created")
+        elif status not in HANDOFF_TRANSITIONS.get(previous_status, set()):
+            raise _handoff_failure(FailureCode.HANDOFF_TRANSITION_INVALID, f"invalid handoff transition: {previous_status}->{status}")
+        if status in {"ACKNOWLEDGED", "ANSWERED"}:
+            if event["ACTOR_INSTANCE_ID"] == message["FROM_INSTANCE_ID"]:
+                raise _handoff_failure(FailureCode.HANDOFF_ACK_IMPERSONATION, "sender cannot acknowledge or answer for recipient", Stage.CONFLICTED)
+            if event["ACTOR_INSTANCE_ID"] != message["TO_INSTANCE_ID"]:
+                raise _handoff_failure(FailureCode.HANDOFF_ACTOR_MISMATCH, "ACK/answer actor is not the verified recipient")
+        if status == "REVIEWED" and event["ACTOR_INSTANCE_ID"] in {message["FROM_INSTANCE_ID"], message["TO_INSTANCE_ID"]}:
+            raise _handoff_failure(FailureCode.HANDOFF_ACTOR_MISMATCH, "review must be performed by a distinct verified instance")
+        previous_status = status
+        previous_hash = event["EVENT_SHA256"]
+    return previous_status or "FAILED_CLOSED"
 
 
 def validate_state_sha(current_state: dict[str, Any]) -> None:
