@@ -24,7 +24,36 @@ No deployment script or Mainnet address is included.
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
 
-## Purpose
+## KUFO Product 05 annual-cohort review continuation
+
+Candidate only; no deployment or original task-lease claim. The complete source
+crosswalk, preserved #201/#600 heads, gas-bound design, validation and deployment
+prerequisites are in
+[`KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md).
+This uses existing candidate paths, leaves deployed V1/main KAIOS and KSHIP
+unchanged, and does not create another Runtime or ledger.
+
+| Full repository path | Purpose |
+|---|---|
+| `KGEN-KAIOS/contracts/KUFOV4.sol` | Annual shared-cohort KUFO candidate; immutable explicit bounded calendar and terminal settlement. |
+| `KGEN-KAIOS/contracts/KAIOSAlchemyFurnaceV4.sol` | Immediate KAIOS burn and current KGEN balance proof. |
+| `KGEN-KAIOS/contracts/KUFOOutputJindouyun168888V4.sol` | Fixed-beneficiary immediate outlet. |
+| `KGEN-KAIOS/runtime/kufo-v4-policy.mjs` | Pure annual/tranche projection using preserved #600 calendar parsing. |
+| `KGEN-KAIOS/tests/contracts/KUFOV4EvmHarness.sol` | Local EVM adversarial actors. |
+| `KGEN-KAIOS/tests/kufo-v4-evm.behavior.test.mjs` | Cohort, dust, gas, allowance, proof and conservation tests. |
+| `KGEN-KAIOS/tests/kufo-v4-kship-interface.unit.test.mjs` | Existing main KSHIP carrier interface compatibility. |
+| `KGEN-KAIOS/tests/kufo-v4-three-autumns.unit.test.mjs` | Pure policy and integer-partition properties. |
+| `KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md` | Full cumulative KUFO candidate specification with preserved history. |
+| `KGEN-KAIOS/docs/KSHIP_V4_WHITEPAPER.md` | Full cumulative KSHIP integration specification with preserved history. |
+| `KGEN-KAIOS/research/kufo-zodiac-cohort-v0.mjs` | Unchanged #600 research, zodiac calendar and unique latency helper. |
+| `KGEN-KAIOS/research/kufo-zodiac-cohort-v0.test.mjs` | Unchanged nine-test research suite. |
+| `KGEN-KAIOS/research/README-kufo-zodiac-cohort-v0.md` | Unchanged research assumptions, noncanonical calendar and safety scope. |
+
+Boot navigation uses the existing CURRENT Boot -> master-library index ->
+`docs/KGEN_MASTER_INDEX.md` -> this module README. Boot and CURRENT remain
+unchanged because no Boot or physics update was requested.
+
+## Operating-system purpose (continued)
 
 KAIOS is the KGEN AI Operating System. It is not another document library and it is not a mass document expansion. It is the architecture layer that coordinates AI workers, tasks, claims, reports, reviews, recovery, dashboard state, and security policy.
 

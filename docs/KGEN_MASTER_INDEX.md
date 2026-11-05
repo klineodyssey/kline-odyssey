@@ -1,5 +1,21 @@
 # KGEN MASTER_INDEX
 
+## KUFO Product 05 source continuation (review candidate)
+
+The existing #201 alchemy paths and all three exact #600 research blobs are
+indexed in `KGEN-KAIOS/README.md` and
+`KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`, including full repository
+paths and purposes. The candidate implements annual cohort 50/75/100% terminal
+conversion with bounded dust-resistant transfer; no parallel Runtime, ledger,
+product or new versioned filename is introduced. Deployed V1, main KAIOS/KSHIP,
+Physics CURRENT, Boot, registry and claims stay unchanged. Formal calendar,
+finite issuance horizon and deployment authority remain unconfigured.
+
+Existing navigation: `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` ->
+`KGEN_MASTER_LIBRARY_INDEX.md` -> this index -> `KGEN-KAIOS/README.md`.
+The original PR #201 owner/lease must be verified before adopting the isolated
+review branch into that PR. #600 is preserved, not closed; #211/#212 are downstream.
+
 ## K11520 three-plane joystick filename (2026-10-19)
 
 Human selected `joystick-xzxyyz.mjs` (option A) for PR #615. This migrates
