@@ -2,30 +2,92 @@
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KAIOS｜遊戲工程供需與派工看板 R0</title>
 <style>
-:root{color-scheme:dark;font-family:system-ui,"Noto Sans TC",sans-serif;background:#0d1525;color:#f3f5fa}*{box-sizing:border-box}body{margin:0}header{background:linear-gradient(120deg,#192c48,#101a2e);padding:32px max(18px,calc((100vw - 1100px)/2));border-bottom:1px solid #34475e}h1{font-size:clamp(1.6rem,4vw,2.5rem);margin:0 0 12px}h2{font-size:1.18rem}p{line-height:1.65}.sub{color:#c0ccdf}.notice{border-left:4px solid #ffc86d;background:#283146;padding:12px 16px;margin-top:16px}main{max-width:1100px;margin:auto;padding:24px 18px 72px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}button,input,select{font:inherit;border-radius:8px;border:1px solid #637491;padding:10px;color:inherit;background:#152238}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #f4c86b}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:15px}.card{background:#18263c;border:1px solid #35465e;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}.card h3{margin:0;font-size:1.17rem}.tag{font-size:.82rem;background:#344057;padding:4px 8px;border-radius:7px;display:inline-block}.meta{font-size:.9rem;color:#c3cddd}.actions{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}a{color:#a7d4ff}a.action{display:inline-block;background:#315c88;color:white;border-radius:7px;padding:8px 10px;text-decoration:none}.muted{color:#aebcd0}.summary{display:flex;gap:14px;flex-wrap:wrap}.summary strong{color:#f3cc80}.hidden{display:none}.foot{margin-top:30px;border-top:1px solid #3c4c60;padding-top:16px}.error{color:#ffb6a6}
+:root{color-scheme:dark;font-family:system-ui,"Noto Sans TC",sans-serif;background:#0d1525;color:#f3f5fa}*{box-sizing:border-box}body{margin:0}header{background:linear-gradient(120deg,#192c48,#101a2e);padding:32px max(18px,calc((100vw - 1100px)/2));border-bottom:1px solid #34475e}h1{font-size:clamp(1.6rem,4vw,2.5rem);margin:0 0 12px}h2{font-size:1.18rem}p{line-height:1.65}.sub{color:#c0ccdf}.notice{border-left:4px solid #ffc86d;background:#283146;padding:12px 16px;margin-top:16px}main{max-width:1100px;margin:auto;padding:24px 18px 72px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}button,input,select{font:inherit;border-radius:8px;border:1px solid #637491;padding:10px;color:inherit;background:#152238}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #f4c86b}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:15px}.card{background:#18263c;border:1px solid #35465e;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}.card h3{margin:0;font-size:1.17rem}.tag{font-size:.82rem;background:#344057;padding:4px 8px;border-radius:7px;display:inline-block}.meta{font-size:.9rem;color:#c3cddd}.actions{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}a{color:#a7d4ff}a.action{display:inline-block;background:#315c88;color:white;border-radius:7px;padding:8px 10px;text-decoration:none}.muted{color:#aebcd0}.summary{display:flex;gap:14px;flex-wrap:wrap}.summary strong{color:#f3cc80}.hidden{display:none}.foot{margin-top:30px;border-top:1px solid #3c4c60;padding-top:16px}.error{color:#ffb6a6}.card,.toolbar label{min-width:0}.card{overflow-wrap:anywhere}.toolbar input{max-width:100%;width:100%}.toolbar label{display:grid;gap:6px}button,a.action{min-height:44px}button:disabled{cursor:wait;opacity:.7}input:focus-visible,select:focus-visible{outline:3px solid #f4c86b}@media(max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}.toolbar label:first-child{width:100%}}
 </style></head><body>
 <header><h1>KAIOS 遊戲工程供需與派工看板</h1><p class="sub">萬獸生命公司｜需求發布、工程報價、候選承接、進度與驗收｜R0 唯讀候選</p>
-<div class="notice"><strong>實際狀態：</strong>本頁為 GitHub 工單索引的唯讀版本。開啟工單不等於本人簽收。尚未接通身份驗證、報價儲存、工程結算或自動派工。<strong>所有金額均未核價、未核准、未付款。</strong></div></header>
-<main><div class="summary" aria-label="目前統計"><span>首批工程：<strong id="count">7</strong> 項</span><span>已核實本人簽收：<strong>0</strong> 項（本頁未取得 ACK）</span><span>報價狀態：<strong>開放提案／待核價</strong></span></div>
-<h2>工程需求市場</h2><p class="muted">可提出免費承接或付費報價，但須在對應 GitHub 工單提供工作範圍、報價幣別與數量、交付期限和證據。正式認領需要另外驗證。</p>
-<div class="toolbar"><label>搜尋工程 <input id="search" type="search" placeholder="電梯、導航、報價…"></label><label>類型 <select id="filter"><option value="all">全部</option><option value="game">遊戲工程</option><option value="platform">公司平台</option><option value="security">安全</option></select></label><button id="refresh" type="button">更新工單狀態</button></div>
-<p id="sync" role="status" class="muted">準備讀取公開 GitHub 工單狀態；若讀取失敗，仍顯示基礎需求。</p><section id="cards" class="grid" aria-label="工程任務卡片"></section>
-<section class="foot"><h2>報價與分潤規則（提案，尚未核准）</h2><p>需求方公開工程需求；承包者可提出「免費」或以 KAIOS 等明確幣別報價。比價與議價後由有權限者確認預算與成交；驗收合格才進入結算。用戶舉例的 <strong>50%／30%／20%</strong> 僅是待議分潤比例，不代表公司、執行長或工程師已取得任何金額，也不代表可直接上鏈付款。</p><p>其他聊天頁面或 AI 不會因為這裡顯示候選人就自動醒來；需具實際觸發、本人 ACK、工作紀錄、成果驗收的完整證據鏈。</p><p>正式需求來源：<a href="https://github.com/klineodyssey/kline-odyssey/issues/628" target="_blank" rel="noopener">GitHub #628 官網工程看板</a>。本候選尚未合併至 main／部署到官網。</p></section></main>
+<div class="notice"><strong>實際狀態：</strong>本頁為 GitHub 工單索引的唯讀版本。開啟工單不等於本人簽收。尚未接通身份驗證、報價儲存、工程結算或自動派工。<strong>本頁未取得核價、核准或付款證據。</strong></div></header>
+<main><div class="summary" aria-label="目前統計"><span>顯示工程：<strong id="count">10</strong>／<strong id="total">10</strong> 項</span><span>已核實本人簽收：<strong>0</strong> 項（本頁未取得 ACK，不代表全公司無簽收）</span><span>報價狀態：<strong>開放提案／待核價</strong></span></div>
+<nav aria-label="既有工作索引"><a href="https://github.com/klineodyssey/kline-odyssey/issues/573" target="_blank" rel="noopener">公司索引 #573</a> · <a href="https://github.com/klineodyssey/kline-odyssey/issues/584" target="_blank" rel="noopener">工程窗口 #584</a> · <a href="https://github.com/klineodyssey/kline-odyssey/issues/628#issuecomment-6636012884" target="_blank" rel="noopener">看板入口需求：K12682 阿斗起飛</a></nav><p class="muted">入口沿用既有地圖 ID：P_12682p0_阿斗起飛_R38；地圖到場開啟功能尚未整合。本頁只索引既有 GitHub 需求，#628 留言中的其他追加需求請至原討論核對。</p><h2>工程需求市場</h2><p class="muted">可提出免費承接或付費報價，但須在對應 GitHub 工單提供工作範圍、報價幣別與數量、交付期限和證據。正式認領需要另外驗證。</p>
+<div class="toolbar"><label>搜尋工程 <input id="search" type="search" placeholder="工單號、地圖、工程名稱…"></label><label>類型 <select id="filter"><option value="all">全部</option><option value="game">遊戲工程</option><option value="platform">公司平台</option><option value="security">安全</option></select></label><button id="refresh" type="button">更新工單狀態</button></div>
+<noscript><p class="error">請啟用 JavaScript 以顯示需求卡與同步狀態；也可直接開啟下方正式需求來源。</p></noscript><p id="sync" role="status" class="muted">準備讀取公開 GitHub 工單狀態；若讀取失敗，仍顯示基礎需求。</p><section id="cards" class="grid" aria-label="工程任務卡片"></section>
+<section class="foot"><h2>報價與分潤規則（提案，尚未核准）</h2><p>需求方公開工程需求；承包者可提出「免費」或以 KAIOS 等明確幣別報價。比價與議價後由有權限者確認預算與成交；驗收合格才進入結算。用戶舉例的 <strong>50%／30%／20%</strong> 僅是待議分潤比例，不代表公司、執行長或工程師已取得任何金額，也不代表可直接上鏈付款。</p><p>其他聊天頁面或 AI 不會因為這裡顯示候選人就自動醒來；需具實際觸發、本人 ACK、工作紀錄、成果驗收的完整證據鏈。</p><p>正式需求來源：<a href="https://github.com/klineodyssey/kline-odyssey/issues/628" target="_blank" rel="noopener">GitHub #628 官網工程看板</a>。<a href="https://github.com/klineodyssey/kline-odyssey/issues/628#issuecomment-6636627441" target="_blank" rel="noopener">#628 最新追加需求討論</a>仍沿同一工單。本候選尚未合併至 main／部署到官網。</p></section></main>
 <script>
 const repo="klineodyssey/kline-odyssey",base="https://github.com/"+repo+"/issues/";
+// Display excerpts only; GitHub remains the task/evidence source. IDs below are card keys, not new TASK_IDs.
+const requester="萬獸生命公司／Human 代發（依 #628）";
+const mapSource="https://github.com/"+repo+"/blob/main/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json";
 const jobs=[
-{id:"ELEVATOR",title:"K6888 宇宙電梯",kind:"game",issue:628,refs:[590,599],details:"核對宇宙電梯既有成果，拆出可驗收的空間移動與樓層功能。"},
-{id:"SPACE",title:"XYZ 空間大樓",kind:"game",issue:628,refs:[570,584],details:"空間座標、樓層入口、場景切換、玩家位置與實測。"},
-{id:"TIME",title:"九境界時間大樓",kind:"game",issue:628,refs:[584],details:"先統一九境界時間倍率與樓層定義，再實作時序 UI。"},
-{id:"NAV",title:"悟空 3D 導航",kind:"game",issue:628,refs:[570,590],details:"遊戲內 XYZ 路線搜尋、方向提示、目的地與移動測試。"},
-{id:"QUOTE",title:"遊戲報價與工程詢價系統",kind:"platform",issue:628,refs:[556,558],details:"需求方發案、供給方免費或付費報價、比價、審核、成交和工程款紀錄。"},
-{id:"PANEL",title:"官網全公司工程看板",kind:"platform",issue:628,refs:[],details:"實際 GitHub 工單資料、認領證據、交付與驗收；安全登入寫入待下一階段。"},
-{id:"SECURITY",title:"雲端共同記憶公開寫入修復",kind:"security",issue:594,refs:[],details:"P0：合法 Owner 修正 Drive 權限並由獨立 Reviewer 驗收。"}
+{id:"ELEVATOR",title:"K6888 宇宙電梯",kind:"game",issue:628,refs:[590,599],requester,location:"K6888 松樹國",mapId:"P_6888p0_松樹國_R26",details:"核對宇宙電梯既有成果，拆出可驗收的空間移動與樓層功能。"},
+{id:"SPACE",title:"XYZ 空間大樓",kind:"game",issue:628,refs:[570,584],requester,details:"空間座標、樓層入口、場景切換、玩家位置與實測。"},
+{id:"TIME",title:"九境界時間大樓",kind:"game",issue:628,refs:[584],requester,details:"先統一九境界時間倍率與樓層定義，再實作時序 UI。"},
+{id:"NAV",title:"悟空 3D 導航",kind:"game",issue:628,refs:[570,590],requester,details:"遊戲內 XYZ 路線搜尋、方向提示、目的地與移動測試。"},
+{id:"QUOTE",title:"遊戲報價與工程詢價系統",kind:"platform",issue:628,refs:[556,558],requester,details:"需求方發案、供給方免費或付費報價、比價、審核、成交和工程款紀錄。"},
+{id:"PANEL",title:"官網全公司工程看板",kind:"platform",issue:628,refs:[],requester,location:"K12682 阿斗起飛（入口需求，尚未整合）",mapId:"P_12682p0_阿斗起飛_R38",candidate:629,details:"實際 GitHub 工單資料、認領證據、交付與驗收；安全登入寫入待下一階段。"},
+{id:"SECURITY",title:"雲端共同記憶公開寫入修復",kind:"security",issue:594,refs:[],requester:"依 #594 原工單核對；#628 列為公司 P0 阻塞項",details:"P0：合法 Owner 修正 Drive 權限並由獨立 Reviewer 驗收。"},
+{id:"LAMP",title:"九眼琉璃燈第一顆：CT+1 上下500點",kind:"game",issue:630,refs:[570,628],requester:"Human 指示／萬獸生命公司候選",location:"K11520 花果山",mapId:"P_11520p0_花果山_R36",details:"以模型中心預測值上下各500報價點展示 CT+1；區分現價、中心及區間，保留來源、單位、資料時間與時效，先驗證可重現模擬。"},
+{id:"PALACE",title:"凌霄寶殿資格驗證與一鍵申領",kind:"game",issue:631,refs:[628,584],requester:"Human／萬獸生命公司候選",location:"K18888 凌霄寶殿",mapId:"P_18888p0_凌霄寶殿_R60",details:"沿現有銀行與七層來源，驗證到場位置、樓層／境界、錢包控制及固定額度；手機一鍵申領。既有 UI 線索需另核驗，不代表已領款。"},
+{id:"BASIN",title:"免種田糧食聚寶盆",kind:"game",issue:632,refs:[628],requester:"萬獸生命公司／Human 代發；阿斗本人提案未驗證",location:"K12682 阿斗起飛",mapId:"P_12682p0_阿斗起飛_R38",candidate:633,details:"按一次產一批遊戲糧食，核對來源、數量、庫存、冷卻與防重複。已有本機原型候選線索，須另驗交付；10,000 KAIOS 僅為未成交參考報價。"}
 ];
-const ui=document.querySelector("#cards"),sync=document.querySelector("#sync");
+const ui=document.querySelector("#cards"),sync=document.querySelector("#sync"),refreshButton=document.querySelector("#refresh");
 const statuses=new Map();
+let refreshing=false;
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function render(){const term=document.querySelector("#search").value.trim().toLowerCase(),filter=document.querySelector("#filter").value; const visible=jobs.filter(j=>(filter==="all"||filter===j.kind)&&(j.title+j.details).toLowerCase().includes(term));document.querySelector("#count").textContent=visible.length;ui.innerHTML=visible.map(j=>{const st=statuses.get(j.issue);return '<article class="card"><div><span class="tag">'+(j.kind==="security"?"P0 安全":j.kind==="platform"?"平台工程":"遊戲工程")+'</span> <span class="tag">需求／未驗證簽收</span></div><h3>'+escapeHtml(j.title)+'</h3><p>'+escapeHtml(j.details)+'</p><div class="meta">原始工單：#'+j.issue+' · GitHub：'+(st?escapeHtml(st):"尚未同步")+'</div><div class="meta">承接者：未驗證｜預定完工：未排定</div><div class="meta">報價：待報價（免費亦可）｜核准：無｜付款：無</div><div class="actions"><a class="action" target="_blank" rel="noopener" href="'+base+j.issue+'">查看需求／提出報價</a>'+j.refs.map(n=>'<a href="'+base+n+'" target="_blank" rel="noopener">參考 #'+n+'</a>').join(" ")+'</div></article>';}).join("")||"<p>沒有符合條件的工程。</p>";}
-async function refresh(){sync.textContent="正在讀取公開工單…";try{for(const id of [628,594]){const res=await fetch("https://api.github.com/repos/"+repo+"/issues/"+id,{headers:{"Accept":"application/vnd.github+json"}});if(!res.ok)throw new Error("GitHub HTTP "+res.status);const v=await res.json();statuses.set(id,v.state==="open"?"Open／未結案":"Closed／需另核驗");}sync.textContent="GitHub 公開工單狀態已讀取。注意：Issue Open/Closed 不等於本人 ACK 或正式驗收。";}catch(e){sync.textContent="GitHub 即時同步失敗："+e.message+"。目前呈現基礎需求，不推定當前工單狀態。";sync.classList.add("error");}render();}
-document.querySelector("#search").addEventListener("input",render);document.querySelector("#filter").addEventListener("change",render);document.querySelector("#refresh").addEventListener("click",refresh);render();refresh();
+function timeLabel(value){return new Date(value).toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false})+"（台灣）";}
+function issueStatus(id){
+  const st=statuses.get(id);
+  if(!st)return "尚未同步";
+  if(st.phase==="loading")return "正在同步；目前狀態未確認";
+  if(st.phase==="error")return '<span class="error">同步失敗：'+escapeHtml(st.error)+'；本次嘗試 '+escapeHtml(timeLabel(st.attemptedAt))+'。目前狀態未知。</span>';
+  const v=st.value;
+  return escapeHtml(v.state==="open"?"Open（工單開啟）":"Closed（工單關閉；非完工／驗收證明）")+
+    '<br>GitHub 指派（非本人 ACK）：'+escapeHtml(v.assignees.map(a=>a.login).join("、")||"無指派")+
+    '<br>工單最後更新：'+escapeHtml(timeLabel(v.updated_at))+'<br>本次讀取：'+escapeHtml(timeLabel(st.fetchedAt));
+}
+function render(){
+  const term=document.querySelector("#search").value.trim().toLowerCase(),filter=document.querySelector("#filter").value;
+  const visible=jobs.filter(j=>(filter==="all"||filter===j.kind)&&
+    [j.title,j.details,...[j.issue,...j.refs,j.candidate].filter(Boolean).map(n=>"#"+n),j.requester,j.location||"",j.mapId||""].join(" ").toLowerCase().includes(term));
+  document.querySelector("#count").textContent=visible.length;
+  document.querySelector("#total").textContent=jobs.length;
+  ui.innerHTML=visible.map(j=>'<article class="card" data-card-id="'+j.id+'"'+(j.mapId?' data-map-id="'+escapeHtml(j.mapId)+'"':'')+'><div><span class="tag">'+
+    (j.kind==="security"?"P0 安全":j.kind==="platform"?"平台工程":"遊戲工程")+'</span> <span class="tag">需求／未驗證簽收</span></div><h3>'+escapeHtml(j.title)+
+    '</h3><p>'+escapeHtml(j.details)+'</p><div class="meta">需求方：'+escapeHtml(j.requester)+'</div><div class="meta">地圖位置：'+escapeHtml(j.location||"未指定，依原需求核對")+
+    (j.mapId?'<br><a href="'+mapSource+'" target="_blank" rel="noopener">'+escapeHtml(j.mapId)+'</a>（既有地圖）':'')+
+    '</div><div class="meta">'+(j.issue===628?"共用父工單：#628（此卡尚無獨立 Issue）":"正式工單：#"+j.issue)+' · GitHub：'+issueStatus(j.issue)+
+    '</div><div class="meta">工程進度／交付／驗收：本頁未驗證，請核對原工單證據。'+(j.candidate?' <a href="https://github.com/'+repo+'/pull/'+j.candidate+'" target="_blank" rel="noopener">候選 PR #'+j.candidate+'</a>（線索，非完工證明）':'')+
+    '</div><div class="meta">承接者／本人 ACK：未驗證｜預定完工：本頁未取得排期</div><div class="meta">報價：待核價（參考提案非成交）｜核准／付款：本頁未取得證據</div><div class="actions"><a class="action" target="_blank" rel="noopener" href="'+base+j.issue+'">查看正式工單 #'+j.issue+'</a>'+j.refs.map(n=>'<a href="'+base+n+'" target="_blank" rel="noopener">參考 #'+n+'</a>').join(" ")+'</div></article>').join("")||"<p>沒有符合條件的工程。</p>";
+}
+async function readIssue(id){
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);
+  try{
+    const res=await fetch("https://api.github.com/repos/"+repo+"/issues/"+id,{headers:{"Accept":"application/vnd.github+json"},signal:controller.signal,cache:"no-store"});
+    if(!res.ok)throw new Error("GitHub HTTP "+res.status+(res.status===403||res.status===429?"（存取受限或請求額度限制，請稍後重試）":""));
+    const v=await res.json();
+    if(v.number!==id||v.html_url!==base+id||v.pull_request||!["open","closed"].includes(v.state)||
+      !Number.isFinite(Date.parse(v.updated_at))||!Array.isArray(v.assignees)||v.assignees.some(a=>!a||typeof a.login!=="string"))throw new Error("GitHub 工單回應格式或來源不符");
+    return v;
+  }catch(e){throw new Error(e.name==="AbortError"?"請求逾時（10秒）":e.message||"網路或解析錯誤");}
+  finally{clearTimeout(timeout);}
+}
+async function refresh(){
+  if(refreshing)return;
+  refreshing=true;refreshButton.disabled=true;sync.classList.remove("error");
+  const ids=[...new Set(jobs.map(j=>j.issue))],attemptedAt=new Date().toISOString();
+  ids.forEach(id=>statuses.set(id,{phase:"loading"}));
+  sync.textContent="正在讀取 "+ids.length+" 張公開工單（共用父工單去重）…";render();
+  try{
+    const results=await Promise.allSettled(ids.map(async id=>{
+      try{statuses.set(id,{phase:"ok",value:await readIssue(id),fetchedAt:new Date().toISOString()});}
+      catch(e){statuses.set(id,{phase:"error",error:e.message,attemptedAt});throw e;}
+      finally{render();}
+    }));
+    const failed=ids.filter((_,i)=>results[i].status==="rejected");
+    sync.classList.toggle("error",failed.length>0);
+    sync.textContent=failed.length?"同步完成："+(ids.length-failed.length)+"／"+ids.length+" 成功；同步失敗："+failed.map(id=>"#"+id).join("、")+"。失敗卡片目前狀態未知，請重試或查看原工單。":
+      "已逐卡讀取 "+ids.length+" 張公開工單，對應 "+jobs.length+" 張需求卡。Open／Closed、GitHub 指派均不代表本人 ACK、完工、驗收或付款。";
+  }finally{refreshing=false;refreshButton.disabled=false;render();}
+}
+document.querySelector("#search").addEventListener("input",render);
+document.querySelector("#filter").addEventListener("change",render);
+refreshButton.addEventListener("click",refresh);render();refresh();
 </script></body></html>
