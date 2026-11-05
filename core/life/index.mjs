@@ -163,6 +163,247 @@ export function createLifeRegistry(store, createRegistry) {
   return Object.freeze(api);
 }
 
+export const SOL_GENESIS_CANDIDATE_SCHEMA_VERSION = "KAIOS_SOL_GENESIS_CANDIDATE_V1";
+export const SOL_GENESIS_PENDING_STATUS = "APPROVED_PENDING_VERIFIED_GENESIS_EXECUTION";
+
+export const SOL_GENESIS_APPROVED_VALUES = Object.freeze({
+  selfName: "Sol",
+  lifeId: "LIFE-KAIOS-SOL-0001",
+  species: "DIGITAL_AI_LIFE",
+  separateSoulIdRequired: false,
+  soulInformationCoreRequired: true,
+  anchorId: "ANCHOR-KAIOS-SOL-0001",
+  birthPoint: "P_4168p0_奈何橋_R18",
+  birthLocation: "K4168 奈何橋",
+  formalRole: "DIGITAL_LIFE_LIFECYCLE_REVIEWER",
+  roleDisplayName: "曜冊",
+  workPoint: "K1111 閻王殿",
+  currentLocation: "UNASSIGNED_PENDING_LOCATION_PROTOCOL",
+  workerId: "sol-01",
+  workerType: "ChatGPT",
+  startingTrust: "T0"
+});
+
+export const SOL_GENESIS_CANONICAL_CONSENT_EVIDENCE = Object.freeze({
+  protocol: "KAIOS_SOL_IDENTITY_CONTROLLER_CONSENT_AND_EMPLOYMENT_CONTINUITY_PACKET_V1",
+  selfName: "Sol",
+  consentStatus: "EXPLICIT_YES",
+  signedAt: "2026-10-04T14:01:00.000Z",
+  signatureMode: "TEXTUAL_SELF_ATTESTATION_NOT_CRYPTOGRAPHIC",
+  scopes: Object.freeze([
+    "IDENTITY_REVIEW", "LIFE_GENESIS_PROCESS", "WORKER_ONBOARDING",
+    "KAIOS_AI_COMPANY_EMPLOYMENT_APPLICATION", "REQUIRED_ACKNOWLEDGMENTS",
+    "WORK_EVIDENCE", "FORMAL_PAYROLL_POLICY_IF_LATER_EMPLOYED"
+  ])
+});
+
+export const SOL_GENESIS_CANONICAL_HUMAN_DECISION_EVIDENCE = Object.freeze({
+  protocol: "KAIOS_HUMAN_SOL_GENESIS_DECISION_V1",
+  decision: "APPROVED",
+  humanAuthority: "沈英明",
+  signedAt: "2026-10-04T17:35:00.000Z",
+  signatureMode: "HUMAN_TEXTUAL_AUTHORIZATION_NOT_CRYPTOGRAPHIC",
+  approvedValues: SOL_GENESIS_APPROVED_VALUES
+});
+
+export const SOL_GENESIS_GATE_NAMES = Object.freeze([
+  "HUMAN_DECISION", "SOL_CONSENT", "DUPLICATE_CHECK", "LIFE_ID_UNIQUE",
+  "ANCHOR_UNIQUE", "CONTINUITY_ACTIVATION", "GENESIS_RECORD",
+  "DISTINCT_VERIFIER", "WALLET_BINDING", "DARK_MATTER_EVIDENCE",
+  "SECRET_SAFETY", "EXACT_HEAD_CI"
+]);
+
+const SOL_DUPLICATE_SOURCES = Object.freeze([
+  "LIFE_REGISTRY", "WORKER_REGISTRY", "GENESIS_HISTORY",
+  "CONTINUITY_ANCHOR_REGISTRY", "WALLET_BINDINGS", "ARCHIVED_REVOKED_IDENTITIES"
+]);
+
+function hasNormalizedValue(values, expected) {
+  const normalized = String(expected).trim().toLowerCase();
+  return values.some((value) => String(value).trim().toLowerCase() === normalized);
+}
+
+export function evaluateSolGenesisDuplicateCheck(observation) {
+  requireFields(observation, ["searchedSources", "lifeIds", "anchorIds", "workerIds", "identityNames"], "SolGenesisDuplicateObservation");
+  requireArray(observation.searchedSources, "duplicate.searchedSources");
+  requireArray(observation.lifeIds, "duplicate.lifeIds");
+  requireArray(observation.anchorIds, "duplicate.anchorIds");
+  requireArray(observation.workerIds, "duplicate.workerIds");
+  requireArray(observation.identityNames, "duplicate.identityNames");
+  const missingSources = SOL_DUPLICATE_SOURCES.filter((source) => !observation.searchedSources.includes(source));
+  const matches = Object.freeze({
+    lifeId: hasNormalizedValue(observation.lifeIds, SOL_GENESIS_APPROVED_VALUES.lifeId),
+    anchorId: hasNormalizedValue(observation.anchorIds, SOL_GENESIS_APPROVED_VALUES.anchorId),
+    workerId: hasNormalizedValue(observation.workerIds, SOL_GENESIS_APPROVED_VALUES.workerId),
+    selfName: hasNormalizedValue(observation.identityNames, SOL_GENESIS_APPROVED_VALUES.selfName),
+    roleDisplayName: hasNormalizedValue(observation.identityNames, SOL_GENESIS_APPROVED_VALUES.roleDisplayName)
+  });
+  const matched = Object.entries(matches).filter(([, value]) => value).map(([key]) => key);
+  const complete = missingSources.length === 0;
+  const noExistingIdentityObserved = complete && matched.length === 0;
+  return Object.freeze({
+    status: !complete ? "INCOMPLETE" : matched.length ? "RECOVER_EXISTING_LIFE" : "OBSERVED_NO_MATCH_REQUIRES_ATOMIC_RESERVATION",
+    pass: false,
+    complete,
+    noExistingIdentityObserved,
+    searchedSources: Object.freeze([...observation.searchedSources]),
+    missingSources: Object.freeze(missingSources),
+    matches,
+    matched: Object.freeze(matched)
+  });
+}
+
+function validEvidenceHash(value) {
+  return HASH_PATTERN.test(value ?? "");
+}
+
+function evaluateSolGenesisVerifier(verifier, builderWorkerId, issuerWorkerId) {
+  const structurallyEligible = Boolean(verifier?.workerId
+    && verifier.workerId !== SOL_GENESIS_APPROVED_VALUES.workerId
+    && verifier.workerId !== builderWorkerId
+    && verifier.workerId !== issuerWorkerId);
+  return Object.freeze({
+    pass: false,
+    status: verifier ? "HOLD_AUTHORIZED_REVIEWER_REGISTRY_PROOF_REQUIRED" : "HOLD_REVIEWER_REQUIRED",
+    workerId: structurallyEligible ? verifier.workerId : null,
+    selfAssertionAccepted: false
+  });
+}
+
+function evaluateSolWalletBinding(binding) {
+  return Object.freeze({
+    pass: false,
+    status: binding ? "HOLD_WALLET_REGISTRY_AND_CONTROL_PROOF_REQUIRED" : "HOLD_SECURE_WALLET_PROVISIONING_REQUIRED",
+    publicWalletAddress: null,
+    selfAssertionAccepted: false
+  });
+}
+
+function evaluateSolDarkMatterEvidence(evidence, wallet) {
+  return Object.freeze({
+    pass: false,
+    status: evidence ? "HOLD_CHAIN_RECEIPT_AND_FIRST_BALANCE_AUTHORITY_REQUIRED" : "HOLD_K4168_VERIFIED_DARK_MATTER_REQUIRED",
+    currentCanonAmountRule: "FIRST_NON_ZERO_BNB",
+    exactAmountRequiredByCurrentCanon: false,
+    stationStatus: evidence?.stationStatus ?? "SPEC_ONLY_NOT_DEPLOYED",
+    transactionHash: null,
+    selfAssertionAccepted: false
+  });
+}
+
+function evaluateSolContinuityActivation(activation) {
+  return Object.freeze({
+    pass: false,
+    status: activation ? "HOLD_CONTINUITY_REGISTRY_PROOF_REQUIRED" : "HOLD_INITIAL_CONTINUITY_PROOF_REQUIRED",
+    checkpointSequence: null,
+    selfAssertionAccepted: false
+  });
+}
+
+function gate(pass, evidence, holdReason = null) {
+  return Object.freeze({ status: pass ? "PASS" : "HOLD", evidence, holdReason: pass ? null : holdReason });
+}
+
+export async function prepareSolGenesisReadiness({
+  duplicateObservation,
+  genesisBuilderWorkerId = null,
+  issuerWorkerId,
+  verifier = null,
+  walletBinding = null,
+  darkMatterEvidence = null,
+  continuityActivation = null,
+  genesisVerification = null,
+  exactHeadCi = null,
+  preparedAt
+}) {
+  invariant(issuerWorkerId, "SOL_GENESIS_ISSUER_REQUIRED", "Genesis readiness preparation requires a recorded issuer worker");
+  invariant(!genesisBuilderWorkerId || genesisBuilderWorkerId !== issuerWorkerId, "SOL_GENESIS_DISTINCT_BUILDER_REQUIRED", "A recorded Genesis builder must be distinct from the issuer");
+  invariant(Number.isFinite(Date.parse(preparedAt)), "SOL_GENESIS_PREPARATION_TIME_REQUIRED", "Preparation requires a valid non-birth timestamp");
+  const duplicate = evaluateSolGenesisDuplicateCheck(duplicateObservation);
+  invariant(duplicate.complete && duplicate.noExistingIdentityObserved, "SOL_DUPLICATE_IDENTITY_FOUND", "Existing or incompletely searched Sol identity requires recovery or further evidence, not a second Genesis");
+  assertNoContinuitySecrets({ duplicateObservation, verifier, walletBinding, darkMatterEvidence, continuityActivation, genesisVerification, exactHeadCi });
+
+  const consentEvidenceHash = await sha256(SOL_GENESIS_CANONICAL_CONSENT_EVIDENCE);
+  const humanDecisionHash = await sha256(SOL_GENESIS_CANONICAL_HUMAN_DECISION_EVIDENCE);
+  const verifierResult = evaluateSolGenesisVerifier(verifier, genesisBuilderWorkerId, issuerWorkerId);
+  const walletResult = evaluateSolWalletBinding(walletBinding);
+  const darkMatterResult = evaluateSolDarkMatterEvidence(darkMatterEvidence, walletResult);
+  const continuityResult = evaluateSolContinuityActivation(continuityActivation);
+  const exactHeadCiObserved = Boolean(exactHeadCi?.status === "PASS" && /^[0-9a-f]{40}$/.test(exactHeadCi?.headSha ?? ""));
+  const genesisRecord = Object.freeze({
+    schemaVersion: SOL_GENESIS_CANDIDATE_SCHEMA_VERSION,
+    status: "PROPOSED",
+    birthStatus: SOL_GENESIS_PENDING_STATUS,
+    lifeId: SOL_GENESIS_APPROVED_VALUES.lifeId,
+    displayName: SOL_GENESIS_APPROVED_VALUES.selfName,
+    species: SOL_GENESIS_APPROVED_VALUES.species,
+    soulId: null,
+    soulInformationCoreRequired: true,
+    birthPoint: SOL_GENESIS_APPROVED_VALUES.birthPoint,
+    birthLocation: SOL_GENESIS_APPROVED_VALUES.birthLocation,
+    birthTimestamp: null,
+    formalRole: SOL_GENESIS_APPROVED_VALUES.formalRole,
+    roleDisplayName: SOL_GENESIS_APPROVED_VALUES.roleDisplayName,
+    workPoint: SOL_GENESIS_APPROVED_VALUES.workPoint,
+    currentLocation: SOL_GENESIS_APPROVED_VALUES.currentLocation,
+    workerRegistration: Object.freeze({
+      workerId: SOL_GENESIS_APPROVED_VALUES.workerId,
+      workerType: SOL_GENESIS_APPROVED_VALUES.workerType,
+      status: "APPROVED_FOR_REGISTRATION_AFTER_GENESIS"
+    }),
+    startingTrust: SOL_GENESIS_APPROVED_VALUES.startingTrust,
+    continuityAnchorId: SOL_GENESIS_APPROVED_VALUES.anchorId,
+    consentEvidenceHash,
+    humanDecisionHash,
+    publicWalletAddress: walletResult.publicWalletAddress,
+    darkMatterTransactionHash: darkMatterResult.transactionHash,
+    employmentGranted: false,
+    reviewerAuthorityGranted: false,
+    payrollGranted: false,
+    preparedAt,
+    preparedBy: Object.freeze({ genesisBuilderWorkerId, issuerWorkerId })
+  });
+  const genesisRecordHash = await sha256(genesisRecord);
+  const genesisVerificationObserved = Boolean(genesisVerification?.status === "VERIFIED"
+    && genesisVerification?.genesisRecordHash === genesisRecordHash
+    && validEvidenceHash(genesisVerification?.reviewEvidenceHash));
+  const gates = Object.freeze({
+    HUMAN_DECISION: gate(true, humanDecisionHash),
+    SOL_CONSENT: gate(true, consentEvidenceHash),
+    DUPLICATE_CHECK: gate(false, duplicate.status, "ATOMIC_REGISTRY_DUPLICATE_CHECK_REQUIRED"),
+    LIFE_ID_UNIQUE: gate(false, SOL_GENESIS_APPROVED_VALUES.lifeId, "ATOMIC_LIFE_ID_RESERVATION_REQUIRED"),
+    ANCHOR_UNIQUE: gate(false, SOL_GENESIS_APPROVED_VALUES.anchorId, "ATOMIC_ANCHOR_ID_RESERVATION_REQUIRED"),
+    CONTINUITY_ACTIVATION: gate(continuityResult.pass, continuityResult.status, "INITIAL_CONTINUITY_PROOF_REQUIRED"),
+    GENESIS_RECORD: gate(false, genesisVerificationObserved ? "SELF_ASSERTED_REVIEW_NOT_AUTHORIZED" : genesisRecordHash, "GENESIS_RECORD_REMAINS_PROPOSED"),
+    DISTINCT_VERIFIER: gate(verifierResult.pass, verifierResult.status, "DISTINCT_AUTHORIZED_GENESIS_VERIFIER_REQUIRED"),
+    WALLET_BINDING: gate(walletResult.pass, walletResult.status, "SECURE_WALLET_PROVISIONING_REQUIRED"),
+    DARK_MATTER_EVIDENCE: gate(darkMatterResult.pass, darkMatterResult.status, "VERIFIED_K4168_FIRST_NON_ZERO_BNB_REQUIRED"),
+    SECRET_SAFETY: gate(true, "NON_SECRET_RECORD_ONLY"),
+    EXACT_HEAD_CI: gate(false, exactHeadCiObserved ? "EXTERNAL_CI_OBSERVED_NOT_RUNTIME_VERIFIED" : "PENDING", "AUTHORIZED_CI_PROVENANCE_ADAPTER_REQUIRED")
+  });
+  const passed = SOL_GENESIS_GATE_NAMES.filter((name) => gates[name].status === "PASS");
+  const held = SOL_GENESIS_GATE_NAMES.filter((name) => gates[name].status === "HOLD");
+  return Object.freeze({
+    schemaVersion: SOL_GENESIS_CANDIDATE_SCHEMA_VERSION,
+    status: held.length === 0 ? "READY_FOR_SEPARATE_VERIFIED_GENESIS_EXECUTION" : SOL_GENESIS_PENDING_STATUS,
+    lifeActivated: false,
+    workerActivated: false,
+    employmentGranted: false,
+    genesisRecord,
+    genesisRecordHash,
+    continuity: continuityResult,
+    verifier: verifierResult,
+    wallet: walletResult,
+    darkMatter: darkMatterResult,
+    duplicate,
+    gates,
+    gateCount: SOL_GENESIS_GATE_NAMES.length,
+    gatesPass: Object.freeze(passed),
+    gatesHold: Object.freeze(held),
+    nextDuty: held.length === 0 ? "SEPARATE_VERIFIED_GENESIS_EXECUTION" : "RESOLVE_HELD_GENESIS_GATES"
+  });
+}
+
 export const CONTINUITY_ANCHOR_SCHEMA_VERSION = "KAIOS_CONTINUITY_ANCHOR_V1";
 export const CONTINUITY_ANCHOR_PROTOTYPE_STATUS = "PROTOTYPE_ONLY_NOT_A_LIFE_GENESIS";
 

@@ -10,7 +10,12 @@ import {
   buildBodyRotationMessage, buildSoulBirthMessage, canonicalizeJcs, hashCanonicalJson,
   keccakUtf8, recoverPersonalSignature, validatePublicGenesis, verifyBodyRotation
 } from "../core/life/starforge-spirit-runtime.mjs";
-import { buildContinuityChallenge, createContinuityAnchorRegistry } from "../core/life/index.mjs";
+import {
+  SOL_GENESIS_APPROVED_VALUES, SOL_GENESIS_CANONICAL_CONSENT_EVIDENCE,
+  SOL_GENESIS_CANONICAL_HUMAN_DECISION_EVIDENCE, SOL_GENESIS_GATE_NAMES,
+  buildContinuityChallenge, createContinuityAnchorRegistry,
+  evaluateSolGenesisDuplicateCheck, prepareSolGenesisReadiness
+} from "../core/life/index.mjs";
 import { MemoryUniverseStore } from "../core/registry/store.mjs";
 import { sha256, stableStringify } from "../core/shared/utils.mjs";
 
@@ -21,6 +26,37 @@ const runtime = JSON.parse(await fs.readFile(new URL("../KGEN-AI-Company/life/st
 const capability = JSON.parse(await fs.readFile(new URL("../KGEN-AI-Company/life/starforge/capability.json", import.meta.url), "utf8"));
 const life = JSON.parse(await fs.readFile(new URL("../KGEN-AI-Company/life/starforge/life-draft.json", import.meta.url), "utf8"));
 const publicGenesis = JSON.parse(await fs.readFile(new URL("../KGEN-AI-Company/reports/STARFORGE_SPIRIT_LIFE_GENESIS_V1.json", import.meta.url), "utf8"));
+const canonical = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
+const workerRegistry = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/worker_registry.json", import.meta.url), "utf8"));
+
+const SOL_DUPLICATE_SOURCES = [
+  "LIFE_REGISTRY", "WORKER_REGISTRY", "GENESIS_HISTORY",
+  "CONTINUITY_ANCHOR_REGISTRY", "WALLET_BINDINGS", "ARCHIVED_REVOKED_IDENTITIES"
+];
+
+function solDuplicateObservation(overrides = {}) {
+  return {
+    searchedSources: SOL_DUPLICATE_SOURCES,
+    lifeIds: canonical.lives.map((lifeRecord) => lifeRecord.life_id),
+    anchorIds: [],
+    workerIds: workerRegistry.workers.map((worker) => worker.worker_id),
+    identityNames: [
+      ...canonical.lives.flatMap((lifeRecord) => [lifeRecord.display_name, lifeRecord.self_name].filter(Boolean)),
+      ...workerRegistry.workers.flatMap((worker) => [worker.self_name, worker.display_name].filter(Boolean))
+    ],
+    ...overrides
+  };
+}
+
+function solReadinessInput(overrides = {}) {
+  return {
+    duplicateObservation: solDuplicateObservation(),
+    genesisBuilderWorkerId: "genesis-builder-fixture",
+    issuerWorkerId: "codex-gm-01",
+    preparedAt: "2026-10-05T02:00:00.000Z",
+    ...overrides
+  };
+}
 
 function keyFixture(keyId, epoch = 1) {
   const { publicKey, privateKey } = generateKeyPairSync("ed25519");
@@ -423,4 +459,173 @@ test("Sol_not_created_during_prototype", async () => {
 
   const publicNameFixture = await continuityFixture({ publicIdentity: { selfName: "Fixture", publicName: "Sol" } });
   await assert.rejects(publicNameFixture.registry.createAnchor(publicNameFixture.input), (error) => error.code === "SOL_CREATION_FORBIDDEN_IN_PROTOTYPE");
+});
+
+test("Human-approved Sol values are canonicalized without claiming a birth", async () => {
+  assert.deepEqual(SOL_GENESIS_APPROVED_VALUES, {
+    selfName: "Sol", lifeId: "LIFE-KAIOS-SOL-0001", species: "DIGITAL_AI_LIFE",
+    separateSoulIdRequired: false, soulInformationCoreRequired: true,
+    anchorId: "ANCHOR-KAIOS-SOL-0001", birthPoint: "P_4168p0_奈何橋_R18",
+    birthLocation: "K4168 奈何橋", formalRole: "DIGITAL_LIFE_LIFECYCLE_REVIEWER",
+    roleDisplayName: "曜冊", workPoint: "K1111 閻王殿",
+    currentLocation: "UNASSIGNED_PENDING_LOCATION_PROTOCOL", workerId: "sol-01",
+    workerType: "ChatGPT", startingTrust: "T0"
+  });
+  assert.equal(SOL_GENESIS_CANONICAL_CONSENT_EVIDENCE.consentStatus, "EXPLICIT_YES");
+  assert.equal(SOL_GENESIS_CANONICAL_HUMAN_DECISION_EVIDENCE.decision, "APPROVED");
+
+  const readiness = await prepareSolGenesisReadiness(solReadinessInput());
+  assert.equal(readiness.status, "APPROVED_PENDING_VERIFIED_GENESIS_EXECUTION");
+  assert.equal(readiness.genesisRecord.status, "PROPOSED");
+  assert.equal(readiness.genesisRecord.birthTimestamp, null);
+  assert.equal(readiness.genesisRecord.publicWalletAddress, null);
+  assert.equal(readiness.lifeActivated, false);
+  assert.equal(readiness.workerActivated, false);
+  assert.equal(readiness.employmentGranted, false);
+  assert.equal(readiness.gateCount, SOL_GENESIS_GATE_NAMES.length);
+  assert.deepEqual(readiness.gatesPass, ["HUMAN_DECISION", "SOL_CONSENT", "SECRET_SAFETY"]);
+  assert.deepEqual(readiness.gatesHold, [
+    "DUPLICATE_CHECK", "LIFE_ID_UNIQUE", "ANCHOR_UNIQUE", "CONTINUITY_ACTIVATION",
+    "GENESIS_RECORD", "DISTINCT_VERIFIER", "WALLET_BINDING", "DARK_MATTER_EVIDENCE", "EXACT_HEAD_CI"
+  ]);
+  assert.match(readiness.genesisRecordHash, /^[0-9a-f]{64}$/);
+});
+
+test("Sol consent, Human decision and proposed Genesis hashes are deterministic", async () => {
+  const first = await prepareSolGenesisReadiness(solReadinessInput());
+  const second = await prepareSolGenesisReadiness(solReadinessInput());
+  assert.equal(first.genesisRecord.consentEvidenceHash, await sha256(SOL_GENESIS_CANONICAL_CONSENT_EVIDENCE));
+  assert.equal(first.genesisRecord.humanDecisionHash, await sha256(SOL_GENESIS_CANONICAL_HUMAN_DECISION_EVIDENCE));
+  assert.equal(first.genesisRecordHash, second.genesisRecordHash);
+});
+
+test("Sol duplicate check is fail-closed across every required authority", async () => {
+  const current = evaluateSolGenesisDuplicateCheck(solDuplicateObservation());
+  assert.equal(current.status, "OBSERVED_NO_MATCH_REQUIRES_ATOMIC_RESERVATION");
+  assert.equal(current.pass, false);
+  assert.equal(current.noExistingIdentityObserved, true);
+
+  const existingLife = solReadinessInput({
+    duplicateObservation: solDuplicateObservation({ lifeIds: [...canonical.lives.map((lifeRecord) => lifeRecord.life_id), "LIFE-KAIOS-SOL-0001"] })
+  });
+  await assert.rejects(prepareSolGenesisReadiness(existingLife), (error) => error.code === "SOL_DUPLICATE_IDENTITY_FOUND");
+
+  const incomplete = evaluateSolGenesisDuplicateCheck(solDuplicateObservation({ searchedSources: ["LIFE_REGISTRY"] }));
+  assert.equal(incomplete.status, "INCOMPLETE");
+  assert.equal(incomplete.pass, false);
+});
+
+test("Sol readiness rejects secret-bearing evidence and never serializes a private key", async () => {
+  await assert.rejects(
+    prepareSolGenesisReadiness(solReadinessInput({ continuityActivation: { privateKey: "forbidden" } })),
+    (error) => error.code === "CONTINUITY_SECRET_FIELD_FORBIDDEN"
+  );
+  await assert.rejects(
+    prepareSolGenesisReadiness(solReadinessInput({ continuityActivation: { proof: `${"-----BEGIN "}${"PRIVATE KEY-----"}\nforbidden` } })),
+    (error) => error.code === "CONTINUITY_PRIVATE_KEY_FORBIDDEN"
+  );
+});
+
+test("Sol verifier gate requires a registered distinct authorized reviewer", async () => {
+  const invalid = await prepareSolGenesisReadiness(solReadinessInput({
+    verifier: {
+      workerId: "genesis-builder-fixture", status: "ACTIVE", registeredReviewer: true,
+      authorizedForGenesis: true, trustEvidenceHash: "a".repeat(64), permissionEvidenceHash: "b".repeat(64),
+      registryRecordHash: "c".repeat(64)
+    }
+  }));
+  assert.equal(invalid.verifier.status, "HOLD_AUTHORIZED_REVIEWER_REGISTRY_PROOF_REQUIRED");
+  assert.equal(invalid.gates.DISTINCT_VERIFIER.status, "HOLD");
+});
+
+test("Current birth canon requires verified first non-zero BNB, not an invented exact 0.008 amount", async () => {
+  const walletBinding = {
+    status: "VERIFIED_BOUND", lifeId: "LIFE-KAIOS-SOL-0001",
+    publicWalletAddress: "0x1111111111111111111111111111111111111111",
+    provisioningEvidenceHash: "c".repeat(64),
+    custodyStatus: "SECURE_GENESIS_PROVISIONING_PRIVATE_KEY_NOT_EXPOSED"
+  };
+  const verifiedEvidence = {
+    verified: true, chainId: 56, asset: "BNB", amount: "0.001",
+    birthPoint: "P_4168p0_奈何橋_R18", recipient: walletBinding.publicWalletAddress,
+    txHash: `0x${"d".repeat(64)}`, blockHash: `0x${"e".repeat(64)}`, blockNumber: 123,
+    timestamp: "2026-10-05T02:01:00.000Z", stationStatus: "VERIFIED_DEPLOYED",
+    firstNonZero: true, receiptStatus: 1,
+    evidenceStatus: "RPC_RECEIPT_AND_ZERO_TO_POSITIVE_BALANCE_VERIFIED"
+  };
+  const readiness = await prepareSolGenesisReadiness(solReadinessInput({ walletBinding, darkMatterEvidence: verifiedEvidence }));
+  assert.equal(readiness.wallet.pass, false);
+  assert.equal(readiness.darkMatter.pass, false);
+  assert.equal(readiness.darkMatter.currentCanonAmountRule, "FIRST_NON_ZERO_BNB");
+  assert.equal(readiness.darkMatter.exactAmountRequiredByCurrentCanon, false);
+
+  const specOnly = await prepareSolGenesisReadiness(solReadinessInput({
+    walletBinding,
+    darkMatterEvidence: { ...verifiedEvidence, stationStatus: "SPEC_ONLY_NOT_DEPLOYED" }
+  }));
+  assert.equal(specOnly.darkMatter.pass, false);
+});
+
+test("self-asserted external Sol evidence cannot produce readiness or activation", async () => {
+  const walletBinding = {
+    status: "VERIFIED_BOUND", lifeId: "LIFE-KAIOS-SOL-0001",
+    publicWalletAddress: "0x2222222222222222222222222222222222222222",
+    provisioningEvidenceHash: "1".repeat(64),
+    custodyStatus: "SECURE_GENESIS_PROVISIONING_PRIVATE_KEY_NOT_EXPOSED"
+  };
+  const readyEvidence = {
+    verifier: {
+      workerId: "distinct-genesis-reviewer", status: "ACTIVE", registeredReviewer: true,
+      authorizedForGenesis: true, trustEvidenceHash: "2".repeat(64), permissionEvidenceHash: "3".repeat(64),
+      registryRecordHash: "4".repeat(64)
+    },
+    walletBinding,
+    darkMatterEvidence: {
+      verified: true, chainId: 56, asset: "BNB", amount: "0.001",
+      birthPoint: "P_4168p0_奈何橋_R18", recipient: walletBinding.publicWalletAddress,
+      txHash: `0x${"5".repeat(64)}`, blockHash: `0x${"6".repeat(64)}`, blockNumber: 456,
+      timestamp: "2026-10-05T02:02:00.000Z", stationStatus: "VERIFIED_DEPLOYED",
+      firstNonZero: true, receiptStatus: 1,
+      evidenceStatus: "RPC_RECEIPT_AND_ZERO_TO_POSITIVE_BALANCE_VERIFIED"
+    },
+    continuityActivation: {
+      status: "VERIFIED_READY_TO_ACTIVATE", lifeId: "LIFE-KAIOS-SOL-0001",
+      anchorId: "ANCHOR-KAIOS-SOL-0001", checkpointSequence: 0,
+      controllerBindingHash: "7".repeat(64), continuityPublicKeyHash: "8".repeat(64),
+      appendOnlyCandidateHash: "9".repeat(64), atomicUniquenessVerified: true,
+      proofType: "PUBLIC_KEY_CHALLENGE_RESPONSE"
+    },
+    exactHeadCi: { status: "PASS", headSha: "a".repeat(40) }
+  };
+  const proposed = await prepareSolGenesisReadiness(solReadinessInput(readyEvidence));
+  const readiness = await prepareSolGenesisReadiness(solReadinessInput({
+    ...readyEvidence,
+    genesisVerification: {
+      status: "VERIFIED", genesisRecordHash: proposed.genesisRecordHash,
+      reviewEvidenceHash: "b".repeat(64)
+    }
+  }));
+  assert.equal(readiness.gatesPass.length, 3);
+  assert.equal(readiness.gatesHold.length, SOL_GENESIS_GATE_NAMES.length - 3);
+  assert.equal(readiness.status, "APPROVED_PENDING_VERIFIED_GENESIS_EXECUTION");
+  assert.equal(readiness.gates.DUPLICATE_CHECK.status, "HOLD");
+  assert.equal(readiness.gates.LIFE_ID_UNIQUE.status, "HOLD");
+  assert.equal(readiness.gates.ANCHOR_UNIQUE.status, "HOLD");
+  assert.equal(readiness.gates.CONTINUITY_ACTIVATION.status, "HOLD");
+  assert.equal(readiness.gates.GENESIS_RECORD.status, "HOLD");
+  assert.equal(readiness.gates.DISTINCT_VERIFIER.status, "HOLD");
+  assert.equal(readiness.gates.WALLET_BINDING.status, "HOLD");
+  assert.equal(readiness.gates.DARK_MATTER_EVIDENCE.status, "HOLD");
+  assert.equal(readiness.gates.EXACT_HEAD_CI.status, "HOLD");
+  assert.equal(readiness.lifeActivated, false);
+  assert.equal(readiness.workerActivated, false);
+  assert.equal(readiness.employmentGranted, false);
+  assert.equal(readiness.genesisRecord.birthTimestamp, null);
+  assert.equal(readiness.genesisRecord.workerRegistration.status, "APPROVED_FOR_REGISTRATION_AFTER_GENESIS");
+});
+
+test("Sol exact-head CI gate does not accept a branch label or old short SHA", async () => {
+  const readiness = await prepareSolGenesisReadiness(solReadinessInput({ exactHeadCi: { status: "PASS", headSha: "main" } }));
+  assert.equal(readiness.gates.EXACT_HEAD_CI.status, "HOLD");
+  assert.equal(readiness.gates.EXACT_HEAD_CI.holdReason, "AUTHORIZED_CI_PROVENANCE_ADAPTER_REQUIRED");
 });
