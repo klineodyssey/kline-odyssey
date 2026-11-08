@@ -74,6 +74,7 @@ async function inlineBankApi() {
   const context = { ...ethers.utils, window: {}, navigator: {}, structuredClone };
   vm.runInNewContext(adapter + `\nglobalThis.bankTestApi = {
     FUNDING_FORMAL,FUNDING_RUNTIME_PINS,FUNDING_IMPLEMENTATION_SLOT,FUNDING_STORAGE_KEY,FUNDING_LOCK_KEY,
+    walletAccounts,authorizedWalletAccount,
     buildLifeResourcePlan,deriveFundingStep,HumanFundingWallet,buildSharedCapPlan,deriveSharedCapStep,SharedCapWallet,
     buildBankPausePlan,deriveBankPauseStep,HumanBankPauseWallet,readFundingRuntimePins,
     SEVEN_FLOORS,SEVEN_FLOOR_RELEASE,sevenFloorRuntimePins,projectSevenFloorPlayerContext,
@@ -417,7 +418,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   await t.test("actual funding controller discards stale prepare success and failure after form changes", async () => {
     const { readFileSync } = await import("node:fs");
     const { runInNewContext } = await import("node:vm");
-    const { buildBankPausePlan, buildSharedCapPlan } = await inlineBankApi();
+    const { buildBankPausePlan, buildSharedCapPlan, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
     const html = readFileSync(new URL("../../K線西遊記/temples/18888/index.html", import.meta.url), "utf8");
     const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
     assert.ok(source, "test the real existing inline funding controller");
@@ -425,8 +426,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     const controller = source.split(BANK_CONTROLLER_MARKER)[1].split(BANK_CONTROLLER_END)[0];
     const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
     const mount = async (options = {}) => {
-      const nodes = new Map(), providerListeners = new Map(), requests = [], wallets = [];
-      const state = { account: options.account ?? formal.mother, chainId: 56, pauser: options.pauser ?? false };
+      const nodes = new Map(), providerListeners = new Map(), requests = [], wallets = [], walletEvents = [], walletMethods = [];
+      const state = { accounts: options.accounts ?? [options.account ?? formal.mother], chainId: 56, pauser: options.pauser ?? false };
       const node = (name) => {
         if (!nodes.has(name)) {
           const listeners = new Map();
@@ -449,23 +450,28 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         node(name).setAttribute("aria-disabled", "true"); node(name).tabIndex = -1;
       }
       const provider = { request: async ({ method }) => {
-        if (method === "eth_accounts") return [state.account];
+        walletMethods.push(method);
+        if (method === "eth_requestAccounts") {
+          providerListeners.get("accountsChanged")?.(state.accounts);
+          return state.accounts;
+        }
+        if (method === "eth_accounts") return state.accounts;
         if (method === "eth_chainId") return `0x${state.chainId.toString(16)}`;
         throw Error(`Unexpected offline UI provider request: ${method}`);
       }, on: (event, handler) => providerListeners.set(event, handler) };
       class FakeWallet {
-        constructor() { this.next = null; this.invalidations = 0; wallets.push(this); }
+        constructor({ selectedAccount }) { this.selectedAccount = selectedAccount; this.next = null; this.invalidations = 0; wallets.push(this); }
         invalidatePreview() { this.invalidations++; }
         invalidate() { this.invalidatePreview(); }
-        async connect() { return [state.account]; }
         async prepare(nextPlan) {
+          const account = this.selectedAccount();
           const wait = this.next; this.next = null;
           if (wait) await wait.promise;
           const pause = nextPlan?.type === "BANK_PAUSE";
-          const allowed = options.forceReady ?? (!pause || state.account.toLowerCase() === formal.guanyin.toLowerCase() && state.pauser && state.chainId === 56);
-          return { plan: nextPlan, account: state.account,
-            snapshot: { account: state.account, chainId: state.chainId, codeOk: true, identityErrors: [],
-              roles: { proposer: state.account === formal.mother, approver: state.account === formal.jade, pauser: state.pauser },
+          const allowed = options.forceReady ?? (!pause || account?.toLowerCase() === formal.guanyin.toLowerCase() && state.pauser && state.chainId === 56);
+          return { plan: nextPlan, account,
+            snapshot: { account, chainId: state.chainId, codeOk: true, identityErrors: [],
+              roles: { proposer: account === formal.mother, approver: account === formal.jade, pauser: state.pauser },
               ...options.snapshotOverride },
             step: { ready: allowed, kind: pause ? "BANK_PAUSE" : nextPlan?.type === "SHARED_CAP" ? "CAP_PROPOSE" : "ALLOCATION_PROPOSE",
               blockers: allowed ? [] : ["GUANYIN_PAUSER_REQUIRED"], to: pause ? formal.bank : formal.governance } };
@@ -479,18 +485,18 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       }
       class FakeCapWallet extends FakeWallet { async prepare(plan = buildSharedCapPlan()) { return super.prepare(plan); } }
       const window = { ethereum: provider, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
-        localStorage: storage(), addEventListener() {}, dispatchEvent() {} };
+        localStorage: storage(), addEventListener() {}, dispatchEvent(event) { if (event.type === "kaios18888:wallet") walletEvents.push(event.detail); } };
       const context = { window, document: { getElementById: (id) => node(id.replace(/^funding-/, "")),
         createElement: () => ({ value: "", textContent: "" }), head: { append() { throw Error("No external scripts in offline UI test"); } } },
         Event: class { constructor(type) { this.type = type; } },
-        CustomEvent: class { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }, URL,
+        CustomEvent: class { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }, URL, setTimeout, clearTimeout,
         Option: class { constructor(textContent, value) { this.textContent = textContent; this.value = value; } },
-        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, SharedCapWallet: FakeCapWallet,
+        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, walletAccounts, authorizedWalletAccount, SharedCapWallet: FakeCapWallet,
         HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet };
       runInNewContext(controller + "\nglobalThis.uiProbe = { preview: () => preview, setCases: (cases) => { importedCases = cases; } };", context);
       node("wallet").value = "0";
       await node("connect").onclick();
-      return { node, wallets, requests, state, providerListeners, probe: context.uiProbe };
+      return { node, wallets, requests, state, providerListeners, walletEvents, walletMethods, probe: context.uiProbe };
     };
     for (const failure of [false, true]) {
       const ui = await mount(), wait = deferred();
@@ -515,7 +521,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       const ui = await mount(), wait = deferred(); ui.wallets[0].next = wait;
       const pending = ui.node("prepare").onclick();
       if (change === "amount") { ui.node("amount").value = "3"; ui.node("amount").emit("input"); }
-      else if (change === "wallet") { ui.node("wallet").value = "1"; ui.node("wallet").emit("input"); }
+      else if (change === "wallet") { ui.node("wallet").value = "1"; ui.node("wallet").emit("change"); }
       else ui.providerListeners.get(change)?.(change === "chainChanged" ? "0x1" : [formal.jade]);
       wait.resolve(); await pending;
       assert.equal(ui.probe.preview(), null, `${change} invalidates an in-flight preview`);
@@ -534,6 +540,24 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     await fresh.node("send").onclick();
     assert.equal(fresh.requests.length, 1, "a fresh unchanged acknowledged form still reaches the explicit mock wallet method");
     assert.equal(fresh.requests[0].plan.allocationId, plan.allocationId);
+
+    const multiple = await mount({ accounts: [formal.mother, formal.jade] });
+    assert.deepEqual(multiple.walletMethods, ["eth_requestAccounts", "eth_accounts", "eth_chainId"]);
+    assert.equal(multiple.walletEvents.length, 2, "connection first suspends the old context, then publishes one usable context");
+    assert.equal(multiple.walletEvents[0].provider, undefined);
+    assert.equal(multiple.walletEvents[1].account, formal.mother);
+    await multiple.node("prepare").onclick();
+    multiple.node("ack").checked = true; multiple.node("ack").emit("change");
+    multiple.node("account").value = formal.jade; multiple.node("account").emit("change");
+    assert.equal(multiple.walletEvents.at(-1).account, formal.jade);
+    assert.equal(multiple.node("ack").checked, false);
+    assert.equal(multiple.probe.preview(), null);
+    assert.equal(multiple.node("send").disabled, true);
+    await multiple.node("send").onclick();
+    assert.equal(multiple.requests.length, 0, "the prior account acknowledgment cannot send from the new account");
+    multiple.state.accounts = [formal.mother]; multiple.providerListeners.get("accountsChanged")?.(multiple.state.accounts);
+    assert.equal(multiple.node("account").value, "", "removing the selected address requires explicit reselection");
+    assert.equal(multiple.walletEvents.at(-1).account, null);
 
     for (const change of ["accountsChanged", "chainChanged", "role"]) {
       const ui = await mount(); await ui.node("prepare").onclick();
@@ -678,12 +702,13 @@ test("shared cap: beneficiary-free governance preserves original bytes, accounti
     assert.equal(digest(api.deriveSharedCapStep(plan,snapshot()).data),"f6b8337dfca0f65de86017bae0d83c92c7b5b81e5bd38ee4d955826619391584");
     for (const beneficiary of [F.mother,F.jade,F.guanyin]) equalInline(api.buildLifeResourcePlan({beneficiary,amount:"1080000"}).cap,plan.cap);
   });
-  await t.test("real fixed-block inspector reads shared governance and three pins, never individual cases", async () => {
+  await t.test("real fixed-block inspector reads shared governance and three pins, never individual cases", async (t) => {
     const calls = [], token = new Interface(["function decimals() view returns(uint8)"]);
+    let exposed = [F.mother], selected;
     const provider = { request:async({method,params=[]})=>{
       calls.push({method,params});
       if (method === "eth_chainId") return "0x38";
-      if (method === "eth_accounts") return [F.mother];
+      if (method === "eth_accounts") return exposed;
       if (method === "eth_getBlockByNumber") return {number:tag,timestamp:"0x"+timestamp.toString(16)};
       if (method === "eth_getStorageAt") { assert.equal(params[1],api.FUNDING_IMPLEMENTATION_SLOT); assert.equal(params[2],tag); const pin = Object.values(api.FUNDING_RUNTIME_PINS).find(p=>p.proxy.toLowerCase()===params[0].toLowerCase()); assert.ok(pin); return "0x"+pin.implementation.slice(2).padStart(64,"0"); }
       if (method === "eth_getCode") { assert.equal(params[1],tag); return "0x6000"; }
@@ -699,13 +724,36 @@ test("shared cap: beneficiary-free governance preserves original bytes, accounti
       }
       throw Error(`Forbidden shared inspector RPC: ${method}`);
     }};
-    const wallet = new api.SharedCapWallet({provider,storage:storage()}); const state = await wallet.inspect(plan);
+    const wallet = new api.SharedCapWallet({provider,storage:storage(),selectedAccount:()=>selected,
+      locks:{request:async(_key,_opts,fn)=>fn({})}}); const state = await wallet.inspect(plan);
     assert.equal(calls.filter(c=>c.method==="eth_getStorageAt").length,3);
     assert.equal(calls.filter(c=>c.method==="eth_call" && c.params[0].data.startsWith(gov.getFunction("proposal").selector)).length,1);
     assert.ok(state.identityErrors.length>=3,"synthetic runtime bytes must fail the actual reviewed pins");
     assert.equal(api.deriveSharedCapStep(plan,state).ready,false);
     for (const key of ["allocationProposal","allocation","paymentConsumed"]) assert.equal(Object.hasOwn(state,key),false,key);
     assert.equal(calls.some(c=>/send|sign/i.test(c.method)),false);
+
+    await t.test("selected second account supplies role reads and silent revocation blocks a ready request", async () => {
+      calls.length = 0; exposed = [F.mother,F.jade]; selected = F.jade;
+      assert.equal((await wallet.inspect(plan)).account,F.jade);
+      const roleReads = calls.filter(c=>c.method==="eth_call" && c.params[0].to===F.governance)
+        .map(c=>gov.parseTransaction({data:c.params[0].data})).filter(c=>c.name==="hasRole");
+      assert.equal(roleReads.length,2);
+      assert.ok(roleReads.every(c=>c.args[1]===F.jade), "role lookup must use the selected account, not the first exposed account");
+
+      // Seed only the reviewed preflight snapshot. The actual send-time
+      // inspector below must detect account loss without a provider event.
+      selected = F.mother; exposed = [F.jade,F.mother];
+      const inspect = wallet.inspect;
+      wallet.inspect = async () => snapshot();
+      const preview = await wallet.prepare();
+      wallet.inspect = inspect;
+      assert.equal(preview.step.ready,true);
+      calls.length = 0; exposed = [F.jade];
+      await assert.rejects(wallet.request(preview),/CONNECT_EXISTING_HOLDER_EXPLICITLY/);
+      assert.equal(calls.some(c=>/send|sign/i.test(c.method)),false);
+      assert.equal(wallet.readPending(),null);
+    });
   });
   await t.test("unknown identity, accounting, roles, cap lowering and current UTC spend fail closed", () => {
     assert.equal(api.deriveSharedCapStep(plan,snapshot()).kind,"CAP_PROPOSE");
@@ -1068,6 +1116,7 @@ test("seven floor controller: actual handlers reject stale context and preserve 
       window: { localStorage: {}, addEventListener: (name, listener) => events.set(name, listener),
         dispatchEvent: event => events.get(event.type)?.(event) },
       navigator: { locks: {} },
+      setTimeout, clearTimeout,
       Option: class { constructor(text, value) { this.text = text; this.value = value; } },
       Event: class { constructor(type) { this.type = type; } },
       SEVEN_FLOORS, validateSevenFloorAmount, buildSevenFloorPlan, projectSevenFloorPlayerContext, SevenFloorClaimWallet: FakeWallet,
@@ -1076,11 +1125,10 @@ test("seven floor controller: actual handlers reject stale context and preserve 
     const emit = (name, detail) => events.get(name)?.({ detail });
     const role = (characterId = roleA) => emit("kaios18888:character", { characterId, displayName: "既有角色" });
     const connect = () => {
-      const listeners = new Map();
-      const provider = { request: () => { liveRequests++; throw Error("NO_LIVE_PROVIDER_ALLOWED"); },
-        on: (name, listener) => listeners.set(name, listener) };
-      emit("kaios18888:wallet", { provider, account: controller, chainId: 56 });
-      return { provider, listeners };
+      const provider = { request: () => { liveRequests++; throw Error("NO_LIVE_PROVIDER_ALLOWED"); } };
+      const updateContext = (chainId, account = controller) => emit("kaios18888:wallet", { provider, account, chainId });
+      updateContext(56);
+      return { provider, updateContext };
     };
     const choose = floor => {
       if (floor > 0) buttons[floor - 1].listeners.get("click")();
@@ -1194,7 +1242,7 @@ test("seven floor controller: actual handlers reject stale context and preserve 
     assert.equal(ui.element("send").disabled, true);
     assert.match(ui.element("result").textContent, /不代表成功或入帳/);
     await ui.click("prepare"); ui.acknowledge();
-    connected.listeners.get("chainChanged")("0x1");
+    connected.updateContext(1);
     assert.equal(ui.element("send").disabled, true);
     assert.ok(ui.instances[0].invalidations > 0, "invalidate the actual wallet preview capability too");
     assert.equal(ui.liveRequests(), 0);
