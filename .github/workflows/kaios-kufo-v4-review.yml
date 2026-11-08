@@ -1,0 +1,163 @@
+name: KAIOS KUFO V4 Review
+
+on:
+  pull_request:
+    paths:
+      - 'KGEN-KAIOS/contracts/**'
+      - 'KGEN-KAIOS/runtime/kufo-*.mjs'
+      - 'KGEN-KAIOS/research/*kufo*'
+      - 'KGEN-KAIOS/tests/**'
+      - 'KGEN-KAIOS/tools/**'
+      - 'KGEN-KAIOS/package*.json'
+      - 'KGEN-KAIOS/docs/*V4_WHITEPAPER.md'
+      - 'KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md'
+      - 'KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol'
+      - '.github/workflows/kaios-kufo-v4-review.yml'
+  push:
+    branches:
+      - 'main'
+      - 'gm/k18911-kufo-three-autumn-final-v4'
+      - 'review/kufo-annual-cohort-core-20261106'
+    paths:
+      - 'KGEN-KAIOS/contracts/**'
+      - 'KGEN-KAIOS/runtime/kufo-*.mjs'
+      - 'KGEN-KAIOS/research/*kufo*'
+      - 'KGEN-KAIOS/tests/**'
+      - 'KGEN-KAIOS/tools/**'
+      - 'KGEN-KAIOS/package*.json'
+      - 'KGEN-KAIOS/docs/*V4_WHITEPAPER.md'
+      - 'KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md'
+      - 'KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol'
+      - '.github/workflows/kaios-kufo-v4-review.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kufo-review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-head:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      KUFO_REVIEW_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      KUFO_REVIEW_BASE: ${{ github.event.pull_request.base.sha || (github.ref == 'refs/heads/main' && github.event.before) || 'origin/main' }}
+    defaults:
+      run:
+        working-directory: KGEN-KAIOS
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          # The unchanged compiler and storage validator read a frozen historical
+          # TempleHeart object. Shallow checkout silently loses that regression input.
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: KGEN-KAIOS/package-lock.json
+      - name: Verify exact source head and historical baseline
+        run: |
+          test "$(git rev-parse HEAD)" = "$KUFO_REVIEW_EXPECTED_HEAD"
+          git cat-file -e 7344d231837d40b504622c8c8b4376ed25110e20:KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol
+          mkdir -p artifacts/kufo-review
+      - name: Install locked test dependencies without lifecycle scripts
+        # Existing Ganache lock contains a Darwin-only extraneous fsevents entry.
+        # --force permits that platform entry; it does not change package-lock.json.
+        run: npm ci --force --ignore-scripts --no-audit --no-fund
+      - name: Compile complete contract set including preserved TempleHeart baseline
+        id: compile
+        run: npm run compile
+      - name: Validate existing storage and lineage
+        id: validate
+        run: |
+          npm run storage:validate
+          npm run lineage:verify
+      - name: Run EVM, invariant, surface, policy and preserved research suites
+        id: tests
+        run: |
+          set -o pipefail
+          # Compilation recreates artifacts/, so create the log directory after it.
+          mkdir -p artifacts/kufo-review
+          node --test --test-concurrency=1 \
+            --test-reporter=spec --test-reporter=junit \
+            --test-reporter-destination=stdout \
+            --test-reporter-destination=artifacts/kufo-review/tests.junit.xml \
+            tests/*.test.mjs research/kufo-zodiac-cohort-v0.test.mjs \
+            | tee artifacts/kufo-review/tests.log
+      - name: Check complete diff and integration artifacts
+        id: checks
+        env:
+          INTEGRATION_BASE_RANGE: ${{ env.KUFO_REVIEW_BASE }}...HEAD
+        run: |
+          git diff --check "$KUFO_REVIEW_BASE"...HEAD
+          npm run integrity:validate
+      - name: Record commit-bound evidence without deployment configuration
+        if: always()
+        env:
+          KUFO_COMPILE_OUTCOME: ${{ steps.compile.outcome }}
+          KUFO_VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+          KUFO_TEST_OUTCOME: ${{ steps.tests.outcome }}
+          KUFO_INTEGRITY_OUTCOME: ${{ steps.checks.outcome }}
+          KUFO_JOB_STATUS: ${{ job.status }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+          const head = git('rev-parse', 'HEAD');
+          assert.match(head, /^[0-9a-f]{40}$/);
+          assert.equal(head, process.env.KUFO_REVIEW_EXPECTED_HEAD);
+          const paths = [
+            'contracts/KUFOV4.sol', 'contracts/KAIOS.sol', 'contracts/KSHIP.sol',
+            'contracts/KSHIPConverter.sol', 'contracts/KAIOSAlchemyFurnaceV4.sol',
+            'contracts/KUFOOutputJindouyun168888V4.sol', 'runtime/kufo-v4-policy.mjs',
+            'tests/kufo-v4-evm.behavior.test.mjs', 'tests/kufo-v4-kship-interface.unit.test.mjs',
+            'tests/kufo-v4-three-autumns.unit.test.mjs', 'tests/token-surface.security.test.mjs',
+            'tests/contracts/KUFOV4EvmHarness.sol', 'research/kufo-zodiac-cohort-v0.mjs',
+            'research/kufo-zodiac-cohort-v0.test.mjs', 'tools/compile-contracts.mjs',
+            'package.json', 'package-lock.json'
+          ];
+          git('diff', '--exit-code', 'HEAD', '--', ...paths.map(p => `:(top)KGEN-KAIOS/${p}`));
+          const sources = paths.map(path => ({ path: `KGEN-KAIOS/${path}`,
+            blob: git('rev-parse', `HEAD:KGEN-KAIOS/${path}`),
+            sha256: createHash('sha256').update(fs.readFileSync(path)).digest('hex') }));
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          const compile = process.env.KUFO_COMPILE_OUTCOME === 'success'
+            ? JSON.parse(fs.readFileSync('reports/SOLIDITY_COMPILE_EVIDENCE.json', 'utf8')) : null;
+          const validation = process.env.KUFO_VALIDATION_OUTCOME === 'success'
+            ? JSON.parse(fs.readFileSync('reports/TEMPLEHEART_STORAGE_LAYOUT_VALIDATION.json', 'utf8')) : null;
+          const integrity = process.env.KUFO_INTEGRITY_OUTCOME === 'success'
+            ? JSON.parse(fs.readFileSync('reports/INTEGRATION_ARTIFACT_VALIDATION.json', 'utf8')) : null;
+          const evidence = { status: process.env.KUFO_JOB_STATUS,
+            execution: 'REVIEW_ONLY_NOT_DEPLOYED', sourceHead: head,
+            comparisonBase: git('rev-parse', process.env.KUFO_REVIEW_BASE),
+            workflowBlob: git('rev-parse', 'HEAD:.github/workflows/kaios-kufo-v4-review.yml'),
+            historicalBaseline: { commit: '7344d231837d40b504622c8c8b4376ed25110e20',
+              blob: git('rev-parse', '7344d231837d40b504622c8c8b4376ed25110e20:KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol') },
+            compileOutcome: process.env.KUFO_COMPILE_OUTCOME,
+            validationOutcome: process.env.KUFO_VALIDATION_OUTCOME,
+            testOutcome: process.env.KUFO_TEST_OUTCOME, node: process.version,
+            integrityOutcome: process.env.KUFO_INTEGRITY_OUTCOME,
+            dependencies: Object.fromEntries(['solc', 'ethers', 'ganache', '@openzeppelin/contracts',
+              '@openzeppelin/contracts-upgradeable'].map(name => [name, lock.packages[`node_modules/${name}`].version])),
+            compile, validation, integrity, sources };
+          fs.mkdirSync('artifacts/kufo-review', { recursive: true });
+          fs.writeFileSync('artifacts/kufo-review/evidence.json', JSON.stringify(evidence, null, 2) + '\n');
+          NODE
+      - name: Preserve exact-head logs and compiler evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: kufo-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            KGEN-KAIOS/artifacts/kufo-review/
+          if-no-files-found: error
+          retention-days: 14

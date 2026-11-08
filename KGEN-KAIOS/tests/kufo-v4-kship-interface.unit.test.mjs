@@ -37,3 +37,15 @@ test("KSHIP and KSHIPConverter remain compatible with KUFOV4 proof lineage", () 
   assert.equal(kshipNames.has("mintFromCarrierProof"), true);
   assert.equal(converterNames.has("convert"), true);
 });
+
+test("annual KUFO requires explicit calendar construction and exposes no calendar or upgrade authority", () => {
+  const kufo = artifact("KUFOV4");
+  const constructor = kufo.abi.find(item => item.type === "constructor");
+  assert.deepEqual(constructor.inputs.map(item => item.type), ["address", "bytes32", "uint32", "uint8", "uint64[]"]);
+  const names = functionNames(kufo.abi);
+  for (const forbidden of ["setCalendar", "appendYear", "setYearStarts", "setBirthYear",
+    "setBirthZodiac", "setConstellation", "setOrganRegistry", "setConverter", "owner",
+    "transferOwnership", "upgradeTo", "upgradeToAndCall", "mint", "burn", "burnFrom"]) {
+    assert.equal(names.has(forbidden), false, forbidden);
+  }
+});

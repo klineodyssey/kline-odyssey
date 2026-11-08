@@ -35,6 +35,7 @@ unchanged, and does not create another Runtime or ledger.
 
 | Full repository path | Purpose |
 |---|---|
+| `.github/workflows/kaios-kufo-v4-review.yml` | Reused #201 exact-head CI; full compile/history, all offline regressions, seeded EVM invariants and commit-bound artifacts. |
 | `KGEN-KAIOS/contracts/KUFOV4.sol` | Annual shared-cohort KUFO candidate; immutable explicit bounded calendar and terminal settlement. |
 | `KGEN-KAIOS/contracts/KAIOSAlchemyFurnaceV4.sol` | Immediate KAIOS burn and current KGEN balance proof. |
 | `KGEN-KAIOS/contracts/KUFOOutputJindouyun168888V4.sol` | Fixed-beneficiary immediate outlet. |
@@ -42,6 +43,7 @@ unchanged, and does not create another Runtime or ledger.
 | `KGEN-KAIOS/tests/contracts/KUFOV4EvmHarness.sol` | Local EVM adversarial actors. |
 | `KGEN-KAIOS/tests/kufo-v4-evm.behavior.test.mjs` | Cohort, dust, gas, allowance, proof and conservation tests. |
 | `KGEN-KAIOS/tests/kufo-v4-kship-interface.unit.test.mjs` | Existing main KSHIP carrier interface compatibility. |
+| `KGEN-KAIOS/tests/token-surface.security.test.mjs` | Existing security surface checks now cover the annual KUFO candidate as well as legacy cores. |
 | `KGEN-KAIOS/tests/kufo-v4-three-autumns.unit.test.mjs` | Pure policy and integer-partition properties. |
 | `KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md` | Full cumulative KUFO candidate specification with preserved history. |
 | `KGEN-KAIOS/docs/KSHIP_V4_WHITEPAPER.md` | Full cumulative KSHIP integration specification with preserved history. |

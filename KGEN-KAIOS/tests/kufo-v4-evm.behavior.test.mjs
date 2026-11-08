@@ -419,3 +419,248 @@ test("outside the configured issuance interval the entire alchemy burn rolls bac
   }
   await conservation(f);
 });
+
+// This oracle checks observable deltas and conservation rather than reproducing
+// the contract's proportional transfer partition or its cohort traversal order.
+// Small odd mint amounts deliberately exercise the documented per-proof rounding.
+for (const seed of [0x5eed0280, 0xc0ffee11]) {
+  test(`state-machine invariants across mixed operations, seed=0x${seed.toString(16)}`, async (t) => {
+    const f = await fixture(t);
+    const actors = [f.owner, f.beneficiary, f.recipient, f.victim, f.outsider];
+    const addresses = await Promise.all(actors.map((actor) => actor.getAddress()));
+    const years = [0, 1, 2, 3].map((i) => FIRST_YEAR + i);
+    const mintedByYear = years.map(() => 0n);
+    const burnedByYear = years.map(() => 0n);
+    const origins = new Map();
+    const stats = { mint: 0, transfer: 0, transferFrom: 0, self: 0, zero: 0, settlePartial: 0, settleAll: 0, partialTransfers: 0, merges: 0 };
+    let randomState = seed;
+    let expectedMinted = 0n;
+    let expectedBurned = 0n;
+    let clock = BASE + 10;
+    let birthIndex = 0;
+    let operation = -1;
+    let kind = "bootstrap";
+    let transactions = 0;
+    let maxGas = 0n;
+
+    function next() {
+      randomState ^= randomState << 13;
+      randomState ^= randomState >>> 17;
+      randomState ^= randomState << 5;
+      return randomState >>> 0;
+    }
+    const choose = (values) => values[next() % values.length];
+    const positive = (maximum) => 1n + BigInt(next()) % maximum;
+    const other = (index) => (index + 1 + next() % (actors.length - 1)) % actors.length;
+    const context = () => `seed=0x${seed.toString(16)} operation=${operation} kind=${kind} timestamp=${clock}`;
+    const eligible = (row) => sum(row.cohorts.flatMap((cohort, year) =>
+      cohort.filter((_, tranche) => clock >= f.starts[year + tranche + 1])));
+
+    async function send(promise) {
+      const receipt = await mined(promise);
+      transactions += 1;
+      if (receipt.gasUsed > maxGas) maxGas = receipt.gasUsed;
+      assert.ok(receipt.gasUsed < GAS_BOUND, context());
+    }
+
+    async function snapshot() {
+      const [rows, minted, burned, supply, kshipSupply, kshipMinted] = await Promise.all([
+        Promise.all(addresses.map(async (address) => {
+          const [balance, kshipBalance, claimable, cohorts] = await Promise.all([
+            f.kufo.balanceOf(address), f.kship.balanceOf(address), f.kufo.claimableTotal(address),
+            Promise.all(years.map(async (year) => tranches(await f.kufo.cohort(address, year)))),
+          ]);
+          return { balance, kshipBalance, claimable, cohorts };
+        })),
+        f.kufo.totalMintedFromAlchemy(), f.kufo.totalDecayedForKship(), f.kufo.totalSupply(),
+        f.kship.totalSupply(), f.kship.totalMintedFromKufo(),
+      ]);
+      return { rows, minted, burned, supply, kshipSupply, kshipMinted };
+    }
+
+    function invariants(state) {
+      const message = context();
+      for (const row of state.rows) {
+        assert.equal(sum(row.cohorts.flat()), row.balance, `holder cohort sum: ${message}`);
+        assert.equal(row.claimable, eligible(row), `calendar eligibility: ${message}`);
+      }
+      const outstanding = sum(state.rows.map((row) => row.balance));
+      assert.equal(outstanding, state.supply, `all holders account for supply: ${message}`);
+      assert.equal(outstanding + expectedBurned, expectedMinted, `global mass: ${message}`);
+      assert.equal(state.minted, expectedMinted, `issuance counter: ${message}`);
+      assert.equal(state.burned, expectedBurned, `burn counter: ${message}`);
+      assert.equal(state.kshipSupply, expectedBurned * 1000n, `KSHIP ratio: ${message}`);
+      assert.equal(state.kshipMinted, expectedBurned * 1000n, `KSHIP issuance: ${message}`);
+      assert.equal(sum(state.rows.map((row) => row.kshipBalance)), state.kshipSupply, `carrier beneficiary balances: ${message}`);
+      for (let year = 0; year < years.length; year += 1) {
+        const live = sum(state.rows.flatMap((row) => row.cohorts[year]));
+        assert.equal(live + burnedByYear[year], mintedByYear[year], `birth-year conservation ${years[year]}: ${message}`);
+      }
+    }
+
+    async function verifyOrigins() {
+      await Promise.all([...origins].map(async ([proof, expected]) => {
+        const origin = await f.kufo.mintOrigin(proof);
+        assert.deepEqual(
+          [origin.beneficiary, origin.amount, origin.bornAt, origin.birthYear, origin.birthZodiac, origin.birthConstellation],
+          expected,
+          `immutable origin ${proof}: ${context()}`,
+        );
+      }));
+    }
+
+    let state = await snapshot();
+    invariants(state);
+
+    async function action(requestedKind, forcedHolder) {
+      kind = requestedKind;
+      const before = state;
+      const funded = before.rows.map((row, i) => row.balance > 0n ? i : -1).filter((i) => i >= 0);
+      const mature = before.rows.map((row, i) => eligible(row) > 0n ? i : -1).filter((i) => i >= 0);
+      if ((kind === "settlePartial" || kind === "settleAll") && mature.length === 0) kind = "mint";
+      if ((kind === "transfer" || kind === "transferFrom") && funded.length === 0) kind = "mint";
+      const source = forcedHolder ?? choose(kind.startsWith("settle") ? mature : funded.length ? funded : [0, 1, 2, 3, 4]);
+      let destination = other(source);
+      let amount;
+
+      if (kind === "mint") {
+        amount = operation % 13 === 0 ? 1n : 1n + BigInt(next() % 2000);
+        const proof = hash(`state-machine-${seed}-${operation}-${stats.mint}`);
+        await send(f.output.mint(await f.kufo.getAddress(), proof, addresses[source], amount, { gasLimit: GAS_BOUND }));
+        expectedMinted += amount;
+        mintedByYear[birthIndex] += amount;
+        origins.set(proof, [addresses[source], amount, BigInt(clock), BigInt(years[birthIndex]), BigInt((FIRST_ZODIAC + birthIndex) % 12), 0n]);
+      } else if (kind.startsWith("settle")) {
+        const available = eligible(before.rows[source]);
+        if (kind === "settlePartial" && available > 1n) amount = positive(available - 1n);
+        else { kind = "settleAll"; amount = available; }
+        destination = next() % actors.length;
+        await send(f.converter.connect(actors[source]).convert(amount, addresses[destination], { gasLimit: GAS_BOUND }));
+        expectedBurned += amount;
+      } else {
+        amount = kind === "zero" ? 0n : before.rows[source].balance === 0n ? 0n :
+          positive(before.rows[source].balance > 1n ? before.rows[source].balance - 1n : 1n);
+        if (kind === "self") destination = source;
+        if (kind === "transferFrom") {
+          const spender = other(source);
+          await send(f.kufo.connect(actors[source]).approve(addresses[spender], amount, { gasLimit: GAS_BOUND }));
+          await send(f.kufo.connect(actors[spender]).transferFrom(addresses[source], addresses[destination], amount, { gasLimit: GAS_BOUND }));
+          assert.equal(await f.kufo.allowance(addresses[source], addresses[spender]), 0n, context());
+        } else {
+          await send(f.kufo.connect(actors[source]).transfer(addresses[destination], amount, { gasLimit: GAS_BOUND }));
+        }
+        if (source !== destination && amount > 0n && amount < before.rows[source].balance) stats.partialTransfers += 1;
+      }
+      stats[kind] += 1;
+      state = await snapshot();
+
+      if (kind === "mint") {
+        // Percentage specifications, not the production transfer-split algorithm.
+        const first = amount * 50n / 100n;
+        const secondCumulative = amount * 75n / 100n;
+        const additions = [first, secondCumulative - first, amount - secondCumulative];
+        for (let holder = 0; holder < actors.length; holder += 1) {
+          for (let year = 0; year < years.length; year += 1) {
+            state.rows[holder].cohorts[year].forEach((value, tranche) => assert.equal(
+              value - before.rows[holder].cohorts[year][tranche],
+              holder === source && year === birthIndex ? additions[tranche] : 0n,
+              `mint changes only its original birth year: ${context()}`,
+            ));
+          }
+          assert.equal(state.rows[holder].kshipBalance, before.rows[holder].kshipBalance, context());
+        }
+      } else if (kind.startsWith("settle")) {
+        let reduced = 0n;
+        for (let holder = 0; holder < actors.length; holder += 1) {
+          assert.equal(state.rows[holder].balance, before.rows[holder].balance - (holder === source ? amount : 0n), context());
+          assert.equal(state.rows[holder].kshipBalance, before.rows[holder].kshipBalance + (holder === destination ? amount * 1000n : 0n), context());
+          for (let year = 0; year < years.length; year += 1) {
+            for (let tranche = 0; tranche < 3; tranche += 1) {
+              const delta = before.rows[holder].cohorts[year][tranche] - state.rows[holder].cohorts[year][tranche];
+              assert.ok(delta >= 0n, context());
+              if (holder !== source || clock < f.starts[year + tranche + 1]) assert.equal(delta, 0n, `only mature source rights may settle: ${context()}`);
+              reduced += delta;
+              burnedByYear[year] += delta;
+            }
+          }
+        }
+        assert.equal(reduced, amount, `settlement accounts for every requested unit: ${context()}`);
+      } else {
+        assert.equal(state.burned, before.burned, `transfer cannot settle: ${context()}`);
+        assert.equal(state.minted, before.minted, `transfer cannot mint: ${context()}`);
+        let moved = 0n;
+        for (let holder = 0; holder < actors.length; holder += 1) {
+          const delta = holder === source && holder !== destination ? -amount : holder === destination && holder !== source ? amount : 0n;
+          assert.equal(state.rows[holder].balance, before.rows[holder].balance + delta, context());
+          assert.equal(state.rows[holder].kshipBalance, before.rows[holder].kshipBalance, `transfer cannot create KSHIP: ${context()}`);
+          for (let year = 0; year < years.length; year += 1) {
+            if (holder !== source && holder !== destination || source === destination || amount === 0n) {
+              assert.deepEqual(state.rows[holder].cohorts[year], before.rows[holder].cohorts[year], context());
+            }
+          }
+        }
+        if (source !== destination) {
+          for (let year = 0; year < years.length; year += 1) {
+            let movedInYear = 0n;
+            for (let tranche = 0; tranche < 3; tranche += 1) {
+              const out = before.rows[source].cohorts[year][tranche] - state.rows[source].cohorts[year][tranche];
+              const incoming = state.rows[destination].cohorts[year][tranche] - before.rows[destination].cohorts[year][tranche];
+              assert.ok(out >= 0n && incoming >= 0n, context());
+              assert.equal(out, incoming, `transfer preserves each tranche in the same birth year: ${context()}`);
+              movedInYear += out;
+            }
+            if (movedInYear > 0n && sum(before.rows[destination].cohorts[year]) > 0n) stats.merges += 1;
+            moved += movedInYear;
+          }
+          assert.equal(moved, amount, `all transferred units preserve their birth year: ${context()}`);
+        }
+      }
+      invariants(state);
+      if (operation % 10 === 0) await verifyOrigins();
+    }
+
+    try {
+      for (let holder = 0; holder < actors.length; holder += 1) {
+        operation = holder - actors.length;
+        await action("mint", holder);
+      }
+      const pattern = ["mint", "transfer", "transferFrom", "self", "settlePartial", "transfer", "mint", "settleAll", "zero", "transferFrom"];
+      for (operation = 0; operation < 60; operation += 1) {
+        if (operation === 16 || operation === 32) {
+          birthIndex = operation === 16 ? 1 : 3; // intentionally skip year 2
+          clock = f.starts[birthIndex] + (birthIndex === 1 ? 0 : 7);
+          const previous = state;
+          await at(f, clock);
+          state = await snapshot();
+          state.rows.forEach((row, holder) => {
+            assert.equal(row.balance, previous.rows[holder].balance, `clock alone cannot burn: ${context()}`);
+            assert.deepEqual(row.cohorts, previous.rows[holder].cohorts, `clock alone cannot rewrite cohorts: ${context()}`);
+          });
+          invariants(state);
+        }
+        await action(pattern[(operation + seed % pattern.length) % pattern.length]);
+      }
+      clock = f.starts.at(-1) + 1_000_000;
+      await at(f, clock);
+      state = await snapshot();
+      invariants(state);
+      let sweeps = 0;
+      for (let holder = 0; holder < actors.length; holder += 1) {
+        operation = 60 + holder;
+        if (state.rows[holder].balance > 0n) { await action("settleAll", holder); sweeps += 1; }
+      }
+      state.rows.forEach((row) => {
+        assert.equal(row.balance, 0n, `final holder balance must be zero: ${context()}`);
+        assert.equal(sum(row.cohorts.flat()), 0n, `final tranches must be zero: ${context()}`);
+      });
+      assert.equal(state.supply, 0n, context());
+      assert.equal(state.kshipSupply, expectedMinted * 1000n, context());
+      for (const required of ["mint", "transfer", "transferFrom", "self", "zero", "settlePartial", "settleAll", "partialTransfers", "merges"]) assert.ok(stats[required] > 0, `missing ${required}: ${context()}`);
+      await verifyOrigins();
+      t.diagnostic(`seed=0x${seed.toString(16)} mixed_operations=60 bootstrap_mints=5 final_sweeps=${sweeps} transactions=${transactions} max_operation_gas=${maxGas} minted_wei=${expectedMinted} burned_wei=${expectedBurned} stats=${JSON.stringify(stats)}`);
+    } catch (error) {
+      error.message = `${context()}: ${error.message}`;
+      throw error;
+    }
+  });
+}

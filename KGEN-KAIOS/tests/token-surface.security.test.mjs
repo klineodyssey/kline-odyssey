@@ -26,7 +26,7 @@ test("token ABIs expose no arbitrary mint, blacklist, seizure, tax, or AMM-pair 
     "setMarketMakerPair",
     "setPair",
   ];
-  for (const contractName of ["KAIOS", "KUFO", "KSHIP"]) {
+  for (const contractName of ["KAIOS", "KUFO", "KUFOV4", "KSHIP"]) {
     const names = functionNames(contractName);
     for (const name of forbidden) assert.equal(names.has(name), false, `${contractName}.${name}`);
   }

@@ -16,6 +16,12 @@ Existing navigation: `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` ->
 The original PR #201 owner/lease must be verified before adopting the isolated
 review branch into that PR. #600 is preserved, not closed; #211/#212 are downstream.
 
+The same #201 review workflow path `.github/workflows/kaios-kufo-v4-review.yml`
+now runs complete exact-head offline CI and preserves commit-bound logs, JUnit
+and source/compiler evidence. Existing KUFO EVM tests include two deterministic
+60-operation state-machine sequences. This adds review automation, without a
+deployment path or a second Runtime; the full entry remains in the module README.
+
 ## K11520 three-plane joystick filename (2026-10-19)
 
 Human selected `joystick-xzxyyz.mjs` (option A) for PR #615. This migrates

@@ -1,5 +1,70 @@
 # K18911 KUFO annual-cohort integration review
 
+## Review automation continuation — 2026-11-08
+
+This stage continues the same Product 05 review branch after initial implementation
+commit `3c92efd72a12404f95d95c573e428434d8c26e55`. Latest main and the original
+#201/#600 heads were read back unchanged. The current branch is still a review
+candidate; neither the formal calendar nor the finite issuance horizon is approved.
+The Solidity core and pure policy source blobs are unchanged in this stage.
+
+The original #201 workflow path `.github/workflows/kaios-kufo-v4-review.yml` is
+restored and updated in place. It now tests this continuation branch as well as
+the original branch and future main/PR changes. It checks out and asserts the
+exact source head, retains the full history required by the frozen TempleHeart
+baseline, installs the existing lock without lifecycle scripts, compiles the
+complete contract set, and runs storage, lineage, all contract/security/policy
+tests and the preserved #600 research tests. It has read-only contents permission,
+does not retain checkout credentials, and contains no deployment or chain call.
+The three v7 action SHAs were resolved against their official repositories.
+
+Every run uploads JUnit XML, the actual test log and `evidence.json`, named for the
+tested head. Evidence binds the head, comparison base, workflow blob, historical
+baseline, source Git blobs/SHA-256 values, dependency versions and step outcomes.
+Compiler/validator records are included only if that step succeeded in the same
+run; checked-in historical PASS files cannot masquerade as fresh run evidence.
+Hosted CI success must be read from that head's actual run, not inferred from
+this workflow's existence or the initial local results below.
+
+Two fixed-seed, 60-operation EVM sequences add independent conservation checks
+across five holders and multiple shared years, including a skipped year. The
+oracle uses observed balances/tranches and timestamp-derived eligibility; it does
+not import the production split function or reproduce its allocation formula.
+It verifies per-holder/year balances, global KUFO/KSHIP conservation, transfer
+tranche preservation without settlement, immutable proof origins, allowance spend,
+and a complete terminal drain. These supplement the existing explicit rounding,
+replay, failure rollback, settled/unsettled merge, dust and maximum-history tests;
+the seeded successful-operation sequences do not replace those specific checks.
+
+| Current-stage local check | Result |
+|---|---|
+| Updated complete EVM file | PASS: 16/16, fail 0, skip 0; 344,220.6503 ms. |
+| Seeds `0x5eed0280`, `0xc0ffee11` | PASS: 60 mixed operations each, plus five bootstrap mints and five terminal sweeps each; 164 local transactions total. |
+| Final conservation | All holder KUFO balances zero; minted/burned 16,240 and 17,986 wei respectively; KSHIP exactly burn x1000. |
+| Added-state-machine maximum operation gas | 321,427. Existing dust and 32-cohort gas checks also passed unchanged. |
+| Policy, KSHIP interface and preserved research | PASS: 21/21; simultaneous spec/JUnit reporters also verified. |
+| Existing security-surface suite including KUFOV4 | PASS: 65/65 including imported nested regressions. |
+| Official actionlint 1.7.12 | PASS; downloaded release checksum verified. |
+
+The updated EVM source blob is `67f6b572fc215de8be7a9026c96f1debd9f82275`.
+No Solidity or dependency source changed, so the existing compiled artifacts retain
+the initial verified core blob; hosted CI recompiles the complete source independently.
+
+The existing token-surface security guard now includes `KUFOV4`, and the existing
+KSHIP-interface test also rejects mutable calendar, registry, arbitrary burn or
+proxy-upgrade entry points. No production Runtime, ledger, deploy script or
+parallel product is added. This stage's local and hosted validation is separate
+from the initial implementation evidence preserved below.
+
+Original #201 writer/lease authority remains unestablished. An empty claim list
+does not prove a lease expired or identify this session. The same read-back
+evidence remains in [the original GM discussion](https://github.com/klineodyssey/kline-odyssey/issues/584#issuecomment-6154939875).
+The authorized continuation branch can progress independently; adopting it into
+#201 still requires a verified coordinated writer update. No parallel PR, merge,
+PR close, branch deletion, deployment or asset operation is performed.
+
+### Initial implementation record (preserved)
+
 STATUS: REVIEW_CANDIDATE / NOT_DEPLOYED
 SOURCE_MAIN: c5cc66e5d2dc7e193bb21a57b9a4e5b7dc70fde3
 CORE_VERSION: 4.1.0-candidate
@@ -35,7 +100,9 @@ Main's `KGEN-KAIOS/contracts/KAIOS.sol`, `KUFO.sol`, `KSHIP.sol`,
 `KSHIPConverter.sol`, deployed V1 archive and `tools/compile-contracts.mjs` stay
 unchanged. The compiler still loads the git-bound TempleHeart V3.3.2 baseline
 from `7344d231837d40b504622c8c8b4376ed25110e20`.
-The old workflow and all three 11520 HUD/browser paths are excluded.
+At the initial implementation stage the old workflow and all three 11520
+HUD/browser paths were excluded. The continuation above restores only the same
+review workflow path with current checks; all three HUD paths remain excluded.
 
 ## Preserved unique research and audit evidence
 
