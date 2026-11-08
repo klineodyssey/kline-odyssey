@@ -1,5 +1,53 @@
 # K18911 KUFO annual-cohort integration review
 
+## KUFO 本頁自主接續 checkpoint
+
+### KUFO-CONTINUATION-20261108T092351Z — first autonomous work round
+
+- Trigger: direct Human request in this conversation, not a scheduled invocation.
+- Actual author: this page's Codex /root engineering session; formal employee/Writer identity NOT_VERIFIED. Private thread binding is retained in the original conversation, not published here.
+- Started: 2026-11-08 09:23:51 UTC / 2026-11-08 17:23:51 Asia/Taipei.
+- Previous handoff/source head: c4b50afd9f63a9e946f84fd27249920728b9cfd8; previous exact-head CI: [42463391611](https://github.com/klineodyssey/kline-odyssey/actions/runs/42463391611), 33 contracts / 128 tests.
+- Main read back: c5cc66e5d2dc7e193bb21a57b9a4e5b7dc70fde3. Source #201 and #600 remain the original task/research; the [company index #573](https://github.com/klineodyssey/kline-odyssey/issues/573) is a read-only coordination index, not a new claim or authority.
+- First-round action: extend the existing EVM acceptance file with actual reverted-transaction state snapshots. Eight rejection cases verify full relevant rollback, including allowance reduction, partial tranche mutation, converter sequence, real KAIOS burn/proof consumption and closed issuance calendar. Existing tests are retained; Solidity and dependency sources are unchanged.
+- Local verification finished: 2026-11-08 09:38:50 UTC / 2026-11-08T17:38:50.000+08:00. PASS: complete EVM file 17/17, fail 0, skip 0, 484,276.0595 ms. New rollback case: 8 actual reverted local-EVM transactions, 44,019.4485 ms; receipt status zero, no persistent logs, relevant contract snapshots unchanged. ETH gas, nonce and block effects are intentionally excluded from token-state snapshots.
+- Tested EVM source blob: 3a81351120863b64446ef7484f8a50708b557ac4 (+152 lines). Independent review found no blocking defect. Core and policy retain blobs f597188daeca6bd9e23f90a6190f0349e88408de and 875f8a5411eb3162779382baf58487479e486577. No contract, dependency, calendar or economic rule changes.
+- Eight actual rejection cases: over-balance transfer; over-balance transferFrom with valid allowance; available mature amount plus one unit; unauthorized KUFO mint; unauthorized carrier burn; unauthorized KSHIP proof mint; current output replay of an already used mint proof; closed-calendar furnace with valid KAIOS allowance. All relevant supplies, balances, tranches, allowances, counters, consumed flags and burn/origin proof records are restored.
+- Remaining verification at checkpoint save: exact new-head hosted CI and remote save readback. Their final receipt is retained in this same conversation and the commit-bound CI artifacts; the previous 128-test run is not used to assert the new head passed.
+- Blockers: formal annual boundary/zodiac anchor/finite issuance horizon and CURRENT wording reconciliation remain unapproved; original #201 Writer/lease remains unverified. These block adoption/deployment, not independent authorized testing on this continuation branch.
+- Save destination: this existing cumulative document and review/kufo-annual-cohort-core-20261106; no parallel handoff file, product, Runtime or PR.
+- NEXT_ACTION: on the first real scheduled wake (or Human “有更新”), read this checkpoint and Prompt V1, record the actual trigger/thread/run evidence or UNKNOWN, then verify latest remote HEAD/CI and any new formal-calendar or original-Writer evidence. If no new eligible work or changed source exists, record STANDBY and the concrete recovery condition rather than rerun the same tests. Preserve a next action in the same document and this conversation.
+
+### Schedule readback
+
+- Name: KUFO 仙丹｜本頁工程接續.
+- Duplicate check: ten local automation records and the available hosted automation inventory contained no same-purpose task bound to this page. Other pages' schedules were read only.
+- Desktop scheduling interface: unsupported for this execution page (“Automations are only supported for local threads”); not retried or treated as a permission waiver.
+- Supported hosted scheduling interface: creation succeeded and a separate readback confirmed is_enabled=true, self-owned task, inherited execution environment, Asia/Taipei, and exact current-page binding.
+- Frequency: daily at 09:15 Asia/Taipei. Saved first scheduled slot: 2026-11-09 09:15 Asia/Taipei / 2026-11-09 01:15 UTC.
+- Host-confirmed next_run_time: NOT_RETURNED (null). Last-run/result receipts: unavailable; delivery unknown. Configuration is verified; a real automated wake/completion is NOT_VERIFIED.
+- Prompt version: KUFO 本頁自主接續 V1; SHA-256 (UTF-8, LF, no BOM or trailing newline): 918fe3ad810540565ed4ace030e6ddb97bc45d8fda2811e1b91b4c28539509df. The exact saved prompt follows. Schedule identifiers and private thread IDs remain in the original conversation.
+- No runnable game/UI is introduced by this round; this is a source and local-EVM review candidate.
+
+### Exact saved schedule Prompt
+
+```text
+【KUFO 本頁自主接續 V1】
+你是本頁 KUFO 仙丹候選工程協作，不冒認衡曜、數位螞蟻或原 #201 Writer。原工單：https://github.com/klineodyssey/kline-odyssey/pull/201；保留研究：https://github.com/klineodyssey/kline-odyssey/pull/600。需核分工時唯讀查原公司索引 https://github.com/klineodyssey/kline-odyssey/issues/573，不自動留言或另建工單。
+
+交接唯一位置：C:/Desktop/kline-odyssey/2026-11-06/task/kufo-candidate/KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md 的「KUFO 本頁自主接續 checkpoint」及本對話最新回報。遠端沿 review/kufo-annual-cohort-core-20261106 同一路徑讀回；本機不存在時先核對遠端來源，不假設暫存證據仍在。本頁接續分支不等於原 #201 已接管。c4b50afd 的128項CI是歷史證據，不能轉貼成新版本通過。
+
+每次實際喚醒，或 Human 說「有更新」，先讀最新 Human 指示、這份 Prompt 和最後 checkpoint；按現行 AGENTS 核對 Boot V1.4／正式 Boot、Physics CURRENT、正式宇宙地圖、AGENTS、Worker Registry、原 claim／Writer／HOLD，再核最新 main、候選 HEAD、未提交修改及同檔碰撞。來源變動標 STALE；保留 Human 與其他作者修改，不自行取得員工或 lease 身分。
+
+從原授權內選一件可驗收的小型源碼、測試、審查或證據保存工作，直接做並驗證。優先沿 checkpoint 的 NEXT_ACTION，使用既有 KUFO 合約、政策、測試與 CI；不另造 Runtime、ledger、bootstrap、任意版本或平行產品。相同來源已有可靠驗證時沿用，不重跑未變的大型測試；有變更才跑相關本機測試與精確 head CI，讀回結果及來源雜湊。普通修改、commit、push 僅限本頁接續分支和已授權範圍；新檔遵守既有索引規則，累積文件保留歷史。
+
+保留年界50/75/100%、第三年全清零、轉帳保齡、不在一般交易結算、KGEN餘額證明及KSHIP守恆規則。正式年界／生肖錨點／有限發行期間未核定與CURRENT文字衝突不得靠測試樣本補成正典。原 #201 Writer／lease 未核實時不覆寫其分支、不強推。不得自動 merge、close PR、刪 branch、部署、送外部鏈交易、移動真資產、讀取或使用私鑰／seed／秘密、簽署、付款或治理；不改他頁排程、Registry 或 WorkQueue。不聯絡其他人。單一阻塞只停該依賴，先做其他合法部分；實際權限拒絕不換路徑繞過。沒有可推進項就記 STANDBY 與恢復條件，不製造需求或進度。
+
+每輪在同一交接文件追加並讀回：RUN_ID、實際作者／thread、觸發來源（未知填UNKNOWN）、台灣與UTC起訖、main與HEAD、動作、修改檔、測試及證據、commit／遠端讀回、阻擋、需要Human決定的事項和一個具體 NEXT_ACTION。排程已設定、真正觸發、開始、完成、驗收、保存、合併與部署分開記錄；無法寫檔就在本頁留完整交接。使用並維護本頁同一排程，沒有新理由不改頻率、不新增重複排程。
+```
+
+
+
 ## Review automation continuation — 2026-11-08
 
 This stage continues the same Product 05 review branch after initial implementation

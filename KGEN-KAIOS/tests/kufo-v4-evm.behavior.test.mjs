@@ -420,6 +420,158 @@ test("outside the configured issuance interval the entire alchemy burn rolls bac
   await conservation(f);
 });
 
+test("rejected transactions restore complete cohort, proof, allowance and supply snapshots", async (t) => {
+  const f = await alchemyFixture(t);
+  const owner = await f.owner.getAddress();
+  const beneficiary = await f.beneficiary.getAddress();
+  const recipient = await f.recipient.getAddress();
+  const outsider = await f.outsider.getAddress();
+  const token = await f.kufo.getAddress();
+  const furnace = await f.furnace.getAddress();
+  const outlet = await f.realOutput.getAddress();
+  const converter = await f.converter.getAddress();
+  const input = parseEther("0.001");
+  const gasLimit = 3_000_000n;
+  const abi = AbiCoder.defaultAbiCoder();
+  const chainId = (await f.provider.getNetwork()).chainId;
+  const alchemyProofs = [];
+  const carrierProofs = [];
+  const freshMint = hash("rollback-unauthorized-mint");
+  const freshCarrier = hash("rollback-unauthorized-carrier");
+  const closedLife = hash("rollback-closed-calendar-life");
+  const holders = await Promise.all([
+    f.owner, f.beneficiary, f.recipient, f.victim, f.outsider,
+    f.furnace, f.realOutput, f.converter,
+  ].map((holder) => holder.getAddress()));
+  const years = [0, 1, 2, 3].map((index) => FIRST_YEAR + index);
+
+  await mined(f.kaios.approve(furnace, input * 3n));
+  for (let year = 0; year < 2; year += 1) {
+    await at(f, f.starts[year] + 10);
+    const receipt = await mined(f.furnace.burnForKufo(input, owner, hash(`rollback-origin-${year}`)));
+    const event = receipt.logs.map((log) => {
+      try { return f.furnace.interface.parseLog(log); } catch { return null; }
+    }).find((log) => log?.name === "ImmediateAlchemyCreated");
+    assert.ok(event, "populate genuine consumed mint proofs before testing rollback");
+    alchemyProofs.push(event.args.proofId);
+  }
+  await mined(f.kufo.transfer(recipient, 317n));
+  const settled = await mined(f.converter.convert(100n, beneficiary));
+  const conversionEvent = settled.logs.map((log) => {
+    try { return f.converter.interface.parseLog(log); } catch { return null; }
+  }).find((log) => log?.name === "KSHIPConversion");
+  assert.ok(conversionEvent);
+  carrierProofs.push(conversionEvent.args.proofId);
+
+  const matured = await f.kufo.claimableTotal(owner);
+  const overBalance = await f.kufo.balanceOf(owner) + 1n;
+  assert.ok(matured > 0n && matured + 1n < overBalance - 1n,
+    "failed conversion must consume positive mature rights before finding an immature remainder");
+  assert.equal(await f.kufo.activeCohortCount(owner), 2n);
+  await mined(f.kufo.approve(outsider, overBalance));
+  assert.equal(await f.kaios.allowance(owner, furnace), input,
+    "closed-calendar call starts with enough unspent allowance");
+
+  // Proof derivation only identifies public storage to observe; it does not
+  // reproduce cohort mutation, maturity, transfer partition or rollback logic.
+  const nextCarrier = keccak256(abi.encode(
+    ["uint256", "address", "uint256", "address", "address", "uint256"],
+    [chainId, converter, await f.converter.conversionCount() + 1n, owner, beneficiary, matured + 1n],
+  ));
+  carrierProofs.push(nextCarrier, freshCarrier);
+  const closedProof = keccak256(abi.encode(
+    ["uint256", "address", "uint256", "address", "address", "uint256", "bytes32", "bytes32"],
+    [chainId, await f.kaios.getAddress(), await f.kaios.alchemyBurnCount() + 1n,
+      owner, beneficiary, input, closedLife, await f.furnace.DESTINATION_168888()],
+  ));
+  const mintProofs = [...alchemyProofs, freshMint, closedProof];
+  alchemyProofs.push(closedProof);
+
+  async function snapshot() {
+    const [balances, cohorts, allowances, mintRecords, burnRecords, alchemyRecords, counters, organs] = await Promise.all([
+      Promise.all(holders.map(async (holder) => Promise.all([
+        f.kufo.balanceOf(holder), f.kship.balanceOf(holder), f.kaios.balanceOf(holder), f.kgen.balanceOf(holder),
+        f.kufo.claimableTotal(holder), f.kufo.activeCohortCount(holder),
+      ]))),
+      Promise.all(holders.map(async (holder) => Promise.all(years.map(async (year) =>
+        tranches(await f.kufo.cohort(holder, year)))))),
+      Promise.all([f.kufo.allowance(owner, outsider), f.kaios.allowance(owner, furnace), f.kgen.allowance(owner, furnace)]),
+      Promise.all(mintProofs.map(async (proof) => Promise.all([
+        f.kufo.proofMinted(proof), f.kufo.mintOrigin(proof).then((record) => Array.from(record)),
+      ]))),
+      Promise.all(carrierProofs.map(async (proof) => Promise.all([
+        f.kufo.carrierBurnRecord(proof).then((record) => Array.from(record)), f.kship.carrierProofMinted(proof),
+      ]))),
+      Promise.all(alchemyProofs.map(async (proof) => Promise.all([
+        f.kaios.alchemyBurnRecord(proof).then((record) => Array.from(record)),
+        f.furnace.proof(proof).then((record) => Array.from(record)),
+      ]))),
+      Promise.all([
+        f.kufo.totalSupply(), f.kufo.totalMintedFromAlchemy(), f.kufo.totalDecayedForKship(),
+        f.kship.totalSupply(), f.kship.totalMintedFromKufo(), f.converter.conversionCount(),
+        f.kaios.totalSupply(), f.kaios.totalKaiosBurnedForAlchemy(), f.kaios.alchemyBurnCount(),
+        f.kaios.settledKgenBurned(), f.kaios.totalKaiosMintedFromKgen(), f.kaios.settlementCount(), f.kgen.totalSupply(),
+      ]),
+      Promise.all([OUTPUT_ID, CONVERTER_ID, FURNACE_ID].map((organ) => f.registry.organ(organ))),
+    ]);
+    return { balances, cohorts, allowances, mintRecords, burnRecords, alchemyRecords, counters, organs };
+  }
+
+  const rejected = [];
+  async function unchangedAfterRevert(label, send) {
+    const before = await snapshot();
+    let failedReceipt;
+    await assert.rejects(async () => {
+      const transaction = await send();
+      try { await transaction.wait(); } catch (error) {
+        failedReceipt = error.receipt;
+        throw error;
+      }
+    }, (error) => {
+      assert.equal(error.code, "CALL_EXCEPTION", `${label}: a mined contract revert is required`);
+      assert.ok(failedReceipt?.hash && failedReceipt.blockNumber > 0, `${label}: missing mined receipt`);
+      assert.equal(failedReceipt.status, 0, `${label}: failed transaction status`);
+      assert.equal(failedReceipt.logs.length, 0, `${label}: reverted events cannot persist`);
+      assert.ok(failedReceipt.gasUsed < gasLimit, `${label}: reject by contract logic, not out of gas`);
+      return true;
+    });
+    assert.deepEqual(await snapshot(), before, `${label}: complete public product state must roll back`);
+    rejected.push(`${label}:${failedReceipt.gasUsed}`);
+  }
+
+  await unchangedAfterRevert("over-balance transfer", () => f.kufo.transfer(recipient, overBalance, { gasLimit }));
+  await unchangedAfterRevert("over-balance transferFrom restores spent allowance", () =>
+    f.kufo.connect(f.outsider).transferFrom(owner, recipient, overBalance, { gasLimit }));
+  await unchangedAfterRevert("insufficient matured conversion restores consumed tranches and sequence", () =>
+    f.converter.convert(matured + 1n, beneficiary, { gasLimit }));
+  await unchangedAfterRevert("unauthorized immediate mint", () =>
+    f.kufo.connect(f.outsider).mintFromImmediateProof(freshMint, beneficiary, 1n, { gasLimit }));
+  await unchangedAfterRevert("unauthorized carrier burn", () =>
+    f.kufo.connect(f.outsider).burnForCarrier(owner, beneficiary, 1n, freshCarrier, { gasLimit }));
+  await unchangedAfterRevert("unauthorized KSHIP mint with genuine proof", () =>
+    f.kship.connect(f.outsider).mintFromCarrierProof(carrierProofs[0], { gasLimit }));
+
+  // Rebind only this unrestricted local registry so replay is tested by an
+  // authorized output rather than being rejected early as an unauthorized call.
+  await mined(f.registry.setOrgan(OUTPUT_ID, await f.output.getAddress()));
+  await unchangedAfterRevert("authorized output reuses consumed mint proof", () =>
+    f.output.mint(token, mintProofs[0], beneficiary, E18, { gasLimit }));
+  await mined(f.registry.setOrgan(OUTPUT_ID, outlet));
+
+  await at(f, f.starts[4]); // explicit artificial issuance closing boundary
+  assert.ok(await f.kgen.balanceOf(owner) >= input / 1000n);
+  assert.ok(await f.kaios.balanceOf(owner) >= input);
+  assert.equal(await f.kaios.allowance(owner, furnace), input);
+  assert.equal(await f.kufo.proofMinted(closedProof), false);
+  assert.equal((await f.furnace.proof(closedProof)).owner, ZeroAddress);
+  await unchangedAfterRevert("closed calendar restores real KAIOS burn and consumed furnace proof", () =>
+    f.furnace.burnForKufo(input, beneficiary, closedLife, { gasLimit }));
+  assert.equal(rejected.length, 8);
+  await conservation(f);
+  assert.equal(await f.kaios.conservationInvariantHolds(), true);
+  t.diagnostic(`rollback_cases=${rejected.length} mined_status=0 persistent_logs=0 gas_by_case=${JSON.stringify(rejected)}`);
+});
+
 // This oracle checks observable deltas and conservation rather than reproducing
 // the contract's proportional transfer partition or its cohort traversal order.
 // Small odd mint amounts deliberately exercise the documented per-proof rounding.
