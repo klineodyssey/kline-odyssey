@@ -435,7 +435,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     }
   });
 
-  await t.test("actual funding controller discards stale prepare success and failure after form changes", async () => {
+  await t.test("actual funding controller discards stale prepare success and failure after form changes", async t => {
     const { readFileSync } = await import("node:fs");
     const { runInNewContext } = await import("node:vm");
     const { buildBankPausePlan, buildSharedCapPlan, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
@@ -450,6 +450,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       const state = { account: options.account ?? formal.mother, accounts: options.accounts, chainId: options.chainId ?? 56, pauser: options.pauser ?? false };
       const exposedAccounts = () => state.accounts ?? (state.account ? [state.account] : []);
       const rpc = [], mobileLog = [], storageFixture = storage(), providerEvents = [], connectionTimers = new Set();
+      const windowEvents = new Map(), documentEvents = new Map();
+      if (options.savedTopic) storageFixture.setItem("kaios18888.walletconnect.confirmedTopic.v1", options.savedTopic);
       const node = (name) => {
         if (!nodes.has(name)) {
           const listeners = new Map();
@@ -503,7 +505,9 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       }
       if (options.malformedProviders) provider.providers = { unexpected: true };
       const mobileListeners = new Map();
-      const mobileSession = metadata => ({ self: { metadata }, namespaces: { eip155: { accounts: [`eip155:56:${formal.guanyin}`] } } });
+      const mobileSession = (metadata, topic, expired = false) => ({ topic,
+        expiry: Math.floor(Date.now() / 1000) + (expired ? -1 : 3600), self: { metadata },
+        namespaces: { eip155: { accounts: [`eip155:56:${formal.guanyin}`] } } });
       let mobileMetadata;
       const mobile = {
         async disconnect() {
@@ -515,7 +519,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
           mobileLog.push("enable");
           if (options.mobileReject) throw Object.assign(Error("Rejected by wallet"), { code: 4001 });
           state.account = formal.guanyin; state.chainId = 56; state.pauser = true;
-          this.session = mobileSession(mobileMetadata);
+          this.session = mobileSession(mobileMetadata, "new-topic");
           if (options.mobileUnapprovedAccount) this.session.namespaces.eip155.accounts = [`eip155:1:${formal.guanyin}`];
           mobileListeners.get("chainChanged")?.("0x38");
           mobileListeners.get("accountsChanged")?.([state.account]);
@@ -538,7 +542,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
           if (!account) throw Error("ACCOUNT_OR_BLOCK_UNKNOWN");
           const allowed = options.forceReady ?? (!pause || account.toLowerCase() === formal.guanyin.toLowerCase() && state.pauser && state.chainId === 56);
           return { plan: nextPlan, account,
-            snapshot: { account, chainId: state.chainId, codeOk: true, identityErrors: [],
+            snapshot: { account, chainId: state.chainId, codeOk: true, identityErrors: [], paused: false,
               roles: { proposer: account === formal.mother, approver: account === formal.jade, pauser: state.pauser },
               ...options.snapshotOverride },
             step: { ready: allowed, kind: pause ? "BANK_PAUSE" : options.stepKind ?? (nextPlan?.type === "SHARED_CAP" ? "CAP_PROPOSE" : "ALLOCATION_PROPOSE"),
@@ -559,15 +563,17 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       }
       const otherProvider = options.lateOkx ? { request() { throw Error("Unexpected fallback provider request"); } } : provider;
       const window = { ethereum: options.okxOnly ? undefined : otherProvider, okxwallet: options.okxDirect ? provider : options.okxOnly ? { ethereum: provider } : undefined, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
-        localStorage: storageFixture, addEventListener() {}, dispatchEvent: event => providerEvents.push(event),
+        localStorage: storageFixture, addEventListener: (event, handler) => windowEvents.set(event, handler), dispatchEvent: event => providerEvents.push(event),
         WalletConnectEthereumProvider: options.mobile ? { async init({ metadata, chains, storageOptions }) {
           mobileLog.push("init");
           assert.equal(chains[0], 56); assert.equal(storageOptions.database, "kaios18888-walletconnect");
           mobileMetadata = metadata;
-          if (options.mobileCached) mobile.session = mobileSession(options.mobileForeign ? { ...metadata, url: "https://foreign.example" } : metadata);
+          if (options.mobileCached) mobile.session = mobileSession(options.mobileForeign ? { ...metadata, url: "https://foreign.example" } : metadata, "cached-topic", options.mobileExpired);
           return mobile;
         } } : undefined };
       const context = { window, document: { getElementById: (id) => node(id.replace(/^funding-/, "")),
+        visibilityState: options.visible ? "visible" : undefined,
+        addEventListener: (event, handler) => documentEvents.set(event, handler),
         createElement: () => ({ value: "", textContent: "" }), head: { append() { throw Error("No external scripts in offline UI test"); } } },
         navigator: { userAgent: options.userAgent, clipboard: options.clipboard, ...(options.webLocks === false ? {} : { locks: { request() {} } }) },
         Event: class { constructor(type) { this.type = type; } },
@@ -587,7 +593,12 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         node("wallet").value = "0";
         await node("connect").onclick();
       }
-      return { node, wallets, requests, state, providerListeners, receiptCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers, probe: context.uiProbe };
+      const setVisibility = visibility => {
+        context.document.visibilityState = visibility;
+        documentEvents.get("visibilitychange")();
+      };
+      return { node, wallets, requests, state, providerListeners, receiptCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers,
+        setVisibility, pageShow: () => windowEvents.get("pageshow")(), mobile, mobileListeners, probe: context.uiProbe };
     };
     for (const failure of [false, true]) {
       const ui = await mount(), wait = deferred();
@@ -856,6 +867,86 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       }
       assert.equal(ui.node("send").disabled, true); assert.equal(ui.requests.length, 0);
     }
+
+    const settleWallet = () => new Promise(resolve => setImmediate(resolve));
+    await t.test("OKX foreground and cold reload only restore current authorization", async () => {
+      const ui = await mount({ okxOnly: true, role: "guanyin", account: formal.guanyin, pauser: true, skipConnect: true, visible: true });
+      await settleWallet();
+      assert.match(ui.node("role-status").textContent, /目前帳戶已授權/);
+      assert.equal(ui.probe.preview(), null);
+      await ui.node("prepare").onclick();
+      assert.match(ui.node("role-status").textContent, /鏈上角色讀查通過/);
+      assert.equal(JSON.parse(ui.node("preview").textContent).unsignedTransaction.data, "0x8456cb59");
+      ui.pageShow();
+      assert.doesNotMatch(ui.node("preview").textContent, /0x8456cb59/);
+      await settleWallet();
+      const wait = deferred();
+      ui.wallets[0].next = wait;
+      const pendingPreview = ui.node("prepare").onclick();
+      ui.setVisibility("hidden");
+      ui.state.accounts = [alternate];
+      ui.setVisibility("visible"); ui.pageShow();
+      wait.resolve(); await pendingPreview;
+      await settleWallet();
+      assert.doesNotMatch(ui.node("preview").textContent, /0x8456cb59/);
+      assert.doesNotMatch(ui.node("connection").textContent, new RegExp(formal.guanyin, "i"));
+      assert.doesNotMatch(ui.node("role-status").textContent, /鏈上角色讀查通過/);
+      ui.state.accounts = [formal.guanyin]; ui.state.chainId = 1;
+      ui.pageShow();
+      await settleWallet();
+      assert.match(ui.node("connection").textContent, /chainId=1\b/);
+      await ui.node("prepare").onclick();
+      assert.equal(ui.probe.preview(), null);
+      assert.equal(ui.requests.length, 0);
+      assert.ok(ui.rpc.every(call => ["eth_accounts", "eth_chainId"].includes(call.method)));
+      const revoked = await mount({ okxOnly: true, role: "guanyin", account: formal.guanyin, needsAuthorization: true, skipConnect: true, visible: true });
+      await settleWallet();
+      assert.match(revoked.node("role-status").textContent, /實際帳戶：尚未連接/);
+      assert.ok(revoked.rpc.every(call => call.method !== "eth_requestAccounts"));
+    });
+    await t.test("role changes during passive OKX reread cannot restore stale wallet state", async () => {
+      const wait = deferred();
+      const ui = await mount({ okxOnly: true, accountsWait: wait, role: "guanyin", skipConnect: true, visible: true });
+      ui.node("role").value = "mother"; ui.node("role").emit("change");
+      wait.resolve([formal.mother]);
+      await settleWallet();
+      assert.match(ui.node("role-status").textContent, /目前帳戶已授權/);
+      assert.match(ui.node("connection").textContent, new RegExp(formal.mother, "i"));
+      assert.equal(ui.requests.length, 0);
+    });
+    await t.test("passive WalletConnect requires the same live previously confirmed topic and BSC grant", async () => {
+      for (const options of [{ savedTopic: "cached-topic" }, { savedTopic: "old-topic" },
+        { savedTopic: "cached-topic", mobileExpired: true }, { savedTopic: "cached-topic", mobileForeign: true }, {}]) {
+        const ui = await mount({ mobile: true, mobileCached: true, role: "guanyin", account: formal.guanyin, pauser: true, skipConnect: true, visible: true, ...options });
+        await settleWallet();
+        const confirmed = options.savedTopic === "cached-topic" && !options.mobileExpired && !options.mobileForeign;
+        assert.match(ui.node("role-status").textContent, confirmed ? /目前帳戶已授權/ : /實際帳戶：尚未連接/);
+        assert.ok(ui.mobileLog.every(method => ["init", "eth_accounts", "eth_chainId"].includes(method)));
+        if (!confirmed) continue;
+        await ui.node("prepare").onclick();
+        assert.ok(ui.probe.preview());
+        ui.mobileListeners.get("disconnect")({ data: "old-topic" });
+        assert.ok(ui.probe.preview(), "stale disconnect cannot remove the confirmed session");
+        ui.mobile.session.namespaces.eip155.accounts = [`eip155:56:${alternate}`];
+        ui.mobileListeners.get("session_update")();
+        assert.equal(ui.probe.preview(), null);
+        await settleWallet();
+        assert.match(ui.node("role-status").textContent, /實際帳戶：尚未連接/);
+        assert.equal(ui.requests.length, 0);
+      }
+    });
+
+    await t.test("chain switching cannot confirm a replacement WalletConnect session", async () => {
+      const ui = await mount({ mobile: true, mobileCached: true, role: "guanyin", account: formal.guanyin,
+        skipConnect: true, visible: true, savedTopic: "cached-topic" });
+      await settleWallet();
+      ui.state.chainId = 1; ui.mobileListeners.get("chainChanged")("0x1");
+      ui.mobile.session.topic = "unconfirmed-topic";
+      await ui.node("switch-bsc").onclick();
+      assert.equal(ui.storageFixture.getItem("kaios18888.walletconnect.confirmedTopic.v1"), "cached-topic");
+      assert.match(ui.node("role-status").textContent, /實際帳戶：尚未連接/);
+      assert.equal(ui.requests.length, 0);
+    });
 
     const noLocks = await mount({ account: formal.guanyin, pauser: true, webLocks: false });
     noLocks.node("role").value = "guanyin"; noLocks.node("role").emit("change");
@@ -1248,6 +1339,33 @@ test("bank pause wallet: only verified Guanyin can request one pause and receipt
       assert.equal(broken.sends().length, 0);
     }
     assert.equal(valid.sends().length, 0, "read-only inspection never starts a wallet transaction");
+  });
+  await t.test("pending storage does not block read-only pause evidence or allow a send", async () => {
+    const plan = buildBankPausePlan();
+    for (const [raw, reason] of [[JSON.stringify({ state: "AWAITING_HUMAN_WALLET" }), "PENDING_INTENT_RECONCILE_FIRST"],
+      ["invalid-json", "PENDING_STORAGE_CORRUPT_DO_NOT_RESEND"], [null, "DURABLE_STORAGE_REQUIRED"]]) {
+      const m = make();
+      if (raw !== null) m.storage.setItem(FUNDING_STORAGE_KEY, raw);
+      const wallet = raw === null ? new HumanBankPauseWallet({ provider: m.provider, storage: null, locks: m.lockManager }) : m.wallet;
+      const preview = await wallet.prepare(plan);
+      assert.equal(preview.snapshot.roles.pauser, true);
+      assert.equal(preview.step.ready, false);
+      assert.ok(preview.step.blockers.includes(reason));
+      await assert.rejects(wallet.request(preview), /STEP_NOT_READY/);
+      assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), raw);
+      assert.equal(m.sends().length, 0);
+    }
+  });
+  await t.test("an account change during the fixed-block role read discards the pause preview", async () => {
+    const m = make();
+    const request = m.provider.request;
+    m.provider.request = async args => {
+      const result = await request(args);
+      if (args.method === "eth_call" && bank.parseTransaction({ data: args.params[0].data }).name === "hasRole") m.state.account = formal.mother;
+      return result;
+    };
+    await assert.rejects(m.wallet.prepare(), /FRESH_STATE_OR_ACCOUNT_CHANGED/);
+    assert.equal(m.sends().length, 0);
   });
   await t.test("fresh-state changes invalidate a pause; rejection never retries; an explicit request sends once", async () => {
     for (const mutate of [

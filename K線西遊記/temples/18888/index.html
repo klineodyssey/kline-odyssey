@@ -219,7 +219,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
   <!-- Human-operated fixed allocation and emergency pause; prototype values are not account balances. -->
   <section class="funding-panel" id="funding-panel" aria-labelledby="funding-title">
-    <h2 id="funding-title">KAIOS 生命資源 · 錢包確認作業 · OKX V3 · 雙 App 跳轉</h2>
+    <h2 id="funding-title">KAIOS 生命資源 · 錢包確認作業 · OKX V3 · 連線恢復</h2>
     <p>選擇固定配額或共享一千萬調額 → 讀查下一步 → 核對內容 → 由你在既有錢包確認。<strong>每次只送交一筆，不會自動連續簽署或撥款。</strong></p>
     <p class="funding-muted">此區與上方原型展示數字分開。BSC 主網 56；金額單位 KAIOS，不是 BNB。調額、Mother 提案、玉帝獨立批准、到期執行、實際撥款分別核定；連接或交易雜湊不代表已入帳。</p>
     <div class="funding-fields">
@@ -622,12 +622,15 @@ async function inspectBankPause(provider, selectedAccount) {
   const [chain, accounts, block] = await Promise.all([rpc("eth_chainId"), rpc("eth_accounts"), rpc("eth_getBlockByNumber", ["latest", false])]);
   if (Number(BI(chain)) !== 56) throw new Error("CHAIN_ID_MISMATCH");
   const account = authorizedWalletAccount(accounts, selectedAccount);
-  if (!account || !block?.number || !block?.timestamp) throw new Error("ACCOUNT_OR_BLOCK_UNKNOWN");
+  if (!account) throw new Error("CONNECT_EXISTING_HOLDER_EXPLICITLY");
+  if (!block?.number || !block?.timestamp) throw new Error("BLOCK_STATE_UNKNOWN");
   const tag = block.number;
   const pins = await readBankRuntimePin(rpc, tag);
   const call = async (method, args = []) => bankInterface.decodeFunctionResult(method,
     await rpc("eth_call", [{ to: FUNDING_FORMAL.bank, data: bankInterface.encodeFunctionData(method, args) }, tag]));
   const [role, paused] = await Promise.all([call("hasRole", [id("PAUSER_ROLE"), account]), call("paused")]);
+  const [freshAccounts, freshChain] = await Promise.all([rpc("eth_accounts"), rpc("eth_chainId")]);
+  if (Number(BI(freshChain)) !== 56 || !authorizedWalletAccount(freshAccounts, account)) throw new Error("FRESH_STATE_OR_ACCOUNT_CHANGED");
   return { chainId: 56, account, blockNumber: tag, timestamp: String(BI(block.timestamp)), codeOk: pins.ok,
     identityErrors: pins.identityErrors, runtimePins: pins.evidence, roles: { pauser: role[0] }, paused: paused[0] };
 }
@@ -978,11 +981,20 @@ class HumanFundingWallet {
     try { return JSON.parse(raw); } catch { throw new Error("PENDING_STORAGE_CORRUPT_DO_NOT_RESEND"); }
   }
   async prepare(plan) {
-    if (this.readPending()) throw new Error("PENDING_INTENT_RECONCILE_FIRST");
     const canonical = canonicalPlan(plan);
     if (planFlowType(canonical) !== this.flowType) throw new Error("TRANSACTION_FLOW_MISMATCH");
     if (json(plan) !== json(canonical)) throw new Error("PLAN_CHANGED");
+    const pause = isPausePlan(canonical), generation = this.generation;
+    let sendBlocker;
+    try { if (this.readPending()) sendBlocker = "PENDING_INTENT_RECONCILE_FIRST"; }
+    catch (error) {
+      if (!pause) throw error;
+      sendBlocker = error?.message === "PENDING_STORAGE_CORRUPT_DO_NOT_RESEND" ? error.message : "DURABLE_STORAGE_REQUIRED";
+    }
+    if (sendBlocker && !pause) throw new Error(sendBlocker);
     const snapshot = await this.inspect(canonical), step = deriveStep(canonical, snapshot);
+    if (pause && generation !== this.generation) throw new Error("FRESH_STATE_OR_ACCOUNT_CHANGED");
+    if (sendBlocker) { step.ready = false; step.blockers.push(sendBlocker); }
     let fee = null;
     if (isFloorPlan(canonical) && step.ready) {
       try { fee = await this.estimateFloorFee(canonical, snapshot); }
@@ -1211,6 +1223,21 @@ const pretty = value => JSON.stringify(value, (_, item) => typeof item === 'bigi
 const providers = [];
 let wallet = null, preview = null, previewWallet = null, previewRole = null, busy = false, importedCases = [], formGeneration = 0, connectionGeneration = 0, connectedProvider = null, connectedAccount = null, connectedChain = null;
 let receiptWatch = null, mobileProvider = null, mobileInit = null, cancelWalletConnection = null, connectedName = "", connectedAccounts = [], walletContextChanges = 0;
+let mobileMetadata, confirmedMobileTopic, restoringWallet = false, resumePending = false;
+const MOBILE_TOPIC_KEY = 'kaios18888.walletconnect.confirmedTopic.v1';
+function fundingStorage() {
+  try { return window.localStorage; } catch { return null; }
+}
+function savedMobileTopic() {
+  try { return fundingStorage()?.getItem(MOBILE_TOPIC_KEY); } catch { return null; }
+}
+function rememberMobileTopic(topic) {
+  confirmedMobileTopic = topic;
+  try {
+    if (topic) fundingStorage()?.setItem(MOBILE_TOPIC_KEY, topic);
+    else fundingStorage()?.removeItem(MOBILE_TOPIC_KEY);
+  } catch { /* An in-memory session still needs fresh authorization checks. */ }
+}
 const roleChoices = {
   mother: {name:'王母', address:FUNDING_FORMAL.mother, permission:'proposer'},
   jade: {name:'玉帝', address:FUNDING_FORMAL.jade, permission:'approver'},
@@ -1221,6 +1248,7 @@ const sameAddress = (a, b) => typeof a === 'string' && typeof b === 'string' && 
 function roleMatches(candidate) {
   const role = roleChoices[el('role').value], snapshot = candidate?.snapshot;
   return Boolean(role && snapshot && sameAddress(candidate.account, role.address) && sameAddress(snapshot.account, candidate.account) && Number(snapshot.chainId) === 56 && snapshot.roles?.[role.permission] === true
+    && sameAddress(connectedAccount, candidate.account) && connectedChain === 56
     && snapshot.codeOk === true && Array.isArray(snapshot.identityErrors) && snapshot.identityErrors.length === 0
     && (!mobileProvider || connectedProvider !== mobileProvider || walletConnectApprovesBsc(mobileProvider, candidate.account))
     && (el('role').value === 'guanyin' ? candidate.plan?.type === 'BANK_PAUSE' : el('mode').value === 'cap' ? candidate.plan?.type === 'SHARED_CAP' : el('mode').value === 'fixed' && !candidate.plan?.type));
@@ -1230,14 +1258,18 @@ function showRole(snapshot = null) {
   if (!role) { el('role-status').textContent = '角色選項不正確，請重新選擇。'; return; }
   const account = snapshot?.account || connectedAccount, chain = snapshot?.chainId ?? connectedChain;
   const verified = snapshot && roleMatches({snapshot, account:snapshot.account, plan:el('role').value === 'guanyin' ? buildBankPausePlan() : el('mode').value === 'cap' ? buildSharedCapPlan() : {}});
-  el('role-status').textContent = `本次選擇：${role.name}；預期帳戶：${role.address}。實際帳戶：${account || '尚未連接'}；網路：${chain ?? '尚未讀取'}（須為56）。${verified ? '正式帳戶與鏈上角色讀查通過。' : '尚未通過本次角色讀查；請在錢包選正確帳戶後重新預覽。'}選擇角色不會授予權限。`;
+  let evidence = verified ? "正式帳戶與鏈上角色讀查通過。" : "尚未核對本次角色。";
+  if (!snapshot && sameAddress(account, role.address) && chain === 56) evidence = "目前帳戶已授權，請按唯讀預覽核對鏈上角色。";
+  if (snapshot && !verified) evidence = snapshot.roles?.[role.permission] === false ? "鏈上角色讀查未通過。" : "鏈上角色或合約指紋尚未核實。";
+  if (restoringWallet && !snapshot) evidence = "正在重新核對錢包授權與網路。";
+  el('role-status').textContent = `本次選擇：${role.name}；預期帳戶：${role.address}。實際帳戶：${account || '尚未連接'}；網路：${chain ?? '尚未讀取'}（須為56）。${evidence}選擇角色不會授予權限。`;
 }
 const walletSessions = new WeakMap(), observedProviders = new WeakSet(), pendingWalletRequests = new WeakSet();
 function makeWallet(provider) {
   let sessions = walletSessions.get(provider);
   if (!sessions) { sessions = {}; walletSessions.set(provider, sessions); }
   const key = el('role').value === 'guanyin' ? 'pause' : el('mode').value === 'cap' ? 'cap' : 'funding';
-  return sessions[key] ||= new (key === 'pause' ? HumanBankPauseWallet : key === 'cap' ? SharedCapWallet : HumanFundingWallet)({provider, storage:window.localStorage,
+  return sessions[key] ||= new (key === 'pause' ? HumanBankPauseWallet : key === 'cap' ? SharedCapWallet : HumanFundingWallet)({provider, storage:fundingStorage(),
     selectedAccount:() => connectedProvider === provider ? connectedAccount : null});
 }
 const status = text => { el('status').textContent = text; };
@@ -1245,6 +1277,12 @@ const stageNames = {CAP_ALREADY_CONFIGURED:'共享每筆／每日10,000,000 KAIO
 const reasons = {CHAIN_ID_MISMATCH:'請在錢包自行切至BSC主網56。', ACCOUNT_NOT_REVIEWED_HOLDER:'本版只接受原Mother或玉帝帳戶。', MOTHER_PROPOSER_REQUIRED:'此步需切至Mother提案帳戶。', DISTINCT_JADE_APPROVER_REQUIRED:'此步需不同於提案人的玉帝批准帳戶。', CAP_RESET_WOULD_ERASE_CURRENT_DAY_SPEND:'當日已有共享用量；調額會歸零，必須先完成用量影響審查。', HIGHER_EXISTING_CAP_DO_NOT_LOWER:'現有限額較候選更高，停止以免降低其他業務額度。', PENDING_INTENT_RECONCILE_FIRST:'已有待確認意圖，請先核對原交易回執，勿重送。', PREVIEW_INVALID_OR_EXPIRED:'預覽已過期或作廢，請重新讀查。', FRESH_STATE_OR_ACCOUNT_CHANGED:'送交前重查發現狀態或帳戶變動，請重新讀查。', WEB_LOCKS_REQUIRED_NO_SEND:'此瀏覽器缺少安全跨分頁鎖；本版不送交易。', ANOTHER_TAB_REQUEST_IN_PROGRESS:'另一分頁正在處理錢包請求，請勿重送。', NO_PENDING_INTENT:'本瀏覽器沒有待核對的送單意圖，不能用任意雜湊代替。', AVAILABLE_FUNDS_INSUFFICIENT:'目前可用額不足；仍須另外核對全部既有負債。', AMOUNT_DECIMAL_STRING_REQUIRED:'請輸入一般數字，最多18位小數，不含逗號或科學記號。', AMOUNT_OUTSIDE_REVIEWED_CAP:'金額須大於0且不超過本版10,000,000 KAIOS候選上限。'};
 Object.assign(reasons, {GUANYIN_PAUSER_REQUIRED:'請在錢包選擇正式觀音帳戶，並核對銀行PAUSER_ROLE。', ACCOUNT_NOT_REVIEWED_PAUSER:'請在錢包選擇正式觀音帳戶。', PAUSER_ROLE_MISSING:'目前帳戶未通過鏈上暫停權限核對。', PENDING_FLOW_MISMATCH:'待確認交易屬於另一操作流程；請選回原角色與流程核對，勿重送。'});
 Object.assign(reasons, {GUANYIN_ACCOUNT_REQUIRED:'請在錢包選擇正式觀音帳戶。', GUANYIN_PAUSER_ROLE_REQUIRED:'目前帳戶未通過銀行暫停權限核對。', BANK_RUNTIME_IDENTITY_MISMATCH:'銀行合約版本尚未通過正式地址與程式指紋核對，停止操作。', BANK_PAUSE_STATE_UNKNOWN:'目前無法確認銀行暫停狀態，請保留原交易紀錄。', PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL:'待確認意圖屬於另一流程；防重鎖保留，請回原流程核對原交易，勿重送。', TRANSACTION_FLOW_MISMATCH:'目前操作流程與原預覽不符，請重新讀查。'});
+Object.assign(reasons, {
+  CONNECT_EXISTING_HOLDER_EXPLICITLY:'目前錢包未授權所選帳戶。請回錢包選帳戶後重新連接。',
+  BLOCK_STATE_UNKNOWN:'錢包未回傳可用的 BSC 區塊，無法核對鏈上角色。',
+  DURABLE_STORAGE_REQUIRED:'此瀏覽器無法保存待確認交易，只提供唯讀預覽。',
+  PENDING_STORAGE_CORRUPT_DO_NOT_RESEND:'待確認交易紀錄無法讀取，只提供唯讀預覽。'
+});
 const invalidate = () => { formGeneration++; receiptWatch = null; wallet?.invalidate?.(); preview = null; previewWallet = null; previewRole = null; el('ack').checked = false; el('send').disabled = true; el('send').textContent = '先連接並預覽；由我本人到錢包確認'; showRole(); };
 // Original case files and the confirmation checkbox cannot attest to the full bank ledger.
 // Until the custodian evidence can be verified, retain unsigned previews and receipt reads.
@@ -1289,7 +1327,13 @@ function findOkxWeb3Provider() {
   return [ethereum, ...injected, ...providers.map(item => item.provider)]
     .find(provider => provider?.isOkxWallet && typeof provider.request === 'function');
 }
-window.addEventListener('eip6963:announceProvider', event => addProvider(event.detail?.provider, String(event.detail?.info?.name || '既有錢包')));
+window.addEventListener('eip6963:announceProvider', event => {
+  const provider = event.detail?.provider;
+  addProvider(provider, String(event.detail?.info?.name || '既有錢包'));
+  if (provider && provider === findOkxWeb3Provider()) {
+    void Promise.resolve().then(() => { if (!connectedProvider && !restoringWallet) void resumeWallet(); });
+  }
+});
 window.dispatchEvent(new Event('eip6963:requestProvider'));
 addProvider(findOkxWeb3Provider(), 'OKX Web3');
 if (Array.isArray(window.ethereum?.providers)) for (const provider of window.ethereum.providers) {
@@ -1317,11 +1361,23 @@ function readWalletChain(value) {
     return Number.isSafeInteger(chain) && chain > 0 ? chain : null;
   } catch { return null; }
 }
-function walletConnectApprovesBsc(provider, account) {
+function ownsMobileSession(session) {
+  const owner = session?.self?.metadata;
+  return Boolean(mobileMetadata && owner?.url === mobileMetadata.url && owner.name === mobileMetadata.name);
+}
+function validMobileTopic(provider) {
+  const session = provider.session;
+  return ownsMobileSession(session) && typeof session.topic === 'string' && session.topic
+    && Number.isSafeInteger(session.expiry) && session.expiry > Date.now() / 1000 ? session.topic : null;
+}
+function mobileGrantsBsc(provider, account) {
   if (!account) return false;
   const namespaces = provider.session?.namespaces;
   return [namespaces?.eip155, namespaces?.["eip155:56"]].some(namespace =>
     Array.isArray(namespace?.accounts) && namespace.accounts.some(value => sameAddress(value, 'eip155:56:' + account)));
+}
+function walletConnectApprovesBsc(provider, account) {
+  return Boolean(confirmedMobileTopic && validMobileTopic(provider) === confirmedMobileTopic && mobileGrantsBsc(provider, account));
 }
 function selectableWalletAccounts() {
   if (!mobileProvider || connectedProvider !== mobileProvider || connectedChain !== 56) return connectedAccounts;
@@ -1337,8 +1393,8 @@ function renderWalletAccount() {
   }));
   el('account').value = connectedAccount ?? '';
 }
-function publishWalletContext() {
-  const valid = connectedAccount && connectedChain === 56 && authorizedWalletAccount(selectableWalletAccounts(), connectedAccount);
+function publishWalletContext(withhold = false) {
+  const valid = !withhold && document.visibilityState !== 'hidden' && connectedAccount && connectedChain === 56 && authorizedWalletAccount(selectableWalletAccounts(), connectedAccount);
   window.dispatchEvent(new CustomEvent('kaios18888:wallet', {detail:{provider:valid ? connectedProvider : null, account:valid || null, chainId:connectedChain}}));
 }
 function showWalletContext() {
@@ -1353,7 +1409,7 @@ function observeWalletProvider(provider) {
   function changed(update, message) {
     if (connectedProvider !== provider) return;
     walletContextChanges++;
-    if (!wallet) return;
+    if (!wallet || restoringWallet) return;
     update();
     connectedAccount = authorizedWalletAccount(selectableWalletAccounts(), connectedAccount);
     invalidate(); showWalletContext(); publishWalletContext();
@@ -1365,10 +1421,21 @@ function observeWalletProvider(provider) {
     '錢包帳戶已變更，請核對 BSC 56 及角色帳戶後重新預覽。'));
   provider.on?.('chainChanged', chain => changed(() => { connectedChain = readWalletChain(chain); },
     '錢包鏈別已變更，請核對 BSC 56 及角色帳戶後重新預覽。'));
-  provider.on?.('disconnect', () => {
+  if (provider === mobileProvider) {
+    provider.on?.('session_update', () => {
+      changed(() => {}, 'WalletConnect 授權已更新，請重新核對帳戶及鏈別。');
+      if (connectedProvider === provider) void resumeWallet();
+    });
+  }
+  provider.on?.('disconnect', error => {
     if (connectedProvider !== provider) return;
+    if (provider === mobileProvider) {
+      const topic = typeof error?.data === 'string' ? error.data : error?.data?.topic;
+      if (topic && confirmedMobileTopic && topic !== confirmedMobileTopic && validMobileTopic(provider) === confirmedMobileTopic) return;
+      rememberMobileTopic(null);
+    }
     clearWalletConnection();
-    status('錢包已中斷，請重新連接。');
+    status('錢包已中斷，請重新連接；若錢包要求，請重載本頁。');
   });
 }
 
@@ -1381,7 +1448,14 @@ async function requestWalletConnection(provider, action) {
 
 // #638: bound connection waits and accept only a stable account/chain reread.
 async function useProvider(resolveProvider, name, authorize, preferredAccount) {
-  clearWalletConnection();
+  if (authorize || !connectedProvider) clearWalletConnection();
+  else {
+    connectionGeneration++;
+    invalidate();
+    publishWalletContext(true);
+    el('preview').textContent = '舊預覽已作廢，請等本次連線讀回後重新預覽。';
+    el('summary').textContent = '正在核對目前已授權帳戶與鏈別。';
+  }
   const attempt = connectionGeneration;
   const current = () => attempt === connectionGeneration;
   let stopped = false;
@@ -1391,14 +1465,29 @@ async function useProvider(resolveProvider, name, authorize, preferredAccount) {
     if (!active()) return;
     connectedProvider = provider; connectedName = name;
     observeWalletProvider(provider);
-    await requestWalletConnection(provider, walletProvider => authorize(walletProvider, active));
+    if (authorize) await requestWalletConnection(provider, walletProvider => authorize(walletProvider, active));
+    if (!active()) return;
+    const mobile = provider === mobileProvider;
+    const topic = mobile ? validMobileTopic(provider) : null;
+    if (mobile && (!topic || (authorize !== pairMobileWallet && topic !== confirmedMobileTopic && topic !== savedMobileTopic()))) {
+      throw Error('WalletConnect 會話未在本頁確認或已到期，請重新授權。');
+    }
     for (let retry = 0; retry < 4 && active(); retry++) {
       const changes = walletContextChanges;
       const [accounts, chain] = await Promise.all([provider.request({method:'eth_accounts'}), provider.request({method:'eth_chainId'})]);
       if (!active()) return;
       if (changes !== walletContextChanges) continue;
-      connectedAccounts = walletAccounts(accounts); connectedChain = readWalletChain(chain);
-      connectedAccount = authorizedWalletAccount(selectableWalletAccounts(), preferredAccount);
+      const exposedAccounts = walletAccounts(accounts), chainId = readWalletChain(chain);
+      if (mobile) {
+        if (topic !== validMobileTopic(provider)) throw Error('WalletConnect 會話已變更，請重新核對。');
+        if (!exposedAccounts.some(account => mobileGrantsBsc(provider, account))) throw Error('WalletConnect 尚未授權可用的 BSC 帳戶，請重新授權。');
+        if (authorize === pairMobileWallet && chainId !== 56) throw Error('CHAIN_ID_MISMATCH');
+        if (chainId === 56) rememberMobileTopic(topic);
+      }
+      connectedAccounts = exposedAccounts; connectedChain = chainId;
+      const selectable = selectableWalletAccounts();
+      const selected = !authorize && preferredAccount === undefined && selectable.length > 1 ? null : preferredAccount;
+      connectedAccount = authorizedWalletAccount(selectable, selected);
       wallet = makeWallet(provider);
       showWalletContext();
       status(connectedChain !== 56 ? '目前鏈別不是 BSC 56。請按「請錢包切至 BSC 56」，再核對。'
@@ -1406,7 +1495,7 @@ async function useProvider(resolveProvider, name, authorize, preferredAccount) {
         : !sameAddress(connectedAccount, roleChoices[el('role').value]?.address) ? '請從已授權清單選擇正式帳戶，或在錢包重新選帳戶。'
         : '帳戶及鏈別已讀回。請重新唯讀核對鏈上權限與預覽。');
       publishWalletContext();
-      if (connectedAccount && connectedChain === 56) void watchFundingReceipt(wallet);
+      if (authorize && connectedAccount && connectedChain === 56) void watchFundingReceipt(wallet);
       return;
     }
     if (active()) throw Error('帳戶或網路仍在變動，請先在錢包確認後再連接。');
@@ -1441,7 +1530,11 @@ async function run(action, readOnly = false) {
   } catch (error) {
     if (actionGeneration === formGeneration && actionWallet === wallet) { invalidate(); status(error?.message === "WALLET_READ_TIMEOUT" ? "錢包讀查逾時，請重新預覽。" : errorText(error)); }
   }
-  finally { if (timeout !== undefined) clearTimeout(timeout); busy = false; refreshSend(); }
+  finally {
+    if (timeout !== undefined) clearTimeout(timeout);
+    busy = false; refreshSend();
+    if (resumePending && !restoringWallet) void resumeWallet();
+  }
 }
 el('account').addEventListener('change', () => {
   if (busy || !connectedProvider) return;
@@ -1480,7 +1573,7 @@ el('switch-bsc').onclick = () => run(async () => {
     }
   }, preferredAccount);
 });
-el('mobile').onclick = () => run(() => useProvider(async current => {
+async function loadMobileProvider() {
   if (!window.WalletConnectEthereumProvider && !window['@walletconnect/ethereum-provider']) {
     // This UMD build reads NODE_ENV without bundler substitution. This is a
     // public browser-only compatibility literal, never the host environment.
@@ -1498,24 +1591,31 @@ el('mobile').onclick = () => run(() => useProvider(async current => {
   const factory = sdk?.init ? sdk : sdk?.EthereumProvider?.init ? sdk.EthereumProvider : sdk?.default;
   if (!factory?.init) throw Error('原WalletConnect套件入口不可用；不會改用私鑰或自動換路。');
   const url = new URL(window.location.href); url.search = ""; url.hash = "";
-  const metadata = {name:"K18888 凌霄寶殿", description:"K18888 角色錢包", url:url.href, icons:[]};
+  mobileMetadata = {name:"K18888 凌霄寶殿", description:"K18888 角色錢包", url:url.href, icons:[]};
   mobileInit ||= factory.init({projectId:'ed256d3118a9c971d550ed5ee522b4d9', chains:[56],
-    optionalMethods:['wallet_switchEthereumChain'], metadata, storageOptions:{database:'kaios18888-walletconnect'},
+    optionalMethods:['wallet_switchEthereumChain'], metadata:mobileMetadata, storageOptions:{database:'kaios18888-walletconnect'},
     showQrModal:true, qrModalOptions:{themeMode:'dark'}}).catch(error => { mobileInit = null; throw error; });
   mobileProvider = await mobileInit;
-  if (!current()) return mobileProvider;
-  if (mobileProvider.session) {
-    const owner = mobileProvider.session.self?.metadata;
-    if (owner?.url !== metadata.url || owner?.name !== metadata.name) {
+  return mobileProvider;
+}
+function pairMobileWallet(provider) {
+  return provider.enable();
+}
+el('mobile').onclick = () => run(() => useProvider(async current => {
+  const provider = await loadMobileProvider();
+  if (!current()) return provider;
+  if (provider.session) {
+    if (!ownsMobileSession(provider.session)) {
       throw Error('未能辨識舊 WalletConnect 是否屬本頁。請在 OKX Wallet 先中斷本網站舊連線，再重新授權。');
     }
+    rememberMobileTopic(null);
     if (pendingWalletRequests.has(mobileProvider)) throw Error('WalletConnect 仍有請求，請先在錢包完成或取消。');
     try { await requestWalletConnection(mobileProvider, provider => provider.disconnect()); }
     catch { throw Error('舊 WalletConnect 連線未能中斷。請在錢包中斷本頁連線後再試。'); }
     if (mobileProvider.session) throw Error('舊 WalletConnect 連線仍存在。請先在錢包中斷本頁連線。');
   }
   return mobileProvider;
-}, 'WalletConnect', provider => provider.enable()));
+}, 'WalletConnect', pairMobileWallet));
 function formPlan() {
   if (!roleChoices[el('role').value]) throw Error('請選擇本次操作角色。');
   if (el('role').value === 'guanyin') return buildBankPausePlan();
@@ -1547,19 +1647,21 @@ el('prepare').onclick = () => run(async () => {
   const preparingGeneration = formGeneration, preparingWallet = wallet, preparingRole = el('role').value;
   const candidate = await preparingWallet.prepare(plan);
   if (preparingGeneration !== formGeneration || preparingWallet !== wallet || preparingRole !== el('role').value) return;
+  if (!sameAddress(candidate.account, authorizedWalletAccount(selectableWalletAccounts(), connectedAccount))
+    || Number(candidate.snapshot.chainId) !== connectedChain) throw Error('FRESH_STATE_OR_ACCOUNT_CHANGED');
   preview = candidate;
   previewWallet = preparingWallet;
   previewRole = preparingRole;
-  connectedAccount = candidate.account; connectedChain = candidate.snapshot.chainId; showRole(candidate.snapshot);
+  showRole(candidate.snapshot);
   const reviewBlocker = fundingReviewBlocker(candidate);
-  const unsignedPause = candidate.step.kind === 'BANK_PAUSE' && candidate.step.ready && roleMatches(candidate)
+  const unsignedPause = candidate.step.kind === 'BANK_PAUSE' && candidate.snapshot.paused === false && roleMatches(candidate)
     ? {unsignedTransaction:{chainId:56,from:candidate.account,to:plan.pause.to,data:plan.pause.data,value:'0x0'}} : {};
   el('preview').textContent = pretty({beneficiary:plan.beneficiary, amountKaios:plan.amountKaios, amountWei:plan.amountWei, allocationId:plan.allocationId, purposeHash:plan.purposeHash, warning:plan.warnings,
     ...candidate, ...unsignedPause, ...(reviewBlocker ? {review:{status:'BLOCKED', reason:reviewBlocker}, step:{...candidate.step, ready:false}} : {})});
   const stepName = stageNames[candidate.step.kind] || candidate.step.kind;
   const blocked = [...candidate.step.blockers, ...(reviewBlocker ? [reviewBlocker] : [])].map(code => reasons[code] || code).join('；');
   const subject = plan.type === 'BANK_PAUSE' ? '本次為銀行緊急暫停，不會撥款或解除暫停' : plan.type === 'SHARED_CAP' ? '本次僅調整模組共享每筆／每日各10,000,000 KAIOS限額，不建立個案配額、不付款' : `本案：${plan.beneficiary}，${plan.amountKaios} KAIOS`;
-  const roleWarning = roleMatches(candidate) ? '' : '所選角色與實際帳戶／權限尚未核對通過，請切換錢包帳戶再預覽。';
+  const roleWarning = roleMatches(candidate) ? '' : '所選角色、帳戶、權限及合約指紋須全部核對通過。';
   el('summary').textContent = `${subject}。下一步：${stepName}。操作帳戶：${candidate.account}。BSC主網56；本次交易BNB金額為0（仍需BNB手續費）。${candidate.step.to ? `交易目標：${candidate.step.to}。` : ''}${blocked ? `尚缺：${blocked}` : ''}${roleWarning}${candidate.step.kind === 'WAIT_ETA' ? `鏈上等待條件：${candidate.step.label}` : ''}`;
   const ready = candidate.step.ready && !reviewBlocker && roleMatches(candidate);
   el('send').textContent = ready ? `交錢包確認：${stepName}` : '目前不可送交錢包；請先處理上列條件';
@@ -1653,10 +1755,11 @@ function syncFundingMode() {
   el('summary').textContent = pause ? '已選觀音緊急暫停；不需要填入收款人或金額。請在錢包選擇正式觀音帳戶，再讀查權限。' : cap ? '已選共享一千萬調額；不需原案檔、受益人或個案金額。每筆／每日限額各10,000,000 KAIOS，僅處理治理，不會付款。' : '流程或角色已變更，舊預覽與勾選作廢；請在錢包選擇對應帳戶後重新預覽。';
 }
 for (const name of ['role','mode']) el(name).addEventListener('change', () => {
-  connectionGeneration++; invalidate();
+  if (!restoringWallet) connectionGeneration++;
+  invalidate();
   if (wallet && connectedProvider) wallet = makeWallet(connectedProvider);
   syncFundingMode(); showRole(); status('流程與角色選項只表達本次操作意圖，不會切換錢包帳戶、授權或送交易。');
-  void watchFundingReceipt(wallet);
+  if (!restoringWallet) void watchFundingReceipt(wallet);
 });
 el('ack').addEventListener('change', refreshSend);
 el('case').addEventListener('change', () => {
@@ -1757,8 +1860,40 @@ function configureNativeLinks() {
     };
   }
 }
+async function resumeWallet() {
+  if (document.visibilityState !== 'visible') return;
+  if (busy || restoringWallet) { resumePending = true; return; }
+  resumePending = false;
+  const provider = connectedProvider || findOkxWeb3Provider();
+  if (!provider && !savedMobileTopic()) return;
+  const name = connectedName || (provider ? '目前的 OKX 錢包' : 'WalletConnect');
+  const preferred = connectedProvider && connectedAccounts.length ? connectedAccount : undefined;
+  restoringWallet = true;
+  showRole();
+  try {
+    await run(() => useProvider(() => provider || loadMobileProvider(), name, null, preferred));
+  } finally {
+    restoringWallet = false;
+    showRole(preview?.snapshot);
+    if (resumePending) void resumeWallet();
+  }
+}
+function suspendWallet() {
+  publishWalletContext(true);
+  if (!busy) {
+    connectionGeneration++;
+    invalidate();
+    el('preview').textContent = '已暫停本頁讀查，返回後需重新預覽。';
+  }
+}
 configureNativeLinks(); showRole();
-window.addEventListener('pagehide', () => { connectionGeneration++; invalidate(); });
+window.addEventListener('pagehide', suspendWallet);
+window.addEventListener('pageshow', () => { void resumeWallet(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') void resumeWallet();
+  else suspendWallet();
+});
+void resumeWallet();
 // END HUMAN FUNDING CONTROLLER
 
 // BEGIN SEVEN FLOOR CONTROLLER
