@@ -279,7 +279,16 @@ async function verifyFundingPanel(){
         assert.match(await page.locator('#funding-prepare').textContent(),/取消舊共享限額/);
         await noWalletAuthority('offline legacy cap cancellation '+role);
         await visibleAction('#funding-draft','legacy cap cancellation offline preview '+role);
-        row.legacyCapCancellation.push({role,type:draft.type,sendDisabled:true,geometry:await noOverflow('legacy cap cancellation '+role)});
+        const next=page.locator('#funding-legacy-next');
+        const help=page.locator('#funding-legacy-next-help');
+        assert.equal(await next.isVisible(),true,'the disconnected cancellation panel offers a visible next step');
+        assert.equal(await next.isEnabled(),true,'the next step is available before wallet authorization');
+        assert.equal(await next.getAttribute('href'),'#funding-mobile','loopback uses the existing WalletConnect control');
+        assert.equal(await page.locator('#funding-mobile').isEnabled(),true,'the linked WalletConnect control is available');
+        assert.equal(await help.isVisible(),true,'the next step explains the inactive acknowledgment');
+        assert.match(await help.textContent(),/WalletConnect|錢包/);
+        const nextAction=await visibleAction('#funding-legacy-next','legacy-cap-cancel-'+role+'-connect-next');
+        row.legacyCapCancellation.push({role,type:draft.type,sendDisabled:true,nextAction,geometry:await noOverflow('legacy cap cancellation '+role)});
         await capture('legacy-cap-cancel-'+role,true);
       }
       await page.locator('#funding-mode').selectOption('fixed');
@@ -287,6 +296,9 @@ async function verifyFundingPanel(){
       for(const field of ['file','case','beneficiary','amount']){
         assert.equal(await page.locator(`#funding-${field}-field`).isVisible(),true,`fixed allocation restores ${field} field`);
         assert.equal(await page.locator(`#funding-${field}`).isDisabled(),false);
+      }
+      for(const selector of ['#funding-legacy-next','#funding-legacy-next-help']){
+        assert.equal(await page.locator(selector).isVisible(),false,`${selector} is specific to legacy cancellation`);
       }
       await noWalletAuthority('changed back to fixed allocation');
       // Exercise the real seven-floor controller in the same isolated context.
