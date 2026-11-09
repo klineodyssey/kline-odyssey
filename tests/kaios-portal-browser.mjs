@@ -260,8 +260,30 @@ async function verifyFundingPanel(){
         row.sharedCap.push({role,type:capDraft.type,proposalId:capDraft.cap.proposalId,noCaseRequired:true,sendDisabled:true,geometry:await noOverflow(`shared cap ${role}`)});
         await capture(`shared-cap-${role}`,true);
       }
+      await page.locator('#funding-mode').selectOption('legacy-cancel');
+      for(const field of ['file','case','beneficiary','amount']){
+        assert.equal(await page.locator('#funding-'+field+'-field').isVisible(),false);
+        assert.equal(await page.locator('#funding-'+field).isDisabled(),true);
+      }
+      row.legacyCapCancellation=[];
+      for(const role of ['mother','jade']){
+        await page.locator('#funding-role').selectOption(role);
+        await page.locator('#funding-draft').click();
+        const draft=JSON.parse(await page.locator('#funding-preview').textContent());
+        assert.equal(draft.status,'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED');
+        assert.equal(draft.type,'LEGACY_CAP_CANCEL');
+        assert.equal(draft.chainId,56);
+        assert.equal(draft.original.proposalId,'0xc0d6f14daa902e7a74bf3cd93e0a842297760895abff63bc02adaa2716933ab7');
+        assert.equal(draft.cancellation.proposalId,'0xe14e7f573c2ee8a1f7a0e598dc7fff2c13c36c2e20de55845e3ba1f924110b07');
+        assert.match(await page.locator('#funding-summary').textContent(),/舊共享限額取消/);
+        assert.match(await page.locator('#funding-prepare').textContent(),/取消舊共享限額/);
+        await noWalletAuthority('offline legacy cap cancellation '+role);
+        await visibleAction('#funding-draft','legacy cap cancellation offline preview '+role);
+        row.legacyCapCancellation.push({role,type:draft.type,sendDisabled:true,geometry:await noOverflow('legacy cap cancellation '+role)});
+        await capture('legacy-cap-cancel-'+role,true);
+      }
       await page.locator('#funding-mode').selectOption('fixed');
-      assert.equal(await page.locator('#funding-ack').isChecked(),false,'mode changes invalidate the previous shared-cap acknowledgment');
+      assert.equal(await page.locator('#funding-ack').isChecked(),false,'mode changes invalidate the previous governance acknowledgment');
       for(const field of ['file','case','beneficiary','amount']){
         assert.equal(await page.locator(`#funding-${field}-field`).isVisible(),true,`fixed allocation restores ${field} field`);
         assert.equal(await page.locator(`#funding-${field}`).isDisabled(),false);
