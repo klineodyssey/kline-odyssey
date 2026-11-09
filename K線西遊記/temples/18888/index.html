@@ -260,6 +260,10 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     <p id="funding-status" role="status" aria-live="polite">先讀查，不會在載入頁面時請求帳戶或送出交易。</p>
     <p id="funding-summary">下一步：先連接你的既有錢包，再讀查；目前沒有送出任何交易。</p>
     <details><summary>展開精確參數、固定ID及唯讀查核結果</summary><button type="button" id="funding-draft">只顯示離線參數（未驗證）</button><pre id="funding-preview" aria-label="本次未簽署內容">尚無預覽。</pre></details>
+    <div id="funding-legacy-guide" hidden>
+      <p id="funding-legacy-next-help" aria-live="polite"></p>
+      <div class="funding-actions"><a id="funding-legacy-next" data-recommended="true" rel="noopener noreferrer" aria-describedby="funding-legacy-next-help"></a></div>
+    </div>
     <label class="funding-ack"><input type="checkbox" id="funding-ack" disabled><span id="funding-ack-text">我已核對本案的正式用途／付款批准、收款地址、金額、既領及跨ID防重、銀行其他承諾；了解available不等於已扣除全部負債，調額會重設當期共享用量，建立到期配額會開啟可執行付款路徑。本勾選不是合約授權或獨立驗收證明。</span></label>
     <div class="funding-actions"><button type="button" id="funding-send" disabled>先連接並預覽；由我本人到錢包確認</button></div>
     <p class="funding-muted">若錢包拒絕、狀態不明、帳戶／鏈別改變，停止自動重試。已有待確認意圖／交易須先對帳，不用重按按鈕。治理延遲到期不會自動執行。手機原生錢包及主網簽送尚未由工程測試驗收。</p>
@@ -1451,18 +1455,57 @@ Object.assign(reasons, {
   BANK_COMMITMENTS_NOT_VERIFIED:'尚未核對原銀行完整未付承諾、已建未執行配額及調額對 UTC 當期用量的影響。可核對原提案預覽及回執。',
   GUANYAN_RECONCILIATION_NOT_VERIFIED:'觀衍案尚缺完整資金、舊地址及跨 ID 防重對帳。有效金額為 1,080,000 KAIOS，107 萬作廢。',
 });
+function legacyNextAction(blocker) {
+  const role = roleChoices[el("role").value];
+  if (blocker === "CONNECT_ROLE_WALLET") {
+    const native = el(role.route);
+    const href = native.getAttribute("href");
+    if (href && native.getAttribute("aria-disabled") !== "true") return {native, href, label: "連接" + role.name + "錢包"};
+    return providers.length ? {control:"connect", label:"連接" + role.name + "錢包"}
+      : {href:"#funding-mobile", label:"前往 WalletConnect 連接" + role.name + "錢包"};
+  }
+  if (blocker === "CHAIN_ID_MISMATCH") return {control:"switch-bsc", label:"請錢包切至 BSC 56"};
+  if (blocker === "ROLE_ACCOUNT_MISMATCH") return {href:"#funding-account", label:"選擇" + role.name + "錢包帳戶"};
+  return {control:"prepare", label:"只讀預覽取消案"};
+}
+function refreshLegacyNext(blocker, canConfirm) {
+  const guide = el("legacy-guide"), link = el("legacy-next");
+  const active = fundingMode() === "legacy-cancel";
+  guide.hidden = !active;
+  if (!active) return;
+  const help = el("legacy-next-help");
+  const action = legacyNextAction(blocker);
+  const ready = Boolean(canConfirm);
+  help.textContent = ready ? "預覽已核對，現在可以勾選下方小方格。"
+    : busy ? "正在讀取錢包或鏈上狀態。"
+    : blocker ? "小方格會在預覽通過後開放。" + el("connect-next").textContent
+    : preview ? (reasons[fundingReviewBlocker(preview)] || reasons[preview.step.blockers[0]] || stageNames[preview.step.kind] || "請查看唯讀結果。")
+    : "錢包已連接。先按下方按鈕預覽，通過後即可勾選。";
+  link.hidden = ready;
+  link.setAttribute("href", action.href || "#funding-" + action.control);
+  link.setAttribute("aria-disabled", String(busy));
+  link.textContent = action.label;
+}
+el("legacy-next").onclick = event => {
+  if (busy || fundingMode() !== "legacy-cancel") { event.preventDefault(); return; }
+  const action = legacyNextAction(roleConnectionBlocker());
+  if (action.native) return action.native.onclick?.(event);
+  if (action.control && !el(action.control).disabled) { event.preventDefault(); el(action.control).click(); }
+};
 const refreshSend = () => {
   const canConfirm = preview?.step?.ready && previewRole === el('role').value && roleMatches(preview) && !fundingReviewBlocker(preview);
   if (!canConfirm) el('ack').checked = false;
   el('ack').disabled = busy || !canConfirm;
   el('send').disabled = busy || !canConfirm || !el('ack').checked;
-  el('prepare').disabled = busy || Boolean(roleConnectionBlocker());
+  const blocker = roleConnectionBlocker();
+  el('prepare').disabled = busy || Boolean(blocker);
   el('receipt').disabled = el('prepare').disabled;
   el('draft').disabled = busy;
   el('connect').disabled = busy || !providers.length;
   el('reselect').disabled = busy || !wallet || connectedProvider === mobileProvider;
   el('switch-bsc').disabled = busy || !wallet || connectedChain === 56;
   el('account').disabled = busy || !connectedProvider || !selectableWalletAccounts().length;
+  refreshLegacyNext(blocker, canConfirm);
 };
 const errorText = error => Number(error?.code) === 4001 ? '你已在錢包拒絕本次請求；沒有自動重送。' : reasons[error?.message] || `檢查未通過：${error?.message || String(error)}。未確認前請勿重送。`;
 function addProvider(provider, name) {
@@ -1487,7 +1530,10 @@ function findMetaMaskProvider() {
   const okx = findOkxWeb3Provider();
   const known = [...announcedMetaMask].filter(provider => provider !== okx);
   if (known.length) return known.length === 1 ? known[0] : null;
-  const matches = providers.map(item => item.provider).filter(provider => provider !== okx && provider.isMetaMask);
+  const ethereum = window.ethereum;
+  const injected = Array.isArray(ethereum?.providers) ? ethereum.providers : [];
+  const matches = [...new Set([ethereum, ...injected, ...providers.map(item => item.provider)])]
+    .filter(provider => provider !== okx && provider?.isMetaMask && typeof provider.request === "function");
   return matches.length === 1 ? matches[0] : null;
 }
 function findRoleProvider() {
@@ -1502,12 +1548,22 @@ window.addEventListener('eip6963:announceProvider', event => {
     if (provider && provider === findRoleProvider() && !connectedProvider && !restoringWallet) void resumeWallet();
   });
 });
-window.dispatchEvent(new Event('eip6963:requestProvider'));
-addProvider(findOkxWeb3Provider(), 'OKX Web3');
-if (Array.isArray(window.ethereum?.providers)) for (const provider of window.ethereum.providers) {
-  addProvider(provider, provider?.isOkxWallet ? 'OKX Web3' : provider?.isMetaMask ? 'MetaMask' : '既有注入錢包');
+function registerInjectedProviders() {
+  addProvider(findOkxWeb3Provider(), 'OKX Web3');
+  if (Array.isArray(window.ethereum?.providers)) for (const provider of window.ethereum.providers) {
+    addProvider(provider, provider?.isOkxWallet ? 'OKX Web3' : provider?.isMetaMask ? 'MetaMask' : '既有注入錢包');
+  }
+  addProvider(window.ethereum, window.ethereum?.isMetaMask ? 'MetaMask' : '既有瀏覽器錢包');
 }
-addProvider(window.ethereum, window.ethereum?.isMetaMask ? 'MetaMask' : '既有瀏覽器錢包');
+window.addEventListener('ethereum#initialized', () => {
+  registerInjectedProviders();
+  void Promise.resolve().then(() => {
+    updateFundingLinks(); showRole(preview?.snapshot); refreshSend();
+    if (!connectedProvider && !restoringWallet && findRoleProvider()) void resumeWallet();
+  });
+});
+window.dispatchEvent(new Event('eip6963:requestProvider'));
+registerInjectedProviders();
 if (!providers.length) { el('wallet').options[0].textContent = '未偵測到注入錢包，可選手機 WalletConnect'; el('wallet').options[0].value = ''; }
 
 function clearWalletConnection() {

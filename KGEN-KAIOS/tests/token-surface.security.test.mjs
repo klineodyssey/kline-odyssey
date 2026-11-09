@@ -574,7 +574,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         async prepare(plan = buildLegacyCapCancelPlan()) { return super.prepare(plan); }
       }
       const otherProvider = options.lateOkx ? { request() { throw Error("Unexpected fallback provider request"); } } : provider;
-      const window = { ethereum: options.okxOnly ? undefined : otherProvider, okxwallet: options.okxDirect ? provider : options.okxOnly ? { ethereum: provider } : undefined, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
+      const window = { ethereum: options.okxOnly || options.lateMetaMask ? undefined : otherProvider, okxwallet: options.okxDirect ? provider : options.okxOnly ? { ethereum: provider } : undefined, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
         localStorage: storageFixture, addEventListener: (event, handler) => windowEvents.set(event, handler), dispatchEvent: event => providerEvents.push(event),
         WalletConnectEthereumProvider: options.mobile ? { async init({ metadata, chains, storageOptions }) {
           mobileLog.push("init");
@@ -610,8 +610,13 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         context.document.visibilityState = visibility;
         documentEvents.get("visibilitychange")();
       };
+      const injectMetaMask = (announce = false) => {
+        provider.isMetaMask = true;
+        window.ethereum = provider;
+        if (announce) windowEvents.get("ethereum#initialized")?.();
+      };
       return { node, wallets, requests, state, providerListeners, receiptCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers,
-        setVisibility, pageShow: () => windowEvents.get("pageshow")(), mobile, mobileListeners, probe: context.uiProbe };
+        injectMetaMask, setVisibility, pageShow: () => windowEvents.get("pageshow")(), mobile, mobileListeners, probe: context.uiProbe };
     };
     for (const failure of [false, true]) {
       const ui = await mount(), wait = deferred();
@@ -1088,6 +1093,45 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(wrong.probe.preview(), null);
       assert.equal(wrong.node("send").disabled, true);
       assert.equal(wrong.requests.length, 0);
+    });
+
+    await t.test("legacy cancellation gives the disconnected holder the canonical MetaMask next step", async () => {
+      const href = publicHref + "?fundingRole=mother&fundingFlow=legacy-cancel#funding-panel";
+      const ui = await mount({ href, lateMetaMask: true, skipConnect: true, visible: true });
+      const next = ui.node("legacy-next");
+      assert.equal(ui.node("legacy-guide").hidden, false);
+      assert.equal(next.href, "https://link.metamask.io/dapp/" + href.slice("https://".length));
+      assert.ok(ui.node("legacy-next-help").textContent.trim());
+      assert.equal(ui.node("ack").disabled, true);
+      assert.equal(ui.node("send").disabled, true);
+      assert.equal(ui.rpc.length, 0);
+    });
+
+    await t.test("late MetaMask discovery reads authorization passively, or prompts once on the native link", async () => {
+      const href = publicHref + "?fundingRole=mother&fundingFlow=legacy-cancel#funding-panel";
+      const settings = { href, lateMetaMask: true, skipConnect: true, visible: true };
+      const announced = await mount(settings);
+      assert.equal(announced.node("prepare").disabled, true);
+      announced.injectMetaMask(true);
+      await new Promise(resolve => setImmediate(resolve));
+      assert.match(announced.node("connection").textContent, /MetaMask.*chainId=56/);
+      assert.equal(announced.node("prepare").disabled, false);
+      assert.equal(announced.node("legacy-next").href, "#funding-prepare");
+      assert.equal(announced.node("ack").disabled, true, "connection alone must not enable the checkbox");
+      assert.ok(announced.rpc.some(call => call.method === "eth_accounts"));
+      assert.ok(announced.rpc.every(call => ["eth_accounts", "eth_chainId"].includes(call.method)));
+
+      const clicked = await mount({ ...settings, needsAuthorization: true });
+      clicked.injectMetaMask();
+      assert.equal(clicked.rpc.length, 0);
+      let cancelledNavigation = false;
+      await clicked.node("native-metamask").onclick({ preventDefault() { cancelledNavigation = true; } });
+      assert.equal(cancelledNavigation, true);
+      assert.equal(clicked.rpc.filter(call => call.method === "eth_requestAccounts").length, 1);
+      assert.match(clicked.node("connection").textContent, /MetaMask.*chainId=56/);
+      assert.equal(clicked.node("prepare").disabled, false);
+      assert.equal(clicked.node("ack").disabled, true);
+      assert.equal(clicked.requests.length, 0);
     });
 
     await t.test("canonical app handoff restores only role and flow and passively reads MetaMask", async () => {
