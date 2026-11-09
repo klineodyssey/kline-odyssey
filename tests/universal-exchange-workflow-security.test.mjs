@@ -72,3 +72,21 @@ test("Cursor operational state cannot self-authorize an external launch", async 
   assert.equal(registry.workers.find(({worker_id}) => worker_id === "cursor-01").autonomy_scope, "ON_DEMAND_EXTERNAL_CAPACITY_ONLY");
   assert.match(workQueue, /KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 \| HOLD \|/);
 });
+
+test("Company native SQLite tests use Node 24 while the read-only public worker stays on Node 20", async () => {
+  const workflow = await fs.readFile(new URL("../.github/workflows/universal_exchange_v2.yml", import.meta.url), "utf8");
+  const [ordinary, worker] = workflow.split("  digital-ant-public-read-only-worker:");
+  assert.ok(ordinary && worker, "Both existing jobs must remain present");
+  assert.match(ordinary, /node-version: "24"/);
+  assert.match(worker, /node-version: "20"/);
+  assert.equal((ordinary.match(/node-version:/g) || []).length, 1);
+  assert.equal((worker.match(/node-version:/g) || []).length, 1);
+  assert.match(ordinary, /run: node --test tests\/starforge-spirit-life-genesis\.test\.mjs/);
+  assert.match(ordinary, /run: node --test tests\/\*\.test\.mjs/);
+  for (const file of ["universal-exchange", "autonomous-company-engineering-cycle", "universal-exchange-workflow-security", "11520-kgen-native-market-cell"]) {
+    assert.ok(ordinary.includes(`node --test tests/${file}.test.mjs`), `Existing full ${file} command is required`);
+  }
+  assert.doesNotMatch(ordinary, /--test-name-pattern|--test-skip-pattern/);
+  assert.match(ordinary, /fetch-depth: 0/);
+  assert.match(ordinary, /timeout-minutes: 10/);
+});
