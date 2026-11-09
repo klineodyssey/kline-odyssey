@@ -55,10 +55,77 @@ try {
   });
   const testEmail = "browser-" + crypto.randomUUID() + "@example.test";
   await page.locator("#email").fill(testEmail);
+  // Both controls are visible on the login surface. Hold an actual rejected
+  // backend response while a newer native Request Email action succeeds.
+  const verifyURL = origin + "/api/v1/account/email/verify";
+  const observedFailure = Promise.withResolvers();
+  const releaseFailure = Promise.withResolvers();
+  const delayedVerify = async (route) => {
+    try {
+      const response = await route.fetch({ timeout: 10000 });
+      observedFailure.resolve({
+        status: response.status(),
+        code: (await response.json()).code,
+      });
+      await releaseFailure.promise;
+      await route.fulfill({ response });
+    } catch (error) {
+      observedFailure.reject(error);
+      throw error;
+    }
+  };
+  await page.route(verifyURL, delayedVerify);
+  await page.evaluate(() => {
+    const verify = document.querySelector("#verifyEmail");
+    const probe = { owner: verify.onclick };
+    // Observe the real handler's returned promise without replacing its work.
+    verify.onclick = function (event) {
+      probe.verifyTrusted = event.isTrusted;
+      probe.completion = probe.owner.call(this, event);
+      return probe.completion;
+    };
+    document.querySelector("#requestEmail").addEventListener(
+      "click",
+      (event) => {
+        probe.requestEmailTrusted = event.isTrusted;
+      },
+      { once: true },
+    );
+    window.__recoveryVerifyProbe = probe;
+  });
+  await page.locator("#emailToken").fill("0".repeat(64));
+  await page.locator("#verifyEmail").click();
+  const rejectedVerify = await observedFailure.promise;
+  assert.deepEqual(rejectedVerify, {
+    status: 401,
+    code: "IDENTITY_TOKEN_INVALID",
+  });
   await page.locator("#requestEmail").click();
   await page.waitForFunction(() =>
     document.querySelector("#message").textContent.includes("若符合條件"),
   );
+  const newerMessage = await page.locator("#message").innerText();
+  releaseFailure.resolve();
+  const verificationInterruption = await page.evaluate(async () => {
+    const probe = window.__recoveryVerifyProbe;
+    await probe.completion;
+    document.querySelector("#verifyEmail").onclick = probe.owner;
+    delete window.__recoveryVerifyProbe;
+    return {
+      verifyTrusted: probe.verifyTrusted,
+      requestEmailTrusted: probe.requestEmailTrusted,
+      message: document.querySelector("#message").textContent,
+      handlerSettled: true,
+    };
+  });
+  await page.unroute(verifyURL, delayedVerify);
+  assert.equal(verificationInterruption.verifyTrusted, true);
+  assert.equal(verificationInterruption.requestEmailTrusted, true);
+  assert.equal(verificationInterruption.message, newerMessage);
+  await page.screenshot({
+    path: new URL("390x844-verify-interruption.png", dir).pathname,
+    fullPage: true,
+  });
   const testMessages = await (
     await context.request.get(origin + "/__test/mail")
   ).json();
@@ -304,6 +371,7 @@ try {
         ),
         checks: [
           "login",
+          "native-verify-failure-after-newer-email-request",
           "backup",
           "hash-verify",
           "local-first-sync",
@@ -317,6 +385,12 @@ try {
           "no-transaction-RPC",
         ],
         walletRPC: rpc,
+        verificationInterruption: {
+          rejectedStatus: rejectedVerify.status,
+          rejectedCode: rejectedVerify.code,
+          ...verificationInterruption,
+          newerFeedbackPreserved: true,
+        },
         viewports: results,
         pageErrors: errors,
       },
