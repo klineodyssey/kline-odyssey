@@ -504,6 +504,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         };
       }
       if (options.malformedProviders) provider.providers = { unexpected: true };
+      if (options.metaMask) provider.isMetaMask = true;
       const mobileListeners = new Map();
       const mobileSession = (metadata, topic, expired = false) => ({ topic,
         expiry: Math.floor(Date.now() / 1000) + (expired ? -1 : 3600), self: { metadata },
@@ -683,8 +684,11 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       cap.node("role").value = "guanyin"; cap.node("role").emit("change");
       cap.node("mode").value = "cap"; cap.node("mode").emit("change");
       await cap.node("prepare").onclick();
-      assert.equal(cap.probe.preview().plan.type, "BANK_PAUSE", "Guanyin always takes priority over cap mode");
+      assert.equal(cap.probe.preview(), null, "Mother/Jade cannot read Guanyin authority as their own");
+      assert.equal(cap.node("prepare").disabled, true);
       assert.equal(cap.node("send").disabled, true, "Mother/Jade cannot acquire Guanyin authority by choosing pause");
+      await cap.node("draft").onclick();
+      assert.equal(JSON.parse(cap.node("preview").textContent).type, "BANK_PAUSE", "Guanyin offline parameters stay separate from cap mode");
     }
 
     for (const mode of ["cap", "fixed"]) {
@@ -1000,6 +1004,69 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     }
     assert.equal(linked.requests.length, 0, "constructing wallet links never submits a transaction");
 
+    await t.test("all three role routes authorize explicitly, require BSC, and produce only a read-only result", async () => {
+      for (const [role, route, stage] of [["mother", "native-metamask", "CAP_PROPOSE"], ["jade", "native-okx-app", "CAP_APPROVE"],
+        ["guanyin", "native-okx", "BANK_PAUSE"]]) {
+        const ui = await mount({ href: publicHref, role, mode: "cap", account: formal[role], pauser: role === "guanyin",
+          chainId: 1, stepKind: stage, skipConnect: true, needsAuthorization: true, metaMask: role === "mother", okxOnly: role !== "mother" });
+        assert.equal(ui.node(route).getAttribute("data-recommended"), "true");
+        for (const button of ["prepare", "receipt", "ack", "send"]) assert.equal(ui.node(button).disabled, true, role + "/" + button);
+        await ui.node("prepare").onclick();
+        assert.doesNotMatch(ui.node("preview").textContent, /OFFLINE_DRAFT/);
+        assert.equal(ui.rpc.length, 0);
+        await ui.node(route).onclick({ preventDefault() {} });
+        assert.equal(ui.rpc[0].method, "eth_requestAccounts");
+        assert.match(ui.node("connect-next").textContent, /切至 BSC 56/);
+        assert.equal(ui.node("prepare").disabled, true);
+        await ui.node("switch-bsc").onclick();
+        assert.equal(ui.node("prepare").disabled, false);
+        assert.equal(ui.node("ack").disabled, true);
+        await ui.node("prepare").onclick();
+        const shown = JSON.parse(ui.node("preview").textContent);
+        assert.equal(shown.step.kind, stage);
+        assert.equal(shown.snapshot.account.toLowerCase(), formal[role].toLowerCase());
+        assert.equal(shown.snapshot.chainId, 56);
+        if (role === "guanyin") {
+          assert.equal(shown.unsignedTransaction.data, "0x8456cb59"); assert.equal(shown.unsignedTransaction.value, "0x0");
+          assert.equal(ui.node("ack").disabled, false);
+        } else {
+          assert.equal(shown.review.reason, "BANK_COMMITMENTS_NOT_VERIFIED");
+          assert.equal(ui.node("ack").disabled, true);
+        }
+        assert.equal(ui.node("send").disabled, true);
+        assert.equal(ui.requests.length, 0);
+        ui.providerListeners.get("accountsChanged")([alternate]);
+        assert.match(ui.node("connect-next").textContent, /已授權清單/);
+        assert.equal(ui.node("prepare").disabled, true);
+        assert.equal(ui.node("ack").disabled, true);
+        assert.equal(ui.probe.preview(), null);
+      }
+    });
+    await t.test("canonical app handoff restores only role and flow and passively reads MetaMask", async () => {
+      const href = publicHref + "?fundingRole=mother&fundingFlow=cap&txhash=" + transactionHash + "#funding-panel";
+      const ui = await mount({ href, metaMask: true, skipConnect: true, visible: true, accounts: [alternate, formal.mother] });
+      await new Promise(resolve => setImmediate(resolve));
+      assert.equal(ui.node("role").value, "mother");
+      assert.equal(ui.node("mode").value, "cap");
+      assert.match(ui.node("connection").textContent, /MetaMask.*chainId=56/);
+      assert.ok(ui.rpc.every(call => ["eth_accounts", "eth_chainId"].includes(call.method)));
+      ui.node("account").value = formal.mother; ui.node("account").emit("change");
+      await ui.node("native-metamask").onclick({ preventDefault() {} });
+      assert.equal(ui.node("account").value, formal.mother, "same provider preserves a selected non-first account");
+      assert.ok(ui.rpc.every(call => ["eth_accounts", "eth_chainId"].includes(call.method)));
+      await ui.node("prepare").onclick();
+      assert.match(ui.node("summary").textContent, /操作帳戶/);
+      const failed = deferred(); ui.wallets[0].next = failed;
+      const rereading = ui.node("prepare").onclick();
+      failed.reject(Error("RPC_READ_UNAVAILABLE")); await rereading;
+      assert.doesNotMatch(ui.node("summary").textContent, /操作帳戶/);
+      assert.equal(ui.probe.preview(), null);
+      assert.doesNotMatch(ui.node("native-metamask").href, /txhash/);
+      ui.node("role").value = "guanyin"; ui.node("role").emit("change");
+      assert.equal(ui.node("okx-route-url").value, publicHref + "?fundingRole=guanyin#funding-panel");
+      assert.equal(ui.node("prepare").disabled, true);
+    });
+
     const inApp = await mount({ href: publicHref, lateOkx: true, skipConnect: true, role: "guanyin", account: formal.guanyin, pauser: true });
     assert.equal(inApp.rpc.length, 0, "opening the page does not prompt the wallet");
     assert.equal(inApp.node("native-okx").getAttribute("aria-disabled"), "false");
@@ -1007,7 +1074,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     await inApp.node("native-okx").onclick({ preventDefault() { redirected = false; } });
     assert.equal(redirected, false, "an injected wallet stays in the current app");
     assert.equal(inApp.node("okx-route").hidden, true, "connect within the standalone wallet");
-    assert.equal(inApp.rpc.filter(call => call.method === "eth_requestAccounts").length, 0, "reuse existing origin authorization");
+    assert.equal(inApp.rpc.filter(call => call.method === "eth_requestAccounts").length, 1, "explicitly authorize the late injected wallet");
     assert.match(inApp.node("connection").textContent, /目前的 OKX 錢包.*chainId=56/);
     await inApp.node("prepare").onclick();
     assert.equal(inApp.probe.preview()?.step.kind, "BANK_PAUSE");
@@ -1026,11 +1093,13 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     const cancelled = await mount({ href: publicHref, okxOnly: true, skipConnect: true, needsAuthorization: true, accountsWait: accountWait });
     const connecting = cancelled.node("native-okx").onclick({ preventDefault() {} });
     await Promise.resolve();
-    assert.equal(cancelled.rpc.at(-1)?.method, "eth_accounts");
-    accountWait.resolve([]);
+    assert.equal(cancelled.rpc.at(-1)?.method, "eth_requestAccounts", "the user gesture starts authorization directly");
     cancelled.node("cancel-connect").onclick();
     await connecting;
-    assert.equal(cancelled.rpc.some(call => call.method === "eth_requestAccounts"), false, "cancel stops an authorization prompt after a late account read");
+    accountWait.resolve([formal.guanyin]);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(cancelled.rpc.filter(call => call.method === "eth_requestAccounts").length, 1, "a cancelled request never prompts again");
+    assert.equal(cancelled.node("prepare").disabled, true);
     assert.match(cancelled.node("status").textContent, /已取消本頁等待/);
 
     const priorRpc = linked.rpc.length;
@@ -1104,6 +1173,19 @@ test("shared cap: beneficiary-free governance preserves original bytes, accounti
         receipt = {status:"0x1",transactionHash:hash,blockNumber:tag,blockHash,logs:mode === "status" ? [] : [log]};
       }};
   };
+  await t.test("shared-cap read-only results preserve a pending transaction and cannot be sent", async () => {
+    const m = make();
+    const key = api.FUNDING_STORAGE_KEY, pending = JSON.stringify({ flowType: "SHARED_CAP", state: "AWAITING_HUMAN_WALLET" });
+    m.storage.setItem(key, pending);
+    const result = await m.wallet.prepare();
+    assert.equal(result.snapshot.account, F.mother);
+    assert.equal(result.step.kind, "CAP_PROPOSE");
+    assert.equal(result.step.ready, false);
+    assert.ok(result.step.blockers.includes("PENDING_INTENT_RECONCILE_FIRST"));
+    await assert.rejects(m.wallet.request(result), /STEP_NOT_READY/);
+    assert.equal(m.storage.getItem(key), pending);
+    assert.equal(m.sends().length, 0);
+  });
   await t.test("original shared cap ID and inner/propose bytes are independently pinned with no case fields", () => {
     assert.equal(plan.type,"SHARED_CAP"); assert.equal(plan.chainId,56); assert.ok(Object.isFrozen(plan.cap));
     for (const key of ["beneficiary","amountKaios","amountWei","allocationId","paymentId","allocation","payout"]) assert.equal(Object.hasOwn(plan,key),false,key);
