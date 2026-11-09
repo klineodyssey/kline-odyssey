@@ -219,7 +219,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
   <!-- Human-operated fixed allocation and emergency pause; prototype values are not account balances. -->
   <section class="funding-panel" id="funding-panel" aria-labelledby="funding-title">
-    <h2 id="funding-title">KAIOS 生命資源 · 錢包確認作業 · OKX V3 · App Web3</h2>
+    <h2 id="funding-title">KAIOS 生命資源 · 錢包確認作業 · OKX V3 · 雙 App</h2>
     <p>選擇固定配額或共享一千萬調額 → 讀查下一步 → 核對內容 → 由你在既有錢包確認。<strong>每次只送交一筆，不會自動連續簽署或撥款。</strong></p>
     <p class="funding-muted">此區與上方原型展示數字分開。BSC 主網 56；金額單位 KAIOS，不是 BNB。調額、Mother 提案、玉帝獨立批准、到期執行、實際撥款分別核定；連接或交易雜湊不代表已入帳。</p>
     <div class="funding-fields">
@@ -232,7 +232,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     <p id="funding-mode-help" class="funding-muted">固定配額需原案受益人及金額。共享調額只處理模組每筆／每日各10,000,000 KAIOS，不建立配額、不付款、不保留個人額度；觀音暫停獨立於此選項。</p>
     <p id="funding-amount-help" class="funding-muted">最多18位小數，不使用浮點換算。原案載入後地址與金額固定，不因查不到紀錄就改金額／ID重發。此版用途固定為一次性生命初始資源，非月薪、非衡曜88 KAIOS；executableAt=0的配額建立後沒有第二次一小時等待，任何人可呼叫已到期配額撥款。</p>
     <div class="funding-fields">
-      <label>本次操作角色<select id="funding-role"><option value="mother">王母 · 提出調額／配額提案</option><option value="jade">玉帝 · 批准原提案</option><option value="guanyin">觀音 · 緊急暫停銀行</option></select></label>
+      <label>本次操作角色<select id="funding-role"><option value="mother">王母 · 提出調額／配額提案</option><option value="jade">玉帝 · 批准原提案</option><option value="guanyin">觀音 · 緊急暫停銀行（OKX Wallet）</option></select></label>
       <label>筆電／錢包內建瀏覽器的既有錢包<select id="funding-wallet"><option value="">正在偵測既有錢包…</option></select></label>
       <label>錢包已授權的帳戶<select id="funding-account" disabled><option value="">請先連接錢包</option></select></label>
       <label>唯讀核對既有交易雜湊<input id="funding-txhash" spellcheck="false" autocomplete="off" placeholder="0x…（64位交易雜湊）"></label>
@@ -246,8 +246,9 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       <button type="button" id="funding-prepare">讀查並預覽下一步</button>
       <button type="button" id="funding-receipt">只讀核對回執</button>
     </div>
-    <div class="funding-actions"><a id="funding-native-metamask" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 MetaMask 開啟此頁</a><a id="funding-native-okx" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">開啟或連接 OKX Web3</a><a id="funding-native-trust" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 Trust Wallet 開啟此頁</a></div>
-    <p id="funding-native-help" class="funding-muted">使用 OKX 主 App 時，切到 Web3 → 探索，從 App 內的 DApp 瀏覽器開啟本頁。獨立的 OKX Wallet App 也可使用。已在錢包內開啟時，可直接連接目前的 OKX Web3 錢包。WalletConnect 換帳戶時請中斷舊連線再授權。</p>
+    <div class="funding-actions"><a id="funding-native-metamask" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 MetaMask 開啟此頁</a><button id="funding-native-okx" type="button" disabled>連接 OKX Wallet（獨立 App）</button><button id="funding-native-okx-app" type="button" disabled>連接 OKX 主 App（Web3）</button><a id="funding-native-trust" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 Trust Wallet 開啟此頁</a></div>
+    <p id="funding-native-help" class="funding-muted">觀音帳戶在獨立的 OKX Wallet App。請從存放該帳戶的 App 內開啟本頁，再按對應的連線按鈕。WalletConnect 換帳戶時請重新授權。</p>
+    <label id="funding-okx-route" class="funding-muted" hidden><span id="funding-okx-route-text"></span><input id="funding-okx-route-url" type="url" readonly aria-label="複製 K18888 正式網址"></label>
     <p id="funding-connection" class="funding-muted">尚未連接。程式不要求、讀取或保存私鑰與助記詞。手機連線沿用原12345的公開WalletConnect設定；服務／網域允許狀態仍須實際連線確認，localhost不是手機可直接訪問的筆電網址。</p>
     <p id="funding-role-status" class="funding-muted" aria-live="polite">選擇角色只表示本次操作意圖；仍須在錢包選擇正確帳戶，並讀查鏈上權限。</p>
     <p id="funding-status" role="status" aria-live="polite">先讀查，不會在載入頁面時請求帳戶或送出交易。</p>
@@ -1688,32 +1689,44 @@ el('file').addEventListener('change', () => run(async () => {
   status(`已在本機記憶體核對${checked.length}個原案；未上傳、未簽署、未建立配額。請選擇其中一案。`);
 }));
 function configureNativeLinks() {
-  for (const id of ['native-metamask','native-okx','native-trust']) el(id).addEventListener('click', event => {
+  for (const id of ['native-metamask','native-trust']) el(id).addEventListener('click', event => {
     if (el(id).getAttribute('aria-disabled') === 'true') {
       event.preventDefault();
       status('此按鈕需要已發布的正式HTTPS頁。本機請連接既有錢包或使用WalletConnect。');
       return;
     }
-    if (id !== 'native-okx') return;
-    const provider = findOkxWeb3Provider();
-    if (!provider) return;
-    event.preventDefault();
-    return run(() => {
-      el('wallet').value = String(addProvider(provider, 'OKX Web3'));
-      return useProvider(() => provider, 'OKX Web3', async (walletProvider, current) => {
-        const accounts = walletAccounts(await walletProvider.request({method:'eth_accounts'}));
-        if (current() && !accounts.length) await requestInjectedAccounts(walletProvider);
-      });
-    });
   });
   if (!window.location?.href) return;
   const url = new URL(window.location.href);
   if (url.origin !== 'https://klineodyssey.github.io' || decodeURIComponent(url.pathname) !== '/kline-odyssey/K線西遊記/temples/18888/index.html') return;
   // Open this exact published page only; never transmit case data or caller query strings.
   url.search = ''; url.hash = 'funding-panel';
-  const links = { 'native-metamask':`https://link.metamask.io/dapp/${url.href.replace(/^https:\/\//, '')}`, 'native-okx':`okx://wallet/dapp/url?dappUrl=${encodeURIComponent(url.href)}`, 'native-trust':`https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(url.href)}` };
+  const links = { 'native-metamask':`https://link.metamask.io/dapp/${url.href.replace(/^https:\/\//, '')}`, 'native-trust':`https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(url.href)}` };
   for (const [id, href] of Object.entries(links)) { el(id).setAttribute('href', href); el(id).setAttribute('aria-disabled', 'false'); el(id).setAttribute('tabindex', '0'); }
-  if (findOkxWeb3Provider()) el('native-okx').textContent = '連接目前的 OKX Web3 錢包';
+  el('okx-route-url').value = url.href;
+  const okxRoutes = {
+    'native-okx': '開啟獨立的 OKX Wallet App，從「探索」進入 DApp 瀏覽器',
+    'native-okx-app': '開啟 OKX 主 App，切到 Web3 後從「探索」進入 DApp 瀏覽器',
+  };
+  // Both apps expose an OKX provider. The selected route describes how to reach the app.
+  for (const [id, instructions] of Object.entries(okxRoutes)) {
+    el(id).disabled = false;
+    el(id).onclick = () => run(() => {
+      const provider = findOkxWeb3Provider();
+      el('okx-route').hidden = Boolean(provider);
+      if (!provider) {
+        clearWalletConnection();
+        el('okx-route-text').textContent = instructions + '，再貼上這個網址。';
+        status('請從你選擇的 OKX App 開啟此頁並連接。');
+        return;
+      }
+      el('wallet').value = String(addProvider(provider, 'OKX Web3'));
+      return useProvider(() => provider, '目前的 OKX 錢包', async (walletProvider, current) => {
+        const accounts = walletAccounts(await walletProvider.request({method:'eth_accounts'}));
+        if (current() && !accounts.length) await requestInjectedAccounts(walletProvider);
+      });
+    });
+  }
 }
 configureNativeLinks(); showRole();
 window.addEventListener('pagehide', () => { connectionGeneration++; invalidate(); });
