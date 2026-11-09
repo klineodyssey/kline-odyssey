@@ -150,7 +150,7 @@ async function verifyFundingPanel(){
     };
     const noWalletAuthority=async label=>{
       assert.equal(await page.locator('#funding-send').isDisabled(),true,`${label}: no connected/verified wallet means no send authority`);
-      assert.match(await page.locator('#funding-role-status').textContent(),/尚未通過本次角色讀查/);
+      assert.match(await page.locator('#funding-role-status').textContent(),/實際帳戶：尚未連接.*尚未核對本次角色/);
       assert.match(await page.locator('#funding-role-status').textContent(),/選擇角色不會授予權限/);
     };
     const visibleAction=async(selector,name)=>{
