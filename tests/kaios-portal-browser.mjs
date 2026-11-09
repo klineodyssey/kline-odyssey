@@ -149,7 +149,11 @@ async function verifyFundingPanel(){
       return geometry;
     };
     const noWalletAuthority=async label=>{
-      assert.equal(await page.locator('#funding-send').isDisabled(),true,`${label}: no connected/verified wallet means no send authority`);
+      for(const id of ['send','ack','prepare','receipt']) {
+        assert.equal(await page.locator('#funding-'+id).isDisabled(),true,`${label}: ${id} requires live authority`);
+      }
+      assert.equal(await page.locator('#funding-ack').isChecked(),false);
+      assert.match(await page.locator('#funding-connect-next').textContent(),/下一步.*WalletConnect/);
       assert.match(await page.locator('#funding-role-status').textContent(),/實際帳戶：尚未連接.*尚未核對本次角色/);
       assert.match(await page.locator('#funding-role-status').textContent(),/選擇角色不會授予權限/);
     };
@@ -197,20 +201,22 @@ async function verifyFundingPanel(){
         await page.locator('#funding-role').selectOption(value);
         assert.match(await page.locator('#funding-role-status').textContent(),new RegExp(`本次選擇：${name}`));
         assert.equal(await page.locator('#funding-ack').isChecked(),false,'role change clears acknowledgment');
-        await page.locator('#funding-ack').check();await noWalletAuthority(value);await page.locator('#funding-ack').uncheck();
+        await noWalletAuthority(value);
+        const suggested={mother:'native-metamask',jade:'native-okx-app',guanyin:'native-okx'}[value];
+        assert.equal(await page.locator('#funding-'+suggested).getAttribute('data-recommended'),'true');
         const geometry=await noOverflow(value);row.roles.push({value,name,sendDisabled:true,geometry});
         if(value!=='guanyin')await capture(value,value==='mother');
       }
       assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');assert.equal(await page.locator('#funding-amount').inputValue(),'');
-      await page.locator('#funding-prepare').click();
+      await page.locator('#funding-panel details > summary').click();
+      await page.locator('#funding-draft').click();
       await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('OFFLINE_DRAFT_NOT_CHAIN_VERIFIED'));
       const pauseDraft=JSON.parse(await page.locator('#funding-preview').textContent());
       assert.equal(pauseDraft.status,'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED');assert.equal(pauseDraft.type,'BANK_PAUSE');assert.equal(pauseDraft.chainId,56);
       assert.match(pauseDraft.pause.to,/^0x[0-9a-fA-F]{40}$/);assert.match(pauseDraft.pause.data,/^0x[0-9a-fA-F]{8}$/);
       assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');assert.equal(await page.locator('#funding-amount').inputValue(),'');assert.equal(await page.locator('#funding-case').inputValue(),'');
       assert.match(await page.locator('#funding-summary').textContent(),/離線暫停草案/);
-      await page.locator('#funding-ack').check();await noWalletAuthority('offline Guanyin draft');await page.locator('#funding-ack').uncheck();
-      await page.locator('#funding-panel details > summary').click();
+      await noWalletAuthority('offline Guanyin draft');
       row.pauseDraft={status:pauseDraft.status,type:pauseDraft.type,chainId:pauseDraft.chainId,noCaseRequired:true,sendDisabled:true,geometry:await noOverflow('offline Guanyin draft')};
       await capture('guanyin-offline',true);
       row.pauseDraft.acknowledgment=await visibleAction('.funding-ack','guanyin-ack');
@@ -219,7 +225,7 @@ async function verifyFundingPanel(){
       // and long address/hash wrapping; no original case or personal file.
       const beneficiary='0x1111111111111111111111111111111111111111';
       await page.locator('#funding-role').selectOption('mother');await page.locator('#funding-beneficiary').fill(beneficiary);await page.locator('#funding-amount').fill('1080000');
-      await page.locator('#funding-prepare').click();
+      await page.locator('#funding-draft').click();
       await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('OFFLINE_DRAFT_NOT_CHAIN_VERIFIED')&&document.getElementById('funding-preview')?.textContent.includes('allocationId'));
       const fundingDraft=JSON.parse(await page.locator('#funding-preview').textContent());
       assert.equal(fundingDraft.beneficiary.toLowerCase(),beneficiary);assert.equal(fundingDraft.amountKaios,'1080000');
@@ -239,7 +245,7 @@ async function verifyFundingPanel(){
       for(const role of ['mother','jade']){
         await page.locator('#funding-role').selectOption(role);
         assert.equal(await page.locator('#funding-ack').isChecked(),false);
-        await page.locator('#funding-prepare').click();
+        await page.locator('#funding-draft').click();
         await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('"type": "SHARED_CAP"'));
         const capDraft=JSON.parse(await page.locator('#funding-preview').textContent());
         assert.equal(capDraft.status,'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED');assert.equal(capDraft.chainId,56);
@@ -250,12 +256,10 @@ async function verifyFundingPanel(){
         assert.match(await page.locator('#funding-summary').textContent(),/調額/);
         assert.doesNotMatch(await page.locator('#funding-summary').textContent(),/undefined/);
         assert.match(await page.locator('#funding-ack-text').textContent(),/共享|調額/);
-        await page.locator('#funding-ack').check();await noWalletAuthority(`offline shared cap ${role}`);
+        await noWalletAuthority(`offline shared cap ${role}`);
         row.sharedCap.push({role,type:capDraft.type,proposalId:capDraft.cap.proposalId,noCaseRequired:true,sendDisabled:true,geometry:await noOverflow(`shared cap ${role}`)});
         await capture(`shared-cap-${role}`,true);
-        await page.locator('#funding-ack').uncheck();
       }
-      await page.locator('#funding-ack').check();
       await page.locator('#funding-mode').selectOption('fixed');
       assert.equal(await page.locator('#funding-ack').isChecked(),false,'mode changes invalidate the previous shared-cap acknowledgment');
       for(const field of ['file','case','beneficiary','amount']){
