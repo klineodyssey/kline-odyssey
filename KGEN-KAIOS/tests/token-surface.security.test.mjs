@@ -468,10 +468,9 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       };
       node("beneficiary").value = beneficiary; node("amount").value = "1080000"; node("role").value = options.role ?? "mother"; node("mode").value = options.mode ?? "fixed";
       // Match the retained HTML's inert native anchors before the controller boots.
-      for (const name of ["native-metamask", "native-trust"]) {
+      for (const name of ["native-metamask", "native-okx", "native-okx-app", "native-trust"]) {
         node(name).setAttribute("aria-disabled", "true"); node(name).tabIndex = -1;
       }
-      for (const name of ["native-okx", "native-okx-app"]) node(name).disabled = true;
       node("okx-route").hidden = true;
       let authorized = !options.needsAuthorization;
       const provider = { request: async ({ method, params }) => {
@@ -570,7 +569,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         } } : undefined };
       const context = { window, document: { getElementById: (id) => node(id.replace(/^funding-/, "")),
         createElement: () => ({ value: "", textContent: "" }), head: { append() { throw Error("No external scripts in offline UI test"); } } },
-        navigator: options.webLocks === false ? {} : { locks: { request() {} } },
+        navigator: { userAgent: options.userAgent, clipboard: options.clipboard, ...(options.webLocks === false ? {} : { locks: { request() {} } }) },
         Event: class { constructor(type) { this.type = type; } },
         CustomEvent: class { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }, URL,
         setTimeout: (callback, delay) => {
@@ -894,7 +893,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         assert.equal(ui.node(name).getAttribute("aria-disabled"), "true", href);
       }
       for (const name of ["native-okx", "native-okx-app"]) {
-        assert.equal(ui.node(name).disabled, true, href);
+        assert.equal(ui.node(name).getAttribute("href"), null, href);
+        assert.equal(ui.node(name).getAttribute("aria-disabled"), "true", href);
         assert.equal(ui.node(name).onclick, undefined, href);
       }
       assert.equal(ui.requests.length, 0);
@@ -911,8 +911,10 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
 
     const inApp = await mount({ href: publicHref, lateOkx: true, skipConnect: true, role: "guanyin", account: formal.guanyin, pauser: true });
     assert.equal(inApp.rpc.length, 0, "opening the page does not prompt the wallet");
-    assert.equal(inApp.node("native-okx").disabled, false);
-    await inApp.node("native-okx").onclick();
+    assert.equal(inApp.node("native-okx").getAttribute("aria-disabled"), "false");
+    let redirected = true;
+    await inApp.node("native-okx").onclick({ preventDefault() { redirected = false; } });
+    assert.equal(redirected, false, "an injected wallet stays in the current app");
     assert.equal(inApp.node("okx-route").hidden, true, "connect within the standalone wallet");
     assert.equal(inApp.rpc.filter(call => call.method === "eth_requestAccounts").length, 0, "reuse existing origin authorization");
     assert.match(inApp.node("connection").textContent, /目前的 OKX 錢包.*chainId=56/);
@@ -922,8 +924,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     assert.equal(inApp.requests.length, 0, "connecting and previewing never submits a transaction");
 
     const firstUse = await mount({ href: publicHref, okxOnly: true, okxDirect: true, skipConnect: true, needsAuthorization: true });
-    assert.equal(firstUse.node("native-okx-app").disabled, false);
-    await firstUse.node("native-okx-app").onclick();
+    assert.equal(firstUse.node("native-okx-app").getAttribute("aria-disabled"), "false");
+    await firstUse.node("native-okx-app").onclick({ preventDefault() {} });
     assert.equal(firstUse.node("okx-route").hidden, true, "connect within the main app Web3 browser");
     assert.match(firstUse.node("connection").textContent, /目前的 OKX 錢包.*chainId=56/);
     assert.equal(firstUse.rpc.filter(call => call.method === "eth_requestAccounts").length, 1, "ask once if the origin has no authorized accounts");
@@ -931,7 +933,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
 
     const accountWait = deferred();
     const cancelled = await mount({ href: publicHref, okxOnly: true, skipConnect: true, needsAuthorization: true, accountsWait: accountWait });
-    const connecting = cancelled.node("native-okx").onclick();
+    const connecting = cancelled.node("native-okx").onclick({ preventDefault() {} });
     await Promise.resolve();
     assert.equal(cancelled.rpc.at(-1)?.method, "eth_accounts");
     accountWait.resolve([]);
@@ -941,14 +943,33 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     assert.match(cancelled.node("status").textContent, /已取消本頁等待/);
 
     const priorRpc = linked.rpc.length;
-    await linked.node("native-okx").onclick();
+    const externalClick = { preventDefault() { assert.fail("explicit external app launch must navigate"); } };
+    assert.equal(linked.node("native-okx").href, "https://web3link.okx.com/ul/connect");
+    assert.equal(linked.node("native-okx-app").href, "https://link.okx.com/ul/connect");
+    await linked.node("native-okx").onclick(externalClick);
     assert.equal(linked.node("okx-route").hidden, false);
     assert.match(linked.node("okx-route-text").textContent, /獨立的 OKX Wallet App/);
     assert.equal(linked.node("okx-route-url").value, publicHref + "#funding-panel");
-    await linked.node("native-okx-app").onclick();
+    assert.equal(linked.node("okx-alt-link").href, "okxwallet://web3/wallet/connect");
+    await linked.node("native-okx-app").onclick(externalClick);
+    assert.equal(linked.node("okx-alt-link").href, "okx://web3/wallet/connect");
     assert.match(linked.node("okx-route-text").textContent, /OKX 主 App.*Web3/);
     assert.equal(linked.node("okx-route-url").value, publicHref + "#funding-panel");
     assert.equal(linked.rpc.length, priorRpc, "do not use another provider to open an OKX route");
+
+    const copied = [];
+    const android = await mount({ href: publicHref, skipConnect: true, userAgent: "Android Chrome", clipboard: { writeText(url) { copied.push(url); } } });
+    assert.equal(android.node("native-okx").href, "okxwallet://web3?stack=true");
+    assert.equal(android.node("native-okx-app").href, "okx://web3?stack=true");
+    await android.node("native-okx").onclick(externalClick);
+    assert.equal(android.node("okx-alt-link").href, "https://web3link.okx.com/ul/connect");
+    await android.node("okx-copy-url").onclick();
+    assert.deepEqual(copied, [publicHref + "#funding-panel"]);
+    assert.equal(android.rpc.length, 0);
+
+    const iosChrome = await mount({ href: publicHref, skipConnect: true, userAgent: "iPhone CriOS" });
+    assert.equal(iosChrome.node("native-okx").href, "okxwallet://web3/wallet/connect");
+    assert.equal(iosChrome.node("native-okx-app").href, "okx://web3/wallet/connect");
   });
 });
 
