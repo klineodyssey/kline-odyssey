@@ -460,7 +460,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             removeAttribute(name) { delete this.attrs[name]; },
             get href() { return this.attrs.href ?? ""; }, set href(value) { this.attrs.href = String(value); },
             addEventListener: (event, handler) => listeners.set(event, handler),
-            emit: (event) => listeners.get(event)?.(),
+            emit: (event, detail) => listeners.get(event)?.(detail),
             replaceChildren(...children) { this.options = children; },
             append(child) { this.options.push(child); } });
         }
@@ -471,9 +471,11 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       for (const name of ["native-metamask", "native-okx", "native-trust"]) {
         node(name).setAttribute("aria-disabled", "true"); node(name).tabIndex = -1;
       }
+      let authorized = !options.needsAuthorization;
       const provider = { request: async ({ method, params }) => {
         rpc.push({ method, params });
-        if (method === "eth_accounts" || method === "eth_requestAccounts") return exposedAccounts();
+        if (method === "eth_requestAccounts") authorized = true;
+        if (method === "eth_accounts" || method === "eth_requestAccounts") return authorized ? exposedAccounts() : [];
         if (method === "eth_chainId") return `0x${state.chainId.toString(16)}`;
         if (method === "wallet_requestPermissions") {
           if (options.permissionsWait) await options.permissionsWait.promise;
@@ -490,6 +492,14 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         }
         throw Error(`Unexpected offline UI provider request: ${method}`);
       }, on: (event, handler) => providerListeners.set(event, handler) };
+      if (options.accountsWait) {
+        const request = provider.request;
+        provider.request = args => {
+          if (args.method !== "eth_accounts") return request(args);
+          rpc.push(args);
+          return options.accountsWait.promise;
+        };
+      }
       if (options.malformedProviders) provider.providers = { unexpected: true };
       const mobileListeners = new Map();
       const mobileSession = metadata => ({ self: { metadata }, namespaces: { eip155: { accounts: [`eip155:56:${formal.guanyin}`] } } });
@@ -546,7 +556,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         constructor(options) { super(options); this.flowType = "SHARED_CAP"; }
         async prepare(plan = buildSharedCapPlan()) { return super.prepare(plan); }
       }
-      const window = { ethereum: options.okxOnly ? undefined : provider, okxwallet: options.okxOnly ? { ethereum: provider } : undefined, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
+      const otherProvider = options.lateOkx ? { request() { throw Error("Unexpected fallback provider request"); } } : provider;
+      const window = { ethereum: options.okxOnly ? undefined : otherProvider, okxwallet: options.okxOnly ? { ethereum: provider } : undefined, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
         localStorage: storageFixture, addEventListener() {}, dispatchEvent: event => providerEvents.push(event),
         WalletConnectEthereumProvider: options.mobile ? { async init({ metadata, chains, storageOptions }) {
           mobileLog.push("init");
@@ -570,8 +581,11 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, walletAccounts, authorizedWalletAccount, SharedCapWallet: FakeCapWallet,
         HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet };
       runInNewContext(controller + "\nglobalThis.uiProbe = { preview: () => preview, setCases: (cases) => { importedCases = cases; } };", context);
-      node("wallet").value = "0";
-      await node("connect").onclick();
+      if (options.lateOkx) window.okxwallet = { ethereum: provider };
+      if (!options.skipConnect) {
+        node("wallet").value = "0";
+        await node("connect").onclick();
+      }
       return { node, wallets, requests, state, providerListeners, receiptCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers, probe: context.uiProbe };
     };
     for (const failure of [false, true]) {
@@ -888,6 +902,38 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       for (const privateValue of [beneficiary, transactionHash, "1080000", "private-case", "role=guanyin"]) assert.equal(decoded.includes(privateValue), false, name);
     }
     assert.equal(linked.requests.length, 0, "constructing wallet links never submits a transaction");
+
+    const inApp = await mount({ href: publicHref, lateOkx: true, skipConnect: true, role: "guanyin", account: formal.guanyin, pauser: true });
+    assert.equal(inApp.rpc.length, 0, "opening the page does not prompt the wallet");
+    let appNavigationPrevented = false;
+    await inApp.node("native-okx").emit("click", { preventDefault: () => { appNavigationPrevented = true; } });
+    assert.equal(appNavigationPrevented, true, "keep the currently open OKX Web3 app");
+    assert.equal(inApp.rpc.filter(call => call.method === "eth_requestAccounts").length, 0, "reuse existing origin authorization");
+    assert.match(inApp.node("connection").textContent, /OKX Web3.*chainId=56/);
+    await inApp.node("prepare").onclick();
+    assert.equal(inApp.probe.preview()?.step.kind, "BANK_PAUSE");
+    assert.equal(inApp.probe.preview()?.step.ready, true);
+    assert.equal(inApp.requests.length, 0, "connecting and previewing never submits a transaction");
+
+    const firstUse = await mount({ href: publicHref, okxOnly: true, skipConnect: true, needsAuthorization: true });
+    await firstUse.node("native-okx").emit("click", { preventDefault() {} });
+    assert.equal(firstUse.rpc.filter(call => call.method === "eth_requestAccounts").length, 1, "ask once if the origin has no authorized accounts");
+    assert.equal(firstUse.requests.length, 0);
+
+    const accountWait = deferred();
+    const cancelled = await mount({ href: publicHref, okxOnly: true, skipConnect: true, needsAuthorization: true, accountsWait: accountWait });
+    const connecting = cancelled.node("native-okx").emit("click", { preventDefault() {} });
+    await Promise.resolve();
+    assert.equal(cancelled.rpc.at(-1)?.method, "eth_accounts");
+    accountWait.resolve([]);
+    cancelled.node("cancel-connect").onclick();
+    await connecting;
+    assert.equal(cancelled.rpc.some(call => call.method === "eth_requestAccounts"), false, "cancel stops an authorization prompt after a late account read");
+    assert.match(cancelled.node("status").textContent, /已取消本頁等待/);
+
+    let externalNavigationPrevented = false;
+    await linked.node("native-okx").emit("click", { preventDefault: () => { externalNavigationPrevented = true; } });
+    assert.equal(externalNavigationPrevented, false, "keep the existing external-browser fallback");
   });
 });
 
