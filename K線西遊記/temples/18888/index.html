@@ -219,7 +219,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 
   <!-- Human-operated fixed allocation and emergency pause; prototype values are not account balances. -->
   <section class="funding-panel" id="funding-panel" aria-labelledby="funding-title">
-    <h2 id="funding-title">KAIOS 生命資源 · 錢包確認作業 · OKX V3</h2>
+    <h2 id="funding-title">KAIOS 生命資源 · 錢包確認作業 · OKX V3 · App Web3</h2>
     <p>選擇固定配額或共享一千萬調額 → 讀查下一步 → 核對內容 → 由你在既有錢包確認。<strong>每次只送交一筆，不會自動連續簽署或撥款。</strong></p>
     <p class="funding-muted">此區與上方原型展示數字分開。BSC 主網 56；金額單位 KAIOS，不是 BNB。調額、Mother 提案、玉帝獨立批准、到期執行、實際撥款分別核定；連接或交易雜湊不代表已入帳。</p>
     <div class="funding-fields">
@@ -246,8 +246,8 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       <button type="button" id="funding-prepare">讀查並預覽下一步</button>
       <button type="button" id="funding-receipt">只讀核對回執</button>
     </div>
-    <div class="funding-actions"><a id="funding-native-metamask" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 MetaMask 開啟此頁</a><a id="funding-native-okx" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 OKX Wallet 開啟此頁</a><a id="funding-native-trust" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 Trust Wallet 開啟此頁</a></div>
-    <p id="funding-native-help" class="funding-muted">手機 OKX 建議先在錢包切到本人帳戶，再用 OKX 內建 DApp 瀏覽器開啟本頁。WalletConnect 換帳戶時請中斷舊連線再授權。</p>
+    <div class="funding-actions"><a id="funding-native-metamask" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 MetaMask 開啟此頁</a><a id="funding-native-okx" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">開啟或連接 OKX Web3</a><a id="funding-native-trust" aria-disabled="true" tabindex="-1" rel="noopener noreferrer">用 Trust Wallet 開啟此頁</a></div>
+    <p id="funding-native-help" class="funding-muted">使用 OKX 主 App 時，切到 Web3 → 探索，從 App 內的 DApp 瀏覽器開啟本頁。獨立的 OKX Wallet App 也可使用。已在錢包內開啟時，可直接連接目前的 OKX Web3 錢包。WalletConnect 換帳戶時請中斷舊連線再授權。</p>
     <p id="funding-connection" class="funding-muted">尚未連接。程式不要求、讀取或保存私鑰與助記詞。手機連線沿用原12345的公開WalletConnect設定；服務／網域允許狀態仍須實際連線確認，localhost不是手機可直接訪問的筆電網址。</p>
     <p id="funding-role-status" class="funding-muted" aria-live="polite">選擇角色只表示本次操作意圖；仍須在錢包選擇正確帳戶，並讀查鏈上權限。</p>
     <p id="funding-status" role="status" aria-live="polite">先讀查，不會在載入頁面時請求帳戶或送出交易。</p>
@@ -1268,17 +1268,28 @@ const refreshSend = () => {
 };
 const errorText = error => Number(error?.code) === 4001 ? '你已在錢包拒絕本次請求；沒有自動重送。' : reasons[error?.message] || `檢查未通過：${error?.message || String(error)}。未確認前請勿重送。`;
 function addProvider(provider, name) {
-  if (typeof provider?.request !== 'function' || providers.some(item => item.provider === provider)) return;
+  if (typeof provider?.request !== 'function') return;
+  const existing = providers.findIndex(item => item.provider === provider);
+  if (existing !== -1) return existing;
   providers.push({provider, name});
   const option = document.createElement('option'); option.value = String(providers.length - 1); option.textContent = name;
   if (providers.length === 1) el('wallet').replaceChildren();
   el('wallet').append(option);
+  return providers.length - 1;
+}
+function findOkxWeb3Provider() {
+  const {okxwallet, ethereum} = window;
+  if (typeof okxwallet?.ethereum?.request === 'function') return okxwallet.ethereum;
+  if (typeof okxwallet?.request === 'function') return okxwallet;
+  const injected = Array.isArray(ethereum?.providers) ? ethereum.providers : [];
+  return [ethereum, ...injected, ...providers.map(item => item.provider)]
+    .find(provider => provider?.isOkxWallet && typeof provider.request === 'function');
 }
 window.addEventListener('eip6963:announceProvider', event => addProvider(event.detail?.provider, String(event.detail?.info?.name || '既有錢包')));
 window.dispatchEvent(new Event('eip6963:requestProvider'));
-addProvider(window.okxwallet?.ethereum?.request ? window.okxwallet.ethereum : window.okxwallet, 'OKX Wallet');
+addProvider(findOkxWeb3Provider(), 'OKX Web3');
 if (Array.isArray(window.ethereum?.providers)) for (const provider of window.ethereum.providers) {
-  addProvider(provider, provider?.isOkxWallet ? 'OKX Wallet' : provider?.isMetaMask ? 'MetaMask' : '既有注入錢包');
+  addProvider(provider, provider?.isOkxWallet ? 'OKX Web3' : provider?.isMetaMask ? 'MetaMask' : '既有注入錢包');
 }
 addProvider(window.ethereum, window.ethereum?.isMetaMask ? 'MetaMask' : '既有瀏覽器錢包');
 if (!providers.length) { el('wallet').options[0].textContent = '未偵測到注入錢包，可選手機 WalletConnect'; el('wallet').options[0].value = ''; }
@@ -1369,16 +1380,18 @@ async function useProvider(resolveProvider, name, authorize, preferredAccount) {
   clearWalletConnection();
   const attempt = connectionGeneration;
   const current = () => attempt === connectionGeneration;
+  let stopped = false;
+  const active = () => current() && !stopped;
   const connect = async () => {
-    const provider = await resolveProvider(current);
-    if (!current()) return;
+    const provider = await resolveProvider(active);
+    if (!active()) return;
     connectedProvider = provider; connectedName = name;
     observeWalletProvider(provider);
-    await requestWalletConnection(provider, authorize);
-    for (let retry = 0; retry < 4 && current(); retry++) {
+    await requestWalletConnection(provider, walletProvider => authorize(walletProvider, active));
+    for (let retry = 0; retry < 4 && active(); retry++) {
       const changes = walletContextChanges;
       const [accounts, chain] = await Promise.all([provider.request({method:'eth_accounts'}), provider.request({method:'eth_chainId'})]);
-      if (!current()) return;
+      if (!active()) return;
       if (changes !== walletContextChanges) continue;
       connectedAccounts = walletAccounts(accounts); connectedChain = readWalletChain(chain);
       connectedAccount = authorizedWalletAccount(selectableWalletAccounts(), preferredAccount);
@@ -1392,12 +1405,13 @@ async function useProvider(resolveProvider, name, authorize, preferredAccount) {
       if (connectedAccount && connectedChain === 56) void watchFundingReceipt(wallet);
       return;
     }
-    if (current()) throw Error('帳戶或網路仍在變動，請先在錢包確認後再連接。');
+    if (active()) throw Error('帳戶或網路仍在變動，請先在錢包確認後再連接。');
   };
   let deadline;
   const cancelled = new Promise((_, reject) => {
-    cancelWalletConnection = () => reject(Error('已取消本頁等待。若錢包仍顯示舊請求，請在錢包關閉它。'));
-    deadline = setTimeout(() => reject(Error('錢包連線等待逾時。請在錢包完成或取消舊請求後再試。')), 60000);
+    const stop = message => { stopped = true; reject(Error(message)); };
+    cancelWalletConnection = () => stop('已取消本頁等待。若錢包仍顯示舊請求，請在錢包關閉它。');
+    deadline = setTimeout(() => stop('錢包連線等待逾時。請在錢包完成或取消舊請求後再試。'), 60000);
   });
   el('cancel-connect').hidden = false;
   try { await Promise.race([connect(), cancelled]); }
@@ -1433,11 +1447,12 @@ el('account').addEventListener('change', () => {
   el('summary').textContent = '請重新核對本次帳戶及鏈上權限。';
   status('已更新錢包帳戶選擇。');
 });
+const requestInjectedAccounts = provider => provider.request({method:'eth_requestAccounts'});
 el('cancel-connect').onclick = () => cancelWalletConnection?.();
 el('connect').onclick = () => run(async () => {
   const selected = providers[Number(el('wallet').value)];
   if (!selected || el('wallet').value === '') throw Error('未選到既有錢包。可使用手機WalletConnect，不要匯入私鑰。');
-  await useProvider(() => selected.provider, selected.name, provider => provider.request({method:'eth_requestAccounts'}));
+  await useProvider(() => selected.provider, selected.name, requestInjectedAccounts);
 });
 el('reselect').onclick = () => run(async () => {
   const provider = connectedProvider, name = connectedName;
@@ -1674,7 +1689,22 @@ el('file').addEventListener('change', () => run(async () => {
 }));
 function configureNativeLinks() {
   for (const id of ['native-metamask','native-okx','native-trust']) el(id).addEventListener('click', event => {
-    if (el(id).getAttribute('aria-disabled') === 'true') { event.preventDefault(); status('此按鈕需要已發布的正式HTTPS頁。本機請連接既有錢包或使用WalletConnect。'); }
+    if (el(id).getAttribute('aria-disabled') === 'true') {
+      event.preventDefault();
+      status('此按鈕需要已發布的正式HTTPS頁。本機請連接既有錢包或使用WalletConnect。');
+      return;
+    }
+    if (id !== 'native-okx') return;
+    const provider = findOkxWeb3Provider();
+    if (!provider) return;
+    event.preventDefault();
+    return run(() => {
+      el('wallet').value = String(addProvider(provider, 'OKX Web3'));
+      return useProvider(() => provider, 'OKX Web3', async (walletProvider, current) => {
+        const accounts = walletAccounts(await walletProvider.request({method:'eth_accounts'}));
+        if (current() && !accounts.length) await requestInjectedAccounts(walletProvider);
+      });
+    });
   });
   if (!window.location?.href) return;
   const url = new URL(window.location.href);
@@ -1683,7 +1713,7 @@ function configureNativeLinks() {
   url.search = ''; url.hash = 'funding-panel';
   const links = { 'native-metamask':`https://link.metamask.io/dapp/${url.href.replace(/^https:\/\//, '')}`, 'native-okx':`okx://wallet/dapp/url?dappUrl=${encodeURIComponent(url.href)}`, 'native-trust':`https://link.trustwallet.com/open_url?coin_id=20000714&url=${encodeURIComponent(url.href)}` };
   for (const [id, href] of Object.entries(links)) { el(id).setAttribute('href', href); el(id).setAttribute('aria-disabled', 'false'); el(id).setAttribute('tabindex', '0'); }
-  el('native-help').textContent = '原生開啟只會把此正式網頁交給你的錢包；開啟後仍需選角色、連接帳戶及預覽，再本人確認交易。';
+  if (findOkxWeb3Provider()) el('native-okx').textContent = '連接目前的 OKX Web3 錢包';
 }
 configureNativeLinks(); showRole();
 window.addEventListener('pagehide', () => { connectionGeneration++; invalidate(); });
