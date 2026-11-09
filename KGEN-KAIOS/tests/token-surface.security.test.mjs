@@ -64,17 +64,24 @@ const BANK_CONTROLLER_END = "// END HUMAN FUNDING CONTROLLER";
 const SEVEN_CONTROLLER_MARKER = "// BEGIN SEVEN FLOOR CONTROLLER";
 const SEVEN_CONTROLLER_END = "// END SEVEN FLOOR CONTROLLER";
 const BANK_TEST_ETHER = 10n ** 18n;
-async function inlineBankApi() {
+async function inlineBankApi({ mockGovernanceRuntime } = {}) {
   const vm = await import("node:vm"), { createRequire } = await import("node:module");
   const ethers = createRequire(import.meta.url)(path.resolve(root, "../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js"));
   const html = fs.readFileSync(path.resolve(root, "../K線西遊記/temples/18888/index.html"), "utf8");
   const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(source?.includes(BANK_CONTROLLER_MARKER), "execute the real retained inline component");
-  const adapter = source.split(BANK_CONTROLLER_MARKER)[0].replace(/^import[^\n]+\r?\n/gm, "");
+  let adapter = source.split(BANK_CONTROLLER_MARKER)[0].replace(/^import[^\n]+\r?\n/gm, "");
+  if (mockGovernanceRuntime) {
+    // Use the actual pin verification with synthetic, offline code for this fixture only.
+    const governancePin = /(governance: Object.freeze\(\{[^\n]*runtimeHash: ")0x[0-9a-f]{64}(")/;
+    assert.match(adapter, governancePin);
+    adapter = adapter.replace(governancePin, (_pin, prefix, suffix) => prefix + keccak256(mockGovernanceRuntime) + suffix);
+  }
   const context = { ...ethers.utils, window: {}, navigator: {}, structuredClone };
   vm.runInNewContext(adapter + `\nglobalThis.bankTestApi = {
     FUNDING_FORMAL,FUNDING_RUNTIME_PINS,FUNDING_IMPLEMENTATION_SLOT,FUNDING_STORAGE_KEY,FUNDING_LOCK_KEY,
     buildLifeResourcePlan,deriveFundingStep,HumanFundingWallet,buildSharedCapPlan,deriveSharedCapStep,SharedCapWallet,
+    buildLegacyCapCancelPlan,deriveLegacyCapCancelStep,isLegacyCapCancelPlan,LegacyCapCancelWallet,
     buildBankPausePlan,deriveBankPauseStep,HumanBankPauseWallet,readFundingRuntimePins,walletAccounts,authorizedWalletAccount,
     SEVEN_FLOORS,SEVEN_FLOOR_RELEASE,sevenFloorRuntimePins,projectSevenFloorPlayerContext,
     validateSevenFloorAmount,buildSevenFloorPlan,deriveSevenFloorStep,SevenFloorClaimWallet,
@@ -438,7 +445,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   await t.test("actual funding controller discards stale prepare success and failure after form changes", async t => {
     const { readFileSync } = await import("node:fs");
     const { runInNewContext } = await import("node:vm");
-    const { buildBankPausePlan, buildSharedCapPlan, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
+    const { buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
     const html = readFileSync(new URL("../../K線西遊記/temples/18888/index.html", import.meta.url), "utf8");
     const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
     assert.ok(source, "test the real existing inline funding controller");
@@ -562,6 +569,10 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         constructor(options) { super(options); this.flowType = "SHARED_CAP"; }
         async prepare(plan = buildSharedCapPlan()) { return super.prepare(plan); }
       }
+      class FakeLegacyCancelWallet extends FakeWallet {
+        constructor(options) { super(options); this.flowType = "LEGACY_CAP_CANCEL"; }
+        async prepare(plan = buildLegacyCapCancelPlan()) { return super.prepare(plan); }
+      }
       const otherProvider = options.lateOkx ? { request() { throw Error("Unexpected fallback provider request"); } } : provider;
       const window = { ethereum: options.okxOnly ? undefined : otherProvider, okxwallet: options.okxDirect ? provider : options.okxOnly ? { ethereum: provider } : undefined, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
         localStorage: storageFixture, addEventListener: (event, handler) => windowEvents.set(event, handler), dispatchEvent: event => providerEvents.push(event),
@@ -586,7 +597,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         },
         clearTimeout: callback => connectionTimers.delete(callback),
         Option: class { constructor(textContent, value) { this.textContent = textContent; this.value = value; } },
-        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, walletAccounts, authorizedWalletAccount, SharedCapWallet: FakeCapWallet,
+        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan,
+        walletAccounts, authorizedWalletAccount, SharedCapWallet: FakeCapWallet, LegacyCapCancelWallet: FakeLegacyCancelWallet,
         HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet };
       runInNewContext(controller + "\nglobalThis.uiProbe = { preview: () => preview, setCases: (cases) => { importedCases = cases; } };", context);
       if (options.lateOkx) window.okxwallet = { ethereum: provider };
@@ -1042,6 +1054,42 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         assert.equal(ui.probe.preview(), null);
       }
     });
+    await t.test("legacy cancellation uses its own role-confirmed preview; switching modes invalidates it", async () => {
+      const ui = await mount({ mode: "legacy-cancel", stepKind: "LEGACY_CANCEL_PROPOSE" });
+      assert.equal(ui.node("beneficiary").disabled, true);
+      assert.equal(ui.node("amount").disabled, true);
+      await ui.node("prepare").onclick();
+      assert.equal(ui.probe.preview().plan.type, "LEGACY_CAP_CANCEL");
+      assert.equal(ui.probe.preview().step.kind, "LEGACY_CANCEL_PROPOSE");
+      assert.equal(ui.node("send").disabled, true, "preview alone cannot send");
+      assert.equal(ui.requests.length, 0);
+
+      ui.node("ack").checked = true;
+      ui.node("ack").emit("change");
+      assert.equal(ui.node("send").disabled, false);
+      ui.node("mode").value = "cap";
+      ui.node("mode").emit("change");
+      await ui.node("send").onclick();
+      assert.equal(ui.requests.length, 0);
+      assert.equal(ui.node("send").disabled, true);
+
+      ui.node("mode").value = "legacy-cancel";
+      ui.node("mode").emit("change");
+      await ui.node("prepare").onclick();
+      ui.node("ack").checked = true;
+      ui.node("ack").emit("change");
+      await ui.node("send").onclick();
+      assert.equal(ui.requests.length, 1);
+      assert.equal(ui.requests[0].plan.type, "LEGACY_CAP_CANCEL");
+      assert.equal(ui.requests[0].step.kind, "LEGACY_CANCEL_PROPOSE");
+
+      const wrong = await mount({ mode: "legacy-cancel", account: formal.jade });
+      await wrong.node("prepare").onclick();
+      assert.equal(wrong.probe.preview(), null);
+      assert.equal(wrong.node("send").disabled, true);
+      assert.equal(wrong.requests.length, 0);
+    });
+
     await t.test("canonical app handoff restores only role and flow and passively reads MetaMask", async () => {
       const href = publicHref + "?fundingRole=mother&fundingFlow=cap&txhash=" + transactionHash + "#funding-panel";
       const ui = await mount({ href, metaMask: true, skipConnect: true, visible: true, accounts: [alternate, formal.mother] });
@@ -1283,8 +1331,8 @@ test("shared cap: beneficiary-free governance preserves original bytes, accounti
     assert.equal(exact.wallet.readPending().flowType,"SHARED_CAP");
     equalInline(exact.sends()[0].params[0],{from:F.mother,to:F.governance,data:api.deriveSharedCapStep(plan,snapshot()).data,value:"0x0",chainId:"0x38"});
   });
-  await t.test("all four flows and unknown pending types remain isolated before provider reads", async () => {
-    const flows=[[api.SharedCapWallet,plan,"CAP_PROPOSE"],[api.HumanFundingWallet,api.buildLifeResourcePlan({beneficiary:F.mother,amount:"1"}),"CAP_PROPOSE"],
+  await t.test("all five flows and unknown pending types remain isolated before provider reads", async () => {
+    const flows=[[api.SharedCapWallet,plan,"CAP_PROPOSE"],[api.LegacyCapCancelWallet,api.buildLegacyCapCancelPlan(),"LEGACY_CANCEL_PROPOSE"],[api.HumanFundingWallet,api.buildLifeResourcePlan({beneficiary:F.mother,amount:"1"}),"CAP_PROPOSE"],
       [api.HumanBankPauseWallet,api.buildBankPausePlan(),"BANK_PAUSE"],[api.SevenFloorClaimWallet,api.buildSevenFloorPlan({characterId:id("CAP-ISOLATION"),floor:1,amount:"1"}),"FLOOR_CLAIM"]];
     for(const[Owner,ownerPlan,kind]of flows)for(const[Other]of flows)if(Owner!==Other){
       const records=storage(),raw=JSON.stringify({plan:ownerPlan,kind});records.setItem(api.FUNDING_STORAGE_KEY,raw);
@@ -1320,6 +1368,289 @@ test("shared cap: beneficiary-free governance preserves original bytes, accounti
       const preview=await m.wallet.prepare();assert.equal(preview.step.kind,kind);await m.wallet.request(preview);m.confirm(mode);
       const result=await m.wallet.reconcile(hash);assert.equal(result.status,mode==="exact"?"CONFIRMED":"MISMATCH",`${kind}/${mode}`);
       assert.notEqual(result.status,"VERIFIED_PAID");assert.equal(m.wallet.readPending()===null,mode==="exact");assert.equal(m.sends().length,1);
+    }
+  });
+});
+
+test("legacy cap cancellation: fixed self-call, distinct holders and old proposal races", async (t) => {
+  const api = await inlineBankApi();
+  const { Interface, ZeroAddress, ZeroHash } = await import("ethers");
+  const F = api.FUNDING_FORMAL;
+  const plan = api.buildLegacyCapCancelPlan();
+  const { original, cancellation } = plan;
+  const gov = new Interface(api.governanceAbi);
+  const timestamp = 1794165839;
+  const blockNumber = "0x7e50ce3";
+  const blockHash = id("legacy cancel receipt block");
+  const transactionHash = id("legacy cancel wallet transaction");
+  const absent = () => ({
+    target: ZeroAddress, value: "0", dataHash: ZeroHash, executableAt: "0",
+    proposer: ZeroAddress, approver: ZeroAddress, executed: false, cancelled: false,
+  });
+  const snapshot = () => ({
+    chainId: 56, account: F.mother, blockNumber, blockHash, timestamp: String(timestamp),
+    codeOk: true, identityErrors: [], roles: { proposer: true, approver: false, governanceAdmin: true },
+    originalProposal: {
+      target: original.target, value: "0", dataHash: original.dataHash,
+      executableAt: String(original.executableAt), proposer: F.mother, approver: F.jade,
+      executed: false, cancelled: false,
+    },
+    cancellationProposal: absent(), delay: "3600",
+  });
+  const afterPropose = () => {
+    const s = snapshot();
+    s.account = F.jade;
+    s.roles.proposer = false;
+    s.roles.approver = true;
+    s.cancellationProposal = {
+      ...absent(), target: cancellation.target, dataHash: cancellation.dataHash,
+      proposer: F.mother, executableAt: String(timestamp + 3600),
+    };
+    return s;
+  };
+  const afterApprove = () => {
+    const s = afterPropose();
+    s.cancellationProposal.approver = F.jade;
+    return s;
+  };
+  const atEta = () => {
+    const s = afterApprove();
+    s.timestamp = s.cancellationProposal.executableAt;
+    return s;
+  };
+  const derive = state => api.deriveLegacyCapCancelStep(plan, state);
+  const encoded = (name, args) => gov.encodeFunctionData(name, args);
+
+  await t.test("canonical plan pins the old cap and its only zero-value governance self-call", () => {
+    assert.equal(plan.type, "LEGACY_CAP_CANCEL");
+    assert.equal(plan.chainId, 56);
+    assert.equal(original.proposalId, "0xc0d6f14daa902e7a74bf3cd93e0a842297760895abff63bc02adaa2716933ab7");
+    assert.equal(original.target, F.bank);
+    assert.equal(original.dataHash, "0x42c66729ff7bb242fc7bb7401248b15772cce26e523ed5f86e4541d01d07861d");
+    assert.equal(String(original.executableAt), "1788108660");
+    assert.equal(cancellation.proposalId, "0xe14e7f573c2ee8a1f7a0e598dc7fff2c13c36c2e20de55845e3ba1f924110b07");
+    assert.equal(cancellation.target, F.governance);
+    assert.equal(cancellation.data, new Interface(["function cancel(bytes32)"]).encodeFunctionData("cancel", [original.proposalId]));
+    assert.equal(cancellation.dataHash, "0xc53b67431b1546ed0b55b5b8c0393562801738ee52eccad49990fa9063b8f1fc");
+    assert.equal(keccak256(cancellation.data), cancellation.dataHash);
+    for (const key of ["beneficiary", "allocationId", "paymentId", "cap", "allocation", "payout"]) {
+      assert.equal(Object.hasOwn(plan, key), false, key);
+    }
+    const step = derive(snapshot());
+    assert.equal(step.kind, "LEGACY_CANCEL_PROPOSE");
+    assert.equal(step.ready, true);
+    assert.equal(step.to, F.governance);
+    assert.equal(step.data, encoded("propose", [cancellation.proposalId, F.governance, 0, cancellation.data]));
+  });
+
+  await t.test("independent Jade approval and the chain ETA advance the only cancellation", () => {
+    const approval = derive(afterPropose());
+    assert.equal(approval.kind, "LEGACY_CANCEL_APPROVE");
+    assert.equal(approval.ready, true);
+    assert.equal(approval.data, encoded("approve", [cancellation.proposalId]));
+    const justBeforeEta = afterApprove();
+    justBeforeEta.timestamp = String(timestamp + 3599);
+    const waiting = derive(justBeforeEta);
+    assert.equal(waiting.kind, "WAIT_ETA");
+    assert.equal(waiting.ready, false);
+    const ready = atEta();
+    const execution = derive(ready);
+    assert.equal(execution.kind, "LEGACY_CANCEL_EXECUTE");
+    assert.equal(execution.ready, true);
+    assert.equal(execution.data, encoded("execute", [cancellation.proposalId, cancellation.data]));
+    ready.originalProposal.cancelled = true;
+    ready.cancellationProposal.executed = true;
+    const done = derive(ready);
+    assert.equal(done.kind, "LEGACY_CANCEL_DONE");
+    assert.equal(done.ready, false);
+  });
+
+  await t.test("wrong account, changed proposal, closed original, and unavailable chain state fail closed", () => {
+    const mutations = [
+      ["wrong chain", s => { s.chainId = 1; }],
+      ["wrong proposer wallet", s => { s.account = F.guanyin; }],
+      ["proposer role lost", s => { s.roles.proposer = false; }],
+      ["missing self admin", s => { s.roles.governanceAdmin = false; }],
+      ["code mismatch", s => { s.codeOk = false; }],
+      ["unknown code pin", s => { s.identityErrors = ["GOVERNANCE_RUNTIME_HASH_MISMATCH"]; }],
+      ["delay changed", s => { s.delay = "0"; }],
+      ["old not yet mature", s => { s.timestamp = String(Number(original.executableAt) - 1); }],
+      ["old target changed", s => { s.originalProposal.target = F.allocation; }],
+      ["old value changed", s => { s.originalProposal.value = "1"; }],
+      ["old data changed", s => { s.originalProposal.dataHash = id("foreign cap"); }],
+      ["old proposer changed", s => { s.originalProposal.proposer = F.jade; }],
+      ["old approver changed", s => { s.originalProposal.approver = F.mother; }],
+      ["old execution won the race", s => { s.originalProposal.executed = true; }],
+      ["old already cancelled", s => { s.originalProposal.cancelled = true; }],
+      ["old missing", s => { s.originalProposal = absent(); }],
+      ["cancellation state unknown", s => { delete s.cancellationProposal; }],
+    ];
+    for (const [label, mutate] of mutations) {
+      const state = snapshot();
+      mutate(state);
+      assert.equal(derive(state).ready, false, label);
+    }
+    for (const patch of [
+      { target: F.bank }, { value: "1" }, { dataHash: id("foreign cancellation") },
+      { proposer: F.jade }, { approver: F.mother }, { cancelled: true }, { executed: true },
+    ]) {
+      const s = afterPropose();
+      Object.assign(s.cancellationProposal, patch);
+      assert.equal(derive(s).ready, false, JSON.stringify(patch));
+    }
+    const wrongApprover = afterPropose();
+    wrongApprover.account = F.mother;
+    assert.equal(derive(wrongApprover).ready, false);
+    assert.equal(api.deriveLegacyCapCancelStep({
+      ...plan, cancellation: { ...cancellation, data: encoded("approve", [original.proposalId]) },
+    }, snapshot()).ready, false);
+  });
+
+  const mockGovernanceRuntime = "0x600160005260206000f3";
+  const walletFixture = (current = snapshot(), Wallet = api.LegacyCapCancelWallet, { realInspect = false } = {}) => {
+    const calls = [];
+    const storage = new Map();
+    const records = {
+      getItem: key => storage.get(key) ?? null,
+      setItem: (key, value) => storage.set(key, value),
+      removeItem: key => storage.delete(key),
+    };
+    let receipt = null, runtime = mockGovernanceRuntime, canonicalHash = blockHash;
+    let latestHash = blockHash, reorgDuringStateReads = false;
+    const provider = {
+      request: async ({ method, params = [] }) => {
+        calls.push({ method, params });
+        if (method === "eth_sendTransaction") return transactionHash;
+        if (method === "eth_chainId") return "0x38";
+        if (method === "eth_accounts") return [current.account];
+        if (method === "eth_getTransactionReceipt") return receipt;
+        if (method === "eth_getTransactionByHash") {
+          const sent = calls.find(call => call.method === "eth_sendTransaction")?.params[0];
+          return sent ? { ...sent, input: sent.data } : null;
+        }
+        if (method === "eth_getBlockByNumber") {
+          if (params[0] !== "latest" || !realInspect) assert.equal(params[0], blockNumber);
+          const hash = params[0] === "latest" ? latestHash : canonicalHash;
+          return { number: blockNumber, hash, timestamp: "0x" + BigInt(current.timestamp).toString(16) };
+        }
+        const pin = api.FUNDING_RUNTIME_PINS.governance;
+        if (method === "eth_getStorageAt") {
+          assert.deepEqual(Array.from(params), [F.governance, api.FUNDING_IMPLEMENTATION_SLOT, blockNumber]);
+          return "0x" + pin.implementation.slice(2).padStart(64, "0");
+        }
+        if (method === "eth_getCode") {
+          assert.equal(params[0].toLowerCase(), pin.implementation);
+          assert.equal(params[1], blockNumber);
+          return runtime;
+        }
+        if (method === "eth_call") {
+          assert.equal(params[0].to, F.governance);
+          assert.equal(params[1], blockNumber);
+          if (reorgDuringStateReads) canonicalHash = id("changed block during legacy proposal reads");
+          const decoded = gov.parseTransaction({ data: params[0].data });
+          if (decoded.name === "proposal") {
+            assert.ok([original.proposalId, cancellation.proposalId].includes(decoded.args[0]));
+            const state = decoded.args[0] === original.proposalId ? current.originalProposal : current.cancellationProposal;
+            return gov.encodeFunctionResult("proposal", [[state.target, state.value, state.dataHash, state.executableAt,
+              state.proposer, state.approver, state.executed, state.cancelled]]);
+          }
+          if (decoded.name === "bank") return gov.encodeFunctionResult("bank", [F.bank]);
+          if (decoded.name === "governanceDelay") return gov.encodeFunctionResult("governanceDelay", [current.delay]);
+          assert.equal(decoded.name, "hasRole");
+          const [role, account] = decoded.args;
+          if (role === ZeroHash) {
+            assert.equal(account, F.governance);
+            return gov.encodeFunctionResult("hasRole", [current.roles.governanceAdmin]);
+          }
+          assert.ok(realInspect, "receipt verification reads the governance self-admin role only");
+          assert.equal(account, current.account);
+          assert.ok([id("PROPOSER_ROLE"), id("APPROVER_ROLE")].includes(role));
+          return gov.encodeFunctionResult("hasRole", [role === id("PROPOSER_ROLE") ? current.roles.proposer : current.roles.approver]);
+        }
+        throw Error(`No external RPC in legacy cancellation test: ${method}`);
+      },
+    };
+    const wallet = new Wallet({
+      provider, storage: records, now: () => timestamp * 1000,
+      locks: { request: async (_key, _options, fn) => fn({}) },
+    });
+    if (!realInspect) wallet.inspect = async () => structuredClone(current);
+    return {
+      wallet, setReceipt: value => { receipt = value; },
+      setLatestHash: value => { latestHash = value; },
+      reorgDuringStateReads: () => { reorgDuringStateReads = true; },
+      changeRuntime: () => { runtime = "0x6000"; },
+      changeCanonicalHash: () => { canonicalHash = id("changed receipt block"); },
+      sends: () => calls.filter(call => call.method === "eth_sendTransaction"),
+    };
+  };
+
+  await t.test("an old-proposal race blocks the fresh send, while one explicit confirmation stays zero-value", async () => {
+    const raced = snapshot();
+    const blocked = walletFixture(raced);
+    const preview = await blocked.wallet.prepare();
+    assert.equal(preview.step.ready, true);
+    assert.equal(blocked.sends().length, 0);
+    raced.originalProposal.executed = true;
+    await assert.rejects(blocked.wallet.request(preview));
+    assert.equal(blocked.sends().length, 0);
+    assert.equal(blocked.wallet.readPending(), null);
+
+    const exact = walletFixture();
+    const ready = await exact.wallet.prepare();
+    await Promise.allSettled([exact.wallet.request(ready), exact.wallet.request(ready)]);
+    assert.equal(exact.sends().length, 1);
+    assert.equal(exact.wallet.readPending().flowType, "LEGACY_CAP_CANCEL");
+    equalInline(exact.sends()[0].params[0], {
+      from: F.mother, to: F.governance, chainId: "0x38", value: "0x0",
+      data: encoded("propose", [cancellation.proposalId, F.governance, 0, cancellation.data]),
+    });
+  });
+
+  await t.test("legacy preview needs a valid block hash that survives the fixed-block reads", async () => {
+    const { LegacyCapCancelWallet } = await inlineBankApi({ mockGovernanceRuntime });
+    const fixture = () => walletFixture(snapshot(), LegacyCapCancelWallet, { realInspect: true });
+    const exact = fixture();
+    assert.equal((await exact.wallet.prepare()).step.kind, "LEGACY_CANCEL_PROPOSE");
+    assert.equal(exact.sends().length, 0);
+    for (const hash of [undefined, ZeroHash]) {
+      const invalid = fixture();
+      invalid.setLatestHash(hash);
+      await assert.rejects(invalid.wallet.prepare(), /BLOCK/);
+      assert.equal(invalid.sends().length, 0);
+    }
+    const reorg = fixture();
+    reorg.reorgDuringStateReads();
+    await assert.rejects(reorg.wallet.prepare(), /BLOCK|FRESH_STATE/);
+    assert.equal(reorg.sends().length, 0);
+    assert.equal(reorg.wallet.readPending(), null);
+  });
+
+  await t.test("cancellation reconciliation needs both exact governance events and exact receipt-block state", async () => {
+    const { LegacyCapCancelWallet } = await inlineBankApi({ mockGovernanceRuntime });
+    const event = (name, args, address = F.governance) => ({
+      address, ...gov.encodeEventLog(gov.getEvent(name), args),
+    });
+    const execution = event("GovernanceProposalExecuted", [cancellation.proposalId, F.governance, cancellation.dataHash]);
+    const cancelled = event("GovernanceProposalCancelled", [original.proposalId]);
+    for (const mode of ["both", "only-execution", "wrong-old-id", "wrong-emitter", "old-open", "outer-open", "pin", "noncanonical", "reorg-during-read"]) {
+      const state = atEta();
+      const m = walletFixture(state, LegacyCapCancelWallet);
+      const preview = await m.wallet.prepare();
+      assert.equal(preview.step.kind, "LEGACY_CANCEL_EXECUTE");
+      await m.wallet.request(preview);
+      state.originalProposal.cancelled = mode !== "old-open";
+      state.cancellationProposal.executed = mode !== "outer-open";
+      const cancelEvent = mode === "wrong-old-id" ? event("GovernanceProposalCancelled", [cancellation.proposalId])
+        : mode === "wrong-emitter" ? { ...cancelled, address: F.bank } : cancelled;
+      const logs = mode === "only-execution" ? [execution] : [cancelEvent, execution];
+      if (mode === "pin") m.changeRuntime();
+      if (mode === "noncanonical") m.changeCanonicalHash();
+      if (mode === "reorg-during-read") m.reorgDuringStateReads();
+      m.setReceipt({ status: "0x1", transactionHash, blockNumber, blockHash, logs });
+      assert.equal((await m.wallet.reconcile(transactionHash)).status, mode === "both" ? "LEGACY_CANCELLED" : "MISMATCH", mode);
+      assert.equal(m.wallet.readPending() === null, mode === "both", mode);
+      assert.equal(m.sends().length, 1);
     }
   });
 });
