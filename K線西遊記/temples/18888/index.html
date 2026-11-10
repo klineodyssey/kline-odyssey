@@ -891,6 +891,14 @@ function buildLegacyCapCancelPlan() {
     warnings: ["Only cancels the pinned old shared-limit proposal. No allocation, payment, or new limit."] });
 }
 
+// Independently verified on two BSC endpoints. The receipt block must still be canonical.
+const LEGACY_APPROVAL_RECEIPT = Object.freeze({
+  proposalId: "0xe14e7f573c2ee8a1f7a0e598dc7fff2c13c36c2e20de55845e3ba1f924110b07",
+  hash: "0x8d8ebca221cd41f84d7e493cd9adba1430b8a14b699f9f833e39682461085a67",
+  blockNumber: 132778867n,
+  blockHash: "0x6af377a6ca26897c9ac1f2df0f08fd47af16f53823dde74a06cb4ea63e239b41"
+});
+
 const legacyProposalMatches = (stored, candidate) => same(stored?.target, candidate.target) && same(stored.dataHash, candidate.dataHash)
   && same(stored.proposer, FUNDING_FORMAL.mother) && BI(stored.value) === 0n;
 const legacyOriginalMatches = (stored, original) => legacyProposalMatches(stored, original)
@@ -1236,12 +1244,21 @@ class HumanFundingWallet {
       status = verified ? "BANK_PAUSED" : "MISMATCH";
     } else if (pendingFlow === "LEGACY_CAP_CANCEL") {
       const { original, cancellation } = pending.plan;
-      const state = await readLegacyCapProposals(rpc, receipt.blockNumber, pending.plan);
+      const reviewedApproval = pending.kind === "LEGACY_CANCEL_APPROVE"
+        && same(cancellation.proposalId, LEGACY_APPROVAL_RECEIPT.proposalId)
+        && same(hash, LEGACY_APPROVAL_RECEIPT.hash) && same(receipt.blockHash, LEGACY_APPROVAL_RECEIPT.blockHash)
+        && BI(receipt.blockNumber) === LEGACY_APPROVAL_RECEIPT.blockNumber;
+      // The exact reviewed receipt still needs its event and canonical block checked below.
+      // Use current pinned proposal state here because non-archive wallet RPCs prune old state.
+      const state = reviewedApproval
+        ? await inspectLegacyCapCancel(this.provider, pending.plan, pending.transaction.from)
+        : await readLegacyCapProposals(rpc, receipt.blockNumber, pending.plan);
+      const governanceAdmin = reviewedApproval ? state.roles.governanceAdmin : state.governanceAdmin;
       const { originalProposal: old, cancellationProposal: observed } = state;
       const logs = events(FUNDING_FORMAL.governance, governanceInterface);
       const has = (name, proposal, matches = () => true) => logs.some(e => e.name === name && same(e.args[0], proposal.proposalId) && matches(e.args));
       const identity = args => same(args[1], cancellation.target) && same(args[2], cancellation.dataHash);
-      verified = state.codeOk && state.governanceAdmin === true && legacyOriginalMatches(old, original) && !old.executed
+      verified = state.codeOk && governanceAdmin === true && legacyOriginalMatches(old, original) && !old.executed
         && legacyProposalMatches(observed, cancellation) && !observed.cancelled && BI(observed.executableAt) > 0n;
       if (pending.kind === "LEGACY_CANCEL_PROPOSE") verified = verified && has("GovernanceProposalCreated", cancellation, args =>
         identity(args) && BI(args[3]) === BI(observed.executableAt) && same(args[4], FUNDING_FORMAL.mother));
@@ -1353,6 +1370,7 @@ let updateFundingLinks = () => {};
 let wallet = null, preview = null, previewWallet = null, previewRole = null, busy = false, importedCases = [], formGeneration = 0, connectionGeneration = 0, connectedProvider = null, connectedAccount = null, connectedChain = null;
 let receiptWatch = null, mobileProvider = null, mobileInit = null, cancelWalletConnection = null, connectedName = "", connectedAccounts = [], walletContextChanges = 0;
 let mobileMetadata, confirmedMobileTopic, restoringWallet = false, resumePending = false;
+let legacyReceiptNotice = null;
 const MOBILE_TOPIC_KEY = 'kaios18888.walletconnect.confirmedTopic.v1';
 function fundingStorage() {
   try { return window.localStorage; } catch { return null; }
@@ -1437,7 +1455,7 @@ Object.assign(reasons, {
   DURABLE_STORAGE_REQUIRED:'此瀏覽器無法保存待確認交易，只提供唯讀預覽。',
   PENDING_STORAGE_CORRUPT_DO_NOT_RESEND:'待確認交易紀錄無法讀取，只提供唯讀預覽。'
 });
-const invalidate = () => { formGeneration++; receiptWatch = null; wallet?.invalidate?.(); preview = null; previewWallet = null; previewRole = null; el('ack').checked = false; el('ack').disabled = true; el('send').disabled = true; el('send').textContent = '先連接並預覽；由我本人到錢包確認'; showRole(); };
+const invalidate = () => { formGeneration++; receiptWatch = null; legacyReceiptNotice = null; wallet?.invalidate?.(); preview = null; previewWallet = null; previewRole = null; el('ack').checked = false; el('ack').disabled = true; el('send').disabled = true; el('send').textContent = '先連接並預覽；由我本人到錢包確認'; showRole(); };
 // Original case files and the confirmation checkbox cannot attest to the full bank ledger.
 // Until the custodian evidence can be verified, retain unsigned previews and receipt reads.
 function fundingReviewBlocker({ plan, step }) {
@@ -1467,7 +1485,8 @@ function legacyNextAction(blocker) {
   }
   if (blocker === "CHAIN_ID_MISMATCH") return {control:"switch-bsc", label:"請錢包切至 BSC 56"};
   if (blocker === "ROLE_ACCOUNT_MISMATCH") return {href:"#funding-account", label:"選擇" + role.name + "錢包帳戶"};
-  if (preview?.step?.blockers.includes("PENDING_INTENT_RECONCILE_FIRST")) return {control:"receipt", label:"只讀核對回執"};
+  if (legacyReceiptNotice?.needsHash) return {href:"#funding-txhash", label:"填入交易雜湊"};
+  if (legacyReceiptNotice || preview?.step?.blockers.includes("PENDING_INTENT_RECONCILE_FIRST")) return {control:"receipt", label:"只讀核對回執"};
   return {control:"prepare", label:"重新只讀核對取消案"};
 }
 function refreshLegacyNext(blocker, canConfirm) {
@@ -1481,9 +1500,11 @@ function refreshLegacyNext(blocker, canConfirm) {
   help.textContent = ready ? "已核對取消案。確認本次操作後，按下方按鈕交給錢包。"
     : busy ? "正在讀取錢包或鏈上狀態。"
     : blocker ? el("connect-next").textContent
+    : legacyReceiptNotice ? legacyReceiptNotice.message
     : preview ? (reasons[fundingReviewBlocker(preview)] || reasons[preview.step.blockers[0]] || stageNames[preview.step.kind] || "請查看唯讀結果。")
     : "核對完成後會開放錢包確認。若讀取中斷，可按下方重新核對。";
-  link.hidden = ready;
+  link.hidden = ready || legacyReceiptNotice?.complete === true || legacyReceiptNotice?.corrupt === true
+    || preview?.step?.kind === "LEGACY_CANCEL_DONE";
   link.setAttribute("href", action.href || "#funding-" + action.control);
   link.setAttribute("aria-disabled", String(busy));
   link.textContent = action.label;
@@ -1882,7 +1903,59 @@ async function refreshLegacyPreview() {
     || busy || restoringWallet || resumePending || preview || roleConnectionBlocker()) return;
   await prepareFundingPreview();
 }
-const prepareFundingPreview = () => run(async () => {
+async function reconcileLegacyReceipt(receiptWallet, plan, isCurrent, manualHash) {
+  try {
+    const pending = receiptWallet.readPending();
+    if (!pending) return null;
+    if (!isLegacyCapCancelPlan(pending.plan) || (pending.flowType != null && pending.flowType !== "LEGACY_CAP_CANCEL")) {
+      return { message: reasons.PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL };
+    }
+    if (!sameAddress(pending.transaction?.from, connectedAccount)) {
+      return { message: "請選擇送出上一筆操作的錢包帳戶，再核對原回執。" };
+    }
+    const { proposalId } = plan.cancellation;
+    const originalApproval = pending.kind === "LEGACY_CANCEL_APPROVE" && pending.state === "AWAITING_HUMAN_WALLET"
+      && sameAddress(pending.proposalId, LEGACY_APPROVAL_RECEIPT.proposalId) && sameAddress(proposalId, LEGACY_APPROVAL_RECEIPT.proposalId)
+      && sameAddress(connectedAccount, FUNDING_FORMAL.jade);
+    // Persisted hash always wins. The old approval hint still passes the full reconcile checks.
+    const validHash = value => /^0x[0-9a-fA-F]{64}$/.test(value || "");
+    if (pending.hash != null && !validHash(pending.hash)) {
+      return { corrupt: true, message: "原交易紀錄的雜湊格式不正確。請保留原紀錄。" };
+    }
+    const hash = pending.hash ?? (originalApproval ? LEGACY_APPROVAL_RECEIPT.hash : manualHash);
+    if (!validHash(hash)) {
+      const step = stageNames[pending.kind] || "上一筆操作";
+      return { needsHash: true, message: `請從 OKX 交易紀錄複製「${step}」的交易雜湊。填入後按「只讀核對回執」。` };
+    }
+    const watch = { pending: JSON.stringify(pending), isCurrent: () => receiptWatch === watch && isCurrent() };
+    receiptWatch = watch;
+    try {
+      const result = await receiptWallet.reconcile(hash, watch);
+      return { result, hash };
+    } finally {
+      if (receiptWatch === watch) receiptWatch = null;
+    }
+  } catch (error) {
+    return { message: errorText(error) };
+  }
+}
+function showLegacyReceiptCheck(receipt) {
+  const result = receipt.result;
+  const messages = {
+    LEGACY_CANCELLED: "舊共享限額已取消。",
+    PENDING: "原交易仍待鏈上確認。稍後可再只讀核對回執。",
+    REVERTED: "原交易執行失敗。請先核對錢包交易紀錄。",
+    MISMATCH: "原回執與待確認操作不符。請核對 OKX 的交易紀錄。",
+    WATCH_STOPPED: "帳戶或待核對紀錄已變更。請重新只讀核對。"
+  };
+  const message = receipt.message || messages[result?.status] || "暫時無法核對原交易回執。";
+  legacyReceiptNotice = { message, needsHash: receipt.needsHash, corrupt: receipt.corrupt, complete: result?.status === "LEGACY_CANCELLED" };
+  el('preview').textContent = result ? pretty(result) : "尚未取得原交易回執。";
+  el('summary').textContent = receipt.hash ? `原交易：${receipt.hash}。` : "";
+  el('send').textContent = legacyReceiptNotice.complete ? "舊共享限額已取消" : "等待原交易回執";
+  status("");
+}
+const prepareFundingPreview = (manualLegacyReceipt = false) => run(async () => {
   invalidate();
   el('preview').textContent = '尚無有效預覽。';
   el('summary').textContent = '尚未取得本次鏈上結果，請查看連線與讀查提示。';
@@ -1890,9 +1963,18 @@ const prepareFundingPreview = () => run(async () => {
   if (blocker) throw Error(blocker);
   const plan = formPlan();
   const preparingGeneration = formGeneration, preparingWallet = wallet, preparingRole = el('role').value;
+  const isCurrent = () => preparingGeneration === formGeneration && preparingWallet === wallet
+    && preparingRole === el('role').value && !resumePending && !roleConnectionBlocker();
+  let recoveredReceipt = null;
+  if (isLegacyCapCancelPlan(plan)) {
+    const typedHash = manualLegacyReceipt === true ? el('txhash').value.trim() : undefined;
+    const receipt = await reconcileLegacyReceipt(preparingWallet, plan, isCurrent, typedHash);
+    if (!isCurrent()) return;
+    if (receipt?.result?.status === "CONFIRMED") recoveredReceipt = receipt.result;
+    else if (receipt) { showLegacyReceiptCheck(receipt); return; }
+  }
   const candidate = await preparingWallet.prepare(plan);
-  if (preparingGeneration !== formGeneration || preparingWallet !== wallet || preparingRole !== el('role').value
-    || document.visibilityState === 'hidden') return;
+  if (!isCurrent()) return;
   if (!sameAddress(candidate.account, authorizedWalletAccount(selectableWalletAccounts(), connectedAccount))
     || Number(candidate.snapshot.chainId) !== connectedChain) throw Error('FRESH_STATE_OR_ACCOUNT_CHANGED');
   preview = candidate;
@@ -1903,7 +1985,7 @@ const prepareFundingPreview = () => run(async () => {
   const unsignedPause = candidate.step.kind === 'BANK_PAUSE' && candidate.snapshot.paused === false && roleMatches(candidate)
     ? {unsignedTransaction:{chainId:56,from:candidate.account,to:plan.pause.to,data:plan.pause.data,value:'0x0'}} : {};
   el('preview').textContent = pretty({beneficiary:plan.beneficiary, amountKaios:plan.amountKaios, amountWei:plan.amountWei, allocationId:plan.allocationId, purposeHash:plan.purposeHash, warning:plan.warnings,
-    ...candidate, ...unsignedPause, ...(reviewBlocker ? {review:{status:'BLOCKED', reason:reviewBlocker}, step:{...candidate.step, ready:false}} : {})});
+    ...candidate, ...unsignedPause, ...(recoveredReceipt ? { previousReceipt: recoveredReceipt } : {}), ...(reviewBlocker ? {review:{status:'BLOCKED', reason:reviewBlocker}, step:{...candidate.step, ready:false}} : {})});
   const stepName = stageNames[candidate.step.kind] || candidate.step.kind;
   const blocked = [...candidate.step.blockers, ...(reviewBlocker ? [reviewBlocker] : [])].map(code => reasons[code] || code).join('；');
   const subject = plan.type === 'BANK_PAUSE' ? '本次為銀行緊急暫停，不會撥款或解除暫停' : plan.type === 'SHARED_CAP' ? '本次僅調整模組共享每筆／每日各10,000,000 KAIOS限額，不建立個案配額、不付款' : isLegacyCapCancelPlan(plan) ? '取消舊共享限額提案' : `本案：${plan.beneficiary}，${plan.amountKaios} KAIOS`;
@@ -1914,30 +1996,35 @@ const prepareFundingPreview = () => run(async () => {
   const ready = candidate.step.ready && !reviewBlocker && roleMatches(candidate);
   el('send').textContent = ready ? `交錢包確認：${stepName}` : '目前不可送交錢包；請先處理上列條件';
   status(ready ? (isLegacyCapCancelPlan(plan)
-    ? '預覽已核對。請核對這一步，再按「交錢包確認」。'
+    ? (recoveredReceipt ? '上一筆回執已核對。請核對新一步，再按「交錢包確認」。' : '預覽已核對。請核對這一步，再按「交錢包確認」。')
     : '預覽已產生，尚未簽署。核對本次操作後勾選，再由你按一次交給錢包。')
     : '唯讀檢查完成；等待、阻擋或已執行狀態不會自動送單。');
 }, true);
-el('prepare').onclick = prepareFundingPreview;
-el('send').onclick = () => run(async () => {
-  if (!preview?.step?.ready || previewRole !== el('role').value || !roleMatches(preview)
-    || (!isLegacyCapCancelPlan(preview.plan) && !el('ack').checked)) throw Error('請先讀查並核對本次操作及角色。');
-  const candidate = preview;
-  const reviewBlocker = fundingReviewBlocker(candidate);
-  if (reviewBlocker) { status(reasons[reviewBlocker]); return; }
-  const requestingWallet = previewWallet, requestingRole = previewRole, requestingGeneration = formGeneration;
-  if (!requestingWallet || requestingWallet !== wallet || pretty(formPlan()) !== pretty(candidate.plan)) throw Error('目前表單或錢包與預覽不符，請重新讀查；本次未送交錢包。');
-  preview = null; previewWallet = null; previewRole = null; el('ack').checked = false;
-  status('只將這一筆交給你的錢包。請本人核對並決定是否簽署；不會自動送下一筆。');
-  const result = await requestingWallet.request(candidate);
-  if (requestingGeneration !== formGeneration || requestingWallet !== wallet || requestingRole !== el('role').value) return;
-  const hash = typeof result === 'string' ? result : result?.hash || result?.transactionHash;
-  if (hash) el('txhash').value = hash;
-  el('preview').textContent = pretty(result);
-  el('summary').textContent = `本次僅收到錢包交易雜湊：${hash || '未知'}；尚未核實${candidate.plan.type === 'BANK_PAUSE' ? '銀行已暫停' : candidate.plan.type === 'SHARED_CAP' ? '共享調額治理步驟成功' : isLegacyCapCancelPlan(candidate.plan) ? '舊限額取消治理步驟成功' : '成功或入帳'}。請保留原雜湊，先核回執，不要重按。`;
-  status(isLegacyCapCancelPlan(candidate.plan) ? '請按「只讀核對回執」，確認本次取消治理步驟。' : candidate.plan.type === 'SHARED_CAP' ? '錢包已回傳本次治理結果；共享限額尚待回執核對，不會自動執行下一步。' : '錢包已回傳結果；這不等於付款完成。請按「只讀核對回執」，再重新讀查下一步。');
-  void watchFundingReceipt(requestingWallet);
-});
+el('prepare').onclick = () => prepareFundingPreview();
+el('send').onclick = async () => {
+  let checkLegacyReceipt = false;
+  await run(async () => {
+    if (!preview?.step?.ready || previewRole !== el('role').value || !roleMatches(preview)
+      || (!isLegacyCapCancelPlan(preview.plan) && !el('ack').checked)) throw Error('請先讀查並核對本次操作及角色。');
+    const candidate = preview;
+    const reviewBlocker = fundingReviewBlocker(candidate);
+    if (reviewBlocker) { status(reasons[reviewBlocker]); return; }
+    const requestingWallet = previewWallet, requestingRole = previewRole, requestingGeneration = formGeneration;
+    if (!requestingWallet || requestingWallet !== wallet || pretty(formPlan()) !== pretty(candidate.plan)) throw Error('目前表單或錢包與預覽不符，請重新讀查；本次未送交錢包。');
+    preview = null; previewWallet = null; previewRole = null; el('ack').checked = false;
+    status('只將這一筆交給你的錢包。請本人核對並決定是否簽署；不會自動送下一筆。');
+    const result = await requestingWallet.request(candidate);
+    if (requestingGeneration !== formGeneration || requestingWallet !== wallet || requestingRole !== el('role').value) return;
+    const hash = typeof result === 'string' ? result : result?.hash || result?.transactionHash;
+    if (hash) el('txhash').value = hash;
+    el('preview').textContent = pretty(result);
+    el('summary').textContent = `本次僅收到錢包交易雜湊：${hash || '未知'}；尚未核實${candidate.plan.type === 'BANK_PAUSE' ? '銀行已暫停' : candidate.plan.type === 'SHARED_CAP' ? '共享調額治理步驟成功' : isLegacyCapCancelPlan(candidate.plan) ? '舊限額取消治理步驟成功' : '成功或入帳'}。請保留原雜湊，先核回執，不要重按。`;
+    status(isLegacyCapCancelPlan(candidate.plan) ? '已收到交易雜湊，正在只讀核對回執。' : candidate.plan.type === 'SHARED_CAP' ? '錢包已回傳本次治理結果；共享限額尚待回執核對，不會自動執行下一步。' : '錢包已回傳結果；這不等於付款完成。請按「只讀核對回執」，再重新讀查下一步。');
+    checkLegacyReceipt = isLegacyCapCancelPlan(candidate.plan) && /^0x[0-9a-fA-F]{64}$/.test(hash || "");
+    if (!checkLegacyReceipt) void watchFundingReceipt(requestingWallet);
+  });
+  if (checkLegacyReceipt) await refreshLegacyPreview();
+};
 function showFundingReceipt(result, hash) {
   el('preview').textContent = pretty(result);
   invalidate();
@@ -1982,9 +2069,7 @@ async function watchFundingReceipt(watchedWallet) {
     if (receiptWatch === watch) receiptWatch = null;
   }
 }
-window.addEventListener('pagehide', () => { receiptWatch = null; });
-
-el('receipt').onclick = () => run(async () => {
+el('receipt').onclick = () => fundingMode() === 'legacy-cancel' ? prepareFundingPreview(true) : run(async () => {
   const blocker = roleConnectionBlocker();
   if (blocker) throw Error(blocker);
   const reconcilingWallet = wallet, reconcilingGeneration = formGeneration, reconcilingRole = el('role').value;
@@ -2168,6 +2253,7 @@ async function resumeWallet() {
   }
 }
 function suspendWallet() {
+  receiptWatch = null;
   publishWalletContext(true);
   if (!busy) {
     connectionGeneration++;

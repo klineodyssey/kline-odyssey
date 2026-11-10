@@ -81,7 +81,7 @@ async function inlineBankApi({ mockGovernanceRuntime } = {}) {
   vm.runInNewContext(adapter + `\nglobalThis.bankTestApi = {
     FUNDING_FORMAL,FUNDING_RUNTIME_PINS,FUNDING_IMPLEMENTATION_SLOT,FUNDING_STORAGE_KEY,FUNDING_LOCK_KEY,
     buildLifeResourcePlan,deriveFundingStep,HumanFundingWallet,buildSharedCapPlan,deriveSharedCapStep,SharedCapWallet,
-    buildLegacyCapCancelPlan,deriveLegacyCapCancelStep,isLegacyCapCancelPlan,LegacyCapCancelWallet,
+    buildLegacyCapCancelPlan,deriveLegacyCapCancelStep,isLegacyCapCancelPlan,LegacyCapCancelWallet,LEGACY_APPROVAL_RECEIPT,
     buildBankPausePlan,deriveBankPauseStep,HumanBankPauseWallet,readFundingRuntimePins,walletAccounts,authorizedWalletAccount,
     SEVEN_FLOORS,SEVEN_FLOOR_RELEASE,sevenFloorRuntimePins,projectSevenFloorPlayerContext,
     validateSevenFloorAmount,buildSevenFloorPlan,deriveSevenFloorStep,SevenFloorClaimWallet,
@@ -445,7 +445,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   await t.test("actual funding controller discards stale prepare success and failure after form changes", async t => {
     const { readFileSync } = await import("node:fs");
     const { runInNewContext } = await import("node:vm");
-    const { buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
+    const { buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
     const html = readFileSync(new URL("../../K線西遊記/temples/18888/index.html", import.meta.url), "utf8");
     const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
     assert.ok(source, "test the real existing inline funding controller");
@@ -570,7 +570,12 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         async prepare(plan = buildSharedCapPlan()) { return super.prepare(plan); }
       }
       class FakeLegacyCancelWallet extends FakeWallet {
-        constructor(options) { super(options); this.flowType = "LEGACY_CAP_CANCEL"; }
+        constructor(walletOptions) {
+          super(walletOptions);
+          this.flowType = "LEGACY_CAP_CANCEL";
+          this.pending = options.pending ?? null;
+        }
+        readPending() { return this.pending; }
         async prepare(plan = buildLegacyCapCancelPlan()) {
           const candidate = await super.prepare(plan);
           if (this.readPending()) {
@@ -578,6 +583,18 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             candidate.step.blockers.push("PENDING_INTENT_RECONCILE_FIRST");
           }
           return candidate;
+        }
+        async request(candidate) {
+          const result = await super.request(candidate);
+          this.pending = { plan: candidate.plan, kind: candidate.step.kind, hash: result.hash, transaction: { from: candidate.account } };
+          return result;
+        }
+        async reconcile(hash, watch) {
+          const result = await super.reconcile(hash, watch);
+          if (watch && !watch.isCurrent()) return { status: "WATCH_STOPPED", hash };
+          if (!options.receiptResults) return { status: "PENDING", hash };
+          if (["CONFIRMED", "LEGACY_CANCELLED"].includes(result.status)) this.pending = null;
+          return { ...result, hash };
         }
       }
       const otherProvider = options.lateOkx ? { request() { throw Error("Unexpected fallback provider request"); } } : provider;
@@ -604,7 +621,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         },
         clearTimeout: callback => connectionTimers.delete(callback),
         Option: class { constructor(textContent, value) { this.textContent = textContent; this.value = value; } },
-        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan,
+        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT,
         walletAccounts, authorizedWalletAccount, SharedCapWallet: FakeCapWallet, LegacyCapCancelWallet: FakeLegacyCancelWallet,
         HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet };
       runInNewContext(controller + "\nglobalThis.uiProbe = { preview: () => preview, setCases: (cases) => { importedCases = cases; } };", context);
@@ -623,7 +640,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         if (announce) windowEvents.get("ethereum#initialized")?.();
       };
       return { node, wallets, requests, state, providerListeners, receiptCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers,
-        injectMetaMask, setVisibility, pageShow: () => windowEvents.get("pageshow")(), mobile, mobileListeners, probe: context.uiProbe };
+        injectMetaMask, setVisibility, pageShow: () => windowEvents.get("pageshow")(), pageHide: () => windowEvents.get("pagehide")(),
+        mobile, mobileListeners, probe: context.uiProbe };
     };
     for (const failure of [false, true]) {
       const ui = await mount(), wait = deferred();
@@ -1113,6 +1131,71 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       const pending = await mount({ ...options, pending: {} });
       assert.equal(pending.node("legacy-next").href, "#funding-receipt");
       assert.match(pending.node("legacy-next-help").textContent, /待確認意圖/);
+    });
+
+    await t.test("Jade recovery checks the exact saved or reviewed approval receipt before showing the next action", async () => {
+      const plan = buildLegacyCapCancelPlan();
+      const approval = "0x8d8ebca221cd41f84d7e493cd9adba1430b8a14b699f9f833e39682461085a67";
+      const other = "0x" + "ab".repeat(32);
+      const intent = { plan, flowType: "LEGACY_CAP_CANCEL", kind: "LEGACY_CANCEL_APPROVE",
+        state: "AWAITING_HUMAN_WALLET", proposalId: plan.cancellation.proposalId, transaction: { from: formal.jade } };
+      const opts = { mode: "legacy-cancel", role: "jade", account: formal.jade, visible: true,
+        stepKind: "LEGACY_CANCEL_EXECUTE" };
+      for (const [pending, expected] of [[intent, approval], [{...intent, hash: other}, other]]) {
+        const ui = await mount({ ...opts, pending, receiptResults: ["CONFIRMED"] });
+        assert.deepEqual(ui.receiptCalls.map(call => call.hash), [expected]);
+        assert.equal(ui.node("send").disabled, false);
+        assert.equal(ui.requests.length, 0);
+        assert.match(ui.node("status").textContent, /回執已核對/);
+        assert.match(ui.node("preview").textContent, /previousReceipt/);
+      }
+
+      for (const [pending, expected] of [
+        [{ ...intent, kind: "LEGACY_CANCEL_EXECUTE" }, /複製.*交易雜湊/],
+        [{ ...intent, hash: "broken" }, /雜湊格式不正確/],
+        [{ ...intent, proposalId: other }, /複製.*交易雜湊/],
+        [{ ...intent, transaction: { from: formal.mother } }, /送出上一筆操作的錢包帳戶/],
+      ]) {
+        const ui = await mount({ ...opts, pending });
+        assert.match(ui.node("legacy-next-help").textContent, expected);
+        if (pending.kind === "LEGACY_CANCEL_EXECUTE") assert.equal(ui.node("legacy-next").href, "#funding-txhash");
+        if (pending.hash === "broken") assert.equal(ui.node("legacy-next").hidden, true);
+        assert.equal(ui.receiptCalls.length, 0);
+        assert.equal(ui.node("send").disabled, true);
+        assert.equal(ui.requests.length, 0);
+      }
+
+      const failed = await mount({ ...opts, pending: {...intent, hash: other}, receiptResults: ["MISMATCH", "CONFIRMED"] });
+      assert.match(failed.node("legacy-next-help").textContent, /回執.*不符/);
+      assert.equal(failed.node("send").disabled, true);
+      failed.node("txhash").value = approval;
+      await failed.node("receipt").onclick();
+      assert.deepEqual(failed.receiptCalls.map(call => call.hash), [other, other], "stale typed hash never overrides the stored transaction");
+      assert.equal(failed.node("send").disabled, false);
+      assert.equal(failed.requests.length, 0);
+
+      for (const leave of [ui => ui.setVisibility("hidden"), ui => ui.pageHide()]) {
+        const stale = await mount({ ...opts, visible: false, pending: intent, receiptResults: ["CONFIRMED"] });
+        const waiting = deferred();
+        const originalWallet = stale.wallets.at(-1);
+        originalWallet.nextReceipt = waiting;
+        stale.setVisibility("visible");
+        await new Promise(resolve => setImmediate(resolve));
+        assert.equal(stale.receiptCalls.length, 1);
+        leave(stale);
+        waiting.resolve();
+        await new Promise(resolve => setImmediate(resolve));
+        assert.equal(originalWallet.readPending(), intent, "leaving the page cannot clear an in-flight pending intent");
+        assert.equal(stale.node("send").disabled, true);
+        assert.equal(stale.requests.length, 0);
+      }
+
+      const completed = await mount({ ...opts, pending: {...intent, kind: "LEGACY_CANCEL_EXECUTE", hash: other},
+        receiptResults: ["LEGACY_CANCELLED"] });
+      assert.equal(completed.node("legacy-next").hidden, true);
+      assert.match(completed.node("legacy-next-help").textContent, /已取消/);
+      assert.equal(completed.node("send").disabled, true);
+      assert.equal(completed.requests.length, 0);
     });
 
     await t.test("legacy cancellation gives the disconnected holder the canonical MetaMask next step", async () => {
