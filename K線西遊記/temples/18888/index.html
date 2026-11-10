@@ -1343,6 +1343,28 @@ class SharedCapWallet extends HumanFundingWallet {
 class LegacyCapCancelWallet extends HumanFundingWallet {
   constructor(options) { super(options); this.flowType = "LEGACY_CAP_CANCEL"; }
   async prepare(plan = buildLegacyCapCancelPlan()) { return super.prepare(plan); }
+
+  async findExecutionHash(plan) {
+    const snapshot = await this.inspect(plan);
+    const { originalProposal, cancellationProposal } = snapshot;
+    if (deriveLegacyCapCancelStep(plan, snapshot).kind !== "LEGACY_CANCEL_DONE"
+      || !originalProposal.cancelled || !cancellationProposal.executed
+      || !legacyProposalMatches(cancellationProposal, plan.cancellation)
+      || !same(cancellationProposal.approver, FUNDING_FORMAL.jade) || cancellationProposal.cancelled) return;
+    const end = BI(snapshot.blockNumber);
+    const earliest = LEGACY_APPROVAL_RECEIPT.blockNumber;
+    if (end < earliest) return;
+    const start = end - earliest > 4095n ? end - 4095n : earliest;
+    const topic = governanceInterface.getEventTopic("GovernanceProposalExecuted");
+    const logs = await this.provider.request({ method: "eth_getLogs", params: [{
+      address: FUNDING_FORMAL.governance, fromBlock: "0x" + start.toString(16), toBlock: snapshot.blockNumber,
+      topics: [topic, plan.cancellation.proposalId]
+    }] });
+    if (!Array.isArray(logs) || logs.length !== 1) return;
+    const [log] = logs;
+    if (log && !log.removed && same(log.address, FUNDING_FORMAL.governance) && same(log.topics?.[0], topic)
+      && same(log.topics?.[1], plan.cancellation.proposalId) && /^0x[0-9a-f]{64}$/i.test(log.transactionHash || "")) return log.transactionHash;
+  }
 }
 
 // Same wallet, durable pending key, lock and receipt path as the original flow.
@@ -1497,7 +1519,9 @@ function refreshLegacyNext(blocker, canConfirm) {
   const help = el("legacy-next-help");
   const action = legacyNextAction(blocker);
   const ready = Boolean(canConfirm);
-  help.textContent = ready ? "已核對取消案。確認本次操作後，按下方按鈕交給錢包。"
+  help.textContent = ready ? (preview.step.kind === "LEGACY_CANCEL_EXECUTE"
+    ? "玉帝已核準。請在目前錢包確認一次，頁面會自動核對執行結果。"
+    : "請在錢包確認這一步，頁面會自動核對結果。")
     : busy ? "正在讀取錢包或鏈上狀態。"
     : blocker ? el("connect-next").textContent
     : legacyReceiptNotice ? legacyReceiptNotice.message
@@ -1521,6 +1545,7 @@ const refreshSend = () => {
   if (!canConfirm || skipAck) el('ack').checked = false;
   el('ack').disabled = busy || !canConfirm || skipAck;
   el('send').disabled = busy || !canConfirm || !(skipAck || el('ack').checked);
+  el('send').hidden = fundingMode() === 'legacy-cancel' && !canConfirm;
   const blocker = roleConnectionBlocker();
   el('prepare').disabled = busy || Boolean(blocker);
   el('receipt').disabled = el('prepare').disabled;
@@ -1922,7 +1947,13 @@ async function reconcileLegacyReceipt(receiptWallet, plan, isCurrent, manualHash
     if (pending.hash != null && !validHash(pending.hash)) {
       return { corrupt: true, message: "原交易紀錄的雜湊格式不正確。請保留原紀錄。" };
     }
-    const hash = pending.hash ?? (originalApproval ? LEGACY_APPROVAL_RECEIPT.hash : manualHash);
+    let hash = pending.hash ?? (originalApproval ? LEGACY_APPROVAL_RECEIPT.hash : manualHash);
+    if (!validHash(hash) && !manualHash && pending.kind === "LEGACY_CANCEL_EXECUTE"
+      && sameAddress(pending.proposalId, proposalId)) {
+      try { hash = await receiptWallet.findExecutionHash(plan); }
+      catch { /* Keep the original lock when the provider cannot find the receipt. */ }
+      if (!isCurrent()) return null;
+    }
     if (!validHash(hash)) {
       const step = stageNames[pending.kind] || "上一筆操作";
       return { needsHash: true, message: `請從 OKX 交易紀錄複製「${step}」的交易雜湊。填入後按「只讀核對回執」。` };
@@ -1930,8 +1961,12 @@ async function reconcileLegacyReceipt(receiptWallet, plan, isCurrent, manualHash
     const watch = { pending: JSON.stringify(pending), isCurrent: () => receiptWatch === watch && isCurrent() };
     receiptWatch = watch;
     try {
-      const result = await receiptWallet.reconcile(hash, watch);
-      return { result, hash };
+      for (let attempt = 1; attempt <= 4 && watch.isCurrent(); attempt++) {
+        const result = await receiptWallet.reconcile(hash, watch);
+        if (result.status !== "PENDING" || attempt === 4 || manualHash) return { result, hash };
+        await new Promise(resolve => setTimeout(resolve, 4000));
+      }
+      return { result: { status: "WATCH_STOPPED" }, hash };
     } finally {
       if (receiptWatch === watch) receiptWatch = null;
     }
@@ -1992,7 +2027,11 @@ const prepareFundingPreview = (manualLegacyReceipt = false) => run(async () => {
   const legacyEta = isLegacyCapCancelPlan(plan) && candidate.snapshot.cancellationProposal?.executableAt;
   const legacyEtaUtc = legacyEta && Number(legacyEta) > 0 && Number(legacyEta) <= 8.64e12 ? new Date(Number(legacyEta) * 1000).toISOString() : '';
   const roleWarning = roleMatches(candidate) ? '' : '所選角色、帳戶、權限及合約指紋須全部核對通過。';
-  el('summary').textContent = `${subject}。下一步：${stepName}。操作帳戶：${candidate.account}。BSC主網56；本次交易BNB金額為0（仍需BNB手續費）。${candidate.step.to ? `交易目標：${candidate.step.to}。` : ''}${blocked ? `尚缺：${blocked}` : ''}${roleWarning}${legacyEtaUtc ? `取消案鏈上可執行時間：${legacyEtaUtc}。` : candidate.step.kind === 'WAIT_ETA' ? `鏈上等待條件：${candidate.step.label}` : ''}`;
+  el('summary').textContent = isLegacyCapCancelPlan(plan)
+    ? candidate.step.kind === 'LEGACY_CANCEL_DONE' ? '鏈上顯示舊共享限額提案已取消。'
+      : candidate.step.kind === 'WAIT_ETA' ? `取消案已核準，等待鏈上可執行時間 ${legacyEtaUtc}。`
+        : blocked || stepName + '。本次轉帳 0 BNB，須支付網路手續費。'
+    : `${subject}。下一步：${stepName}。操作帳戶：${candidate.account}。BSC主網56；本次交易BNB金額為0（仍需BNB手續費）。${candidate.step.to ? `交易目標：${candidate.step.to}。` : ''}${blocked ? `尚缺：${blocked}` : ''}${roleWarning}${candidate.step.kind === 'WAIT_ETA' ? `鏈上等待條件：${candidate.step.label}` : ''}`;
   const ready = candidate.step.ready && !reviewBlocker && roleMatches(candidate);
   el('send').textContent = ready ? `交錢包確認：${stepName}` : '目前不可送交錢包；請先處理上列條件';
   status(ready ? (isLegacyCapCancelPlan(plan)
