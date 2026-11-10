@@ -571,7 +571,14 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       }
       class FakeLegacyCancelWallet extends FakeWallet {
         constructor(options) { super(options); this.flowType = "LEGACY_CAP_CANCEL"; }
-        async prepare(plan = buildLegacyCapCancelPlan()) { return super.prepare(plan); }
+        async prepare(plan = buildLegacyCapCancelPlan()) {
+          const candidate = await super.prepare(plan);
+          if (this.readPending()) {
+            candidate.step.ready = false;
+            candidate.step.blockers.push("PENDING_INTENT_RECONCILE_FIRST");
+          }
+          return candidate;
+        }
       }
       const otherProvider = options.lateOkx ? { request() { throw Error("Unexpected fallback provider request"); } } : provider;
       const window = { ethereum: options.okxOnly || options.lateMetaMask ? undefined : otherProvider, okxwallet: options.okxDirect ? provider : options.okxOnly ? { ethereum: provider } : undefined, location: new URL(options.href ?? "http://localhost:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html"),
@@ -1059,40 +1066,53 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         assert.equal(ui.probe.preview(), null);
       }
     });
-    await t.test("legacy cancellation uses its own role-confirmed preview; switching modes invalidates it", async () => {
-      const ui = await mount({ mode: "legacy-cancel", stepKind: "LEGACY_CANCEL_PROPOSE" });
+    await t.test("Jade cancellation auto-previews after connection and return, then needs an explicit wallet click", async () => {
+      const options = { mode: "legacy-cancel", role: "jade", account: formal.jade,
+        stepKind: "LEGACY_CANCEL_EXECUTE", visible: true };
+      const ui = await mount(options);
       assert.equal(ui.node("beneficiary").disabled, true);
       assert.equal(ui.node("amount").disabled, true);
-      await ui.node("prepare").onclick();
       assert.equal(ui.probe.preview().plan.type, "LEGACY_CAP_CANCEL");
-      assert.equal(ui.probe.preview().step.kind, "LEGACY_CANCEL_PROPOSE");
-      assert.equal(ui.node("send").disabled, true, "preview alone cannot send");
-      assert.equal(ui.requests.length, 0);
-
-      ui.node("ack").checked = true;
-      ui.node("ack").emit("change");
+      assert.equal(ui.probe.preview().step.kind, "LEGACY_CANCEL_EXECUTE");
+      assert.equal(ui.node("ack-row").hidden, true);
+      assert.equal(ui.node("ack").checked, false);
       assert.equal(ui.node("send").disabled, false);
+      assert.equal(ui.requests.length, 0, "automatic preview never requests a transaction");
+
+      const firstPreview = ui.probe.preview();
+      ui.setVisibility("hidden");
+      assert.equal(ui.probe.preview(), null);
+      ui.setVisibility("visible");
+      await new Promise(resolve => setImmediate(resolve));
+      assert.ok(ui.probe.preview());
+      assert.notEqual(ui.probe.preview(), firstPreview);
+      assert.equal(ui.node("send").disabled, false);
+      assert.equal(ui.requests.length, 0, "returning never requests a transaction");
       ui.node("mode").value = "cap";
       ui.node("mode").emit("change");
       await ui.node("send").onclick();
       assert.equal(ui.requests.length, 0);
       assert.equal(ui.node("send").disabled, true);
+      assert.equal(ui.node("ack-row").hidden, false);
 
       ui.node("mode").value = "legacy-cancel";
       ui.node("mode").emit("change");
-      await ui.node("prepare").onclick();
-      ui.node("ack").checked = true;
-      ui.node("ack").emit("change");
+      await new Promise(resolve => setImmediate(resolve));
       await ui.node("send").onclick();
       assert.equal(ui.requests.length, 1);
       assert.equal(ui.requests[0].plan.type, "LEGACY_CAP_CANCEL");
-      assert.equal(ui.requests[0].step.kind, "LEGACY_CANCEL_PROPOSE");
+      assert.equal(ui.requests[0].step.kind, "LEGACY_CANCEL_EXECUTE");
+      assert.equal(ui.node("send").disabled, true, "an explicit send consumes the preview");
 
-      const wrong = await mount({ mode: "legacy-cancel", account: formal.jade });
-      await wrong.node("prepare").onclick();
-      assert.equal(wrong.probe.preview(), null);
-      assert.equal(wrong.node("send").disabled, true);
-      assert.equal(wrong.requests.length, 0);
+      for (const patch of [{ account: formal.mother }, { chainId: 1 }, { webLocks: false }, { pending: {} }]) {
+        const blocked = await mount({ ...options, ...patch });
+        assert.equal(blocked.node("send").disabled, true);
+        await blocked.node("send").onclick();
+        assert.equal(blocked.requests.length, 0);
+      }
+      const pending = await mount({ ...options, pending: {} });
+      assert.equal(pending.node("legacy-next").href, "#funding-receipt");
+      assert.match(pending.node("legacy-next-help").textContent, /待確認意圖/);
     });
 
     await t.test("legacy cancellation gives the disconnected holder the canonical MetaMask next step", async () => {
@@ -1116,8 +1136,9 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       await new Promise(resolve => setImmediate(resolve));
       assert.match(announced.node("connection").textContent, /MetaMask.*chainId=56/);
       assert.equal(announced.node("prepare").disabled, false);
-      assert.equal(announced.node("legacy-next").href, "#funding-prepare");
-      assert.equal(announced.node("ack").disabled, true, "connection alone must not enable the checkbox");
+      assert.equal(announced.node("legacy-next").hidden, true);
+      assert.equal(announced.node("ack").disabled, true);
+      assert.equal(announced.requests.length, 0);
       assert.ok(announced.rpc.some(call => call.method === "eth_accounts"));
       assert.ok(announced.rpc.every(call => ["eth_accounts", "eth_chainId"].includes(call.method)));
 

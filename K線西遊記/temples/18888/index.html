@@ -61,6 +61,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 .funding-actions a[aria-disabled=true] { opacity:.45; cursor:not-allowed; }
 .funding-actions a[data-recommended=true] { order:-1; border-color:var(--kgen-cyan); }
 .funding-ack input:disabled { cursor:not-allowed; }
+.funding-ack[hidden] { display:none; }
 .funding-panel button:disabled { opacity:.45; cursor:not-allowed; }
 #funding-send { background:#e4bdff; color:#180b23; font-weight:900; }
 .funding-panel pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#08060e; border-radius:10px; padding:12px; font-size:12px; line-height:1.55; max-height:420px; overflow:auto; }
@@ -264,7 +265,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       <p id="funding-legacy-next-help" aria-live="polite"></p>
       <div class="funding-actions"><a id="funding-legacy-next" data-recommended="true" rel="noopener noreferrer" aria-describedby="funding-legacy-next-help"></a></div>
     </div>
-    <label class="funding-ack"><input type="checkbox" id="funding-ack" disabled><span id="funding-ack-text">我已核對本案的正式用途／付款批准、收款地址、金額、既領及跨ID防重、銀行其他承諾；了解available不等於已扣除全部負債，調額會重設當期共享用量，建立到期配額會開啟可執行付款路徑。本勾選不是合約授權或獨立驗收證明。</span></label>
+    <label id="funding-ack-row" class="funding-ack"><input type="checkbox" id="funding-ack" disabled><span id="funding-ack-text">我已核對本案的正式用途／付款批准、收款地址、金額、既領及跨ID防重、銀行其他承諾；了解available不等於已扣除全部負債，調額會重設當期共享用量，建立到期配額會開啟可執行付款路徑。本勾選不是合約授權或獨立驗收證明。</span></label>
     <div class="funding-actions"><button type="button" id="funding-send" disabled>先連接並預覽；由我本人到錢包確認</button></div>
     <p class="funding-muted">若錢包拒絕、狀態不明、帳戶／鏈別改變，停止自動重試。已有待確認意圖／交易須先對帳，不用重按按鈕。治理延遲到期不會自動執行。手機原生錢包及主網簽送尚未由工程測試驗收。</p>
     <noscript>此作業介面需要JavaScript；未啟用時不會送出任何交易。</noscript>
@@ -1466,7 +1467,8 @@ function legacyNextAction(blocker) {
   }
   if (blocker === "CHAIN_ID_MISMATCH") return {control:"switch-bsc", label:"請錢包切至 BSC 56"};
   if (blocker === "ROLE_ACCOUNT_MISMATCH") return {href:"#funding-account", label:"選擇" + role.name + "錢包帳戶"};
-  return {control:"prepare", label:"只讀預覽取消案"};
+  if (preview?.step?.blockers.includes("PENDING_INTENT_RECONCILE_FIRST")) return {control:"receipt", label:"只讀核對回執"};
+  return {control:"prepare", label:"重新只讀核對取消案"};
 }
 function refreshLegacyNext(blocker, canConfirm) {
   const guide = el("legacy-guide"), link = el("legacy-next");
@@ -1476,11 +1478,11 @@ function refreshLegacyNext(blocker, canConfirm) {
   const help = el("legacy-next-help");
   const action = legacyNextAction(blocker);
   const ready = Boolean(canConfirm);
-  help.textContent = ready ? "預覽已核對，現在可以勾選下方小方格。"
+  help.textContent = ready ? "已核對取消案。確認本次操作後，按下方按鈕交給錢包。"
     : busy ? "正在讀取錢包或鏈上狀態。"
-    : blocker ? "小方格會在預覽通過後開放。" + el("connect-next").textContent
+    : blocker ? el("connect-next").textContent
     : preview ? (reasons[fundingReviewBlocker(preview)] || reasons[preview.step.blockers[0]] || stageNames[preview.step.kind] || "請查看唯讀結果。")
-    : "錢包已連接。先按下方按鈕預覽，通過後即可勾選。";
+    : "核對完成後會開放錢包確認。若讀取中斷，可按下方重新核對。";
   link.hidden = ready;
   link.setAttribute("href", action.href || "#funding-" + action.control);
   link.setAttribute("aria-disabled", String(busy));
@@ -1494,9 +1496,10 @@ el("legacy-next").onclick = event => {
 };
 const refreshSend = () => {
   const canConfirm = preview?.step?.ready && previewRole === el('role').value && roleMatches(preview) && !fundingReviewBlocker(preview);
-  if (!canConfirm) el('ack').checked = false;
-  el('ack').disabled = busy || !canConfirm;
-  el('send').disabled = busy || !canConfirm || !el('ack').checked;
+  const skipAck = canConfirm && isLegacyCapCancelPlan(preview.plan);
+  if (!canConfirm || skipAck) el('ack').checked = false;
+  el('ack').disabled = busy || !canConfirm || skipAck;
+  el('send').disabled = busy || !canConfirm || !(skipAck || el('ack').checked);
   const blocker = roleConnectionBlocker();
   el('prepare').disabled = busy || Boolean(blocker);
   el('receipt').disabled = el('prepare').disabled;
@@ -1640,6 +1643,7 @@ function observeWalletProvider(provider) {
     el('preview').textContent = '帳戶或鏈別已變更，舊預覽作廢。';
     el('summary').textContent = '請核對新帳戶及鏈別，然後重新唯讀預覽。';
     status(message);
+    void refreshLegacyPreview();
   }
   provider.on?.('accountsChanged', accounts => changed(() => { connectedAccounts = walletAccounts(accounts); },
     '錢包帳戶已變更，請核對 BSC 56 及角色帳戶後重新預覽。'));
@@ -1717,7 +1721,7 @@ async function useProvider(resolveProvider, name, authorize, preferredAccount) {
       status(connectedChain !== 56 ? '目前鏈別不是 BSC 56。請按「請錢包切至 BSC 56」，再核對。'
         : !connectedAccount ? '請選擇錢包已授權的 BSC 帳戶；若未列出，請在錢包重新選帳戶或重新授權。'
         : !sameAddress(connectedAccount, roleChoices[el('role').value]?.address) ? '請從已授權清單選擇正式帳戶，或在錢包重新選帳戶。'
-        : '帳戶及鏈別已讀回。請重新唯讀核對鏈上權限與預覽。');
+        : fundingMode() === 'legacy-cancel' ? '帳戶及鏈別已讀回，正在核對取消案。' : '帳戶及鏈別已讀回。請重新唯讀核對鏈上權限與預覽。');
       publishWalletContext();
       if (authorize && connectedAccount && connectedChain === 56) void watchFundingReceipt(wallet);
       return;
@@ -1767,15 +1771,16 @@ el('account').addEventListener('change', () => {
   el('preview').textContent = '帳戶已變更，請重新唯讀預覽。';
   el('summary').textContent = '請重新核對本次帳戶及鏈上權限。';
   status('已更新錢包帳戶選擇。');
+  void refreshLegacyPreview();
 });
 const requestInjectedAccounts = provider => provider.request({method:'eth_requestAccounts'});
 el('cancel-connect').onclick = () => cancelWalletConnection?.();
-el('connect').onclick = () => run(async () => {
+el('connect').onclick = () => runWalletConnection(async () => {
   const selected = providers[Number(el('wallet').value)];
   if (!selected || el('wallet').value === '') throw Error('未選到既有錢包。可使用手機WalletConnect，不要匯入私鑰。');
   await useProvider(() => selected.provider, selected.name, requestInjectedAccounts);
 });
-el('reselect').onclick = () => run(async () => {
+el('reselect').onclick = () => runWalletConnection(async () => {
   const provider = connectedProvider, name = connectedName;
   if (!wallet || !provider || provider === mobileProvider) throw Error('請先連接原生錢包，或以 WalletConnect 重新授權。');
   await useProvider(() => provider, name, async walletProvider => {
@@ -1785,7 +1790,7 @@ el('reselect').onclick = () => run(async () => {
     }
   });
 });
-el('switch-bsc').onclick = () => run(async () => {
+el('switch-bsc').onclick = () => runWalletConnection(async () => {
   const provider = connectedProvider, name = connectedName, preferredAccount = connectedAccount ?? undefined;
   if (!wallet || !provider) throw Error('請先連接錢包。');
   if (connectedChain === 56) return;
@@ -1825,7 +1830,7 @@ async function loadMobileProvider() {
 function pairMobileWallet(provider) {
   return provider.enable();
 }
-el('mobile').onclick = () => run(() => useProvider(async current => {
+el('mobile').onclick = () => runWalletConnection(() => useProvider(async current => {
   const provider = await loadMobileProvider();
   if (!current()) return provider;
   if (provider.session) {
@@ -1868,7 +1873,16 @@ el('draft').onclick = () => run(() => {
     : `離線草案，${plan.beneficiary}，${plan.amountKaios} KAIOS，尚未查核原案狀態。`;
   status('離線參數未驗證。請連接角色錢包後使用唯讀預覽。');
 });
-el('prepare').onclick = () => run(async () => {
+async function runWalletConnection(action) {
+  await run(action);
+  await refreshLegacyPreview();
+}
+async function refreshLegacyPreview() {
+  if (fundingMode() !== 'legacy-cancel' || document.visibilityState !== 'visible'
+    || busy || restoringWallet || resumePending || preview || roleConnectionBlocker()) return;
+  await prepareFundingPreview();
+}
+const prepareFundingPreview = () => run(async () => {
   invalidate();
   el('preview').textContent = '尚無有效預覽。';
   el('summary').textContent = '尚未取得本次鏈上結果，請查看連線與讀查提示。';
@@ -1899,10 +1913,15 @@ el('prepare').onclick = () => run(async () => {
   el('summary').textContent = `${subject}。下一步：${stepName}。操作帳戶：${candidate.account}。BSC主網56；本次交易BNB金額為0（仍需BNB手續費）。${candidate.step.to ? `交易目標：${candidate.step.to}。` : ''}${blocked ? `尚缺：${blocked}` : ''}${roleWarning}${legacyEtaUtc ? `取消案鏈上可執行時間：${legacyEtaUtc}。` : candidate.step.kind === 'WAIT_ETA' ? `鏈上等待條件：${candidate.step.label}` : ''}`;
   const ready = candidate.step.ready && !reviewBlocker && roleMatches(candidate);
   el('send').textContent = ready ? `交錢包確認：${stepName}` : '目前不可送交錢包；請先處理上列條件';
-  status(ready ? '預覽已產生，尚未簽署。核對本次操作後勾選，再由你按一次交給錢包。' : '唯讀檢查完成；等待、阻擋或已執行狀態不會自動送單。');
+  status(ready ? (isLegacyCapCancelPlan(plan)
+    ? '預覽已核對。請核對這一步，再按「交錢包確認」。'
+    : '預覽已產生，尚未簽署。核對本次操作後勾選，再由你按一次交給錢包。')
+    : '唯讀檢查完成；等待、阻擋或已執行狀態不會自動送單。');
 }, true);
+el('prepare').onclick = prepareFundingPreview;
 el('send').onclick = () => run(async () => {
-  if (!preview || !preview.step?.ready || !el('ack').checked || previewRole !== el('role').value || !roleMatches(preview)) throw Error('請先讀查並核對本次操作及角色。');
+  if (!preview?.step?.ready || previewRole !== el('role').value || !roleMatches(preview)
+    || (!isLegacyCapCancelPlan(preview.plan) && !el('ack').checked)) throw Error('請先讀查並核對本次操作及角色。');
   const candidate = preview;
   const reviewBlocker = fundingReviewBlocker(candidate);
   if (reviewBlocker) { status(reasons[reviewBlocker]); return; }
@@ -1985,9 +2004,10 @@ function syncFundingMode() {
     el(name + '-field').hidden = pause || cap || cancel;
   }
   el('amount-help').hidden = pause || cap || cancel;
-  el('ack-text').textContent = pause ? '我已核對正式觀音帳戶及銀行暫停權限，了解這筆只會緊急暫停銀行，不會付款、提款或解除暫停；仍由本人在錢包確認。' : cap ? '我已核對共享模組每筆／每日各10,000,000 KAIOS與原治理提案，了解調額會重設當期共享用量，不代表個人額度、個案批准或付款；仍由本人在錢包確認。本勾選不是合約授權。' : cancel ? '我已核對原案、取消案與本次治理步驟，並由本人在錢包確認。' : fundingAcknowledgment;
+  el('ack-row').hidden = cancel;
+  el('ack-text').textContent = pause ? '我已核對正式觀音帳戶及銀行暫停權限，了解這筆只會緊急暫停銀行，不會付款、提款或解除暫停；仍由本人在錢包確認。' : cap ? '我已核對共享模組每筆／每日各10,000,000 KAIOS與原治理提案，了解調額會重設當期共享用量，不代表個人額度、個案批准或付款；仍由本人在錢包確認。本勾選不是合約授權。' : fundingAcknowledgment;
   el('prepare').textContent = pause ? '只讀核對觀音權限並預覽暫停' : cap ? '只讀核對並預覽共享一千萬調額' : cancel ? '只讀核對並預覽取消舊共享限額' : '讀查並預覽下一步';
-  el('summary').textContent = pause ? '已選觀音緊急暫停；不需要填入收款人或金額。請在錢包選擇正式觀音帳戶，再讀查權限。' : cap ? '已選共享一千萬調額；不需原案檔、受益人或個案金額。每筆／每日限額各10,000,000 KAIOS，僅處理治理，不會付款。' : cancel ? '已選取消舊共享限額。連接王母錢包查看提案步驟；王母提案後由玉帝批准，再依鏈上時間執行。' : '流程或角色已變更，舊預覽與勾選作廢；請在錢包選擇對應帳戶後重新預覽。';
+  el('summary').textContent = pause ? '已選觀音緊急暫停；不需要填入收款人或金額。請在錢包選擇正式觀音帳戶，再讀查權限。' : cap ? '已選共享一千萬調額；不需原案檔、受益人或個案金額。每筆／每日限額各10,000,000 KAIOS，僅處理治理，不會付款。' : cancel ? '已選取消舊共享限額。連接所選角色的錢包後，頁面會核對下一步。' : '流程或角色已變更，舊預覽與勾選作廢；請在錢包選擇對應帳戶後重新預覽。';
 }
 for (const name of ['role','mode']) el(name).addEventListener('change', () => {
   if (!restoringWallet) connectionGeneration++;
@@ -1996,7 +2016,10 @@ for (const name of ['role','mode']) el(name).addEventListener('change', () => {
   el('preview').textContent = '角色或流程已變更，請重新唯讀預覽。';
   syncFundingMode(); updateFundingLinks(); showRole(); refreshSend();
   status('流程與角色選項只表達本次操作意圖，不會切換錢包帳戶、授權或送交易。');
-  if (!restoringWallet) void watchFundingReceipt(wallet);
+  if (!restoringWallet) {
+    void watchFundingReceipt(wallet);
+    void refreshLegacyPreview();
+  }
 });
 el('ack').addEventListener('change', refreshSend);
 el('case').addEventListener('change', () => {
@@ -2034,7 +2057,7 @@ el('file').addEventListener('change', () => run(async () => {
 function connectNativeProvider(provider, name) {
   const alreadyAuthorized = provider === connectedProvider && connectedAccounts.length > 0;
   const preferred = alreadyAuthorized ? connectedAccount : undefined;
-  return run(() => {
+  return runWalletConnection(() => {
     el('wallet').value = String(addProvider(provider, name));
     return useProvider(() => provider, name, alreadyAuthorized ? () => undefined : requestInjectedAccounts, preferred);
   });
@@ -2141,6 +2164,7 @@ async function resumeWallet() {
     restoringWallet = false;
     showRole(preview?.snapshot); refreshSend();
     if (resumePending) void resumeWallet();
+    else await refreshLegacyPreview();
   }
 }
 function suspendWallet() {
