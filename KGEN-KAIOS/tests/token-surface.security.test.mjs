@@ -576,6 +576,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
           this.pending = options.pending ?? null;
         }
         readPending() { return this.pending; }
+        async findExecutionHash() { return options.executionHash; }
         async prepare(plan = buildLegacyCapCancelPlan()) {
           const candidate = await super.prepare(plan);
           if (this.readPending()) {
@@ -616,6 +617,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         CustomEvent: class { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }, URL,
         setTimeout: (callback, delay) => {
           if (delay === 60000 || delay === 30000) connectionTimers.add(callback);
+          else if (delay === 4000 && options.mode === "legacy-cancel" && !options.legacyManualTimers) queueMicrotask(callback);
           else timers.push(callback);
           return callback;
         },
@@ -1195,7 +1197,32 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(completed.node("legacy-next").hidden, true);
       assert.match(completed.node("legacy-next-help").textContent, /已取消/);
       assert.equal(completed.node("send").disabled, true);
+      assert.equal(completed.node("send").hidden, true);
       assert.equal(completed.requests.length, 0);
+
+      const recovered = await mount({ ...opts, pending: {...intent, kind: "LEGACY_CANCEL_EXECUTE"},
+        executionHash: other, receiptResults: ["LEGACY_CANCELLED"] });
+      assert.deepEqual(recovered.receiptCalls.map(call => call.hash), [other]);
+      assert.equal(recovered.node("send").hidden, true);
+      assert.match(recovered.node("legacy-next-help").textContent, /已取消/);
+
+      const mined = await mount({ ...opts, pending: {...intent, hash: other},
+        receiptResults: ["PENDING", "PENDING", "CONFIRMED"] });
+      assert.deepEqual(mined.receiptCalls.map(call => call.hash), [other, other, other]);
+      assert.equal(mined.node("send").disabled, false);
+      assert.equal(mined.requests.length, 0);
+
+      const exhausted = await mount({ ...opts, pending: {...intent, hash: other},
+        receiptResults: Array(4).fill("PENDING") });
+      assert.equal(exhausted.receiptCalls.length, 4);
+      assert.match(exhausted.node("legacy-next-help").textContent, /仍待鏈上確認/);
+      assert.equal(exhausted.node("send").hidden, true);
+      assert.equal(exhausted.requests.length, 0);
+
+      const alreadyDone = await mount({ ...opts, stepKind: "LEGACY_CANCEL_DONE", forceReady: false });
+      assert.match(alreadyDone.node("summary").textContent, /鏈上顯示.*已取消/);
+      assert.equal(alreadyDone.node("send").hidden, true);
+      assert.equal(alreadyDone.requests.length, 0);
     });
 
     await t.test("legacy cancellation gives the disconnected holder the canonical MetaMask next step", async () => {
@@ -1663,7 +1690,7 @@ test("legacy cap cancellation: fixed self-call, distinct holders and old proposa
       setItem: (key, value) => storage.set(key, value),
       removeItem: key => storage.delete(key),
     };
-    let receipt = null, runtime = mockGovernanceRuntime, canonicalHash = blockHash;
+    let receipt = null, executionLogs = [], runtime = mockGovernanceRuntime, canonicalHash = blockHash;
     let latestHash = blockHash, reorgDuringStateReads = false;
     const provider = {
       request: async ({ method, params = [] }) => {
@@ -1672,6 +1699,12 @@ test("legacy cap cancellation: fixed self-call, distinct holders and old proposa
         if (method === "eth_chainId") return "0x38";
         if (method === "eth_accounts") return [current.account];
         if (method === "eth_getTransactionReceipt") return receipt;
+        if (method === "eth_getLogs") {
+          assert.equal(params[0].address, F.governance);
+          assert.equal(params[0].toBlock, current.blockNumber);
+          assert.deepEqual(Array.from(params[0].topics), [gov.getEvent("GovernanceProposalExecuted").topicHash, cancellation.proposalId]);
+          return executionLogs;
+        }
         if (method === "eth_getTransactionByHash") {
           const sent = calls.find(call => call.method === "eth_sendTransaction")?.params[0];
           return sent ? { ...sent, input: sent.data } : null;
@@ -1725,6 +1758,8 @@ test("legacy cap cancellation: fixed self-call, distinct holders and old proposa
     if (!realInspect) wallet.inspect = async () => structuredClone(current);
     return {
       wallet, setReceipt: value => { receipt = value; },
+      setExecutionLogs: value => { executionLogs = value; },
+      logReads: () => calls.filter(call => call.method === "eth_getLogs").length,
       setLatestHash: value => { latestHash = value; },
       reorgDuringStateReads: () => { reorgDuringStateReads = true; },
       changeRuntime: () => { runtime = "0x6000"; },
@@ -1772,6 +1807,28 @@ test("legacy cap cancellation: fixed self-call, distinct holders and old proposa
     await assert.rejects(reorg.wallet.prepare(), /BLOCK|FRESH_STATE/);
     assert.equal(reorg.sends().length, 0);
     assert.equal(reorg.wallet.readPending(), null);
+  });
+
+  await t.test("hashless cancellation only searches for the exact execution after verified on-chain completion", async () => {
+    const state = atEta();
+    state.blockNumber = "0x" + (132778867 + 5000).toString(16);
+    const { wallet, setExecutionLogs, logReads, sends } = walletFixture(state);
+    const log = { address: F.governance, topics: [gov.getEvent("GovernanceProposalExecuted").topicHash, cancellation.proposalId], transactionHash };
+    setExecutionLogs([log]);
+    assert.equal(await wallet.findExecutionHash(plan), undefined);
+    assert.equal(logReads(), 0);
+    state.originalProposal.cancelled = true;
+    assert.equal(await wallet.findExecutionHash(plan), undefined);
+    assert.equal(logReads(), 0);
+    state.cancellationProposal.executed = true;
+    assert.equal(await wallet.findExecutionHash(plan), transactionHash);
+    for (const logs of [[{ ...log, removed: true }], [{ ...log, topics: [log.topics[0], original.proposalId] }], [log, log]]) {
+      setExecutionLogs(logs);
+      assert.equal(await wallet.findExecutionHash(plan), undefined);
+    }
+    assert.equal(logReads(), 4);
+    assert.equal(sends().length, 0);
+    assert.equal(wallet.readPending(), null);
   });
 
   await t.test("cancellation reconciliation needs both exact governance events and exact receipt-block state", async () => {
