@@ -266,6 +266,7 @@ async function verifyFundingPanel(){
         assert.equal(await page.locator('#funding-'+field).isDisabled(),true);
       }
       row.legacyCapCancellation=[];
+      assert.equal(await page.locator('#funding-ack-row').isVisible(),false,'the cancellation has a single confirmation action');
       for(const role of ['mother','jade']){
         await page.locator('#funding-role').selectOption(role);
         await page.locator('#funding-draft').click();
@@ -285,13 +286,14 @@ async function verifyFundingPanel(){
         assert.equal(await next.isEnabled(),true,'the next step is available before wallet authorization');
         assert.equal(await next.getAttribute('href'),'#funding-mobile','loopback uses the existing WalletConnect control');
         assert.equal(await page.locator('#funding-mobile').isEnabled(),true,'the linked WalletConnect control is available');
-        assert.equal(await help.isVisible(),true,'the next step explains the inactive acknowledgment');
+        assert.equal(await help.isVisible(),true,'the next step explains the connection requirement');
         assert.match(await help.textContent(),/WalletConnect|錢包/);
         const nextAction=await visibleAction('#funding-legacy-next','legacy-cap-cancel-'+role+'-connect-next');
         row.legacyCapCancellation.push({role,type:draft.type,sendDisabled:true,nextAction,geometry:await noOverflow('legacy cap cancellation '+role)});
         await capture('legacy-cap-cancel-'+role,true);
       }
       await page.locator('#funding-mode').selectOption('fixed');
+      assert.equal(await page.locator('#funding-ack-row').isVisible(),true,'fixed allocation restores its acknowledgment');
       assert.equal(await page.locator('#funding-ack').isChecked(),false,'mode changes invalidate the previous governance acknowledgment');
       for(const field of ['file','case','beneficiary','amount']){
         assert.equal(await page.locator(`#funding-${field}-field`).isVisible(),true,`fixed allocation restores ${field} field`);
