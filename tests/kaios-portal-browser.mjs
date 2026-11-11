@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
 const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
@@ -116,6 +117,208 @@ async function verifyLegacyCards(){
     }
   }
   report.checks.push('fifteen legacy core/hub cards: canonical URLs, actual document clicks/HTTP200/back at local and simulated Pages prefix in portrait/landscape; destination scripts disabled; no claim of playable temples or completion of all123 points');
+}
+async function verify16888ManualOrder(){
+  assert.equal(FUNDING_ONLY,true,'synthetic 16888 order QA stays in the existing isolated CI lane');
+  const route=new URL('K線西遊記/temples/16888/index.html',BASE+'/'),origin=route.origin;
+  const html=await fs.readFile(new URL('../K線西遊記/temples/16888/index.html',import.meta.url),'utf8');
+  const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(match=>match[1]);
+  const scriptWith=marker=>{
+    const found=scripts.filter(script=>script.includes(marker));
+    assert.equal(found.length,1,'one original 16888 '+marker+' script');
+    return found[0];
+  };
+  const safetyScript=scriptWith('const PATCH_ID = "V3.7.12-POOL-SAFETY"');
+  const panelScript=scriptWith('BET PANEL FULLSCREEN RUNTIME PATCH');
+  const dockScript=scriptWith('Backup Wallet Operation Zone Runtime Patch');
+  const documentOnly=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+  const vendor=new URL('K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js',BASE+'/').href;
+  const account='0x1111111111111111111111111111111111111111',hash='0x'+'a'.repeat(64);
+  const key='KGEN_16888_MANUAL_ORDER_PENDING',universe='0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63';
+  const orderButtons='[onclick="betPanel.buy()"],[onclick="betPanel.sell()"],[onclick="web3.place(0)"],[onclick="web3.place(1)"]';
+  report.manual16888=[];
+  for(const [width,height] of [[390,844],[844,390]]){
+    const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
+    context.setDefaultTimeout(10000);context.setDefaultNavigationTimeout(20000);
+    const page=await context.newPage();
+    const row={width,height,mode:'SYNTHETIC_PROVIDER_NO_REAL_ORDER',panelMode:'ORIGINAL_TOGGLE_THEN_FULLSCREEN',realWallet:'NOT_TESTED',chainReads:0,
+      networkWrites:0,realTransactions:0,mockSendCount:0,mockTransactions:[],mockRpcMethods:[],
+      blockedRequests:[],runtimeErrors:[],screenshots:[],
+      sourceHtmlSha256:createHash('sha256').update(html).digest('hex')};
+    report.manual16888.push(row);
+    page.on('pageerror',error=>row.runtimeErrors.push(String(error.stack||error)));
+    await context.route('**/*',async intercepted=>{
+      const request=intercepted.request(),url=new URL(request.url());
+      if(!['GET','HEAD'].includes(request.method())||url.origin!==origin){
+        row.blockedRequests.push({origin:url.origin,method:request.method(),type:request.resourceType()});
+        await intercepted.abort('blockedbyclient');return;
+      }
+      if(request.isNavigationRequest()&&url.pathname===route.pathname){
+        await intercepted.fulfill({status:200,contentType:'text/html; charset=utf-8',body:documentOnly,
+          headers:{'content-security-policy':"connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'"}});
+        return;
+      }
+      await intercepted.continue();
+    });
+    await page.exposeFunction('__16888RecordMockSend',transaction=>{
+      row.mockTransactions.push(transaction);row.mockSendCount++;
+      return hash;
+    });
+    const install=async()=>{
+      await page.addScriptTag({url:vendor});
+      await page.evaluate(({account,hash,universe})=>{
+        const real=window.ethers,amount=real.utils.parseUnits('100',18);
+        const iface=new real.utils.Interface([
+          'function placeOrder(uint8 side,uint256 amountIn)',
+          'event OrderPlaced(address indexed user,uint8 side,uint256 amountIn,uint256 feeTotal,uint256 feeToTreasury,uint256 feeToPool,uint256 stake)',
+          'event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)'
+        ]);
+        let rejectWait;
+        const wait=new Promise((resolve,reject)=>{rejectWait=reject;});
+        const state={rpc:[],waitRequested:false,receipt:null,rejectWait};
+        const listeners=new Map();
+        const raw={
+          on:(event,callback)=>listeners.set(event,callback),
+          removeListener:(event,callback)=>{if(listeners.get(event)===callback)listeners.delete(event);},
+          async request({method,params=[]}){
+            state.rpc.push(method);
+            if(method==='eth_chainId')return '0x38';
+            if(method==='eth_accounts')return [account];
+            if(method==='wallet_switchEthereumChain')return null;
+            if(method==='eth_sendTransaction'){
+              const transaction=params[0],decoded=iface.decodeFunctionData('placeOrder',transaction.data);
+              if(transaction.from.toLowerCase()!==account.toLowerCase()||transaction.to.toLowerCase()!==universe.toLowerCase()
+                ||BigInt(transaction.value||'0x0')!==0n)throw Error('Synthetic order transaction mismatch');
+              return window.__16888RecordMockSend({from:transaction.from,to:transaction.to,side:Number(decoded.side),amountIn:decoded.amountIn.toString()});
+            }
+            throw Error('Unexpected synthetic RPC '+method);
+          }
+        };
+        const provider={provider:raw,getNetwork:async()=>({chainId:56}),send:(method,params)=>raw.request({method,params}),
+          getTransactionReceipt:async requested=>{state.rpc.push('eth_getTransactionReceipt');if(requested!==hash)throw Error('Unknown synthetic hash');return state.receipt;}};
+        const signer={provider,getAddress:async()=>account};
+        class GuardedProvider{
+          constructor(transport){this.transport=transport;}
+          getSigner(from){return {sendTransaction:async transaction=>{
+            const returned=await this.transport.request({method:'eth_sendTransaction',params:[{...transaction,from}]});
+            return {hash:returned,wait:()=>{state.waitRequested=true;return wait;}};
+          }};}
+        }
+        const parameters={poolBalance:async()=>real.utils.parseUnits('100000',18),
+          minOrder:async()=>real.BigNumber.from(1),maxOrder:async()=>real.utils.parseUnits('10000',18),
+          TRIGGER:async()=>real.BigNumber.from(1),MIN_FLOOR:async()=>real.BigNumber.from(1),
+          ROUND_TOTAL:async()=>real.BigNumber.from(1),configLocked:async()=>true,
+          vowWindowSec:async()=>real.BigNumber.from(1),loveWindowSec:async()=>real.BigNumber.from(1)};
+        window.ethers={...real,providers:{...real.providers,Web3Provider:GuardedProvider},
+          Contract:function(address,abi,runner){
+            if(!runner?.sendTransaction)return parameters;
+            return {placeOrder:(side,value)=>runner.sendTransaction({to:address,value:'0x0',data:iface.encodeFunctionData('placeOrder',[side,value])})};
+          }};
+        window.web3={demo:false,signer,provider,UNIVERSE:universe,
+          parseAmt:()=>real.utils.parseUnits(document.getElementById('bet-amt-input').value,18),refresh:async()=>{}};
+        window.betPanel={approve:async()=>{throw Error('Approval is outside synthetic order QA');}};
+        const event=(name,args)=>({address:universe,...iface.encodeEventLog(iface.getEvent(name),args)});
+        state.receiptFor=({side=0,from=account,value=amount}={})=>({
+          transactionHash:hash,from:account,to:universe,blockNumber:100,blockHash:'0x'+'b'.repeat(64),status:1,
+          logs:[event('OrderPlaced',[from,side,value,0,0,0,value]),event('OrderResolved',[from,side,side,true,amount])]
+        });
+        window.__16888ManualOrderQA=state;
+        for(const id of ['w3-addr','bp-wallet','dock-wallet']){
+          const element=document.getElementById(id);if(element)element.textContent=account;
+        }
+      },{account,hash,universe});
+      await page.addScriptTag({content:safetyScript});
+      await page.addScriptTag({content:panelScript});
+      await page.addScriptTag({content:dockScript});
+    };
+    const action=async(selector,label)=>{
+      const locator=page.locator(selector);
+      await locator.scrollIntoViewIfNeeded();
+      const geometry=await reachable(page,selector);
+      assert.ok(geometry.inView&&geometry.hit&&geometry.width>0&&geometry.height>0,label+': original control is reachable '+JSON.stringify(geometry));
+      return geometry;
+    };
+    const capture=async phase=>{
+      const name='16888-manual-order-'+width+'x'+height+'-'+phase;
+      await shot(page,name);row.screenshots.push(name+'.png');
+    };
+    const geometry=async()=>{
+      const measured=await page.locator('#bet-live-panel').evaluate(panel=>{
+        const rect=panel.getBoundingClientRect(),message=document.getElementById('manual-order-state');
+        return {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,viewportWidth:innerWidth,viewportHeight:innerHeight,
+          width:panel.clientWidth,scrollWidth:panel.scrollWidth,messageWidth:message.clientWidth,messageScroll:message.scrollWidth};
+      });
+      assert.ok(measured.left>=-1&&measured.right<=width+1&&measured.top>=-1&&measured.bottom<=height+1,
+        'original fullscreen panel fits '+JSON.stringify(measured));
+      assert.ok(measured.scrollWidth<=measured.width+1&&measured.messageScroll<=measured.messageWidth+1,
+        'account and original transaction wrap '+JSON.stringify(measured));
+      return measured;
+    };
+    const openPanel=async()=>{
+      row.openControl=await action('#betToggleBtn','16888 BET PANEL entry');
+      await page.locator('#betToggleBtn').click();
+      await page.locator('#bet-live-panel').waitFor({state:'visible'});
+      row.expandControl=await action('#bpExpandBtn','16888 original fullscreen control');
+      await page.locator('#bpExpandBtn').click();
+      assert.equal(await page.locator('#bet-live-panel').evaluate(panel=>panel.classList.contains('bet-fullscreen')),true);
+      await page.locator('#bet-amt-input').fill('100');
+    };
+    try{
+      const response=await page.goto(route.href,{waitUntil:'load'});assert.ok(response?.ok(),'16888 source document loads');
+      await install();await openPanel();
+      const up='[onclick="betPanel.buy()"]';
+      await action(up,'16888 manual UP');
+      await page.locator(up).click();
+      await page.waitForFunction(key=>{
+        const pending=JSON.parse(localStorage.getItem(key));
+        return window.__16888ManualOrderQA.waitRequested&&pending?.hash;
+      },key);
+      assert.equal(row.mockSendCount,1);
+      assert.equal(row.mockTransactions[0].side,0);
+      assert.equal(row.mockTransactions[0].amountIn,'100000000000000000000');
+      await page.locator(up).dispatchEvent('click');
+      await page.evaluate(()=>web3.place(1));
+      assert.equal(row.mockSendCount,1,'repeat clicks and legacy DOWN cannot create another request');
+      assert.equal(await page.locator(orderButtons).evaluateAll(buttons=>buttons.length>=2&&buttons.every(button=>button.disabled)),true);
+      assert.doesNotMatch(await page.locator('#bp-status').textContent(),/\bWIN\b|\bLOSE\b/);
+      await page.evaluate(()=>__16888ManualOrderQA.rejectWait(Error('synthetic confirmation timeout')));
+      await page.waitForFunction(()=>!document.getElementById('manual-order-receipt').disabled);
+      assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).hash,key),hash);
+      await page.locator('#manual-order-state').scrollIntoViewIfNeeded();
+      row.pendingGeometry=await geometry();await capture('pending');
+      row.mockRpcMethods.push(...await page.evaluate(()=>__16888ManualOrderQA.rpc));
+
+      await page.reload({waitUntil:'load'});await install();await openPanel();
+      assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).hash,key),hash);
+      assert.equal(await page.locator(orderButtons).evaluateAll(buttons=>buttons.every(button=>button.disabled)),true);
+      await page.evaluate(()=>web3.place(1));
+      assert.equal(row.mockSendCount,1,'reload preserves the original order lock');
+      await page.locator('#manual-order-state').scrollIntoViewIfNeeded();await capture('reload');
+      await page.evaluate(()=>{__16888ManualOrderQA.receipt=__16888ManualOrderQA.receiptFor({side:1});});
+      await action('#manual-order-receipt','16888 read-only receipt check');
+      await page.locator('#manual-order-receipt').click();
+      await page.waitForFunction(()=>!document.getElementById('manual-order-receipt').disabled);
+      assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).hash,key),hash,'wrong-side receipt retains the original order');
+      assert.doesNotMatch(await page.locator('#bp-status').textContent(),/\bWIN\b|\bLOSE\b/);
+      row.wrongReceiptGeometry=await geometry();await capture('wrong-receipt');
+      await page.evaluate(()=>{__16888ManualOrderQA.receipt=__16888ManualOrderQA.receiptFor();});
+      await page.locator('#manual-order-receipt').click();
+      await page.waitForFunction(key=>localStorage.getItem(key)===null,key);
+      assert.match(await page.locator('#bp-status').textContent(),/原帳戶.*UP.*WIN/);
+      assert.equal(await page.locator(orderButtons).evaluateAll(buttons=>buttons.every(button=>!button.disabled)),true);
+      assert.equal(row.mockSendCount,1,'receipt reconciliation only reads the synthetic original transaction');
+      row.mockRpcMethods.push(...await page.evaluate(()=>__16888ManualOrderQA.rpc));
+      row.confirmedGeometry=await geometry();await capture('confirmed');
+      assert.deepEqual(row.runtimeErrors,[],'the isolated original 16888 scripts have no runtime errors');
+      assert.equal(row.blockedRequests.some(request=>!['GET','HEAD'].includes(request.method)),false,'no network write was attempted');
+      row.functional='PASS';
+    }catch(error){
+      row.functional='FAIL';row.error=String(error.stack||error);
+      await page.screenshot({path:OUT+'/16888-manual-order-'+width+'x'+height+'-FAIL.png',fullPage:true}).catch(()=>{});
+      throw error;
+    }finally{await context.close();}
+  }
+  report.checks.push('16888 original manual UP/DOWN controls, original panel opening/fullscreen, synthetic guarded transport only, one mock order across repeated clicks and reload, wrong receipt retains lock, exact real-ethers events clear it; no real wallet, RPC, transaction or asset result');
 }
 async function verifyFundingPanel(){
   const route=new URL('K線西遊記/temples/18888/index.html',BASE+'/'),origin=route.origin;
@@ -400,7 +603,7 @@ async function verifyFundingPanel(){
   report.checks.push('actual seven-floor inline controller; all seven caps and 44px touch targets; one-wei excess rejected; skip clears acknowledgment; all18 basement levels remain disabled; unknown funds/no payment; portrait and landscape screenshots with no wallet or RPC');
 }
 try{
-  if(FUNDING_ONLY){await verifyFundingPanel();await verifyLegacyCards();}
+  if(FUNDING_ONLY){await verifyFundingPanel();await verifyLegacyCards();await verify16888ManualOrder();}
   else{
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();
