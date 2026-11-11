@@ -711,9 +711,9 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.doesNotMatch(cap.node("summary").textContent, /undefined|本案：|已付款|入帳/);
       assert.equal(cap.requests.length, 0, "role/mode/prepare never requests a transaction");
       cap.node("ack").checked = true; cap.node("ack").emit("change");
-      assert.equal(cap.node("send").disabled, true, "a checkbox is not bank ledger evidence");
-      assert.equal(JSON.parse(cap.node("preview").textContent).review.status, "BLOCKED");
-      await cap.node("send").onclick(); assert.equal(cap.requests.length, 0);
+      assert.equal(cap.node("send").disabled, false, "the reviewed shared-cap step can be handed to its holder");
+      assert.equal(JSON.parse(cap.node("preview").textContent).step.ready, true);
+      assert.equal(cap.requests.length, 0, "review and acknowledgment do not send a transaction");
       cap.node("mode").value = "fixed"; cap.node("mode").emit("change");
       assert.equal(cap.probe.preview(), null); assert.equal(cap.node("ack").checked, false);
       assert.equal(cap.node("beneficiary").disabled, false);
@@ -743,12 +743,17 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         await ui.node("prepare").onclick();
         const shown = JSON.parse(ui.node("preview").textContent);
         assert.equal(shown.step.kind, stepKind);
-        assert.equal(shown.step.ready, false);
-        assert.equal(shown.review.reason, "BANK_COMMITMENTS_NOT_VERIFIED");
+        const sharedCap = mode === "cap";
+        assert.equal(shown.step.ready, sharedCap);
+        assert.equal(shown.review?.reason, sharedCap ? undefined : "BANK_COMMITMENTS_NOT_VERIFIED");
         ui.node("ack").checked = true; ui.node("ack").emit("change");
-        assert.equal(ui.node("send").disabled, true);
+        assert.equal(ui.node("send").disabled, !sharedCap);
         await ui.node("send").onclick();
-        assert.equal(ui.requests.length, 0, [mode, stepKind].join("/"));
+        assert.equal(ui.requests.length, sharedCap ? 1 : 0, [mode, stepKind].join("/"));
+        if (sharedCap) {
+          assert.equal(ui.requests[0].plan.type, "SHARED_CAP");
+          assert.equal(ui.requests[0].step.kind, stepKind);
+        }
         await ui.node("receipt").onclick();
         assert.match(ui.node("summary").textContent, /治理步驟已核對/);
       }
@@ -1074,8 +1079,9 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
           assert.equal(shown.unsignedTransaction.data, "0x8456cb59"); assert.equal(shown.unsignedTransaction.value, "0x0");
           assert.equal(ui.node("ack").disabled, false);
         } else {
-          assert.equal(shown.review.reason, "BANK_COMMITMENTS_NOT_VERIFIED");
-          assert.equal(ui.node("ack").disabled, true);
+          assert.equal(shown.review?.reason, undefined);
+          assert.equal(shown.step.ready, true);
+          assert.equal(ui.node("ack").disabled, false);
         }
         assert.equal(ui.node("send").disabled, true);
         assert.equal(ui.requests.length, 0);
