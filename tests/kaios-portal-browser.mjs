@@ -208,7 +208,7 @@ async function verifyFundingPanel(){
         if(value!=='guanyin')await capture(value,value==='mother');
       }
       assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');assert.equal(await page.locator('#funding-amount').inputValue(),'');
-      await page.locator('#funding-panel details > summary').click();
+      await page.locator('#funding-preview-details > summary').click();
       await page.locator('#funding-draft').click();
       await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('OFFLINE_DRAFT_NOT_CHAIN_VERIFIED'));
       const pauseDraft=JSON.parse(await page.locator('#funding-preview').textContent());
@@ -303,6 +303,28 @@ async function verifyFundingPanel(){
         assert.equal(await page.locator(selector).isVisible(),false,`${selector} is specific to legacy cancellation`);
       }
       await noWalletAuthority('changed back to fixed allocation');
+      // The real five-case loader uses the original validator, without an
+      // uploaded file, provider, RPC or wallet request in this isolated job.
+      await visibleAction('#funding-load-five','load-original-five');
+      await page.locator('#funding-load-five').click();
+      assert.equal(await page.locator('#funding-mode').inputValue(),'fixed');
+      assert.equal(await page.locator('#funding-case').inputValue(),'0');
+      assert.equal(await page.locator('#funding-case option').count(),6);
+      assert.equal(await page.locator('#funding-beneficiary').inputValue(),'0x60Ed5A562642cbC303D720507a37170116707259');
+      assert.equal(await page.locator('#funding-amount').inputValue(),'1080000');
+      for(const field of ['beneficiary','amount'])assert.equal(await page.locator('#funding-'+field).evaluate(input=>input.readOnly),true);
+      assert.equal(await page.locator('#funding-file').evaluate(input=>input.files.length),0);
+      assert.equal(await page.locator('#funding-progress').isVisible(),true);
+      assert.match(await page.locator('#funding-progress-title').textContent(),/高翠蘭.*等待重新核對/);
+      assert.equal(await page.locator('#funding-progress-next').isDisabled(),true);
+      await noWalletAuthority('original five loaded without wallet');
+      row.originalFive={count:5,amountKaios:'1080000',totalKaios:'5400000',first:'高翠蘭',noFileRequired:true,sendDisabled:true,geometry:await noOverflow('original five progress')};
+      await capture('original-five-progress',true);
+      await page.locator('#funding-case').selectOption('4');
+      assert.equal(await page.locator('#funding-beneficiary').inputValue(),'0x651ff5e7C183D0d3D40C9cE8a86Be246111521cd');
+      assert.match(await page.locator('#funding-progress-title').textContent(),/澄序.*等待重新核對/);
+      await noWalletAuthority('selected original fifth case');
+      await capture('original-fifth-progress',true);
       // Exercise the real seven-floor controller in the same isolated context.
       // No game character, wallet provider, eligibility source or RPC is supplied.
       const seven=page.locator('#seven-floor-panel');

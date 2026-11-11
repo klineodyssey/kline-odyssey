@@ -66,6 +66,14 @@ STATUS: PROTOTYPE — 前端原型，不改合約
 #funding-send { background:#e4bdff; color:#180b23; font-weight:900; }
 .funding-panel pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#08060e; border-radius:10px; padding:12px; font-size:12px; line-height:1.55; max-height:420px; overflow:auto; }
 .funding-muted { color:#c3afcc; font-size:12px; }
+.funding-progress { border:1px solid #59d8c988; border-radius:14px; padding:16px; margin:16px 0; background:#102522; }
+.funding-progress[hidden] { display:none; }
+.funding-progress h3 { margin:0 0 8px; color:#b8fff1; }
+.funding-progress ol { padding-left:24px; line-height:1.8; }
+.funding-progress li[data-state=done] { color:#a9f0c3; }
+.funding-progress li[data-state=current] { color:#ffe1a3; font-weight:700; }
+.funding-progress small { display:block; color:#c3d9d4; overflow-wrap:anywhere; }
+.funding-progress button { width:100%; }
 .funding-ack { display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.6; }
 .funding-ack input { margin-top:5px; flex-shrink:0; }
 @media(max-width:640px) { .funding-fields { grid-template-columns:1fr; } .funding-panel { padding:14px; } .funding-actions button { flex:1 1 180px; } }
@@ -225,6 +233,26 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     <h2 id="funding-title">KAIOS 生命資源 · 角色錢包連線</h2>
     <p>選擇角色及流程，連接對應錢包並確認實際帳戶與 BSC 56，再讀查鏈上狀態。<strong>唯讀預覽不會送出交易。</strong></p>
     <p class="funding-muted">此區與上方原型展示數字分開。BSC 主網 56；金額單位 KAIOS，不是 BNB。調額、Mother 提案、玉帝獨立批准、到期執行、實際撥款分別核定；連接或交易雜湊不代表已入帳。</p>
+    <div id="funding-progress" class="funding-progress" hidden aria-labelledby="funding-progress-title">
+      <h3 id="funding-progress-title">共享調額進度 · 等待讀查</h3>
+      <p id="funding-progress-detail" role="status" aria-live="polite">先連接錢包，更新鏈上進度。</p>
+      <ol aria-label="共享調額四個階段">
+        <li id="funding-progress-step-0">王母提案 · 待核對</li>
+        <li id="funding-progress-step-1">玉帝批准 · 待核對</li>
+        <li id="funding-progress-step-2">到期執行 · 待核對</li>
+        <li id="funding-progress-step-3">共享限額生效 · 待核對</li>
+      </ol>
+      <p id="funding-progress-eta"></p>
+      <small id="funding-progress-evidence"></small>
+      <div class="funding-actions"><button type="button" id="funding-progress-next" disabled>更新鏈上進度（只讀）</button></div>
+      <details><summary>調額生效後，五筆各108萬怎麼接續？</summary>
+        <ol>
+          <li>按「載入原五筆」，直接帶入已指定的五個地址及每筆108萬。個案提案與批准可和調額並行，不必等調額完成才開始。</li>
+          <li>每筆依序由王母提出配額、玉帝批准；該案治理時間到期後，確認執行建立配額，再確認撥款。</li>
+          <li>核對每筆付款回執後，才算完成。共享一千萬是限額，五筆合計撥款為540萬 KAIOS。</li>
+        </ol>
+      </details>
+    </div>
     <div class="funding-fields">
       <label>本次流程<select id="funding-mode"><option value="fixed">固定配額 · 原案撥款</option><option value="cap">共享一千萬調額 · 不需原案檔</option><option value="legacy-cancel">取消舊共享限額 · 王母／玉帝</option></select></label>
       <label id="funding-file-field">本機原案報告或 JSON（只在此瀏覽器讀取，不上傳）<input id="funding-file" type="file" accept=".json,.md,.txt"></label>
@@ -233,6 +261,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       <label id="funding-amount-field">本筆 KAIOS 金額<input id="funding-amount" inputmode="decimal" autocomplete="off" value="1080000" aria-describedby="funding-amount-help"></label>
     </div>
     <p id="funding-mode-help" class="funding-muted">固定配額需原案受益人及金額。共享調額只處理模組每筆／每日各10,000,000 KAIOS，不建立配額、不付款、不保留個人額度；觀音暫停獨立於此選項。</p>
+    <div class="funding-actions"><button type="button" id="funding-load-five">載入原五筆 · 各108萬 KAIOS</button></div>
     <p id="funding-amount-help" class="funding-muted">最多18位小數，不使用浮點換算。原案載入後地址與金額固定，不因查不到紀錄就改金額／ID重發。此版用途固定為一次性生命初始資源，非月薪、非衡曜88 KAIOS；executableAt=0的配額建立後沒有第二次一小時等待，任何人可呼叫已到期配額撥款。</p>
     <div class="funding-fields">
       <label>本次操作角色<select id="funding-role"><option value="mother">王母 · 提出治理提案</option><option value="jade">玉帝 · 批准原提案</option><option value="guanyin">觀音 · 緊急暫停銀行（OKX Wallet）</option></select></label>
@@ -260,7 +289,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     <p id="funding-role-status" class="funding-muted" aria-live="polite">選擇角色只表示本次操作意圖；仍須在錢包選擇正確帳戶，並讀查鏈上權限。</p>
     <p id="funding-status" role="status" aria-live="polite">先讀查，不會在載入頁面時請求帳戶或送出交易。</p>
     <p id="funding-summary">下一步：先連接你的既有錢包，再讀查；目前沒有送出任何交易。</p>
-    <details><summary>展開精確參數、固定ID及唯讀查核結果</summary><button type="button" id="funding-draft">只顯示離線參數（未驗證）</button><pre id="funding-preview" aria-label="本次未簽署內容">尚無預覽。</pre></details>
+    <details id="funding-preview-details"><summary>展開精確參數、固定ID及唯讀查核結果</summary><button type="button" id="funding-draft">只顯示離線參數（未驗證）</button><pre id="funding-preview" aria-label="本次未簽署內容">尚無預覽。</pre></details>
     <div id="funding-legacy-guide" hidden>
       <p id="funding-legacy-next-help" aria-live="polite"></p>
       <div class="funding-actions"><a id="funding-legacy-next" data-recommended="true" rel="noopener noreferrer" aria-describedby="funding-legacy-next-help"></a></div>
@@ -1022,11 +1051,16 @@ function deriveFundingStep(plan, s) {
     }
     if (BI(h.available) < BI(plan.amountWei)) blockers.push("AVAILABLE_FUNDS_INSUFFICIENT");
     const needsCap = BI(m.perTransactionLimit) !== BI(FUNDING_FORMAL.capWei) || BI(m.epochLimit) !== BI(FUNDING_FORMAL.capWei);
-    if (needsCap && BI(m.epochIndex) === BI(s.timestamp) / 86400n && BI(m.epochSpent) > 0n) blockers.push("CAP_RESET_WOULD_ERASE_CURRENT_DAY_SPEND");
     if (blockers.length) return result("BLOCKED", "Stop: accounting review required");
-    const nextGovernance = (candidate, stored, prefix) => nextFundingGovernance(candidate, stored, prefix, s, needsCap ? plan.warnings[0] : plan.warnings[1], blockers, result);
-    if (needsCap) return nextGovernance(plan.cap, s.capProposal, "CAP");
+    const nextGovernance = (candidate, stored, prefix) => nextFundingGovernance(candidate, stored, prefix, s, prefix === "CAP" ? plan.warnings[0] : plan.warnings[1], blockers, result);
+    // Creating an original allocation transfers nothing. Its governance clock can
+    // run alongside the separately approved shared-cap proposal.
     if (!present) return nextGovernance(plan.allocation, s.allocationProposal, "ALLOCATION");
+    if (needsCap && BI(m.epochIndex) === BI(s.timestamp) / 86400n && BI(m.epochSpent) > 0n) {
+      blockers.push("CAP_RESET_WOULD_ERASE_CURRENT_DAY_SPEND");
+      return result("BLOCKED", "Stop: shared UTC spend review required");
+    }
+    if (needsCap) return nextGovernance(plan.cap, s.capProposal, "CAP");
     const spent = BI(m.epochIndex) === BI(s.timestamp) / 86400n ? BI(m.epochSpent) : 0n;
     if (BI(plan.amountWei) > BI(m.perTransactionLimit) || spent + BI(plan.amountWei) > BI(m.epochLimit)) blockers.push("MODULE_PAYMENT_LIMIT_EXCEEDED");
     if (BI(s.timestamp) < BI(a.executableAt)) blockers.push("ALLOCATION_NOT_READY");
@@ -1393,6 +1427,7 @@ let wallet = null, preview = null, previewWallet = null, previewRole = null, bus
 let receiptWatch = null, mobileProvider = null, mobileInit = null, cancelWalletConnection = null, connectedName = "", connectedAccounts = [], walletContextChanges = 0;
 let mobileMetadata, confirmedMobileTopic, restoringWallet = false, resumePending = false;
 let legacyReceiptNotice = null;
+let fundingProgressNotice = null;
 const MOBILE_TOPIC_KEY = 'kaios18888.walletconnect.confirmedTopic.v1';
 function fundingStorage() {
   try { return window.localStorage; } catch { return null; }
@@ -1477,7 +1512,77 @@ Object.assign(reasons, {
   DURABLE_STORAGE_REQUIRED:'此瀏覽器無法保存待確認交易，只提供唯讀預覽。',
   PENDING_STORAGE_CORRUPT_DO_NOT_RESEND:'待確認交易紀錄無法讀取，只提供唯讀預覽。'
 });
-const invalidate = () => { formGeneration++; receiptWatch = null; legacyReceiptNotice = null; wallet?.invalidate?.(); preview = null; previewWallet = null; previewRole = null; el('ack').checked = false; el('ack').disabled = true; el('send').disabled = true; el('send').textContent = '先連接並預覽；由我本人到錢包確認'; showRole(); };
+function fundingTaipeiTime(seconds) {
+  const value = Number(seconds);
+  return Number.isFinite(value) && value > 0 && value <= 8.64e12
+    ? new Intl.DateTimeFormat('zh-TW', {timeZone:'Asia/Taipei', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'}).format(new Date(value * 1000)) : '';
+}
+function refreshFundingProgress() {
+  const board = el('progress');
+  const capMode = fundingMode() === 'cap';
+  const chosen = el('case').value === '' ? null : importedCases[Number(el('case').value)];
+  board.hidden = !capMode && !(fundingMode() === 'fixed' && chosen);
+  if (board.hidden) return;
+  const blocker = roleConnectionBlocker();
+  el('progress-next').disabled = busy || Boolean(blocker);
+  el('progress-title').textContent = (capMode ? '共享調額進度' : chosen.name + ' · ' + chosen.amountKaios + ' KAIOS原案進度') + ' · 等待重新核對';
+  el('progress-detail').textContent = busy ? '正在讀取或等待錢包結果，請保留目前頁面。'
+    : fundingProgressNotice || (blocker ? el('connect-next').textContent : '按「更新鏈上進度」，查看已完成階段與下一步。');
+  el('progress-eta').textContent = '';
+  el('progress-evidence').textContent = '';
+  const labels = capMode ? ['王母提案', '玉帝批准', '到期執行', '共享限額生效'] : ['王母提出本案配額', '玉帝批准本案', '到期建立配額', '本案實際撥款'];
+  labels.forEach((label, index) => {
+    el('progress-step-' + index).textContent = label + ' · 待核對';
+    el('progress-step-' + index).setAttribute('data-state', 'unknown');
+    el('progress-step-' + index).removeAttribute('aria-current');
+  });
+  // Only the current, identity-checked preview can advance the displayed stage.
+  // The computer clock never advances a stage or enables a transaction.
+  if (busy || blocker || !preview || previewWallet !== wallet || previewRole !== el('role').value || !roleMatches(preview)) return;
+  const {step, snapshot} = preview;
+  const reviewBlocker = fundingReviewBlocker(preview) || step.blockers[0];
+  if (reviewBlocker) {
+    el('progress-detail').textContent = !capMode && reviewBlocker === 'BANK_COMMITMENTS_NOT_VERIFIED'
+      ? '本案配額已存在。下一步：切換「共享一千萬調額」，核對並完成原調額案後再回來撥款；不用重建本案。'
+      : reasons[reviewBlocker] || '目前條件尚待核對，請查看下方說明。';
+    return;
+  }
+  const phases = {
+    CAP_PROPOSE: [0, '等待王母提出調額', '下一步：勾選下方確認，再按「交錢包確認」提出原調額案。'],
+    CAP_APPROVE: [1, '王母已提案，等待玉帝批准', '下一步：玉帝可現在批准，不必等到可執行時間。勾選下方確認，再交錢包批准原案。'],
+    WAIT_ETA: [2, capMode ? '玉帝已批准，等待到期' : '玉帝已批准本案，等待治理時間', capMode
+      ? '下一步：到期後按「更新鏈上進度」。讀查通過後，再勾選並交錢包確認「執行共享調額」；不用重新批准。'
+      : '本案可與調額並行等待，不用重新批准。到期後更新進度，再由錢包確認建立配額；付款時仍須調額與銀行條件有效。'],
+    CAP_EXECUTE: [2, '本次讀查：已批准且到期', '本次鏈上讀查可執行調額。下一步：勾選下方確認，再按「交錢包確認」。送出前會再次核對；預覽超過兩分鐘請更新進度。完成回執核對後再接五筆原案。'],
+    CAP_ALREADY_CONFIGURED: [4, '共享一千萬限額已生效', '下一步：切換「固定配額 · 原案撥款」，依已準備的五筆原案逐筆辦理。調額生效不代表已付款。'],
+    ALLOCATION_PROPOSE: [0, '本案地址與金額已備妥，等待王母提出', '可現在提出本案，與調額並行。勾選下方確認，再交王母錢包提出原配額案。'],
+    ALLOCATION_APPROVE: [1, '王母已提出本案，等待玉帝批准', '下一步：選玉帝並連接其錢包，更新進度後批准這筆原案；原地址、金額與ID不變。'],
+    ALLOCATION_EXECUTE: [2, '本次讀查：本案已批准且到期', '下一步：勾選確認，交目前錢包執行建立配額。回執核對後再更新進度，接續撥款。'],
+    PAYOUT: [3, '本案配額已建立，可以確認撥款', '下一步：核對這筆原案地址及金額，勾選確認後交錢包撥款。面板會核對原交易回執。'],
+    DONE: [3, '本案已觀察到執行，請核對付款回執', '請先核對本案原交易回執；付款核對通過後，再選下一位。不要重送本案。']
+  };
+  const waitingForCap = !capMode && step.kind === 'WAIT_ETA' && step.proposalId === preview.plan.cap.proposalId;
+  const phase = waitingForCap ? [3, '本案配額已建立，等待共享調額到期', '下一步：切換「共享一千萬調額」。在原調額時間到期後更新進度並確認執行，再回來撥款；本案不用重提或重批。'] : phases[step.kind];
+  if (!phase) return;
+  if (waitingForCap) labels[3] = '共享調額生效後撥款';
+  el('progress-title').textContent = capMode ? phase[1] : chosen.name + ' · ' + phase[1];
+  el('progress-detail').textContent = phase[2];
+  labels.forEach((label, index) => {
+    const done = index < phase[0];
+    const state = done ? 'done' : index === phase[0] ? 'current' : 'waiting';
+    const note = waitingForCap && index < 3 && snapshot.allocationProposal?.executed !== true
+      ? '配額已存在，本次無需此步' : step.kind === 'CAP_ALREADY_CONFIGURED' && index < 3 && snapshot.capProposal?.executed !== true
+      ? '本次無需此步' : done ? '已核對完成' : index === phase[0] ? step.kind === 'WAIT_ETA' ? '等待到期' : '目前步驟' : '尚待完成';
+    el('progress-step-' + index).textContent = label + ' · ' + note;
+    el('progress-step-' + index).setAttribute('data-state', state);
+    if (state === 'current') el('progress-step-' + index).setAttribute('aria-current', 'step');
+  });
+  const eta = fundingTaipeiTime((capMode || waitingForCap || step.kind.startsWith('CAP_') ? snapshot.capProposal : snapshot.allocationProposal)?.executableAt);
+  if (eta) el('progress-eta').textContent = '最早可執行：' + eta + '（台灣時間）。批准不會重新計時。';
+  const observed = fundingTaipeiTime(snapshot.timestamp);
+  el('progress-evidence').textContent = '以下為本次查核區塊的狀態：' + (snapshot.blockNumber ?? '未提供') + (observed ? '；鏈上時間：' + observed + '（台灣）' : '') + '。時間到達或預覽超過兩分鐘，請更新進度。';
+}
+const invalidate = () => { formGeneration++; receiptWatch = null; legacyReceiptNotice = null; fundingProgressNotice = null; wallet?.invalidate?.(); preview = null; previewWallet = null; previewRole = null; el('ack').checked = false; el('ack').disabled = true; el('send').disabled = true; el('send').textContent = '先連接並預覽；由我本人到錢包確認'; showRole(); refreshFundingProgress(); };
 // The shared-cap flow follows its own role, runtime, UTC-spend and proposal checks.
 // Fixed-case cap changes still require the original case accounting review.
 function fundingReviewBlocker({ plan, step }) {
@@ -1550,11 +1655,13 @@ const refreshSend = () => {
   el('prepare').disabled = busy || Boolean(blocker);
   el('receipt').disabled = el('prepare').disabled;
   el('draft').disabled = busy;
+  el('load-five').disabled = busy || !['cap', 'fixed'].includes(fundingMode());
   el('connect').disabled = busy || !providers.length;
   el('reselect').disabled = busy || !wallet || connectedProvider === mobileProvider;
   el('switch-bsc').disabled = busy || !wallet || connectedChain === 56;
   el('account').disabled = busy || !connectedProvider || !selectableWalletAccounts().length;
   refreshLegacyNext(blocker, canConfirm);
+  refreshFundingProgress();
 };
 const errorText = error => Number(error?.code) === 4001 ? '你已在錢包拒絕本次請求；沒有自動重送。' : reasons[error?.message] || `檢查未通過：${error?.message || String(error)}。未確認前請勿重送。`;
 function addProvider(provider, name) {
@@ -2040,6 +2147,7 @@ const prepareFundingPreview = (manualLegacyReceipt = false) => run(async () => {
     : '唯讀檢查完成；等待、阻擋或已執行狀態不會自動送單。');
 }, true);
 el('prepare').onclick = () => prepareFundingPreview();
+el('progress-next').onclick = () => { if (!busy && !el('prepare').disabled) return prepareFundingPreview(); };
 el('send').onclick = async () => {
   let checkLegacyReceipt = false;
   await run(async () => {
@@ -2051,6 +2159,7 @@ el('send').onclick = async () => {
     const requestingWallet = previewWallet, requestingRole = previewRole, requestingGeneration = formGeneration;
     if (!requestingWallet || requestingWallet !== wallet || pretty(formPlan()) !== pretty(candidate.plan)) throw Error('目前表單或錢包與預覽不符，請重新讀查；本次未送交錢包。');
     preview = null; previewWallet = null; previewRole = null; el('ack').checked = false;
+    refreshFundingProgress();
     status('只將這一筆交給你的錢包。請本人核對並決定是否簽署；不會自動送下一筆。');
     const result = await requestingWallet.request(candidate);
     if (requestingGeneration !== formGeneration || requestingWallet !== wallet || requestingRole !== el('role').value) return;
@@ -2064,11 +2173,22 @@ el('send').onclick = async () => {
   });
   if (checkLegacyReceipt) await refreshLegacyPreview();
 };
-function showFundingReceipt(result, hash) {
-  el('preview').textContent = pretty(result);
+function showFundingReceipt(result, hash, receiptPlan = null) {
+  const original = importedCases.find(row => row.allocationId === receiptPlan?.allocationId);
+  const receiptSubject = original?.name || receiptPlan?.beneficiary || '原交易';
+  const selected = el('case').value === '' ? null : importedCases[Number(el('case').value)];
+  const differentCase = Boolean(receiptPlan?.allocationId && selected?.allocationId !== receiptPlan.allocationId);
+  el('preview').textContent = pretty({...result, ...(receiptPlan?.allocationId ? {receiptAllocationId:receiptPlan.allocationId, receiptBeneficiary:receiptPlan.beneficiary, receiptAmountKaios:receiptPlan.amountKaios} : {})});
   invalidate();
+  if (['cap', 'fixed'].includes(fundingMode())) {
+    fundingProgressNotice = result.status === 'CONFIRMED'
+      ? '本次治理步驟回執已確認。按「更新鏈上進度」核對下一步。'
+      : result.status === 'VERIFIED_PAID' ? '「' + receiptSubject + '」原交易付款回執核對通過。' + (differentCase ? '原交易與目前選案不同，請依原交易所屬原案對帳。' : '可選下一位原案接續；不會自動重送或代簽。')
+      : '原交易回執仍待處理。請先查看下方回執結果，保留原交易，勿重送。';
+    refreshFundingProgress();
+  }
   const receiptNames = {LEGACY_CANCELLED:'已核對取消案執行及舊共享限額取消事件', PENDING:'尚未確認，請保留原交易等待核查', REVERTED:'交易失敗，保留防重鎖，先查原因', MISMATCH:'回執／事件／狀態不符，停止重送', CONFIRMED:fundingMode() === 'legacy-cancel' ? '已核對本次取消案的治理步驟，請重新預覽下一步' : el('mode').value === 'cap' ? '本次共享調額治理步驟已核對；不建立個案配額、不付款' : '本次治理步驟已核對，不代表本案已付款', VERIFIED_PAID:'本錢包RPC核對本案付款事件及狀態通過，仍須獨立對帳', EVIDENCE_INCOMPLETE:'觀衍付款事件相符，仍待銀行、受益人及原帳本餘額對帳，保留防重鎖', BANK_PAUSED:'已核對銀行暫停事件及狀態；本次未撥款'};
-  el('summary').textContent = `${receiptNames[result.status] || result.status}。原交易：${result.hash || hash}。`;
+  el('summary').textContent = `${receiptPlan?.allocationId ? '原案「' + receiptSubject + '」：' : ''}${(receiptNames[result.status] || result.status).replace(/本案/g, '該原案')}。原交易：${result.hash || hash}。`;
   status(fundingMode() === 'legacy-cancel' ? '取消案回執檢查完成，請查看上方結果。' : el('mode').value === 'cap' && el('role').value !== 'guanyin' ? '已完成本次共享調額唯讀回執檢查；以治理事件、合約版本與實際限額核對，不會自動送下一筆。' : '已完成本次唯讀回執檢查；請依詳細結果區分待確認、失敗、治理成功與本案Transfer核對，不以雜湊或餘額冒充付款。');
 }
 
@@ -2083,8 +2203,10 @@ async function watchFundingReceipt(watchedWallet) {
       || !sameAddress(pending.transaction?.from, connectedAccount)
       || !sameAddress(connectedAccount, roleChoices[el('role').value]?.address)) return;
     const cap = ['CAP_PROPOSE', 'CAP_APPROVE', 'CAP_EXECUTE'].includes(pending.kind);
+    const selected = el('case').value === '' ? null : importedCases[Number(el('case').value)];
     if (!(pending.flowType === 'SHARED_CAP' && cap || pending.flowType === 'FIXED_ALLOCATION'
-      && (cap || sameAddress(pending.plan?.beneficiary, FUNDING_FORMAL.guanyanBeneficiary)))) return;
+      && (cap || selected?.allocationId === pending.plan?.allocationId && Boolean(selected)
+        || sameAddress(pending.plan?.beneficiary, FUNDING_FORMAL.guanyanBeneficiary)))) return;
     const generation = formGeneration, role = el('role').value;
     watch = {pending:JSON.stringify(pending), isCurrent:() => receiptWatch === watch
       && generation === formGeneration && wallet === watchedWallet && role === el('role').value};
@@ -2095,7 +2217,7 @@ async function watchFundingReceipt(watchedWallet) {
       const result = await watchedWallet.reconcile(pending.hash, watch);
       if (!watch.isCurrent() || result.status === 'WATCH_STOPPED') return;
       if (result.status !== 'PENDING' || attempt === 4) {
-        showFundingReceipt(result, pending.hash);
+        showFundingReceipt(result, pending.hash, pending.plan);
         return;
       }
       await new Promise(resolve => setTimeout(resolve, 4000));
@@ -2115,9 +2237,10 @@ el('receipt').onclick = () => fundingMode() === 'legacy-cancel' ? prepareFunding
   const hash = el('txhash').value.trim();
   if (hash && !/^0x[0-9a-fA-F]{64}$/.test(hash)) throw Error('交易雜湊格式不正確。');
   receiptWatch = null;
+  const receiptPlan = reconcilingWallet.readPending()?.plan;
   const result = await reconcilingWallet.reconcile(hash || undefined);
   if (reconcilingGeneration !== formGeneration || reconcilingWallet !== wallet || reconcilingRole !== el('role').value) return;
-  showFundingReceipt(result, hash);
+  showFundingReceipt(result, hash, receiptPlan);
 });
 for (const name of ['beneficiary','amount']) el(name).addEventListener('input', invalidate);
 for (const event of ['input','change']) el('wallet').addEventListener(event, clearWalletConnection);
@@ -2152,18 +2275,7 @@ el('case').addEventListener('change', () => {
   el('beneficiary').readOnly = el('amount').readOnly = Boolean(chosen);
   if (chosen) { el('beneficiary').value = chosen.beneficiary; el('amount').value = chosen.amountKaios; }
 });
-el('file').addEventListener('change', () => run(async () => {
-  invalidate();
-  const file = el('file').files?.[0];
-  if (!file || file.size > 5 * 1024 * 1024) throw Error('請選擇5MiB以內的既有原案報告或JSON；不需要私鑰檔。');
-  const source = await file.text();
-  let data;
-  try { data = JSON.parse(source); } catch {
-    const block = source.match(/```json\s*([\s\S]*?)```/i);
-    if (!block) throw Error('未找到原案JSON。請用原R7報告或原checkpoint，不要選環境變數／私鑰檔。');
-    data = JSON.parse(block[1]);
-  }
-  const pack = data.current_continuity?.financial_transaction_package_current?.package || data.package || data;
+function loadOriginalFundingCases(pack) {
   if (!Array.isArray(pack.cases) || !pack.cases.length || pack.cases.length > 20) throw Error('未找到原交易包cases；不會推測地址或新建案件。');
   const checked = pack.cases.map(row => {
     const plan = buildLifeResourcePlan({beneficiary:row.beneficiary, amount:String(row.amountKaios)});
@@ -2177,7 +2289,39 @@ el('file').addEventListener('change', () => run(async () => {
   checked.forEach((row, index) => el('case').append(new Option(`${row.name} · ${row.beneficiary} · ${row.amountKaios} KAIOS`, String(index))));
   el('beneficiary').readOnly = el('amount').readOnly = false;
   status(`已在本機記憶體核對${checked.length}個原案；未上傳、未簽署、未建立配額。請選擇其中一案。`);
+}
+el('file').addEventListener('change', () => run(async () => {
+  invalidate();
+  const file = el('file').files?.[0];
+  if (!file || file.size > 5 * 1024 * 1024) throw Error('請選擇5MiB以內的既有原案報告或JSON；不需要私鑰檔。');
+  const source = await file.text();
+  let data;
+  try { data = JSON.parse(source); } catch {
+    const block = source.match(/```json\s*([\s\S]*?)```/i);
+    if (!block) throw Error('未找到原案JSON。請用原R7報告或原checkpoint，不要選環境變數／私鑰檔。');
+    data = JSON.parse(block[1]);
+  }
+  loadOriginalFundingCases(data.current_continuity?.financial_transaction_package_current?.package || data.package || data);
 }));
+// The five original Human-designated cases, not a new allocation campaign.
+const originalFiveFundingCases = [
+  ['高翠蘭', '0x60Ed5A562642cbC303D720507a37170116707259', '0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428'],
+  ['知蘭', '0x9B72FA6A8827ccE211239B0b0E739c98851D1B78', '0xbb183e13332a2594ffdf45b0501f4a26561378e167450b9de19ebf70cdd9f3c7'],
+  ['豬八戒', '0xc5d59016b380a0757b5A6A4d9037E9ecd578471C', '0x2ac4cf224f86e93394833036e96068523e5b71295c5c535d82f2efa3f2827359'],
+  ['白寧', '0x21ce2065b0171a26B5F9EFE2268cBdce08e94922', '0x58114b263f63088c52711b13bc7b370fc71ab63b45470fd45ef610d237775dd9'],
+  ['澄序', '0x651ff5e7C183D0d3D40C9cE8a86Be246111521cd', '0x7132c7a0eb6b887a7f373e646f3f84b5e64f64379899399e18e393fb7b65ff81']
+];
+el('load-five').onclick = () => run(async () => {
+  if (!['cap', 'fixed'].includes(fundingMode())) return;
+  invalidate();
+  loadOriginalFundingCases({cases: originalFiveFundingCases.map(([name, beneficiary, allocationId]) => ({name, beneficiary, allocationId,
+    amountKaios:'1080000', purposeHash:buildLifeResourcePlan({beneficiary, amount:'1080000'}).purposeHash}))});
+  el('mode').value = 'fixed';
+  if (wallet && connectedProvider) wallet = makeWallet(connectedProvider);
+  syncFundingMode(); updateFundingLinks();
+  el('case').value = '0'; el('case').dispatchEvent(new Event('change'));
+  status('原五筆已核對載入，各108萬、合計540萬 KAIOS。已選第一案；先更新進度，逐筆由必要角色確認。未送出交易。');
+});
 function connectNativeProvider(provider, name) {
   const alreadyAuthorized = provider === connectedProvider && connectedAccounts.length > 0;
   const preferred = alreadyAuthorized ? connectedAccount : undefined;
