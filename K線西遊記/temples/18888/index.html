@@ -2525,7 +2525,8 @@ async function continueFiveFunding(session) {
       : '本角色目前可辦步驟已完成。' + waiting.join('；') + '。換角色或到期後，重新勾選同一入口接續。';
     await performFiveStep(session, session.fixedWallet, next.candidate, originalFiveFundingCases[next.index][0], 'fixed');
   }
-  return '本次已達原五案有限接續上限。請只讀更新後重新核對，沒有自動重送。';
+  return fiveReceipts.size === 5 ? '原五筆付款回執全部核對通過，合計 5,400,000 KAIOS。'
+    : '本次已達原五案有限接續上限。請只讀更新後重新核對，沒有自動重送。';
 }
 el('five-ack').addEventListener('change', () => {
   if (fiveSession) { stopFiveFunding('接續確認已撤回，接續已停止；原交易保留。'); refreshFiveControls(); return; }

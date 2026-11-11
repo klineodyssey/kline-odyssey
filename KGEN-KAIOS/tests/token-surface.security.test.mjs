@@ -1256,6 +1256,13 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.match(ui.node('five-paid-count').textContent,/5 \/ 5/);
       assert.match(ui.node('five-status').textContent,/付款回執全部核對通過.*5,400,000/);
       assert.equal(ui.pending(),null);
+      const bounded=await mount({visible:true,role:'jade',account:formal.jade,guided:{cap:'approved',phase:'proposed'}});
+      await startFive(bounded);
+      assert.equal(bounded.requests.length,16,bounded.node('five-status').textContent);
+      assert.equal(bounded.receiptCalls.length,16);
+      assert.match(bounded.node('five-paid-count').textContent,/5 \/ 5/);
+      assert.match(bounded.node('five-status').textContent,/付款回執全部核對通過.*5,400,000/);
+      assert.equal(bounded.pending(),null);
       const observed=await mount({visible:true,guided:{phase:'done'}});
       await startFive(observed);
       assert.equal(observed.requests.length,0); assert.match(observed.node('five-paid-count').textContent,/0 \/ 5/);
