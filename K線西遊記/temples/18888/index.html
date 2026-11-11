@@ -1478,13 +1478,13 @@ Object.assign(reasons, {
   PENDING_STORAGE_CORRUPT_DO_NOT_RESEND:'待確認交易紀錄無法讀取，只提供唯讀預覽。'
 });
 const invalidate = () => { formGeneration++; receiptWatch = null; legacyReceiptNotice = null; wallet?.invalidate?.(); preview = null; previewWallet = null; previewRole = null; el('ack').checked = false; el('ack').disabled = true; el('send').disabled = true; el('send').textContent = '先連接並預覽；由我本人到錢包確認'; showRole(); };
-// Original case files and the confirmation checkbox cannot attest to the full bank ledger.
-// Until the custodian evidence can be verified, retain unsigned previews and receipt reads.
+// The shared-cap flow follows its own role, runtime, UTC-spend and proposal checks.
+// Fixed-case cap changes still require the original case accounting review.
 function fundingReviewBlocker({ plan, step }) {
   if ((plan.type === 'BANK_PAUSE' || isLegacyCapCancelPlan(plan)) && typeof globalThis.navigator?.locks?.request !== 'function') {
     return 'WEB_LOCKS_REQUIRED_NO_SEND';
   }
-  if ((!step && plan.type === 'SHARED_CAP') || ['CAP_PROPOSE', 'CAP_APPROVE', 'CAP_EXECUTE'].includes(step?.kind)) {
+  if (plan.type !== 'SHARED_CAP' && ['CAP_PROPOSE', 'CAP_APPROVE', 'CAP_EXECUTE'].includes(step?.kind)) {
     return 'BANK_COMMITMENTS_NOT_VERIFIED';
   }
   if (sameAddress(plan.beneficiary, FUNDING_FORMAL.guanyanBeneficiary)) {
@@ -2129,7 +2129,7 @@ function syncFundingMode() {
   }
   el('amount-help').hidden = pause || cap || cancel;
   el('ack-row').hidden = cancel;
-  el('ack-text').textContent = pause ? '我已核對正式觀音帳戶及銀行暫停權限，了解這筆只會緊急暫停銀行，不會付款、提款或解除暫停；仍由本人在錢包確認。' : cap ? '我已核對共享模組每筆／每日各10,000,000 KAIOS與原治理提案，了解調額會重設當期共享用量，不代表個人額度、個案批准或付款；仍由本人在錢包確認。本勾選不是合約授權。' : fundingAcknowledgment;
+  el('ack-text').textContent = pause ? '我已核對正式觀音帳戶及銀行暫停權限，了解這筆只會緊急暫停銀行，不會付款、提款或解除暫停；仍由本人在錢包確認。' : cap ? '我已核對每筆／每日共享上限各 10,000,000 KAIOS。生效會重設當期共享用量，既有符合條件的配額也可使用新限額付款，由本人在錢包確認。' : fundingAcknowledgment;
   el('prepare').textContent = pause ? '只讀核對觀音權限並預覽暫停' : cap ? '只讀核對並預覽共享一千萬調額' : cancel ? '只讀核對並預覽取消舊共享限額' : '讀查並預覽下一步';
   el('summary').textContent = pause ? '已選觀音緊急暫停；不需要填入收款人或金額。請在錢包選擇正式觀音帳戶，再讀查權限。' : cap ? '已選共享一千萬調額；不需原案檔、受益人或個案金額。每筆／每日限額各10,000,000 KAIOS，僅處理治理，不會付款。' : cancel ? '已選取消舊共享限額。連接所選角色的錢包後，頁面會核對下一步。' : '流程或角色已變更，舊預覽與勾選作廢；請在錢包選擇對應帳戶後重新預覽。';
 }
