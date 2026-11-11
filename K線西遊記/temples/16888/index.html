@@ -1123,7 +1123,14 @@ K線西遊記｜16888 廣寒宮 OG Engine V3.7.12｜Yuelao Backend Test Patch
 .bet-live-panel .bp-btn.buy{ background:rgba(60,220,120,.16); color:#d8ffe6; }
 .bet-live-panel .bp-btn.sell{ background:rgba(255,110,110,.16); color:#ffdede; }
 .bet-live-panel .bp-status{ margin-top:10px; min-height:18px; font-size:12px; color:#cfe8ff; }
-@media (max-width: 820px){ .bet-live-panel{ top:auto; bottom:96px; right:12px; width:min(360px,92vw);} }
+#manual-order-state{ overflow-wrap:anywhere; white-space:normal; }
+@media (max-width: 820px), (max-height: 500px){
+  .bet-live-panel{ top:auto; bottom:96px; right:12px; width:min(360px,92vw); box-sizing:border-box; max-height:calc(100vh - 192px); overflow-y:auto; }
+}
+@media (max-height: 500px){
+  #universe-nav{ max-height:calc(100vh - 145px); overflow-y:auto; overscroll-behavior:contain; padding:2px; }
+  #universe-nav > button{ flex-shrink:0; }
+}
 
 
 /* ===== V3.7.12 leaderboard panel ===== */
@@ -3819,6 +3826,11 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
     <button class="bp-btn" type="button" onclick="roundHistory && roundHistory.open()">月老歷史</button>
   </div>
   <div class="bp-status" id="bp-status">待命中</div>
+  <div class="bp-status" id="manual-order-state" role="status" hidden>
+    <span id="manual-order-message"></span>
+    <a id="manual-order-link" target="_blank" rel="noopener noreferrer" hidden>查看原交易</a>
+    <button id="manual-order-receipt" type="button" class="bp-mini-btn" hidden>核對原交易</button>
+  </div>
 </div>
 
 
@@ -7865,6 +7877,7 @@ if(chainLive){
     "function configLocked() view returns (bool)",
     "function vowWindowSec() view returns (uint32)",
     "function loveWindowSec() view returns (uint32)",
+    "event OrderPlaced(address indexed user,uint8 side,uint256 amountIn,uint256 feeTotal,uint256 feeToTreasury,uint256 feeToPool,uint256 stake)",
     "event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)"
   ];
 
@@ -7952,31 +7965,170 @@ if(chainLive){
       return null;
     }
   }
-  function parseOrderResolved(receipt){
+  const MANUAL_ORDER_KEY = "KGEN_16888_MANUAL_ORDER_PENDING";
+  const orderButtons = '[onclick="betPanel.buy()"],[onclick="betPanel.sell()"],[onclick="web3.place(0)"],[onclick="web3.place(1)"]';
+  const orderButtonStates = new Map();
+  let orderBusy = false, pendingOrder = null, unrecordedBroadcast = null, orderGeneration = 0, watchedProvider = null;
+  const sameAddress = (a,b) => typeof a === "string" && typeof b === "string" && a.toLowerCase() === b.toLowerCase();
+  const isHash = value => /^0x[0-9a-fA-F]{64}$/.test(value || "");
+
+  function readPendingOrder(){
+    const raw = localStorage.getItem(MANUAL_ORDER_KEY);
+    if(raw === null) return null;
+    const item = JSON.parse(raw);
+    if(item?.version !== 1 || typeof item.intentId !== "string" || !item.intentId || item.chainId !== 56 || !sameAddress(item.to,LIVE_UNIVERSE_16888)
+      || !/^0x[0-9a-fA-F]{40}$/.test(item.account || "") || ![0,1].includes(item.side)
+      || !/^[1-9][0-9]*$/.test(item.amountIn || "") || (item.hash !== null && !isHash(item.hash))){
+      throw Error("原下單紀錄無法核對，請先保留紀錄查證。");
+    }
+    return item;
+  }
+  function savePendingOrder(item,previous=null){
+    const expected = previous === null ? null : JSON.stringify(previous);
+    if(localStorage.getItem(MANUAL_ORDER_KEY) !== expected) throw Error("原下單紀錄已變更，請保留原交易查證。");
+    pendingOrder = item;
+    const raw = JSON.stringify(item);
+    localStorage.setItem(MANUAL_ORDER_KEY,raw);
+    if(localStorage.getItem(MANUAL_ORDER_KEY) !== raw) throw Error("原下單紀錄保存失敗，請先查證錢包。");
+    if(unrecordedBroadcast?.intentId === item.intentId && unrecordedBroadcast.hash === item.hash) unrecordedBroadcast = null;
+    renderManualOrder();
+  }
+  function clearPendingOrder(item){
+    if(localStorage.getItem(MANUAL_ORDER_KEY) !== JSON.stringify(item)) throw Error("原下單紀錄已變更，請重新核對。");
+    localStorage.removeItem(MANUAL_ORDER_KEY);
+    if(localStorage.getItem(MANUAL_ORDER_KEY) !== null) throw Error("原下單紀錄尚未解除，請先查證。");
+    pendingOrder = null;
+    if(unrecordedBroadcast?.intentId === item.intentId) unrecordedBroadcast = null;
+  }
+  function renderManualOrder(message){
+    const item = unrecordedBroadcast || pendingOrder;
+    const locked = orderBusy || item !== null;
+    for(const button of document.querySelectorAll(orderButtons)){
+      if(locked){if(!orderButtonStates.has(button)) orderButtonStates.set(button,button.disabled);button.disabled = true;}
+      else if(orderButtonStates.has(button)){button.disabled = orderButtonStates.get(button);orderButtonStates.delete(button);}
+    }
+    const panel = $("manual-order-state"), link = $("manual-order-link"), check = $("manual-order-receipt");
+    if(panel) panel.hidden = !locked;
+    setText("manual-order-message",message || (item?.hash
+      ? `原帳戶 ${item.account}｜${item.side === 0 ? "UP" : "DOWN"} ${ethers.utils.formatUnits(item.amountIn,18)} KGEN｜原交易待核對：${item.hash}。`
+      : item ? "錢包請求結果尚未確認，請先查錢包原請求。" : "正在核對本次手動下單，請稍候。"));
+    if(link){link.hidden = !isHash(item?.hash);if(!link.hidden) link.href = "https://bscscan.com/tx/" + item.hash;}
+    if(check){check.hidden = !isHash(item?.hash);check.disabled = orderBusy;}
+  }
+  async function withManualOrderLock(action){
+    if(typeof navigator.locks?.request !== "function") throw Error("此瀏覽器缺少安全分頁鎖，請使用支援的錢包瀏覽器核對原單。");
+    return navigator.locks.request(MANUAL_ORDER_KEY,{mode:"exclusive",ifAvailable:true},lock => {
+      if(!lock) throw Error("另一分頁正在處理原下單，請先等待錢包結果。");
+      return action();
+    });
+  }
+  function invalidateManualOrder(){
+    orderGeneration++;
+    if(orderBusy || pendingOrder) renderManualOrder("錢包帳戶或鏈別已變更。請先核對原交易，再重新下單。" + (pendingOrder?.hash || ""));
+  }
+  function watchManualOrderProvider(provider){
+    if(provider === watchedProvider) return;
+    for(const event of ["accountsChanged","chainChanged","disconnect"]){
+      watchedProvider?.removeListener?.(event,invalidateManualOrder);
+      provider?.on?.(event,invalidateManualOrder);
+    }
+    watchedProvider = provider;
+  }
+  async function manualOrderIdentity(context){
+    const [chain,accounts,account] = await Promise.all([
+      context.request("eth_chainId"),context.request("eth_accounts"),context.signer.getAddress()
+    ]);
+    if(context.generation !== orderGeneration || window.web3 !== context.wallet || web3.signer !== context.signer
+      || web3.provider !== context.walletProvider || context.signer.provider !== context.provider
+      || (context.provider.provider || web3.provider) !== context.transport || BigInt(chain) !== 56n
+      || !accounts?.some(address => sameAddress(address,account))
+      || (context.account && !sameAddress(context.account,account))) throw Error("錢包連線已變更，請重新核對帳戶與 BSC 56。");
+    return account;
+  }
+  function parseOrderResolved(receipt,item){
+    if(!isHash(receipt?.transactionHash) || !sameAddress(receipt.transactionHash,item.hash)
+      || !sameAddress(receipt.from,item.account) || !sameAddress(receipt.to,item.to)
+      || !isHash(receipt.blockHash) || !Number.isSafeInteger(Number(receipt.blockNumber)) || Number(receipt.blockNumber) <= 0) return null;
+    if(Number(receipt.status) === 0) return {reverted:true};
+    if(Number(receipt.status) !== 1) return null;
     try{
       const iface = new ethers.utils.Interface(ABI_UNIVERSE_SAFETY);
+      const placed = [], resolved = [];
       for(const log of receipt.logs || []){
         if((log.address || "").toLowerCase() !== LIVE_UNIVERSE_16888.toLowerCase()) continue;
         try{
           const parsed = iface.parseLog(log);
-          if(parsed && parsed.name === "OrderResolved"){
-            const a = parsed.args;
-            return {
+          if(parsed?.name === "OrderPlaced") placed.push(parsed.args);
+          if(parsed?.name === "OrderResolved") resolved.push(parsed.args);
+        }catch(_){ }
+      }
+      if(placed.length === 1 && resolved.length === 1){
+        const p = placed[0], a = resolved[0];
+        if(sameAddress(p.user,item.account) && Number(p.side) === item.side && p.amountIn.toString() === item.amountIn
+          && sameAddress(a.user,item.account) && Number(a.side) === item.side){
+          return {
               user: a.user,
               side: Number(a.side),
               outcome: Number(a.outcome),
               win: !!a.win,
               payout: fmt(a.payout)
             };
-          }
-        }catch(_){ }
+        }
       }
     }catch(e){ console.warn(e); }
     return null;
   }
+  function settleManualOrder(receipt,item){
+    const result = parseOrderResolved(receipt,item);
+    if(!result) throw Error("原交易回執或下單事件未完整對上，請保留原交易查證。");
+    clearPendingOrder(item);
+    status(result.reverted ? "原交易已確認失敗，可重新核對後手動下單。"
+      : `原帳戶 ${item.account} 鏈上結算完成｜${result.side === 0 ? "UP" : "DOWN"}｜${result.win ? "WIN" : "LOSE"}｜payout ${kgen(result.payout,4)}。`);
+    return result;
+  }
+  async function reconcileManualOrder(){
+    if(orderBusy) return;
+    orderBusy = true;
+    let message;
+    try{
+      await withManualOrderLock(async()=>{
+      let item = readPendingOrder();pendingOrder = item;
+      if(!item) return;
+      if(unrecordedBroadcast){
+        if(unrecordedBroadcast.intentId !== item.intentId) throw Error("另有原下單紀錄，請先保留尚未保存的交易雜湊。");
+        const known = unrecordedBroadcast;
+        savePendingOrder(known,item);item = known;
+      }
+      if(!isHash(item.hash)) throw Error("請先在錢包查原請求結果，尚無已核對的原交易雜湊。");
+      renderManualOrder("正在唯讀核對原交易：" + item.hash);
+      const provider = web3.signer?.provider || getProvider();
+      if(BigInt(await provider.send("eth_chainId",[])) !== 56n) throw Error("請切回 BSC 56 核對原交易。");
+      const receipt = await provider.getTransactionReceipt(item.hash);
+      if(BigInt(await provider.send("eth_chainId",[])) !== 56n) throw Error("鏈別已變更，請切回 BSC 56 核對原交易。");
+      if(!receipt){message = "原交易仍待確認：" + item.hash;return;}
+      if(!parseOrderResolved(receipt,item)) throw Error("回填雜湊與原下單回執未完整對上，請保留原紀錄。");
+      settleManualOrder(receipt,item);
+      });
+    }catch(e){message = e.message + " " + (unrecordedBroadcast?.hash || pendingOrder?.hash || "");}
+    finally{orderBusy = false;renderManualOrder(message);}
+  }
   async function safePlace(side){
     if(!window.web3) return alert("web3 尚未初始化");
+    if(orderBusy || pendingOrder || unrecordedBroadcast){renderManualOrder();return;}
+    orderBusy = true;
+    try{return await withManualOrderLock(()=>placeManualOrder(side));}
+    catch(e){
+      try{pendingOrder = readPendingOrder();}catch(_){pendingOrder = {invalid:true};}
+      status(e.message);return null;
+    }
+    finally{orderBusy = false;renderManualOrder();}
+  }
+  async function placeManualOrder(side){
+    let context = null, item = null, broadcastRequested = false, explicitlyRejected = false;
     try{
+      pendingOrder = readPendingOrder();
+      if(pendingOrder){renderManualOrder();return;}
+      renderManualOrder();
       universeAddr();
       if((web3.UNIVERSE || "").toLowerCase() === HEART_12345_BLOCKED){
         alert("地址錯誤：目前是 12345 Heart，不可作為 16888 Universe。已自動鎖回 16888 正式地址。");
@@ -7988,8 +8140,15 @@ if(chainLive){
         status("DEMO 模式：此為本機模擬，不代表鏈上輸贏。");
         return web3.demoOrder(side, web3.parseAmt());
       }
-      const okChain = await web3.ensureBSC();
-      if(!okChain) return alert("請切到 BNB Smart Chain (BSC) 再操作。");
+      if(![0,1].includes(side)) throw Error("請選擇 UP 或 DOWN。");
+      const signer = web3.signer, provider = signer?.provider;
+      const transport = provider?.provider || web3.provider;
+      if(!signer || !provider || (!transport?.request && !provider.send)) throw Error("請先連接本人錢包。");
+      const request = (method,params=[]) => transport?.request ? transport.request({method,params}) : provider.send(method,params);
+      context = {wallet:web3,walletProvider:web3.provider,signer,provider,transport,request,generation:orderGeneration};
+      watchManualOrderProvider(transport);
+      if(BigInt(await request("eth_chainId")) !== 56n) await request("wallet_switchEthereumChain",[{chainId:"0x38"}]);
+      context.account = await manualOrderIdentity(context);
 
       const amt = web3.parseAmt();
       const params = await getParams();
@@ -8005,24 +8164,62 @@ if(chainLive){
         return alert("POOL_THIN：本單若勝出會使獎池低於 MIN_FLOOR 1688 KGEN，合約會拒絕。");
       }
 
+      await manualOrderIdentity(context);
+      if(readPendingOrder()) throw Error("已有原下單紀錄，請先核對。");
+      if(typeof crypto.randomUUID !== "function") throw Error("此瀏覽器無法建立唯一原單識別，請使用支援的錢包瀏覽器。");
+      item = {version:1,intentId:crypto.randomUUID(),chainId:56,to:LIVE_UNIVERSE_16888,account:context.account,side,amountIn:amt.toString(),hash:null};
+      savePendingOrder(item);
       status((side===0 ? "UP ↑" : "DOWN ↓") + " 錢包請求已送出；確認前不顯示輸贏結果。");
-      const uni = web3.cUNI();
+      const expectedData = new ethers.utils.Interface(ABI_UNIVERSE_SAFETY).encodeFunctionData("placeOrder",[side,amt]);
+      const guardedProvider = new ethers.providers.Web3Provider({request:async args=>{
+        if(args.method === "eth_sendTransaction"){
+          await manualOrderIdentity(context);
+          const transaction = args.params?.[0];
+          if(context.generation !== orderGeneration || window.web3 !== context.wallet || web3.signer !== context.signer
+            || web3.provider !== context.walletProvider || context.signer.provider !== context.provider
+            || (context.provider.provider || web3.provider) !== context.transport || !sameAddress(transaction?.from,context.account)
+            || !sameAddress(transaction?.to,LIVE_UNIVERSE_16888) || transaction.data !== expectedData
+            || BigInt(transaction.value || "0x0") !== 0n) throw Error("原下單或錢包狀態已變更，停止送出。");
+          if(localStorage.getItem(MANUAL_ORDER_KEY) !== JSON.stringify(item)) throw Error("原下單紀錄已變更，停止送出。");
+          broadcastRequested = true;
+          let hash;
+          try{hash = await request(args.method,args.params);}
+          catch(error){explicitlyRejected = Number(error.code) === 4001;throw error;}
+          if(isHash(hash)){
+            const previous = item;item = {...item,hash};unrecordedBroadcast = item;
+            savePendingOrder(item,previous);
+          }
+          return hash;
+        }
+        return request(args.method,args.params || []);
+      }},"any");
+      const uni = new ethers.Contract(LIVE_UNIVERSE_16888,ABI_UNIVERSE_SAFETY,guardedProvider.getSigner(context.account));
       const tx = await uni.placeOrder(side, amt);
+      if(!isHash(tx?.hash)) throw Error("錢包回覆未確認，請先查原請求。");
+      if(!sameAddress(item.hash,tx.hash)) throw Error("錢包回覆與原送出雜湊不符，請先查原交易。");
+      if(context.generation !== orderGeneration) throw Error("錢包連線已變更，原交易待核對。");
       status("交易已送出：" + tx.hash.slice(0,10) + "… 等待 confirmed。");
       const receipt = await tx.wait();
-      const r = parseOrderResolved(receipt);
-      if(r){
-        status("鏈上結算完成｜" + (r.side===0?"UP":"DOWN") + " → outcome " + (r.outcome===0?"UP":"DOWN") + "｜" + (r.win?"WIN":"LOSE") + "｜payout " + kgen(r.payout,4));
-      }else{
-        status("交易 confirmed，但未解析到 OrderResolved；請看 BscScan event。");
-      }
+      if(context.generation !== orderGeneration) throw Error("錢包連線已變更，原交易待核對。");
+      const r = settleManualOrder(receipt,item);
       await refreshSafety();
       try{ await web3.refresh(); }catch(_){ }
       return r;
     }catch(e){
       console.warn("[16888 safety] place failed/cancelled", e);
-      status("交易取消或失敗；未 confirmed 不顯示、不計入鏈上結果。");
-      throw e;
+      if(broadcastRequested && item && !item.hash && isHash(e.transactionHash)){
+        const previous = item;item = {...item,hash:e.transactionHash};unrecordedBroadcast = item;
+        try{savePendingOrder(item,previous);}catch(_){ }
+      }
+      if(item && !item.hash && (!broadcastRequested || explicitlyRejected)){
+        try{
+          if(!broadcastRequested && localStorage.getItem(MANUAL_ORDER_KEY) === null) pendingOrder = null;
+          else clearPendingOrder(item);
+        }catch(_){ }
+      }
+      const known = unrecordedBroadcast || pendingOrder;
+      status(known ? "原下單結果待核對，請保留原交易：" + (known.hash || "錢包請求尚無雜湊") : e.message || "本次下單已停止，請重新核對。");
+      return null;
     }
   }
 
@@ -8066,6 +8263,16 @@ if(chainLive){
     ensureSafetyPanel();
     patchWeb3();
     patchBetPanel();
+    try{pendingOrder = readPendingOrder();}catch(e){pendingOrder = {invalid:true};status(e.message);}
+    renderManualOrder();
+    const receiptButton = $("manual-order-receipt");
+    if(receiptButton) receiptButton.onclick = reconcileManualOrder;
+    window.addEventListener("storage",event => {
+      if(event.key !== MANUAL_ORDER_KEY) return;
+      invalidateManualOrder();
+      try{pendingOrder = readPendingOrder();}catch(_){pendingOrder = {invalid:true};}
+      renderManualOrder();
+    });
     refreshSafety();
     setInterval(function(){ patchWeb3(); patchBetPanel(); refreshSafety(); }, 20000);
   }
