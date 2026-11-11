@@ -479,7 +479,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     const controller = source.split(BANK_CONTROLLER_MARKER)[1].split(BANK_CONTROLLER_END)[0];
     const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
     const mount = async (options = {}) => {
-      const nodes = new Map(), providerListeners = new Map(), requests = [], wallets = [], receiptCalls = [], timers = [];
+      const nodes = new Map(), providerListeners = new Map(), requests = [], wallets = [], receiptCalls = [], prepareCalls = [], timers = [];
       const state = { account: options.account ?? formal.mother, accounts: options.accounts, chainId: options.chainId ?? 56, pauser: options.pauser ?? false };
       const exposedAccounts = () => state.accounts ?? (state.account ? [state.account] : []);
       const rpc = [], mobileLog = [], storageFixture = storage(), providerEvents = [], connectionTimers = new Set();
@@ -511,7 +511,10 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       let authorized = !options.needsAuthorization;
       const provider = { request: async ({ method, params }) => {
         rpc.push({ method, params });
-        if (method === "eth_requestAccounts") authorized = true;
+        if (method === "eth_requestAccounts") {
+          if (options.requestAccountsError) throw Object.assign(Error("Wallet rejected connection"), { code: options.requestAccountsError });
+          authorized = true;
+        }
         if (method === "eth_accounts" || method === "eth_requestAccounts") return authorized ? exposedAccounts() : [];
         if (method === "eth_chainId") return `0x${state.chainId.toString(16)}`;
         if (method === "wallet_requestPermissions") {
@@ -570,6 +573,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         invalidate() { this.invalidatePreview(); }
         async connect() { return [state.account]; }
         async prepare(nextPlan) {
+          prepareCalls.push({ plan: nextPlan, wallet: this });
           const wait = this.next; this.next = null;
           if (wait) await wait.promise;
           const pause = nextPlan?.type === "BANK_PAUSE";
@@ -668,7 +672,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         window.ethereum = provider;
         if (announce) windowEvents.get("ethereum#initialized")?.();
       };
-      return { node, wallets, requests, state, providerListeners, receiptCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers,
+      return { node, wallets, requests, state, providerListeners, receiptCalls, prepareCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers,
         injectMetaMask, setVisibility, pageShow: () => windowEvents.get("pageshow")(), pageHide: () => windowEvents.get("pagehide")(),
         mobile, mobileListeners, probe: context.uiProbe };
     };
@@ -1066,19 +1070,101 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     }
 
     const settleWallet = () => new Promise(resolve => setImmediate(resolve));
+    await t.test("authorized fixed connection and case/mode changes preview once without acknowledging or sending", async () => {
+      const ui = await mount({ visible: true });
+      assert.equal(ui.prepareCalls.length, 1, "successful connection uses the original read-only preparation");
+      await ui.node("load-five").onclick(); await settleWallet();
+      assert.equal(ui.probe.preview().plan.allocationId, "0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428");
+      assert.equal(ui.probe.preview().plan.amountKaios, "1080000");
+      assert.match(ui.node("summary").textContent, /下一步/);
+      assert.doesNotMatch(ui.node("status").textContent, /離線參數未驗證/);
+      assert.equal(ui.node("ack").checked, false); assert.equal(ui.node("send").disabled, true);
+      ui.node("case").value = "1"; ui.node("case").emit("change"); await settleWallet();
+      assert.equal(ui.probe.preview().plan.allocationId, "0xbb183e13332a2594ffdf45b0501f4a26561378e167450b9de19ebf70cdd9f3c7");
+      ui.node("mode").value = "cap"; ui.node("mode").emit("change"); await settleWallet();
+      assert.equal(ui.probe.preview().plan.type, "SHARED_CAP");
+      assert.equal(ui.node("ack").checked, false); assert.equal(ui.node("send").disabled, true);
+      assert.equal(ui.requests.length, 0);
+      const reads = ui.prepareCalls.length;
+      await ui.node("draft").onclick(); await settleWallet();
+      assert.equal(ui.prepareCalls.length, reads, "explicit offline draft stays offline");
+      assert.equal(JSON.parse(ui.node("preview").textContent).status, "OFFLINE_DRAFT_NOT_CHAIN_VERIFIED");
+    });
+    await t.test("one queued latest case replaces an in-flight stale preview and invalid contexts cannot preview", async () => {
+      const ui = await mount({ visible: true });
+      await ui.node("load-five").onclick(); await settleWallet();
+      const wait = deferred(), before = ui.prepareCalls.length;
+      ui.wallets.at(-1).next = wait;
+      const reading = ui.node("prepare").onclick();
+      assert.match(ui.node("status").textContent, /正在唯讀核對.*不會送出交易/);
+      for (const index of ["1", "2"]) { ui.node("case").value = index; ui.node("case").emit("change"); }
+      wait.resolve(); await reading; await settleWallet();
+      assert.equal(ui.prepareCalls.length, before + 2, "one stale read plus one latest selection read");
+      assert.equal(ui.probe.preview().plan.allocationId, "0x2ac4cf224f86e93394833036e96068523e5b71295c5c535d82f2efa3f2827359");
+      ui.state.chainId = 1; ui.providerListeners.get("chainChanged")("0x1"); await settleWallet();
+      assert.equal(ui.probe.preview(), null);
+      const wrongChainReads = ui.prepareCalls.length;
+      ui.node("case").value = "3"; ui.node("case").emit("change"); await settleWallet();
+      assert.equal(ui.prepareCalls.length, wrongChainReads);
+      ui.state.chainId = 56; ui.providerListeners.get("chainChanged")("0x38"); await settleWallet();
+      assert.equal(ui.probe.preview().plan.allocationId, "0x58114b263f63088c52711b13bc7b370fc71ab63b45470fd45ef610d237775dd9");
+      ui.node("role").value = "jade"; ui.node("role").emit("change"); await settleWallet();
+      assert.equal(ui.probe.preview(), null); assert.equal(ui.node("send").disabled, true);
+      ui.state.accounts = [formal.jade]; ui.providerListeners.get("accountsChanged")([formal.jade]);
+      ui.node("account").value = formal.jade; ui.node("account").emit("change"); await settleWallet();
+      assert.equal(ui.probe.preview().account, formal.jade);
+      assert.equal(ui.node("ack").checked, false); assert.equal(ui.requests.length, 0);
+    });
+    await t.test("connection rejection/cancellation and failed reads do not auto-retry or restore stale results", async () => {
+      const rejected = await mount({ visible: true, skipConnect: true, requestAccountsError: 4001 });
+      rejected.node("wallet").value = "0"; await rejected.node("connect").onclick(); await settleWallet();
+      assert.equal(rejected.prepareCalls.length, 0); assert.equal(rejected.probe.preview(), null);
+      for (const timeout of [false, true]) {
+        const accounts = deferred();
+        const ui = await mount({ visible: true, skipConnect: true, accountsWait: accounts });
+        ui.node("wallet").value = "0"; const connecting = ui.node("connect").onclick(); await settleWallet();
+        if (timeout) [...ui.connectionTimers][0](); else ui.node("cancel-connect").onclick();
+        await connecting; accounts.resolve([formal.mother]); await settleWallet();
+        assert.equal(ui.prepareCalls.length, 0); assert.equal(ui.probe.preview(), null); assert.equal(ui.requests.length, 0);
+      }
+      const ui = await mount({ visible: true }), wait = deferred(), before = ui.prepareCalls.length;
+      ui.wallets.at(-1).next = wait;
+      const reading = ui.node("prepare").onclick(); ui.pageShow();
+      wait.reject(Error("RPC_READ_UNAVAILABLE")); await reading; await settleWallet();
+      assert.equal(ui.prepareCalls.length, before + 1, "queued foreground restoration cannot retry a failed read");
+      assert.equal(ui.probe.preview(), null); assert.match(ui.node("status").textContent, /RPC_READ_UNAVAILABLE/);
+      assert.doesNotMatch(ui.node("connection").textContent, new RegExp(formal.mother, "i"), "unverified app return cannot display the old account as currently authorized");
+      assert.equal(ui.node("prepare").disabled, true);
+      await ui.node("connect").onclick();
+      assert.equal(ui.prepareCalls.length, before + 2, "an explicit reconnect may read again after the stopped failure");
+      assert.ok(ui.probe.preview()); assert.equal(ui.requests.length, 0);
+    });
+    await t.test("automatic preview preserves the original pending watcher and its error or receipt evidence", async () => {
+      for (const result of ["PENDING", "CONFIRMED", "MISMATCH", Error("receipt offline")]) {
+        const pending = { flowType: "SHARED_CAP", kind: "CAP_PROPOSE", hash: transactionHash,
+          transaction: { from: formal.mother }, plan: buildSharedCapPlan() };
+        const ui = await mount({ mode: "cap", visible: true, pending, receiptResults: [result] });
+        await settleWallet();
+        assert.equal(ui.receiptCalls.length, 1, "one original receipt check, without replacing its watch");
+        assert.equal(ui.prepareCalls.length, 0); assert.equal(ui.probe.preview(), null);
+        assert.equal(ui.wallets.at(-1).readPending(), pending); assert.equal(ui.requests.length, 0);
+        assert.equal(ui.node("send").disabled, true);
+        if (result instanceof Error) assert.match(ui.node("status").textContent, /查詢已停止.*receipt offline/);
+        else if (result !== "PENDING") assert.equal(JSON.parse(ui.node("preview").textContent).status, result);
+      }
+    });
     await t.test("OKX foreground and cold reload only restore current authorization", async () => {
       const ui = await mount({ okxOnly: true, role: "guanyin", account: formal.guanyin, pauser: true, skipConnect: true, visible: true });
       await settleWallet();
-      assert.match(ui.node("role-status").textContent, /目前帳戶已授權/);
-      assert.equal(ui.probe.preview(), null);
-      await ui.node("prepare").onclick();
       assert.match(ui.node("role-status").textContent, /鏈上角色讀查通過/);
+      assert.ok(ui.probe.preview(), "authorized cold reload automatically reads the current pause preview");
       assert.equal(JSON.parse(ui.node("preview").textContent).unsignedTransaction.data, "0x8456cb59");
       ui.pageShow();
       assert.doesNotMatch(ui.node("preview").textContent, /0x8456cb59/);
       await settleWallet();
+      assert.equal(JSON.parse(ui.node("preview").textContent).unsignedTransaction.data, "0x8456cb59");
       const wait = deferred();
-      ui.wallets[0].next = wait;
+      ui.wallets.at(-1).next = wait;
       const pendingPreview = ui.node("prepare").onclick();
       ui.setVisibility("hidden");
       ui.state.accounts = [alternate];
@@ -1107,7 +1193,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       ui.node("role").value = "mother"; ui.node("role").emit("change");
       wait.resolve([formal.mother]);
       await settleWallet();
-      assert.match(ui.node("role-status").textContent, /目前帳戶已授權/);
+      assert.match(ui.node("role-status").textContent, /鏈上角色讀查通過/);
       assert.match(ui.node("connection").textContent, new RegExp(formal.mother, "i"));
       assert.equal(ui.requests.length, 0);
     });
@@ -1117,7 +1203,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         const ui = await mount({ mobile: true, mobileCached: true, role: "guanyin", account: formal.guanyin, pauser: true, skipConnect: true, visible: true, ...options });
         await settleWallet();
         const confirmed = options.savedTopic === "cached-topic" && !options.mobileExpired && !options.mobileForeign;
-        assert.match(ui.node("role-status").textContent, confirmed ? /目前帳戶已授權/ : /實際帳戶：尚未連接/);
+        assert.match(ui.node("role-status").textContent, confirmed ? /鏈上角色讀查通過/ : /實際帳戶：尚未連接/);
         assert.ok(ui.mobileLog.every(method => ["init", "eth_accounts", "eth_chainId"].includes(method)));
         if (!confirmed) continue;
         await ui.node("prepare").onclick();
@@ -1424,12 +1510,13 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.match(ui.node("connection").textContent, /MetaMask.*chainId=56/);
       assert.ok(ui.rpc.every(call => ["eth_accounts", "eth_chainId"].includes(call.method)));
       ui.node("account").value = formal.mother; ui.node("account").emit("change");
+      await settleWallet();
       await ui.node("native-metamask").onclick({ preventDefault() {} });
       assert.equal(ui.node("account").value, formal.mother, "same provider preserves a selected non-first account");
       assert.ok(ui.rpc.every(call => ["eth_accounts", "eth_chainId"].includes(call.method)));
       await ui.node("prepare").onclick();
       assert.match(ui.node("summary").textContent, /操作帳戶/);
-      const failed = deferred(); ui.wallets[0].next = failed;
+      const failed = deferred(); ui.wallets.at(-1).next = failed;
       const rereading = ui.node("prepare").onclick();
       failed.reject(Error("RPC_READ_UNAVAILABLE")); await rereading;
       assert.doesNotMatch(ui.node("summary").textContent, /操作帳戶/);
