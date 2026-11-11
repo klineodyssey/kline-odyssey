@@ -740,9 +740,15 @@ async function verifyFundingPanel(){
   for(const [width,height] of [[390,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
     context.setDefaultTimeout(10000);context.setDefaultNavigationTimeout(20000);
-    const row={width,height,mode:'UI_ONLY_NO_REAL_WALLET',roles:[],screenshots:[],runtimeErrors:[],failedScripts:[],externalRequests:[],rpcMethods:[],networkWrites:[]};
+    const row={width,height,mode:'UI_ONLY_NO_REAL_WALLET',roles:[],recoveryHelpers:[],screenshots:[],runtimeErrors:[],failedScripts:[],externalRequests:[],rpcMethods:[],networkWrites:[]};
     report.profiles.push(row);
     const page=await context.newPage();
+    await context.addInitScript(()=>{
+      window.SpeechRecognition=undefined;window.webkitSpeechRecognition=undefined;
+      const state={starts:0,aborts:0,stops:0,microphoneRequests:0,availableCalls:[],instances:[]};
+      window.__fundingVoiceQA=state;
+      if(navigator.mediaDevices?.getUserMedia)navigator.mediaDevices.getUserMedia=async()=>{state.microphoneRequests++;throw Error('NO_REAL_MICROPHONE_IN_SYNTHETIC_QA');};
+    });
     const capture=async(name,viewport=false)=>{
       const prefix=`funding-${width}x${height}-${name}`;
       if(viewport){
@@ -772,6 +778,28 @@ async function verifyFundingPanel(){
       assert.match(await page.locator('#funding-connect-next').textContent(),/下一步.*WalletConnect/);
       assert.match(await page.locator('#funding-role-status').textContent(),/實際帳戶：尚未連接.*尚未核對本次角色/);
       assert.match(await page.locator('#funding-role-status').textContent(),/選擇角色不會授予權限/);
+      const guide=page.locator('#funding-legacy-guide'),next=page.locator('#funding-legacy-next'),help=page.locator('#funding-legacy-next-help');
+      assert.equal(await guide.isVisible(),true,`${label}: the original recovery helper is available in every funding flow`);
+      assert.equal(await next.isVisible(),true,`${label}: an unconnected checkbox has a visible recovery action`);
+      assert.equal(await next.getAttribute('aria-disabled'),'false',`${label}: a settled read does not leave the recovery link busy`);
+      assert.equal(await next.getAttribute('href'),'#funding-mobile',`${label}: the isolated browser uses the existing WalletConnect entry`);
+      assert.match(await help.textContent(),/WalletConnect|錢包/);
+      assert.equal(await guide.evaluate(element=>element.nextElementSibling?.id),'funding-ack-row','recovery guidance remains immediately beside the original acknowledgment');
+      const flow=await page.evaluate(()=>document.getElementById('funding-role').value==='guanyin'?'pause':document.getElementById('funding-mode').value);
+      if(['fixed','cap','pause'].includes(flow)&&!row.recoveryHelpers.some(item=>item.flow===flow)){
+        const geometry=await visibleAction('#funding-legacy-next','recovery-'+flow);
+        const notice=await reachable(page,'#funding-legacy-guide [data-qa-recovery-notice]');
+        assert.ok(notice.inView&&notice.hit&&notice.width>0&&notice.height>0,`${label}: the mock notice is visible in the recovery screenshot ${JSON.stringify(notice)}`);
+        const before={rpc:row.rpcMethods.length,writes:row.networkWrites.length};
+        await next.click();
+        assert.equal(new URL(page.url()).hash,'#funding-mobile','the recovery link reaches the original connection control');
+        assert.equal(await page.locator('#funding-mobile').isEnabled(),true,'the original connection control remains usable');
+        assert.equal(await page.locator('#funding-ack').isChecked(),false,'following recovery guidance never acknowledges a financial operation');
+        assert.equal(await page.locator('#funding-send').isDisabled(),true,'following recovery guidance never enables a financial request');
+        assert.equal(row.rpcMethods.length,before.rpc,'the unconnected helper never calls RPC');
+        assert.equal(row.networkWrites.length,before.writes,'the unconnected helper never sends a request body');
+        row.recoveryHelpers.push({flow,href:'#funding-mobile',sendDisabled:true,acknowledged:false,geometry,notice});
+      }
     };
     const visibleAction=async(selector,name)=>{
       const locator=page.locator(selector);
@@ -784,6 +812,66 @@ async function verifyFundingPanel(){
       assert.ok(geometry.top>=geometry.hudBottom&&geometry.bottom<=geometry.statusTop&&geometry.hit,`${name}: action must be visible and unobscured ${JSON.stringify(geometry)}`);
       const file=`funding-${width}x${height}-${name}-viewport.png`;await shot(page,file.replace(/\.png$/,''));row.screenshots.push(file);
       return geometry;
+    };
+    const verifyDiagnosticsAndLocalVoice=async()=>{
+      const diagnostics=page.locator('#funding-diagnostics'),voice=page.locator('#funding-voice-status');
+      assert.equal(await diagnostics.isVisible(),true,'the main action has visible automatic diagnostics without a provider');
+      const diagnosticText=await diagnostics.innerText();
+      assert.match(diagnosticText,/帳戶|帳號/);assert.match(diagnosticText,/鏈|網路/);assert.match(diagnosticText,/待確認|原交易/);
+      assert.match(diagnosticText,/未連接|尚未連接|未偵測|沒有.*錢包/);assert.match(diagnosticText,/下一步|請先|連接/);
+      await page.evaluate(()=>{
+        const notice=document.createElement('small');notice.dataset.qaVoiceNotice='true';notice.textContent='模擬驗收／未連真錢包／未錄音';
+        notice.style.cssText='display:block;margin:8px 0;color:#ffe1a3;font-weight:700;line-height:1.5;';
+        document.getElementById('funding-voice-status').before(notice);
+      });
+      const noVoiceAuthority=async label=>{
+        for(const id of ['ack','five-ack'])assert.equal(await page.locator('#funding-'+id).isChecked(),false,label+': voice never grants acknowledgment');
+        for(const id of ['send','five-start'])assert.equal(await page.locator('#funding-'+id).isDisabled(),true,label+': no financial authority without a wallet');
+        assert.equal(await page.evaluate(()=>__fundingVoiceQA.microphoneRequests),0,label+': no real microphone call');
+        assert.deepEqual(row.rpcMethods,[],label+': no RPC');assert.deepEqual(row.networkWrites,[],label+': no request body');
+      };
+      const captureVoice=async phase=>{
+        await page.locator('[data-qa-voice-notice]').scrollIntoViewIfNeeded();
+        const badge=await reachable(page,'[data-qa-voice-notice]');
+        assert.ok(badge.inView&&badge.hit&&badge.width>0&&badge.height>0,'the synthetic voice notice is visible '+JSON.stringify(badge));
+        const file=`funding-${width}x${height}-voice-${phase}`;await shot(page,file);row.screenshots.push(file+'.png');
+        return{badge,geometry:await noOverflow('voice '+phase)};
+      };
+      if(await page.locator('#funding-voice-start').isEnabled())await page.locator('#funding-voice-start').click();
+      await page.waitForFunction(()=>/不支援|無法|未提供|未確認.*語音|手動|文字/.test(document.getElementById('funding-voice-status').textContent));
+      assert.equal(await page.evaluate(()=>__fundingVoiceQA.starts),0,'unsupported speech never starts recognition');
+      await noVoiceAuthority('unsupported recognition');
+      row.voice={mode:'SYNTHETIC_LOCAL_RECOGNITION_NO_REAL_AUDIO_NO_REAL_WALLET',realMicrophone:'NOT_TESTED',realVoice:'NOT_VERIFIED',
+        diagnosticText,unsupported:await captureVoice('unsupported')};
+      await page.evaluate(()=>{
+        const state=__fundingVoiceQA;
+        class SyntheticLocalRecognition{
+          constructor(){state.instances.push(this);}
+          static async available(options){state.availableCalls.push(options);return'available';}
+          start(){if(this.processLocally!==true||this.lang!=='zh-TW')throw Error('SYNTHETIC_LOCAL_ZH_TW_REQUIRED');state.starts++;this.onstart?.();}
+          abort(){state.aborts++;this.onend?.();}
+          stop(){state.stops++;this.onend?.();}
+        }
+        SyntheticLocalRecognition.prototype.processLocally=false;window.SpeechRecognition=SyntheticLocalRecognition;
+        state.event=text=>{const result=[{transcript:text,confidence:1}];result.isFinal=true;return{resultIndex:0,results:[result]};};
+      });
+      const before=await page.evaluate(()=>__fundingVoiceQA.starts);
+      await page.locator('#funding-voice-start').click();await page.waitForFunction(count=>__fundingVoiceQA.starts===count+1,before);
+      await page.evaluate(()=>{const state=__fundingVoiceQA;state.instances.at(-1).onresult?.(state.event('接續辦理'));});
+      await noVoiceAuthority('local continuation without acknowledgment');
+      if(await page.locator('#funding-voice-stop').isEnabled())await page.locator('#funding-voice-stop').click();
+      const later=await page.evaluate(()=>__fundingVoiceQA.starts);
+      await page.locator('#funding-voice-start').click();await page.waitForFunction(count=>__fundingVoiceQA.starts===count+1,later);
+      await page.evaluate(()=>{const state=__fundingVoiceQA;state.lateResult=state.instances.at(-1).onresult;});
+      await page.locator('#funding-voice-stop').click();
+      const stopped=await voice.textContent();
+      await page.evaluate(()=>{const state=__fundingVoiceQA;state.lateResult?.(state.event('接續辦理'));});
+      assert.equal(await voice.textContent(),stopped,'a stopped recognition session cannot deliver a late command');
+      await noVoiceAuthority('late synthetic voice result');
+      const observations=await page.evaluate(()=>({starts:__fundingVoiceQA.starts,aborts:__fundingVoiceQA.aborts,stops:__fundingVoiceQA.stops,
+        microphoneRequests:__fundingVoiceQA.microphoneRequests,availableCalls:__fundingVoiceQA.availableCalls}));
+      assert.ok(observations.availableCalls.length>=2&&observations.availableCalls.every(call=>call.processLocally===true&&JSON.stringify(call.langs)==='["zh-TW"]'),'only available local zh-TW recognition is requested');
+      Object.assign(row.voice,{localReady:await captureVoice('local-ready-stopped'),...observations,financialRequests:0});
     };
     page.on('pageerror',error=>{const text=String(error.stack||error);row.runtimeErrors.push(text);report.runtimeErrors.push(text);});
     page.on('response',response=>{if(response.request().resourceType()==='script'&&response.status()>=400)row.failedScripts.push({url:response.url(),status:response.status()});});
@@ -801,17 +889,29 @@ async function verifyFundingPanel(){
       await intercepted.continue();
     });
     try{
+      const capLanding=new URL(route.href);capLanding.searchParams.set('fundingRole','jade');capLanding.searchParams.set('fundingFlow','cap');capLanding.hash='';
+      const landingResponse=await page.goto(capLanding.href,{waitUntil:'load'});assert.ok(landingResponse?.ok(),'fragment-free Jade cap entry loads');
+      await page.waitForFunction(()=>document.getElementById('funding-role-status')?.textContent.includes('本次選擇：玉帝'));
+      assert.equal(await page.locator('#funding-mode').inputValue(),'cap','flow selection does not depend on a scroll fragment');
+      assert.equal(await page.locator('#funding-ack').isChecked(),false);assert.equal(await page.locator('#funding-send').isDisabled(),true);
+      row.fragmentFreeCap={role:'jade',flow:'cap',walletAuthority:false};
       const response=await page.goto(route.href,{waitUntil:'load'});assert.ok(response?.ok(),'18888 static page loads');
       await page.locator('#funding-panel').waitFor({state:'visible'});
       // This text is written by the real inline module only after its imports
       // and event handlers have initialized; an unexecuted HTML shell fails.
       await page.waitForFunction(()=>document.getElementById('funding-role-status')?.textContent.includes('本次選擇：王母'));
       await page.locator('#funding-advanced > summary').click();
+      await page.evaluate(()=>{
+        const notice=document.createElement('small');notice.dataset.qaRecoveryNotice='true';notice.textContent='模擬驗收／未連真錢包';
+        notice.style.cssText='display:block;margin:8px 0;color:#ffe1a3;font-weight:700;line-height:1.5;';
+        document.getElementById('funding-legacy-guide').prepend(notice);
+      });
       assert.equal(await page.evaluate(()=>Boolean(window.ethereum||window.okxwallet||window.WalletConnectEthereumProvider||window['@walletconnect/ethereum-provider'])),false,'isolated context has no wallet provider or loaded WalletConnect SDK');
       assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');
       assert.equal(await page.locator('#funding-case').inputValue(),'');
       assert.equal(await page.locator('#funding-ack').isChecked(),false);
       await noWalletAuthority('initial');
+      await verifyDiagnosticsAndLocalVoice();
       assert.deepEqual(await page.locator('#funding-role option').evaluateAll(options=>options.map(option=>option.value)),Object.keys(roles));
       for(const [value,name] of Object.entries(roles)){
         if(value==='guanyin'){await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('');}
@@ -917,7 +1017,7 @@ async function verifyFundingPanel(){
         assert.equal(await page.locator(`#funding-${field}`).isDisabled(),false);
       }
       for(const selector of ['#funding-legacy-next','#funding-legacy-next-help']){
-        assert.equal(await page.locator(selector).isVisible(),false,`${selector} is specific to legacy cancellation`);
+        assert.equal(await page.locator(selector).isVisible(),true,`${selector} also restores the fixed-allocation connection`);
       }
       await noWalletAuthority('changed back to fixed allocation');
       // The real five-case loader uses the original validator, without an
@@ -1008,6 +1108,7 @@ async function verifyFundingPanel(){
       assert.deepEqual(row.runtimeErrors,[],'18888 has no JavaScript/import errors');assert.deepEqual(row.failedScripts,[],'all actual scripts/import dependencies load');
       assert.deepEqual(row.rpcMethods,[],'offline drafts never attempt RPC');assert.deepEqual(row.networkWrites,[],'offline UI never sends a request body');
       assert.deepEqual(row.externalRequests,[],'offline funding UI never fetches wallet, relay or chain endpoints');
+      assert.deepEqual(row.recoveryHelpers.map(item=>item.flow).sort(),['cap','fixed','pause'],'each ordinary funding flow exposes the original safe recovery action');
       row.functional='PASS';
     }catch(error){row.functional='FAIL';row.error=String(error.stack||error);await page.screenshot({path:`${OUT}/funding-${width}x${height}-FAIL.png`,fullPage:true}).catch(()=>{});throw error;}
     finally{await context.close();}
@@ -1015,6 +1116,8 @@ async function verifyFundingPanel(){
   report.checks.push('actual 18888 module boot and three role choices; no wallet connection or send; offline Guanyin draft without case/address/amount; acknowledgment and role selection grant no authority; long address/ID wrapping in portrait and landscape');
   report.checks.push('standalone shared-cap Mother/Jade offline drafts require no beneficiary or private file, retain exact original cap ID/hash/calldata, have no individual payout fields, and never grant unconnected send authority; mode changes clear acknowledgment; portrait/landscape captures');
   report.checks.push('actual seven-floor inline controller; all seven caps and 44px touch targets; one-wei excess rejected; skip clears acknowledgment; all18 basement levels remain disabled; unknown funds/no payment; portrait and landscape screenshots with no wallet or RPC');
+  report.checks.push('original checkbox recovery helper is visible, reachable and adjacent in fixed/cap/pause; its unconnected link only navigates to the original WalletConnect control, with acknowledgment/send/RPC/network writes unchanged and a visible synthetic notice');
+  report.checks.push('same two offline funding contexts: automatic no-provider diagnostics, unsupported speech and explicitly labeled synthetic available local zh-TW recognition; no real audio/microphone, no acknowledgment or financial authority, and stopped-session late commands ignored');
 }
 try{
   if(FUNDING_ONLY){await verifyFundingPanel();await verifyFundingAutoPreview();await verifyFundingGuidedFive();await verifyLegacyCards();await verify16888ManualOrder();}
