@@ -471,7 +471,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   await t.test("actual funding controller discards stale prepare success and failure after form changes", async t => {
     const { readFileSync } = await import("node:fs");
     const { runInNewContext } = await import("node:vm");
-    const { buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
+    const { buildBankPausePlan, buildSharedCapPlan, deriveSharedCapStep, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
     const html = readFileSync(new URL("../../K線西遊記/temples/18888/index.html", import.meta.url), "utf8");
     const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
     assert.ok(source, "test the real existing inline funding controller");
@@ -484,6 +484,27 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       const exposedAccounts = () => state.accounts ?? (state.account ? [state.account] : []);
       const rpc = [], mobileLog = [], storageFixture = storage(), providerEvents = [], connectionTimers = new Set();
       const windowEvents = new Map(), documentEvents = new Map();
+      let guidedPending = options.guided?.pending ?? null;
+      const guided = options.guided;
+      const guidedPhases = guided ? new Map(Object.entries(guided.phases ?? {})) : null;
+      const guidedSnapshot = (nextPlan, account) => {
+        const capConfigured = (guided.cap ?? 'configured') === 'configured', phase = guidedPhases.get(nextPlan.allocationId) ?? guided.phase ?? 'absent';
+        const proposal = (candidate, value) => value === 'absent' ? absent() : {
+          target:candidate.target, value:'0', dataHash:candidate.dataHash, proposer:formal.mother,
+          approver:['approved','created','paid','done'].includes(value) ? formal.jade : zero,
+          executableAt:String(guided.eta ?? timestamp - 1), executed:['created','paid','done','configured'].includes(value), cancelled:false,
+        };
+        return {...snapshot(), account, chainId:state.chainId, identityErrors:[],
+          roles:{proposer:account === formal.mother, approver:account === formal.jade, moduleAdmin:true, allocationGovernance:true},
+          module:{...snapshot().module, perTransactionLimit:capConfigured ? formal.capWei : '1', epochLimit:capConfigured ? formal.capWei : '1'},
+          capProposal:proposal(nextPlan.cap, guided.cap ?? 'configured'),
+          ...(nextPlan.type === 'SHARED_CAP' ? {} : {
+            allocationProposal:proposal(nextPlan.allocation, phase),
+            allocation:['created','paid','done'].includes(phase) ? {beneficiary:nextPlan.beneficiary, amount:nextPlan.amountWei,
+              purposeHash:nextPlan.purposeHash, executableAt:'0', executed:['paid','done'].includes(phase), cancelled:false} : snapshot().allocation,
+            paymentConsumed:['paid','done'].includes(phase),
+          }), ...guided.snapshotOverride};
+      };
       if (options.savedTopic) storageFixture.setItem("kaios18888.walletconnect.confirmedTopic.v1", options.savedTopic);
       const node = (name) => {
         if (!nodes.has(name)) {
@@ -567,9 +588,9 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         on: (event, handler) => mobileListeners.set(event, handler),
       };
       class FakeWallet {
-        constructor({selectedAccount} = {}) { this.selectedAccount = selectedAccount; this.next = null; this.invalidations = 0; this.flowType = "FIXED_ALLOCATION"; wallets.push(this); }
-        readPending() { return options.pending ?? null; }
-        invalidatePreview() { this.invalidations++; }
+        constructor({selectedAccount} = {}) { this.selectedAccount = selectedAccount; this.next = null; this.invalidations = 0; this.generation = 0; this.flowType = "FIXED_ALLOCATION"; wallets.push(this); }
+        readPending() { return guided ? guidedPending : options.pending ?? null; }
+        invalidatePreview() { this.invalidations++; this.generation++; }
         invalidate() { this.invalidatePreview(); }
         async connect() { return [state.account]; }
         async prepare(nextPlan) {
@@ -579,6 +600,12 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
           const pause = nextPlan?.type === "BANK_PAUSE";
           const account = authorizedWalletAccount(exposedAccounts(), this.selectedAccount?.());
           if (!account) throw Error("ACCOUNT_OR_BLOCK_UNKNOWN");
+          if (guided) {
+            if (guided.onPrepare) await guided.onPrepare(nextPlan);
+            const observed = guidedSnapshot(nextPlan, account);
+            const step = nextPlan.type === 'SHARED_CAP' ? deriveSharedCapStep(nextPlan, observed) : deriveFundingStep(nextPlan, observed);
+            return {plan:nextPlan, account, snapshot:observed, step, generation:this.generation};
+          }
           const allowed = options.forceReady ?? (!pause || account.toLowerCase() === formal.guanyin.toLowerCase() && state.pauser && state.chainId === 56);
           return { plan: nextPlan, account,
             snapshot: { account, chainId: state.chainId, codeOk: true, identityErrors: [], paused: false,
@@ -587,8 +614,34 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             step: { ready: allowed, kind: pause ? "BANK_PAUSE" : options.stepKind ?? (nextPlan?.type === "SHARED_CAP" ? "CAP_PROPOSE" : "ALLOCATION_PROPOSE"),
               blockers: allowed ? [] : options.stepBlockers ?? ["GUANYIN_PAUSER_REQUIRED"], proposalId: options.stepProposalId, to: pause ? formal.bank : formal.governance } };
         }
-        async request(candidate) { requests.push(candidate); if (this.nextSend) await this.nextSend.promise; return { hash: transactionHash }; }
+        async request(candidate) {
+          requests.push(candidate);
+          if (guided) {
+            const hash = '0x' + requests.length.toString(16).padStart(64, '0');
+            guidedPending = {flowType:this.flowType, plan:candidate.plan, kind:candidate.step.kind, proposalId:candidate.step.proposalId,
+              hash, intentId:'mock-' + requests.length, transaction:{from:candidate.account}};
+            try { if (guided.onRequest) await guided.onRequest(candidate); }
+            catch(error) { if (Number(error.code) === 4001) guidedPending = null; throw error; }
+            return {hash,status:'SUBMITTED_UNCONFIRMED',kind:candidate.step.kind};
+          }
+          if (this.nextSend) await this.nextSend.promise; return { hash: transactionHash };
+        }
         async reconcile(hash, watch) { receiptCalls.push({hash, watch}); if (this.nextReceipt) await this.nextReceipt.promise;
+          if (guided) {
+            if (guided.onReconcile) await guided.onReconcile(hash);
+            if (watch && !watch.isCurrent()) return {hash,status:'WATCH_STOPPED'};
+            const pending = guidedPending;
+            const result = guided.results?.shift() ?? (pending.kind === 'PAYOUT' ? 'VERIFIED_PAID' : 'CONFIRMED');
+            if (result instanceof Error) throw result;
+            if (result === (pending.kind === 'PAYOUT' ? 'VERIFIED_PAID' : 'CONFIRMED')) {
+              if (!guided.staleState) {
+                if (pending.kind.startsWith('CAP_')) guided.cap = {CAP_PROPOSE:'proposed',CAP_APPROVE:'approved',CAP_EXECUTE:'configured'}[pending.kind];
+                else guidedPhases.set(pending.plan.allocationId, {ALLOCATION_PROPOSE:'proposed',ALLOCATION_APPROVE:'approved',ALLOCATION_EXECUTE:'created',PAYOUT:'paid'}[pending.kind]);
+              }
+              guidedPending = null;
+            }
+            return {hash:guided.wrongHash ? blockHash : hash,status:result,kind:pending.kind};
+          }
           const result = options.receiptResults?.shift();
           if (result instanceof Error) throw result;
           return { hash: transactionHash, status: result ?? (this instanceof FakePauseWallet ? "BANK_PAUSED" : "CONFIRMED") }; }
@@ -648,7 +701,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         CustomEvent: class { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }, URL,
         setTimeout: (callback, delay) => {
           if (delay === 60000 || delay === 30000) connectionTimers.add(callback);
-          else if (delay === 4000 && options.mode === "legacy-cancel" && !options.legacyManualTimers) queueMicrotask(callback);
+          else if (delay === 4000 && (options.mode === "legacy-cancel" && !options.legacyManualTimers || guided && !guided.manualTimers)) queueMicrotask(callback);
           else timers.push(callback);
           return callback;
         },
@@ -674,7 +727,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       };
       return { node, wallets, requests, state, providerListeners, receiptCalls, prepareCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers,
         injectMetaMask, setVisibility, pageShow: () => windowEvents.get("pageshow")(), pageHide: () => windowEvents.get("pagehide")(),
-        mobile, mobileListeners, probe: context.uiProbe };
+        mobile, mobileListeners, probe: context.uiProbe, guidedPhases, pending:() => guidedPending };
     };
     for (const failure of [false, true]) {
       const ui = await mount(), wait = deferred();
@@ -1151,6 +1204,149 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         assert.equal(ui.node("send").disabled, true);
         if (result instanceof Error) assert.match(ui.node("status").textContent, /查詢已停止.*receipt offline/);
         else if (result !== "PENDING") assert.equal(JSON.parse(ui.node("preview").textContent).status, result);
+      }
+    });
+    const startFive = async ui => {
+      ui.node('five-ack').checked = true; ui.node('five-ack').emit('change');
+      assert.equal(ui.node('five-start').disabled, false);
+      await ui.node('five-start').onclick();
+      assert.equal(ui.node('five').getAttribute('aria-busy'), 'false');
+    };
+    await t.test('guided original five: one consent proposes all eligible Mother cases, independent of imported cases', async () => {
+      const ui = await mount({visible:true,guided:{}});
+      await ui.node('five-start').onclick();
+      assert.equal(ui.requests.length,0,'a click without reviewed bulk consent cannot send');
+      const arbitrary = buildLifeResourcePlan({beneficiary:alternate,amount:'2'});
+      ui.probe.setCases([{...arbitrary,name:'not an original case'}]);
+      await startFive(ui);
+      assert.equal(ui.requests.length,5,ui.node('five-status').textContent);
+      assert.ok(ui.requests.every(p=>p.step.kind==='ALLOCATION_PROPOSE' && p.plan.amountKaios==='1080000'));
+      assert.equal(new Set(ui.requests.map(p=>p.plan.allocationId)).size,5);
+      assert.ok(ui.requests.every(p=>p.plan.beneficiary.toLowerCase()!==alternate.toLowerCase()));
+      assert.equal(ui.receiptCalls.length,5);
+      assert.match(ui.node('five-status').textContent,/本角色目前可辦步驟已完成.*玉帝/);
+      assert.match(ui.node('five-paid-count').textContent,/0 \/ 5/);
+      assert.equal(ui.node('ack').checked,false,'bulk consent never checks the original per-case acknowledgment');
+      await settleWallet(); ui.pageShow(); await settleWallet();
+      assert.equal(ui.requests.length,5,'passive restoration never resumes a finished send session');
+    });
+    await t.test('guided original five: cap execution is followed by real case roles, never claimed as five payouts', async () => {
+      const ui = await mount({visible:true,role:'jade',account:formal.jade,guided:{cap:'approved'}});
+      await startFive(ui);
+      assert.deepEqual(ui.requests.map(p=>p.step.kind),['CAP_EXECUTE'],ui.node('five-status').textContent);
+      assert.equal(ui.receiptCalls.length,1);
+      assert.match(ui.node('five-status').textContent,/Mother|王母/);
+      assert.match(ui.node('five-paid-count').textContent,/0 \/ 5/);
+      assert.doesNotMatch(ui.node('five-status').textContent,/付款回執全部核對通過/);
+      const waiting = await mount({visible:true,role:'jade',account:formal.jade,guided:{phase:'approved',eta:timestamp+3600}});
+      await startFive(waiting);
+      assert.equal(waiting.requests.length,0); assert.match(waiting.node('five-status').textContent,/等待.*治理|等待到期/);
+      assert.match(waiting.node('five-case-0').textContent,/最早可執行/);
+    });
+    await t.test('guided original five: mature approved allocations create then pay five exact cases with full verified receipts', async () => {
+      const ui=await mount({visible:true,role:'jade',account:formal.jade,guided:{phase:'approved'}});
+      await startFive(ui);
+      assert.equal(ui.requests.length,10,ui.node('five-status').textContent); assert.equal(ui.receiptCalls.length,10);
+      for(let index=0;index<5;index++) {
+        const [create,pay]=ui.requests.slice(index*2,index*2+2);
+        assert.equal(create.step.kind,'ALLOCATION_EXECUTE'); assert.equal(pay.step.kind,'PAYOUT');
+        assert.equal(create.plan.allocationId,pay.plan.allocationId); assert.equal(pay.plan.amountKaios,'1080000');
+        assert.match(ui.node('five-case-'+index).textContent,/付款回執核對通過.*0x/);
+      }
+      assert.match(ui.node('five-paid-count').textContent,/5 \/ 5/);
+      assert.match(ui.node('five-status').textContent,/付款回執全部核對通過.*5,400,000/);
+      assert.equal(ui.pending(),null);
+      const observed=await mount({visible:true,guided:{phase:'done'}});
+      await startFive(observed);
+      assert.equal(observed.requests.length,0); assert.match(observed.node('five-paid-count').textContent,/0 \/ 5/);
+      assert.match(observed.node('five-case-0').textContent,/待原付款回執.*不重送/);
+    });
+    await t.test('guided original five: scan past another-role case and stop unchanged confirmed actions without resending', async () => {
+      const first='0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428';
+      const mixed=await mount({visible:true,guided:{phases:{[first]:'proposed'}}});
+      await startFive(mixed);
+      assert.equal(mixed.requests.length,4); assert.ok(mixed.requests.every(p=>p.plan.allocationId!==first));
+      const stale=await mount({visible:true,guided:{staleState:true}});
+      await startFive(stale);
+      assert.equal(stale.requests.length,1); assert.match(stale.node('five-status').textContent,/鏈上狀態尚未更新.*不會重送/);
+    });
+    await t.test('guided original five: pending or noncanonical outcomes stop, and only the exact saved intent can resume', async () => {
+      for(const outcome of ['PENDING','MISMATCH','REVERTED','EVIDENCE_INCOMPLETE']) {
+        const cfg={results:outcome==='PENDING'?Array(4).fill('PENDING'):[outcome]}, ui=await mount({visible:true,guided:cfg});
+        await startFive(ui);
+        assert.equal(ui.requests.length,1); assert.equal(ui.receiptCalls.length,outcome==='PENDING'?4:1); assert.ok(ui.pending());
+        assert.match(ui.node('five-paid-count').textContent,/0 \/ 5/);
+        if(outcome==='PENDING') {
+          const saved=ui.pending(); cfg.results=['CONFIRMED']; await startFive(ui);
+          assert.equal(ui.requests.length,5,'recovery confirms the saved case, then proposes only the other four');
+          assert.equal(ui.receiptCalls[4].hash,saved.hash);
+          assert.equal(ui.pending(),null);
+        }
+      }
+      const foreign={flowType:'SEVEN_FLOOR_CLAIM',plan:{type:'SEVEN_FLOOR_CLAIM'},kind:'FLOOR_CLAIM',hash:transactionHash,transaction:{from:formal.mother}};
+      const ui=await mount({visible:true,guided:{pending:foreign}});
+      await startFive(ui);
+      assert.equal(ui.requests.length,0); assert.equal(ui.pending(),foreign);
+      assert.match(ui.node('five-status').textContent,/另一流程/);
+    });
+    await t.test('guided original five: wallet rejection, explicit stop and external contexts never continue a send session', async () => {
+      for(const code of [4001,-32603]) {
+        const ui=await mount({visible:true,guided:{onRequest:()=>{throw Object.assign(Error('wallet unavailable'),{code});}}});
+        await startFive(ui); assert.equal(ui.requests.length,1); assert.equal(ui.receiptCalls.length,0);
+        assert.equal(Boolean(ui.pending()),code!==4001);
+        assert.equal(ui.node('five-ack').checked,false);
+      }
+      for(const change of ['stop','accountsChanged','chainChanged','role','mode','case','background']) {
+        const cfg={}, ui=await mount({visible:true,guided:cfg});
+        cfg.onRequest=()=>{
+          if(change==='stop') ui.node('five-stop').onclick();
+          else if(change==='accountsChanged') {ui.state.accounts=[formal.jade];ui.providerListeners.get(change)([formal.jade]);}
+          else if(change==='chainChanged') {ui.state.chainId=1;ui.providerListeners.get(change)('0x1');}
+          else if(change==='background') ui.setVisibility('hidden');
+          else {ui.node(change).value=change==='role'?'jade':change==='mode'?'cap':'';ui.node(change).emit('change');}
+        };
+        await startFive(ui);
+        assert.equal(ui.requests.length,1,change); assert.equal(ui.receiptCalls.length,0,change); assert.ok(ui.pending(),change);
+        assert.equal(ui.node('five-ack').checked,false,change);
+        ui.setVisibility('visible'); await settleWallet();
+        assert.equal(ui.requests.length,1,'foreground never restores bulk mutation consent: '+change);
+      }
+    });
+    await t.test('guided original five: stale preparation and silent consent changes cannot reach a wallet request', async () => {
+      const cfg={}, ui=await mount({visible:true,guided:cfg}), wait=deferred();
+      cfg.onPrepare=()=>wait.promise;
+      ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+      const running=ui.node('five-start').onclick();
+      await settleWallet();ui.pageHide();wait.resolve();await running;
+      assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+      const silent=await mount({visible:true,guided:{}});
+      silent.node('five-ack').checked=true;silent.node('five-ack').emit('change');
+      silent.node('amount').value='2';await silent.node('five-start').onclick();
+      assert.equal(silent.requests.length,0,'bulk consent binds the original current context, even without an input event');
+    });
+    await t.test('guided original five: original bounded receipt waiter rechecks one hash and advances only on final evidence', async () => {
+      for(const [role,phase,terminal] of [['mother','absent','CONFIRMED'],['jade','created','VERIFIED_PAID']]) {
+        const ui=await mount({visible:true,role,account:formal[role],guided:{phase,results:['PENDING',terminal]}});
+        await startFive(ui);
+        assert.equal(ui.requests.length,5);assert.equal(ui.receiptCalls.length,6);
+        assert.equal(ui.receiptCalls[0].hash,ui.receiptCalls[1].hash,'PENDING rechecks the saved hash without another request');
+        assert.match(ui.node('five-paid-count').textContent,role==='jade'?/5 \/ 5/:/0 \/ 5/);
+      }
+    });
+    await t.test('guided original five: read deadlines stop stale preparation or receipt completion and retain pending', async () => {
+      for(const phase of ['prepare','receipt']) {
+        const cfg={},ui=await mount({visible:true,guided:cfg}),wait=deferred();
+        if(phase==='prepare') cfg.onPrepare=()=>wait.promise; else cfg.onReconcile=()=>wait.promise;
+        ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+        const running=ui.node('five-start').onclick();await settleWallet();
+        assert.equal(ui.connectionTimers.size,1);[...ui.connectionTimers][0]();await running;
+        assert.match(ui.node('five-status').textContent,/唯讀查核逾時/);
+        assert.equal(ui.node('five-ack').checked,false);
+        const pending=ui.pending();wait.resolve();await settleWallet();
+        assert.equal(ui.requests.length,phase==='prepare'?0:1);
+        assert.equal(ui.pending(),pending,'late receipt cannot clear the durable intent after its watch expired');
+        assert.equal(Boolean(pending),phase==='receipt');
+        assert.match(ui.node('five-paid-count').textContent,/0 \/ 5/);
       }
     });
     await t.test("OKX foreground and cold reload only restore current authorization", async () => {
