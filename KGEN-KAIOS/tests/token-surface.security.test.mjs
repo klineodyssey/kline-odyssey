@@ -211,7 +211,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       (s) => { s.module.versionHash = id("wrong-version"); },
       (s) => { s.roles.proposer = false; },
       (s) => { delete s.allocation; }, (s) => { delete s.paymentConsumed; },
-      (s) => { s.module.perTransactionLimit = "1"; s.module.epochLimit = "1"; s.module.epochSpent = "1"; },
+      (s) => { s.module.perTransactionLimit = "1"; s.module.epochLimit = "1"; s.module.epochSpent = "1";
+        s.allocation = { beneficiary:plan.beneficiary, amount:plan.amountWei, executableAt:"0", purposeHash:plan.purposeHash, executed:false, cancelled:false }; },
     ]) {
       const state = snapshot(); mutate(state);
       assert.equal(deriveFundingStep(plan, state).ready, false);
@@ -261,6 +262,30 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     assert.equal(deriveFundingStep(plan, state).kind, "DONE");
     state.allocation.beneficiary = alternate;
     assert.equal(deriveFundingStep(plan, state).ready, false, "an executed mismatched allocation is not this payment");
+  });
+
+  await t.test("original allocation governance runs beside cap governance without opening a premature payment", () => {
+    const state = snapshot();
+    state.module.perTransactionLimit = "6010928961748633879781";
+    state.module.epochLimit = "6010928961748633879781";
+    state.module.epochSpent = "1";
+    assert.equal(deriveFundingStep(plan, state).kind, "ALLOCATION_PROPOSE", "no transfer or cap reset is involved");
+    assert.equal(deriveFundingStep(plan, state).proposalId, plan.allocation.proposalId);
+    state.allocationProposal = { ...absent(), target:plan.allocation.target, dataHash:plan.allocation.dataHash,
+      proposer:formal.mother, executableAt:String(timestamp + 3600) };
+    state.account = formal.jade; state.roles.approver = true;
+    assert.equal(deriveFundingStep(plan, state).kind, "ALLOCATION_APPROVE");
+    state.allocationProposal.approver = formal.jade;
+    assert.equal(deriveFundingStep(plan, state).kind, "WAIT_ETA");
+    state.allocationProposal.executableAt = String(timestamp);
+    assert.equal(deriveFundingStep(plan, state).kind, "ALLOCATION_EXECUTE");
+    state.allocation = {beneficiary:plan.beneficiary, amount:plan.amountWei, executableAt:"0", purposeHash:plan.purposeHash, executed:false, cancelled:false};
+    assert.equal(deriveFundingStep(plan, state).ready, false, "used UTC spend still blocks a cap reset");
+    assert.notEqual(deriveFundingStep(plan, state).kind, "PAYOUT");
+    state.module.epochSpent = "0";
+    assert.notEqual(deriveFundingStep(plan, state).kind, "PAYOUT", "pending cap cannot pay 1.08M");
+    state.module.perTransactionLimit = formal.capWei; state.module.epochLimit = formal.capWei;
+    assert.equal(deriveFundingStep(plan, state).kind, "PAYOUT");
   });
 
   await t.test("prepare never sends and a double click sends only once", async () => {
@@ -424,6 +449,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       const mock = mockWallet({ receipt: receipt(logs) });
       const state = snapshot();
       state.module.perTransactionLimit = "1"; state.module.epochLimit = "1";
+      state.allocation = {beneficiary:plan.beneficiary, amount:plan.amountWei, executableAt:"0", purposeHash:plan.purposeHash, executed:false, cancelled:false};
       state.capProposal = { ...absent(), target: plan.cap.target, dataHash: plan.cap.dataHash,
         proposer: formal.mother, approver: formal.jade, executableAt: String(timestamp - 1) };
       mock.change(state);
@@ -470,6 +496,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             get href() { return this.attrs.href ?? ""; }, set href(value) { this.attrs.href = String(value); },
             addEventListener: (event, handler) => listeners.set(event, handler),
             emit: (event, detail) => listeners.get(event)?.(detail),
+             dispatchEvent: (event) => listeners.get(event.type)?.(event),
             replaceChildren(...children) { this.options = children; },
             append(child) { this.options.push(child); } });
         }
@@ -554,7 +581,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
               roles: { proposer: account === formal.mother, approver: account === formal.jade, pauser: state.pauser },
               ...options.snapshotOverride },
             step: { ready: allowed, kind: pause ? "BANK_PAUSE" : options.stepKind ?? (nextPlan?.type === "SHARED_CAP" ? "CAP_PROPOSE" : "ALLOCATION_PROPOSE"),
-              blockers: allowed ? [] : ["GUANYIN_PAUSER_REQUIRED"], to: pause ? formal.bank : formal.governance } };
+              blockers: allowed ? [] : options.stepBlockers ?? ["GUANYIN_PAUSER_REQUIRED"], proposalId: options.stepProposalId, to: pause ? formal.bank : formal.governance } };
         }
         async request(candidate) { requests.push(candidate); if (this.nextSend) await this.nextSend.promise; return { hash: transactionHash }; }
         async reconcile(hash, watch) { receiptCalls.push({hash, watch}); if (this.nextReceipt) await this.nextReceipt.promise;
@@ -626,7 +653,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT,
         walletAccounts, authorizedWalletAccount, SharedCapWallet: FakeCapWallet, LegacyCapCancelWallet: FakeLegacyCancelWallet,
         HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet };
-      runInNewContext(controller + "\nglobalThis.uiProbe = { preview: () => preview, setCases: (cases) => { importedCases = cases; } };", context);
+      runInNewContext(controller + "\nglobalThis.uiProbe = { preview: () => preview, setCases: (cases) => { importedCases = cases; }, watchReceipt: () => watchFundingReceipt(wallet) };", context);
       if (options.lateOkx) window.okxwallet = { ethereum: provider };
       if (!options.skipConnect) {
         node("wallet").value = "0";
@@ -734,6 +761,123 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       await cap.node("draft").onclick();
       assert.equal(JSON.parse(cap.node("preview").textContent).type, "BANK_PAUSE", "Guanyin offline parameters stay separate from cap mode");
     }
+
+    await t.test("shared cap progress explains approved chain ETA and invalidates when the account changes", async () => {
+      const ui = await mount({ mode: "cap", role: "jade", account: formal.jade,
+        stepKind: "WAIT_ETA", forceReady: false, stepBlockers: [],
+        snapshotOverride: { timestamp: "1794381780", blockNumber: "0x7ec5951", capProposal: { executableAt: "1794383466" } } });
+      assert.equal(ui.node("progress").hidden, false);
+      assert.match(ui.node("progress-title").textContent, /等待重新核對/);
+      await ui.node("progress-next").onclick();
+      assert.match(ui.node("progress-title").textContent, /玉帝已批准.*等待到期/);
+      assert.equal(ui.node("progress-step-1").attrs["data-state"], "done");
+      assert.equal(ui.node("progress-step-2").attrs["aria-current"], "step");
+      assert.match(ui.node("progress-eta").textContent, /2026.*11.*11.*15:51:06.*台灣/);
+      assert.match(ui.node("progress-detail").textContent, /到期後.*更新鏈上進度.*不用重新批准/);
+      assert.match(ui.node("progress-evidence").textContent, /0x7ec5951.*15:23:00/);
+      assert.equal(ui.node("send").disabled, true);
+      assert.equal(ui.requests.length, 0);
+      ui.providerListeners.get("accountsChanged")([formal.mother]);
+      assert.equal(ui.node("progress-step-1").attrs["data-state"], "unknown");
+      assert.equal(ui.node("progress-step-2").attrs["aria-current"], undefined);
+      assert.equal(ui.node("progress-eta").textContent, "");
+      assert.equal(ui.node("send").disabled, true);
+      assert.equal(ui.requests.length, 0);
+    });
+    await t.test("cap progress does not advance on a submitted hash or a governance receipt", async () => {
+      const ui = await mount({ mode: "cap", role: "jade", account: formal.jade, stepKind: "CAP_EXECUTE",
+        snapshotOverride: { timestamp: "1794383466", capProposal: { executableAt: "1794383466" } } });
+      await ui.node("progress-next").onclick();
+      assert.match(ui.node("progress-title").textContent, /本次讀查.*已批准且到期/);
+      assert.match(ui.node("progress-detail").textContent, /送出前會再次核對.*超過兩分鐘請更新/);
+      assert.equal(ui.node("progress-step-3").attrs["data-state"], "waiting");
+      assert.equal(ui.node("send").disabled, true, "a progress card never supplies acknowledgment");
+      assert.equal(ui.requests.length, 0);
+      ui.node("ack").checked = true; ui.node("ack").emit("change");
+      await ui.node("send").onclick();
+      assert.equal(ui.requests.length, 1);
+      assert.equal(ui.node("progress-step-3").attrs["data-state"], "unknown", "hash is not an effect");
+      await ui.node("receipt").onclick();
+      assert.match(ui.node("progress-detail").textContent, /回執已確認.*更新鏈上進度/);
+      assert.equal(ui.node("progress-step-3").attrs["data-state"], "unknown", "read actual module limits again");
+      assert.equal(ui.requests.length, 1, "receipt completion never sends the next transaction");
+    });
+    await t.test("observed shared limits guide five original cases without claiming payment", async () => {
+      const ui = await mount({ mode: "cap", role: "jade", account: formal.jade,
+        stepKind: "CAP_ALREADY_CONFIGURED", forceReady: false, stepBlockers: [] });
+      await ui.node("progress-next").onclick();
+      assert.match(ui.node("progress-title").textContent, /限額已生效/);
+      assert.match(ui.node("progress-detail").textContent, /固定配額.*五筆.*不代表已付款/);
+      assert.match(ui.node("progress-step-0").textContent, /本次無需此步/);
+      assert.equal(ui.node("progress-step-3").attrs["data-state"], "done");
+      assert.equal(ui.node("send").disabled, true);
+      assert.equal(ui.requests.length, 0);
+      ui.node("mode").value = "fixed"; ui.node("mode").emit("change");
+      assert.equal(ui.node("progress").hidden, true);
+      assert.equal(ui.requests.length, 0);
+    });
+    await t.test("unverified role or runtime never displays completed cap progress", async () => {
+      for (const snapshotOverride of [{ codeOk: false }, { identityErrors: ["RUNTIME_PIN_MISMATCH"] }]) {
+        const ui = await mount({ mode: "cap", role: "jade", account: formal.jade,
+          stepKind: "CAP_ALREADY_CONFIGURED", snapshotOverride });
+        await ui.node("progress-next").onclick();
+        assert.equal(ui.node("progress-step-3").attrs["data-state"], "unknown");
+        assert.doesNotMatch(ui.node("progress-title").textContent, /已生效/);
+        assert.equal(ui.node("send").disabled, true);
+        assert.equal(ui.requests.length, 0);
+      }
+    });
+
+    await t.test("one click loads and locks the original five cases with no file or transaction", async () => {
+      const ui = await mount({ mode:"cap" });
+      await ui.node("load-five").onclick();
+      assert.equal(ui.node("mode").value, "fixed");
+      assert.equal(ui.node("case").value, "0");
+      assert.equal(ui.node("case").options.length, 6);
+      assert.equal(ui.node("beneficiary").value, "0x60Ed5A562642cbC303D720507a37170116707259");
+      assert.equal(ui.node("amount").value, "1080000");
+      assert.equal(ui.node("beneficiary").readOnly, true);
+      assert.equal(ui.node("amount").readOnly, true);
+      const seen = new Set();
+      for (let index=0; index<5; index++) {
+        ui.node("case").value=String(index); ui.node("case").emit("change");
+        await ui.node("progress-next").onclick();
+        const p=ui.probe.preview().plan;
+        assert.equal(p.amountKaios,"1080000"); seen.add(p.allocationId);
+        assert.equal(ui.node("progress").hidden,false);
+        assert.match(ui.node("progress-detail").textContent,/與調額並行/);
+      }
+      assert.equal(seen.size,5);
+      assert.equal(ui.requests.length,0);
+      assert.match(ui.node("case").options.map(o=>o.textContent).join(" "),/高翠蘭.*知蘭.*豬八戒.*白寧.*澄序/);
+    });
+
+    await t.test("a created original case waiting for the shared cap shows the cap ETA, not its earlier case ETA", async () => {
+      const ui = await mount({mode:"fixed", role:"jade", account:formal.jade, stepKind:"WAIT_ETA", forceReady:false, stepBlockers:[],
+        stepProposalId:buildSharedCapPlan().cap.proposalId, snapshotOverride:{capProposal:{executableAt:"1794383466"}, allocationProposal:{executableAt:"1700000000",executed:true}}});
+      await ui.node("load-five").onclick();
+      await ui.node("progress-next").onclick();
+      assert.match(ui.node("progress-title").textContent,/高翠蘭.*配額已建立.*共享調額/);
+      assert.match(ui.node("progress-eta").textContent,/2026.*15:51:06/);
+      assert.doesNotMatch(ui.node("progress-eta").textContent,/2023/);
+      assert.match(ui.node("progress-detail").textContent,/切換.*共享一千萬調額.*不用重提或重批/);
+      assert.equal(ui.node("send").disabled,true); assert.equal(ui.requests.length,0);
+    });
+    await t.test("a saved case A receipt cannot advance the selected case B", async () => {
+      const savedPlan=buildLifeResourcePlan({beneficiary:"0x60Ed5A562642cbC303D720507a37170116707259",amount:"1080000"});
+      const ui=await mount({mode:"fixed",pending:{flowType:"FIXED_ALLOCATION",kind:"PAYOUT",hash:transactionHash,transaction:{from:formal.mother},plan:savedPlan},receiptResults:["VERIFIED_PAID"]});
+      await ui.node("load-five").onclick();
+      ui.node("case").value="1"; ui.node("case").emit("change");
+      await ui.probe.watchReceipt();
+      assert.equal(ui.receiptCalls.length,0,"automatic checks stay with the selected original case");
+      await ui.node("receipt").onclick();
+      assert.match(ui.node("progress-detail").textContent,/高翠蘭.*付款回執核對通過.*與目前選案不同/);
+      assert.match(ui.node("summary").textContent,/原案「高翠蘭」/);
+      assert.equal(JSON.parse(ui.node("preview").textContent).receiptAllocationId,savedPlan.allocationId);
+      assert.match(ui.node("progress-title").textContent,/知蘭.*等待重新核對/);
+      assert.equal(ui.node("progress-step-3").attrs["data-state"],"unknown");
+      assert.equal(ui.requests.length,0);
+    });
 
     for (const mode of ["cap", "fixed"]) {
       for (const [stepKind, role] of [["CAP_PROPOSE", "mother"], ["CAP_APPROVE", "jade"], ["CAP_EXECUTE", "jade"]]) {
