@@ -275,7 +275,6 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       <button type="button" id="funding-reselect" disabled>在錢包重新選帳戶</button>
       <button type="button" id="funding-switch-bsc" disabled>請錢包切至 BSC 56</button>
       <button type="button" id="funding-mobile">WalletConnect 連線／重新授權（中斷本頁舊連線）</button>
-      <button type="button" id="funding-prepare" disabled>讀查並預覽下一步</button>
       <button type="button" id="funding-receipt" disabled>只讀核對回執</button>
     </div>
     <p id="funding-connect-next" aria-live="polite">請先連接所選角色的錢包。</p>
@@ -289,6 +288,7 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     <p id="funding-role-status" class="funding-muted" aria-live="polite">選擇角色只表示本次操作意圖；仍須在錢包選擇正確帳戶，並讀查鏈上權限。</p>
     <p id="funding-status" role="status" aria-live="polite">先讀查，不會在載入頁面時請求帳戶或送出交易。</p>
     <p id="funding-summary">下一步：先連接你的既有錢包，再讀查；目前沒有送出任何交易。</p>
+    <div class="funding-actions"><button type="button" id="funding-prepare" disabled>讀查並預覽下一步</button></div>
     <details id="funding-preview-details"><summary>展開精確參數、固定ID及唯讀查核結果</summary><button type="button" id="funding-draft">只顯示離線參數（未驗證）</button><pre id="funding-preview" aria-label="本次未簽署內容">尚無預覽。</pre></details>
     <div id="funding-legacy-guide" hidden>
       <p id="funding-legacy-next-help" aria-live="polite"></p>
@@ -1425,7 +1425,7 @@ const providers = [], announcedMetaMask = new Set();
 let updateFundingLinks = () => {};
 let wallet = null, preview = null, previewWallet = null, previewRole = null, busy = false, importedCases = [], formGeneration = 0, connectionGeneration = 0, connectedProvider = null, connectedAccount = null, connectedChain = null;
 let receiptWatch = null, mobileProvider = null, mobileInit = null, cancelWalletConnection = null, connectedName = "", connectedAccounts = [], walletContextChanges = 0;
-let mobileMetadata, confirmedMobileTopic, restoringWallet = false, resumePending = false;
+let mobileMetadata, confirmedMobileTopic, restoringWallet = false, resumePending = false, autoPreviewPending = false;
 let legacyReceiptNotice = null;
 let fundingProgressNotice = null;
 const MOBILE_TOPIC_KEY = 'kaios18888.walletconnect.confirmedTopic.v1';
@@ -1796,7 +1796,7 @@ function observeWalletProvider(provider) {
     el('preview').textContent = '帳戶或鏈別已變更，舊預覽作廢。';
     el('summary').textContent = '請核對新帳戶及鏈別，然後重新唯讀預覽。';
     status(message);
-    void refreshLegacyPreview();
+    void refreshConnectedFundingPreview();
   }
   provider.on?.('accountsChanged', accounts => changed(() => { connectedAccounts = walletAccounts(accounts); },
     '錢包帳戶已變更，請核對 BSC 56 及角色帳戶後重新預覽。'));
@@ -1908,13 +1908,24 @@ async function run(action, readOnly = false) {
       const deadline = new Promise((_, reject) => { timeout = setTimeout(() => reject(Error('WALLET_READ_TIMEOUT')), 30000); });
       await Promise.race([pending, deadline]);
     } else await pending;
+    return true;
   } catch (error) {
-    if (actionGeneration === formGeneration && actionWallet === wallet) { invalidate(); status(error?.message === "WALLET_READ_TIMEOUT" ? "錢包讀查逾時，請重新預覽。" : errorText(error)); }
+    if (actionGeneration === formGeneration && actionWallet === wallet) {
+      const unverifiedReturn = readOnly && resumePending;
+      autoPreviewPending = false;
+      if (readOnly) resumePending = false;
+      if (unverifiedReturn) clearWalletConnection();
+      else invalidate();
+      status((unverifiedReturn ? '返回後的錢包讀查未完成，請重新連接再唯讀核對。' : '')
+        + (error?.message === "WALLET_READ_TIMEOUT" ? "錢包讀查逾時，請重新預覽。" : errorText(error)));
+    }
+    return false;
   }
   finally {
     if (timeout !== undefined) clearTimeout(timeout);
     busy = false; refreshSend();
     if (resumePending && !restoringWallet) void resumeWallet();
+    else if (autoPreviewPending && !restoringWallet) void refreshConnectedFundingPreview();
   }
 }
 el('account').addEventListener('change', () => {
@@ -1924,7 +1935,7 @@ el('account').addEventListener('change', () => {
   el('preview').textContent = '帳戶已變更，請重新唯讀預覽。';
   el('summary').textContent = '請重新核對本次帳戶及鏈上權限。';
   status('已更新錢包帳戶選擇。');
-  void refreshLegacyPreview();
+  void refreshConnectedFundingPreview();
 });
 const requestInjectedAccounts = provider => provider.request({method:'eth_requestAccounts'});
 el('cancel-connect').onclick = () => cancelWalletConnection?.();
@@ -2027,12 +2038,24 @@ el('draft').onclick = () => run(() => {
   status('離線參數未驗證。請連接角色錢包後使用唯讀預覽。');
 });
 async function runWalletConnection(action) {
-  await run(action);
-  await refreshLegacyPreview();
+  if (await run(action)) await refreshConnectedFundingPreview();
 }
-async function refreshLegacyPreview() {
-  if (fundingMode() !== 'legacy-cancel' || document.visibilityState !== 'visible'
-    || busy || restoringWallet || resumePending || preview || roleConnectionBlocker()) return;
+async function refreshConnectedFundingPreview() {
+  autoPreviewPending = false;
+  if (document.visibilityState !== 'visible' || restoringWallet || resumePending || preview || roleConnectionBlocker()) return;
+  if (busy) { autoPreviewPending = true; return; }
+  // Keep an original pending transaction ahead of a fresh preview. Preparing
+  // invalidates receipt watches, so do not interrupt its read-only reconciliation.
+  if (fundingMode() !== 'legacy-cancel') {
+    if (receiptWatch || fundingProgressNotice) return;
+    try {
+      if (wallet.readPending()) {
+        status('原交易尚待核對，先只讀核對原回執；不會建立新預覽或重送。');
+        await watchFundingReceipt(wallet);
+        return;
+      }
+    } catch (error) { invalidate(); status(errorText(error)); return; }
+  }
   await prepareFundingPreview();
 }
 async function reconcileLegacyReceipt(receiptWallet, plan, isCurrent, manualHash) {
@@ -2105,6 +2128,7 @@ const prepareFundingPreview = (manualLegacyReceipt = false) => run(async () => {
   if (blocker) throw Error(blocker);
   const plan = formPlan();
   const preparingGeneration = formGeneration, preparingWallet = wallet, preparingRole = el('role').value;
+  status('已連接，正在唯讀核對本案與下一步；不會送出交易。');
   const isCurrent = () => preparingGeneration === formGeneration && preparingWallet === wallet
     && preparingRole === el('role').value && !resumePending && !roleConnectionBlocker();
   let recoveredReceipt = null;
@@ -2171,7 +2195,7 @@ el('send').onclick = async () => {
     checkLegacyReceipt = isLegacyCapCancelPlan(candidate.plan) && /^0x[0-9a-fA-F]{64}$/.test(hash || "");
     if (!checkLegacyReceipt) void watchFundingReceipt(requestingWallet);
   });
-  if (checkLegacyReceipt) await refreshLegacyPreview();
+  if (checkLegacyReceipt) await refreshConnectedFundingPreview();
 };
 function showFundingReceipt(result, hash, receiptPlan = null) {
   const original = importedCases.find(row => row.allocationId === receiptPlan?.allocationId);
@@ -2224,7 +2248,8 @@ async function watchFundingReceipt(watchedWallet) {
     }
   } catch (error) {
     if (watch?.isCurrent() || !watch && wallet === watchedWallet) {
-      status('自動回執查詢已停止。請保留原交易，先查證再操作。' + errorText(error));
+      fundingProgressNotice = '自動回執查詢已停止。請保留原交易，先查證再操作。' + errorText(error);
+      status(fundingProgressNotice);
     }
   } finally {
     if (receiptWatch === watch) receiptWatch = null;
@@ -2265,7 +2290,7 @@ for (const name of ['role','mode']) el(name).addEventListener('change', () => {
   status('流程與角色選項只表達本次操作意圖，不會切換錢包帳戶、授權或送交易。');
   if (!restoringWallet) {
     void watchFundingReceipt(wallet);
-    void refreshLegacyPreview();
+    void refreshConnectedFundingPreview();
   }
 });
 el('ack').addEventListener('change', refreshSend);
@@ -2274,6 +2299,7 @@ el('case').addEventListener('change', () => {
   const chosen = el('case').value === '' ? null : importedCases[Number(el('case').value)];
   el('beneficiary').readOnly = el('amount').readOnly = Boolean(chosen);
   if (chosen) { el('beneficiary').value = chosen.beneficiary; el('amount').value = chosen.amountKaios; }
+  void refreshConnectedFundingPreview();
 });
 function loadOriginalFundingCases(pack) {
   if (!Array.isArray(pack.cases) || !pack.cases.length || pack.cases.length > 20) throw Error('未找到原交易包cases；不會推測地址或新建案件。');
@@ -2432,7 +2458,7 @@ async function resumeWallet() {
     restoringWallet = false;
     showRole(preview?.snapshot); refreshSend();
     if (resumePending) void resumeWallet();
-    else await refreshLegacyPreview();
+    else await refreshConnectedFundingPreview();
   }
 }
 function suspendWallet() {
