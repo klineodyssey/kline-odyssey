@@ -614,7 +614,8 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
   const importmap=html.match(/<script type="importmap">([\s\S]*?)<\/script>/)?.[1];assert.ok(importmap);
   const core=[{name:'jade-cap-needs-mother',role:'jade',capConfigured:false,initialPhase:'NONE',expected:1},
     {name:'mother-five-proposals',role:'mother',capConfigured:true,initialPhase:'NONE',expected:5},
-    {name:'mature-five-payments',role:'mother',capConfigured:true,initialPhase:'APPROVED',expected:10}];
+    {name:'mature-five-payments',role:'mother',capConfigured:true,initialPhase:'APPROVED',expected:10},
+    {name:'guanyan-mother-proposal-only',role:'mother',capConfigured:true,initialPhase:'NONE',expected:1,guanyan:true}];
   const originalIds=['0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428','0xbb183e13332a2594ffdf45b0501f4a26561378e167450b9de19ebf70cdd9f3c7',
     '0x2ac4cf224f86e93394833036e96068523e5b71295c5c535d82f2efa3f2827359','0x58114b263f63088c52711b13bc7b370fc71ab63b45470fd45ef610d237775dd9','0x7132c7a0eb6b887a7f373e646f3f84b5e64f64379899399e18e393fb7b65ff81'];
   report.fundingGuidedFive=[];
@@ -684,6 +685,44 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
         await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
         await page.waitForFunction(()=>!document.getElementById('funding-connect').disabled);
         assert.deepEqual((await snapshot()).requests,[],'connecting and passive reads never start a transaction sequence');
+        if(scenario.guanyan){
+          await page.locator('#funding-load-guanyan').click();
+          await page.locator('#funding-prepare').click();
+          await page.waitForFunction(()=>!document.getElementById('funding-ack').disabled);
+          const candidate=JSON.parse(await page.locator('#funding-preview').textContent());
+          assert.equal(candidate.plan.amountKaios,'1080000');
+          assert.equal(candidate.plan.beneficiary.toLowerCase(),'0xea6aec0bf657cf78d3dfec9fa0f5e4d586d9f642');
+          assert.equal(candidate.plan.allocationId,'0x9b55643098effba87c8cf383b423502cb5e24883f0d0f5e192a6c74cf40e98a1');
+          assert.equal(candidate.step.kind,'ALLOCATION_PROPOSE');assert.equal(candidate.review,undefined);
+          assert.equal(await page.locator('#funding-ack').isChecked(),false);
+          assert.equal(await page.locator('#funding-send').isDisabled(),true);
+          assert.deepEqual((await snapshot()).requests,[]);
+          assert.match(await page.locator('#funding-summary').innerText(),/未批准提案.*不代表可付款.*其他介面批准/);
+          const summary=page.locator('#funding-summary');
+          await summary.evaluate(element=>{const notice=document.createElement('p');notice.textContent='模擬驗收／未連真錢包';notice.style.cssText='color:#ffe1a3;font-weight:bold';element.before(notice);element.scrollIntoView({block:'center',behavior:'instant'});});
+          const file=`funding-guanyan-${width}x${height}`;
+          await shot(page,file+'-proposal-preview');row.screenshots.push(file+'-proposal-preview.png');
+          await page.locator('#funding-ack').check();
+          await page.locator('#funding-send').scrollIntoViewIfNeeded();
+          row.mainAction=await reachable(page,'#funding-send');
+          assert.ok(row.mainAction.inView&&row.mainAction.hit&&row.mainAction.height>=44);
+          assert.equal(await page.locator('#funding-send').isDisabled(),false);
+          await shot(page,file+'-proposal-consent');row.screenshots.push(file+'-proposal-consent.png');
+          await page.locator('#funding-send').click();
+          await page.waitForFunction(()=>__fundingGuidedFiveQA.requests.length===1&&!document.getElementById('funding-receipt').disabled);
+          await page.locator('#funding-receipt').click();
+          await page.locator('#funding-prepare').click();
+          await page.waitForFunction(()=>document.getElementById('funding-preview').textContent.includes('GUANYAN_RECONCILIATION_NOT_VERIFIED'));
+          assert.equal(await page.locator('#funding-send').isDisabled(),true);
+          const result=await snapshot();assert.equal(result.requests.length,1);
+          assert.equal(result.requests[0].kind,'ALLOCATION_PROPOSE');assert.equal(result.paidWei,'0');
+          assert.equal(result.rpc.some(method=>/sendTransaction|sign/.test(method)),false);
+          row.mockConfirmationRequests=result.requests;row.mockReceiptResults=result.results;row.mockWalletMethods=result.rpc;
+          await summary.evaluate(element=>element.scrollIntoView({block:'center',behavior:'instant'}));
+          await shot(page,file+'-approval-held');row.screenshots.push(file+'-approval-held.png');
+          assert.deepEqual(row.runtimeErrors,[]);assert.deepEqual(row.blockedRequests,[]);row.functional='PASS';
+          continue;
+        }
         assert.equal(await page.locator('#funding-five-ack').isChecked(),false);
         assert.equal(await page.locator('#funding-five-start').isDisabled(),false,'the main action can guide review before financial consent');
         await page.locator('#funding-five-start').click();

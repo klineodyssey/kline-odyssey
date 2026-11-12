@@ -240,14 +240,14 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       <h3 id="funding-guanyan-title">觀衍獨立專案 · 1,080,000 KAIOS</h3>
       <p>GUANYAN-KAIOS-LIFE-WALLET-001 · 與原五筆及玩家七層領取分開。</p>
       <p style="overflow-wrap:anywhere">唯一收款地址：<code>0xea6aec0bf657cf78d3dfec9fa0f5e4d586d9f642</code></p>
-      <p>目前等待對帳完成；尚未確認入帳。107 萬筆誤已作廢，不會使用。</p>
+      <p>目前可由王母核對並提出本案治理提案；尚未付款。107 萬筆誤已作廢，不會使用。</p>
       <ol aria-label="觀衍撥款仍須核清的條件">
-        <li>核清三筆舊案、已建未付配額及銀行完整未付義務；可用餘額足夠單筆，不等於已扣除全部承諾。</li>
-        <li>核對本案原用途、唯一地址及跨 ID 既領紀錄；不因查不到回執就換 ID 重送。</li>
-        <li>前兩項完成後，由王母提出本案、玉帝獨立批准，依原鏈上到期時間建立配額並確認撥款。</li>
+        <li>連接王母錢包，按下方載入原案，再唯讀核對角色、合約與本案進度。原五位及歷史已付款不重送；三筆舊提案仍留鏈上。</li>
+        <li>核對唯一地址與 1,080,000 KAIOS，勾選同意，再按「交錢包確認」提出本案。這是真實治理提案，須本人確認並支付 BNB 網路手續費。</li>
+        <li>本頁目前僅開放提案；玉帝批准、到期執行及撥款仍待核定。持有人若在其他介面批准，提案到期後可被執行；本頁阻擋不會取消鏈上提案。</li>
       </ol>
       <div class="funding-actions"><button type="button" id="funding-load-guanyan">載入觀衍108萬 · 準備與核對</button></div>
-      <p class="funding-muted">不必上傳檔案或重填地址。此按鈕只載入固定原案；已連接時沿原流程唯讀檢查。付款條件未核清時，錢包確認保持停用。</p>
+      <p class="funding-muted">不必上傳檔案或重填地址。載入與唯讀核對不送交易；本人同意後只提出這一筆，不會自動批准、執行或付款。可用餘額不代表已扣除全部承諾。</p>
     </section>
     <div class="funding-fields">
       <label>操作角色（辦理者）<select id="funding-role"><option value="mother">王母 · 提出治理提案</option><option value="jade">玉帝 · 批准原提案</option><option value="guanyin">觀音 · 緊急暫停銀行（OKX Wallet）</option></select></label>
@@ -1863,7 +1863,8 @@ el('voice-start').onclick = async () => {
 el('voice-stop').onclick = () => stopFundingVoice('語音已停止，可直接使用原按鈕。');
 // The shared-cap flow follows its own role, runtime, UTC-spend and proposal checks.
 // Fixed-case cap changes still require the original case accounting review.
-function fundingReviewBlocker({ plan, step }) {
+function fundingReviewBlocker(candidate) {
+  const { plan, step } = candidate;
   if ((plan.type === 'BANK_PAUSE' || isLegacyCapCancelPlan(plan)) && typeof globalThis.navigator?.locks?.request !== 'function') {
     return 'WEB_LOCKS_REQUIRED_NO_SEND';
   }
@@ -1871,13 +1872,22 @@ function fundingReviewBlocker({ plan, step }) {
     return 'BANK_COMMITMENTS_NOT_VERIFIED';
   }
   if (sameAddress(plan.beneficiary, FUNDING_FORMAL.guanyanBeneficiary)) {
+    // Only the original, unapproved proposal may reach the holder's wallet.
+    // Approval elsewhere can still enable permissionless execution after ETA.
+    try {
+      const canonical = buildLifeResourcePlan({beneficiary:FUNDING_FORMAL.guanyanBeneficiary, amount:'1080000'});
+      if (step?.kind === 'ALLOCATION_PROPOSE' && step.ready === true
+        && Array.isArray(step.blockers) && step.blockers.length === 0
+        && el('role').value === 'mother' && roleMatches(candidate)
+        && pretty(plan) === pretty(canonical) && wallet && !wallet.readPending()) return null;
+    } catch { /* Unknown or corrupt pending state keeps the original guard. */ }
     return 'GUANYAN_RECONCILIATION_NOT_VERIFIED';
   }
   return null;
 }
 Object.assign(reasons, {
   BANK_COMMITMENTS_NOT_VERIFIED:'尚未核對原銀行完整未付承諾、已建未執行配額及調額對 UTC 當期用量的影響。可核對原提案預覽及回執。',
-  GUANYAN_RECONCILIATION_NOT_VERIFIED:'觀衍案尚缺完整資金、舊地址及跨 ID 防重對帳。有效金額為 1,080,000 KAIOS，107 萬作廢。',
+  GUANYAN_RECONCILIATION_NOT_VERIFIED:'觀衍案僅開放原108萬提案由王母本人確認；批准、執行、撥款及入帳核銷仍待資金與防重條件核定。107 萬作廢。',
 });
 function legacyNextAction(blocker) {
   const role = roleChoices[el("role").value];
@@ -2476,7 +2486,9 @@ const prepareFundingPreview = (manualLegacyReceipt = false) => run(async () => {
   const subject = plan.type === 'BANK_PAUSE' ? '本次為銀行緊急暫停，不會撥款或解除暫停' : plan.type === 'SHARED_CAP' ? '本次僅調整模組共享每筆／每日各10,000,000 KAIOS限額，不建立個案配額、不付款' : isLegacyCapCancelPlan(plan) ? '取消舊共享限額提案' : `本案：${plan.beneficiary}，${plan.amountKaios} KAIOS`;
   const legacyEta = isLegacyCapCancelPlan(plan) && candidate.snapshot.cancellationProposal?.executableAt;
   const legacyEtaUtc = legacyEta && Number(legacyEta) > 0 && Number(legacyEta) <= 8.64e12 ? new Date(Number(legacyEta) * 1000).toISOString() : '';
-  const roleWarning = roleMatches(candidate) ? '' : '所選角色、帳戶、權限及合約指紋須全部核對通過。';
+  const roleWarning = (roleMatches(candidate) ? '' : '所選角色、帳戶、權限及合約指紋須全部核對通過。')
+    + (sameAddress(plan.beneficiary, FUNDING_FORMAL.guanyanBeneficiary)
+      ? '本頁僅開放王母提出未批准提案，不代表可付款。後續批准／執行／撥款仍待核定；其他介面批准後，鏈上提案到期可被執行。' : '');
   el('summary').textContent = isLegacyCapCancelPlan(plan)
     ? candidate.step.kind === 'LEGACY_CANCEL_DONE' ? '鏈上顯示舊共享限額提案已取消。'
       : candidate.step.kind === 'WAIT_ETA' ? `取消案已核準，等待鏈上可執行時間 ${legacyEtaUtc}。`
@@ -2897,7 +2909,7 @@ el('load-guanyan').onclick = () => run(async () => {
   el('case').value = '0';
   el('case').dispatchEvent(new Event('change'));
   el('advanced').open = true;
-  status('觀衍獨立108萬原案已載入，地址與金額固定。先完成原對帳，再由王母／玉帝沿原流程辦理；目前只供核對，不會送出交易。');
+  status('觀衍獨立108萬原案已載入，地址與金額固定；載入不送交易。請連接王母錢包唯讀核對，同意後只提出本案未批准提案。後續批准、執行及撥款仍待核定。');
   el('status').scrollIntoView({block:'nearest'});
 });
 el('load-five').onclick = () => run(async () => {
