@@ -685,7 +685,11 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
         await page.waitForFunction(()=>!document.getElementById('funding-connect').disabled);
         assert.deepEqual((await snapshot()).requests,[],'connecting and passive reads never start a transaction sequence');
         assert.equal(await page.locator('#funding-five-ack').isChecked(),false);
-        assert.equal(await page.locator('#funding-five-start').isDisabled(),true,'the new main action still requires Human acknowledgment');
+        assert.equal(await page.locator('#funding-five-start').isDisabled(),false,'the main action can guide review before financial consent');
+        await page.locator('#funding-five-start').click();
+        assert.equal(await page.locator('#funding-five-ack').evaluate(element=>document.activeElement===element),true,'the same main entry focuses the original five-case review');
+        assert.equal(await page.locator('#funding-five-ack').isChecked(),false,'review navigation never checks consent');
+        assert.deepEqual((await snapshot()).requests,[],'review navigation never starts a wallet request');
         await page.locator('#funding-five-ack').check();await page.locator('#funding-five-start').scrollIntoViewIfNeeded();
         const action=await reachable(page,'#funding-five-start');assert.ok(action.inView&&action.hit&&action.height>=44,'original guided main action is reachable '+JSON.stringify(action));row.mainAction=action;
         if(scenario.name==='jade-cap-needs-mother')row.readyGeometry=await capture('ready');
@@ -826,7 +830,9 @@ async function verifyFundingPanel(){
       });
       const noVoiceAuthority=async label=>{
         for(const id of ['ack','five-ack'])assert.equal(await page.locator('#funding-'+id).isChecked(),false,label+': voice never grants acknowledgment');
-        for(const id of ['send','five-start'])assert.equal(await page.locator('#funding-'+id).isDisabled(),true,label+': no financial authority without a wallet');
+        assert.equal(await page.locator('#funding-send').isDisabled(),true,label+': no financial authority without a wallet');
+        assert.equal(await page.locator('#funding-five-start').isDisabled(),false,label+': the nonfinancial connection entry remains usable');
+        assert.match(await page.locator('#funding-five-start').textContent(),/WalletConnect|連接/);
         assert.equal(await page.evaluate(()=>__fundingVoiceQA.microphoneRequests),0,label+': no real microphone call');
         assert.deepEqual(row.rpcMethods,[],label+': no RPC');assert.deepEqual(row.networkWrites,[],label+': no request body');
       };
@@ -912,6 +918,45 @@ async function verifyFundingPanel(){
       assert.equal(await page.locator('#funding-ack').isChecked(),false);
       await noWalletAuthority('initial');
       await verifyDiagnosticsAndLocalVoice();
+      await page.evaluate(()=>{
+        const notice=document.createElement('small');notice.textContent='模擬驗收／未連真錢包';
+        document.getElementById('funding-selection-switch').prepend(notice);
+      });
+      for(const role of Object.keys(roles)){
+        await page.locator('#funding-switch-role-'+role).click();
+        assert.equal(await page.locator('#funding-role').inputValue(),role,'shortcut updates the original operator select');
+        assert.equal(await page.locator('#funding-switch-role-'+role).getAttribute('aria-pressed'),'true');
+        if(role==='guanyin'){
+          await page.locator('#funding-case-select').click();
+          assert.equal(await page.evaluate(()=>document.activeElement?.id),'funding-role');
+          assert.equal(await page.locator('#funding-role').inputValue(),'guanyin','guidance never silently changes the operator');
+          assert.match(await page.locator('#funding-status').innerText(),/先選王母或玉帝/);
+        }
+        assert.equal(await page.locator('#funding-ack').isChecked(),false);
+        assert.equal(await page.locator('#funding-send').isDisabled(),true);
+      }
+      await page.locator('#funding-switch-role-jade').click();
+      await page.locator('#funding-load-five').click();
+      const caseOptions=await page.locator('#funding-case option').evaluateAll(options=>options.map(option=>({value:option.value,text:option.textContent})));
+      await page.locator('#funding-case-next').click();
+      assert.equal(await page.locator('#funding-case').inputValue(),'1');
+      assert.equal(await page.locator('#funding-role').inputValue(),'jade');
+      assert.match(await page.locator('#funding-selection-status').innerText(),/玉帝.*知蘭.*2\/5/);
+      await page.locator('#funding-load-five').click();
+      assert.equal(await page.locator('#funding-case').inputValue(),'1','reload preserves the selected recipient');
+      for(let index=2;index<5;index++)await page.locator('#funding-case-next').click();
+      assert.equal(await page.locator('#funding-case').inputValue(),'4');
+      assert.equal(await page.locator('#funding-case-next').isDisabled(),true);
+      await page.locator('#funding-case-prev').click();
+      assert.equal(await page.locator('#funding-case').inputValue(),'3');
+      assert.deepEqual(await page.locator('#funding-case option').evaluateAll(options=>options.map(option=>({value:option.value,text:option.textContent}))),caseOptions);
+      assert.equal(await page.locator('#funding-ack').isChecked(),false);assert.equal(await page.locator('#funding-send').isDisabled(),true);
+      row.switching={operator:'jade',selectedCase:'白寧',noWallet:true,geometry:await noOverflow('role and original case switching')};
+      const switchingImage='funding-switching-'+width+'x'+height+'.png';
+      await page.locator('#funding-selection-switch').screenshot({path:OUT+'/'+switchingImage});row.switching.screenshot=switchingImage;
+      await page.locator('#funding-switch-role-mother').click();
+      await page.locator('#funding-case').selectOption('');
+      await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('1080000');
       assert.deepEqual(await page.locator('#funding-role option').evaluateAll(options=>options.map(option=>option.value)),Object.keys(roles));
       for(const [value,name] of Object.entries(roles)){
         if(value==='guanyin'){await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('');}

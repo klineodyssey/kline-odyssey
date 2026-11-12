@@ -518,6 +518,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             setAttribute(name, value) { this.attrs[name] = String(value); },
             getAttribute(name) { return this.attrs[name] ?? null; },
             removeAttribute(name) { delete this.attrs[name]; },
+            focus() { this.focused = true; }, scrollIntoView() { this.scrolled = true; },
             get href() { return this.attrs.href ?? ""; }, set href(value) { this.attrs.href = String(value); },
             addEventListener: (event, handler) => listeners.set(event, handler),
             emit: (event, detail) => listeners.get(event)?.(detail),
@@ -632,7 +633,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         }
         async reconcile(hash, watch) { receiptCalls.push({hash, watch}); if (this.nextReceipt) await this.nextReceipt.promise;
           if (guided) {
-            if (guided.onReconcile) await guided.onReconcile(hash);
+            if (guided.onReconcile) await guided.onReconcile(hash, this);
             if (watch && !watch.isCurrent()) return {hash,status:'WATCH_STOPPED'};
             const pending = guidedPending;
             const result = guided.results?.shift() ?? (pending.kind === 'PAYOUT' ? 'VERIFIED_PAID' : 'CONFIRMED');
@@ -933,6 +934,77 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.match(ui.node("case").options.map(o=>o.textContent).join(" "),/高翠蘭.*知蘭.*豬八戒.*白寧.*澄序/);
     });
 
+    await t.test('role shortcuts change the sole original selection without changing the wallet account or sending', async () => {
+      const pending = {flowType:'FIXED_ALLOCATION',kind:'ALLOCATION_APPROVE',hash:transactionHash,
+        transaction:{from:formal.jade},plan:buildLifeResourcePlan({beneficiary:'0x60Ed5A562642cbC303D720507a37170116707259',amount:'1080000'})};
+      const ui = await mount({role:'jade',account:formal.jade,pending,stepKind:'ALLOCATION_APPROVE'});
+      const originalAccounts = ui.rpc.filter(call=>/requestAccounts|requestPermissions|switchEthereumChain/.test(call.method)).length;
+      for (const role of ['mother','guanyin','jade']) {
+        ui.node('switch-role-'+role).onclick(); await new Promise(resolve=>setImmediate(resolve));
+        assert.equal(ui.node('role').value,role);
+        assert.equal(ui.node('switch-role-'+role).getAttribute('aria-pressed'),'true');
+        assert.equal(ui.state.account,formal.jade); assert.equal(ui.wallets.at(-1).readPending(),pending);
+        assert.equal(ui.node('ack').checked,false); assert.equal(ui.node('send').disabled,true);
+      }
+      assert.equal(ui.rpc.filter(call=>/requestAccounts|requestPermissions|switchEthereumChain/.test(call.method)).length,originalAccounts);
+      assert.equal(ui.requests.length,0);
+    });
+    await t.test('previous and next original cases preserve the five IDs, operator and selected case on reload', async () => {
+      const ui = await mount({role:'jade',account:formal.jade,stepKind:'ALLOCATION_APPROVE'});
+      await ui.node('load-five').onclick();
+      const options = ui.node('case').options.map(option=>({value:option.value,text:option.textContent}));
+      assert.equal(ui.node('case-prev').disabled,true); assert.equal(ui.node('case-next').disabled,false);
+      for (let index=1;index<5;index++) {
+        await ui.node('prepare').onclick(); ui.node('ack').checked=true; ui.node('ack').emit('change');
+        assert.equal(ui.node('ack').checked,true);
+        ui.node('case-next').onclick();
+        assert.equal(ui.node('case').value,String(index)); assert.equal(ui.node('role').value,'jade');
+        assert.equal(ui.node('ack').checked,false); assert.equal(ui.node('send').disabled,true);
+        assert.equal(ui.node('beneficiary').readOnly,true); assert.equal(ui.node('amount').value,'1080000');
+        await ui.node('prepare').onclick();
+        assert.equal(ui.probe.preview().plan.beneficiary.toLowerCase(),ui.node('beneficiary').value.toLowerCase());
+        assert.match(ui.node('selection-status').textContent,new RegExp(`（${index+1}/5）`));
+      }
+      assert.equal(ui.node('case-next').disabled,true); ui.node('case-next').onclick();
+      assert.equal(ui.node('case').value,'4','last case never wraps to the first or empty draft');
+      ui.node('case-prev').onclick(); assert.equal(ui.node('case').value,'3');
+      await ui.node('load-five').onclick(); assert.equal(ui.node('case').value,'3','reloading does not reset to GaoCuilan');
+      assert.deepEqual(ui.node('case').options.map(option=>({value:option.value,text:option.textContent})),options);
+      assert.equal(ui.requests.length,0);
+    });
+    await t.test('case and role shortcuts preserve an in-flight wallet request and never release its busy state', async () => {
+      const wait=deferred();
+      const ui=await mount({role:'jade',account:formal.jade,guided:{phase:'proposed',onRequest:()=>wait.promise}});
+      await ui.node('load-five').onclick(); await ui.node('prepare').onclick();
+      ui.node('ack').checked=true;ui.node('ack').emit('change');
+      const sending=ui.node('send').onclick(); await new Promise(resolve=>setImmediate(resolve));
+      const pending=ui.pending();assert.ok(pending);assert.equal(ui.requests.length,1);
+      ui.node('case-next').onclick();ui.node('switch-role-mother').onclick();
+      assert.equal(ui.node('case').value,'1');assert.equal(ui.node('role').value,'mother');
+      assert.equal(ui.node('account').disabled,true);assert.equal(ui.pending(),pending);
+      assert.match(ui.node('selection-status').textContent,/原請求仍在處理/);
+      await ui.node('send').onclick();assert.equal(ui.requests.length,1);
+      wait.resolve();await sending;await new Promise(resolve=>setImmediate(resolve));
+      assert.equal(ui.pending(),pending);assert.equal(ui.requests.length,1);
+      assert.equal(ui.node('ack').checked,false);assert.equal(ui.node('send').disabled,true);
+      assert.equal(ui.node('case').value,'1');assert.equal(ui.node('role').value,'mother');
+    });
+    await t.test('case selection guidance focuses existing controls without changing a non-fixed flow or loading cases', async () => {
+      const ui=await mount({mode:'cap'});
+      ui.node('case-select').onclick();
+      assert.equal(ui.node('advanced').open,true);assert.equal(ui.node('mode').focused,true);
+      assert.equal(ui.node('mode').value,'cap');assert.equal(ui.node('case-prev').disabled,true);assert.equal(ui.node('case-next').disabled,true);
+      ui.node('mode').value='fixed';ui.node('mode').emit('change');ui.node('case-select').onclick();
+      assert.equal(ui.node('load-five').focused,true);assert.equal(ui.node('case').value,'');
+      await ui.node('load-five').onclick();ui.node('case-select').onclick();
+      assert.equal(ui.node('case').focused,true);assert.equal(ui.node('case').scrolled,true);
+      ui.node('switch-role-guanyin').onclick();ui.node('case-select').onclick();
+      assert.equal(ui.node('role').value,'guanyin');assert.equal(ui.node('role').focused,true);
+      assert.match(ui.node('status').textContent,/先選王母或玉帝/);
+      assert.equal(ui.node('case-prev').disabled,true);assert.equal(ui.node('case-next').disabled,true);
+      assert.equal(ui.requests.length,0);
+    });
+
     await t.test("a created original case waiting for the shared cap shows the cap ETA, not its earlier case ETA", async () => {
       const ui = await mount({mode:"fixed", role:"jade", account:formal.jade, stepKind:"WAIT_ETA", forceReady:false, stepBlockers:[],
         stepProposalId:buildSharedCapPlan().cap.proposalId, snapshotOverride:{capProposal:{executableAt:"1794383466"}, allocationProposal:{executableAt:"1700000000",executed:true}}});
@@ -1061,6 +1133,63 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     assert.equal(multiple.node("account").value, "", "removal never silently changes the selected account");
     await multiple.node("prepare").onclick();
     assert.equal(multiple.node("send").disabled, true); assert.equal(multiple.requests.length, 0);
+
+    const manualReceiptPending = () => ({flowType:'FIXED_ALLOCATION', kind:'ALLOCATION_APPROVE', hash:transactionHash,
+      transaction:{from:formal.jade}, plan:buildLifeResourcePlan({beneficiary:'0x60Ed5A562642cbC303D720507a37170116707259', amount:'1080000'})});
+    await t.test('manual receipt: a stalled RPC releases controls at the original deadline and late results retain pending', async () => {
+      const pending = manualReceiptPending(), wait = deferred();
+      const ui = await mount({mode:'fixed', role:'jade', account:formal.jade, guided:{pending}});
+      ui.wallets.at(-1).nextReceipt = wait;
+      const running = ui.node('receipt').onclick();
+      assert.equal(ui.node('account').disabled, true);
+      assert.equal(ui.node('load-five').disabled, true);
+      assert.equal(ui.receiptCalls.length, 1);
+      const watch = ui.receiptCalls[0].watch;
+      assert.equal(watch.pending, JSON.stringify(pending)); assert.equal(watch.isCurrent(), true);
+      assert.equal(ui.connectionTimers.size, 1);
+      [...ui.connectionTimers][0](); await running;
+      assert.equal(ui.connectionTimers.size, 0);
+      assert.equal(ui.node('account').disabled, false);
+      assert.equal(ui.node('load-five').disabled, false);
+      assert.equal(ui.node('prepare').disabled, false);
+      assert.equal(ui.pending(), pending); assert.equal(watch.isCurrent(), false);
+      assert.match(ui.node('status').textContent, /逾時/);
+      const status = ui.node('status').textContent, preview = ui.node('preview').textContent;
+      wait.resolve(); await new Promise(resolve => setImmediate(resolve));
+      assert.equal(ui.pending(), pending, 'a late confirmed read cannot release the original intent');
+      assert.equal(ui.node('status').textContent, status); assert.equal(ui.node('preview').textContent, preview);
+      assert.equal(ui.requests.length, 0); assert.equal(ui.receiptCalls.length, 1);
+    });
+    await t.test('manual receipt: changing the selected case or operation role invalidates a delayed read', async () => {
+      for (const change of ['case','role']) {
+        const pending = manualReceiptPending(), wait = deferred();
+        const ui = await mount({mode:'fixed', role:'jade', account:formal.jade, guided:{pending}});
+        ui.wallets.at(-1).nextReceipt = wait;
+        const running = ui.node('receipt').onclick();
+        if (change === 'case') {
+          ui.probe.setCases([{name:'知蘭',beneficiary:'0x9B72FA6A8827ccE211239B0b0E739c98851D1B78',amountKaios:'1080000',
+            allocationId:'0xbb183e13332a2594ffdf45b0501f4a26561378e167450b9de19ebf70cdd9f3c7'}]);
+          ui.node('case').value = '0'; ui.node('case').emit('change');
+        } else { ui.node('role').value = 'mother'; ui.node('role').emit('change'); }
+        const selected = ui.node(change).value;
+        assert.equal(ui.receiptCalls[0].watch.isCurrent(), false, change);
+        wait.resolve(); await running; await new Promise(resolve => setImmediate(resolve));
+        assert.equal(ui.pending(), pending, change);
+        assert.equal(ui.node(change).value, selected); assert.equal(ui.node('send').disabled, true);
+        assert.doesNotMatch(ui.node('summary').textContent, /本次治理步驟已核對/);
+        assert.equal(ui.connectionTimers.size, 0); assert.equal(ui.requests.length, 0);
+      }
+    });
+    await t.test('manual receipt: a current confirmed read clears only the original pending without sending', async () => {
+      const pending = manualReceiptPending();
+      const ui = await mount({mode:'fixed', role:'jade', account:formal.jade, guided:{pending}});
+      await ui.node('receipt').onclick();
+      assert.equal(ui.receiptCalls.length, 1);
+      assert.equal(ui.receiptCalls[0].watch.pending, JSON.stringify(pending));
+      assert.equal(ui.pending(), null); assert.equal(ui.connectionTimers.size, 0);
+      assert.match(ui.node('summary').textContent, /本次治理步驟已核對/);
+      assert.equal(ui.node('account').disabled, false); assert.equal(ui.requests.length, 0);
+    });
 
     const delayedRead = await mount(), readWait = deferred();
     delayedRead.wallets[0].next = readWait;
@@ -1336,6 +1465,117 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         if (result instanceof Error) assert.match(ui.node("status").textContent, /查詢已停止.*receipt offline/);
         else if (result !== "PENDING") assert.equal(JSON.parse(ui.node("preview").textContent).status, result);
       }
+    });
+    await t.test('primary five entry opens only the original native route in the current click and never resumes sending after connection', async () => {
+      const href='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html?fundingRole=mother&fundingFlow=fixed';
+      const ui=await mount({href,lateMetaMask:true,skipConnect:true,needsAuthorization:true,visible:true,guided:{}});
+      let clicks=0, inGesture=true;
+      const native=ui.node('native-metamask');
+      native.click=()=>{assert.equal(inGesture,true,'native navigation stays in this synchronous gesture');clicks++;};
+      assert.equal(ui.node('five-start').disabled,false);
+      assert.match(ui.node('five-start').textContent,/連接王母/);
+      await ui.node('five-start').onclick();
+      assert.equal(clicks,1);assert.match(native.href,/^https:\/\/link\.metamask\.io\/dapp\//);
+      assert.equal(ui.rpc.length,0);assert.equal(ui.requests.length,0);
+      ui.injectMetaMask();
+      native.click=()=>{assert.equal(inGesture,true);clicks++;return native.onclick({preventDefault(){}});};
+      const connecting=ui.node('five-start').onclick();inGesture=false;await connecting;await settleWallet();
+      assert.equal(clicks,2);assert.equal(ui.rpc.filter(call=>call.method==='eth_requestAccounts').length,1);
+      assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+      assert.match(ui.node('five-start').textContent,/確認原五筆/);
+      assert.ok(ui.rpc.every(call=>['eth_accounts','eth_requestAccounts','eth_chainId'].includes(call.method)));
+      await ui.node('five-start').onclick();
+      assert.equal(ui.node('five-ack').focused,true);assert.equal(ui.node('five-ack').checked,false);
+      assert.equal(ui.requests.length,0,'connection and review navigation never start the original send loop');
+    });
+    await t.test('primary five entry routes a wrong chain or account to the original control without selecting authority or granting consent', async () => {
+      const chain=await mount({visible:true,chainId:1});let switches=0;
+      chain.node('switch-bsc').click=()=>{switches++;return chain.node('switch-bsc').onclick();};
+      assert.match(chain.node('five-start').textContent,/BSC 56/);
+      await chain.node('five-start').onclick();await settleWallet();
+      assert.equal(switches,1);assert.equal(chain.state.chainId,56);assert.equal(chain.requests.length,0);
+      assert.equal(chain.node('five-ack').checked,false);
+      const account=await mount({visible:true,account:alternate}), before=account.rpc.length;
+      await account.node('five-start').onclick();
+      assert.equal(account.node('account').focused,true);assert.equal(account.node('account').scrolled,true);
+      assert.equal(account.node('advanced').open,true);assert.equal(account.state.account,alternate);
+      assert.equal(account.rpc.length,before);assert.equal(account.requests.length,0);
+      assert.equal(account.node('five-ack').checked,false);
+    });
+    await t.test('primary five entry reconciles a saved original intent read-only, then stops at an unacknowledged main entry', async () => {
+      const original=buildLifeResourcePlan({beneficiary:'0x60Ed5A562642cbC303D720507a37170116707259',amount:'1080000'});
+      const intent={flowType:'FIXED_ALLOCATION',plan:original,kind:'ALLOCATION_EXECUTE',hash:transactionHash,transaction:{from:formal.mother}};
+      const ui=await mount({visible:true,guided:{pending:intent}});
+      const before=ui.receiptCalls.length;
+      ui.node('receipt').click=()=>ui.node('receipt').onclick();
+      assert.match(ui.node('five-start').textContent,/核對原交易/);
+      await ui.node('five-start').onclick();await settleWallet();
+      assert.equal(ui.receiptCalls.length,before+1);assert.equal(ui.requests.length,0);assert.equal(ui.pending(),null);
+      assert.equal(ui.node('five-ack').checked,false);assert.match(ui.node('five-start').textContent,/確認原五筆/);
+      await ui.node('five-start').onclick();
+      assert.equal(ui.node('five-ack').focused,true);assert.equal(ui.requests.length,0);
+    });
+    await t.test('primary five entry returns canonical pending to its original cap or fixed wallet while foreign intents stay untouched', async () => {
+      const original=buildLifeResourcePlan({beneficiary:'0x60Ed5A562642cbC303D720507a37170116707259',amount:'1080000'});
+      for(const [mode,flowType,plan,kind] of [['cap','FIXED_ALLOCATION',original,'ALLOCATION_EXECUTE'],['fixed','SHARED_CAP',buildSharedCapPlan(),'CAP_EXECUTE']]) {
+        const pending={flowType,plan,kind,hash:transactionHash,transaction:{from:formal.mother}}, seen=[];
+        const ui=await mount({mode,visible:true,guided:{pending,onReconcile:(hash,wallet)=>seen.push({hash,flowType:wallet.flowType})}});
+        assert.equal(ui.receiptCalls.length,0);
+        assert.match(ui.node('five-start').textContent,/切回原交易流程/);
+        await ui.node('five-start').onclick();await settleWallet();
+        assert.equal(ui.node('mode').value,mode==='cap'?'fixed':'cap');
+        if(ui.pending()) {ui.node('receipt').click=()=>ui.node('receipt').onclick();await ui.node('five-start').onclick();await settleWallet();}
+        assert.deepEqual(seen,[{hash:mode==='cap'?undefined:transactionHash,flowType}]);
+        assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+        assert.equal(ui.pending(),null,'only the original reconciler, in the correct flow, consumes this mock-confirmed record');
+      }
+      const foreign={flowType:'SEVEN_FLOOR_CLAIM',kind:'FLOOR_CLAIM',plan:{type:'SEVEN_FLOOR_CLAIM'},hash:transactionHash};
+      const ui=await mount({visible:true,guided:{pending:foreign}});
+      await ui.node('five-start').onclick();
+      assert.equal(ui.node('mode').value,'fixed');assert.equal(ui.pending(),foreign);assert.equal(ui.node('status').focused,true);
+      assert.equal(ui.receiptCalls.length,0);assert.equal(ui.requests.length,0);assert.match(ui.node('five-next').textContent,/另一流程/);
+    });
+    await t.test('primary five entry preserves pending storage errors and never turns a scripted checkbox or stale label into consent', async () => {
+      const ui=await mount({visible:true,guided:{}});
+      ui.node('five-ack').checked=true;
+      await ui.node('five-start').onclick();
+      assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+      ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+      const reads=ui.prepareCalls.length;
+      ui.wallets.at(-1).readPending=()=>{throw Error('PENDING_STORAGE_CORRUPT_DO_NOT_RESEND');};
+      await ui.node('five-start').onclick();
+      assert.match(ui.node('five-next').textContent,/紀錄讀取失敗/);assert.equal(ui.node('status').focused,true);
+      assert.equal(ui.requests.length,0);assert.equal(ui.prepareCalls.length,reads);
+      const changed=await mount({visible:true,guided:{}});
+      changed.node('five-ack').checked=true;changed.node('five-ack').emit('change');
+      changed.node('role').value='jade';
+      await changed.node('five-start').onclick();
+      assert.equal(changed.node('account').focused,true);assert.equal(changed.requests.length,0,'click re-evaluates the actual role instead of an old ready label');
+    });
+    await t.test('primary five entry blocks a second click during the original receipt watcher and updates the entry when the watch settles', async () => {
+      const ui=await mount({visible:true,receiptResults:['CONFIRMED']}), wait=deferred();
+      const intent={flowType:'FIXED_ALLOCATION',kind:'CAP_PROPOSE',plan:buildSharedCapPlan(),hash:transactionHash,transaction:{from:formal.mother}};
+      ui.wallets.at(-1).readPending=()=>intent;ui.wallets.at(-1).nextReceipt=wait;
+      const watching=ui.probe.watchReceipt();await settleWallet();
+      assert.equal(ui.node('five-start').disabled,true);assert.match(ui.node('five-start').textContent,/正在核對原交易/);
+      await ui.node('five-start').onclick();await ui.node('five-start').onclick();
+      assert.equal(ui.receiptCalls.length,1);assert.equal(ui.requests.length,0);
+      wait.resolve();await watching;
+      assert.equal(ui.node('five-start').disabled,false);assert.equal(ui.receiptCalls.length,1);
+      assert.equal(ui.wallets.at(-1).readPending(),intent,'entry routing does not clear the saved record itself');
+    });
+    await t.test('primary five entry keeps the original financial busy guard and cannot reconnect or resume while hidden', async () => {
+      const cfg={},ui=await mount({visible:true,guided:cfg}),wait=deferred();
+      cfg.onRequest=()=>wait.promise;
+      ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+      const sending=ui.node('five-start').onclick();await settleWallet();
+      assert.equal(ui.requests.length,1);assert.equal(ui.node('five-start').disabled,true);
+      await ui.node('five-start').onclick();assert.equal(ui.requests.length,1);
+      ui.setVisibility('hidden');const reads=ui.rpc.length;
+      await ui.node('five-start').onclick();assert.equal(ui.rpc.length,reads);
+      wait.resolve();await sending;
+      assert.equal(ui.requests.length,1);assert.ok(ui.pending());assert.equal(ui.node('five-ack').checked,false);
+      assert.equal(ui.node('five-start').disabled,true);
     });
     const startFive = async ui => {
       ui.node('five-ack').checked = true; ui.node('five-ack').emit('change');
