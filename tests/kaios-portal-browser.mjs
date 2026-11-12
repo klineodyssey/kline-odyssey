@@ -730,6 +730,17 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
         assert.equal(result.rpc.some(method=>/sendTransaction|sign|requestPermissions|switchEthereumChain/.test(method)),false,'no real transaction/signature route exists in synthetic QA');
         row.mockConfirmationRequests=result.requests;row.mockReceiptResults=result.results;row.mockReceiptQueries=result.reconciles;row.mockWalletMethods=result.rpc;
         row.finalStatus=await page.locator('#funding-five-status').innerText();row.finalGeometry=await capture('settled');
+        if(scenario.name==='jade-cap-needs-mother'){
+          await page.evaluate(()=>{for(const item of Object.values(__fundingGuidedFiveQA.cases))item.phase='PAID';});
+          await page.locator('#funding-five-ack').check();await page.locator('#funding-five-start').click();
+          await page.waitForFunction(()=>document.getElementById('funding-five').getAttribute('aria-busy')==='false');
+          assert.match(await page.locator('#funding-five-chain-count').innerText(),/5\s*\/\s*5/);
+          assert.match(await page.locator('#funding-five-paid-count').innerText(),/0\s*\/\s*5.*本頁對帳數.*不是錢包餘額/);
+          assert.match(await page.locator('#funding-five-status').innerText(),/沒有待撥原案.*請勿重送/);
+          assert.doesNotMatch(await page.locator('#funding-five-status').innerText(),/付款回執全部核對通過/);
+          assert.equal((await snapshot()).requests.length,1,'observed completed cases never submit another request or invent a receipt');
+          row.observedDoneGeometry=await capture('all-executed-receipts-pending');
+        }
         assert.deepEqual(row.runtimeErrors,[]);assert.deepEqual(row.blockedRequests,[],'all requests remain local static GET/HEAD');row.functional='PASS';
       }catch(error){row.functional='FAIL';row.error=String(error.stack||error);await page.screenshot({path:OUT+'/funding-guided-five-'+width+'x'+height+'-'+scenario.name+'-FAIL.png',fullPage:true}).catch(()=>{});throw error;}
       finally{await context.close();}

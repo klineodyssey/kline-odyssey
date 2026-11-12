@@ -1625,8 +1625,13 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         assert.match(ui.node('five-case-'+index).textContent,/付款回執核對通過.*0x/);
       }
       assert.match(ui.node('five-paid-count').textContent,/5 \/ 5/);
+      assert.match(ui.node('five-chain-count').textContent,/5 \/ 5/);
+      assert.doesNotMatch(ui.node('five-chain-count').textContent,/10 \/ 5/,'observed execution and verified receipts count each original case once');
       assert.match(ui.node('five-status').textContent,/付款回執全部核對通過.*5,400,000/);
       assert.equal(ui.pending(),null);
+      ui.node('role').value='mother';ui.node('role').emit('change');
+      assert.match(ui.node('five-paid-count').textContent,/5 \/ 5/,'context changes preserve already verified receipt evidence');
+      assert.match(ui.node('five-chain-count').textContent,/5 \/ 5/);
       const bounded=await mount({visible:true,role:'jade',account:formal.jade,guided:{cap:'approved',phase:'proposed'}});
       await startFive(bounded);
       assert.equal(bounded.requests.length,16,bounded.node('five-status').textContent);
@@ -1637,7 +1642,40 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       const observed=await mount({visible:true,guided:{phase:'done'}});
       await startFive(observed);
       assert.equal(observed.requests.length,0); assert.match(observed.node('five-paid-count').textContent,/0 \/ 5/);
+      assert.match(observed.node('five-chain-count').textContent,/5 \/ 5/);
+      assert.match(observed.node('five-paid-count').textContent,/本頁對帳數.*不是錢包餘額/);
+      assert.match(observed.node('five-status').textContent,/沒有待撥原案.*請勿重送/);
+      assert.doesNotMatch(observed.node('five-status').textContent,/付款回執全部核對通過/);
       assert.match(observed.node('five-case-0').textContent,/待原付款回執.*不重送/);
+      observed.node('role').value='jade';observed.node('role').emit('change');
+      assert.match(observed.node('five-chain-count').textContent,/尚未讀查/,'context invalidation clears volatile chain observations');
+      assert.match(observed.node('five-paid-count').textContent,/0 \/ 5/);
+    });
+    await t.test('guided original five: active selection names the actual remaining recipient while the advanced case stays Gao', async () => {
+      const phases=Object.fromEntries([
+        '0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428',
+        '0xbb183e13332a2594ffdf45b0501f4a26561378e167450b9de19ebf70cdd9f3c7',
+        '0x2ac4cf224f86e93394833036e96068523e5b71295c5c535d82f2efa3f2827359'
+      ].map(id=>[id,'done']));
+      const names=new Map([
+        ['0x21ce2065b0171a26b5f9efe2268cbdce08e94922','白寧'],
+        ['0x651ff5e7c183d0d3d40c9ce8a86be246111521cd','澄序']
+      ]);
+      const cfg={phase:'approved',phases},ui=await mount({visible:true,role:'jade',account:formal.jade,guided:cfg});
+      await ui.node('load-five').onclick();await settleWallet();assert.equal(ui.node('case').value,'0');
+      assert.match(ui.node('selection-status').textContent,/單案檢查選擇.*高翠蘭.*不決定原五案接續順序/);
+      cfg.onRequest=candidate=>{
+        const name=names.get(candidate.plan.beneficiary.toLowerCase());assert.ok(name,'only the two unpaid fixture cases may request confirmation');
+        assert.equal(ui.node('case').value,'0','bulk steps do not change the separate advanced selection');
+        assert.ok(ui.node('selection-status').textContent.includes(name),ui.node('selection-status').textContent);
+        assert.match(ui.node('selection-status').textContent,/原五案目前步驟.*1,080,000/);
+        assert.ok(ui.node('selection-status').textContent.includes(ui.node('five-status').textContent));
+      };
+      await startFive(ui);
+      assert.deepEqual(ui.requests.map(p=>p.step.kind),['ALLOCATION_EXECUTE','PAYOUT','ALLOCATION_EXECUTE','PAYOUT']);
+      assert.match(ui.node('five-chain-count').textContent,/5 \/ 5/);
+      assert.match(ui.node('five-paid-count').textContent,/2 \/ 5/,'the first three observed DONE cases do not manufacture receipt evidence');
+      assert.match(ui.node('selection-status').textContent,/單案檢查選擇.*高翠蘭/);
     });
     await t.test('guided original five: scan past another-role case and stop unchanged confirmed actions without resending', async () => {
       const first='0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428';
@@ -1685,6 +1723,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         };
         await startFive(ui);
         assert.equal(ui.requests.length,1,change); assert.equal(ui.receiptCalls.length,0,change); assert.ok(ui.pending(),change);
+        if(['accountsChanged','chainChanged','role','mode','case'].includes(change)) assert.match(ui.node('five-chain-count').textContent,/尚未讀查/,'context clears observed rows: '+change);
         assert.equal(ui.node('five-ack').checked,false,change);
         ui.setVisibility('visible'); await settleWallet();
         assert.equal(ui.requests.length,1,'foreground never restores bulk mutation consent: '+change);
@@ -1697,6 +1736,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       const running=ui.node('five-start').onclick();
       await settleWallet();ui.pageHide();wait.resolve();await running;
       assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+      assert.match(ui.node('five-chain-count').textContent,/尚未讀查/,'late preparation cannot refill observations after invalidation');
       const silent=await mount({visible:true,guided:{}});
       silent.node('five-ack').checked=true;silent.node('five-ack').emit('change');
       silent.node('amount').value='2';await silent.node('five-start').onclick();
