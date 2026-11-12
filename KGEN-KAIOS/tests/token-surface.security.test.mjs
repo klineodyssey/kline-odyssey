@@ -147,13 +147,13 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   const timestamp = 1_700_000_000;
   const absent = () => ({ target: zero, value: "0", dataHash: id("absent"), executableAt: "0", proposer: zero, approver: zero, executed: false, cancelled: false });
   const snapshot = () => ({
-    chainId: 56, account: formal.mother, timestamp,
-    codeOk: true, token: formal.kaios, decimals: 18,
+    chainId: 56, account: formal.mother, timestamp:String(timestamp), blockNumber:'0x100',
+    codeOk: true, identityErrors:[], token: formal.kaios, decimals: 18,
     module: { module: formal.allocation, versionHash: formal.versionHash, active: true,
       perTransactionLimit: formal.capWei, epochLimit: formal.capWei,
       epochSpent: "0", epochIndex: String(Math.floor(timestamp / 86400)) },
-    health: { healthy: true, paused: false, available: String(20_000_000n * BANK_TEST_ETHER) },
-    roles: { proposer: true, approver: false, moduleAdmin: true },
+    health: { healthy: true, paused: false, balance:String(23_000_000n * BANK_TEST_ETHER), reserve:String(3_000_000n * BANK_TEST_ETHER), available: String(20_000_000n * BANK_TEST_ETHER) },
+    roles: { proposer: true, approver: false, moduleAdmin: true, allocationGovernance:true },
     capProposal: absent(), allocationProposal: absent(),
     allocation: { beneficiary: zero, amount: "0", executableAt: "0", purposeHash: id("absent"), executed: false, cancelled: false },
     paymentConsumed: false,
@@ -534,6 +534,44 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     }
   });
 
+  await t.test('Guanyan approval, execution and payout recheck current funding before the sole wallet request', async () => {
+    const p=buildLifeResourcePlan({beneficiary:formal.guanyanBeneficiary,amount:'1080000'});
+    const phaseState=phase=>{
+      const s=snapshot();s.account=formal.jade;s.roles.approver=true;
+      s.allocationProposal={...absent(),target:p.allocation.target,value:'0',dataHash:p.allocation.dataHash,
+        proposer:formal.mother,approver:phase==='proposed'?zero:formal.jade,executableAt:String(timestamp-1),executed:phase==='created'};
+      if(phase==='created')s.allocation={beneficiary:p.beneficiary,amount:p.amountWei,purposeHash:p.purposeHash,executableAt:'0',executed:false,cancelled:false};
+      return s;
+    };
+    for(const [phase,kind] of [['proposed','ALLOCATION_APPROVE'],['approved','ALLOCATION_EXECUTE'],['created','PAYOUT']]){
+      const valid=mockWallet();valid.change(phaseState(phase));const ready=await valid.wallet.prepare(p);
+      assert.equal(ready.step.kind,kind);assert.equal(ready.step.fundingPrecheck.enough,true);
+      await valid.wallet.request(ready);assert.equal(valid.sends().length,1);
+      assert.equal(valid.sends()[0].params[0].data,ready.step.data);
+      for(const mutate of [
+        s=>{s.health.available=String(BigInt(p.amountWei)-1n);},
+        s=>{delete s.health.reserve;},s=>{s.blockNumber='unknown';},
+        s=>{s.module.perTransactionLimit=String(BigInt(p.amountWei)-1n);},
+        s=>{s.module.epochSpent=String(BigInt(s.module.epochLimit)-BigInt(p.amountWei)+1n);},
+        s=>{s.module.epochIndex=String(Math.floor(timestamp/86400)+1);},
+        s=>{s.fundingReadErrors=['RPC_UNKNOWN'];},s=>{delete s.identityErrors;},
+        s=>{s.roles.allocationGovernance=false;},s=>{s.paymentConsumed=true;},
+        s=>{if(phase==='created')s.allocation.purposeHash=id('different purpose');else s.allocationProposal.dataHash=id('different proposal');},
+      ]){
+        const mock=mockWallet(),current=phaseState(phase);mock.change(current);
+        const preview=await mock.wallet.prepare(p);assert.equal(preview.step.ready,true);
+        mutate(current);mock.change(current);
+        await assert.rejects(mock.wallet.request(preview),/FRESH_STATE_OR_ACCOUNT_CHANGED/);
+        assert.equal(mock.sends().length,0,phase+': changed state never reaches the provider');
+      }
+    }
+    const previousEpoch=phaseState('proposed');previousEpoch.module.epochIndex=String(Math.floor(timestamp/86400)-1);
+    previousEpoch.module.epochSpent=previousEpoch.module.epochLimit;
+    assert.equal(deriveFundingStep(p,previousEpoch).ready,true,'past-UTC spend does not consume the new day');
+    const voidPlan=buildLifeResourcePlan({beneficiary:formal.guanyanBeneficiary,amount:'1070000'});
+    assert.equal(deriveFundingStep(voidPlan,phaseState('proposed')).ready,false,'107萬 stays void in the actual adapter');
+  });
+
   await t.test("Guanyan matching payment events retain the original pending ID until full reconciliation", async () => {
     const p = buildLifeResourcePlan({ beneficiary: formal.guanyanBeneficiary, amount: "1080000" });
     const mock = mockWallet({ receipt: receipt([
@@ -750,8 +788,10 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             if (guided.onReconcile) await guided.onReconcile(hash, this);
             if (watch && !watch.isCurrent()) return {hash,status:'WATCH_STOPPED'};
             const pending = guidedPending;
-            const result = guided.results?.shift() ?? (pending.kind === 'PAYOUT' ? 'VERIFIED_PAID' : 'CONFIRMED');
+            const guanyanPayment = pending.kind === 'PAYOUT' && pending.plan.beneficiary.toLowerCase() === formal.guanyanBeneficiary.toLowerCase();
+            const result = guided.results?.shift() ?? (guanyanPayment ? 'EVIDENCE_INCOMPLETE' : pending.kind === 'PAYOUT' ? 'VERIFIED_PAID' : 'CONFIRMED');
             if (result instanceof Error) throw result;
+            if (guanyanPayment && result === 'EVIDENCE_INCOMPLETE') guidedPhases.set(pending.plan.allocationId,'paid');
             if (result === (pending.kind === 'PAYOUT' ? 'VERIFIED_PAID' : 'CONFIRMED')) {
               if (!guided.staleState) {
                 if (pending.kind.startsWith('CAP_')) guided.cap = {CAP_PROPOSE:'proposed',CAP_APPROVE:'approved',CAP_EXECUTE:'configured'}[pending.kind];
@@ -828,7 +868,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         },
         clearTimeout: callback => connectionTimers.delete(callback),
         Option: class { constructor(textContent, value) { this.textContent = textContent; this.value = value; } },
-        FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT,
+        FUNDING_FORMAL: formal, buildLifeResourcePlan, deriveFundingStep, buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT,
         walletAccounts, authorizedWalletAccount, SharedCapWallet: FakeCapWallet, LegacyCapCancelWallet: FakeLegacyCancelWallet,
         HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet, detectVoiceCapabilities, normalizeVoiceError };
       const injectRecognition = (settings = {}) => {
@@ -1188,8 +1228,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(ui.node('case').options.length,6,'returning to the original five does not add a sixth payee');
       assert.doesNotMatch(ui.node('case').options.map(row=>row.textContent).join(' '),/觀衍/);
     });
-    await t.test('Guanyan permits one canonical Mother proposal after explicit consent and stops before approval', async () => {
-      const ui = await mount({guided:{phase:'absent'}});
+    await t.test('Guanyan permits one canonical Mother proposal after explicit consent and never auto-approves', async () => {
+      const ui = await mount({guided:{phase:'absent',manualTimers:true}});
       await ui.node('load-guanyan').onclick();
       await new Promise(resolve=>setImmediate(resolve));
       await ui.node('prepare').onclick();
@@ -1197,7 +1237,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(shown.plan.allocationId,buildLifeResourcePlan({beneficiary:formal.guanyanBeneficiary,amount:'1080000'}).allocationId);
       assert.equal(shown.review,undefined);
       assert.equal(shown.step.kind,'ALLOCATION_PROPOSE');
-      assert.match(ui.node('summary').textContent,/僅開放王母提出未批准提案.*不代表可付款/);
+      assert.match(ui.node('summary').textContent,/每次只確認目前這一步.*玉帝批准後任何人可立即執行及撥款/);
       assert.equal(ui.node('send').disabled,true,'preparing never supplies consent');
       assert.equal(ui.requests.length,0);
       ui.node('ack').checked=true;ui.node('ack').emit('change');
@@ -1225,7 +1265,33 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(ui.node('role').value,'guanyin');
       assert.equal(ui.requests.length,1);
     });
-    await t.test('Guanyan rejects void amounts, later stages, wrong authority, identities and pending intents', async () => {
+    await t.test('Guanyan exact Jade approval, mature execution and payout each need separate consent; incomplete payout keeps pending', async () => {
+      for (const [phase,kind] of [['proposed','ALLOCATION_APPROVE'],['approved','ALLOCATION_EXECUTE'],['created','PAYOUT']]) {
+        const ui=await mount({role:'jade',account:formal.jade,guided:{phase,manualTimers:true}});
+        await ui.node('load-guanyan').onclick();await ui.node('prepare').onclick();
+        const shown=JSON.parse(ui.node('preview').textContent);
+        assert.equal(shown.step.kind,kind);assert.equal(shown.step.fundingPrecheck.known,true);
+        assert.equal(shown.step.fundingPrecheck.enough,true);assert.equal(shown.review,undefined);
+        assert.equal(ui.node('send').disabled,true);assert.equal(ui.requests.length,0);
+        ui.node('ack').checked=true;ui.node('ack').emit('change');
+        assert.equal(ui.node('send').disabled,false);
+        await ui.node('send').onclick();assert.equal(ui.requests.length,1);assert.equal(ui.requests[0].step.kind,kind);
+        await ui.node('send').onclick();assert.equal(ui.requests.length,1,'one click never advances the next step');
+        await ui.node('receipt').onclick();
+        assert.equal(ui.requests.length,1);assert.equal(ui.node('ack').checked,false);
+        if(kind==='PAYOUT'){
+          assert.ok(ui.pending(),'incomplete reconciliation keeps the original intent');
+          assert.match(ui.node('summary').textContent,/仍待銀行|仍須|對帳/);
+          await ui.node('send').onclick();assert.equal(ui.requests.length,1,'incomplete payout cannot be resent');
+        }
+      }
+      const waiting=await mount({role:'jade',account:formal.jade,guided:{phase:'approved',eta:timestamp+3600}});
+      await waiting.node('load-guanyan').onclick();await waiting.node('prepare').onclick();
+      assert.equal(waiting.probe.preview().step.kind,'WAIT_ETA');
+      waiting.node('ack').checked=true;waiting.node('ack').emit('change');
+      await waiting.node('send').onclick();assert.equal(waiting.requests.length,0);
+    });
+    await t.test('Guanyan rejects void amounts, forged stages, wrong authority, identities and pending intents', async () => {
       const ui = await mount();
       ui.node("beneficiary").value = formal.guanyanBeneficiary; ui.node("amount").value = '1070000';
       await ui.node("prepare").onclick();
@@ -1254,7 +1320,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         p=>p.allocation.proposalId=blockHash, p=>p.allocation.data='0x',
         p=>p.allocation.target=formal.bank, p=>p.warnings.push('changed'),
       ]) {
-        const changed=await mount();await changed.node('load-guanyan').onclick();await changed.node('prepare').onclick();
+        const changed=await mount({guided:{phase:'absent'}});await changed.node('load-guanyan').onclick();await changed.node('prepare').onclick();
         changed.probe.preview().plan=JSON.parse(JSON.stringify(changed.probe.preview().plan));
         mutate(changed.probe.preview().plan);
         changed.node('ack').checked=true;changed.node('ack').emit('change');
@@ -1262,7 +1328,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         await changed.node('send').onclick();assert.equal(changed.requests.length,0);
       }
       for (const event of ['accountsChanged','chainChanged']) {
-        const changed=await mount();await changed.node('load-guanyan').onclick();await changed.node('prepare').onclick();
+        const changed=await mount({guided:{phase:'absent'}});await changed.node('load-guanyan').onclick();await changed.node('prepare').onclick();
         changed.node('ack').checked=true;changed.node('ack').emit('change');
         changed.providerListeners.get(event)(event==='accountsChanged'?[formal.jade]:'0x1');
         await changed.node('send').onclick();assert.equal(changed.requests.length,0);
