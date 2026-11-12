@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {webcrypto} from 'node:crypto';
 import vm from 'node:vm';
 import {createRequire} from 'node:module';
-import {WORLD_REGISTRY,WORLD_STATUSES,SHARED_GAME_VERSION,findWorld,isPlayable,isNavigable,playableDestination,entryDestination,portalBase,worldUrl,sharedGameUrl,mountSharedGameEntry,validateWorldRegistry} from '../assets/kaios-world-registry.mjs';
+import {WORLD_REGISTRY,WORLD_STATUSES,BANK_SERVICE,SHARED_GAME_VERSION,findWorld,isPlayable,isNavigable,playableDestination,entryDestination,portalBase,worldUrl,sharedGameUrl,mountSharedGameEntry,validateWorldRegistry} from '../assets/kaios-world-registry.mjs';
 import {readPortalPlayer} from '../assets/kaios-portal.mjs';
 import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../K線西遊記/temples/11520/runtime/player-life-runtime.mjs';
 const root=new URL('../',import.meta.url);
@@ -60,6 +60,17 @@ test('corrupt/tampered save and storage denial preserve data and fail safe to gu
 test('canonical Portal has no hand-coded play statuses/duplicate entry URLs; legacy redirects',()=>{
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8'),legacy=readFileSync(new URL('../K線西遊記/index.html',import.meta.url),'utf8');
  assert.ok(html.includes('assets/kaios-portal.mjs'));assert.ok(html.includes('id="portalAudio"'));assert.ok(!html.includes('temples/'));assert.ok(!html.includes('PLAYABLE'));assert.ok(legacy.includes('location.replace'));assert.ok(legacy.includes('content="0;url=../"'));assert.ok(!legacy.includes('全部神殿可進入'));
+});
+
+test('bank service opens the original five-case panel without selecting a wallet role or changing game readiness',()=>{
+ assert.equal(Object.isFrozen(BANK_SERVICE),true);
+ for(const base of ['http://localhost:4173/','https://klineodyssey.github.io/kline-odyssey/']){
+  const url=new URL(BANK_SERVICE.entryUrl,base),expected=new URL('K線西遊記/temples/18888/index.html#funding-panel',base);
+  assert.equal(url.href,expected.href);assert.equal(url.search,'');assert.equal(url.hash,'#funding-panel');
+ }
+ assert.ok(existsSync(new URL(BANK_SERVICE.entryUrl.split('#')[0],root)));
+ assert.equal(findWorld('18888').status,'UNDER_CONSTRUCTION');assert.equal(isNavigable(findWorld('18888')),false);assert.equal(playableDestination('18888'),null);
+ assert.match(findWorld('18888').name,/遊戲世界/);
 });
 
 function entryDocument(){
