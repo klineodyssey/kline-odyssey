@@ -1169,6 +1169,44 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         assert.match(ui.node("summary").textContent, /治理步驟已核對/);
       }
     }
+    await t.test('Guanyan shortcut loads one canonical locked case without a file or wallet authority', async () => {
+      const ui = await mount({mode:'cap', needsAuthorization:true, skipConnect:true});
+      await ui.node('load-guanyan').onclick();
+      assert.equal(ui.node('mode').value,'fixed');
+      assert.equal(ui.node('case').options.length,2,'Guanyan is separate from the five original cases');
+      assert.match(ui.node('case').options[1].textContent,/觀衍/);
+      assert.equal(ui.node('beneficiary').value.toLowerCase(),formal.guanyanBeneficiary);
+      assert.equal(ui.node('amount').value,'1080000');
+      for (const field of ['beneficiary','amount']) assert.equal(ui.node(field).readOnly,true);
+      assert.equal(ui.node('advanced').open,true);
+      assert.equal(ui.node('progress').hidden,false);
+      assert.match(ui.node('progress-title').textContent,/觀衍.*1080000/);
+      assert.equal(ui.node('send').disabled,true);
+      assert.equal(ui.requests.length,0);
+      assert.equal(ui.rpc.some(call=>/requestAccounts|requestPermissions|switchEthereumChain|sendTransaction|sign/.test(call.method)),false);
+      await ui.node('load-five').onclick();
+      assert.equal(ui.node('case').options.length,6,'returning to the original five does not add a sixth payee');
+      assert.doesNotMatch(ui.node('case').options.map(row=>row.textContent).join(' '),/觀衍/);
+    });
+    await t.test('Guanyan shortcut cannot enable sending even when the original stage is otherwise ready', async () => {
+      const ui = await mount();
+      await ui.node('load-guanyan').onclick();
+      await new Promise(resolve=>setImmediate(resolve));
+      await ui.node('prepare').onclick();
+      const shown=JSON.parse(ui.node('preview').textContent);
+      assert.equal(shown.plan.allocationId,buildLifeResourcePlan({beneficiary:formal.guanyanBeneficiary,amount:'1080000'}).allocationId);
+      assert.equal(shown.review.reason,'GUANYAN_RECONCILIATION_NOT_VERIFIED');
+      assert.match(ui.node('progress-detail').textContent,/觀衍案尚缺/);
+      ui.node('ack').checked=true;ui.node('ack').emit('change');
+      assert.equal(ui.node('send').disabled,true);
+      await ui.node('send').onclick();
+      assert.equal(ui.requests.length,0);
+      ui.node('switch-role-guanyin').onclick();
+      assert.equal(ui.node('load-guanyan').disabled,true);
+      await ui.node('load-guanyan').onclick();
+      assert.equal(ui.node('role').value,'guanyin');
+      assert.equal(ui.requests.length,0);
+    });
     for (const amount of ["1070000", "1080000"]) {
       const ui = await mount();
       ui.node("beneficiary").value = formal.guanyanBeneficiary; ui.node("amount").value = amount;

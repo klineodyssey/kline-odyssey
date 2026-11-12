@@ -1098,6 +1098,26 @@ async function verifyFundingPanel(){
       assert.match(await page.locator('#funding-progress-title').textContent(),/澄序.*等待重新核對/);
       await noWalletAuthority('selected original fifth case');
       await capture('original-fifth-progress',true);
+      // The actual Guanyan loader is a separate fixed case. No wallet or RPC;
+      // its original reconciliation gate must survive even an offline preview.
+      await visibleAction('#funding-load-guanyan','guanyan-load');
+      await page.locator('#funding-load-guanyan').click();
+      assert.equal(await page.locator('#funding-case option').count(),2);
+      assert.equal(await page.locator('#funding-beneficiary').inputValue().then(value=>value.toLowerCase()),'0xea6aec0bf657cf78d3dfec9fa0f5e4d586d9f642');
+      assert.equal(await page.locator('#funding-amount').inputValue(),'1080000');
+      for(const field of ['beneficiary','amount']) assert.equal(await page.locator('#funding-'+field).evaluate(input=>input.readOnly),true);
+      assert.match(await page.locator('#funding-progress-title').textContent(),/觀衍.*1080000/);
+      await page.locator('#funding-draft').click();
+      const guanyanDraft=JSON.parse(await page.locator('#funding-preview').textContent());
+      assert.equal(guanyanDraft.review.reason,'GUANYAN_RECONCILIATION_NOT_VERIFIED');
+      await noWalletAuthority('Guanyan original reconciliation gate');
+      row.guanyan={amountKaios:'1080000',separateCase:true,sendDisabled:true,geometry:await noOverflow('Guanyan fixed case')};
+      await capture('guanyan-readiness-progress',true);
+      const guanyan=page.locator('#funding-guanyan');
+      await guanyan.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+      await shot(page,`funding-${width}x${height}-guanyan-readiness-card-viewport`);
+      await guanyan.screenshot({path:`${OUT}/funding-${width}x${height}-guanyan-readiness-card.png`});
+      row.screenshots.push(`funding-${width}x${height}-guanyan-readiness-card-viewport.png`,`funding-${width}x${height}-guanyan-readiness-card.png`);
       // Exercise the real seven-floor controller in the same isolated context.
       // No game character, wallet provider, eligibility source or RPC is supplied.
       const seven=page.locator('#seven-floor-panel');
