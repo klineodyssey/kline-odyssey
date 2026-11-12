@@ -79,7 +79,7 @@ async function inlineBankApi({ mockGovernanceRuntime } = {}) {
   }
   const context = { ...ethers.utils, window: {}, navigator: {}, structuredClone };
   vm.runInNewContext(adapter + `\nglobalThis.bankTestApi = {
-    FUNDING_FORMAL,FUNDING_RUNTIME_PINS,FUNDING_IMPLEMENTATION_SLOT,FUNDING_STORAGE_KEY,FUNDING_LOCK_KEY,
+    FUNDING_FORMAL,FUNDING_RUNTIME_PINS,FUNDING_IMPLEMENTATION_SLOT,FUNDING_STORAGE_KEY,FUNDING_LOCK_KEY,FUNDING_EVIDENCE_PREFIX,
     buildLifeResourcePlan,deriveFundingStep,HumanFundingWallet,buildSharedCapPlan,deriveSharedCapStep,SharedCapWallet,
     buildLegacyCapCancelPlan,deriveLegacyCapCancelStep,isLegacyCapCancelPlan,LegacyCapCancelWallet,LEGACY_APPROVAL_RECEIPT,
     buildBankPausePlan,deriveBankPauseStep,HumanBankPauseWallet,readFundingRuntimePins,walletAccounts,authorizedWalletAccount,
@@ -121,6 +121,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   const {
     FUNDING_FORMAL: formal,
     FUNDING_LOCK_KEY,
+    FUNDING_STORAGE_KEY,
+    FUNDING_EVIDENCE_PREFIX,
     buildLifeResourcePlan,
     deriveFundingStep,
     HumanFundingWallet,
@@ -417,7 +419,118 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(result.status, mode === "exact" ? "VERIFIED_PAID" : "MISMATCH");
       if (mode === "exact") assert.equal(mock.wallet.readPending(), null);
       else assert.notEqual(mock.wallet.readPending(), null, "uncertain receipt retains the lock");
+      assert.equal(mock.wallet.storage.getItem(FUNDING_EVIDENCE_PREFIX+transactionHash)!==null,mode==='exact','only fully verified evidence is saved');
       assert.equal(mock.sends().length, 1);
+    }
+  });
+
+  const paidEvidenceFixture = async (records, options={}) => {
+    const mock=mockWallet({storage:records,...options,receipt:receipt([
+      eventLog(formal.kaios,'Transfer',[formal.bank,beneficiary,plan.amountWei]),
+      eventLog(formal.allocation,'AllocationExecuted',[plan.allocationId,beneficiary,plan.amountWei,formal.mother]),
+      eventLog(formal.bank,'ModulePaymentExecuted',[formal.moduleId,plan.paymentId,beneficiary,plan.amountWei])
+    ])});
+    const state=snapshot();state.allocation={beneficiary,amount:plan.amountWei,purposeHash:plan.purposeHash,executableAt:'0',executed:false,cancelled:false};
+    mock.change(state);await mock.wallet.request(await mock.wallet.prepare(plan));
+    state.allocation.executed=true;state.paymentConsumed=true;mock.change(state);
+    return mock;
+  };
+  const evidenceKey=FUNDING_EVIDENCE_PREFIX+transactionHash;
+  await t.test('verified receipt evidence is written and read back before clearing the original pending intent',async()=>{
+    const records=storage(),operations=[],get=records.getItem,set=records.setItem,remove=records.removeItem;
+    records.getItem=key=>{if(key===evidenceKey)operations.push('read-evidence');return get(key);};
+    records.setItem=(key,value)=>{if(key===evidenceKey)operations.push('write-evidence');set(key,value);};
+    records.removeItem=key=>{if(key===FUNDING_STORAGE_KEY){operations.push('clear-pending');assert.ok(get(evidenceKey),'complete evidence exists before release');}remove(key);};
+    const mock=await paidEvidenceFixture(records),original=mock.wallet.readPending();
+    assert.equal((await mock.wallet.reconcile(transactionHash)).status,'VERIFIED_PAID');
+    const saved=JSON.parse(get(evidenceKey));assert.equal(saved.schema,1);assert.equal(saved.firstVerifiedAt,timestamp*1000);
+    assert.equal(saved.evidence.chainId,56);assert.equal(saved.evidence.hash,transactionHash);
+    assert.equal(saved.evidence.status,'VERIFIED_PAID');assert.equal(saved.evidence.intent.intentId,original.intentId);
+    assert.equal(saved.evidence.intent.plan.allocationId,plan.allocationId);assert.equal(saved.evidence.intent.plan.paymentId,plan.paymentId);
+    assert.equal(saved.evidence.transaction.input,original.transaction.data.toLowerCase());
+    assert.equal(saved.evidence.receipt.blockHash,blockHash);assert.equal(saved.evidence.canonicalBlock.hash,blockHash);
+    assert.equal(saved.evidence.receipt.logs.length,3);assert.equal(saved.evidence.receipt.logs[0].address,formal.kaios.toLowerCase());
+    assert.ok(operations.indexOf('write-evidence')<operations.lastIndexOf('read-evidence'));
+    assert.ok(operations.lastIndexOf('read-evidence')<operations.indexOf('clear-pending'));
+    assert.equal(get(FUNDING_STORAGE_KEY),null);assert.equal(mock.sends().length,1);
+  });
+  await t.test('evidence storage, quota, corrupt records and readback failures retain the exact original pending intent',async()=>{
+    for(const mode of ['write','quota','read','drop-write','wrong-readback','corrupt','schema','invalid-clock']){
+      const records=storage(),get=records.getItem,set=records.setItem;
+      let wrote=false;
+      records.setItem=(key,value)=>{if(key===evidenceKey){if(mode==='write'||mode==='quota')throw Error(mode);wrote=true;if(mode==='drop-write')return;}set(key,value);};
+      records.getItem=key=>{if(key===evidenceKey){if(mode==='read')throw Error('read failed');if(mode==='wrong-readback'&&wrote)return '{}';}return get(key);};
+      if(mode==='corrupt')set(evidenceKey,'{');
+      if(mode==='schema')set(evidenceKey,JSON.stringify({schema:999,firstVerifiedAt:1,evidence:{}}));
+      const mock=await paidEvidenceFixture(records),pending=get(FUNDING_STORAGE_KEY),prior=get(evidenceKey);
+      if(mode==='invalid-clock')mock.wallet.now=()=>NaN;
+      await assert.rejects(mock.wallet.reconcile(transactionHash),/EVIDENCE_(STORAGE_FAILED|CONFLICT)_RETAIN_PENDING/,mode);
+      assert.equal(get(FUNDING_STORAGE_KEY),pending,mode);assert.equal(mock.sends().length,1,mode);
+      if(mode==='corrupt'||mode==='schema')assert.equal(get(evidenceKey),prior,'existing evidence is never overwritten');
+    }
+  });
+  await t.test('saved evidence survives interrupted pending release and reload retries are idempotent across clock changes',async()=>{
+    const records=storage(),remove=records.removeItem;let interrupt=true;
+    records.removeItem=key=>{if(key===FUNDING_STORAGE_KEY&&interrupt)throw Error('interrupted before clear');remove(key);};
+    const mock=await paidEvidenceFixture(records),pending=records.getItem(FUNDING_STORAGE_KEY);
+    await assert.rejects(mock.wallet.reconcile(transactionHash),/interrupted before clear/);
+    const saved=records.getItem(evidenceKey);assert.ok(saved);assert.equal(records.getItem(FUNDING_STORAGE_KEY),pending);
+    const reloaded=new HumanFundingWallet({provider:mock.wallet.provider,storage:records,now:()=>timestamp*1000+60000,
+      locks:{request:async(_name,_options,callback)=>callback({})}});
+    reloaded.inspect=mock.wallet.inspect;interrupt=false;
+    assert.equal((await reloaded.reconcile(transactionHash)).status,'VERIFIED_PAID');
+    assert.equal(records.getItem(evidenceKey),saved,'retry preserves the first proof and original verification time');
+    assert.equal(reloaded.readPending(),null);assert.equal(mock.sends().length,1,'reload never resubmits the original payment');
+  });
+  await t.test('same-hash conflicting intent, IDs, block or events cannot overwrite saved evidence or release pending',async()=>{
+    for(const mutate of [r=>r.evidence.intent.intentId='different-intent',r=>r.evidence.intent.plan.paymentId=id('other-payment'),
+      r=>r.evidence.intent.plan.allocationId=id('other-allocation'),r=>r.evidence.intent.plan.beneficiary=alternate,
+      r=>r.evidence.receipt.blockHash=id('other-block'),r=>r.evidence.receipt.logs[0].data='0x00']){
+      const records=storage(),mock=await paidEvidenceFixture(records),pending=records.getItem(FUNDING_STORAGE_KEY);
+      await mock.wallet.reconcile(transactionHash);const record=JSON.parse(records.getItem(evidenceKey));mutate(record);
+      const conflicting=JSON.stringify(record);records.setItem(evidenceKey,conflicting);records.setItem(FUNDING_STORAGE_KEY,pending);
+      await assert.rejects(mock.wallet.reconcile(transactionHash),/EVIDENCE_CONFLICT_RETAIN_PENDING/);
+      assert.equal(records.getItem(evidenceKey),conflicting);assert.equal(records.getItem(FUNDING_STORAGE_KEY),pending);
+      assert.equal(mock.sends().length,1);
+    }
+  });
+  await t.test('equivalent saved evidence accepts hex case and object key order without rewriting its first record',async()=>{
+    const records=storage(),mock=await paidEvidenceFixture(records),pending=records.getItem(FUNDING_STORAGE_KEY);
+    await mock.wallet.reconcile(transactionHash);const record=JSON.parse(records.getItem(evidenceKey));
+    record.evidence.transaction.from=record.evidence.transaction.from.toUpperCase();
+    record.evidence.receipt.logs[0].data=record.evidence.receipt.logs[0].data.toUpperCase();
+    record.evidence=Object.fromEntries(Object.entries(record.evidence).reverse());
+    const reordered=JSON.stringify(record);records.setItem(evidenceKey,reordered);records.setItem(FUNDING_STORAGE_KEY,pending);
+    assert.equal((await mock.wallet.reconcile(transactionHash)).status,'VERIFIED_PAID');
+    assert.equal(records.getItem(evidenceKey),reordered);assert.equal(mock.wallet.readPending(),null);assert.equal(mock.sends().length,1);
+  });
+  await t.test('stale watches before or after evidence storage cannot clear pending or publish a completed result',async()=>{
+    for(const stage of ['before','after','pending-changed']){
+      const records=storage(),get=records.getItem,set=records.setItem,mock=await paidEvidenceFixture(records);
+      const pending=records.getItem(FUNDING_STORAGE_KEY);let current=true;
+      if(stage==='before'){const inspect=mock.wallet.inspect;mock.wallet.inspect=async(...args)=>{const value=await inspect(...args);current=false;return value;};}
+      else records.getItem=key=>{const value=get(key);if(key===evidenceKey&&value!==null){if(stage==='after')current=false;else set(FUNDING_STORAGE_KEY,JSON.stringify({...JSON.parse(pending),intentId:'newer-pending'}));}return value;};
+      const watch={pending,isCurrent:()=>current};
+      if(stage==='pending-changed')await assert.rejects(mock.wallet.reconcile(transactionHash,watch),/PENDING_CHANGED_RETAIN_LOCK/);
+      else assert.equal((await mock.wallet.reconcile(transactionHash,watch)).status,'WATCH_STOPPED');
+      assert.equal(get(evidenceKey)!==null,stage!=='before');
+      if(stage==='pending-changed')assert.equal(JSON.parse(get(FUNDING_STORAGE_KEY)).intentId,'newer-pending');
+      else assert.equal(get(FUNDING_STORAGE_KEY),pending);
+      assert.equal(mock.sends().length,1);
+    }
+  });
+  await t.test('archived evidence never replaces fresh canonical checks after a reload',async()=>{
+    const records=storage(),mock=await paidEvidenceFixture(records),pending=records.getItem(FUNDING_STORAGE_KEY);
+    await mock.wallet.reconcile(transactionHash);const saved=records.getItem(evidenceKey);
+    for(const mode of ['pending','wrong-block']){
+      records.setItem(FUNDING_STORAGE_KEY,pending);const reads=[];
+      const provider={request:args=>{reads.push(args.method);if(mode==='pending'&&args.method==='eth_getTransactionReceipt')return null;
+        if(mode==='wrong-block'&&args.method==='eth_getBlockByNumber')return {number:'0x100',hash:id('noncanonical')};return mock.wallet.provider.request(args);}};
+      const reloaded=new HumanFundingWallet({provider,storage:records,locks:{request:async(_name,_options,callback)=>callback({})}});
+      reloaded.inspect=mock.wallet.inspect;
+      assert.equal((await reloaded.reconcile(transactionHash)).status,mode==='pending'?'PENDING':'MISMATCH');
+      assert.ok(reads.includes('eth_getTransactionReceipt'));assert.equal(records.getItem(evidenceKey),saved);
+      assert.equal(records.getItem(FUNDING_STORAGE_KEY),pending);assert.equal(mock.sends().length,1);
     }
   });
 
@@ -438,6 +551,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     state.allocation.executed = true; state.paymentConsumed = true; mock.change(state);
     const result = await mock.wallet.reconcile(transactionHash);
     assert.equal(result.status, "EVIDENCE_INCOMPLETE");
+    assert.equal(mock.wallet.storage.getItem(FUNDING_EVIDENCE_PREFIX+transactionHash),null,'Guanyan incomplete evidence never becomes an archived PAID result');
     equalInline(mock.wallet.readPending(), originalPending);
     assert.equal(mock.sends().length, 1);
   });
@@ -3429,7 +3543,7 @@ test("seven floor amounts: every exact cap, scale interval and 18-decimal bounda
 
 test("seven floor wallet: exact plans, fail-closed previews, asynchronous guards and canonical payment receipts", async (t) => {
   const { Interface } = await import("ethers");
-  const { FUNDING_FORMAL: formal, FUNDING_LOCK_KEY, FUNDING_STORAGE_KEY, SEVEN_FLOORS, SEVEN_FLOOR_RELEASE,
+  const { FUNDING_FORMAL: formal, FUNDING_LOCK_KEY, FUNDING_STORAGE_KEY, FUNDING_EVIDENCE_PREFIX, SEVEN_FLOORS, SEVEN_FLOOR_RELEASE,
     buildSevenFloorPlan, deriveSevenFloorStep, SevenFloorClaimWallet, HumanFundingWallet, buildLifeResourcePlan } = await inlineBankApi();
   const sevenFloorPaymentId = (characterId, floor) => keccak256(AbiCoder.defaultAbiCoder().encode(
     ["bytes32", "bytes32", "bytes32", "uint8"],
@@ -3666,6 +3780,9 @@ test("seven floor wallet: exact plans, fail-closed previews, asynchronous guards
     const m = mock(); await m.wallet.request(await m.wallet.prepare(input)); m.confirm();
     assert.equal((await m.wallet.reconcile(hash)).status, "VERIFIED_PAID");
     assert.equal(m.storage.getItem(FUNDING_STORAGE_KEY), null);
+    const saved=JSON.parse(m.storage.getItem(FUNDING_EVIDENCE_PREFIX+hash));
+    assert.equal(saved.evidence.intent.expectedBeneficiary,receiver.toLowerCase(),'the original floor recipient binding survives pending release');
+    assert.equal(saved.evidence.intent.plan.characterId,characterId);
     assert.ok(m.lockCalls.every(call => call.name === FUNDING_LOCK_KEY), "request and reconciliation use the same original cross-tab mutex");
   });
   await t.test("reconcile A never clears a newer pending B; unavailable lock yields zero sends", async () => {

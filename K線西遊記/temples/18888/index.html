@@ -610,6 +610,12 @@ const freeze = (value) => { if (value && typeof value === "object") { Object.val
 const json = (value) => JSON.stringify(value, (_, item) => typeof item === "bigint" ? item.toString() : item);
 const FUNDING_STORAGE_KEY = "kaios18888.humanFunding.pending.v1";
 const FUNDING_LOCK_KEY = "kaios18888.humanFunding.request.v1";
+const FUNDING_EVIDENCE_PREFIX = "kaios18888.humanFunding.receipt.v1:56:";
+const fundingEvidenceJSON = value => json((function normalize(item) {
+  if (Array.isArray(item)) return item.map(normalize);
+  if (item && typeof item === 'object') return Object.fromEntries(Object.keys(item).sort().map(key => [key, normalize(item[key])]));
+  return typeof item === 'string' && /^0x[0-9a-f]*$/i.test(item) ? item.toLowerCase() : item;
+})(value));
 
 // Seven-floor source candidate. Never infer deployment/authority from this UI.
 const SEVEN_FLOORS = Object.freeze([
@@ -1301,9 +1307,10 @@ class HumanFundingWallet {
     if (!receipt) return { status: "PENDING", hash };
     if (!same(receipt.transactionHash, hash)) return { status: "MISMATCH", hash };
     if (receipt.blockNumber == null || !/^0x[0-9a-fA-F]{64}$/.test(receipt.blockHash || "")) return { status: "MISMATCH", hash };
+    let canonicalBlock;
     try {
-      const canonical = await rpc("eth_getBlockByNumber", [receipt.blockNumber, false]);
-      if (!canonical || !same(canonical.hash, receipt.blockHash)
+      canonicalBlock = await rpc("eth_getBlockByNumber", [receipt.blockNumber, false]);
+      if (!canonicalBlock || !same(canonicalBlock.hash, receipt.blockHash)
         || (tx.blockHash != null && !same(tx.blockHash, receipt.blockHash))
         || (tx.blockNumber != null && BI(tx.blockNumber) !== BI(receipt.blockNumber))) return { status: "MISMATCH", hash };
     } catch { return { status: "MISMATCH", hash, warning: "Canonical receipt block could not be verified; lock retained." }; }
@@ -1407,6 +1414,34 @@ class HumanFundingWallet {
       status = verified ? "CONFIRMED" : "MISMATCH";
     }
     if (verified) {
+      if (watch && !watch.isCurrent()) return { status: "WATCH_STOPPED", hash };
+      if (json(this.readPending()) !== json(pending)) throw new Error("PENDING_CHANGED_RETAIN_LOCK");
+      // Public historical evidence only: never read this cache as payment authority.
+      // Keep the first proof, even if a later attempt fails while clearing pending.
+      // Aside from key order and hex case, differing RPC fields require review.
+      const key = FUNDING_EVIDENCE_PREFIX + hash.toLowerCase();
+      const evidence = JSON.parse(fundingEvidenceJSON({ chainId: 56, hash, status,
+        intent: { intentId: pending.intentId ?? null, flowType: pendingFlow, kind: pending.kind,
+          proposalId: pending.proposalId ?? null, plan: pending.plan, transaction: pending.transaction,
+          ...(pending.expectedBeneficiary ? { expectedBeneficiary: pending.expectedBeneficiary } : {}) },
+        transaction: tx, receipt, canonicalBlock }));
+      let saved;
+      try {
+        saved = this.storage.getItem(key);
+        if (saved !== null) {
+          const record = JSON.parse(saved);
+          if (record.schema !== 1 || !Number.isFinite(record.firstVerifiedAt)
+            || fundingEvidenceJSON(record.evidence) !== fundingEvidenceJSON(evidence)) throw Error('EVIDENCE_CONFLICT_RETAIN_PENDING');
+        } else {
+          const firstVerifiedAt = this.now();
+          if (!Number.isFinite(firstVerifiedAt)) throw Error('EVIDENCE_STORAGE_FAILED_RETAIN_PENDING');
+          saved = json({ schema: 1, firstVerifiedAt, evidence });
+          this.storage.setItem(key, saved);
+        }
+        if (this.storage.getItem(key) !== saved) throw Error('EVIDENCE_STORAGE_FAILED_RETAIN_PENDING');
+      } catch (error) {
+        throw Error(error?.message === 'EVIDENCE_CONFLICT_RETAIN_PENDING' ? error.message : 'EVIDENCE_STORAGE_FAILED_RETAIN_PENDING');
+      }
       if (watch && !watch.isCurrent()) return { status: "WATCH_STOPPED", hash };
       if (json(this.readPending()) !== json(pending)) throw new Error("PENDING_CHANGED_RETAIN_LOCK");
       this.storage.removeItem(FUNDING_STORAGE_KEY);
@@ -1549,6 +1584,10 @@ const status = text => { el('status').textContent = text; refreshFundingDiagnost
 const stageNames = {LEGACY_CANCEL_PROPOSE:'王母提出取消案', LEGACY_CANCEL_APPROVE:'玉帝批准取消案', LEGACY_CANCEL_EXECUTE:'執行已批准且到期的取消案', LEGACY_CANCEL_DONE:'鏈上顯示舊案已取消，請核對原回執', CAP_ALREADY_CONFIGURED:'共享每筆／每日10,000,000 KAIOS限額已生效；本次不建立配額或付款', BLOCKED:'先處理查核缺項', DONE:'觀察到已執行狀態，仍須核對原回執', CAP_PROPOSE:'王母：提出一份共享調額提案（每筆／每日各10,000,000 KAIOS）', CAP_APPROVE:'玉帝：批准原調額提案', WAIT_ETA:'等待鏈上治理時間，不送交易', CAP_EXECUTE:'執行已批准的10,000,000 KAIOS共享調額', ALLOCATION_PROPOSE:'王母：提出本案配額提案', ALLOCATION_APPROVE:'玉帝：批准本案配額提案', ALLOCATION_EXECUTE:'執行本案配額建立（並非已付款）', PAYOUT:'執行本案撥款', BANK_PAUSE:'觀音：緊急暫停銀行', BANK_ALREADY_PAUSED:'銀行已暫停，無需再送暫停交易'};
 const reasons = {CHAIN_ID_MISMATCH:'請在錢包自行切至BSC主網56。', ACCOUNT_NOT_REVIEWED_HOLDER:'本版只接受原Mother或玉帝帳戶。', MOTHER_PROPOSER_REQUIRED:'此步需切至Mother提案帳戶。', DISTINCT_JADE_APPROVER_REQUIRED:'此步需不同於提案人的玉帝批准帳戶。', CAP_RESET_WOULD_ERASE_CURRENT_DAY_SPEND:'當日已有共享用量；調額會歸零，必須先完成用量影響審查。', HIGHER_EXISTING_CAP_DO_NOT_LOWER:'現有限額較候選更高，停止以免降低其他業務額度。', PENDING_INTENT_RECONCILE_FIRST:'已有待確認意圖，請先核對原交易回執，勿重送。', PREVIEW_INVALID_OR_EXPIRED:'預覽已過期或作廢，請重新讀查。', FRESH_STATE_OR_ACCOUNT_CHANGED:'送交前重查發現狀態或帳戶變動，請重新讀查。', WEB_LOCKS_REQUIRED_NO_SEND:'此瀏覽器缺少安全跨分頁鎖；本版不送交易。', ANOTHER_TAB_REQUEST_IN_PROGRESS:'另一分頁正在處理錢包請求，請勿重送。', NO_PENDING_INTENT:'本瀏覽器沒有待核對的送單意圖，不能用任意雜湊代替。', AVAILABLE_FUNDS_INSUFFICIENT:'目前可用額不足；仍須另外核對全部既有負債。', AMOUNT_DECIMAL_STRING_REQUIRED:'請輸入一般數字，最多18位小數，不含逗號或科學記號。', AMOUNT_OUTSIDE_REVIEWED_CAP:'金額須大於0且不超過本版10,000,000 KAIOS候選上限。'};
 Object.assign(reasons, {GUANYIN_PAUSER_REQUIRED:'請在錢包選擇正式觀音帳戶，並核對銀行PAUSER_ROLE。', ACCOUNT_NOT_REVIEWED_PAUSER:'請在錢包選擇正式觀音帳戶。', PAUSER_ROLE_MISSING:'目前帳戶未通過鏈上暫停權限核對。', PENDING_FLOW_MISMATCH:'待確認交易屬於另一操作流程；請選回原角色與流程核對，勿重送。'});
+Object.assign(reasons, {
+  EVIDENCE_STORAGE_FAILED_RETAIN_PENDING:'回執證據未能保存並讀回；原交易紀錄保留，請勿重送。',
+  EVIDENCE_CONFLICT_RETAIN_PENDING:'同一交易已有不同證據；原紀錄保留並停止核銷，請勿重送。'
+});
 Object.assign(reasons, {GUANYIN_ACCOUNT_REQUIRED:'請在錢包選擇正式觀音帳戶。', GUANYIN_PAUSER_ROLE_REQUIRED:'目前帳戶未通過銀行暫停權限核對。', BANK_RUNTIME_IDENTITY_MISMATCH:'銀行合約版本尚未通過正式地址與程式指紋核對，停止操作。', BANK_PAUSE_STATE_UNKNOWN:'目前無法確認銀行暫停狀態，請保留原交易紀錄。', PENDING_OTHER_FLOW_RECONCILE_AT_ORIGINAL_PANEL:'待確認意圖屬於另一流程；防重鎖保留，請回原流程核對原交易，勿重送。', TRANSACTION_FLOW_MISMATCH:'目前操作流程與原預覽不符，請重新讀查。'});
 Object.assign(reasons, {
   LEGACY_CANCEL_AUTHORITY_UNKNOWN:'未核實治理合約的取消權限或等待時間。',
