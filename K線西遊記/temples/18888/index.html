@@ -236,6 +236,19 @@ STATUS: PROTOTYPE — 前端原型，不改合約
     <h2 id="funding-title">KAIOS 原五筆發放 · 在這一頁接續辦理</h2>
     <p>連接王母或玉帝錢包，核對 BSC 56，再使用下方「原五筆發放／接續辦理」。頁面會接續目前角色可辦的步驟，<strong>每筆仍由本人在錢包確認。</strong>觀音暫停與其它單案可在進階區辦理。</p>
     <p class="funding-muted">此區與上方原型展示數字分開。BSC 主網 56；金額單位 KAIOS，不是 BNB。調額、Mother 提案、玉帝獨立批准、到期執行、實際撥款分別核定；連接或交易雜湊不代表已入帳。</p>
+    <section class="funding-progress" id="funding-guanyan" aria-labelledby="funding-guanyan-title">
+      <h3 id="funding-guanyan-title">觀衍獨立專案 · 1,080,000 KAIOS</h3>
+      <p>GUANYAN-KAIOS-LIFE-WALLET-001 · 與原五筆及玩家七層領取分開。</p>
+      <p style="overflow-wrap:anywhere">唯一收款地址：<code>0xea6aec0bf657cf78d3dfec9fa0f5e4d586d9f642</code></p>
+      <p>目前等待對帳完成；尚未確認入帳。107 萬筆誤已作廢，不會使用。</p>
+      <ol aria-label="觀衍撥款仍須核清的條件">
+        <li>核清三筆舊案、已建未付配額及銀行完整未付義務；可用餘額足夠單筆，不等於已扣除全部承諾。</li>
+        <li>核對本案原用途、唯一地址及跨 ID 既領紀錄；不因查不到回執就換 ID 重送。</li>
+        <li>前兩項完成後，由王母提出本案、玉帝獨立批准，依原鏈上到期時間建立配額並確認撥款。</li>
+      </ol>
+      <div class="funding-actions"><button type="button" id="funding-load-guanyan">載入觀衍108萬 · 準備與核對</button></div>
+      <p class="funding-muted">不必上傳檔案或重填地址。此按鈕只載入固定原案；已連接時沿原流程唯讀檢查。付款條件未核清時，錢包確認保持停用。</p>
+    </section>
     <div class="funding-fields">
       <label>操作角色（辦理者）<select id="funding-role"><option value="mother">王母 · 提出治理提案</option><option value="jade">玉帝 · 批准原提案</option><option value="guanyin">觀音 · 緊急暫停銀行（OKX Wallet）</option></select></label>
       <label>筆電／錢包內建瀏覽器的既有錢包<select id="funding-wallet"><option value="">正在偵測既有錢包…</option></select></label>
@@ -1925,6 +1938,7 @@ const refreshSend = () => {
   el('receipt').disabled = el('prepare').disabled;
   el('draft').disabled = busy;
   el('load-five').disabled = busy || !['cap', 'fixed'].includes(fundingMode());
+  el('load-guanyan').disabled = busy || el('role').value === 'guanyin';
   el('connect').disabled = busy || !providers.length;
   el('reselect').disabled = busy || !wallet || connectedProvider === mobileProvider;
   el('switch-bsc').disabled = busy || !wallet || connectedChain === 56;
@@ -2871,6 +2885,21 @@ el('five-start').onclick = () => {
   });
 };
 renderFiveRows();
+el('load-guanyan').onclick = () => run(async () => {
+  if (el('role').value === 'guanyin') throw Error('請先選王母或玉帝辦理觀衍原案；觀音僅辦理緊急暫停。');
+  invalidate();
+  const plan = buildLifeResourcePlan({beneficiary:FUNDING_FORMAL.guanyanBeneficiary, amount:'1080000'});
+  loadOriginalFundingCases({cases:[{name:'觀衍', beneficiary:plan.beneficiary, amountKaios:plan.amountKaios,
+    allocationId:plan.allocationId, purposeHash:plan.purposeHash}]});
+  el('mode').value = 'fixed';
+  if (wallet && connectedProvider) wallet = makeWallet(connectedProvider);
+  syncFundingMode(); updateFundingLinks();
+  el('case').value = '0';
+  el('case').dispatchEvent(new Event('change'));
+  el('advanced').open = true;
+  status('觀衍獨立108萬原案已載入，地址與金額固定。先完成原對帳，再由王母／玉帝沿原流程辦理；目前只供核對，不會送出交易。');
+  el('status').scrollIntoView({block:'nearest'});
+});
 el('load-five').onclick = () => run(async () => {
   if (!['cap', 'fixed'].includes(fundingMode())) return;
   const selectedAllocationId = importedCases[selectedFundingCaseIndex()]?.allocationId;
