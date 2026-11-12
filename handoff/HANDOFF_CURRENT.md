@@ -2,6 +2,15 @@
 
 STATUS: INITIAL
 
+## K8888 workforce/payroll simulation continuity
+
+- WORK_ID: `KAIOS-WORKFORCE-K8888-PAYROLL-20261017-001`; issue https://github.com/klineodyssey/kline-odyssey/issues/606; base `e545462ba0419c7569521f7fa5e0cecbc9980283`; branch `codex/kaios-workforce-k8888-payroll-20261017`. PR and exact delivery head are pending this branch's Draft PR publication.
+- This GM-authored bounded prototype preserves DOT as primary engineering dispatcher. DOT contact was published at https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6230486588; actual recipient wake, ACK and exclusive claim are NOT_VERIFIED. Do not create a competing writer for the same files.
+- Existing `core/company/index.mjs` gained read-only KAIOS cycle, KGEN work-reward and K8888 game-claim previews. Existing K8888 page gained roster lookup and local-only HR draft. No new Life, real employment decision, transfer, salary receipt or payment entitlement is created.
+- Local QA: Node universal exchange 262/262 PASS; Chromium desktop and 390×844 visual inspection and interactions PASS. Remote CI and independent exact-head review pending. No real reserve or payroll funding evidence was present.
+- Next: create/read back Draft PR; review exact head; resolve DOT/HR coordination; later K8888 claim route and K88888/K11520 internal bases. Real payment requires a separate exact protected authorization. Preserve #523 HOLD and `PAYMENT_STATUS=NOT_LIVE`.
+- Text signature: 衡曜｜KAIOS GM｜2026-10-17T06:12Z; cryptographic signature NOT_VERIFIED.
+
 ## Three-cell cargo / cross-market simulation acceptance
 
 - WORK_ID: `K11520-THREE-CELL-CARGO-MARKET-QA-20261013-001`.

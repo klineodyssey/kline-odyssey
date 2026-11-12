@@ -1,5 +1,17 @@
 # KGEN Organization V2.0 WorkQueue
 
+## K8888 workforce and payroll simulation — 2026-10-17
+
+- WORK_ID: `KAIOS-WORKFORCE-K8888-PAYROLL-20261017-001`; source and durable task: https://github.com/klineodyssey/kline-odyssey/issues/606.
+- GENERATED_AT: `2026-10-17T06:04:12Z`; BASE_MAIN_SHA: `e545462ba0419c7569521f7fa5e0cecbc9980283`; branch: `codex/kaios-workforce-k8888-payroll-20261017`.
+- OWNER: `HENGYAO_GM`; IMPLEMENTER: `codex-gm-01` for this bounded simulation prototype while DOT actual receipt/claim remains `NOT_VERIFIED`; REVIEWER: independent exact-head review pending. DOT's original window is https://github.com/klineodyssey/kline-odyssey/issues/573#issuecomment-6230486588. This does not transfer DOT's broader primary ownership.
+- STATUS: `LOCAL_QA_PASS / DRAFT_PR_PENDING`; SCOPE: reuse existing roster/policy/claim queue, add read-only KAIOS fifth-through-fourth cycle, separately evidenced KGEN hourly and cross-day calculation, K8888 game-claim gating, local-only HR application draft. No Life issuance, payroll execution, new HR system, or route/navigation system.
+- EVIDENCE: `node --test tests/universal-exchange.test.mjs` 262/262 PASS; K8888 desktop and 390×844 Chromium screenshots inspected; worker lookup, existing Digital Ant Life lookup, blocked claim and local draft exercised. Exact PR head/remote CI/independent review remain pending.
+- LIFE_ID_LOOKUP: `DIGITAL_ANT_0001` found in the existing roster; DOT formal Life/Worker identity `NOT_VERIFIED`, and lack of that identity does not block ordinary safe work. Ant notice published at https://github.com/klineodyssey/kline-odyssey/issues/577#issuecomment-6230484509; recipient ACK `NOT_VERIFIED`.
+- PAYROLL_POLICY: existing `COMPENSATION_STANDARD.md` and `payroll_policy.json` V4.1; approved salary, KGEN rates/bonuses, funds and receipts not evidenced. `PAYMENT_STATUS=NOT_LIVE`; #523 HOLD and all signer/Treasury/Mainnet boundaries unchanged.
+- NEXT: publish Draft PR, read back exact head/CI, obtain independent review; DOT/HR to bind approved amounts and verified attendance/work evidence before any payable state. K8888 game transit/vehicle route and K88888/K11520 internal-base presentation remain later scoped milestones, not delivered here.
+- TEXT_SIGNATURE: `衡曜｜KAIOS GM｜2026-10-17T06:12Z`; CRYPTOGRAPHIC_SIGNATURE_STATUS: `NOT_VERIFIED`.
+
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei
 
 - WORK_ID: `K11520-THREE-CELL-CARGO-MARKET-QA-20261013-001`.

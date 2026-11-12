@@ -8,6 +8,10 @@
 <style>
 .hero{background:linear-gradient(135deg,rgba(232,184,109,.15),transparent),var(--kgen-panel);border:1px solid rgba(232,184,109,.4);border-radius:20px;padding:20px;margin-bottom:16px}
 .loan-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--kgen-line);font-size:13px}
+.salary-form{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin:12px 0}
+.salary-form label{display:grid;gap:5px;font-size:12px;color:var(--kgen-muted)}
+.salary-form input,.salary-form select{width:100%;box-sizing:border-box;background:#101824;color:#f7f1e8;border:1px solid var(--kgen-line);border-radius:8px;padding:10px;font:inherit}
+.salary-result{white-space:pre-line;line-height:1.6;font-size:13px;color:#f7f1e8}
 </style>
 </head>
 <body>
@@ -41,6 +45,31 @@
     <div id="loan-log" style="margin-top:10px;font-size:12px;color:var(--kgen-muted)">按鈕只建立需求草稿；不會產生提款、訂單、收入或代幣轉帳。</div>
   </div>
 
+  <div class="kgen-section-head"><h2>💼 員工薪資與入職（內部試算）</h2></div>
+  <div class="kgen-card">
+    <p style="font-size:13px;line-height:1.6">沿用既有 HR 名冊、薪酬政策與 8888 領取佇列。這裡不登入、不核發生命 ID，也不執行 KAIOS／KGEN 付款。未核定金額只顯示待核。</p>
+    <form id="salary-lookup-form" class="salary-form">
+      <label>既有 Worker ID 或 Life ID<input id="salary-worker-id" maxlength="128" autocomplete="off" placeholder="例如 codex-gm-01" required></label>
+      <div style="align-self:end"><button type="submit" class="kgen-btn cyan full">查詢薪資／待領</button></div>
+    </form>
+    <div id="salary-result" class="salary-result" role="status" aria-live="polite">請輸入既有 Worker ID 或 Life ID；查詢不建立僱傭或薪資資格。</div>
+    <button class="kgen-btn full" id="salary-claim-preview" type="button" style="margin-top:10px">檢查遊戲領薪資格（不付款）</button>
+    <div id="salary-claim-result" class="salary-result" role="status" aria-live="polite"></div>
+  </div>
+  <div class="kgen-card" style="margin-top:12px">
+    <h3>入職／合作申請草稿</h3>
+    <p style="font-size:12px;line-height:1.6">僅存此瀏覽器；尚未送達 HR。可填既有 Life ID，但不會重發或把證件待補等同不能做一般安全工作。</p>
+    <form id="onboarding-draft-form" class="salary-form">
+      <label>稱呼<input id="onboarding-name" maxlength="80" required></label>
+      <label>職務／合作方向<input id="onboarding-role" maxlength="120" required></label>
+      <label>專長與可驗收能力<input id="onboarding-skills" maxlength="300" required></label>
+      <label>希望待遇（待 HR 核定）<input id="onboarding-requested-pay" maxlength="80" placeholder="可留空"></label>
+      <label>既有 Life ID（可留空）<input id="onboarding-life-id" maxlength="128"></label>
+      <div style="align-self:end"><button type="submit" class="kgen-btn cyan full">保存本機申請草稿</button></div>
+    </form>
+    <div id="onboarding-result" class="salary-result" role="status" aria-live="polite">狀態：未提交 HR；沒有錄用、出勤或薪資權利。</div>
+  </div>
+
   <div class="kgen-section-head"><h2>🫀 既有研究介面（SIMULATION）</h2></div>
   <div class="kgen-card" id="organ-table"></div>
 
@@ -70,6 +99,105 @@
   document.querySelectorAll('[data-request]').forEach(function(button){ button.onclick=function(){ localStorage.setItem('11520.pendingPrompt',button.getAttribute('data-request')); status.push('需求草稿已建立，前往11520確認'); location.href='../11520/index.html#/REQUEST'; }; });
   status.push('8888 玩家入口已啟動 · 銀行/ATM/KUFO/薪資仍依證據標示未部署');
 })();
+</script>
+<script type="module">
+import { previewKAIOSWorkforceCycle, previewK8888GameClaim } from '../../../core/company/index.mjs';
+const lookup = document.getElementById('salary-lookup-form');
+const salaryResult = document.getElementById('salary-result');
+const claimResult = document.getElementById('salary-claim-result');
+let selectedWorker = null;
+let claimQueue = null;
+const fetchJson = async (path) => {
+  const response = await fetch(path, { cache: 'no-store' });
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  return response.json();
+};
+const currentPayday = () => {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+  const value = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  const date = new Date(Date.UTC(Number(value.year), Number(value.month) - 1, 5));
+  if (Number(value.day) < 5) date.setUTCMonth(date.getUTCMonth() - 1);
+  return date.toISOString().slice(0, 10);
+};
+lookup.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  claimResult.textContent = '';
+  selectedWorker = null;
+  salaryResult.textContent = '讀取既有名冊與政策中…';
+  try {
+    const [roster, policy, queue] = await Promise.all([
+      fetchJson('../../../KGEN-KAIOS/workforce/employee_roster.json'),
+      fetchJson('../../../KGEN-KAIOS/workforce/payroll_policy.json'),
+      fetchJson('../../../KGEN-KAIOS/bank/8888/claim_queue.json')
+    ]);
+    const workerId = document.getElementById('salary-worker-id').value.trim();
+    const employee = roster.employees?.find(item => item.worker_id === workerId);
+    const audit = roster.payroll_eligibility_audit?.find(item => item.worker_id === workerId);
+    if (!employee || !audit) {
+      const life = roster.identity_audit?.find(item => item.life_id === workerId);
+      salaryResult.textContent = life
+        ? '既有 Life ID：' + life.life_id + '｜生命查核：' + life.life_id_status + '\n工作／合作身分：' + life.employment_decision + '｜薪資資格：' + life.payroll_eligibility + '\n不得重發生命 ID；本頁無法把 Life 身分當成已受雇或已付款。'
+        : '名冊未確認此 Worker/Life ID；不推定沒有 Life，也不建立新 ID。請走既有 HR 查核。';
+      return;
+    }
+    selectedWorker = workerId;
+    claimQueue = queue;
+    const cycle = previewKAIOSWorkforceCycle({ worker_id: workerId, payday_date: currentPayday(), employee_status: audit.employee_status });
+    const claims = queue.claims?.filter(item => item.worker_id === workerId) ?? [];
+    const pending = claims.filter(item => item.status === 'CLAIMABLE' || item.status === 'HELD_IN_BANK').length;
+    const paid = claims.filter(item => item.status === 'PAID' && item.receipt).length;
+    salaryResult.textContent = [
+      'Worker ID：' + workerId + '｜名冊狀態：' + employee.status,
+      '薪資資格：' + audit.payroll_eligibility + '｜薪酬政策：' + policy.metadata.version,
+      'KAIOS 預付週期：' + cycle.period_start + ' 至 ' + cycle.period_end + '（台北時間）',
+      '核定月薪：待 HR／Human 核定；薪資試算：' + cycle.salary_status,
+      'KGEN 時薪／跨日獎勵：待核定費率與出勤、工作驗收證據；不以空心跳計薪。',
+      '8888 佇列內待領／已領：' + pending + '／' + paid + '（不代表全部歷史薪資）',
+      '真實付款：NOT_LIVE；未驗證來源、餘額、地址、權限與收據時不得標為已付。'
+    ].join('\n');
+  } catch (error) {
+    salaryResult.textContent = '資料讀取失敗，未建立任何薪資或領取紀錄：' + error.message;
+  }
+});
+document.getElementById('salary-claim-preview').addEventListener('click', () => {
+  if (!selectedWorker || !claimQueue) {
+    claimResult.textContent = '請先查詢既有 Worker ID；尚無可驗證領薪資格。';
+    return;
+  }
+  const claim = claimQueue.claims?.find(item => item.worker_id === selectedWorker && item.status === 'CLAIMABLE');
+  const decision = previewK8888GameClaim({ claim_id: claim?.claim_id || 'K8888_CLAIM_PREVIEW',
+    approved_claimable_amount_atomic: claim?.approved_amount_atomic ?? null,
+    entitlement_evidence: claim?.review_evidence ?? null,
+    reserve_amount_atomic: null });
+  claimResult.textContent = '遊戲領薪檢查：' + decision.status + '；阻擋：' + (decision.blockers.join('、') || '無') + '。本頁不會付款或產生已領收據。';
+});
+const draftForm = document.getElementById('onboarding-draft-form');
+const draftResult = document.getElementById('onboarding-result');
+draftForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const draft = {
+    name: document.getElementById('onboarding-name').value.trim(),
+    role: document.getElementById('onboarding-role').value.trim(),
+    skills: document.getElementById('onboarding-skills').value.trim(),
+    requested_pay: document.getElementById('onboarding-requested-pay').value.trim(),
+    existing_life_id: document.getElementById('onboarding-life-id').value.trim(),
+    status: 'LOCAL_DRAFT_NOT_HR_SUBMITTED'
+  };
+  try {
+    localStorage.setItem('8888.onboardingDraft', JSON.stringify(draft));
+    draftResult.textContent = '已保存本機申請草稿；HR 尚未收件、錄用或核定待遇。';
+  } catch {
+    draftResult.textContent = '本機儲存不可用；未送達 HR，請勿視為已提交。';
+  }
+});
+try {
+  const draft = JSON.parse(localStorage.getItem('8888.onboardingDraft') || 'null');
+  if (draft?.status === 'LOCAL_DRAFT_NOT_HR_SUBMITTED') {
+    for (const [field, id] of Object.entries({ name: 'onboarding-name', role: 'onboarding-role', skills: 'onboarding-skills', requested_pay: 'onboarding-requested-pay', existing_life_id: 'onboarding-life-id' }))
+      document.getElementById(id).value = draft[field] || '';
+    draftResult.textContent = '已讀回本機申請草稿；HR 尚未收件。';
+  }
+} catch { /* A malformed local draft never changes HR or payroll state. */ }
 </script>
 </body>
 </html>
