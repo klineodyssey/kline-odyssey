@@ -471,7 +471,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
   await t.test("actual funding controller discards stale prepare success and failure after form changes", async t => {
     const { readFileSync } = await import("node:fs");
     const { runInNewContext } = await import("node:vm");
-    const { buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
+    const {detectVoiceCapabilities, normalizeVoiceError} = await import('../../core/apps/index.mjs');
+    const { buildBankPausePlan, buildSharedCapPlan, deriveSharedCapStep, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT, walletAccounts, authorizedWalletAccount } = await inlineBankApi();
     const html = readFileSync(new URL("../../K線西遊記/temples/18888/index.html", import.meta.url), "utf8");
     const source = html.match(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/)?.[1];
     assert.ok(source, "test the real existing inline funding controller");
@@ -483,7 +484,31 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       const state = { account: options.account ?? formal.mother, accounts: options.accounts, chainId: options.chainId ?? 56, pauser: options.pauser ?? false };
       const exposedAccounts = () => state.accounts ?? (state.account ? [state.account] : []);
       const rpc = [], mobileLog = [], storageFixture = storage(), providerEvents = [], connectionTimers = new Set();
+      const voiceLog = [], recognitions = [], storageWrites = [];
+      const originalStorageSet = storageFixture.setItem.bind(storageFixture);
+      storageFixture.setItem = (key, value) => {storageWrites.push({key,value}); originalStorageSet(key,value);};
       const windowEvents = new Map(), documentEvents = new Map();
+      let guidedPending = options.guided?.pending ?? null;
+      const guided = options.guided;
+      const guidedPhases = guided ? new Map(Object.entries(guided.phases ?? {})) : null;
+      const guidedSnapshot = (nextPlan, account) => {
+        const capConfigured = (guided.cap ?? 'configured') === 'configured', phase = guidedPhases.get(nextPlan.allocationId) ?? guided.phase ?? 'absent';
+        const proposal = (candidate, value) => value === 'absent' ? absent() : {
+          target:candidate.target, value:'0', dataHash:candidate.dataHash, proposer:formal.mother,
+          approver:['approved','created','paid','done'].includes(value) ? formal.jade : zero,
+          executableAt:String(guided.eta ?? timestamp - 1), executed:['created','paid','done','configured'].includes(value), cancelled:false,
+        };
+        return {...snapshot(), account, chainId:state.chainId, identityErrors:[],
+          roles:{proposer:account === formal.mother, approver:account === formal.jade, moduleAdmin:true, allocationGovernance:true},
+          module:{...snapshot().module, perTransactionLimit:capConfigured ? formal.capWei : '1', epochLimit:capConfigured ? formal.capWei : '1'},
+          capProposal:proposal(nextPlan.cap, guided.cap ?? 'configured'),
+          ...(nextPlan.type === 'SHARED_CAP' ? {} : {
+            allocationProposal:proposal(nextPlan.allocation, phase),
+            allocation:['created','paid','done'].includes(phase) ? {beneficiary:nextPlan.beneficiary, amount:nextPlan.amountWei,
+              purposeHash:nextPlan.purposeHash, executableAt:'0', executed:['paid','done'].includes(phase), cancelled:false} : snapshot().allocation,
+            paymentConsumed:['paid','done'].includes(phase),
+          }), ...guided.snapshotOverride};
+      };
       if (options.savedTopic) storageFixture.setItem("kaios18888.walletconnect.confirmedTopic.v1", options.savedTopic);
       const node = (name) => {
         if (!nodes.has(name)) {
@@ -493,6 +518,7 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             setAttribute(name, value) { this.attrs[name] = String(value); },
             getAttribute(name) { return this.attrs[name] ?? null; },
             removeAttribute(name) { delete this.attrs[name]; },
+            focus() { this.focused = true; }, scrollIntoView() { this.scrolled = true; },
             get href() { return this.attrs.href ?? ""; }, set href(value) { this.attrs.href = String(value); },
             addEventListener: (event, handler) => listeners.set(event, handler),
             emit: (event, detail) => listeners.get(event)?.(detail),
@@ -567,9 +593,9 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         on: (event, handler) => mobileListeners.set(event, handler),
       };
       class FakeWallet {
-        constructor({selectedAccount} = {}) { this.selectedAccount = selectedAccount; this.next = null; this.invalidations = 0; this.flowType = "FIXED_ALLOCATION"; wallets.push(this); }
-        readPending() { return options.pending ?? null; }
-        invalidatePreview() { this.invalidations++; }
+        constructor({selectedAccount} = {}) { this.selectedAccount = selectedAccount; this.next = null; this.invalidations = 0; this.generation = 0; this.flowType = "FIXED_ALLOCATION"; wallets.push(this); }
+        readPending() { return guided ? guidedPending : options.pending ?? null; }
+        invalidatePreview() { this.invalidations++; this.generation++; }
         invalidate() { this.invalidatePreview(); }
         async connect() { return [state.account]; }
         async prepare(nextPlan) {
@@ -579,6 +605,12 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
           const pause = nextPlan?.type === "BANK_PAUSE";
           const account = authorizedWalletAccount(exposedAccounts(), this.selectedAccount?.());
           if (!account) throw Error("ACCOUNT_OR_BLOCK_UNKNOWN");
+          if (guided) {
+            if (guided.onPrepare) await guided.onPrepare(nextPlan);
+            const observed = guidedSnapshot(nextPlan, account);
+            const step = nextPlan.type === 'SHARED_CAP' ? deriveSharedCapStep(nextPlan, observed) : deriveFundingStep(nextPlan, observed);
+            return {plan:nextPlan, account, snapshot:observed, step, generation:this.generation};
+          }
           const allowed = options.forceReady ?? (!pause || account.toLowerCase() === formal.guanyin.toLowerCase() && state.pauser && state.chainId === 56);
           return { plan: nextPlan, account,
             snapshot: { account, chainId: state.chainId, codeOk: true, identityErrors: [], paused: false,
@@ -587,8 +619,34 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
             step: { ready: allowed, kind: pause ? "BANK_PAUSE" : options.stepKind ?? (nextPlan?.type === "SHARED_CAP" ? "CAP_PROPOSE" : "ALLOCATION_PROPOSE"),
               blockers: allowed ? [] : options.stepBlockers ?? ["GUANYIN_PAUSER_REQUIRED"], proposalId: options.stepProposalId, to: pause ? formal.bank : formal.governance } };
         }
-        async request(candidate) { requests.push(candidate); if (this.nextSend) await this.nextSend.promise; return { hash: transactionHash }; }
+        async request(candidate) {
+          requests.push(candidate);
+          if (guided) {
+            const hash = '0x' + requests.length.toString(16).padStart(64, '0');
+            guidedPending = {flowType:this.flowType, plan:candidate.plan, kind:candidate.step.kind, proposalId:candidate.step.proposalId,
+              hash, intentId:'mock-' + requests.length, transaction:{from:candidate.account}};
+            try { if (guided.onRequest) await guided.onRequest(candidate); }
+            catch(error) { if (Number(error.code) === 4001) guidedPending = null; throw error; }
+            return {hash,status:'SUBMITTED_UNCONFIRMED',kind:candidate.step.kind};
+          }
+          if (this.nextSend) await this.nextSend.promise; return { hash: transactionHash };
+        }
         async reconcile(hash, watch) { receiptCalls.push({hash, watch}); if (this.nextReceipt) await this.nextReceipt.promise;
+          if (guided) {
+            if (guided.onReconcile) await guided.onReconcile(hash, this);
+            if (watch && !watch.isCurrent()) return {hash,status:'WATCH_STOPPED'};
+            const pending = guidedPending;
+            const result = guided.results?.shift() ?? (pending.kind === 'PAYOUT' ? 'VERIFIED_PAID' : 'CONFIRMED');
+            if (result instanceof Error) throw result;
+            if (result === (pending.kind === 'PAYOUT' ? 'VERIFIED_PAID' : 'CONFIRMED')) {
+              if (!guided.staleState) {
+                if (pending.kind.startsWith('CAP_')) guided.cap = {CAP_PROPOSE:'proposed',CAP_APPROVE:'approved',CAP_EXECUTE:'configured'}[pending.kind];
+                else guidedPhases.set(pending.plan.allocationId, {ALLOCATION_PROPOSE:'proposed',ALLOCATION_APPROVE:'approved',ALLOCATION_EXECUTE:'created',PAYOUT:'paid'}[pending.kind]);
+              }
+              guidedPending = null;
+            }
+            return {hash:guided.wrongHash ? blockHash : hash,status:result,kind:pending.kind};
+          }
           const result = options.receiptResults?.shift();
           if (result instanceof Error) throw result;
           return { hash: transactionHash, status: result ?? (this instanceof FakePauseWallet ? "BANK_PAUSED" : "CONFIRMED") }; }
@@ -639,16 +697,18 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
           if (options.mobileCached) mobile.session = mobileSession(options.mobileForeign ? { ...metadata, url: "https://foreign.example" } : metadata, "cached-topic", options.mobileExpired);
           return mobile;
         } } : undefined };
-      const context = { window, document: { getElementById: (id) => node(id.replace(/^funding-/, "")),
+      const context = { window, isSecureContext:options.secureContext ?? true, document: { getElementById: (id) => node(id.replace(/^funding-/, "")),
         visibilityState: options.visible ? "visible" : undefined,
         addEventListener: (event, handler) => documentEvents.set(event, handler),
         createElement: () => ({ value: "", textContent: "" }), head: { append() { throw Error("No external scripts in offline UI test"); } } },
-        navigator: { userAgent: options.userAgent, clipboard: options.clipboard, ...(options.webLocks === false ? {} : { locks: { request() {} } }) },
+        navigator: { userAgent: options.userAgent, clipboard: options.clipboard,
+          mediaDevices:{getUserMedia(){voiceLog.push('microphone');throw Error('No microphone allowed in offline tests');}},
+          ...(options.webLocks === false ? {} : { locks: { request() {} } }) },
         Event: class { constructor(type) { this.type = type; } },
         CustomEvent: class { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }, URL,
         setTimeout: (callback, delay) => {
           if (delay === 60000 || delay === 30000) connectionTimers.add(callback);
-          else if (delay === 4000 && options.mode === "legacy-cancel" && !options.legacyManualTimers) queueMicrotask(callback);
+          else if (delay === 4000 && (options.mode === "legacy-cancel" && !options.legacyManualTimers || guided && !guided.manualTimers)) queueMicrotask(callback);
           else timers.push(callback);
           return callback;
         },
@@ -656,7 +716,24 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         Option: class { constructor(textContent, value) { this.textContent = textContent; this.value = value; } },
         FUNDING_FORMAL: formal, buildLifeResourcePlan, buildBankPausePlan, buildSharedCapPlan, buildLegacyCapCancelPlan, isLegacyCapCancelPlan, LEGACY_APPROVAL_RECEIPT,
         walletAccounts, authorizedWalletAccount, SharedCapWallet: FakeCapWallet, LegacyCapCancelWallet: FakeLegacyCancelWallet,
-        HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet };
+        HumanFundingWallet: FakeWallet, HumanBankPauseWallet: FakePauseWallet, detectVoiceCapabilities, normalizeVoiceError };
+      const injectRecognition = (settings = {}) => {
+        class Recognition {
+          constructor(){recognitions.push(this);}
+          start(){voiceLog.push('start');assert.equal(this.processLocally,true);assert.equal(this.lang,'zh-TW');this.onstart?.();}
+          abort(){voiceLog.push('abort');this.onend?.();}
+        }
+        if(settings.localProperty!==false) Recognition.prototype.processLocally=false;
+        if(settings.api!==false) Recognition.available=options=>{
+          voiceLog.push({available:options});
+          if(settings.wait) return settings.wait.promise;
+          if(settings.error) throw settings.error;
+          return Promise.resolve(settings.availability ?? 'available');
+        };
+        Recognition.install=()=>{voiceLog.push('install');throw Error('Language installation not authorized');};
+        context.SpeechRecognition=Recognition;
+      };
+      if(options.voice) injectRecognition(options.voice);
       runInNewContext(controller + "\nglobalThis.uiProbe = { preview: () => preview, setCases: (cases) => { importedCases = cases; }, watchReceipt: () => watchFundingReceipt(wallet) };", context);
       if (options.lateOkx) window.okxwallet = { ethereum: provider };
       if (!options.skipConnect) {
@@ -674,7 +751,8 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       };
       return { node, wallets, requests, state, providerListeners, receiptCalls, prepareCalls, timers, rpc, mobileLog, providerEvents, storageFixture, connectionTimers,
         injectMetaMask, setVisibility, pageShow: () => windowEvents.get("pageshow")(), pageHide: () => windowEvents.get("pagehide")(),
-        mobile, mobileListeners, probe: context.uiProbe };
+        mobile, mobileListeners, probe: context.uiProbe, guidedPhases, pending:() => guidedPending,
+        voiceLog, recognitions, injectRecognition, storageWrites, allText:()=>[...nodes.values()].map(node=>node.textContent).join('\n') };
     };
     for (const failure of [false, true]) {
       const ui = await mount(), wait = deferred();
@@ -856,6 +934,77 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.match(ui.node("case").options.map(o=>o.textContent).join(" "),/高翠蘭.*知蘭.*豬八戒.*白寧.*澄序/);
     });
 
+    await t.test('role shortcuts change the sole original selection without changing the wallet account or sending', async () => {
+      const pending = {flowType:'FIXED_ALLOCATION',kind:'ALLOCATION_APPROVE',hash:transactionHash,
+        transaction:{from:formal.jade},plan:buildLifeResourcePlan({beneficiary:'0x60Ed5A562642cbC303D720507a37170116707259',amount:'1080000'})};
+      const ui = await mount({role:'jade',account:formal.jade,pending,stepKind:'ALLOCATION_APPROVE'});
+      const originalAccounts = ui.rpc.filter(call=>/requestAccounts|requestPermissions|switchEthereumChain/.test(call.method)).length;
+      for (const role of ['mother','guanyin','jade']) {
+        ui.node('switch-role-'+role).onclick(); await new Promise(resolve=>setImmediate(resolve));
+        assert.equal(ui.node('role').value,role);
+        assert.equal(ui.node('switch-role-'+role).getAttribute('aria-pressed'),'true');
+        assert.equal(ui.state.account,formal.jade); assert.equal(ui.wallets.at(-1).readPending(),pending);
+        assert.equal(ui.node('ack').checked,false); assert.equal(ui.node('send').disabled,true);
+      }
+      assert.equal(ui.rpc.filter(call=>/requestAccounts|requestPermissions|switchEthereumChain/.test(call.method)).length,originalAccounts);
+      assert.equal(ui.requests.length,0);
+    });
+    await t.test('previous and next original cases preserve the five IDs, operator and selected case on reload', async () => {
+      const ui = await mount({role:'jade',account:formal.jade,stepKind:'ALLOCATION_APPROVE'});
+      await ui.node('load-five').onclick();
+      const options = ui.node('case').options.map(option=>({value:option.value,text:option.textContent}));
+      assert.equal(ui.node('case-prev').disabled,true); assert.equal(ui.node('case-next').disabled,false);
+      for (let index=1;index<5;index++) {
+        await ui.node('prepare').onclick(); ui.node('ack').checked=true; ui.node('ack').emit('change');
+        assert.equal(ui.node('ack').checked,true);
+        ui.node('case-next').onclick();
+        assert.equal(ui.node('case').value,String(index)); assert.equal(ui.node('role').value,'jade');
+        assert.equal(ui.node('ack').checked,false); assert.equal(ui.node('send').disabled,true);
+        assert.equal(ui.node('beneficiary').readOnly,true); assert.equal(ui.node('amount').value,'1080000');
+        await ui.node('prepare').onclick();
+        assert.equal(ui.probe.preview().plan.beneficiary.toLowerCase(),ui.node('beneficiary').value.toLowerCase());
+        assert.match(ui.node('selection-status').textContent,new RegExp(`（${index+1}/5）`));
+      }
+      assert.equal(ui.node('case-next').disabled,true); ui.node('case-next').onclick();
+      assert.equal(ui.node('case').value,'4','last case never wraps to the first or empty draft');
+      ui.node('case-prev').onclick(); assert.equal(ui.node('case').value,'3');
+      await ui.node('load-five').onclick(); assert.equal(ui.node('case').value,'3','reloading does not reset to GaoCuilan');
+      assert.deepEqual(ui.node('case').options.map(option=>({value:option.value,text:option.textContent})),options);
+      assert.equal(ui.requests.length,0);
+    });
+    await t.test('case and role shortcuts preserve an in-flight wallet request and never release its busy state', async () => {
+      const wait=deferred();
+      const ui=await mount({role:'jade',account:formal.jade,guided:{phase:'proposed',onRequest:()=>wait.promise}});
+      await ui.node('load-five').onclick(); await ui.node('prepare').onclick();
+      ui.node('ack').checked=true;ui.node('ack').emit('change');
+      const sending=ui.node('send').onclick(); await new Promise(resolve=>setImmediate(resolve));
+      const pending=ui.pending();assert.ok(pending);assert.equal(ui.requests.length,1);
+      ui.node('case-next').onclick();ui.node('switch-role-mother').onclick();
+      assert.equal(ui.node('case').value,'1');assert.equal(ui.node('role').value,'mother');
+      assert.equal(ui.node('account').disabled,true);assert.equal(ui.pending(),pending);
+      assert.match(ui.node('selection-status').textContent,/原請求仍在處理/);
+      await ui.node('send').onclick();assert.equal(ui.requests.length,1);
+      wait.resolve();await sending;await new Promise(resolve=>setImmediate(resolve));
+      assert.equal(ui.pending(),pending);assert.equal(ui.requests.length,1);
+      assert.equal(ui.node('ack').checked,false);assert.equal(ui.node('send').disabled,true);
+      assert.equal(ui.node('case').value,'1');assert.equal(ui.node('role').value,'mother');
+    });
+    await t.test('case selection guidance focuses existing controls without changing a non-fixed flow or loading cases', async () => {
+      const ui=await mount({mode:'cap'});
+      ui.node('case-select').onclick();
+      assert.equal(ui.node('advanced').open,true);assert.equal(ui.node('mode').focused,true);
+      assert.equal(ui.node('mode').value,'cap');assert.equal(ui.node('case-prev').disabled,true);assert.equal(ui.node('case-next').disabled,true);
+      ui.node('mode').value='fixed';ui.node('mode').emit('change');ui.node('case-select').onclick();
+      assert.equal(ui.node('load-five').focused,true);assert.equal(ui.node('case').value,'');
+      await ui.node('load-five').onclick();ui.node('case-select').onclick();
+      assert.equal(ui.node('case').focused,true);assert.equal(ui.node('case').scrolled,true);
+      ui.node('switch-role-guanyin').onclick();ui.node('case-select').onclick();
+      assert.equal(ui.node('role').value,'guanyin');assert.equal(ui.node('role').focused,true);
+      assert.match(ui.node('status').textContent,/先選王母或玉帝/);
+      assert.equal(ui.node('case-prev').disabled,true);assert.equal(ui.node('case-next').disabled,true);
+      assert.equal(ui.requests.length,0);
+    });
+
     await t.test("a created original case waiting for the shared cap shows the cap ETA, not its earlier case ETA", async () => {
       const ui = await mount({mode:"fixed", role:"jade", account:formal.jade, stepKind:"WAIT_ETA", forceReady:false, stepBlockers:[],
         stepProposalId:buildSharedCapPlan().cap.proposalId, snapshotOverride:{capProposal:{executableAt:"1794383466"}, allocationProposal:{executableAt:"1700000000",executed:true}}});
@@ -985,6 +1134,63 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     await multiple.node("prepare").onclick();
     assert.equal(multiple.node("send").disabled, true); assert.equal(multiple.requests.length, 0);
 
+    const manualReceiptPending = () => ({flowType:'FIXED_ALLOCATION', kind:'ALLOCATION_APPROVE', hash:transactionHash,
+      transaction:{from:formal.jade}, plan:buildLifeResourcePlan({beneficiary:'0x60Ed5A562642cbC303D720507a37170116707259', amount:'1080000'})});
+    await t.test('manual receipt: a stalled RPC releases controls at the original deadline and late results retain pending', async () => {
+      const pending = manualReceiptPending(), wait = deferred();
+      const ui = await mount({mode:'fixed', role:'jade', account:formal.jade, guided:{pending}});
+      ui.wallets.at(-1).nextReceipt = wait;
+      const running = ui.node('receipt').onclick();
+      assert.equal(ui.node('account').disabled, true);
+      assert.equal(ui.node('load-five').disabled, true);
+      assert.equal(ui.receiptCalls.length, 1);
+      const watch = ui.receiptCalls[0].watch;
+      assert.equal(watch.pending, JSON.stringify(pending)); assert.equal(watch.isCurrent(), true);
+      assert.equal(ui.connectionTimers.size, 1);
+      [...ui.connectionTimers][0](); await running;
+      assert.equal(ui.connectionTimers.size, 0);
+      assert.equal(ui.node('account').disabled, false);
+      assert.equal(ui.node('load-five').disabled, false);
+      assert.equal(ui.node('prepare').disabled, false);
+      assert.equal(ui.pending(), pending); assert.equal(watch.isCurrent(), false);
+      assert.match(ui.node('status').textContent, /逾時/);
+      const status = ui.node('status').textContent, preview = ui.node('preview').textContent;
+      wait.resolve(); await new Promise(resolve => setImmediate(resolve));
+      assert.equal(ui.pending(), pending, 'a late confirmed read cannot release the original intent');
+      assert.equal(ui.node('status').textContent, status); assert.equal(ui.node('preview').textContent, preview);
+      assert.equal(ui.requests.length, 0); assert.equal(ui.receiptCalls.length, 1);
+    });
+    await t.test('manual receipt: changing the selected case or operation role invalidates a delayed read', async () => {
+      for (const change of ['case','role']) {
+        const pending = manualReceiptPending(), wait = deferred();
+        const ui = await mount({mode:'fixed', role:'jade', account:formal.jade, guided:{pending}});
+        ui.wallets.at(-1).nextReceipt = wait;
+        const running = ui.node('receipt').onclick();
+        if (change === 'case') {
+          ui.probe.setCases([{name:'知蘭',beneficiary:'0x9B72FA6A8827ccE211239B0b0E739c98851D1B78',amountKaios:'1080000',
+            allocationId:'0xbb183e13332a2594ffdf45b0501f4a26561378e167450b9de19ebf70cdd9f3c7'}]);
+          ui.node('case').value = '0'; ui.node('case').emit('change');
+        } else { ui.node('role').value = 'mother'; ui.node('role').emit('change'); }
+        const selected = ui.node(change).value;
+        assert.equal(ui.receiptCalls[0].watch.isCurrent(), false, change);
+        wait.resolve(); await running; await new Promise(resolve => setImmediate(resolve));
+        assert.equal(ui.pending(), pending, change);
+        assert.equal(ui.node(change).value, selected); assert.equal(ui.node('send').disabled, true);
+        assert.doesNotMatch(ui.node('summary').textContent, /本次治理步驟已核對/);
+        assert.equal(ui.connectionTimers.size, 0); assert.equal(ui.requests.length, 0);
+      }
+    });
+    await t.test('manual receipt: a current confirmed read clears only the original pending without sending', async () => {
+      const pending = manualReceiptPending();
+      const ui = await mount({mode:'fixed', role:'jade', account:formal.jade, guided:{pending}});
+      await ui.node('receipt').onclick();
+      assert.equal(ui.receiptCalls.length, 1);
+      assert.equal(ui.receiptCalls[0].watch.pending, JSON.stringify(pending));
+      assert.equal(ui.pending(), null); assert.equal(ui.connectionTimers.size, 0);
+      assert.match(ui.node('summary').textContent, /本次治理步驟已核對/);
+      assert.equal(ui.node('account').disabled, false); assert.equal(ui.requests.length, 0);
+    });
+
     const delayedRead = await mount(), readWait = deferred();
     delayedRead.wallets[0].next = readWait;
     const reading = delayedRead.node("prepare").onclick();
@@ -1070,6 +1276,113 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
     }
 
     const settleWallet = () => new Promise(resolve => setImmediate(resolve));
+    const say = (ui, transcript, final = true, recognition = ui.recognitions.at(-1)) => recognition.onresult?.({
+      resultIndex:0, results:[Object.assign([{transcript}],{isFinal:final})]
+    });
+    await t.test('funding diagnostics automatically show current account, chain, pending and failed identity near the main action', async () => {
+      const ui=await mount({visible:true});
+      assert.match(ui.node('diagnostics').textContent,new RegExp(formal.mother,'i'));
+      assert.match(ui.node('diagnostics').textContent,/網路：56.*原待核交易.*下一步/);
+      ui.state.chainId=1;ui.providerListeners.get('chainChanged')('0x1');
+      assert.match(ui.node('diagnostics').textContent,/網路：1.*BSC主網56/);
+      ui.wallets.at(-1).readPending=()=>{throw Error('PENDING_STORAGE_CORRUPT_DO_NOT_RESEND');};
+      ui.node('ack').emit('change');
+      assert.match(ui.node('diagnostics').textContent,/紀錄讀取失敗.*停止送單/);
+      assert.equal(ui.requests.length,0);
+      const identity=await mount({visible:true,snapshotOverride:{identityErrors:['BANK_RUNTIME_PIN_UNKNOWN'],codeOk:false}});
+      assert.match(identity.node('diagnostics').textContent,/BANK_RUNTIME_PIN_UNKNOWN/);
+      assert.doesNotMatch(identity.node('diagnostics').textContent,/本次鏈上角色與版本已核對/);
+      assert.equal(identity.requests.length,0);
+    });
+    await t.test('funding voice requires an explicit click and confirmed on-device zh-TW without microphone, installation or cloud fallback', async () => {
+      for(const options of [{},{voice:{api:false}},{voice:{localProperty:false}},{voice:{availability:'downloadable'}},
+        {voice:{availability:'downloading'}},{voice:{availability:'unavailable'}},{voice:{availability:'unknown'}},
+        {voice:{error:Object.assign(Error('permission blocked'),{error:'not-allowed'})}},{voice:{},secureContext:false}]) {
+        const ui=await mount({visible:true,...options});
+        assert.deepEqual(ui.voiceLog,[],'boot and wallet restoration do not inspect or activate speech');
+        assert.equal(ui.node('voice-start').disabled,false,'unsupported capability still has an explained check button');
+        await ui.node('voice-start').onclick();
+        assert.match(ui.node('voice-status').textContent,/未確認本機中文語音可用/);
+        assert.equal(ui.voiceLog.includes('start'),false);
+        assert.equal(ui.voiceLog.includes('microphone'),false);assert.equal(ui.voiceLog.includes('install'),false);
+        assert.equal(ui.connectionTimers.size,0);assert.equal(ui.requests.length,0);
+      }
+    });
+    await t.test('funding voice executes only final whitelisted read intent, never stores or displays transcripts, and permits late API detection', async () => {
+      const ui=await mount({visible:true});
+      await ui.node('voice-start').onclick();
+      assert.match(ui.node('voice-status').textContent,/未確認/);
+      ui.injectRecognition();
+      const reads=ui.prepareCalls.length;await ui.node('voice-start').onclick();
+      equalInline(ui.voiceLog.find(call=>call.available).available,{langs:['zh-TW'],processLocally:true});
+      assert.equal(ui.voiceLog.filter(call=>call==='start').length,1);
+      await say(ui,'核對狀態',false);assert.equal(ui.prepareCalls.length,reads,'interim speech cannot execute');
+      await say(ui,'核對狀態');
+      assert.equal(ui.prepareCalls.length,reads+1);assert.equal(ui.requests.length,0);
+      assert.equal(ui.connectionTimers.size,0);assert.equal(ui.node('ack').checked,false);
+      const unknown='do not save this synthetic unknown phrase 987654';
+      await ui.node('voice-start').onclick();await say(ui,unknown);
+      assert.match(ui.node('voice-status').textContent,/未符合三項操作指令/);
+      assert.equal(ui.allText().includes(unknown),false);
+      assert.equal(ui.storageWrites.some(entry=>String(entry.value).includes(unknown)),false);
+      assert.equal(ui.prepareCalls.length,reads+1);assert.equal(ui.voiceLog.includes('microphone'),false);
+      assert.equal(ui.voiceLog.includes('install'),false);
+    });
+    await t.test('funding voice continuation uses only pre-existing bound bulk consent and stopping preserves an in-flight original transaction', async () => {
+      const ui=await mount({visible:true,role:'jade',account:formal.jade,guided:{phase:'created'},voice:{}});
+      await ui.node('voice-start').onclick();await say(ui,'接續辦理');
+      assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+      assert.match(ui.node('voice-status').textContent,/尚未完成原五案確認/);
+      ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+      await ui.node('voice-start').onclick();await say(ui,'接續辦理');
+      assert.equal(ui.requests.length,5);assert.match(ui.node('five-paid-count').textContent,/5 \/ 5/);
+      assert.equal(ui.node('ack').checked,false);assert.equal(ui.voiceLog.includes('microphone'),false);
+      const cfg={},stopped=await mount({visible:true,guided:cfg,voice:{}}),wait=deferred();
+      stopped.node('five-ack').checked=true;stopped.node('five-ack').emit('change');
+      await stopped.node('voice-start').onclick();cfg.onRequest=()=>wait.promise;
+      const working=stopped.node('five-start').onclick();await settleWallet();
+      assert.match(stopped.node('diagnostics').textContent,/本次接續中.*高翠蘭.*1,080,000/);
+      const pending=stopped.pending();await say(stopped,'停止');wait.resolve();await working;
+      assert.equal(stopped.requests.length,1);assert.equal(stopped.pending(),pending);assert.equal(stopped.receiptCalls.length,0);
+      assert.equal(stopped.node('five-ack').checked,false);assert.match(stopped.node('voice-status').textContent,/語音與接續已停止/);
+    });
+    await t.test('funding voice aborts on external context or cancellation and ignores late recognition or availability', async () => {
+      for(const change of ['accountsChanged','chainChanged','role','mode','case','wallet','background']) {
+        const ui=await mount({visible:true,voice:{}});await ui.node('voice-start').onclick();const recognition=ui.recognitions.at(-1);
+        if(change==='accountsChanged'){ui.state.accounts=[formal.jade];ui.providerListeners.get(change)([formal.jade]);}
+        else if(change==='chainChanged'){ui.state.chainId=1;ui.providerListeners.get(change)('0x1');}
+        else if(change==='background')ui.setVisibility('hidden');
+        else {ui.node(change).value=change==='role'?'jade':change==='mode'?'cap':'';ui.node(change).emit(change==='wallet'?'input':'change');}
+        await settleWallet();const before=ui.prepareCalls.length,message=ui.node('voice-status').textContent;
+        await say(ui,'核對狀態',true,recognition);
+        assert.equal(ui.prepareCalls.length,before,change);assert.equal(ui.requests.length,0,change);
+        assert.equal(ui.node('voice-status').textContent,message,change);assert.ok(ui.voiceLog.includes('abort'),change);
+      }
+      const wait=deferred(),ui=await mount({visible:true,voice:{wait}});
+      const checking=ui.node('voice-start').onclick();await settleWallet();ui.node('voice-stop').onclick();await checking;
+      const message=ui.node('voice-status').textContent;wait.resolve('available');await settleWallet();
+      assert.equal(ui.voiceLog.includes('start'),false);assert.equal(ui.connectionTimers.size,0);
+      assert.equal(ui.node('voice-status').textContent,message);assert.equal(ui.requests.length,0);
+    });
+    await t.test('funding voice deadlines preserve financial consent and pending records and never restart recognition', async () => {
+      for(const available of [true,false]) {
+        const wait=deferred(),ui=await mount({visible:true,voice:available?{}:{wait}});
+        const pending={flowType:'FIXED_ALLOCATION',kind:'ALLOCATION_PROPOSE',hash:transactionHash,transaction:{from:formal.mother}};
+        ui.wallets.at(-1).readPending=()=>pending;
+        ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+        const listening=ui.node('voice-start').onclick();await settleWallet();
+        assert.equal(ui.connectionTimers.size,1);[...ui.connectionTimers][0]();await listening;
+        const message=ui.node('voice-status').textContent;wait.resolve('available');await settleWallet();
+        const recognition=ui.recognitions.at(-1);if(recognition.onresult)await say(ui,'接續辦理',true,recognition);
+        assert.equal(ui.node('voice-status').textContent,message);
+        assert.equal(ui.node('five-ack').checked,true);assert.equal(ui.wallets.at(-1).readPending(),pending);
+        assert.equal(ui.requests.length,0);assert.equal(ui.connectionTimers.size,0);
+        assert.equal(ui.voiceLog.filter(call=>call==='start').length,available?1:0);
+      }
+      const ended=await mount({visible:true,voice:{}});await ended.node('voice-start').onclick();
+      ended.recognitions.at(-1).onend();await settleWallet();
+      assert.equal(ended.voiceLog.filter(call=>call==='start').length,1);assert.equal(ended.connectionTimers.size,0);
+    });
     await t.test("authorized fixed connection and case/mode changes preview once without acknowledging or sending", async () => {
       const ui = await mount({ visible: true });
       assert.equal(ui.prepareCalls.length, 1, "successful connection uses the original read-only preparation");
@@ -1151,6 +1464,267 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
         assert.equal(ui.node("send").disabled, true);
         if (result instanceof Error) assert.match(ui.node("status").textContent, /查詢已停止.*receipt offline/);
         else if (result !== "PENDING") assert.equal(JSON.parse(ui.node("preview").textContent).status, result);
+      }
+    });
+    await t.test('primary five entry opens only the original native route in the current click and never resumes sending after connection', async () => {
+      const href='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18888/index.html?fundingRole=mother&fundingFlow=fixed';
+      const ui=await mount({href,lateMetaMask:true,skipConnect:true,needsAuthorization:true,visible:true,guided:{}});
+      let clicks=0, inGesture=true;
+      const native=ui.node('native-metamask');
+      native.click=()=>{assert.equal(inGesture,true,'native navigation stays in this synchronous gesture');clicks++;};
+      assert.equal(ui.node('five-start').disabled,false);
+      assert.match(ui.node('five-start').textContent,/連接王母/);
+      await ui.node('five-start').onclick();
+      assert.equal(clicks,1);assert.match(native.href,/^https:\/\/link\.metamask\.io\/dapp\//);
+      assert.equal(ui.rpc.length,0);assert.equal(ui.requests.length,0);
+      ui.injectMetaMask();
+      native.click=()=>{assert.equal(inGesture,true);clicks++;return native.onclick({preventDefault(){}});};
+      const connecting=ui.node('five-start').onclick();inGesture=false;await connecting;await settleWallet();
+      assert.equal(clicks,2);assert.equal(ui.rpc.filter(call=>call.method==='eth_requestAccounts').length,1);
+      assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+      assert.match(ui.node('five-start').textContent,/確認原五筆/);
+      assert.ok(ui.rpc.every(call=>['eth_accounts','eth_requestAccounts','eth_chainId'].includes(call.method)));
+      await ui.node('five-start').onclick();
+      assert.equal(ui.node('five-ack').focused,true);assert.equal(ui.node('five-ack').checked,false);
+      assert.equal(ui.requests.length,0,'connection and review navigation never start the original send loop');
+    });
+    await t.test('primary five entry routes a wrong chain or account to the original control without selecting authority or granting consent', async () => {
+      const chain=await mount({visible:true,chainId:1});let switches=0;
+      chain.node('switch-bsc').click=()=>{switches++;return chain.node('switch-bsc').onclick();};
+      assert.match(chain.node('five-start').textContent,/BSC 56/);
+      await chain.node('five-start').onclick();await settleWallet();
+      assert.equal(switches,1);assert.equal(chain.state.chainId,56);assert.equal(chain.requests.length,0);
+      assert.equal(chain.node('five-ack').checked,false);
+      const account=await mount({visible:true,account:alternate}), before=account.rpc.length;
+      await account.node('five-start').onclick();
+      assert.equal(account.node('account').focused,true);assert.equal(account.node('account').scrolled,true);
+      assert.equal(account.node('advanced').open,true);assert.equal(account.state.account,alternate);
+      assert.equal(account.rpc.length,before);assert.equal(account.requests.length,0);
+      assert.equal(account.node('five-ack').checked,false);
+    });
+    await t.test('primary five entry reconciles a saved original intent read-only, then stops at an unacknowledged main entry', async () => {
+      const original=buildLifeResourcePlan({beneficiary:'0x60Ed5A562642cbC303D720507a37170116707259',amount:'1080000'});
+      const intent={flowType:'FIXED_ALLOCATION',plan:original,kind:'ALLOCATION_EXECUTE',hash:transactionHash,transaction:{from:formal.mother}};
+      const ui=await mount({visible:true,guided:{pending:intent}});
+      const before=ui.receiptCalls.length;
+      ui.node('receipt').click=()=>ui.node('receipt').onclick();
+      assert.match(ui.node('five-start').textContent,/核對原交易/);
+      await ui.node('five-start').onclick();await settleWallet();
+      assert.equal(ui.receiptCalls.length,before+1);assert.equal(ui.requests.length,0);assert.equal(ui.pending(),null);
+      assert.equal(ui.node('five-ack').checked,false);assert.match(ui.node('five-start').textContent,/確認原五筆/);
+      await ui.node('five-start').onclick();
+      assert.equal(ui.node('five-ack').focused,true);assert.equal(ui.requests.length,0);
+    });
+    await t.test('primary five entry returns canonical pending to its original cap or fixed wallet while foreign intents stay untouched', async () => {
+      const original=buildLifeResourcePlan({beneficiary:'0x60Ed5A562642cbC303D720507a37170116707259',amount:'1080000'});
+      for(const [mode,flowType,plan,kind] of [['cap','FIXED_ALLOCATION',original,'ALLOCATION_EXECUTE'],['fixed','SHARED_CAP',buildSharedCapPlan(),'CAP_EXECUTE']]) {
+        const pending={flowType,plan,kind,hash:transactionHash,transaction:{from:formal.mother}}, seen=[];
+        const ui=await mount({mode,visible:true,guided:{pending,onReconcile:(hash,wallet)=>seen.push({hash,flowType:wallet.flowType})}});
+        assert.equal(ui.receiptCalls.length,0);
+        assert.match(ui.node('five-start').textContent,/切回原交易流程/);
+        await ui.node('five-start').onclick();await settleWallet();
+        assert.equal(ui.node('mode').value,mode==='cap'?'fixed':'cap');
+        if(ui.pending()) {ui.node('receipt').click=()=>ui.node('receipt').onclick();await ui.node('five-start').onclick();await settleWallet();}
+        assert.deepEqual(seen,[{hash:mode==='cap'?undefined:transactionHash,flowType}]);
+        assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+        assert.equal(ui.pending(),null,'only the original reconciler, in the correct flow, consumes this mock-confirmed record');
+      }
+      const foreign={flowType:'SEVEN_FLOOR_CLAIM',kind:'FLOOR_CLAIM',plan:{type:'SEVEN_FLOOR_CLAIM'},hash:transactionHash};
+      const ui=await mount({visible:true,guided:{pending:foreign}});
+      await ui.node('five-start').onclick();
+      assert.equal(ui.node('mode').value,'fixed');assert.equal(ui.pending(),foreign);assert.equal(ui.node('status').focused,true);
+      assert.equal(ui.receiptCalls.length,0);assert.equal(ui.requests.length,0);assert.match(ui.node('five-next').textContent,/另一流程/);
+    });
+    await t.test('primary five entry preserves pending storage errors and never turns a scripted checkbox or stale label into consent', async () => {
+      const ui=await mount({visible:true,guided:{}});
+      ui.node('five-ack').checked=true;
+      await ui.node('five-start').onclick();
+      assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+      ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+      const reads=ui.prepareCalls.length;
+      ui.wallets.at(-1).readPending=()=>{throw Error('PENDING_STORAGE_CORRUPT_DO_NOT_RESEND');};
+      await ui.node('five-start').onclick();
+      assert.match(ui.node('five-next').textContent,/紀錄讀取失敗/);assert.equal(ui.node('status').focused,true);
+      assert.equal(ui.requests.length,0);assert.equal(ui.prepareCalls.length,reads);
+      const changed=await mount({visible:true,guided:{}});
+      changed.node('five-ack').checked=true;changed.node('five-ack').emit('change');
+      changed.node('role').value='jade';
+      await changed.node('five-start').onclick();
+      assert.equal(changed.node('account').focused,true);assert.equal(changed.requests.length,0,'click re-evaluates the actual role instead of an old ready label');
+    });
+    await t.test('primary five entry blocks a second click during the original receipt watcher and updates the entry when the watch settles', async () => {
+      const ui=await mount({visible:true,receiptResults:['CONFIRMED']}), wait=deferred();
+      const intent={flowType:'FIXED_ALLOCATION',kind:'CAP_PROPOSE',plan:buildSharedCapPlan(),hash:transactionHash,transaction:{from:formal.mother}};
+      ui.wallets.at(-1).readPending=()=>intent;ui.wallets.at(-1).nextReceipt=wait;
+      const watching=ui.probe.watchReceipt();await settleWallet();
+      assert.equal(ui.node('five-start').disabled,true);assert.match(ui.node('five-start').textContent,/正在核對原交易/);
+      await ui.node('five-start').onclick();await ui.node('five-start').onclick();
+      assert.equal(ui.receiptCalls.length,1);assert.equal(ui.requests.length,0);
+      wait.resolve();await watching;
+      assert.equal(ui.node('five-start').disabled,false);assert.equal(ui.receiptCalls.length,1);
+      assert.equal(ui.wallets.at(-1).readPending(),intent,'entry routing does not clear the saved record itself');
+    });
+    await t.test('primary five entry keeps the original financial busy guard and cannot reconnect or resume while hidden', async () => {
+      const cfg={},ui=await mount({visible:true,guided:cfg}),wait=deferred();
+      cfg.onRequest=()=>wait.promise;
+      ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+      const sending=ui.node('five-start').onclick();await settleWallet();
+      assert.equal(ui.requests.length,1);assert.equal(ui.node('five-start').disabled,true);
+      await ui.node('five-start').onclick();assert.equal(ui.requests.length,1);
+      ui.setVisibility('hidden');const reads=ui.rpc.length;
+      await ui.node('five-start').onclick();assert.equal(ui.rpc.length,reads);
+      wait.resolve();await sending;
+      assert.equal(ui.requests.length,1);assert.ok(ui.pending());assert.equal(ui.node('five-ack').checked,false);
+      assert.equal(ui.node('five-start').disabled,true);
+    });
+    const startFive = async ui => {
+      ui.node('five-ack').checked = true; ui.node('five-ack').emit('change');
+      assert.equal(ui.node('five-start').disabled, false);
+      await ui.node('five-start').onclick();
+      assert.equal(ui.node('five').getAttribute('aria-busy'), 'false');
+    };
+    await t.test('guided original five: one consent proposes all eligible Mother cases, independent of imported cases', async () => {
+      const ui = await mount({visible:true,guided:{}});
+      await ui.node('five-start').onclick();
+      assert.equal(ui.requests.length,0,'a click without reviewed bulk consent cannot send');
+      const arbitrary = buildLifeResourcePlan({beneficiary:alternate,amount:'2'});
+      ui.probe.setCases([{...arbitrary,name:'not an original case'}]);
+      await startFive(ui);
+      assert.equal(ui.requests.length,5,ui.node('five-status').textContent);
+      assert.ok(ui.requests.every(p=>p.step.kind==='ALLOCATION_PROPOSE' && p.plan.amountKaios==='1080000'));
+      assert.equal(new Set(ui.requests.map(p=>p.plan.allocationId)).size,5);
+      assert.ok(ui.requests.every(p=>p.plan.beneficiary.toLowerCase()!==alternate.toLowerCase()));
+      assert.equal(ui.receiptCalls.length,5);
+      assert.match(ui.node('five-status').textContent,/本角色目前可辦步驟已完成.*玉帝/);
+      assert.match(ui.node('five-paid-count').textContent,/0 \/ 5/);
+      assert.equal(ui.node('ack').checked,false,'bulk consent never checks the original per-case acknowledgment');
+      await settleWallet(); ui.pageShow(); await settleWallet();
+      assert.equal(ui.requests.length,5,'passive restoration never resumes a finished send session');
+    });
+    await t.test('guided original five: cap execution is followed by real case roles, never claimed as five payouts', async () => {
+      const ui = await mount({visible:true,role:'jade',account:formal.jade,guided:{cap:'approved'}});
+      await startFive(ui);
+      assert.deepEqual(ui.requests.map(p=>p.step.kind),['CAP_EXECUTE'],ui.node('five-status').textContent);
+      assert.equal(ui.receiptCalls.length,1);
+      assert.match(ui.node('five-status').textContent,/Mother|王母/);
+      assert.match(ui.node('five-paid-count').textContent,/0 \/ 5/);
+      assert.doesNotMatch(ui.node('five-status').textContent,/付款回執全部核對通過/);
+      const waiting = await mount({visible:true,role:'jade',account:formal.jade,guided:{phase:'approved',eta:timestamp+3600}});
+      await startFive(waiting);
+      assert.equal(waiting.requests.length,0); assert.match(waiting.node('five-status').textContent,/等待.*治理|等待到期/);
+      assert.match(waiting.node('five-case-0').textContent,/最早可執行/);
+    });
+    await t.test('guided original five: mature approved allocations create then pay five exact cases with full verified receipts', async () => {
+      const ui=await mount({visible:true,role:'jade',account:formal.jade,guided:{phase:'approved'}});
+      await startFive(ui);
+      assert.equal(ui.requests.length,10,ui.node('five-status').textContent); assert.equal(ui.receiptCalls.length,10);
+      for(let index=0;index<5;index++) {
+        const [create,pay]=ui.requests.slice(index*2,index*2+2);
+        assert.equal(create.step.kind,'ALLOCATION_EXECUTE'); assert.equal(pay.step.kind,'PAYOUT');
+        assert.equal(create.plan.allocationId,pay.plan.allocationId); assert.equal(pay.plan.amountKaios,'1080000');
+        assert.match(ui.node('five-case-'+index).textContent,/付款回執核對通過.*0x/);
+      }
+      assert.match(ui.node('five-paid-count').textContent,/5 \/ 5/);
+      assert.match(ui.node('five-status').textContent,/付款回執全部核對通過.*5,400,000/);
+      assert.equal(ui.pending(),null);
+      const bounded=await mount({visible:true,role:'jade',account:formal.jade,guided:{cap:'approved',phase:'proposed'}});
+      await startFive(bounded);
+      assert.equal(bounded.requests.length,16,bounded.node('five-status').textContent);
+      assert.equal(bounded.receiptCalls.length,16);
+      assert.match(bounded.node('five-paid-count').textContent,/5 \/ 5/);
+      assert.match(bounded.node('five-status').textContent,/付款回執全部核對通過.*5,400,000/);
+      assert.equal(bounded.pending(),null);
+      const observed=await mount({visible:true,guided:{phase:'done'}});
+      await startFive(observed);
+      assert.equal(observed.requests.length,0); assert.match(observed.node('five-paid-count').textContent,/0 \/ 5/);
+      assert.match(observed.node('five-case-0').textContent,/待原付款回執.*不重送/);
+    });
+    await t.test('guided original five: scan past another-role case and stop unchanged confirmed actions without resending', async () => {
+      const first='0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428';
+      const mixed=await mount({visible:true,guided:{phases:{[first]:'proposed'}}});
+      await startFive(mixed);
+      assert.equal(mixed.requests.length,4); assert.ok(mixed.requests.every(p=>p.plan.allocationId!==first));
+      const stale=await mount({visible:true,guided:{staleState:true}});
+      await startFive(stale);
+      assert.equal(stale.requests.length,1); assert.match(stale.node('five-status').textContent,/鏈上狀態尚未更新.*不會重送/);
+    });
+    await t.test('guided original five: pending or noncanonical outcomes stop, and only the exact saved intent can resume', async () => {
+      for(const outcome of ['PENDING','MISMATCH','REVERTED','EVIDENCE_INCOMPLETE']) {
+        const cfg={results:outcome==='PENDING'?Array(4).fill('PENDING'):[outcome]}, ui=await mount({visible:true,guided:cfg});
+        await startFive(ui);
+        assert.equal(ui.requests.length,1); assert.equal(ui.receiptCalls.length,outcome==='PENDING'?4:1); assert.ok(ui.pending());
+        assert.match(ui.node('five-paid-count').textContent,/0 \/ 5/);
+        if(outcome==='PENDING') {
+          const saved=ui.pending(); cfg.results=['CONFIRMED']; await startFive(ui);
+          assert.equal(ui.requests.length,5,'recovery confirms the saved case, then proposes only the other four');
+          assert.equal(ui.receiptCalls[4].hash,saved.hash);
+          assert.equal(ui.pending(),null);
+        }
+      }
+      const foreign={flowType:'SEVEN_FLOOR_CLAIM',plan:{type:'SEVEN_FLOOR_CLAIM'},kind:'FLOOR_CLAIM',hash:transactionHash,transaction:{from:formal.mother}};
+      const ui=await mount({visible:true,guided:{pending:foreign}});
+      await startFive(ui);
+      assert.equal(ui.requests.length,0); assert.equal(ui.pending(),foreign);
+      assert.match(ui.node('five-status').textContent,/另一流程/);
+    });
+    await t.test('guided original five: wallet rejection, explicit stop and external contexts never continue a send session', async () => {
+      for(const code of [4001,-32603]) {
+        const ui=await mount({visible:true,guided:{onRequest:()=>{throw Object.assign(Error('wallet unavailable'),{code});}}});
+        await startFive(ui); assert.equal(ui.requests.length,1); assert.equal(ui.receiptCalls.length,0);
+        assert.equal(Boolean(ui.pending()),code!==4001);
+        assert.equal(ui.node('five-ack').checked,false);
+      }
+      for(const change of ['stop','accountsChanged','chainChanged','role','mode','case','background']) {
+        const cfg={}, ui=await mount({visible:true,guided:cfg});
+        cfg.onRequest=()=>{
+          if(change==='stop') ui.node('five-stop').onclick();
+          else if(change==='accountsChanged') {ui.state.accounts=[formal.jade];ui.providerListeners.get(change)([formal.jade]);}
+          else if(change==='chainChanged') {ui.state.chainId=1;ui.providerListeners.get(change)('0x1');}
+          else if(change==='background') ui.setVisibility('hidden');
+          else {ui.node(change).value=change==='role'?'jade':change==='mode'?'cap':'';ui.node(change).emit('change');}
+        };
+        await startFive(ui);
+        assert.equal(ui.requests.length,1,change); assert.equal(ui.receiptCalls.length,0,change); assert.ok(ui.pending(),change);
+        assert.equal(ui.node('five-ack').checked,false,change);
+        ui.setVisibility('visible'); await settleWallet();
+        assert.equal(ui.requests.length,1,'foreground never restores bulk mutation consent: '+change);
+      }
+    });
+    await t.test('guided original five: stale preparation and silent consent changes cannot reach a wallet request', async () => {
+      const cfg={}, ui=await mount({visible:true,guided:cfg}), wait=deferred();
+      cfg.onPrepare=()=>wait.promise;
+      ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+      const running=ui.node('five-start').onclick();
+      await settleWallet();ui.pageHide();wait.resolve();await running;
+      assert.equal(ui.requests.length,0);assert.equal(ui.node('five-ack').checked,false);
+      const silent=await mount({visible:true,guided:{}});
+      silent.node('five-ack').checked=true;silent.node('five-ack').emit('change');
+      silent.node('amount').value='2';await silent.node('five-start').onclick();
+      assert.equal(silent.requests.length,0,'bulk consent binds the original current context, even without an input event');
+    });
+    await t.test('guided original five: original bounded receipt waiter rechecks one hash and advances only on final evidence', async () => {
+      for(const [role,phase,terminal] of [['mother','absent','CONFIRMED'],['jade','created','VERIFIED_PAID']]) {
+        const ui=await mount({visible:true,role,account:formal[role],guided:{phase,results:['PENDING',terminal]}});
+        await startFive(ui);
+        assert.equal(ui.requests.length,5);assert.equal(ui.receiptCalls.length,6);
+        assert.equal(ui.receiptCalls[0].hash,ui.receiptCalls[1].hash,'PENDING rechecks the saved hash without another request');
+        assert.match(ui.node('five-paid-count').textContent,role==='jade'?/5 \/ 5/:/0 \/ 5/);
+      }
+    });
+    await t.test('guided original five: read deadlines stop stale preparation or receipt completion and retain pending', async () => {
+      for(const phase of ['prepare','receipt']) {
+        const cfg={},ui=await mount({visible:true,guided:cfg}),wait=deferred();
+        if(phase==='prepare') cfg.onPrepare=()=>wait.promise; else cfg.onReconcile=()=>wait.promise;
+        ui.node('five-ack').checked=true;ui.node('five-ack').emit('change');
+        const running=ui.node('five-start').onclick();await settleWallet();
+        assert.equal(ui.connectionTimers.size,1);[...ui.connectionTimers][0]();await running;
+        assert.match(ui.node('five-status').textContent,/唯讀查核逾時/);
+        assert.equal(ui.node('five-ack').checked,false);
+        const pending=ui.pending();wait.resolve();await settleWallet();
+        assert.equal(ui.requests.length,phase==='prepare'?0:1);
+        assert.equal(ui.pending(),pending,'late receipt cannot clear the durable intent after its watch expired');
+        assert.equal(Boolean(pending),phase==='receipt');
+        assert.match(ui.node('five-paid-count').textContent,/0 \/ 5/);
       }
     });
     await t.test("OKX foreground and cold reload only restore current authorization", async () => {
@@ -1461,6 +2035,67 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(alreadyDone.requests.length, 0);
     });
 
+    await t.test("funding recovery next to the acknowledgment reuses read-only controls and stops duplicate busy clicks", async () => {
+      for (const options of [{mode:"fixed"}, {mode:"cap"}, {role:"guanyin",account:formal.guanyin,pauser:true}]) {
+        const ui = await mount(options), wait = deferred();
+        ui.node("amount").emit("input");
+        assert.equal(ui.node("legacy-guide").hidden,false);
+        assert.equal(ui.node("legacy-next").hidden,false);
+        assert.equal(ui.node("legacy-next").href,"#funding-prepare");
+        assert.match(ui.node("legacy-next").textContent,/重新唯讀核對/);
+        let reading, clicks=0, prevented=0;
+        ui.wallets.at(-1).next=wait;
+        ui.node("prepare").click=()=>{clicks++;reading=ui.node("prepare").onclick();};
+        ui.node("legacy-next").onclick({preventDefault(){prevented++;}});
+        assert.equal(clicks,1);
+        assert.equal(ui.node("legacy-next").attrs["aria-disabled"],"true");
+        ui.node("legacy-next").onclick({preventDefault(){prevented++;}});
+        assert.equal(clicks,1,"a busy recovery click cannot start another read");
+        wait.resolve(); await reading;
+        assert.equal(prevented,2);
+        assert.equal(ui.requests.length,0,"recovery cannot request a financial confirmation");
+        assert.equal(ui.node("ack").checked,false);
+        assert.equal(ui.node("send").disabled,true);
+        assert.equal(ui.node("legacy-next").hidden,true,"valid preview returns to the original acknowledgment");
+        ui.node("wallet").emit("input");
+        assert.match(ui.node("preview").textContent,/舊預覽已作廢.*下方入口/);
+        assert.equal(ui.node("legacy-next").hidden,false);
+        assert.equal(ui.node("legacy-next").href,"#funding-connect");
+        assert.equal(ui.node("prepare").disabled,true);
+        assert.equal(ui.node("ack").disabled,true);
+        assert.equal(ui.requests.length,0);
+      }
+    });
+
+    await t.test("funding recovery routes incorrect chain, account and pending state to the original controls", async () => {
+      const chain=await mount();
+      chain.state.chainId=1; chain.providerListeners.get("chainChanged")("0x1");
+      assert.equal(chain.node("legacy-next").href,"#funding-switch-bsc");
+      const account=await mount();
+      account.state.account=alternate; account.providerListeners.get("accountsChanged")([alternate]);
+      assert.equal(account.node("legacy-next").href,"#funding-account");
+      const pending=await mount({forceReady:false,stepKind:"BLOCKED",stepBlockers:["PENDING_INTENT_RECONCILE_FIRST"]});
+      await pending.node("prepare").onclick();
+      assert.equal(pending.node("legacy-next").href,"#funding-receipt");
+      for(const ui of [chain,account,pending]){
+        assert.equal(ui.node("ack").checked,false); assert.equal(ui.node("send").disabled,true);
+        assert.equal(ui.requests.length,0); assert.equal(ui.receiptCalls.length,0);
+      }
+      const original={flowType:"FIXED_ALLOCATION",kind:"ALLOCATION_PROPOSE",hash:"0x"+"12".repeat(32)};
+      const saved=await mount({pending:original});
+      saved.wallets.at(-1).prepare=async()=>{throw Error("PENDING_INTENT_RECONCILE_FIRST");};
+      await saved.node("prepare").onclick();
+      assert.equal(saved.probe.preview(),null,"a real pending preparation failure leaves no preview");
+      assert.equal(saved.node("legacy-next").href,"#funding-receipt");
+      assert.equal(saved.wallets.at(-1).readPending(),original,"recovery preserves the original record");
+      assert.equal(saved.requests.length,0); assert.equal(saved.receiptCalls.length,0);
+      saved.wallets.at(-1).readPending=()=>{throw Error("PENDING_STORAGE_CORRUPT_DO_NOT_RESEND");};
+      saved.node("ack").emit("change");
+      assert.equal(saved.node("legacy-next").href,"#funding-status");
+      assert.match(saved.node("legacy-next").textContent,/紀錄讀取失敗/);
+      assert.equal(saved.node("send").disabled,true); assert.equal(saved.requests.length,0);
+    });
+
     await t.test("legacy cancellation gives the disconnected holder the canonical MetaMask next step", async () => {
       const href = publicHref + "?fundingRole=mother&fundingFlow=legacy-cancel#funding-panel";
       const ui = await mount({ href, lateMetaMask: true, skipConnect: true, visible: true });
@@ -1499,6 +2134,34 @@ test("human funding: exact plans, fail-closed steps and explicit wallet requests
       assert.equal(clicked.node("prepare").disabled, false);
       assert.equal(clicked.node("ack").disabled, true);
       assert.equal(clicked.requests.length, 0);
+    });
+
+    await t.test("canonical role and flow selection survives a missing or changed scroll fragment without granting wallet authority", async () => {
+      for (const hash of ["", "#funding-panel", "#funding-five"]) {
+        for (const role of ["mother", "jade"]) {
+          const href=publicHref+"?fundingRole="+role+"&fundingFlow=cap&txhash="+transactionHash+"&amount=888&beneficiary="+alternate+hash;
+          const ui=await mount({href,skipConnect:true});
+          assert.equal(ui.node("role").value,role);
+          assert.equal(ui.node("mode").value,"cap");
+          await ui.node("draft").onclick();
+          assert.equal(JSON.parse(ui.node("preview").textContent).type,"SHARED_CAP");
+          assert.equal(ui.node("txhash").value,"");
+          assert.equal(ui.node("amount").value,"1080000");
+          assert.equal(ui.node("beneficiary").value,beneficiary);
+          assert.equal(ui.node("ack").checked,false); assert.equal(ui.node("send").disabled,true);
+          assert.equal(ui.rpc.length,0); assert.equal(ui.requests.length,0);
+        }
+      }
+      for (const href of [publicHref.replace("klineodyssey.github.io","foreign.invalid"), publicHref.replace("/18888/","/16888/")]) {
+        const ui=await mount({href:href+"?fundingRole=jade&fundingFlow=cap",skipConnect:true});
+        assert.equal(ui.node("role").value,"mother"); assert.equal(ui.node("mode").value,"fixed");
+        assert.equal(ui.rpc.length,0); assert.equal(ui.requests.length,0);
+      }
+      const invalid=await mount({href:publicHref+"?fundingRole=unknown&fundingFlow=cap",skipConnect:true});
+      assert.equal(invalid.node("role").value,"mother"); assert.equal(invalid.node("mode").value,"fixed");
+      const unknownFlow=await mount({href:publicHref+"?fundingRole=jade&fundingFlow=send-all",skipConnect:true});
+      assert.equal(unknownFlow.node("role").value,"jade"); assert.equal(unknownFlow.node("mode").value,"fixed");
+      assert.equal(unknownFlow.requests.length,0);
     });
 
     await t.test("canonical app handoff restores only role and flow and passively reads MetaMask", async () => {
