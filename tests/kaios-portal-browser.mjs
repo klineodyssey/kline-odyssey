@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
-import {worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
+import {BANK_SERVICE,worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
 const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const OUT='artifacts/kaios-portal-qa';
 const FUNDING_ONLY=process.argv.includes('--funding-only');
@@ -1175,6 +1175,11 @@ try{
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Portal horizontal overflow');
     assert.equal((await audio(page)).contextState,'NOT_CREATED','no context before gesture');
     const primary=await reachable(page,'#primaryPlay');assert.ok(primary.hit&&primary.inView,'primary CTA must be reachable on first screen');assert.ok(primary.height>=44);
+    const bankService=await reachable(page,'#bankEntryLink');assert.ok(bankService.hit&&bankService.inView&&bankService.height>=44,'bank service must be visible and reachable on first screen');
+    assert.equal(await page.evaluate(()=>{const summary=document.querySelector('.portal-header .kaios-audio-summary').getBoundingClientRect(),bank=document.querySelector('#bankEntryLink').getBoundingClientRect();return !summary.height||summary.bottom<=bank.top||summary.top>=bank.bottom||summary.right<=bank.left||summary.left>=bank.right;}),true,'audio summary must not overlap the bank entry');
+    assert.equal(await page.locator('#bankEntryLink').getAttribute('data-world-id'),null,'bank service must not invoke game audio navigation');
+    assert.match(await page.locator('#bankEntryLink').innerText(),/18888 靈霄寶殿銀行/);assert.match(await page.locator('#bankEntryLink').innerText(),/五筆專案撥款／查進度/);
+    assertExactRoute(await page.locator('#bankEntryLink').getAttribute('href'),new URL(BANK_SERVICE.entryUrl,BASE+'/').href,'bank service original route');
     const toggle=await reachable(page,'[data-kaios-audio-toggle]');assert.ok(toggle.hit&&toggle.inView&&toggle.height>=44);
     await shot(page,`portal-${width}x${height}`);
     const links=await page.locator('a[href]').evaluateAll(nodes=>nodes.map(a=>({href:a.href,label:a.textContent.trim()})));
@@ -1210,7 +1215,12 @@ try{
     await page.locator('[data-kaios-audio-toggle]').click();state=await audio(page);assert.equal(state.settings.muted,false);assert.equal(state.activeMusicLayers,1,'unmute resumes only one theme');
     await page.locator('[data-kaios-audio-toggle]').click();assert.equal((await audio(page)).settings.muted,true);
     await page.reload({waitUntil:'networkidle'});state=await audio(page);assert.equal(state.settings.muted,true);assert.equal(state.settings.master,.35);assert.equal(state.contextState,'NOT_CREATED');
-    assert.deepEqual(errors,[]);report.profiles.push({width,height,primary,toggle,signal,links:links.length,audio:'PASS',reload:'PASS'});
+    if([390,844].includes(width)){
+      await clickRoute(page,'#bankEntryLink',new URL(BANK_SERVICE.entryUrl,BASE+'/').href,'#funding-title','Portal to original bank service');
+      assert.equal(await page.locator('#funding-five-ack').isChecked(),false,'bank navigation must not acknowledge a payment');
+      await page.goBack({waitUntil:'networkidle'});await page.locator('#bankEntryLink').waitFor();assertExactRoute(page.url(),BASE+'/','bank back to Portal');
+    }
+    assert.deepEqual(errors,[]);report.profiles.push({width,height,primary,bankService,toggle,signal,links:links.length,audio:'PASS',reload:'PASS'});
     await context.close();
   }
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
@@ -1235,7 +1245,7 @@ try{
   assert.equal(await page.evaluate(()=>localStorage.getItem('KAIOS_PLAYER_LIFE_V1')),seeded.raw,'Portal projection read-only');
   assert.equal(await page.locator('body').innerText().then(t=>t.includes(seeded.id)),false,'Portal does not need to display persistent private identifier');
   await shot(page,'returning-player-390x844');
-  for(let i=0;i<3;i++)for(const viewport of [{width:844,height:390},{width:390,height:844}]){await page.setViewportSize(viewport);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);const r=await reachable(page,'#primaryPlay');assert.ok(r.inView&&r.hit);}
+  for(let i=0;i<3;i++)for(const viewport of [{width:844,height:390},{width:390,height:844}]){await page.setViewportSize(viewport);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);const r=await reachable(page,'#primaryPlay');assert.ok(r.inView&&r.hit);const bank=await reachable(page,'#bankEntryLink');assert.ok(bank.inView&&bank.hit&&bank.height>=44,'returning player retains the bank entry after rotation');}
   report.checks.push('new guest, validated returning player, allowlisted continue, read-only private profile, three rotation cycles');
   const routes=portalRoutes(BASE);
   for(let i=0;i<2;i++){
