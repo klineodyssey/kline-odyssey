@@ -550,7 +550,7 @@ qa.formal={mother:F.mother,jade:F.jade};qa.account=qa.formal[qa.role];
 const qaEmptyProposal=()=>({target:ZERO,value:'0',dataHash:ZeroHash,executableAt:'0',proposer:ZERO,approver:ZERO,executed:false,cancelled:false});
 const qaProposal=(candidate,phase,eta)=>phase==='NONE'?qaEmptyProposal():({target:candidate.target,value:'0',dataHash:candidate.dataHash,
   executableAt:eta,proposer:F.mother,approver:phase==='PROPOSED'?ZERO:F.jade,executed:phase==='CREATED'||phase==='PAID',cancelled:false});
-const qaCase=plan=>qa.cases[plan.allocationId]??=( {phase:qa.initialPhase,eta:qa.initialPhase==='APPROVED'?String(BigInt(qa.timestamp)-1n):'0'} );
+const qaCase=plan=>qa.cases[plan.allocationId]??=( {phase:qa.initialPhase,eta:qa.initialPhase==='PROPOSED'?String(BigInt(qa.timestamp)+3600n):qa.initialPhase==='APPROVED'?String(BigInt(qa.timestamp)-1n):'0'} );
 HumanFundingWallet=class {
   constructor(options={}){this.selectedAccount=options.selectedAccount;this.flowType='FIXED_ALLOCATION';}
   readPending(){return qa.pending;}
@@ -597,11 +597,12 @@ HumanFundingWallet=class {
       if(pending.kind==='ALLOCATION_PROPOSE'){state.phase='PROPOSED';state.eta=String(BigInt(qa.timestamp)+3600n);}
       else if(pending.kind==='ALLOCATION_APPROVE')state.phase='APPROVED';
       else if(pending.kind==='ALLOCATION_EXECUTE')state.phase='CREATED';
-      else if(pending.kind==='PAYOUT'){state.phase='PAID';qa.paidWei=String(BigInt(qa.paidWei)+BigInt(pending.plan.amountWei));}
+      else if(pending.kind==='PAYOUT'){if(state.phase!=='PAID')qa.paidWei=String(BigInt(qa.paidWei)+BigInt(pending.plan.amountWei));state.phase='PAID';}
       else throw Error('Unexpected synthetic guided action '+pending.kind);
     }
-    const status=pending.kind==='PAYOUT'?'VERIFIED_PAID':'CONFIRMED';
-    qa.results.push({hash,status,kind:pending.kind,allocationId:pending.plan.allocationId??null});qa.pending=null;
+    const guanyanPayment=pending.kind==='PAYOUT'&&same(pending.plan.beneficiary,F.guanyanBeneficiary);
+    const status=guanyanPayment?'EVIDENCE_INCOMPLETE':pending.kind==='PAYOUT'?'VERIFIED_PAID':'CONFIRMED';
+    qa.results.push({hash,status,kind:pending.kind,allocationId:pending.plan.allocationId??null});if(!guanyanPayment)qa.pending=null;
     return {hash,status,kind:pending.kind};
   }
 };
@@ -615,7 +616,8 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
   const core=[{name:'jade-cap-needs-mother',role:'jade',capConfigured:false,initialPhase:'NONE',expected:1},
     {name:'mother-five-proposals',role:'mother',capConfigured:true,initialPhase:'NONE',expected:5},
     {name:'mature-five-payments',role:'mother',capConfigured:true,initialPhase:'APPROVED',expected:10},
-    {name:'guanyan-mother-proposal-only',role:'mother',capConfigured:true,initialPhase:'NONE',expected:1,guanyan:true}];
+    {name:'guanyan-mother-proposal-only',role:'mother',capConfigured:true,initialPhase:'NONE',expected:1,guanyan:true},
+    {name:'guanyan-jade-approval-to-payout',role:'jade',capConfigured:true,initialPhase:'PROPOSED',expected:3,guanyan:true}];
   const originalIds=['0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428','0xbb183e13332a2594ffdf45b0501f4a26561378e167450b9de19ebf70cdd9f3c7',
     '0x2ac4cf224f86e93394833036e96068523e5b71295c5c535d82f2efa3f2827359','0x58114b263f63088c52711b13bc7b370fc71ab63b45470fd45ef610d237775dd9','0x7132c7a0eb6b887a7f373e646f3f84b5e64f64379899399e18e393fb7b65ff81'];
   report.fundingGuidedFive=[];
@@ -693,33 +695,58 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
           assert.equal(candidate.plan.amountKaios,'1080000');
           assert.equal(candidate.plan.beneficiary.toLowerCase(),'0xea6aec0bf657cf78d3dfec9fa0f5e4d586d9f642');
           assert.equal(candidate.plan.allocationId,'0x9b55643098effba87c8cf383b423502cb5e24883f0d0f5e192a6c74cf40e98a1');
-          assert.equal(candidate.step.kind,'ALLOCATION_PROPOSE');assert.equal(candidate.review,undefined);
+          assert.equal(candidate.step.kind,scenario.role==='jade'?'ALLOCATION_APPROVE':'ALLOCATION_PROPOSE');assert.equal(candidate.review,undefined);
+          assert.equal(candidate.step.fundingPrecheck.known,true);assert.equal(candidate.step.fundingPrecheck.enough,true);
           assert.equal(await page.locator('#funding-ack').isChecked(),false);
           assert.equal(await page.locator('#funding-send').isDisabled(),true);
           assert.deepEqual((await snapshot()).requests,[]);
-          assert.match(await page.locator('#funding-summary').innerText(),/未批准提案.*不代表可付款.*其他介面批准/);
+          assert.match(await page.locator('#funding-summary').innerText(),/每次只確認目前這一步.*玉帝批准後任何人可立即執行及撥款/);
           const summary=page.locator('#funding-summary');
-          await summary.evaluate(element=>{const notice=document.createElement('p');notice.textContent='模擬驗收／未連真錢包';notice.style.cssText='color:#ffe1a3;font-weight:bold';element.before(notice);element.scrollIntoView({block:'center',behavior:'instant'});});
-          const file=`funding-guanyan-${width}x${height}`;
-          await shot(page,file+'-proposal-preview');row.screenshots.push(file+'-proposal-preview.png');
-          await page.locator('#funding-ack').check();
-          await page.locator('#funding-send').scrollIntoViewIfNeeded();
-          row.mainAction=await reachable(page,'#funding-send');
-          assert.ok(row.mainAction.inView&&row.mainAction.hit&&row.mainAction.height>=44);
-          assert.equal(await page.locator('#funding-send').isDisabled(),false);
-          await shot(page,file+'-proposal-consent');row.screenshots.push(file+'-proposal-consent.png');
-          await page.locator('#funding-send').click();
-          await page.waitForFunction(()=>__fundingGuidedFiveQA.requests.length===1&&!document.getElementById('funding-receipt').disabled);
-          await page.locator('#funding-receipt').click();
+          await summary.evaluate(element=>{for(const target of [element,document.getElementById('funding-send')]){const notice=document.createElement('p');notice.textContent='模擬驗收／未連真錢包';notice.style.cssText='color:#ffe1a3;font-weight:bold';target.before(notice);}element.scrollIntoView({block:'center',behavior:'instant'});});
+          const file=`funding-guanyan-${width}x${height}-${scenario.role}`;
+          const guanyanCapture=async label=>{await summary.evaluate(element=>element.scrollIntoView({block:'center',behavior:'instant'}));await shot(page,file+'-'+label);row.screenshots.push(file+'-'+label+'.png');};
+          const confirmOne=async(kind,count,label)=>{
+            const shown=JSON.parse(await page.locator('#funding-preview').textContent());assert.equal(shown.step.kind,kind);
+            assert.equal(await page.locator('#funding-ack').isChecked(),false,'each step needs new consent');
+            assert.equal(await page.locator('#funding-send').isDisabled(),true);
+            assert.equal((await snapshot()).requests.length,count-1);
+            await guanyanCapture(label+'-preview');
+            await page.locator('#funding-ack').check();
+            await page.locator('#funding-send').evaluate(element=>element.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+            const action=await reachable(page,'#funding-send');row.mainAction=action;
+            await shot(page,file+'-'+label+'-consent');row.screenshots.push(file+'-'+label+'-consent.png');
+            assert.ok(action.inView&&action.hit&&action.height>=44,'confirmation geometry '+JSON.stringify(action));
+            assert.equal(await page.locator('#funding-send').isDisabled(),false);
+            await page.locator('#funding-send').click();
+            await page.waitForFunction(n=>__fundingGuidedFiveQA.requests.length===n&&!document.getElementById('funding-receipt').disabled,count);
+            await page.locator('#funding-receipt').click();
+            assert.equal((await snapshot()).requests.length,count,'receipt never sends another step');
+            assert.equal(await page.locator('#funding-ack').isChecked(),false);
+          };
+          await confirmOne(candidate.step.kind,1,scenario.role==='jade'?'approve':'propose');
           await page.locator('#funding-prepare').click();
-          await page.waitForFunction(()=>document.getElementById('funding-preview').textContent.includes('GUANYAN_RECONCILIATION_NOT_VERIFIED'));
-          assert.equal(await page.locator('#funding-send').isDisabled(),true);
-          const result=await snapshot();assert.equal(result.requests.length,1);
-          assert.equal(result.requests[0].kind,'ALLOCATION_PROPOSE');assert.equal(result.paidWei,'0');
+          if(scenario.role==='jade'){
+            await page.waitForFunction(()=>JSON.parse(document.getElementById('funding-preview').textContent).step.kind==='WAIT_ETA');
+            assert.equal(await page.locator('#funding-send').isDisabled(),true);await guanyanCapture('wait-eta');
+            row.syntheticTimeAdvanced=true;
+            await page.evaluate(()=>{const qa=__fundingGuidedFiveQA;qa.timestamp=Object.values(qa.cases)[0].eta;});
+            await page.locator('#funding-prepare').click();
+            await confirmOne('ALLOCATION_EXECUTE',2,'execute');
+            await page.locator('#funding-prepare').click();await confirmOne('PAYOUT',3,'payout');
+            const after=await snapshot();assert.ok(after.pending,'incomplete payout keeps the original pending intent');
+            assert.equal(after.results.at(-1).status,'EVIDENCE_INCOMPLETE');
+            assert.equal(after.paidWei,'1080000000000000000000000');
+            assert.equal(await page.locator('#funding-send').isDisabled(),true);
+            assert.match(await page.locator('#funding-summary').innerText(),/對帳/);
+            await guanyanCapture('payout-reconciliation-pending');
+          }else{
+            await page.waitForFunction(()=>document.getElementById('funding-preview').textContent.includes('DISTINCT_JADE_APPROVER_REQUIRED'));
+            assert.equal(await page.locator('#funding-send').isDisabled(),true);await guanyanCapture('needs-jade');
+          }
+          const result=await snapshot();assert.equal(result.requests.length,scenario.expected);
+          assert.deepEqual(result.requests.map(item=>item.kind),scenario.role==='jade'?['ALLOCATION_APPROVE','ALLOCATION_EXECUTE','PAYOUT']:['ALLOCATION_PROPOSE']);
           assert.equal(result.rpc.some(method=>/sendTransaction|sign/.test(method)),false);
           row.mockConfirmationRequests=result.requests;row.mockReceiptResults=result.results;row.mockWalletMethods=result.rpc;
-          await summary.evaluate(element=>element.scrollIntoView({block:'center',behavior:'instant'}));
-          await shot(page,file+'-approval-held');row.screenshots.push(file+'-approval-held.png');
           assert.deepEqual(row.runtimeErrors,[]);assert.deepEqual(row.blockedRequests,[]);row.functional='PASS';
           continue;
         }

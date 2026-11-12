@@ -240,14 +240,14 @@ STATUS: PROTOTYPE — 前端原型，不改合約
       <h3 id="funding-guanyan-title">觀衍獨立專案 · 1,080,000 KAIOS</h3>
       <p>GUANYAN-KAIOS-LIFE-WALLET-001 · 與原五筆及玩家七層領取分開。</p>
       <p style="overflow-wrap:anywhere">唯一收款地址：<code>0xea6aec0bf657cf78d3dfec9fa0f5e4d586d9f642</code></p>
-      <p>目前可由王母核對並提出本案治理提案；尚未付款。107 萬筆誤已作廢，不會使用。</p>
+      <p>載入原案後會顯示目前進度與所需角色。107 萬筆誤已作廢，不會使用。</p>
       <ol aria-label="觀衍撥款仍須核清的條件">
-        <li>連接王母錢包，按下方載入原案，再唯讀核對角色、合約與本案進度。原五位及歷史已付款不重送；三筆舊提案仍留鏈上。</li>
-        <li>核對唯一地址與 1,080,000 KAIOS，勾選同意，再按「交錢包確認」提出本案。這是真實治理提案，須本人確認並支付 BNB 網路手續費。</li>
-        <li>本頁目前僅開放提案；玉帝批准、到期執行及撥款仍待核定。持有人若在其他介面批准，提案到期後可被執行；本頁阻擋不會取消鏈上提案。</li>
+        <li>王母提出原案，玉帝獨立批准。先連接本步所需錢包，再按下方載入與核對。</li>
+        <li>每一步核對原地址、108萬及銀行額度，勾選後由本人在錢包確認；須支付 BNB 網路手續費。</li>
+        <li>批准且到期後才可建立配額，再確認撥款。若提案已到期，批准後任何人可立即執行及撥款；本頁不會自動送下一筆。</li>
       </ol>
       <div class="funding-actions"><button type="button" id="funding-load-guanyan">載入觀衍108萬 · 準備與核對</button></div>
-      <p class="funding-muted">不必上傳檔案或重填地址。載入與唯讀核對不送交易；本人同意後只提出這一筆，不會自動批准、執行或付款。可用餘額不代表已扣除全部承諾。</p>
+      <p class="funding-muted">不必上傳檔案或重填地址。原五位不重送；三筆舊提案仍留鏈上，可用餘額不代表觀衍獨占資金或已扣除全部承諾。付款回執仍須核銷。</p>
     </section>
     <div class="funding-fields">
       <label>操作角色（辦理者）<select id="funding-role"><option value="mother">王母 · 提出治理提案</option><option value="jade">玉帝 · 批准原提案</option><option value="guanyin">觀音 · 緊急暫停銀行（OKX Wallet）</option></select></label>
@@ -1095,18 +1095,23 @@ function deriveSharedCapStep(plan, s) {
 
 function deriveFundingStep(plan, s) {
   const blockers = [];
-  const result = (kind, label, to = null, data = null, proposalId = null, warning = "") => ({ kind, label, to, data, proposalId, blockers: [...blockers], warning, ready: blockers.length === 0 && !["BLOCKED", "DONE", "WAIT_ETA"].includes(kind) });
+  let fundingPrecheck = null;
+  const result = (kind, label, to = null, data = null, proposalId = null, warning = "") => ({ kind, label, to, data, proposalId, blockers: [...blockers], warning, ...(fundingPrecheck ? {fundingPrecheck} : {}), ready: blockers.length === 0 && !["BLOCKED", "DONE", "WAIT_ETA"].includes(kind) });
   try {
     if (json(plan) !== json(buildLifeResourcePlan({ beneficiary: plan.beneficiary, amount: plan.amountKaios }))) blockers.push("PLAN_CHANGED");
+    const guanyan = same(plan.beneficiary, FUNDING_FORMAL.guanyanBeneficiary);
+    if (guanyan && json(plan) !== json(buildLifeResourcePlan({beneficiary:FUNDING_FORMAL.guanyanBeneficiary, amount:'1080000'}))) blockers.push("PLAN_CHANGED");
     if (Number(s.chainId) !== 56) blockers.push("CHAIN_ID_MISMATCH");
     if (!s.account || (!same(s.account, FUNDING_FORMAL.mother) && !same(s.account, FUNDING_FORMAL.jade))) blockers.push("ACCOUNT_NOT_REVIEWED_HOLDER");
     if (s.codeOk !== true || !same(s.token, FUNDING_FORMAL.kaios) || Number(s.decimals) !== 18) blockers.push("CONTRACT_IDENTITY_MISMATCH");
     blockers.push(...(s.identityErrors || []));
+    if (guanyan && !Array.isArray(s.identityErrors)) blockers.push("RUNTIME_IDENTITY_STATE_UNKNOWN");
     const m = s.module, h = s.health, a = s.allocation;
     if (!a || typeof a.beneficiary !== "string" || typeof a.executed !== "boolean" || typeof a.cancelled !== "boolean" || typeof s.paymentConsumed !== "boolean") blockers.push("ALLOCATION_OR_PAYMENT_STATE_UNKNOWN");
     if (!same(m.module, FUNDING_FORMAL.allocation) || !same(m.versionHash, FUNDING_FORMAL.versionHash) || m.active !== true) blockers.push("MODULE_IDENTITY_MISMATCH");
     if (h.healthy !== true || h.paused !== false) blockers.push("BANK_UNHEALTHY_OR_PAUSED");
     if (s.roles?.moduleAdmin !== true) blockers.push("GOVERNANCE_MODULE_ADMIN_MISSING");
+    if (guanyan && s.roles?.allocationGovernance !== true) blockers.push("GOVERNANCE_MODULE_ADMIN_MISSING");
     if (BI(m.perTransactionLimit) > BI(FUNDING_FORMAL.capWei) || BI(m.epochLimit) > BI(FUNDING_FORMAL.capWei)) blockers.push("HIGHER_EXISTING_CAP_DO_NOT_LOWER");
     const present = a && !same(a.beneficiary, ZERO);
     if (present && (!same(a.beneficiary, plan.beneficiary) || BI(a.amount) !== BI(plan.amountWei) || !same(a.purposeHash, plan.purposeHash) || BI(a.executableAt) !== 0n)) blockers.push("ALLOCATION_IDENTITY_MISMATCH");
@@ -1115,6 +1120,12 @@ function deriveFundingStep(plan, s) {
     if (a?.executed || s.paymentConsumed) {
       if (present && a.executed === true && s.paymentConsumed === true) return result("DONE", "Executed/consumed state observed; verify the exact receipt before claiming payment");
       blockers.push("PAYMENT_STATE_INCONSISTENT"); return result("BLOCKED", "Stop: consumed/executed mismatch");
+    }
+    // Approval can enable permissionless execution/payout. Check the existing
+    // shared funding rules here so the original fresh request rechecks them too.
+    if (guanyan) {
+      fundingPrecheck = sevenFloorFundingPrecheck(plan, s);
+      if (!fundingPrecheck.known || !fundingPrecheck.enough) blockers.push(...fundingPrecheck.reasons);
     }
     if (BI(h.available) < BI(plan.amountWei)) blockers.push("AVAILABLE_FUNDS_INSUFFICIENT");
     const needsCap = BI(m.perTransactionLimit) !== BI(FUNDING_FORMAL.capWei) || BI(m.epochLimit) !== BI(FUNDING_FORMAL.capWei);
@@ -1872,13 +1883,14 @@ function fundingReviewBlocker(candidate) {
     return 'BANK_COMMITMENTS_NOT_VERIFIED';
   }
   if (sameAddress(plan.beneficiary, FUNDING_FORMAL.guanyanBeneficiary)) {
-    // Only the original, unapproved proposal may reach the holder's wallet.
-    // Approval elsewhere can still enable permissionless execution after ETA.
+    // Only the canonical case and its fresh, explicitly confirmed next step.
     try {
       const canonical = buildLifeResourcePlan({beneficiary:FUNDING_FORMAL.guanyanBeneficiary, amount:'1080000'});
-      if (step?.kind === 'ALLOCATION_PROPOSE' && step.ready === true
+      const expected = deriveFundingStep(canonical, candidate.snapshot);
+      const sameStep = value => pretty([value?.kind, value?.to, value?.data, value?.proposalId, value?.ready, value?.blockers]);
+      if (['ALLOCATION_PROPOSE','ALLOCATION_APPROVE','ALLOCATION_EXECUTE','PAYOUT'].includes(step?.kind) && step.ready === true
         && Array.isArray(step.blockers) && step.blockers.length === 0
-        && el('role').value === 'mother' && roleMatches(candidate)
+        && roleMatches(candidate) && expected.ready && sameStep(step) === sameStep(expected)
         && pretty(plan) === pretty(canonical) && wallet && !wallet.readPending()) return null;
     } catch { /* Unknown or corrupt pending state keeps the original guard. */ }
     return 'GUANYAN_RECONCILIATION_NOT_VERIFIED';
@@ -1887,7 +1899,10 @@ function fundingReviewBlocker(candidate) {
 }
 Object.assign(reasons, {
   BANK_COMMITMENTS_NOT_VERIFIED:'尚未核對原銀行完整未付承諾、已建未執行配額及調額對 UTC 當期用量的影響。可核對原提案預覽及回執。',
-  GUANYAN_RECONCILIATION_NOT_VERIFIED:'觀衍案僅開放原108萬提案由王母本人確認；批准、執行、撥款及入帳核銷仍待資金與防重條件核定。107 萬作廢。',
+  GUANYAN_RECONCILIATION_NOT_VERIFIED:'觀衍原108萬案的目前步驟、角色、資金或防重狀態未核對通過。請重新唯讀核對；107 萬作廢。',
+  FUNDING_STATE_UNKNOWN:'銀行資金或共享限額資料不完整，請重新唯讀核對。',
+  PER_TRANSACTION_LIMIT_EXCEEDED:'本次金額超過共享單筆上限。',
+  DAILY_LIMIT_EXCEEDED:'本次金額超過共享UTC當日剩餘額度。',
 });
 function legacyNextAction(blocker) {
   const role = roleChoices[el("role").value];
@@ -2488,12 +2503,18 @@ const prepareFundingPreview = (manualLegacyReceipt = false) => run(async () => {
   const legacyEtaUtc = legacyEta && Number(legacyEta) > 0 && Number(legacyEta) <= 8.64e12 ? new Date(Number(legacyEta) * 1000).toISOString() : '';
   const roleWarning = (roleMatches(candidate) ? '' : '所選角色、帳戶、權限及合約指紋須全部核對通過。')
     + (sameAddress(plan.beneficiary, FUNDING_FORMAL.guanyanBeneficiary)
-      ? '本頁僅開放王母提出未批准提案，不代表可付款。後續批准／執行／撥款仍待核定；其他介面批准後，鏈上提案到期可被執行。' : '');
+      ? '每次只確認目前這一步。若提案已到期，玉帝批准後任何人可立即執行及撥款；回執核對通過才接續。' : '');
   el('summary').textContent = isLegacyCapCancelPlan(plan)
     ? candidate.step.kind === 'LEGACY_CANCEL_DONE' ? '鏈上顯示舊共享限額提案已取消。'
       : candidate.step.kind === 'WAIT_ETA' ? `取消案已核準，等待鏈上可執行時間 ${legacyEtaUtc}。`
         : blocked || stepName + '。本次轉帳 0 BNB，須支付網路手續費。'
     : `${subject}。下一步：${stepName}。操作帳戶：${candidate.account}。BSC主網56；本次交易BNB金額為0（仍需BNB手續費）。${candidate.step.to ? `交易目標：${candidate.step.to}。` : ''}${blocked ? `尚缺：${blocked}` : ''}${roleWarning}${candidate.step.kind === 'WAIT_ETA' ? `鏈上等待條件：${candidate.step.label}` : ''}`;
+  if (sameAddress(plan.beneficiary, FUNDING_FORMAL.guanyanBeneficiary)) {
+    const funding = candidate.step.fundingPrecheck;
+    const kaios = wei => String(wei).padStart(19,'0').replace(/(\d{18})$/,'.$1').replace(/\.?0+$/,'');
+    const funds = funding?.known ? `銀行帳面可用 ${kaios(funding.available)} KAIOS；共享當日剩餘 ${kaios(funding.epochRemaining)} KAIOS。` : '';
+    el('summary').textContent = `觀衍：1,080,000 KAIOS。收款地址：${plan.beneficiary}。下一步：${stepName}。${funds}${blocked ? `尚缺：${blocked}。` : ''}${roleWarning}本人確認仍需 BNB 網路手續費。`;
+  }
   const ready = candidate.step.ready && !reviewBlocker && roleMatches(candidate);
   el('send').textContent = ready ? `交錢包確認：${stepName}` : '目前不可送交錢包；請先處理上列條件';
   status(ready ? (isLegacyCapCancelPlan(plan)
@@ -2909,7 +2930,7 @@ el('load-guanyan').onclick = () => run(async () => {
   el('case').value = '0';
   el('case').dispatchEvent(new Event('change'));
   el('advanced').open = true;
-  status('觀衍獨立108萬原案已載入，地址與金額固定；載入不送交易。請連接王母錢包唯讀核對，同意後只提出本案未批准提案。後續批准、執行及撥款仍待核定。');
+  status('觀衍108萬原案已載入，地址與金額固定；載入不送交易。請唯讀核對目前所需角色與資金，勾選後由本人在錢包確認這一步，不會自動送下一筆。');
   el('status').scrollIntoView({block:'nearest'});
 });
 el('load-five').onclick = () => run(async () => {
