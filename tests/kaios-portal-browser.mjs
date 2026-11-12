@@ -1176,6 +1176,7 @@ try{
     assert.equal((await audio(page)).contextState,'NOT_CREATED','no context before gesture');
     const primary=await reachable(page,'#primaryPlay');assert.ok(primary.hit&&primary.inView,'primary CTA must be reachable on first screen');assert.ok(primary.height>=44);
     const bankService=await reachable(page,'#bankEntryLink');assert.ok(bankService.hit&&bankService.inView&&bankService.height>=44,'bank service must be visible and reachable on first screen');
+    assert.equal(await page.evaluate(()=>{const summary=document.querySelector('.portal-header .kaios-audio-summary').getBoundingClientRect(),bank=document.querySelector('#bankEntryLink').getBoundingClientRect();return !summary.height||summary.bottom<=bank.top||summary.top>=bank.bottom||summary.right<=bank.left||summary.left>=bank.right;}),true,'audio summary must not overlap the bank entry');
     assert.equal(await page.locator('#bankEntryLink').getAttribute('data-world-id'),null,'bank service must not invoke game audio navigation');
     assert.match(await page.locator('#bankEntryLink').innerText(),/18888 靈霄寶殿銀行/);assert.match(await page.locator('#bankEntryLink').innerText(),/五筆專案撥款／查進度/);
     assertExactRoute(await page.locator('#bankEntryLink').getAttribute('href'),new URL(BANK_SERVICE.entryUrl,BASE+'/').href,'bank service original route');
