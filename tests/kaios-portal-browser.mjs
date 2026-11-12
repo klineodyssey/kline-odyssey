@@ -702,7 +702,7 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
           assert.deepEqual((await snapshot()).requests,[]);
           assert.match(await page.locator('#funding-summary').innerText(),/每次只確認目前這一步.*玉帝批准後任何人可立即執行及撥款/);
           const summary=page.locator('#funding-summary');
-          await summary.evaluate(element=>{const notice=document.createElement('p');notice.textContent='模擬驗收／未連真錢包';notice.style.cssText='color:#ffe1a3;font-weight:bold';element.before(notice);element.scrollIntoView({block:'center',behavior:'instant'});});
+          await summary.evaluate(element=>{for(const target of [element,document.getElementById('funding-send')]){const notice=document.createElement('p');notice.textContent='模擬驗收／未連真錢包';notice.style.cssText='color:#ffe1a3;font-weight:bold';target.before(notice);}element.scrollIntoView({block:'center',behavior:'instant'});});
           const file=`funding-guanyan-${width}x${height}-${scenario.role}`;
           const guanyanCapture=async label=>{await summary.evaluate(element=>element.scrollIntoView({block:'center',behavior:'instant'}));await shot(page,file+'-'+label);row.screenshots.push(file+'-'+label+'.png');};
           const confirmOne=async(kind,count,label)=>{
@@ -711,10 +711,12 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
             assert.equal(await page.locator('#funding-send').isDisabled(),true);
             assert.equal((await snapshot()).requests.length,count-1);
             await guanyanCapture(label+'-preview');
-            await page.locator('#funding-ack').check();await page.locator('#funding-send').scrollIntoViewIfNeeded();
-            const action=await reachable(page,'#funding-send');assert.ok(action.inView&&action.hit&&action.height>=44);
-            row.mainAction=action;assert.equal(await page.locator('#funding-send').isDisabled(),false);
+            await page.locator('#funding-ack').check();
+            await page.locator('#funding-send').evaluate(element=>element.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+            const action=await reachable(page,'#funding-send');row.mainAction=action;
             await shot(page,file+'-'+label+'-consent');row.screenshots.push(file+'-'+label+'-consent.png');
+            assert.ok(action.inView&&action.hit&&action.height>=44,'confirmation geometry '+JSON.stringify(action));
+            assert.equal(await page.locator('#funding-send').isDisabled(),false);
             await page.locator('#funding-send').click();
             await page.waitForFunction(n=>__fundingGuidedFiveQA.requests.length===n&&!document.getElementById('funding-receipt').disabled,count);
             await page.locator('#funding-receipt').click();
