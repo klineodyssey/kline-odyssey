@@ -650,7 +650,7 @@ HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super
       },scenario);
       const snapshot=()=>page.evaluate(()=>{const qa=__fundingGuidedFiveQA;return{requests:qa.requests,reconciles:qa.reconciles,results:qa.results,rpc:qa.rpc,pending:qa.pending,paidWei:qa.paidWei};});
       const capture=async phase=>{
-        const notice=page.locator('#funding-five [data-qa-guided-notice=status]');await notice.scrollIntoViewIfNeeded();
+        const notice=page.locator('#funding-five [data-qa-guided-notice=status]');await notice.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
         const badge=await reachable(page,'#funding-five [data-qa-guided-notice=status]');
         assert.ok(badge.inView&&badge.hit&&badge.width>0&&badge.height>0,'guided synthetic notice is visible '+JSON.stringify(badge));
         const geometry=await page.locator('#funding-five').evaluate(section=>{
