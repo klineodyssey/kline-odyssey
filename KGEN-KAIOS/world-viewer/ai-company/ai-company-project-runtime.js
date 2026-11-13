@@ -2829,3 +2829,453 @@ export function createAiCompanyDemonstrationFlows({ seed = "KAIOS-AI-COMPANY-DEM
     boundaries: { simulation_only: true, wallet_access: false, real_kgen: false, production_authority: false, external_execution: false }
   };
 }
+
+export const UNIVERSAL_CUSTOMER_ORDER_ENGINE = deepFreeze({
+  organ_id: "KAIOS_UNIVERSAL_CUSTOMER_ORDER_ENGINE_V1",
+  organ_name: "KAIOS AI Company Universal Customer Order Engine",
+  version: "1.0.0",
+  mode: "BOUNDED_LOCAL_DRY_RUN",
+  canonical_runtime: AI_COMPANY_RUNTIME_ID,
+  authority: "SIMULATION_COORDINATION_ONLY"
+});
+
+export const CUSTOMER_TRUTH_CLASSES = deepFreeze([
+  "MEASURED", "OBSERVED", "DOCUMENTED", "CALCULATED",
+  "MODEL_ESTIMATE", "INFERRED", "UNKNOWN"
+]);
+
+const LAND_GOD_DATA_REQUIREMENTS = deepFreeze([
+  { domain: "LAND_IDENTITY", source_class: "CUSTOMER_LAND_RECORD_OR_GOVERNMENT_CADASTRE", required_truth_class: "DOCUMENTED" },
+  { domain: "LAND_HISTORY", source_class: "GOVERNMENT_ARCHIVE_AND_HISTORICAL_MAP", required_truth_class: "DOCUMENTED" },
+  { domain: "ARCHAEOLOGY", source_class: "CULTURAL_HERITAGE_AND_ARCHAEOLOGY_RECORD", required_truth_class: "DOCUMENTED" },
+  { domain: "GEOLOGY", source_class: "GEOLOGICAL_SURVEY_AND_BOREHOLE_DATA", required_truth_class: "DOCUMENTED" },
+  { domain: "GROUNDWATER", source_class: "HYDROGEOLOGY_AND_MONITORING_DATA", required_truth_class: "MEASURED" },
+  { domain: "MINERAL_RESOURCES", source_class: "LICENSED_MINERAL_SURVEY", required_truth_class: "MODEL_ESTIMATE" },
+  { domain: "GEOTHERMAL", source_class: "GEOTHERMAL_SURVEY_AND_TEMPERATURE_MODEL", required_truth_class: "MODEL_ESTIMATE" },
+  { domain: "SEISMIC", source_class: "SEISMIC_NETWORK_AND_HAZARD_MODEL", required_truth_class: "MEASURED" },
+  { domain: "DEEP_EARTH_MODEL", source_class: "REGIONAL_GEOPHYSICS_AND_EARTH_MODEL", required_truth_class: "MODEL_ESTIMATE" },
+  { domain: "CULTURAL_MEMORY", source_class: "CONSENTED_COMMUNITY_ARCHIVE", required_truth_class: "DOCUMENTED" },
+  { domain: "LAND_USE_HISTORY", source_class: "LAND_USE_AND_REMOTE_SENSING_ARCHIVE", required_truth_class: "DOCUMENTED" },
+  { domain: "FUTURE_MONITORING", source_class: "AUTHORIZED_SENSOR_OR_REFRESH_PIPELINE", required_truth_class: "OBSERVED" }
+]);
+
+function simulatedUniversalWorkerCatalog() {
+  const worker = (worker_id, capabilities, { review_qualified = false, past_quality = 0.9 } = {}) => ({
+    worker_id,
+    identity_verified: true,
+    simulation_only: true,
+    authority: ["LOCAL_DRY_RUN"],
+    capabilities,
+    available: true,
+    load: 0,
+    past_quality,
+    review_qualified
+  });
+  return [
+    worker("SIMULATED-RESEARCH-WORKER", ["RESEARCH", "GIS", "GEOLOGY", "ARCHAEOLOGY", "DATA"]),
+    worker("SIMULATED-ARCHITECT-WORKER", ["ARCHITECTURE", "DESIGN", "AI", "LIFECYCLE"]),
+    worker("SIMULATED-ENGINEERING-WORKER", ["CODE", "AI", "UI"]),
+    worker("SIMULATED-QA-WORKER", ["QA", "TEST", "ACCESSIBILITY"]),
+    worker("SIMULATED-REVIEWER-A", ["REVIEW", "SECURITY", "DOMAIN_ACCURACY", "DATA_PROVENANCE"], { review_qualified: true, past_quality: 0.98 }),
+    worker("SIMULATED-REVIEWER-B", ["REVIEW", "SECURITY", "DOMAIN_ACCURACY", "DATA_PROVENANCE"], { review_qualified: true, past_quality: 0.97 })
+  ];
+}
+
+function matchUniversalWorker(catalog, requiredCapabilities, { reviewer = false, exclude = [] } = {}) {
+  const excluded = new Set(exclude);
+  const matches = catalog.filter((candidate) => {
+    if (!candidate || excluded.has(candidate.worker_id)) return false;
+    if (candidate.identity_verified !== true || candidate.available !== true) return false;
+    if (!Array.isArray(candidate.authority) || !candidate.authority.includes("LOCAL_DRY_RUN")) return false;
+    if (reviewer && candidate.review_qualified !== true) return false;
+    const capabilities = new Set(candidate.capabilities ?? []);
+    return requiredCapabilities.every((capability) => capabilities.has(capability));
+  });
+  return matches.sort((left, right) =>
+    Number(right.past_quality ?? 0) - Number(left.past_quality ?? 0)
+    || Number(left.load ?? 1) - Number(right.load ?? 1)
+    || String(left.worker_id).localeCompare(String(right.worker_id))
+  )[0] ?? null;
+}
+
+function universalAuditLedger(records) {
+  let previous_hash = "0".repeat(64);
+  return records.map((record, index) => {
+    const entry = {
+      sequence: index + 1,
+      event_type: record.event_type,
+      status: record.status,
+      evidence: record.evidence,
+      previous_hash
+    };
+    const record_hash = computeAiCompanyStateHash(entry);
+    previous_hash = record_hash;
+    return { ...entry, record_hash };
+  });
+}
+
+function landGodWorkOrderBlueprints(projectId) {
+  return [
+    { code: "DISCOVERY", type: "RESEARCH", capabilities: ["RESEARCH"], scope: "Confirm desired users, land identity, jurisdiction, consent, interaction and maintenance boundaries.", dependencies: [] },
+    { code: "DATA_PROVENANCE", type: "DATA", capabilities: ["RESEARCH", "GIS", "DATA"], scope: "Inventory licensed cadastral, historical, cultural, geological, groundwater, seismic and remote-sensing sources.", dependencies: ["DISCOVERY"] },
+    { code: "DEEP_EARTH_MODEL", type: "RESEARCH", capabilities: ["RESEARCH", "GEOLOGY", "DATA"], scope: "Define the surface-to-50-km model with source, method, uncertainty and confidence; never assert unknown treasure.", dependencies: ["DATA_PROVENANCE"] },
+    { code: "LIFE_ARCHITECTURE", type: "ARCHITECTURE", capabilities: ["ARCHITECTURE", "DESIGN", "AI", "LIFECYCLE"], scope: "Design candidate Life identity, domain, memory, sensors, tools, uncertainty model, maintenance and lifecycle.", dependencies: ["DISCOVERY", "DATA_PROVENANCE"] },
+    { code: "BOUNDED_IMPLEMENTATION", type: "CODE", capabilities: ["CODE", "AI", "UI"], scope: "Implement a local candidate application using the approved architecture and truth labels.", dependencies: ["DEEP_EARTH_MODEL", "LIFE_ARCHITECTURE"] },
+    { code: "ACCEPTANCE_QA", type: "QA", capabilities: ["QA", "TEST", "ACCESSIBILITY"], scope: "Run functional, provenance, uncertainty, privacy, accessibility and regression acceptance tests.", dependencies: ["BOUNDED_IMPLEMENTATION"] },
+    { code: "INDEPENDENT_REVIEW", type: "REVIEW", capabilities: ["REVIEW", "SECURITY", "DOMAIN_ACCURACY", "DATA_PROVENANCE"], scope: "Independently review scope, truth claims, data provenance, safety, privacy and delivery limitations.", dependencies: ["ACCEPTANCE_QA"] }
+  ].map((blueprint, index) => ({ ...blueprint, work_id: `${projectId}-WORK-${String(index + 1).padStart(3, "0")}` }));
+}
+
+function isSupportedLandGodCandidateIntent(rawRequest) {
+  const text = String(rawRequest).trim();
+  const negativeIntent = /(?:不要|不需要|不是要|並非要|不想要|排除|只是討論|文化討論)|\b(?:do\s+not|don't|not|without|exclude|instead\s+of)\b/i;
+  if (negativeIntent.test(text)) return false;
+  const chineseIntent = /(?:我要|我需要|請建立|請製作|請開發|建立|製作|開發).{0,80}土地公.{0,80}(?:生命|App|APP|應用)/;
+  const englishIntent = /\b(?:want|need|build|create|develop)\b.{0,100}\bland\s+god\b.{0,100}\b(?:life|app|application)\b/i;
+  return chineseIntent.test(text) || englishIntent.test(text);
+}
+
+export function createUniversalCustomerOrderManufacturingRecordV1({
+  base_sha = null,
+  head_sha = null,
+  branch = null,
+  pr = null,
+  tests = "NOT_VERIFIED",
+  ci = "NOT_VERIFIED",
+  reviewed_by = null,
+  review_result = "NOT_VERIFIED"
+} = {}) {
+  const evidenceShapeValid = /^[a-f0-9]{40}$/.test(base_sha ?? "")
+    && /^[a-f0-9]{40}$/.test(head_sha ?? "")
+    && /^codex\/[A-Za-z0-9._/-]+$/.test(branch ?? "")
+    && /^https:\/\/github\.com\/klineodyssey\/kline-odyssey\/pull\/\d+$/.test(pr ?? "")
+    && tests === "PASS" && ci === "PASS" && typeof reviewed_by === "string" && reviewed_by.length > 0
+    && review_result === "PASS";
+  return deepFreeze({
+    organ_id: UNIVERSAL_CUSTOMER_ORDER_ENGINE.organ_id,
+    organ_name: UNIVERSAL_CUSTOMER_ORDER_ENGINE.organ_name,
+    version: UNIVERSAL_CUSTOMER_ORDER_ENGINE.version,
+    designed_by: "沈英明 / ChatGPT GPT-5.6 Sol",
+    implemented_by: "衡曜 / codex-gm-01",
+    maintained_by: "KAIOS_GM_AND_DOT_PENDING_CANONICAL_ASSIGNMENT",
+    reviewed_by,
+    base_sha,
+    head_sha,
+    branch,
+    pr,
+    tests,
+    ci,
+    known_limits: [
+      "V1_HAS_ONE_EXECUTABLE_DRY_RUN_PROFILE_LAND_GOD_CANDIDATE_APP",
+      "NO_EXTERNAL_DATA_FETCH",
+      "NO_REAL_CUSTOMER_ACCEPTANCE_OR_COMMERCIAL_PRICE",
+      "NO_REAL_WORKER_DISPATCH",
+      "NO_DEPLOYMENT_OR_LIFE_ACTIVATION"
+    ],
+    rollback: "REVERT_THE_DEDICATED_COMMIT_WITHOUT_RESETTING_THE_CANONICAL_AI_COMPANY_RUNTIME",
+    evidence_shape_status: evidenceShapeValid ? "FORMAT_VALID_NOT_EXTERNALLY_VERIFIED" : "INCOMPLETE_OR_INVALID",
+    signature: "NOT_SIGNED",
+    seal_status: "INVALID_NOT_AUTHORIZED_OR_EXTERNALLY_VERIFIED",
+    review_result,
+    manufacturing_status: evidenceShapeValid ? "EVIDENCE_PENDING_EXTERNAL_VERIFICATION" : "INCOMPLETE"
+  });
+}
+
+/**
+ * Adapts one natural-language customer request to the existing canonical AI
+ * Company runtime. The result is a deterministic dry-run proposal: it is not a
+ * real customer, contract, quote acceptance, worker dispatch, payment or deploy.
+ */
+export function runUniversalCustomerOrderDryRunV1({
+  raw_request,
+  customer_order_id = "CUSTOMER-ORDER-DEMO-LAND-GOD-001",
+  customer_type = "SIMULATED_CUSTOMER",
+  request_source = "CHAT",
+  desired_outcome = null,
+  budget_if_known = null,
+  deadline_if_known = null
+} = {}, { worker_catalog } = {}) {
+  const rawRequest = String(raw_request ?? "").trim();
+  if (!rawRequest) throw new Error("RAW_CUSTOMER_REQUEST_REQUIRED");
+  if (!isSupportedLandGodCandidateIntent(rawRequest)) {
+    return deepFreeze({
+      engine: UNIVERSAL_CUSTOMER_ORDER_ENGINE,
+      customer_order: {
+        customer_order_id,
+        customer_type,
+        request_source,
+        raw_request: rawRequest,
+        request_time: null,
+        desired_outcome,
+        budget_if_known,
+        deadline_if_known,
+        status: "DISCOVERY",
+        real_customer: false
+      },
+      product_requirement: null,
+      assumptions: [],
+      open_questions: ["Which bounded product profile and evidence sources should discovery establish?"],
+      feasibility: {
+        status: "RESEARCH_REQUIRED",
+        reasons: ["NO_BOUNDED_V1_PRODUCT_PROFILE"],
+        required_next_evidence: ["REQUIREMENT_DISCOVERY", "CANONICAL_OWNER_SELECTION"]
+      },
+      quote_draft: null,
+      project_proposal: null,
+      work_orders: [],
+      review_routing: [],
+      audit_ledger: universalAuditLedger([
+        { event_type: "RAW_REQUEST_RECORDED", status: "COMPLETE", evidence: customer_order_id },
+        { event_type: "PROFILE_CLASSIFICATION", status: "RESEARCH_REQUIRED", evidence: "NO_BOUNDED_V1_PRODUCT_PROFILE" }
+      ]),
+      truth_classes: CUSTOMER_TRUTH_CLASSES,
+      boundaries: {
+        dry_run_only: true,
+        real_customer: false,
+        real_acceptance: false,
+        real_contract: false,
+        payment: false,
+        deployment: false,
+        life_created: false,
+        worker_dispatched: false,
+        external_data_fetched: false,
+        protected_action: false
+      }
+    });
+  }
+  const catalog = worker_catalog === undefined ? simulatedUniversalWorkerCatalog() : clone(worker_catalog);
+  if (!Array.isArray(catalog)) throw new Error("WORKER_CATALOG_MUST_BE_ARRAY");
+
+  const runtime = createKaiosAiCompanyRuntimeV1({ seed: `UNIVERSAL-CUSTOMER-ORDER:${customer_order_id}` });
+  try {
+    const submitted = runtime.submitRequest({
+      customer_life_id: "LIFE-SIMULATED-CUSTOMER-ORDER-REQUESTER",
+      customer_type: "PLAYER",
+      request_text: rawRequest,
+      requested_object: "LAND GOD CANDIDATE LIFE PACKAGE",
+      requested_location: "CUSTOMER_LAND_IDENTITY_PENDING",
+      requested_quantity: 1,
+      requested_quality: "PROVENANCE_AND_UNCERTAINTY_REQUIRED",
+      requested_deadline: 1000,
+      requested_budget: PROJECT_TEMPLATES.LIFE_PACKAGE_PROJECT.rough_cost,
+      intended_use: desired_outcome ?? "LAND_STEWARDSHIP_RESEARCH_AND_EXPLANATION",
+      civilization_context: "INDUSTRIAL_INFORMATION_SYSTEM",
+      rights_context: ["SIMULATED_RESEARCH_ONLY", "CUSTOMER_DATA_PERMISSION_REQUIRED"],
+      risk_level: "MEDIUM",
+      priority: "NORMAL"
+    });
+    if (submitted.status === "BLOCKED" || submitted.status === "REJECTED") throw new Error(`CANONICAL_REQUEST_REJECTED:${submitted.reason}`);
+    const requestId = submitted.outputs.request.request_id;
+    const analysis = runtime.analyzeRequirements(requestId);
+    if (analysis.status !== "COMPLETED") throw new Error(`CANONICAL_ANALYSIS_BLOCKED:${analysis.reason}`);
+    const canonicalFeasibility = runtime.evaluateFeasibility(requestId);
+    if (canonicalFeasibility.status !== "COMPLETED") throw new Error(`CANONICAL_FEASIBILITY_BLOCKED:${canonicalFeasibility.reason}`);
+    const canonicalProposal = runtime.createProposal(requestId).outputs.proposal;
+    runtime.approveProposal(canonicalProposal.proposal_id);
+    const canonicalProject = runtime.createProject(canonicalProposal.proposal_id).outputs.project;
+    runtime.decomposeProject(canonicalProject.project_id);
+    runtime.calculateDependencies(canonicalProject.project_id);
+
+    const productRequirement = {
+      what: "LAND_GOD_DIGITAL_LIFE_APPLICATION_CANDIDATE",
+      why: desired_outcome ?? "Help an authorized user understand and steward one identified land parcel.",
+      who: "AUTHORIZED_CUSTOMER_AND_CONSENTED_USERS",
+      where: "LAND_IDENTITY_AND_JURISDICTION_PENDING_CUSTOMER_EVIDENCE",
+      when: deadline_if_known,
+      data: LAND_GOD_DATA_REQUIREMENTS.map(({ domain }) => domain),
+      interaction: ["QUESTION_ANSWERING", "MAP_AND_DEPTH_EXPLORATION", "SOURCE_AND_UNCERTAINTY_DISCLOSURE"],
+      output: ["LAND_HISTORY", "CULTURAL_MEMORY", "SURFACE_TO_50_KM_MODEL", "MONITORING_PLAN"],
+      accuracy: "EVERY_CLAIM_REQUIRES_TRUTH_CLASS_SOURCE_METHOD_UNCERTAINTY_AND_CONFIDENCE",
+      safety: ["NO_TREASURE_CLAIM_WITHOUT_EVIDENCE", "NO_PRIVATE_CUSTOMER_DATA_REUSE", "NO_AUTOMATIC_LIFE_ACTIVATION"],
+      maintenance: "OWNER_REFRESH_POLICY_AND_INCIDENT_LOG_REQUIRED"
+    };
+    const openQuestions = [
+      "What is the exact authorized land parcel and jurisdiction?",
+      "Which customer data and community cultural records may be used?",
+      "Which deployment environment and maintenance service level are desired?",
+      "What budget, delivery deadline and legal review are approved?"
+    ];
+    const dataAvailability = LAND_GOD_DATA_REQUIREMENTS.map((requirement) => ({
+      ...requirement,
+      truth_class: "UNKNOWN",
+      source: null,
+      source_date: null,
+      license: "NOT_VERIFIED",
+      quality: "NOT_ASSESSED",
+      coverage: requirement.domain === "DEEP_EARTH_MODEL" ? "SURFACE_TO_50_KM_TARGET_NOT_VERIFIED" : "NOT_VERIFIED",
+      freshness: "NOT_VERIFIED",
+      uncertainty: "REQUIRES_DISCOVERY",
+      status: "RESEARCH_REQUIRED"
+    }));
+    const depthModel = [0, 100, 1000, 10000, 50000].map((depth_m) => ({
+      depth_m,
+      temperature: null,
+      pressure: null,
+      rock_model: null,
+      data_source: null,
+      method: depth_m === 0 ? "FIELD_OR_PUBLISHED_DATA_REQUIRED" : "REGIONAL_MODEL_PLUS_LOCAL_DATA_REQUIRED",
+      truth_class: depth_m === 0 ? "UNKNOWN" : "MODEL_ESTIMATE",
+      uncertainty: "NOT_QUANTIFIED_UNTIL_DATA_DISCOVERY",
+      confidence: null
+    }));
+    const feasibility = {
+      status: "PARTIALLY_FEASIBLE",
+      executable_scope: "DISCOVERY_RESEARCH_ARCHITECTURE_AND_LOCAL_CANDIDATE_APP",
+      blocked_scope: ["CANONICAL_DIGITAL_LIFE_ACTIVATION", "PRODUCTION_DEPLOYMENT", "CONFIRMED_SUBSURFACE_RESOURCE_CLAIMS"],
+      reasons: ["LAND_IDENTITY_NOT_PROVIDED", "DATA_LICENSE_AND_COVERAGE_NOT_VERIFIED", "DEEP_EARTH_LOCAL_MEASUREMENTS_NOT_AVAILABLE"],
+      canonical_gate_review_id: canonicalFeasibility.outputs.review.review_id,
+      required_next_evidence: ["AUTHORIZED_LAND_IDENTITY", "SOURCE_LICENSE_REVIEW", "CUSTOMER_SCOPE_CONFIRMATION"]
+    };
+    const effort = {
+      discovery: 12, research: 48, design: 24, engineering: 80, data: 40,
+      ai: 32, qa: 32, security: 12, review: 16, deployment: 0, maintenance: 8
+    };
+    const quoteDraft = {
+      quote_id: `${customer_order_id}-QUOTE-001`,
+      status: "DRAFT_GM_REVIEW_REQUIRED",
+      project_scope: "BOUNDED_DISCOVERY_TO_LOCAL_CANDIDATE_APP",
+      deliverables: ["DATA_SOURCE_REGISTER", "LAND_GOD_LIFE_CANDIDATE_SPEC", "LOCAL_CANDIDATE_APP", "ACCEPTANCE_EVIDENCE", "MAINTENANCE_PLAN"],
+      estimated_effort_hours: Object.values(effort).reduce((sum, hours) => sum + hours, 0),
+      effort_breakdown_hours: effort,
+      dependencies: feasibility.required_next_evidence,
+      exclusions: feasibility.blocked_scope,
+      customer_budget_if_known: budget_if_known,
+      price: null,
+      payment_terms: null,
+      valid_until: null,
+      commercial_decision: "GM_REQUIRED",
+      real_contract: false,
+      payment_received: false
+    };
+    const simulatedAcceptance = {
+      status: "SIMULATED_ACCEPTANCE_FOR_DRY_RUN_ONLY",
+      real_customer_acceptance: false,
+      acceptance_evidence: "SCENARIO_FIXTURE_ONLY",
+      accepted_at: null
+    };
+    const projectProposal = {
+      project_id: `${customer_order_id}-PROJECT-001`,
+      canonical_project_id: canonicalProject.project_id,
+      canonical_template: canonicalProject.template_id,
+      project_owner: "KAIOS_GM_SIMULATION_OWNER",
+      customer: customer_type,
+      status: "PROPOSAL_SIMULATION",
+      budget: null,
+      milestones: ["DISCOVERY", "RESEARCH", "ARCHITECTURE", "BUILD", "QA", "INDEPENDENT_REVIEW", "CUSTOMER_ACCEPTANCE"],
+      dependencies: feasibility.required_next_evidence,
+      risks: feasibility.reasons,
+      delivery_criteria: ["FUNCTIONAL_PASS", "DOMAIN_ACCURACY_PASS", "DATA_PROVENANCE_PASS", "SECURITY_PRIVACY_PASS", "ACCESSIBILITY_PASS", "INDEPENDENT_REVIEW_PASS"],
+      project_memory: "SINGLE_CANONICAL_PROJECT_RECORD_REQUIRED",
+      active: false
+    };
+
+    const workOrders = landGodWorkOrderBlueprints(projectProposal.project_id).map((blueprint) => {
+      const implementer = matchUniversalWorker(catalog, blueprint.capabilities, { reviewer: blueprint.type === "REVIEW" });
+      const reviewer = matchUniversalWorker(catalog, ["REVIEW", "SECURITY", "DOMAIN_ACCURACY", "DATA_PROVENANCE"], { reviewer: true, exclude: implementer ? [implementer.worker_id] : [] });
+      return {
+        work_id: blueprint.work_id,
+        project_id: projectProposal.project_id,
+        revision: 1,
+        source: customer_order_id,
+        why_now: "SIMULATED_CUSTOMER_ACCEPTANCE_REACHED_FOR_DRY_RUN",
+        priority: "P1_CUSTOMER_DISCOVERY_SIMULATION",
+        base_sha: "DRY_RUN_NOT_GIT_BOUND",
+        owner: "KAIOS_GM_SIMULATION_OWNER",
+        implementer: implementer?.worker_id ?? null,
+        reviewer: reviewer?.worker_id ?? null,
+        scope: blueprint.scope,
+        inputs: [rawRequest, ...blueprint.dependencies],
+        expected_output: `${blueprint.code}_EVIDENCE_PACKAGE`,
+        acceptance_tests: ["SCOPE_BOUNDED", "TRUTH_LABELS_PRESENT", "PROVENANCE_RECORDED", "NO_PROTECTED_ACTION"],
+        dependencies: blueprint.dependencies.map((code) => `${projectProposal.project_id}-WORK-${String(landGodWorkOrderBlueprints(projectProposal.project_id).findIndex((item) => item.code === code) + 1).padStart(3, "0")}`),
+        protected_actions: ["NO_PAYMENT", "NO_DEPLOYMENT", "NO_LIFE_ACTIVATION", "NO_PRIVATE_DATA_PUBLICATION"],
+        expires_when: "REQUEST_SCOPE_DATA_OR_CANON_CHANGES",
+        supersedes: null,
+        status: implementer && reviewer ? "SIMULATED_MATCH_NOT_DISPATCHED" : "WAITING_FOR_QUALIFIED_WORKER",
+        work_type: blueprint.type,
+        assignment_evidence: implementer && reviewer ? "SIMULATION_CATALOG_MATCH_ONLY" : "NO_QUALIFIED_VERIFIED_MATCH"
+      };
+    });
+    const acceptancePlan = {
+      demo_required: true,
+      tests: ["FUNCTIONAL", "DOMAIN_ACCURACY", "DATA_PROVENANCE", "SECURITY", "PRIVACY", "VISUAL_QA", "PERFORMANCE", "ACCESSIBILITY", "REGRESSION"],
+      known_limits_required: true,
+      data_limitations_required: true,
+      maintenance_plan_required: true,
+      allowed_outcomes: ["ACCEPTED", "ACCEPTED_WITH_FOLLOWUP", "REJECTED"],
+      current_outcome: "NOT_PERFORMED"
+    };
+    const auditLedger = universalAuditLedger([
+      { event_type: "RAW_REQUEST_RECORDED", status: "COMPLETE", evidence: customer_order_id },
+      { event_type: "REQUIREMENT_ANALYSIS", status: "COMPLETE", evidence: computeAiCompanyStateHash(productRequirement) },
+      { event_type: "FEASIBILITY", status: feasibility.status, evidence: canonicalFeasibility.outputs.review.review_id },
+      { event_type: "QUOTE_DRAFTED", status: quoteDraft.status, evidence: quoteDraft.quote_id },
+      { event_type: "SIMULATED_ACCEPTANCE", status: simulatedAcceptance.status, evidence: simulatedAcceptance.acceptance_evidence },
+      { event_type: "PROJECT_PROPOSED", status: projectProposal.status, evidence: projectProposal.project_id },
+      { event_type: "WORK_ORDERS_MATCHED", status: workOrders.every(({ status }) => status === "SIMULATED_MATCH_NOT_DISPATCHED") ? "COMPLETE" : "PARTIAL", evidence: computeAiCompanyStateHash(workOrders) },
+      { event_type: "REVIEW_ROUTED", status: workOrders.every(({ reviewer }) => reviewer) ? "COMPLETE" : "BLOCKED", evidence: computeAiCompanyStateHash(workOrders.map(({ work_id, reviewer }) => ({ work_id, reviewer }))) }
+    ]);
+    const integrity = runtime.integrityReport();
+    return deepFreeze({
+      engine: UNIVERSAL_CUSTOMER_ORDER_ENGINE,
+      customer_order: {
+        customer_order_id,
+        customer_type,
+        request_source,
+        raw_request: rawRequest,
+        request_time: null,
+        desired_outcome,
+        budget_if_known,
+        deadline_if_known,
+        status: "DISCOVERY",
+        real_customer: false
+      },
+      product_requirement: productRequirement,
+      assumptions: ["LAND_PARCEL_AND_JURISDICTION_WILL_BE_PROVIDED", "CUSTOMER_WILL_AUTHORIZE_EACH_DATA_SOURCE"],
+      open_questions: openQuestions,
+      feasibility,
+      data_availability: dataAvailability,
+      depth_model: depthModel,
+      quote_draft: quoteDraft,
+      customer_simulated_acceptance: simulatedAcceptance,
+      project_proposal: projectProposal,
+      work_orders: workOrders,
+      review_routing: workOrders.map(({ work_id, reviewer, status }) => ({ work_id, reviewer, status })),
+      acceptance_plan: acceptancePlan,
+      ip_and_confidentiality: {
+        customer_ip: ["RAW_REQUEST", "CUSTOMER_PROVIDED_LAND_AND_CULTURAL_DATA"],
+        kaios_background_ip: [AI_COMPANY_RUNTIME_ID, UNIVERSAL_CUSTOMER_ORDER_ENGINE.organ_id],
+        ai_contribution: ["REQUIREMENT_ANALYSIS", "FEASIBILITY_MODEL", "WORK_BREAKDOWN", "DRY_RUN_ARTIFACTS"],
+        third_party_sources: "PENDING_DISCOVERY",
+        license: "PENDING_SOURCE_BY_SOURCE_REVIEW",
+        confidentiality: "PRIVATE_BY_DEFAULT",
+        public_repository_authorized: false,
+        cross_customer_reuse_authorized: false
+      },
+      audit_ledger: auditLedger,
+      canonical_runtime_evidence: {
+        runtime: AI_COMPANY_RUNTIME_ID,
+        request_id: requestId,
+        proposal_id: canonicalProposal.proposal_id,
+        project_id: canonicalProject.project_id,
+        integrity_ok: integrity.ok,
+        state_hash: integrity.state_hash
+      },
+      truth_classes: CUSTOMER_TRUTH_CLASSES,
+      boundaries: {
+        dry_run_only: true,
+        real_customer: false,
+        real_acceptance: false,
+        real_contract: false,
+        payment: false,
+        deployment: false,
+        life_created: false,
+        worker_dispatched: false,
+        external_data_fetched: false,
+        protected_action: false
+      }
+    });
+  } finally {
+    runtime.destroy();
+  }
+}
