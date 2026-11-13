@@ -1,6 +1,8 @@
 /** First-party KAIOS Portal registry. Product status is not financial readiness. */
 export const WORLD_STATUSES=Object.freeze(['PLAYABLE','BETA','UNDER_CONSTRUCTION','RESEARCH','ARCHIVED']);
 export const CANONICAL_PORTAL_URL='https://klineodyssey.github.io/kline-odyssey/';
+/** Existing bank service; independent of the unfinished K18888 game world. */
+export const BANK_SERVICE=Object.freeze({name:'18888 靈霄寶殿銀行',description:'五筆專案撥款／查進度',cta:'開啟銀行',entryUrl:'K線西遊記/temples/18888/index.html#funding-panel'});
 const entry=value=>Object.freeze({...value,capabilities:Object.freeze(value.capabilities||[])});
 export const SHARED_GAME_VERSION='V2.9.11';
 export const WORLD_REGISTRY=Object.freeze([
@@ -16,7 +18,7 @@ export const WORLD_REGISTRY=Object.freeze([
  entry({worldId:'k280',name:'K280 數位生命研究展示',subtitle:'RESEARCH · READ ONLY',status:'RESEARCH',entryUrl:'world-viewer/k280/',version:'CURRENT',audioTheme:null,description:'觀察數位恐龍 K280 與公開生命資料，不是已完成的玩家世界。',capabilities:['INFORMATION_ONLY'],disclosure:true}),
  entry({worldId:'ai-company',name:'KAIOS AI 公司研究展示',subtitle:'RESEARCH · NO EXTERNAL AUTONOMY',status:'RESEARCH',entryUrl:'world-viewer/ai-company-v1/',version:'CURRENT',audioTheme:null,description:'公司任務與工程規劃的本機模擬；無真實錢包、KGEN、合約或外部執行權。',capabilities:['INFORMATION_ONLY'],disclosure:true}),
  entry({worldId:'mars',name:'Mars 世界',subtitle:'建設中',status:'UNDER_CONSTRUCTION',entryUrl:null,version:'DESIGN',audioTheme:null,description:'火星世界尚未開放正式遊玩。',capabilities:[]}),
- ...['18888','18921','20888','21319','21520','21666','21888','22188','23333','108000'].map(id=>entry({worldId:id,name:`K${id}`,subtitle:'未開放世界',status:'UNDER_CONSTRUCTION',entryUrl:null,version:'DESIGN',audioTheme:null,description:'規劃與展示保留於資料庫，正式玩法仍在建設中。',capabilities:[]}))
+ ...['18888','18921','20888','21319','21520','21666','21888','22188','23333','108000'].map(id=>entry({worldId:id,name:id==='18888'?'K18888 遊戲世界':`K${id}`,subtitle:'未開放世界',status:'UNDER_CONSTRUCTION',entryUrl:null,version:'DESIGN',audioTheme:null,description:'規劃與展示保留於資料庫，正式玩法仍在建設中。',capabilities:[]}))
 ]);
 export const isPlayable=world=>world?.status==='PLAYABLE';
 export const isNavigable=world=>isPlayable(world)||(world?.status==='BETA'&&typeof world.entryUrl==='string'&&!!world.cta);

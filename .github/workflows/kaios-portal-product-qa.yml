@@ -57,6 +57,9 @@ jobs:
       - name: Install Chromium
         run: |
           npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0 ethers@6.15.0
+          # Keep signed Ubuntu packages on the official archive when Azure DNS fails.
+          test -f /etc/apt/apt-mirrors.txt
+          sudo sed -i 's#http://azure\.archive\.ubuntu\.com/ubuntu#https://archive.ubuntu.com/ubuntu#g' /etc/apt/apt-mirrors.txt
           npx playwright install --with-deps chromium
       - name: Real browser product QA
         env:

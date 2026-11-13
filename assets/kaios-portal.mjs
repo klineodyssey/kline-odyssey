@@ -1,4 +1,4 @@
-import {WORLD_REGISTRY,findWorld,isPlayable,isNavigable,playableDestination,resumeDestination,portalBase,worldUrl} from './kaios-world-registry.mjs';
+import {WORLD_REGISTRY,BANK_SERVICE,findWorld,isPlayable,isNavigable,playableDestination,resumeDestination,portalBase,worldUrl} from './kaios-world-registry.mjs';
 import {createLocalPlayerStore} from '../K線西遊記/temples/11520/runtime/player-life-runtime.mjs';
 
 /** Read-only, privacy-minimal projection of the existing validated Player Life. */
@@ -14,6 +14,10 @@ function el(document,tag,className,text){const node=document.createElement(tag);
 export function renderPortal(document,{storage,base=portalBase()}={}){
  const link=(text,path,className='')=>{const a=el(document,'a',className,text);a.href=new URL(path,base).href;return a};
  const status=world=>el(document,'span','world-status',world.status==='PLAYABLE'?'● PLAYABLE · 可玩':world.status==='BETA'?'BETA · 候選入口':'研究 / 資訊');
+ const bankHost=document.querySelector('#bankEntry');bankHost.replaceChildren();
+ const bank=link('',BANK_SERVICE.entryUrl,'bank-service');bank.id='bankEntryLink';
+ const bankCopy=el(document,'span','bank-service-copy');bankCopy.append(el(document,'strong','bank-service-name',BANK_SERVICE.name),el(document,'span','bank-service-description',BANK_SERVICE.description));
+ bank.append(bankCopy,el(document,'span','bank-service-action',BANK_SERVICE.cta+' →'));bankHost.append(bank);
  const primary=findWorld('11520'),primaryHost=document.querySelector('#primaryWorld');primaryHost.replaceChildren(status(primary));
  const launch=link('前往花果山台灣報價',primary.entryUrl,'primary-cta');launch.dataset.worldId=primary.worldId;launch.id='primaryPlay';launch.append(el(document,'span','','↗'));primaryHost.append(launch);
  const cards=document.querySelector('#worldCards');cards.replaceChildren();

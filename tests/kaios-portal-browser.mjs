@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
-import {worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
+import {BANK_SERVICE,worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
 const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const OUT='artifacts/kaios-portal-qa';
 const FUNDING_ONLY=process.argv.includes('--funding-only');
@@ -117,6 +118,702 @@ async function verifyLegacyCards(){
   }
   report.checks.push('fifteen legacy core/hub cards: canonical URLs, actual document clicks/HTTP200/back at local and simulated Pages prefix in portrait/landscape; destination scripts disabled; no claim of playable temples or completion of all123 points');
 }
+async function verify16888ManualOrder(){
+  assert.equal(FUNDING_ONLY,true,'synthetic 16888 order QA stays in the existing isolated CI lane');
+  const route=new URL('K線西遊記/temples/16888/index.html',BASE+'/'),origin=route.origin;
+  const html=await fs.readFile(new URL('../K線西遊記/temples/16888/index.html',import.meta.url),'utf8');
+  const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(match=>match[1]);
+  const scriptWith=marker=>{
+    const found=scripts.filter(script=>script.includes(marker));
+    assert.equal(found.length,1,'one original 16888 '+marker+' script');
+    return found[0];
+  };
+  const safetyScript=scriptWith('const PATCH_ID = "V3.7.12-POOL-SAFETY"');
+  const panelScript=scriptWith('BET PANEL FULLSCREEN RUNTIME PATCH');
+  const dockScript=scriptWith('Backup Wallet Operation Zone Runtime Patch');
+  const documentOnly=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+  const vendor=new URL('K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js',BASE+'/').href;
+  const account='0x1111111111111111111111111111111111111111',hash='0x'+'a'.repeat(64);
+  const key='KGEN_16888_MANUAL_ORDER_PENDING',universe='0xAbF1EBF153A69Cf383a1435AFC20F7232D893D63';
+  const orderButtons='[onclick="betPanel.buy()"],[onclick="betPanel.sell()"],[onclick="web3.place(0)"],[onclick="web3.place(1)"]';
+  report.manual16888=[];
+  for(const [width,height] of [[390,844],[844,390]]){
+    const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
+    context.setDefaultTimeout(10000);context.setDefaultNavigationTimeout(20000);
+    const page=await context.newPage();
+    const row={width,height,mode:'SYNTHETIC_PROVIDER_NO_REAL_ORDER',panelMode:'ORIGINAL_TOGGLE_THEN_FULLSCREEN',realWallet:'NOT_TESTED',chainReads:0,
+      networkWrites:0,realTransactions:0,mockSendCount:0,mockTransactions:[],mockRpcMethods:[],
+      blockedRequests:[],runtimeErrors:[],screenshots:[],
+      sourceHtmlSha256:createHash('sha256').update(html).digest('hex')};
+    report.manual16888.push(row);
+    page.on('pageerror',error=>row.runtimeErrors.push(String(error.stack||error)));
+    await context.route('**/*',async intercepted=>{
+      const request=intercepted.request(),url=new URL(request.url());
+      if(!['GET','HEAD'].includes(request.method())||url.origin!==origin){
+        row.blockedRequests.push({origin:url.origin,method:request.method(),type:request.resourceType()});
+        await intercepted.abort('blockedbyclient');return;
+      }
+      if(request.isNavigationRequest()&&url.pathname===route.pathname){
+        await intercepted.fulfill({status:200,contentType:'text/html; charset=utf-8',body:documentOnly,
+          headers:{'content-security-policy':"connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'"}});
+        return;
+      }
+      await intercepted.continue();
+    });
+    await page.exposeFunction('__16888RecordMockSend',transaction=>{
+      row.mockTransactions.push(transaction);row.mockSendCount++;
+      return hash;
+    });
+    const install=async()=>{
+      await page.addScriptTag({url:vendor});
+      await page.evaluate(({account,hash,universe})=>{
+        const real=window.ethers,amount=real.utils.parseUnits('100',18);
+        const iface=new real.utils.Interface([
+          'function placeOrder(uint8 side,uint256 amountIn)',
+          'event OrderPlaced(address indexed user,uint8 side,uint256 amountIn,uint256 feeTotal,uint256 feeToTreasury,uint256 feeToPool,uint256 stake)',
+          'event OrderResolved(address indexed user,uint8 side,uint8 outcome,bool win,uint256 payout)'
+        ]);
+        let rejectWait;
+        const wait=new Promise((resolve,reject)=>{rejectWait=reject;});
+        const state={rpc:[],waitRequested:false,receipt:null,rejectWait};
+        const listeners=new Map();
+        const raw={
+          on:(event,callback)=>listeners.set(event,callback),
+          removeListener:(event,callback)=>{if(listeners.get(event)===callback)listeners.delete(event);},
+          async request({method,params=[]}){
+            state.rpc.push(method);
+            if(method==='eth_chainId')return '0x38';
+            if(method==='eth_accounts')return [account];
+            if(method==='wallet_switchEthereumChain')return null;
+            if(method==='eth_sendTransaction'){
+              const transaction=params[0],decoded=iface.decodeFunctionData('placeOrder',transaction.data);
+              if(transaction.from.toLowerCase()!==account.toLowerCase()||transaction.to.toLowerCase()!==universe.toLowerCase()
+                ||BigInt(transaction.value||'0x0')!==0n)throw Error('Synthetic order transaction mismatch');
+              return window.__16888RecordMockSend({from:transaction.from,to:transaction.to,side:Number(decoded.side),amountIn:decoded.amountIn.toString()});
+            }
+            throw Error('Unexpected synthetic RPC '+method);
+          }
+        };
+        const provider={provider:raw,getNetwork:async()=>({chainId:56}),send:(method,params)=>raw.request({method,params}),
+          getTransactionReceipt:async requested=>{state.rpc.push('eth_getTransactionReceipt');if(requested!==hash)throw Error('Unknown synthetic hash');return state.receipt;}};
+        const signer={provider,getAddress:async()=>account};
+        class GuardedProvider{
+          constructor(transport){this.transport=transport;}
+          getSigner(from){return {sendTransaction:async transaction=>{
+            const returned=await this.transport.request({method:'eth_sendTransaction',params:[{...transaction,from}]});
+            return {hash:returned,wait:()=>{state.waitRequested=true;return wait;}};
+          }};}
+        }
+        const parameters={poolBalance:async()=>real.utils.parseUnits('100000',18),
+          minOrder:async()=>real.BigNumber.from(1),maxOrder:async()=>real.utils.parseUnits('10000',18),
+          TRIGGER:async()=>real.BigNumber.from(1),MIN_FLOOR:async()=>real.BigNumber.from(1),
+          ROUND_TOTAL:async()=>real.BigNumber.from(1),configLocked:async()=>true,
+          vowWindowSec:async()=>real.BigNumber.from(1),loveWindowSec:async()=>real.BigNumber.from(1)};
+        window.ethers={...real,providers:{...real.providers,Web3Provider:GuardedProvider},
+          Contract:function(address,abi,runner){
+            if(!runner?.sendTransaction)return parameters;
+            return {placeOrder:(side,value)=>runner.sendTransaction({to:address,value:'0x0',data:iface.encodeFunctionData('placeOrder',[side,value])})};
+          }};
+        window.web3={demo:false,signer,provider,UNIVERSE:universe,
+          parseAmt:()=>real.utils.parseUnits(document.getElementById('bet-amt-input').value,18),refresh:async()=>{}};
+        window.betPanel={approve:async()=>{throw Error('Approval is outside synthetic order QA');}};
+        const event=(name,args)=>({address:universe,...iface.encodeEventLog(iface.getEvent(name),args)});
+        state.receiptFor=({side=0,from=account,value=amount}={})=>({
+          transactionHash:hash,from:account,to:universe,blockNumber:100,blockHash:'0x'+'b'.repeat(64),status:1,
+          logs:[event('OrderPlaced',[from,side,value,0,0,0,value]),event('OrderResolved',[from,side,side,true,amount])]
+        });
+        window.__16888ManualOrderQA=state;
+        for(const id of ['w3-addr','bp-wallet','dock-wallet']){
+          const element=document.getElementById(id);if(element)element.textContent=account;
+        }
+        const notice=document.createElement('small');
+        notice.dataset.qaSyntheticWallet='true';notice.textContent='模擬驗收／未連真錢包';
+        notice.style.cssText='display:block;color:#ffe1a3;font-size:10px;font-weight:700;line-height:1.5;';
+        document.querySelector('#bet-live-panel .bp-head > span').append(notice);
+      },{account,hash,universe});
+      await page.addScriptTag({content:safetyScript});
+      await page.addScriptTag({content:panelScript});
+      await page.addScriptTag({content:dockScript});
+    };
+    const action=async(selector,label)=>{
+      const locator=page.locator(selector);
+      await locator.scrollIntoViewIfNeeded();
+      const geometry=await reachable(page,selector);
+      assert.ok(geometry.inView&&geometry.hit&&geometry.width>0&&geometry.height>0,label+': original control is reachable '+JSON.stringify(geometry));
+      return geometry;
+    };
+    const capture=async phase=>{
+      const name='16888-manual-order-'+width+'x'+height+'-'+phase;
+      const badge=await reachable(page,'#bet-live-panel [data-qa-synthetic-wallet]');
+      assert.ok(badge.inView&&badge.hit&&badge.width>0&&badge.height>0,'synthetic wallet notice remains visible in '+phase+' '+JSON.stringify(badge));
+      await shot(page,name);row.screenshots.push(name+'.png');
+    };
+    const geometry=async()=>{
+      const measured=await page.locator('#bet-live-panel').evaluate(panel=>{
+        const rect=panel.getBoundingClientRect(),message=document.getElementById('manual-order-state');
+        return {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,viewportWidth:innerWidth,viewportHeight:innerHeight,
+          width:panel.clientWidth,scrollWidth:panel.scrollWidth,messageWidth:message.clientWidth,messageScroll:message.scrollWidth};
+      });
+      assert.ok(measured.left>=-1&&measured.right<=width+1&&measured.top>=-1&&measured.bottom<=height+1,
+        'original fullscreen panel fits '+JSON.stringify(measured));
+      assert.ok(measured.scrollWidth<=measured.width+1&&measured.messageScroll<=measured.messageWidth+1,
+        'account and original transaction wrap '+JSON.stringify(measured));
+      return measured;
+    };
+    const openPanel=async()=>{
+      row.openControl=await action('#betToggleBtn','16888 BET PANEL entry');
+      await page.locator('#betToggleBtn').click();
+      await page.locator('#bet-live-panel').waitFor({state:'visible'});
+      row.expandControl=await action('#bpExpandBtn','16888 original fullscreen control');
+      await page.locator('#bpExpandBtn').click();
+      assert.equal(await page.locator('#bet-live-panel').evaluate(panel=>panel.classList.contains('bet-fullscreen')),true);
+      await page.locator('#bet-amt-input').fill('100');
+    };
+    try{
+      const response=await page.goto(route.href,{waitUntil:'load'});assert.ok(response?.ok(),'16888 source document loads');
+      await install();await openPanel();
+      const up='[onclick="betPanel.buy()"]';
+      await action(up,'16888 manual UP');
+      await page.locator(up).click();
+      await page.waitForFunction(key=>{
+        const pending=JSON.parse(localStorage.getItem(key));
+        return window.__16888ManualOrderQA.waitRequested&&pending?.hash;
+      },key);
+      assert.equal(row.mockSendCount,1);
+      assert.equal(row.mockTransactions[0].side,0);
+      assert.equal(row.mockTransactions[0].amountIn,'100000000000000000000');
+      await page.locator(up).dispatchEvent('click');
+      await page.evaluate(()=>web3.place(1));
+      assert.equal(row.mockSendCount,1,'repeat clicks and legacy DOWN cannot create another request');
+      assert.equal(await page.locator(orderButtons).evaluateAll(buttons=>buttons.length>=2&&buttons.every(button=>button.disabled)),true);
+      assert.doesNotMatch(await page.locator('#bp-status').textContent(),/\bWIN\b|\bLOSE\b/);
+      await page.evaluate(()=>__16888ManualOrderQA.rejectWait(Error('synthetic confirmation timeout')));
+      await page.waitForFunction(()=>!document.getElementById('manual-order-receipt').disabled);
+      assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).hash,key),hash);
+      await page.locator('#manual-order-state').scrollIntoViewIfNeeded();
+      row.pendingGeometry=await geometry();await capture('pending');
+      row.mockRpcMethods.push(...await page.evaluate(()=>__16888ManualOrderQA.rpc));
+
+      await page.reload({waitUntil:'load'});await install();await openPanel();
+      assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).hash,key),hash);
+      assert.equal(await page.locator(orderButtons).evaluateAll(buttons=>buttons.every(button=>button.disabled)),true);
+      await page.evaluate(()=>web3.place(1));
+      assert.equal(row.mockSendCount,1,'reload preserves the original order lock');
+      await page.locator('#manual-order-state').scrollIntoViewIfNeeded();await capture('reload');
+      await page.evaluate(()=>{__16888ManualOrderQA.receipt=__16888ManualOrderQA.receiptFor({side:1});});
+      await action('#manual-order-receipt','16888 read-only receipt check');
+      await page.locator('#manual-order-receipt').click();
+      await page.waitForFunction(()=>!document.getElementById('manual-order-receipt').disabled);
+      assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).hash,key),hash,'wrong-side receipt retains the original order');
+      assert.doesNotMatch(await page.locator('#bp-status').textContent(),/\bWIN\b|\bLOSE\b/);
+      row.wrongReceiptGeometry=await geometry();await capture('wrong-receipt');
+      await page.evaluate(()=>{__16888ManualOrderQA.receipt=__16888ManualOrderQA.receiptFor();});
+      await page.locator('#manual-order-receipt').click();
+      await page.waitForFunction(key=>localStorage.getItem(key)===null,key);
+      assert.match(await page.locator('#bp-status').textContent(),/原帳戶.*UP.*WIN/);
+      assert.equal(await page.locator(orderButtons).evaluateAll(buttons=>buttons.every(button=>!button.disabled)),true);
+      assert.equal(row.mockSendCount,1,'receipt reconciliation only reads the synthetic original transaction');
+      row.mockRpcMethods.push(...await page.evaluate(()=>__16888ManualOrderQA.rpc));
+      row.confirmedGeometry=await geometry();await capture('confirmed');
+      assert.deepEqual(row.runtimeErrors,[],'the isolated original 16888 scripts have no runtime errors');
+      assert.equal(row.blockedRequests.some(request=>!['GET','HEAD'].includes(request.method)),false,'no network write was attempted');
+      row.functional='PASS';
+    }catch(error){
+      row.functional='FAIL';row.error=String(error.stack||error);
+      await page.screenshot({path:OUT+'/16888-manual-order-'+width+'x'+height+'-FAIL.png',fullPage:true}).catch(()=>{});
+      throw error;
+    }finally{await context.close();}
+  }
+  report.checks.push('16888 original manual UP/DOWN controls, original panel opening/fullscreen, synthetic guarded transport only, one mock order across repeated clicks and reload, wrong receipt retains lock, exact real-ethers events clear it; no real wallet, RPC, transaction or asset result');
+}
+async function verifyFundingAutoPreview(){
+  assert.equal(FUNDING_ONLY,true,'synthetic connection QA stays in the original isolated CI lane');
+  const route=new URL('K線西遊記/temples/18888/index.html#funding-panel',BASE+'/'),origin=route.origin;
+  const html=await fs.readFile(new URL('../K線西遊記/temples/18888/index.html',import.meta.url),'utf8');
+  const modules=[...html.matchAll(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/gi)];
+  assert.equal(modules.length,1,'one original funding controller module');
+  const marker='// BEGIN HUMAN FUNDING CONTROLLER',end='// END HUMAN FUNDING CONTROLLER';
+  const original=modules[0][1].split(end)[0]+end;
+  assert.equal(original.split(marker).length,2,'one original controller injection boundary');
+  // The original plans, validator and controller run against the same synthetic
+  // wallet-adapter boundary as the security suite. No RPC implementation or
+  // real signer is available to this browser context.
+  const fixture=`
+const qa=window.__fundingAutoPreviewQA;
+qa.formal={mother:FUNDING_FORMAL.mother,jade:FUNDING_FORMAL.jade};
+qa.account=qa.formal.mother;
+HumanFundingWallet=class {
+  constructor(options={}){this.selectedAccount=options.selectedAccount;this.flowType='FIXED_ALLOCATION';}
+  readPending(){return null;}
+  invalidatePreview(){}
+  invalidate(){}
+  async prepare(plan){
+    const call={beneficiary:plan.beneficiary??null,type:plan.type??'FIXED_ALLOCATION',account:this.selectedAccount?.()};
+    qa.prepares.push(call);
+    if(qa.failNext){qa.failNext=false;throw Error('SYNTHETIC_READ_FAILED');}
+    const account=call.account,cap=plan.type==='SHARED_CAP',ready=account===qa.formal.mother;
+    return {plan,account,snapshot:{account,chainId:qa.chainId,codeOk:true,identityErrors:[],paused:false,
+      blockNumber:'0x64',timestamp:'1762858800',roles:{proposer:account===qa.formal.mother,approver:account===qa.formal.jade,pauser:false}},
+      step:{ready,kind:cap?'CAP_PROPOSE':'ALLOCATION_PROPOSE',blockers:ready?[]:['MOTHER_PROPOSER_REQUIRED'],to:FUNDING_FORMAL.governance}};
+  }
+  async request(candidate){qa.requests.push(candidate);throw Error('NO_REAL_WALLET_IN_SYNTHETIC_QA');}
+  async reconcile(){throw Error('NO_PENDING_RECEIPT_IN_SYNTHETIC_QA');}
+};
+SharedCapWallet=class extends HumanFundingWallet{constructor(options){super(options);this.flowType='SHARED_CAP';}};
+LegacyCapCancelWallet=class extends HumanFundingWallet{constructor(options){super(options);this.flowType='LEGACY_CAP_CANCEL';}};
+HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super(options);this.flowType='BANK_PAUSE';}};
+`;
+  const syntheticModule=original.replace(marker,fixture+'\n'+marker);
+  const documentOnly=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+  const vendor=new URL('K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js',BASE+'/').href;
+  const importmap=html.match(/<script type="importmap">([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(importmap,'the existing vendored ethers import map is retained');
+  report.fundingAutoPreview=[];
+  for(const [width,height] of [[390,844],[844,390]]){
+    const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
+    context.setDefaultTimeout(10000);context.setDefaultNavigationTimeout(20000);
+    const page=await context.newPage();
+    const row={width,height,mode:'SYNTHETIC_WALLET_ADAPTER_ORIGINAL_CONTROLLER_NO_REAL_WALLET',realWallet:'NOT_TESTED',
+      chainReads:0,networkWrites:0,realTransactions:0,transactionRequests:0,blockedRequests:[],runtimeErrors:[],screenshots:[],checks:[],
+      sourceHtmlSha256:createHash('sha256').update(html).digest('hex')};
+    report.fundingAutoPreview.push(row);
+    page.on('pageerror',error=>row.runtimeErrors.push(String(error.stack||error)));
+    await context.route('**/*',async intercepted=>{
+      const request=intercepted.request(),url=new URL(request.url());
+      if(!['GET','HEAD'].includes(request.method())||url.origin!==origin){
+        row.blockedRequests.push({origin:url.origin,method:request.method(),type:request.resourceType()});
+        if(!['GET','HEAD'].includes(request.method()))row.networkWrites++;
+        await intercepted.abort('blockedbyclient');return;
+      }
+      if(request.isNavigationRequest()&&url.pathname===route.pathname){
+        await intercepted.fulfill({status:200,contentType:'text/html; charset=utf-8',body:documentOnly,
+          headers:{'content-security-policy':"connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'"}});return;
+      }
+      await intercepted.continue();
+    });
+    await context.addInitScript(()=>{
+      const listeners=new Map();
+      const state={authorized:false,account:null,chainId:56,prepares:[],requests:[],rpc:[],failNext:false};
+      const provider={isMetaMask:true,
+        on(event,listener){const handlers=listeners.get(event)||[];handlers.push(listener);listeners.set(event,handlers);},
+        removeListener(event,listener){listeners.set(event,(listeners.get(event)||[]).filter(item=>item!==listener));},
+        async request({method}){
+          state.rpc.push(method);
+          if(method==='eth_requestAccounts'){state.authorized=true;return [state.account];}
+          if(method==='eth_accounts')return state.authorized?[state.account]:[];
+          if(method==='eth_chainId')return '0x'+state.chainId.toString(16);
+          throw Error('Unexpected synthetic wallet request: '+method);
+        }};
+      state.emit=(event,value)=>{for(const listener of listeners.get(event)||[])listener(value);};
+      window.__fundingAutoPreviewQA=state;window.ethereum=provider;
+    });
+    const count=()=>page.evaluate(()=>__fundingAutoPreviewQA.prepares.length);
+    const settled=()=>page.waitForFunction(()=>!document.getElementById('funding-prepare').disabled&&document.getElementById('funding-preview').textContent.includes('"snapshot"'));
+    const noSend=async label=>{
+      assert.equal(await page.locator('#funding-ack').isChecked(),false,label+': no automatic acknowledgment');
+      assert.equal(await page.locator('#funding-send').isDisabled(),true,label+': sending still needs the explicit holder action');
+      assert.deepEqual(await page.evaluate(()=>__fundingAutoPreviewQA.requests),[],label+': no adapter transaction request');
+      assert.equal(await page.evaluate(()=>__fundingAutoPreviewQA.rpc.some(method=>/sendTransaction|sign|requestPermissions|switchEthereumChain/.test(method))),false,label+': no signature, transaction or permission-switch prompt');
+    };
+    const stableCount=async(expected,label)=>{
+      await page.waitForTimeout(200);
+      assert.equal(await count(),expected,label+': no automatic retry loop');
+    };
+    const capture=async phase=>{
+      const progress=page.locator('#funding-progress');
+      const failure=phase==='visible-read-failure';
+      const notice=failure?page.locator('#funding-status + [data-qa-synthetic-wallet]')
+        :await progress.isVisible()?progress.locator('[data-qa-synthetic-wallet]'):page.locator('#funding-title + [data-qa-synthetic-wallet]');
+      await notice.scrollIntoViewIfNeeded();
+      const badge=await notice.evaluate(element=>{
+        const r=element.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+        return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,visible:r.width>0&&r.height>0&&r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth,hit:hit===element||element.contains(hit)};
+      });
+      assert.ok(badge.visible&&badge.hit,phase+': synthetic wallet notice must be visible '+JSON.stringify(badge));
+      const geometry=await page.locator('#funding-panel').evaluate(panel=>{
+        const rect=panel.getBoundingClientRect();
+        return {viewport:innerWidth,document:document.documentElement.scrollWidth,left:rect.left,right:rect.right,width:panel.clientWidth,scroll:panel.scrollWidth};
+      });
+      assert.ok(geometry.document<=geometry.viewport+1&&geometry.scroll<=geometry.width+1&&geometry.left>=-1&&geometry.right<=geometry.viewport+1,phase+': original funding layout fits '+JSON.stringify(geometry));
+      assert.equal(await page.locator('#funding-panel [data-qa-synthetic-wallet]').count(),3);
+      const file='funding-auto-preview-'+width+'x'+height+'-'+phase;
+      await shot(page,file+'-viewport');row.screenshots.push(file+'-viewport.png');
+      await page.locator('#funding-panel').screenshot({path:OUT+'/'+file+'-panel.png'});row.screenshots.push(file+'-panel.png');
+      return geometry;
+    };
+    try{
+      const response=await page.goto(route.href,{waitUntil:'load'});assert.ok(response?.ok(),'original funding document loads');
+      await page.addScriptTag({url:vendor});await page.addScriptTag({type:'importmap',content:importmap});
+      await page.addScriptTag({type:'module',content:syntheticModule});
+      await page.waitForFunction(()=>document.getElementById('funding-role-status').textContent.includes('本次選擇：王母')&&document.getElementById('funding-cancel-connect').hidden);
+      await page.locator('#funding-advanced > summary').click();
+      await page.evaluate(()=>{
+        for(const id of ['funding-title','funding-progress-title','funding-status']){
+          const notice=document.createElement('p');notice.dataset.qaSyntheticWallet='true';notice.textContent='模擬驗收／未連真錢包';
+          notice.style.cssText='margin:8px 0;color:#ffe1a3;font-weight:700;line-height:1.5;';document.getElementById(id).after(notice);
+        }
+      });
+      await page.locator('#funding-load-five').click();
+      await page.locator('#funding-preview-details > summary').click();
+      await page.locator('#funding-draft').click();
+      await page.locator('#funding-preview-details > summary').click();
+      assert.match(await page.locator('#funding-summary').textContent(),/離線草案/);
+      assert.equal(await count(),0,'loading the five original cases while disconnected does not pretend to verify them');
+      await page.locator('#funding-wallet').selectOption('0');
+      await page.locator('#funding-connect').click();await settled();
+      assert.equal(await count(),1,'one explicit connection automatically reads one preview without clicking prepare');
+      assert.match(await page.locator('#funding-progress-title').textContent(),/高翠蘭.*等待王母提出/);
+      assert.match(await page.locator('#funding-progress-detail').textContent(),/勾選.*王母錢包/);
+      assert.match(await page.locator('#funding-role-status').textContent(),/正式帳戶與鏈上角色讀查通過/);
+      await noSend('connected fixed case');await stableCount(1,'connected fixed case');
+      row.connectedGeometry=await capture('connected-fixed');row.checks.push('explicit connect automatically replaces the offline fixed-case draft with the original progress board; no prepare click or send');
+
+      await page.evaluate(()=>{__fundingAutoPreviewQA.failNext=true;});
+      await page.locator('#funding-case').selectOption('1');
+      await page.waitForFunction(()=>document.getElementById('funding-status').textContent.includes('SYNTHETIC_READ_FAILED')&&!document.getElementById('funding-prepare').disabled);
+      assert.match(await page.locator('#funding-progress-title').textContent(),/知蘭.*等待重新核對/);
+      const failed=await count();assert.equal(failed,2);await noSend('failed automatic preview');await stableCount(failed,'failed automatic preview');
+      row.failureGeometry=await capture('visible-read-failure');
+      await page.locator('#funding-prepare').click();await settled();assert.equal(await count(),3,'manual retry makes one fresh read');
+      assert.match(await page.locator('#funding-progress-title').textContent(),/知蘭.*等待王母提出/);
+      await noSend('manual read retry');row.checks.push('read failure stays visible without a retry loop; the existing manual preview retries once');
+
+      await page.locator('#funding-mode').selectOption('cap');await settled();
+      assert.match(await page.locator('#funding-progress-title').textContent(),/等待王母提出調額/);
+      assert.equal(await count(),4);await noSend('cap mode change');
+      await page.locator('#funding-mode').selectOption('fixed');await settled();
+      assert.equal(await count(),5);assert.match(await page.locator('#funding-progress-title').textContent(),/知蘭.*等待王母提出/);
+      await noSend('return to fixed');row.checks.push('valid cap/fixed mode changes refresh one preview while keeping acknowledgment and send inactive');
+
+      const promptsBefore=await page.evaluate(()=>__fundingAutoPreviewQA.rpc.filter(method=>method==='eth_requestAccounts').length);
+      await page.evaluate(()=>{dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));});
+      await settled();assert.equal(await count(),6,'passive page return refreshes one current preview');
+      assert.equal(await page.evaluate(()=>__fundingAutoPreviewQA.rpc.filter(method=>method==='eth_requestAccounts').length),promptsBefore,'passive recovery does not ask for wallet authorization again');
+      await noSend('passive page return');await stableCount(6,'passive page return');row.resumedGeometry=await capture('passive-resume');
+
+      await page.evaluate(()=>{const qa=__fundingAutoPreviewQA;qa.account=qa.formal.jade;qa.emit('accountsChanged',[qa.account]);});
+      assert.equal(await page.locator('#funding-send').isDisabled(),true);await stableCount(6,'account changed before selection');
+      await page.locator('#funding-role').selectOption('jade');
+      await page.locator('#funding-account').selectOption(await page.evaluate(()=>__fundingAutoPreviewQA.formal.jade));await settled();
+      assert.equal(await count(),7);assert.match(await page.locator('#funding-progress-detail').textContent(),/(?:Mother|王母).*(?:提案|提出)/);
+      assert.match(await page.locator('#funding-summary').textContent(),/(?:Mother|王母).*(?:提案|提出)/);
+      await noSend('explicit new role account selection');
+      await page.evaluate(()=>{const qa=__fundingAutoPreviewQA;qa.chainId=1;qa.emit('chainChanged','0x1');});
+      assert.match(await page.locator('#funding-connect-next').textContent(),/BSC 56/);
+      assert.equal(await page.locator('#funding-prepare').isDisabled(),true);await stableCount(7,'wrong chain');
+      await page.evaluate(()=>{const qa=__fundingAutoPreviewQA;qa.chainId=56;qa.emit('chainChanged','0x38');});await settled();
+      assert.equal(await count(),8);await noSend('restored BSC chain');await stableCount(8,'restored BSC chain');
+      row.changedContextGeometry=await capture('account-and-chain-refresh');row.checks.push('account/chain changes invalidate old authority; explicit authorized account selection and valid BSC return refresh only reads');
+
+      // Reproduce the Human's exact role combination: Jade/OKX connected to
+      // the original, still-unproposed Gao Cuilan fixed case. A matching role
+      // wallet cannot substitute for Mother's required proposal.
+      await page.evaluate(()=>{
+        const qa=__fundingAutoPreviewQA,provider={...window.ethereum,isMetaMask:false,isOkxWallet:true};
+        window.okxwallet={ethereum:provider};
+        dispatchEvent(new CustomEvent('eip6963:announceProvider',{detail:{provider,info:{name:'模擬 OKX Web3',rdns:'com.okex.wallet'}}}));
+      });
+      await page.locator('#funding-wallet').selectOption('1');
+      await page.locator('#funding-case').selectOption('0');
+      await page.locator('#funding-connect').click();await settled();
+      assert.equal(await count(),9,'fresh Jade/OKX connection automatically reads the original Gao Cuilan case once');
+      assert.match(await page.locator('#funding-connection').textContent(),/模擬 OKX Web3/);
+      assert.match(await page.locator('#funding-connection').textContent(),/0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756/);
+      assert.match(await page.locator('#funding-progress-title').textContent(),/高翠蘭/);
+      assert.match(await page.locator('#funding-progress-detail').textContent(),/(?:Mother|王母).*(?:提案|提出)/);
+      assert.match(await page.locator('#funding-summary').textContent(),/(?:Mother|王母).*(?:提案|提出)/);
+      assert.doesNotMatch(await page.locator('#funding-summary').textContent(),/離線草案/);
+      await noSend('Jade connected to an unproposed original fixed case');await stableCount(9,'Jade connected to an unproposed original fixed case');
+      row.jadeUnproposedCaseGeometry=await capture('jade-original-case-needs-mother');
+      row.checks.push('Jade/OKX c15…756 plus original Gao Cuilan 1,080,000 case automatically shows Mother proposal is still required, never grants Jade send authority');
+      row.mockPrepareCount=await count();row.mockWalletMethods=await page.evaluate(()=>__fundingAutoPreviewQA.rpc);
+      assert.deepEqual(await page.evaluate(()=>__fundingAutoPreviewQA.requests),[]);assert.deepEqual(row.runtimeErrors,[]);
+      assert.deepEqual(row.blockedRequests,[],'the synthetic controller makes no external or non-GET request');
+      row.functional='PASS';
+    }catch(error){row.functional='FAIL';row.error=String(error.stack||error);await page.screenshot({path:OUT+'/funding-auto-preview-'+width+'x'+height+'-FAIL.png',fullPage:true}).catch(()=>{});throw error;}
+    finally{await context.close();}
+  }
+  report.checks.push('18888 original controller with explicitly labeled synthetic wallet adapter: fixed/cap connection, passive return, case/mode/account/network invalidation, visible read failure and no retry loop; no real wallet/RPC/signature/transaction');
+}
+async function verifyFundingGuidedFive(){
+  assert.equal(FUNDING_ONLY,true,'guided five-case QA stays in the original isolated CI job');
+  const route=new URL('K線西遊記/temples/18888/index.html#funding-five',BASE+'/'),origin=route.origin;
+  const html=await fs.readFile(new URL('../K線西遊記/temples/18888/index.html',import.meta.url),'utf8');
+  const modules=[...html.matchAll(/<script\b[^>]*id="funding-controller"[^>]*>([\s\S]*?)<\/script>/gi)];
+  assert.equal(modules.length,1,'one original funding controller module');
+  const marker='// BEGIN HUMAN FUNDING CONTROLLER',end='// END HUMAN FUNDING CONTROLLER';
+  const original=modules[0][1].split(end)[0]+end;
+  assert.equal(original.split(marker).length,2,'one original controller boundary');
+  const fixture=`
+const qa=window.__fundingGuidedFiveQA,F=FUNDING_FORMAL;
+qa.formal={mother:F.mother,jade:F.jade};qa.account=qa.formal[qa.role];
+const qaEmptyProposal=()=>({target:ZERO,value:'0',dataHash:ZeroHash,executableAt:'0',proposer:ZERO,approver:ZERO,executed:false,cancelled:false});
+const qaProposal=(candidate,phase,eta)=>phase==='NONE'?qaEmptyProposal():({target:candidate.target,value:'0',dataHash:candidate.dataHash,
+  executableAt:eta,proposer:F.mother,approver:phase==='PROPOSED'?ZERO:F.jade,executed:phase==='CREATED'||phase==='PAID',cancelled:false});
+const qaCase=plan=>qa.cases[plan.allocationId]??=( {phase:qa.initialPhase,eta:qa.initialPhase==='PROPOSED'?String(BigInt(qa.timestamp)+3600n):qa.initialPhase==='APPROVED'?String(BigInt(qa.timestamp)-1n):'0'} );
+HumanFundingWallet=class {
+  constructor(options={}){this.selectedAccount=options.selectedAccount;this.flowType='FIXED_ALLOCATION';}
+  readPending(){return qa.pending;}
+  invalidatePreview(){}
+  invalidate(){}
+  async inspect(plan){
+    const shared=plan.type==='SHARED_CAP',state=shared?null:qaCase(plan),present=state&&['CREATED','PAID'].includes(state.phase);
+    const balance=50000000n*10n**18n-BigInt(qa.paidWei),reserve=3000000n*10n**18n;
+    return {chainId:56,account:this.selectedAccount?.(),blockNumber:'0x64',timestamp:qa.timestamp,codeOk:true,token:F.kaios,decimals:18,identityErrors:[],
+      runtimePins:FUNDING_RUNTIME_PINS,roles:{proposer:qa.account===F.mother,approver:qa.account===F.jade,moduleAdmin:true,allocationGovernance:true},
+      module:{module:F.allocation,versionHash:F.versionHash,perTransactionLimit:qa.capConfigured?F.capWei:'6010928961748633879781',
+        epochLimit:qa.capConfigured?F.capWei:'6010928961748633879781',epochSpent:qa.paidWei,epochIndex:String(BigInt(qa.timestamp)/86400n),active:true},
+      health:{balance:String(balance),reserve:String(reserve),available:String(balance-reserve),accountedInflow:'50000000000000000000000000',totalOutflow:qa.paidWei,healthy:true,paused:false},
+      capProposal:qaProposal(plan.cap,qa.capConfigured?'CREATED':'APPROVED',String(BigInt(qa.timestamp)-1n)),
+      ...(shared?{}:{allocationProposal:qaProposal(plan.allocation,state.phase,state.eta),
+        allocation:{beneficiary:present?plan.beneficiary:ZERO,amount:present?plan.amountWei:'0',executableAt:'0',purposeHash:present?plan.purposeHash:ZeroHash,
+          executed:state.phase==='PAID',cancelled:false},paymentConsumed:state.phase==='PAID'})};
+  }
+  async prepare(plan){
+    const canonical=canonicalPlan(plan),snapshot=await this.inspect(canonical),step=deriveStep(canonical,snapshot);
+    if(planFlowType(canonical)!==this.flowType)throw Error('SYNTHETIC_FLOW_MISMATCH');
+    if(qa.pending){step.ready=false;step.blockers.push('PENDING_INTENT_RECONCILE_FIRST');}
+    qa.prepares.push({allocationId:canonical.allocationId??null,kind:step.kind,ready:step.ready});
+    return {plan:canonical,snapshot,step,account:snapshot.account,preparedAt:Date.now(),previewId:'synthetic-'+qa.prepares.length};
+  }
+  async request(candidate){
+    if(qa.pending)throw Error('PENDING_INTENT_RECONCILE_FIRST');
+    qa.requests.push({kind:candidate.step.kind,allocationId:candidate.plan.allocationId??null,proposalId:candidate.step.proposalId??null});
+    if(qa.behavior==='reject')throw Object.assign(Error('Synthetic wallet rejected this confirmation'),{code:4001});
+    const hash='0x'+qa.requests.length.toString(16).padStart(64,'0');
+    qa.pending={flowType:this.flowType,plan:candidate.plan,kind:candidate.step.kind,hash,transaction:{from:qa.account},intentId:'synthetic-'+qa.requests.length};
+    if(qa.behavior==='cancel')await new Promise(resolve=>{qa.releaseRequest=resolve;});
+    return {hash,status:'SUBMITTED_UNCONFIRMED',kind:candidate.step.kind};
+  }
+  async reconcile(hash,watch){
+    const pending=qa.pending;
+    if(!pending||pending.hash!==hash)throw Error('SYNTHETIC_ORIGINAL_HASH_REQUIRED');
+    qa.reconciles.push({hash,kind:pending.kind,allocationId:pending.plan.allocationId??null});
+    if(watch&&!watch.isCurrent())return {hash,status:'WATCH_STOPPED',kind:pending.kind};
+    if(qa.behavior==='pending')return {hash,status:'PENDING',kind:pending.kind};
+    if(pending.kind==='CAP_EXECUTE')qa.capConfigured=true;
+    else {
+      const state=qaCase(pending.plan);
+      if(pending.kind==='ALLOCATION_PROPOSE'){state.phase='PROPOSED';state.eta=String(BigInt(qa.timestamp)+3600n);}
+      else if(pending.kind==='ALLOCATION_APPROVE')state.phase='APPROVED';
+      else if(pending.kind==='ALLOCATION_EXECUTE')state.phase='CREATED';
+      else if(pending.kind==='PAYOUT'){if(state.phase!=='PAID')qa.paidWei=String(BigInt(qa.paidWei)+BigInt(pending.plan.amountWei));state.phase='PAID';}
+      else throw Error('Unexpected synthetic guided action '+pending.kind);
+    }
+    const guanyanPayment=pending.kind==='PAYOUT'&&same(pending.plan.beneficiary,F.guanyanBeneficiary);
+    const status=guanyanPayment?'EVIDENCE_INCOMPLETE':pending.kind==='PAYOUT'?'VERIFIED_PAID':'CONFIRMED';
+    qa.results.push({hash,status,kind:pending.kind,allocationId:pending.plan.allocationId??null});if(!guanyanPayment)qa.pending=null;
+    return {hash,status,kind:pending.kind};
+  }
+};
+SharedCapWallet=class extends HumanFundingWallet{constructor(options){super(options);this.flowType='SHARED_CAP';}async prepare(plan=buildSharedCapPlan()){return super.prepare(plan);}};
+LegacyCapCancelWallet=class extends HumanFundingWallet{constructor(options){super(options);this.flowType='LEGACY_CAP_CANCEL';}};
+HumanBankPauseWallet=class extends HumanFundingWallet{constructor(options){super(options);this.flowType='BANK_PAUSE';}};
+`;
+  const syntheticModule=original.replace(marker,fixture+'\n'+marker),documentOnly=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+  const vendor=new URL('K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js',BASE+'/').href;
+  const importmap=html.match(/<script type="importmap">([\s\S]*?)<\/script>/)?.[1];assert.ok(importmap);
+  const core=[{name:'jade-cap-needs-mother',role:'jade',capConfigured:false,initialPhase:'NONE',expected:1},
+    {name:'mother-five-proposals',role:'mother',capConfigured:true,initialPhase:'NONE',expected:5},
+    {name:'mature-five-payments',role:'mother',capConfigured:true,initialPhase:'APPROVED',expected:10},
+    {name:'guanyan-mother-proposal-only',role:'mother',capConfigured:true,initialPhase:'NONE',expected:1,guanyan:true},
+    {name:'guanyan-jade-approval-to-payout',role:'jade',capConfigured:true,initialPhase:'PROPOSED',expected:3,guanyan:true}];
+  const originalIds=['0x75a5aaf0a27ce1b009f71e28319a587feaacbb8bf1204cf4b4a1fc53da70e428','0xbb183e13332a2594ffdf45b0501f4a26561378e167450b9de19ebf70cdd9f3c7',
+    '0x2ac4cf224f86e93394833036e96068523e5b71295c5c535d82f2efa3f2827359','0x58114b263f63088c52711b13bc7b370fc71ab63b45470fd45ef610d237775dd9','0x7132c7a0eb6b887a7f373e646f3f84b5e64f64379899399e18e393fb7b65ff81'];
+  report.fundingGuidedFive=[];
+  for(const [width,height] of [[390,844],[844,390]]){
+    const edges=width===390?[{name:'refusal-stops',behavior:'reject'}]:[{name:'pending-stops',behavior:'pending'},{name:'cancel-stops',behavior:'cancel'}];
+    for(const scenario of [...core,...edges.map(edge=>({role:'mother',capConfigured:true,initialPhase:'NONE',expected:1,...edge}))]){
+      const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
+      context.setDefaultTimeout(10000);context.setDefaultNavigationTimeout(20000);
+      const page=await context.newPage();
+      const row={width,height,scenario:scenario.name,mode:'SYNTHETIC_WALLET_ADAPTER_ORIGINAL_GUIDED_CONTROLLER_NO_REAL_WALLET',realWallet:'NOT_TESTED',
+        chainReads:0,networkWrites:0,realTransactions:0,transactionRequests:0,blockedRequests:[],runtimeErrors:[],screenshots:[],sourceHtmlSha256:createHash('sha256').update(html).digest('hex')};
+      report.fundingGuidedFive.push(row);
+      page.on('pageerror',error=>row.runtimeErrors.push(String(error.stack||error)));
+      await context.route('**/*',async intercepted=>{
+        const request=intercepted.request(),url=new URL(request.url());
+        if(!['GET','HEAD'].includes(request.method())||url.origin!==origin){
+          row.blockedRequests.push({origin:url.origin,method:request.method(),type:request.resourceType()});
+          if(!['GET','HEAD'].includes(request.method()))row.networkWrites++;
+          await intercepted.abort('blockedbyclient');return;
+        }
+        if(request.isNavigationRequest()&&url.pathname===route.pathname){await intercepted.fulfill({status:200,contentType:'text/html; charset=utf-8',body:documentOnly,
+          headers:{'content-security-policy':"connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'"}});return;}
+        await intercepted.continue();
+      });
+      await context.addInitScript(settings=>{
+        const handlers=new Map(),state={...settings,authorized:false,account:null,cases:{},pending:null,paidWei:'0',prepares:[],requests:[],reconciles:[],results:[],rpc:[],timestamp:String(Math.floor(Date.UTC(2026,10,11,12)/1000))};
+        const provider={isMetaMask:settings.role==='mother',isOkxWallet:settings.role==='jade',
+          on(event,handler){const current=handlers.get(event)||[];current.push(handler);handlers.set(event,current);},
+          removeListener(event,handler){handlers.set(event,(handlers.get(event)||[]).filter(item=>item!==handler));},
+          async request({method}){state.rpc.push(method);if(method==='eth_requestAccounts'){state.authorized=true;return[state.account];}
+            if(method==='eth_accounts')return state.authorized?[state.account]:[];if(method==='eth_chainId')return'0x38';throw Error('Unexpected synthetic request '+method);}};
+        window.__fundingGuidedFiveQA=state;window.ethereum=provider;if(settings.role==='jade')window.okxwallet={ethereum:provider};
+      },scenario);
+      const snapshot=()=>page.evaluate(()=>{const qa=__fundingGuidedFiveQA;return{requests:qa.requests,reconciles:qa.reconciles,results:qa.results,rpc:qa.rpc,pending:qa.pending,paidWei:qa.paidWei};});
+      const capture=async phase=>{
+        const notice=page.locator('#funding-five [data-qa-guided-notice=status]');await notice.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+        const badge=await reachable(page,'#funding-five [data-qa-guided-notice=status]');
+        assert.ok(badge.inView&&badge.hit&&badge.width>0&&badge.height>0,'guided synthetic notice is visible '+JSON.stringify(badge));
+        const geometry=await page.locator('#funding-five').evaluate(section=>{
+          const rect=section.getBoundingClientRect();return{viewport:innerWidth,document:document.documentElement.scrollWidth,left:rect.left,right:rect.right,width:section.clientWidth,scroll:section.scrollWidth,
+            rows:[...section.querySelectorAll('[id^="funding-five-case-"]')].map(element=>({id:element.id,width:element.clientWidth,scroll:element.scrollWidth}))};
+        });
+        assert.ok(geometry.document<=geometry.viewport+1&&geometry.left>=-1&&geometry.right<=geometry.viewport+1&&geometry.scroll<=geometry.width+1,'original guided section fits '+JSON.stringify(geometry));
+        assert.ok(geometry.rows.every(item=>item.scroll<=item.width+1),'each original case row wraps its address and state '+JSON.stringify(geometry.rows));
+        const file='funding-guided-five-'+width+'x'+height+'-'+scenario.name+'-'+phase;
+        await shot(page,file+'-viewport');row.screenshots.push(file+'-viewport.png');
+        await page.locator('#funding-five').screenshot({path:OUT+'/'+file+'-panel.png'});row.screenshots.push(file+'-panel.png');return geometry;
+      };
+      try{
+        const response=await page.goto(route.href,{waitUntil:'load'});assert.ok(response?.ok());
+        await page.addScriptTag({url:vendor});await page.addScriptTag({type:'importmap',content:importmap});await page.addScriptTag({type:'module',content:syntheticModule});
+        await page.waitForFunction(()=>document.getElementById('funding-role-status').textContent.includes('本次選擇：王母')&&document.getElementById('funding-cancel-connect').hidden);
+        await page.locator('#funding-five').waitFor({state:'visible'});
+        await page.evaluate(()=>{
+          const section=document.getElementById('funding-five'),heading=section.querySelector('h2,h3');if(!heading)throw Error('Original guided heading is missing');
+          for(const [target,key]of[[heading,'title'],[document.getElementById('funding-five-status'),'status']]){
+            const notice=document.createElement('p');notice.dataset.qaGuidedNotice=key;notice.textContent='模擬驗收／未連真錢包';
+            notice.style.cssText='margin:8px 0;color:#ffe1a3;font-weight:700;line-height:1.5;';key==='status'?target.before(notice):target.after(notice);
+          }
+        });
+        assert.match(await page.locator('#funding-five').innerText(),/1,?080,?000|108\s*萬/);
+        assert.match(await page.locator('#funding-five').innerText(),/5,?400,?000|540\s*萬/);
+        for(let index=0;index<5;index++)assert.equal(await page.locator('#funding-five-case-'+index).count(),1);
+        assert.deepEqual((await snapshot()).requests,[],'boot never starts a guided transaction sequence');
+        await page.locator('#funding-role').selectOption(scenario.role);await page.locator('#funding-wallet').selectOption('0');await page.locator('#funding-connect').click();
+        await page.waitForFunction(()=>!document.getElementById('funding-connect').disabled&&document.getElementById('funding-connection').textContent.includes('chainId=56'));
+        await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
+        await page.waitForFunction(()=>!document.getElementById('funding-connect').disabled);
+        assert.deepEqual((await snapshot()).requests,[],'connecting and passive reads never start a transaction sequence');
+        if(scenario.guanyan){
+          await page.locator('#funding-load-guanyan').click();
+          await page.locator('#funding-prepare').click();
+          await page.waitForFunction(()=>!document.getElementById('funding-ack').disabled);
+          const candidate=JSON.parse(await page.locator('#funding-preview').textContent());
+          assert.equal(candidate.plan.amountKaios,'1080000');
+          assert.equal(candidate.plan.beneficiary.toLowerCase(),'0xea6aec0bf657cf78d3dfec9fa0f5e4d586d9f642');
+          assert.equal(candidate.plan.allocationId,'0x9b55643098effba87c8cf383b423502cb5e24883f0d0f5e192a6c74cf40e98a1');
+          assert.equal(candidate.step.kind,scenario.role==='jade'?'ALLOCATION_APPROVE':'ALLOCATION_PROPOSE');assert.equal(candidate.review,undefined);
+          assert.equal(candidate.step.fundingPrecheck.known,true);assert.equal(candidate.step.fundingPrecheck.enough,true);
+          assert.equal(await page.locator('#funding-ack').isChecked(),false);
+          assert.equal(await page.locator('#funding-send').isDisabled(),true);
+          assert.deepEqual((await snapshot()).requests,[]);
+          assert.match(await page.locator('#funding-summary').innerText(),/每次只確認目前這一步.*玉帝批准後任何人可立即執行及撥款/);
+          const summary=page.locator('#funding-summary');
+          await summary.evaluate(element=>{for(const target of [element,document.getElementById('funding-send')]){const notice=document.createElement('p');notice.textContent='模擬驗收／未連真錢包';notice.style.cssText='color:#ffe1a3;font-weight:bold';target.before(notice);}element.scrollIntoView({block:'center',behavior:'instant'});});
+          const file=`funding-guanyan-${width}x${height}-${scenario.role}`;
+          const guanyanCapture=async label=>{await summary.evaluate(element=>element.scrollIntoView({block:'center',behavior:'instant'}));await shot(page,file+'-'+label);row.screenshots.push(file+'-'+label+'.png');};
+          const confirmOne=async(kind,count,label)=>{
+            const shown=JSON.parse(await page.locator('#funding-preview').textContent());assert.equal(shown.step.kind,kind);
+            assert.equal(await page.locator('#funding-ack').isChecked(),false,'each step needs new consent');
+            assert.equal(await page.locator('#funding-send').isDisabled(),true);
+            assert.equal((await snapshot()).requests.length,count-1);
+            await guanyanCapture(label+'-preview');
+            await page.locator('#funding-ack').check();
+            await page.locator('#funding-send').evaluate(element=>element.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+            const action=await reachable(page,'#funding-send');row.mainAction=action;
+            await shot(page,file+'-'+label+'-consent');row.screenshots.push(file+'-'+label+'-consent.png');
+            assert.ok(action.inView&&action.hit&&action.height>=44,'confirmation geometry '+JSON.stringify(action));
+            assert.equal(await page.locator('#funding-send').isDisabled(),false);
+            await page.locator('#funding-send').click();
+            await page.waitForFunction(n=>__fundingGuidedFiveQA.requests.length===n&&!document.getElementById('funding-receipt').disabled,count);
+            await page.locator('#funding-receipt').click();
+            assert.equal((await snapshot()).requests.length,count,'receipt never sends another step');
+            assert.equal(await page.locator('#funding-ack').isChecked(),false);
+          };
+          await confirmOne(candidate.step.kind,1,scenario.role==='jade'?'approve':'propose');
+          await page.locator('#funding-prepare').click();
+          if(scenario.role==='jade'){
+            await page.waitForFunction(()=>JSON.parse(document.getElementById('funding-preview').textContent).step.kind==='WAIT_ETA');
+            assert.equal(await page.locator('#funding-send').isDisabled(),true);await guanyanCapture('wait-eta');
+            row.syntheticTimeAdvanced=true;
+            await page.evaluate(()=>{const qa=__fundingGuidedFiveQA;qa.timestamp=Object.values(qa.cases)[0].eta;});
+            await page.locator('#funding-prepare').click();
+            await confirmOne('ALLOCATION_EXECUTE',2,'execute');
+            await page.locator('#funding-prepare').click();await confirmOne('PAYOUT',3,'payout');
+            const after=await snapshot();assert.ok(after.pending,'incomplete payout keeps the original pending intent');
+            assert.equal(after.results.at(-1).status,'EVIDENCE_INCOMPLETE');
+            assert.equal(after.paidWei,'1080000000000000000000000');
+            assert.equal(await page.locator('#funding-send').isDisabled(),true);
+            assert.match(await page.locator('#funding-summary').innerText(),/對帳/);
+            await guanyanCapture('payout-reconciliation-pending');
+          }else{
+            await page.waitForFunction(()=>document.getElementById('funding-preview').textContent.includes('DISTINCT_JADE_APPROVER_REQUIRED'));
+            assert.equal(await page.locator('#funding-send').isDisabled(),true);await guanyanCapture('needs-jade');
+          }
+          const result=await snapshot();assert.equal(result.requests.length,scenario.expected);
+          assert.deepEqual(result.requests.map(item=>item.kind),scenario.role==='jade'?['ALLOCATION_APPROVE','ALLOCATION_EXECUTE','PAYOUT']:['ALLOCATION_PROPOSE']);
+          assert.equal(result.rpc.some(method=>/sendTransaction|sign/.test(method)),false);
+          row.mockConfirmationRequests=result.requests;row.mockReceiptResults=result.results;row.mockWalletMethods=result.rpc;
+          assert.deepEqual(row.runtimeErrors,[]);assert.deepEqual(row.blockedRequests,[]);row.functional='PASS';
+          continue;
+        }
+        assert.equal(await page.locator('#funding-five-ack').isChecked(),false);
+        assert.equal(await page.locator('#funding-five-start').isDisabled(),false,'the main action can guide review before financial consent');
+        await page.locator('#funding-five-start').click();
+        assert.equal(await page.locator('#funding-five-ack').evaluate(element=>document.activeElement===element),true,'the same main entry focuses the original five-case review');
+        assert.equal(await page.locator('#funding-five-ack').isChecked(),false,'review navigation never checks consent');
+        assert.deepEqual((await snapshot()).requests,[],'review navigation never starts a wallet request');
+        await page.locator('#funding-five-ack').check();await page.locator('#funding-five-start').scrollIntoViewIfNeeded();
+        const action=await reachable(page,'#funding-five-start');assert.ok(action.inView&&action.hit&&action.height>=44,'original guided main action is reachable '+JSON.stringify(action));row.mainAction=action;
+        if(scenario.name==='jade-cap-needs-mother')row.readyGeometry=await capture('ready');
+        await page.locator('#funding-five-start').click();
+        if(scenario.behavior==='cancel'){
+          await page.waitForFunction(()=>__fundingGuidedFiveQA.requests.length===1&&typeof __fundingGuidedFiveQA.releaseRequest==='function');
+          await page.locator('#funding-five-stop').click();await page.evaluate(()=>__fundingGuidedFiveQA.releaseRequest());
+        }
+        await page.waitForFunction(()=>document.getElementById('funding-five').getAttribute('aria-busy')==='false',null,{timeout:35000});
+        assert.equal(await page.locator('#funding-five-stop').isDisabled(),true,'settled guided sequence releases its original stop control');
+        const result=await snapshot();assert.equal(result.requests.length,scenario.expected,'only the current role and confirmed original step can continue');
+        assert.ok(result.requests.every(item=>item.allocationId===null||originalIds.includes(item.allocationId)),'the guided action cannot manufacture another allocation ID');
+        await page.waitForTimeout(200);assert.equal((await snapshot()).requests.length,scenario.expected,'stopped or completed sequence does not restart itself');
+        if(scenario.name==='jade-cap-needs-mother'){
+          assert.deepEqual(result.requests.map(item=>item.kind),['CAP_EXECUTE']);
+          assert.match(await page.locator('#funding-five').innerText(),/王母|Mother/);assert.equal(result.results.filter(item=>item.status==='VERIFIED_PAID').length,0);
+        }else if(scenario.name==='mother-five-proposals'){
+          assert.deepEqual(result.requests.map(item=>item.kind),Array(5).fill('ALLOCATION_PROPOSE'));
+          assert.deepEqual(result.requests.map(item=>item.allocationId).sort(),[...originalIds].sort(),'the five requests retain the original exact allocation IDs');
+          for(let index=0;index<5;index++)assert.match(await page.locator('#funding-five-case-'+index).innerText(),/玉帝|等待.*到期/);
+          assert.equal(result.results.filter(item=>item.status==='VERIFIED_PAID').length,0);
+        }else if(scenario.name==='mature-five-payments'){
+          assert.equal(result.requests.filter(item=>item.kind==='ALLOCATION_EXECUTE').length,5);assert.equal(result.requests.filter(item=>item.kind==='PAYOUT').length,5);
+          assert.deepEqual(result.results.filter(item=>item.status==='VERIFIED_PAID').map(item=>item.allocationId).sort(),[...originalIds].sort());
+          assert.equal(result.paidWei,'5400000000000000000000000');
+          assert.match(await page.locator('#funding-five-paid-count').innerText(),/5\s*\/\s*5/);
+          for(let index=0;index<5;index++)assert.match(await page.locator('#funding-five-case-'+index).innerText(),/付款回執核對通過/);
+        }else{
+          assert.equal(result.results.length,0,'refused, pending or cancelled confirmation is not a completed payment');
+          assert.match(await page.locator('#funding-five-paid-count').innerText(),/0\s*\/\s*5/);
+          assert.match(await page.locator('#funding-five-status').innerText(),scenario.behavior==='pending'?/待.*確認/:/停止|拒絕|取消/);
+          if(scenario.behavior==='pending'){
+            assert.ok(result.pending?.hash,'pending keeps its original transaction rather than moving to the next case');
+            assert.equal(result.requests.length,1,'pending never sends a second transaction');
+            assert.equal(result.reconciles.length,4,'the original bounded watcher checks the same pending receipt four times');
+          }
+        }
+        assert.equal(result.rpc.some(method=>/sendTransaction|sign|requestPermissions|switchEthereumChain/.test(method)),false,'no real transaction/signature route exists in synthetic QA');
+        row.mockConfirmationRequests=result.requests;row.mockReceiptResults=result.results;row.mockReceiptQueries=result.reconciles;row.mockWalletMethods=result.rpc;
+        row.finalStatus=await page.locator('#funding-five-status').innerText();row.finalGeometry=await capture('settled');
+        if(scenario.name==='jade-cap-needs-mother'){
+          await page.evaluate(()=>{for(const item of Object.values(__fundingGuidedFiveQA.cases))item.phase='PAID';});
+          await page.locator('#funding-five-ack').check();await page.locator('#funding-five-start').click();
+          await page.waitForFunction(()=>document.getElementById('funding-five').getAttribute('aria-busy')==='false');
+          assert.match(await page.locator('#funding-five-chain-count').innerText(),/5\s*\/\s*5/);
+          assert.match(await page.locator('#funding-five-paid-count').innerText(),/0\s*\/\s*5.*本頁對帳數.*不是錢包餘額/);
+          assert.match(await page.locator('#funding-five-status').innerText(),/沒有待撥原案.*請勿重送/);
+          assert.doesNotMatch(await page.locator('#funding-five-status').innerText(),/付款回執全部核對通過/);
+          assert.equal((await snapshot()).requests.length,1,'observed completed cases never submit another request or invent a receipt');
+          row.observedDoneGeometry=await capture('all-executed-receipts-pending');
+        }
+        assert.deepEqual(row.runtimeErrors,[]);assert.deepEqual(row.blockedRequests,[],'all requests remain local static GET/HEAD');row.functional='PASS';
+      }catch(error){row.functional='FAIL';row.error=String(error.stack||error);await page.screenshot({path:OUT+'/funding-guided-five-'+width+'x'+height+'-'+scenario.name+'-FAIL.png',fullPage:true}).catch(()=>{});throw error;}
+      finally{await context.close();}
+    }
+  }
+  report.checks.push('original guided five-case UI and canonical plans/deriveStep with a labeled synthetic wallet adapter: role/ETA boundaries, five original proposals, five mature create/pay receipt results, refusal/pending/stop boundaries; no real wallet, RPC, signature or payment');
+}
 async function verifyFundingPanel(){
   const route=new URL('K線西遊記/temples/18888/index.html',BASE+'/'),origin=route.origin;
   route.hash='funding-panel';
@@ -124,9 +821,15 @@ async function verifyFundingPanel(){
   for(const [width,height] of [[390,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'});
     context.setDefaultTimeout(10000);context.setDefaultNavigationTimeout(20000);
-    const row={width,height,mode:'UI_ONLY_NO_REAL_WALLET',roles:[],screenshots:[],runtimeErrors:[],failedScripts:[],externalRequests:[],rpcMethods:[],networkWrites:[]};
+    const row={width,height,mode:'UI_ONLY_NO_REAL_WALLET',roles:[],recoveryHelpers:[],screenshots:[],runtimeErrors:[],failedScripts:[],externalRequests:[],rpcMethods:[],networkWrites:[]};
     report.profiles.push(row);
     const page=await context.newPage();
+    await context.addInitScript(()=>{
+      window.SpeechRecognition=undefined;window.webkitSpeechRecognition=undefined;
+      const state={starts:0,aborts:0,stops:0,microphoneRequests:0,availableCalls:[],instances:[]};
+      window.__fundingVoiceQA=state;
+      if(navigator.mediaDevices?.getUserMedia)navigator.mediaDevices.getUserMedia=async()=>{state.microphoneRequests++;throw Error('NO_REAL_MICROPHONE_IN_SYNTHETIC_QA');};
+    });
     const capture=async(name,viewport=false)=>{
       const prefix=`funding-${width}x${height}-${name}`;
       if(viewport){
@@ -149,9 +852,35 @@ async function verifyFundingPanel(){
       return geometry;
     };
     const noWalletAuthority=async label=>{
-      assert.equal(await page.locator('#funding-send').isDisabled(),true,`${label}: no connected/verified wallet means no send authority`);
-      assert.match(await page.locator('#funding-role-status').textContent(),/尚未通過本次角色讀查/);
+      for(const id of ['send','ack','prepare','receipt']) {
+        assert.equal(await page.locator('#funding-'+id).isDisabled(),true,`${label}: ${id} requires live authority`);
+      }
+      assert.equal(await page.locator('#funding-ack').isChecked(),false);
+      assert.match(await page.locator('#funding-connect-next').textContent(),/下一步.*WalletConnect/);
+      assert.match(await page.locator('#funding-role-status').textContent(),/實際帳戶：尚未連接.*尚未核對本次角色/);
       assert.match(await page.locator('#funding-role-status').textContent(),/選擇角色不會授予權限/);
+      const guide=page.locator('#funding-legacy-guide'),next=page.locator('#funding-legacy-next'),help=page.locator('#funding-legacy-next-help');
+      assert.equal(await guide.isVisible(),true,`${label}: the original recovery helper is available in every funding flow`);
+      assert.equal(await next.isVisible(),true,`${label}: an unconnected checkbox has a visible recovery action`);
+      assert.equal(await next.getAttribute('aria-disabled'),'false',`${label}: a settled read does not leave the recovery link busy`);
+      assert.equal(await next.getAttribute('href'),'#funding-mobile',`${label}: the isolated browser uses the existing WalletConnect entry`);
+      assert.match(await help.textContent(),/WalletConnect|錢包/);
+      assert.equal(await guide.evaluate(element=>element.nextElementSibling?.id),'funding-ack-row','recovery guidance remains immediately beside the original acknowledgment');
+      const flow=await page.evaluate(()=>document.getElementById('funding-role').value==='guanyin'?'pause':document.getElementById('funding-mode').value);
+      if(['fixed','cap','pause'].includes(flow)&&!row.recoveryHelpers.some(item=>item.flow===flow)){
+        const geometry=await visibleAction('#funding-legacy-next','recovery-'+flow);
+        const notice=await reachable(page,'#funding-legacy-guide [data-qa-recovery-notice]');
+        assert.ok(notice.inView&&notice.hit&&notice.width>0&&notice.height>0,`${label}: the mock notice is visible in the recovery screenshot ${JSON.stringify(notice)}`);
+        const before={rpc:row.rpcMethods.length,writes:row.networkWrites.length};
+        await next.click();
+        assert.equal(new URL(page.url()).hash,'#funding-mobile','the recovery link reaches the original connection control');
+        assert.equal(await page.locator('#funding-mobile').isEnabled(),true,'the original connection control remains usable');
+        assert.equal(await page.locator('#funding-ack').isChecked(),false,'following recovery guidance never acknowledges a financial operation');
+        assert.equal(await page.locator('#funding-send').isDisabled(),true,'following recovery guidance never enables a financial request');
+        assert.equal(row.rpcMethods.length,before.rpc,'the unconnected helper never calls RPC');
+        assert.equal(row.networkWrites.length,before.writes,'the unconnected helper never sends a request body');
+        row.recoveryHelpers.push({flow,href:'#funding-mobile',sendDisabled:true,acknowledged:false,geometry,notice});
+      }
     };
     const visibleAction=async(selector,name)=>{
       const locator=page.locator(selector);
@@ -164,6 +893,68 @@ async function verifyFundingPanel(){
       assert.ok(geometry.top>=geometry.hudBottom&&geometry.bottom<=geometry.statusTop&&geometry.hit,`${name}: action must be visible and unobscured ${JSON.stringify(geometry)}`);
       const file=`funding-${width}x${height}-${name}-viewport.png`;await shot(page,file.replace(/\.png$/,''));row.screenshots.push(file);
       return geometry;
+    };
+    const verifyDiagnosticsAndLocalVoice=async()=>{
+      const diagnostics=page.locator('#funding-diagnostics'),voice=page.locator('#funding-voice-status');
+      assert.equal(await diagnostics.isVisible(),true,'the main action has visible automatic diagnostics without a provider');
+      const diagnosticText=await diagnostics.innerText();
+      assert.match(diagnosticText,/帳戶|帳號/);assert.match(diagnosticText,/鏈|網路/);assert.match(diagnosticText,/待確認|原交易/);
+      assert.match(diagnosticText,/未連接|尚未連接|未偵測|沒有.*錢包/);assert.match(diagnosticText,/下一步|請先|連接/);
+      await page.evaluate(()=>{
+        const notice=document.createElement('small');notice.dataset.qaVoiceNotice='true';notice.textContent='模擬驗收／未連真錢包／未錄音';
+        notice.style.cssText='display:block;margin:8px 0;color:#ffe1a3;font-weight:700;line-height:1.5;';
+        document.getElementById('funding-voice-status').before(notice);
+      });
+      const noVoiceAuthority=async label=>{
+        for(const id of ['ack','five-ack'])assert.equal(await page.locator('#funding-'+id).isChecked(),false,label+': voice never grants acknowledgment');
+        assert.equal(await page.locator('#funding-send').isDisabled(),true,label+': no financial authority without a wallet');
+        assert.equal(await page.locator('#funding-five-start').isDisabled(),false,label+': the nonfinancial connection entry remains usable');
+        assert.match(await page.locator('#funding-five-start').textContent(),/WalletConnect|連接/);
+        assert.equal(await page.evaluate(()=>__fundingVoiceQA.microphoneRequests),0,label+': no real microphone call');
+        assert.deepEqual(row.rpcMethods,[],label+': no RPC');assert.deepEqual(row.networkWrites,[],label+': no request body');
+      };
+      const captureVoice=async phase=>{
+        await page.locator('[data-qa-voice-notice]').scrollIntoViewIfNeeded();
+        const badge=await reachable(page,'[data-qa-voice-notice]');
+        assert.ok(badge.inView&&badge.hit&&badge.width>0&&badge.height>0,'the synthetic voice notice is visible '+JSON.stringify(badge));
+        const file=`funding-${width}x${height}-voice-${phase}`;await shot(page,file);row.screenshots.push(file+'.png');
+        return{badge,geometry:await noOverflow('voice '+phase)};
+      };
+      if(await page.locator('#funding-voice-start').isEnabled())await page.locator('#funding-voice-start').click();
+      await page.waitForFunction(()=>/不支援|無法|未提供|未確認.*語音|手動|文字/.test(document.getElementById('funding-voice-status').textContent));
+      assert.equal(await page.evaluate(()=>__fundingVoiceQA.starts),0,'unsupported speech never starts recognition');
+      await noVoiceAuthority('unsupported recognition');
+      row.voice={mode:'SYNTHETIC_LOCAL_RECOGNITION_NO_REAL_AUDIO_NO_REAL_WALLET',realMicrophone:'NOT_TESTED',realVoice:'NOT_VERIFIED',
+        diagnosticText,unsupported:await captureVoice('unsupported')};
+      await page.evaluate(()=>{
+        const state=__fundingVoiceQA;
+        class SyntheticLocalRecognition{
+          constructor(){state.instances.push(this);}
+          static async available(options){state.availableCalls.push(options);return'available';}
+          start(){if(this.processLocally!==true||this.lang!=='zh-TW')throw Error('SYNTHETIC_LOCAL_ZH_TW_REQUIRED');state.starts++;this.onstart?.();}
+          abort(){state.aborts++;this.onend?.();}
+          stop(){state.stops++;this.onend?.();}
+        }
+        SyntheticLocalRecognition.prototype.processLocally=false;window.SpeechRecognition=SyntheticLocalRecognition;
+        state.event=text=>{const result=[{transcript:text,confidence:1}];result.isFinal=true;return{resultIndex:0,results:[result]};};
+      });
+      const before=await page.evaluate(()=>__fundingVoiceQA.starts);
+      await page.locator('#funding-voice-start').click();await page.waitForFunction(count=>__fundingVoiceQA.starts===count+1,before);
+      await page.evaluate(()=>{const state=__fundingVoiceQA;state.instances.at(-1).onresult?.(state.event('接續辦理'));});
+      await noVoiceAuthority('local continuation without acknowledgment');
+      if(await page.locator('#funding-voice-stop').isEnabled())await page.locator('#funding-voice-stop').click();
+      const later=await page.evaluate(()=>__fundingVoiceQA.starts);
+      await page.locator('#funding-voice-start').click();await page.waitForFunction(count=>__fundingVoiceQA.starts===count+1,later);
+      await page.evaluate(()=>{const state=__fundingVoiceQA;state.lateResult=state.instances.at(-1).onresult;});
+      await page.locator('#funding-voice-stop').click();
+      const stopped=await voice.textContent();
+      await page.evaluate(()=>{const state=__fundingVoiceQA;state.lateResult?.(state.event('接續辦理'));});
+      assert.equal(await voice.textContent(),stopped,'a stopped recognition session cannot deliver a late command');
+      await noVoiceAuthority('late synthetic voice result');
+      const observations=await page.evaluate(()=>({starts:__fundingVoiceQA.starts,aborts:__fundingVoiceQA.aborts,stops:__fundingVoiceQA.stops,
+        microphoneRequests:__fundingVoiceQA.microphoneRequests,availableCalls:__fundingVoiceQA.availableCalls}));
+      assert.ok(observations.availableCalls.length>=2&&observations.availableCalls.every(call=>call.processLocally===true&&JSON.stringify(call.langs)==='["zh-TW"]'),'only available local zh-TW recognition is requested');
+      Object.assign(row.voice,{localReady:await captureVoice('local-ready-stopped'),...observations,financialRequests:0});
     };
     page.on('pageerror',error=>{const text=String(error.stack||error);row.runtimeErrors.push(text);report.runtimeErrors.push(text);});
     page.on('response',response=>{if(response.request().resourceType()==='script'&&response.status()>=400)row.failedScripts.push({url:response.url(),status:response.status()});});
@@ -181,45 +972,99 @@ async function verifyFundingPanel(){
       await intercepted.continue();
     });
     try{
+      const capLanding=new URL(route.href);capLanding.searchParams.set('fundingRole','jade');capLanding.searchParams.set('fundingFlow','cap');capLanding.hash='';
+      const landingResponse=await page.goto(capLanding.href,{waitUntil:'load'});assert.ok(landingResponse?.ok(),'fragment-free Jade cap entry loads');
+      await page.waitForFunction(()=>document.getElementById('funding-role-status')?.textContent.includes('本次選擇：玉帝'));
+      assert.equal(await page.locator('#funding-mode').inputValue(),'cap','flow selection does not depend on a scroll fragment');
+      assert.equal(await page.locator('#funding-ack').isChecked(),false);assert.equal(await page.locator('#funding-send').isDisabled(),true);
+      row.fragmentFreeCap={role:'jade',flow:'cap',walletAuthority:false};
       const response=await page.goto(route.href,{waitUntil:'load'});assert.ok(response?.ok(),'18888 static page loads');
       await page.locator('#funding-panel').waitFor({state:'visible'});
       // This text is written by the real inline module only after its imports
       // and event handlers have initialized; an unexecuted HTML shell fails.
       await page.waitForFunction(()=>document.getElementById('funding-role-status')?.textContent.includes('本次選擇：王母'));
+      await page.locator('#funding-advanced > summary').click();
+      await page.evaluate(()=>{
+        const notice=document.createElement('small');notice.dataset.qaRecoveryNotice='true';notice.textContent='模擬驗收／未連真錢包';
+        notice.style.cssText='display:block;margin:8px 0;color:#ffe1a3;font-weight:700;line-height:1.5;';
+        document.getElementById('funding-legacy-guide').prepend(notice);
+      });
       assert.equal(await page.evaluate(()=>Boolean(window.ethereum||window.okxwallet||window.WalletConnectEthereumProvider||window['@walletconnect/ethereum-provider'])),false,'isolated context has no wallet provider or loaded WalletConnect SDK');
       assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');
       assert.equal(await page.locator('#funding-case').inputValue(),'');
       assert.equal(await page.locator('#funding-ack').isChecked(),false);
       await noWalletAuthority('initial');
+      await verifyDiagnosticsAndLocalVoice();
+      await page.evaluate(()=>{
+        const notice=document.createElement('small');notice.textContent='模擬驗收／未連真錢包';
+        document.getElementById('funding-selection-switch').prepend(notice);
+      });
+      for(const role of Object.keys(roles)){
+        await page.locator('#funding-switch-role-'+role).click();
+        assert.equal(await page.locator('#funding-role').inputValue(),role,'shortcut updates the original operator select');
+        assert.equal(await page.locator('#funding-switch-role-'+role).getAttribute('aria-pressed'),'true');
+        if(role==='guanyin'){
+          await page.locator('#funding-case-select').click();
+          assert.equal(await page.evaluate(()=>document.activeElement?.id),'funding-role');
+          assert.equal(await page.locator('#funding-role').inputValue(),'guanyin','guidance never silently changes the operator');
+          assert.match(await page.locator('#funding-status').innerText(),/先選王母或玉帝/);
+        }
+        assert.equal(await page.locator('#funding-ack').isChecked(),false);
+        assert.equal(await page.locator('#funding-send').isDisabled(),true);
+      }
+      await page.locator('#funding-switch-role-jade').click();
+      await page.locator('#funding-load-five').click();
+      const caseOptions=await page.locator('#funding-case option').evaluateAll(options=>options.map(option=>({value:option.value,text:option.textContent})));
+      await page.locator('#funding-case-next').click();
+      assert.equal(await page.locator('#funding-case').inputValue(),'1');
+      assert.equal(await page.locator('#funding-role').inputValue(),'jade');
+      assert.match(await page.locator('#funding-selection-status').innerText(),/玉帝.*知蘭.*2\/5/);
+      await page.locator('#funding-load-five').click();
+      assert.equal(await page.locator('#funding-case').inputValue(),'1','reload preserves the selected recipient');
+      for(let index=2;index<5;index++)await page.locator('#funding-case-next').click();
+      assert.equal(await page.locator('#funding-case').inputValue(),'4');
+      assert.equal(await page.locator('#funding-case-next').isDisabled(),true);
+      await page.locator('#funding-case-prev').click();
+      assert.equal(await page.locator('#funding-case').inputValue(),'3');
+      assert.deepEqual(await page.locator('#funding-case option').evaluateAll(options=>options.map(option=>({value:option.value,text:option.textContent}))),caseOptions);
+      assert.equal(await page.locator('#funding-ack').isChecked(),false);assert.equal(await page.locator('#funding-send').isDisabled(),true);
+      row.switching={operator:'jade',selectedCase:'白寧',noWallet:true,geometry:await noOverflow('role and original case switching')};
+      const switchingImage='funding-switching-'+width+'x'+height+'.png';
+      await page.locator('#funding-selection-switch').screenshot({path:OUT+'/'+switchingImage});row.switching.screenshot=switchingImage;
+      await page.locator('#funding-switch-role-mother').click();
+      await page.locator('#funding-case').selectOption('');
+      await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('1080000');
       assert.deepEqual(await page.locator('#funding-role option').evaluateAll(options=>options.map(option=>option.value)),Object.keys(roles));
       for(const [value,name] of Object.entries(roles)){
         if(value==='guanyin'){await page.locator('#funding-beneficiary').fill('');await page.locator('#funding-amount').fill('');}
         await page.locator('#funding-role').selectOption(value);
         assert.match(await page.locator('#funding-role-status').textContent(),new RegExp(`本次選擇：${name}`));
         assert.equal(await page.locator('#funding-ack').isChecked(),false,'role change clears acknowledgment');
-        await page.locator('#funding-ack').check();await noWalletAuthority(value);await page.locator('#funding-ack').uncheck();
+        await noWalletAuthority(value);
+        const suggested={mother:'native-metamask',jade:'native-okx-app',guanyin:'native-okx'}[value];
+        assert.equal(await page.locator('#funding-'+suggested).getAttribute('data-recommended'),'true');
         const geometry=await noOverflow(value);row.roles.push({value,name,sendDisabled:true,geometry});
         if(value!=='guanyin')await capture(value,value==='mother');
       }
       assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');assert.equal(await page.locator('#funding-amount').inputValue(),'');
-      await page.locator('#funding-prepare').click();
+      await page.locator('#funding-preview-details > summary').click();
+      await page.locator('#funding-draft').click();
       await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('OFFLINE_DRAFT_NOT_CHAIN_VERIFIED'));
       const pauseDraft=JSON.parse(await page.locator('#funding-preview').textContent());
       assert.equal(pauseDraft.status,'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED');assert.equal(pauseDraft.type,'BANK_PAUSE');assert.equal(pauseDraft.chainId,56);
       assert.match(pauseDraft.pause.to,/^0x[0-9a-fA-F]{40}$/);assert.match(pauseDraft.pause.data,/^0x[0-9a-fA-F]{8}$/);
       assert.equal(await page.locator('#funding-beneficiary').inputValue(),'');assert.equal(await page.locator('#funding-amount').inputValue(),'');assert.equal(await page.locator('#funding-case').inputValue(),'');
       assert.match(await page.locator('#funding-summary').textContent(),/離線暫停草案/);
-      await page.locator('#funding-ack').check();await noWalletAuthority('offline Guanyin draft');await page.locator('#funding-ack').uncheck();
-      await page.locator('#funding-panel details > summary').click();
+      await noWalletAuthority('offline Guanyin draft');
       row.pauseDraft={status:pauseDraft.status,type:pauseDraft.type,chainId:pauseDraft.chainId,noCaseRequired:true,sendDisabled:true,geometry:await noOverflow('offline Guanyin draft')};
       await capture('guanyin-offline',true);
-      row.pauseDraft.acknowledgment=await visibleAction('.funding-ack','guanyin-ack');
+      row.pauseDraft.acknowledgment=await visibleAction('#funding-ack-row','guanyin-ack');
       row.pauseDraft.send=await visibleAction('#funding-send','guanyin-send');
       // A synthetic public fixture address exercises the actual inline plan
       // and long address/hash wrapping; no original case or personal file.
       const beneficiary='0x1111111111111111111111111111111111111111';
       await page.locator('#funding-role').selectOption('mother');await page.locator('#funding-beneficiary').fill(beneficiary);await page.locator('#funding-amount').fill('1080000');
-      await page.locator('#funding-prepare').click();
+      await page.locator('#funding-draft').click();
       await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('OFFLINE_DRAFT_NOT_CHAIN_VERIFIED')&&document.getElementById('funding-preview')?.textContent.includes('allocationId'));
       const fundingDraft=JSON.parse(await page.locator('#funding-preview').textContent());
       assert.equal(fundingDraft.beneficiary.toLowerCase(),beneficiary);assert.equal(fundingDraft.amountKaios,'1080000');
@@ -239,7 +1084,7 @@ async function verifyFundingPanel(){
       for(const role of ['mother','jade']){
         await page.locator('#funding-role').selectOption(role);
         assert.equal(await page.locator('#funding-ack').isChecked(),false);
-        await page.locator('#funding-prepare').click();
+        await page.locator('#funding-draft').click();
         await page.waitForFunction(()=>document.getElementById('funding-preview')?.textContent.includes('"type": "SHARED_CAP"'));
         const capDraft=JSON.parse(await page.locator('#funding-preview').textContent());
         assert.equal(capDraft.status,'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED');assert.equal(capDraft.chainId,56);
@@ -250,19 +1095,95 @@ async function verifyFundingPanel(){
         assert.match(await page.locator('#funding-summary').textContent(),/調額/);
         assert.doesNotMatch(await page.locator('#funding-summary').textContent(),/undefined/);
         assert.match(await page.locator('#funding-ack-text').textContent(),/共享|調額/);
-        await page.locator('#funding-ack').check();await noWalletAuthority(`offline shared cap ${role}`);
+        await noWalletAuthority(`offline shared cap ${role}`);
         row.sharedCap.push({role,type:capDraft.type,proposalId:capDraft.cap.proposalId,noCaseRequired:true,sendDisabled:true,geometry:await noOverflow(`shared cap ${role}`)});
         await capture(`shared-cap-${role}`,true);
-        await page.locator('#funding-ack').uncheck();
       }
-      await page.locator('#funding-ack').check();
+      await page.locator('#funding-mode').selectOption('legacy-cancel');
+      for(const field of ['file','case','beneficiary','amount']){
+        assert.equal(await page.locator('#funding-'+field+'-field').isVisible(),false);
+        assert.equal(await page.locator('#funding-'+field).isDisabled(),true);
+      }
+      row.legacyCapCancellation=[];
+      assert.equal(await page.locator('#funding-ack-row').isVisible(),false,'the cancellation has a single confirmation action');
+      for(const role of ['mother','jade']){
+        await page.locator('#funding-role').selectOption(role);
+        await page.locator('#funding-draft').click();
+        const draft=JSON.parse(await page.locator('#funding-preview').textContent());
+        assert.equal(draft.status,'OFFLINE_DRAFT_NOT_CHAIN_VERIFIED');
+        assert.equal(draft.type,'LEGACY_CAP_CANCEL');
+        assert.equal(draft.chainId,56);
+        assert.equal(draft.original.proposalId,'0xc0d6f14daa902e7a74bf3cd93e0a842297760895abff63bc02adaa2716933ab7');
+        assert.equal(draft.cancellation.proposalId,'0xe14e7f573c2ee8a1f7a0e598dc7fff2c13c36c2e20de55845e3ba1f924110b07');
+        assert.match(await page.locator('#funding-summary').textContent(),/舊共享限額取消/);
+        assert.match(await page.locator('#funding-prepare').textContent(),/取消舊共享限額/);
+        await noWalletAuthority('offline legacy cap cancellation '+role);
+        await visibleAction('#funding-draft','legacy cap cancellation offline preview '+role);
+        const next=page.locator('#funding-legacy-next');
+        const help=page.locator('#funding-legacy-next-help');
+        assert.equal(await next.isVisible(),true,'the disconnected cancellation panel offers a visible next step');
+        assert.equal(await next.isEnabled(),true,'the next step is available before wallet authorization');
+        assert.equal(await next.getAttribute('href'),'#funding-mobile','loopback uses the existing WalletConnect control');
+        assert.equal(await page.locator('#funding-mobile').isEnabled(),true,'the linked WalletConnect control is available');
+        assert.equal(await help.isVisible(),true,'the next step explains the connection requirement');
+        assert.match(await help.textContent(),/WalletConnect|錢包/);
+        const nextAction=await visibleAction('#funding-legacy-next','legacy-cap-cancel-'+role+'-connect-next');
+        row.legacyCapCancellation.push({role,type:draft.type,sendDisabled:true,nextAction,geometry:await noOverflow('legacy cap cancellation '+role)});
+        await capture('legacy-cap-cancel-'+role,true);
+      }
       await page.locator('#funding-mode').selectOption('fixed');
-      assert.equal(await page.locator('#funding-ack').isChecked(),false,'mode changes invalidate the previous shared-cap acknowledgment');
+      assert.equal(await page.locator('#funding-ack-row').isVisible(),true,'fixed allocation restores its acknowledgment');
+      assert.equal(await page.locator('#funding-ack').isChecked(),false,'mode changes invalidate the previous governance acknowledgment');
       for(const field of ['file','case','beneficiary','amount']){
         assert.equal(await page.locator(`#funding-${field}-field`).isVisible(),true,`fixed allocation restores ${field} field`);
         assert.equal(await page.locator(`#funding-${field}`).isDisabled(),false);
       }
+      for(const selector of ['#funding-legacy-next','#funding-legacy-next-help']){
+        assert.equal(await page.locator(selector).isVisible(),true,`${selector} also restores the fixed-allocation connection`);
+      }
       await noWalletAuthority('changed back to fixed allocation');
+      // The real five-case loader uses the original validator, without an
+      // uploaded file, provider, RPC or wallet request in this isolated job.
+      await visibleAction('#funding-load-five','load-original-five');
+      await page.locator('#funding-load-five').click();
+      assert.equal(await page.locator('#funding-mode').inputValue(),'fixed');
+      assert.equal(await page.locator('#funding-case').inputValue(),'0');
+      assert.equal(await page.locator('#funding-case option').count(),6);
+      assert.equal(await page.locator('#funding-beneficiary').inputValue(),'0x60Ed5A562642cbC303D720507a37170116707259');
+      assert.equal(await page.locator('#funding-amount').inputValue(),'1080000');
+      for(const field of ['beneficiary','amount'])assert.equal(await page.locator('#funding-'+field).evaluate(input=>input.readOnly),true);
+      assert.equal(await page.locator('#funding-file').evaluate(input=>input.files.length),0);
+      assert.equal(await page.locator('#funding-progress').isVisible(),true);
+      assert.match(await page.locator('#funding-progress-title').textContent(),/高翠蘭.*等待重新核對/);
+      assert.equal(await page.locator('#funding-progress-next').isDisabled(),true);
+      await noWalletAuthority('original five loaded without wallet');
+      row.originalFive={count:5,amountKaios:'1080000',totalKaios:'5400000',first:'高翠蘭',noFileRequired:true,sendDisabled:true,geometry:await noOverflow('original five progress')};
+      await capture('original-five-progress',true);
+      await page.locator('#funding-case').selectOption('4');
+      assert.equal(await page.locator('#funding-beneficiary').inputValue(),'0x651ff5e7C183D0d3D40C9cE8a86Be246111521cd');
+      assert.match(await page.locator('#funding-progress-title').textContent(),/澄序.*等待重新核對/);
+      await noWalletAuthority('selected original fifth case');
+      await capture('original-fifth-progress',true);
+      // The actual Guanyan loader is a separate fixed case. No wallet or RPC;
+      // its original reconciliation gate must survive even an offline preview.
+      await visibleAction('#funding-load-guanyan','guanyan-load');
+      await page.locator('#funding-load-guanyan').click();
+      assert.equal(await page.locator('#funding-case option').count(),2);
+      assert.equal(await page.locator('#funding-beneficiary').inputValue().then(value=>value.toLowerCase()),'0xea6aec0bf657cf78d3dfec9fa0f5e4d586d9f642');
+      assert.equal(await page.locator('#funding-amount').inputValue(),'1080000');
+      for(const field of ['beneficiary','amount']) assert.equal(await page.locator('#funding-'+field).evaluate(input=>input.readOnly),true);
+      assert.match(await page.locator('#funding-progress-title').textContent(),/觀衍.*1080000/);
+      await page.locator('#funding-draft').click();
+      const guanyanDraft=JSON.parse(await page.locator('#funding-preview').textContent());
+      assert.equal(guanyanDraft.review.reason,'GUANYAN_RECONCILIATION_NOT_VERIFIED');
+      await noWalletAuthority('Guanyan original reconciliation gate');
+      row.guanyan={amountKaios:'1080000',separateCase:true,sendDisabled:true,geometry:await noOverflow('Guanyan fixed case')};
+      await capture('guanyan-readiness-progress',true);
+      const guanyan=page.locator('#funding-guanyan');
+      await guanyan.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+      await shot(page,`funding-${width}x${height}-guanyan-readiness-card-viewport`);
+      await guanyan.screenshot({path:`${OUT}/funding-${width}x${height}-guanyan-readiness-card.png`});
+      row.screenshots.push(`funding-${width}x${height}-guanyan-readiness-card-viewport.png`,`funding-${width}x${height}-guanyan-readiness-card.png`);
       // Exercise the real seven-floor controller in the same isolated context.
       // No game character, wallet provider, eligibility source or RPC is supplied.
       const seven=page.locator('#seven-floor-panel');
@@ -329,6 +1250,7 @@ async function verifyFundingPanel(){
       assert.deepEqual(row.runtimeErrors,[],'18888 has no JavaScript/import errors');assert.deepEqual(row.failedScripts,[],'all actual scripts/import dependencies load');
       assert.deepEqual(row.rpcMethods,[],'offline drafts never attempt RPC');assert.deepEqual(row.networkWrites,[],'offline UI never sends a request body');
       assert.deepEqual(row.externalRequests,[],'offline funding UI never fetches wallet, relay or chain endpoints');
+      assert.deepEqual(row.recoveryHelpers.map(item=>item.flow).sort(),['cap','fixed','pause'],'each ordinary funding flow exposes the original safe recovery action');
       row.functional='PASS';
     }catch(error){row.functional='FAIL';row.error=String(error.stack||error);await page.screenshot({path:`${OUT}/funding-${width}x${height}-FAIL.png`,fullPage:true}).catch(()=>{});throw error;}
     finally{await context.close();}
@@ -336,9 +1258,11 @@ async function verifyFundingPanel(){
   report.checks.push('actual 18888 module boot and three role choices; no wallet connection or send; offline Guanyin draft without case/address/amount; acknowledgment and role selection grant no authority; long address/ID wrapping in portrait and landscape');
   report.checks.push('standalone shared-cap Mother/Jade offline drafts require no beneficiary or private file, retain exact original cap ID/hash/calldata, have no individual payout fields, and never grant unconnected send authority; mode changes clear acknowledgment; portrait/landscape captures');
   report.checks.push('actual seven-floor inline controller; all seven caps and 44px touch targets; one-wei excess rejected; skip clears acknowledgment; all18 basement levels remain disabled; unknown funds/no payment; portrait and landscape screenshots with no wallet or RPC');
+  report.checks.push('original checkbox recovery helper is visible, reachable and adjacent in fixed/cap/pause; its unconnected link only navigates to the original WalletConnect control, with acknowledgment/send/RPC/network writes unchanged and a visible synthetic notice');
+  report.checks.push('same two offline funding contexts: automatic no-provider diagnostics, unsupported speech and explicitly labeled synthetic available local zh-TW recognition; no real audio/microphone, no acknowledgment or financial authority, and stopped-session late commands ignored');
 }
 try{
-  if(FUNDING_ONLY){await verifyFundingPanel();await verifyLegacyCards();}
+  if(FUNDING_ONLY){await verifyFundingPanel();await verifyFundingAutoPreview();await verifyFundingGuidedFive();await verifyLegacyCards();await verify16888ManualOrder();}
   else{
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();
@@ -348,6 +1272,11 @@ try{
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Portal horizontal overflow');
     assert.equal((await audio(page)).contextState,'NOT_CREATED','no context before gesture');
     const primary=await reachable(page,'#primaryPlay');assert.ok(primary.hit&&primary.inView,'primary CTA must be reachable on first screen');assert.ok(primary.height>=44);
+    const bankService=await reachable(page,'#bankEntryLink');assert.ok(bankService.hit&&bankService.inView&&bankService.height>=44,'bank service must be visible and reachable on first screen');
+    assert.equal(await page.evaluate(()=>{const summary=document.querySelector('.portal-header .kaios-audio-summary').getBoundingClientRect(),bank=document.querySelector('#bankEntryLink').getBoundingClientRect();return !summary.height||summary.bottom<=bank.top||summary.top>=bank.bottom||summary.right<=bank.left||summary.left>=bank.right;}),true,'audio summary must not overlap the bank entry');
+    assert.equal(await page.locator('#bankEntryLink').getAttribute('data-world-id'),null,'bank service must not invoke game audio navigation');
+    assert.match(await page.locator('#bankEntryLink').innerText(),/18888 靈霄寶殿銀行/);assert.match(await page.locator('#bankEntryLink').innerText(),/五筆專案撥款／查進度/);
+    assertExactRoute(await page.locator('#bankEntryLink').getAttribute('href'),new URL(BANK_SERVICE.entryUrl,BASE+'/').href,'bank service original route');
     const toggle=await reachable(page,'[data-kaios-audio-toggle]');assert.ok(toggle.hit&&toggle.inView&&toggle.height>=44);
     await shot(page,`portal-${width}x${height}`);
     const links=await page.locator('a[href]').evaluateAll(nodes=>nodes.map(a=>({href:a.href,label:a.textContent.trim()})));
@@ -383,7 +1312,12 @@ try{
     await page.locator('[data-kaios-audio-toggle]').click();state=await audio(page);assert.equal(state.settings.muted,false);assert.equal(state.activeMusicLayers,1,'unmute resumes only one theme');
     await page.locator('[data-kaios-audio-toggle]').click();assert.equal((await audio(page)).settings.muted,true);
     await page.reload({waitUntil:'networkidle'});state=await audio(page);assert.equal(state.settings.muted,true);assert.equal(state.settings.master,.35);assert.equal(state.contextState,'NOT_CREATED');
-    assert.deepEqual(errors,[]);report.profiles.push({width,height,primary,toggle,signal,links:links.length,audio:'PASS',reload:'PASS'});
+    if([390,844].includes(width)){
+      await clickRoute(page,'#bankEntryLink',new URL(BANK_SERVICE.entryUrl,BASE+'/').href,'#funding-title','Portal to original bank service');
+      assert.equal(await page.locator('#funding-five-ack').isChecked(),false,'bank navigation must not acknowledge a payment');
+      await page.goBack({waitUntil:'networkidle'});await page.locator('#bankEntryLink').waitFor();assertExactRoute(page.url(),BASE+'/','bank back to Portal');
+    }
+    assert.deepEqual(errors,[]);report.profiles.push({width,height,primary,bankService,toggle,signal,links:links.length,audio:'PASS',reload:'PASS'});
     await context.close();
   }
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
@@ -408,7 +1342,7 @@ try{
   assert.equal(await page.evaluate(()=>localStorage.getItem('KAIOS_PLAYER_LIFE_V1')),seeded.raw,'Portal projection read-only');
   assert.equal(await page.locator('body').innerText().then(t=>t.includes(seeded.id)),false,'Portal does not need to display persistent private identifier');
   await shot(page,'returning-player-390x844');
-  for(let i=0;i<3;i++)for(const viewport of [{width:844,height:390},{width:390,height:844}]){await page.setViewportSize(viewport);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);const r=await reachable(page,'#primaryPlay');assert.ok(r.inView&&r.hit);}
+  for(let i=0;i<3;i++)for(const viewport of [{width:844,height:390},{width:390,height:844}]){await page.setViewportSize(viewport);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);const r=await reachable(page,'#primaryPlay');assert.ok(r.inView&&r.hit);const bank=await reachable(page,'#bankEntryLink');assert.ok(bank.inView&&bank.hit&&bank.height>=44,'returning player retains the bank entry after rotation');}
   report.checks.push('new guest, validated returning player, allowlisted continue, read-only private profile, three rotation cycles');
   const routes=portalRoutes(BASE);
   for(let i=0;i<2;i++){
