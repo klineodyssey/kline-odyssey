@@ -1,5 +1,18 @@
 # KGEN AI Operating System
 
+## KUFO 原 #637 正式工程入口（2026-11-13）
+
+Human 已指定沿既有年度候選與最新 main 整合。正式名稱固定 KUFO；唯一原碼入口為
+`KGEN-KAIOS/contracts/KUFO.sol`、`KAIOSAlchemyFurnace.sol`、
+`KUFOOutputJindouyun168888.sol`、`KSHIP.sol`、`KSHIPConverter.sol`，
+原有純投影遷移至 `KGEN-KAIOS/runtime/kufo-policy.mjs`，不另建 Runtime。
+其中 Output 檔完整路徑為 `KGEN-KAIOS/contracts/KUFOOutputJindouyun168888.sol`。
+完整來源／歷史相容性／規格與部署檢核，沿用
+[`KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)。
+帶版本測試與文件路徑是沿革，不是另一正式代幣。
+正式曆法、時區、年界、生肖／星座窗口與發行期限未定；尚未部署。
+以下較早的 49 Epoch 與 V4 候選路徑表保留為歷史，不構成現行入口或新驗收。
+
 **System ID:** KAIOS
 **Version:** V10.0 Operating System
 **Status:** Active / Read-only Operating Center

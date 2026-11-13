@@ -277,7 +277,7 @@ async function bootstrapBscTestnetUniverse() {
     confirmations,
   );
   const furnace = await deployArtifact(
-    "KAIOSAlchemyFurnace",
+    "KAIOSAlchemyFurnaceLegacyBaseline",
     signer,
     [await kaios.getAddress(), await registry.getAddress(), 100],
     confirmations,

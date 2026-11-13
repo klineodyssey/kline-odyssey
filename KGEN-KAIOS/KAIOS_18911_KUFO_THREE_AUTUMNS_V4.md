@@ -1,3 +1,82 @@
+# KUFO 工程接續與部署準備（2026-11-13）
+
+狀態：`ENGINEERING_IN_PROGRESS / NOT_DEPLOYED / FORMAL_CALENDAR_PENDING`。
+本檔沿原 #637 累積維護；檔名是工程沿革，正式產品、代幣及合約入口均為 KUFO。
+下方完整保留前輪工程紀錄；其中舊版本、測試數量、gas、未配置星座及「主線檔不變」均為歷史證據，不是本輪完成或部署聲明。
+
+## 本輪來源、Writer 與唯一實作
+
+Human 在本頁透過知蘭於 2026-11-13 交付「KUFO V5 白皮書工程接續定稿」。
+規格為 [KUFO 仙丹幣白皮書 V5.0 年度批次定案](https://docs.google.com/document/d/1LgTiHx7yjE_nqgSFiDz5hCOBEXp5YDOo7h1P50Hbv_o/edit)，
+讀取 revision `AHj4eMSleS8eBWYL8tN8ZJqzRkvSjnMrx4-JGENTG8OlsKr6Rrbr16FV3tkg_Gqcr2t6X5xEpTqpzTEgdGh_I1h4Xq4MeGKRrqlAGJ0lND0`，166 段；Drive 修改時間為 `2026-11-05T22:07:14.047Z`。
+來源 main `33967045ed725848a6b814af0e9b10eac64f2ec7`，原 #637 head `9dc0260543005597d2d02f9b3b8c9dbe5a6be0a6`，其年度核心 `3c92efd72a12404f95d95c573e428434d8c26e55`。
+純整合提交 `82dea461` 保留兩邊歷史及 main 後續安全測試；未將舊候選整棵覆蓋 main。
+WORK_ID `KUFO-637-ANNUAL-FINALIZATION-20261113`；單一整合 Writer 衡曜 `/root`，分離的合約、policy、EVM 測試 Writer 在本輪宣告檔案範圍內工作；不是原子 claim 或新排程。
+
+| 正式路徑 | 用途 |
+|---|---|
+| `KGEN-KAIOS/contracts/KUFO.sol` | 唯一年度 KUFO 核心，真實 burn proof、不可變出生分組及持有人授權轉化 |
+| `KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol` | K18911 真銷毀與即時鑄幣原子流程；KGEN 只讀當下餘額 |
+| `KGEN-KAIOS/contracts/KUFOOutputJindouyun168888.sol` | K168888 固定受益人出料，綁定 Furnace 與 KUFO |
+| `KGEN-KAIOS/contracts/KSHIP.sol` | 原有 KSHIP proof-bound core，immutable KUFO 綁定不變 |
+| `KGEN-KAIOS/contracts/KSHIPConverter.sol` | 持有人發起一般或指定分組轉化 |
+| `KGEN-KAIOS/runtime/kufo-policy.mjs` | 既有純投影，無第二帳冊或自動交易 |
+
+候選同功能 `KUFOV4.sol`、`KAIOSAlchemyFurnaceV4.sol`、`KUFOOutputJindouyun168888V4.sol` 與 `kufo-v4-policy.mjs` 透過 Git 遷移到上述唯一入口；歷史提交仍可追溯。
+原 main 的 KUFO／Furnace 49 Epoch 完整回歸來源由既有 compiler 以固定 main SHA 讀取，只改編譯時合約識別字為 `KUFOLegacyBaseline`／`KAIOSAlchemyFurnaceLegacyBaseline`，不建立可部署的第二產品檔案。
+原 `tests/token-lineage.unit.test.mjs` 的行為與安全斷言保留；該套件證明歷史相容性，新的 `tests/kufo-v4-evm.behavior.test.mjs` 才驗收年度入口。測試檔版本字樣僅屬工程沿革。
+
+## 部署前安全修正與規格驗收
+
+候選獨立審查找到三項必修：output 可提供虛構 proof 鑄幣、Furnace 只核 output 回傳 tuple 可能燒幣無出料、現任 Converter 可在未核 holder allowance 時燒別人餘額。
+接續複查另補跨 KUFO 實例重用同一真 burn proof 的防線：KUFO 必須核記錄 Furnace 的 immutable `canonicalKufo()` 為自己，並核其 KAIOS／Registry 綁定；各實例的 proofMinted 獨立，不能單靠它防跨代幣重放。
+Furnace 的 KGEN 地址亦須等於 canonical KAIOS 的 `KGEN()`，KUFO／Furnace Registry 必須等於 KAIOS 的 `ORGAN_REGISTRY()`；避免錯傳另一個代幣作資格或接入不相干路由域。
+本輪驗收須分別證明 immutable KAIOS burn record 與消耗後 Furnace proof 一致、canonical KUFO 實際 proof／mint／受益人餘額增量一致，以及 Converter 必須消耗 holder 授權。
+Registry 的 `code.length` 與治理延遲並不認證路由邏輯；授權 Converter 仍是受信任 spender，持有人只應向核定 canonical Converter 給相稱 allowance。
+
+協議固定為投入並銷毀 1 KAIOS，在同筆成功交易產出 1,000 KUFO；KGEN 餘額至少投入量 / 1,000，不扣、不鎖、不需 KGEN allowance。
+鏈上最小精度沿既有候選：KAIOS wei 至少 1,000 且為 1,000 的整數倍，避免資格除法截尾；不是最低投入 1,000 枚 KAIOS。
+共同年界累計可轉化第一年 50%、第二年 75%、第三年 100%；第三年清餘額尾差，漏年永久可補結。
+到年界只增加資格，不自動扣餘額或送交易。轉讓搬移剩餘三段權利，不重算出生年、不重設年齡。
+
+曆法 constructor 明確提交 financial yearStarts 與獨立的精確出生窗口（start/end/zodiac/constellation）；窗口須連續、無重疊並完整覆蓋發行期。兩種曆法不默認相同。
+出生 group 為共同年與窗口的交集，mintOrigin 保留 bornAt、出生年、生肖、星座與 calendarHash；轉讓保留 group 權利。不能只用事件推定持有人分組。
+32 發行年、512 出生窗口及每批 32 group 是待驗證工程上限，不代表 Human 已採納任何發行期限。
+一般轉讓／轉化若需觸及過多分組，整筆拒絕並改由 `transferGroups`／`transferFromGroups`／`convertGroups` 明確分批；分批不取消尚未轉化的權利。
+一次批次須選唯一升序 group IDs，任何失敗原子回滾，不可留下半筆轉讓或 burn。
+
+商家用自有 KUFO 庫存、補貼及利潤報價，不改協議鑄造比例。「10 KAIOS 購餐後交付 500 KUFO」及「100 萬維持量」只屬討論例子；本輪不把它們寫入合約或活動力規則。
+餐廳付款、庫存交付、退款／交付證據及活動力投影仍需獨立需求與授權，不能以本次合約測試宣稱已可使用。
+
+## 可審核部署清單（尚不能送部署交易）
+
+| 項目 | 本輪準備／必須確認 |
+|---|---|
+| 目標鏈 | 原站 BNB Smart Chain mainnet chainId 56；部署當時由合法持有人核實 chainId、RPC、gas 及原成本上限 |
+| 既有 KGEN | 原 manifest `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be`；不重發、不改 tax |
+| 既有 KAIOS | 原 manifest `0xD4E67B3a69e41524c424150E6b6e921b01D036db`；須核 `alchemyBurnRecord` ABI、runtime code 及 immutable Registry |
+| 既有 Registry | 原 Genesis 記錄 `0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D`；須以當時 code、owner、bootstrap、minimumDelay、pending 與實際權限核對，不能當已授權可改 |
+| 已部署 Furnace V1 | `0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1`，tx `0x4dae645b4b40348fc06bd65f08d238919c20011924bf54da82c3d7e5f0fd6343`，block115628629；保留歷史，不原址覆蓋、不稱新 KUFO |
+| 新 KUFO／Furnace／Output／KSHIP／Converter | 地址全部待部署回執，不以 18911／168888／511111 世界點位代替；原 manifest 將 KUFO／KSHIP 標為 NOT_DEPLOYED/FUTURE |
+| 曆法參數 | effective timestamp、正式曆法名稱／版本與時區、N 年發行期限、N+3 年界、生肖邊界、星座精確窗口、跨年／閏年解釋，全部待 Human 定值與完整校驗 |
+| KUFO constructor | `(registry, kaiosToken, CalendarConfig)`；cfg 包含 version、firstFinancialYear、yearStarts、packedBirthWindows |
+| Furnace constructor | `(kaiosToken, kgenToken, registry, canonicalKufo)` |
+| Output constructor | `(furnace, kufo)`，讀回 immutable 綁定 |
+| KSHIP／Converter constructor | KSHIP `(registry, kufo)`；Converter `(kufo, kship)`；舊版 immutable 地址不能靠 ABI 相容性改接 |
+| 編譯 | solc 0.8.24、OZ 5.0.2、optimizer enabled/runs1、viaIR true、EVM paris、metadata bytecodeHash none；固定最後 source commit 後重建 |
+| 位元碼與驗證 | 保存 ABI、creation bytecode、runtime template、immutable references、來源 SHA256、constructor 編碼；部署後以實參重建含 immutable 的 runtime 再比對 code/hash，不能只比較零填充 template |
+| 角色／啟用 | Holder 個別核定 Registry FURNACE18911、OUTPUT168888、KSHIP_CONVERTER 路由、owner/延遲與 pending；先核所有 immutable/code/授權再依既有治理流程啟用；bootstrap 若已封不嘗試重開 |
+| 舊 proof 相容性 | 舊 49 Epoch proof 不自動匯入年度 KUFO；舊 Furnace 銷毀紀錄不能重複產出，需另有明確遷移方案才處理；本輪不代做遷移 |
+| 交易邊界 | AI 不取得秘密、不簽署、不送主網／測試網部署、治理或真交易；由合法持有人核定並用本人既有錢包確認 |
+
+上述地址為原站已保存證據，並非本輪新的鏈查或部署回執。新正式時間尚未核定，因此 final constructor encoding、含實參的 creation bytecode／部署地址／runtime hash／治理 proposalId／executableAt 全部保持空白待決。
+窗口編碼為每個 uint256：`start | (end << 64) | (zodiac << 128) | (constellation << 136)`；start/end 為 uint64 UTC 秒，生肖／星座各1..12，高於 bit143 的資料拒絕。完整calendarHash為 `keccak256(abi.encode(bytes32 version,uint32 firstFinancialYear,uint64[] yearStarts,uint256[] packedBirthWindows))`。
+此編碼避免512個四欄ABI tuple超出初始化大小；仍須以實際完整constructor交易資料核 [EIP-3860](https://eips.ethereum.org/EIPS/eip-3860) 的49,152 bytes及 [EIP-170](https://eips.ethereum.org/EIPS/eip-170) 的24,576 bytes runtime上限。測試不能開unlimited size或放寬blockgas冒充可部署。
+既有compiler另輸出自足的 `KGEN-KAIOS/artifacts/solidity-standard-input.json` 與其SHA256，含精確依賴來源；這是忽略的編譯產物，不是新Runtime。`artifacts/*LegacyBaseline.json` 只用歷史回歸，不能列入部署包。
+最終固定提交的測試與獨立審查結果會累積於本節後，不將舊 LIVE、舊 CI 或舊 gas 數字充作新驗收。
+
+## 前版完整工程紀錄（SUPERSEDED historical evidence）
+
 # K18911 KUFO annual-cohort integration review
 
 STATUS: REVIEW_CANDIDATE / NOT_DEPLOYED

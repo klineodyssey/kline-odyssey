@@ -1,3 +1,30 @@
+# KSHIP Whitepaper — cumulative KUFO annual conversion edition
+
+## 2026-11-13 KUFO #637 工程接續
+
+正式代號沿用 KSHIP，KUFO 的正式名稱及入口不附版本。
+本文件完整保留前版於下方；其中「Converter unchanged」、V4 來源名及舊測試／gas 是歷史證據。
+現行關係為：真銷毀 1 KAIOS 同筆即時產出 1,000 KUFO，KGEN 只作當下餘額資格；
+共同年界第一年累計 50%、第二年75%、第三年100%，終局清餘額尾差。
+每 1 KUFO 最終對應 1,000 KSHIP，漏年永久可補結，轉讓不重設出生年或已耗用權利。
+年界不自動扣幣；由持有人發起 Converter，KUFO 消耗其授權並記 carrier proof，KSHIP 核 immutable KUFO proof 後鑄造。
+
+KUFO 的 financial year 與出生生肖／星座窗口分別明確配置；現存權利依不可變出生 group 搬移。
+大量歷史分組可用既有 Converter 新增的 `convertGroups` 分批處理；每批至多32個唯一升序group，未選權利保持。
+任何 proof、路由、授權或輸出失配須原子回滾，不能將路由回傳 tuple 當實際 KUFO/KSHIP 產出。
+Registry 現任 Converter 是受信任 spender，並不因此獲得未授權持有人的餘額。
+
+KSHIP 的 `carrierBurnRecord` ABI 保留；KSHIP 及 Converter 的 immutable KUFO／KSHIP 地址不可被 ABI 相容性改接。
+舊部署與舊49 Epoch proof 保留，沒有隱含遷移或重複領取。當前主網 manifest 將 KUFO／KSHIP列為 NOT_DEPLOYED/FUTURE，Furnace V1 的 LIVE 歷史不能代表本版部署。
+正式曆法、時區、生效時間、年界、生肖／星座窗口與發行期限尚待 Human 核准；工程合成 fixture 不作正式參數。
+餐廳庫存交付及活動力討論例子不改協議比例，也不是本版已部署功能。
+
+最終來源、固定提交測試、compiler設定、bytecode及地址／角色／合法持有人部署檢核，沿既有
+`KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md` 累積記錄。
+AI 未部署、未代簽或送治理交易。正式參數及合法授權完成後，才由有權持有人確認。
+
+## 前版完整正文（SUPERSEDED historical evidence）
+
 # KSHIP V4 Whitepaper — cumulative annual-cohort compatibility edition
 
 Status: REVIEW CANDIDATE DOCUMENTATION / NO LIVE ACTIVATION

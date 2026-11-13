@@ -1,5 +1,16 @@
 # KGEN MASTER_INDEX
 
+## KUFO #637 正式名稱與部署準備接續（2026-11-13）
+
+原 Product05 / #637 已接 Human 同範圍普通工程指令；唯一正式合約入口沿
+`KGEN-KAIOS/contracts/KUFO.sol`、`KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol`、
+`KGEN-KAIOS/contracts/KUFOOutputJindouyun168888.sol`、`KGEN-KAIOS/contracts/KSHIP.sol`、
+`KGEN-KAIOS/contracts/KSHIPConverter.sol`，原純投影沿 `KGEN-KAIOS/runtime/kufo-policy.mjs`。
+完整用途、已部署 V1 歷史、legacy source baseline、年度出生權利、安全修正及部署前待決
+保存於 `KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md` 與原模組 README。
+正式曆法等實參未定前不部署。既有 CURRENT Boot → master-library → 本索引的路徑不變；
+未新增 Boot、Runtime、排程或同功能版本。下節是前輪候選沿革。
+
 ## KUFO Product 05 source continuation (review candidate)
 
 The existing #201 alchemy paths and all three exact #600 research blobs are
