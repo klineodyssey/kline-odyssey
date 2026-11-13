@@ -433,13 +433,49 @@ test("real main KAIOS spends holder allowance; KGEN is balance-only; outlet bene
   const owner = await f.owner.getAddress();
   const beneficiary = await f.beneficiary.getAddress();
   const life = hash("local-fixture-not-a-life-identity-claim");
+  const invalidAmounts = [
+    { amount: 0n, error: "AlchemyAmountTooSmall", args: [0n, 1000n] },
+    { amount: 999n, error: "AlchemyAmountTooSmall", args: [999n, 1000n] },
+    { amount: 1001n, error: "InexactRatio", args: [1001n] },
+  ];
+  for (const invalid of invalidAmounts) {
+    await assert.rejects(f.furnace.burnForKufo.staticCall(invalid.amount, beneficiary, life), (error) => {
+      const parsed = f.furnace.interface.parseError(error.data);
+      assert.equal(parsed.name, invalid.error);
+      assert.deepEqual(Array.from(parsed.args), invalid.args);
+      return true;
+    });
+  }
   // A holder with sufficient KAIOS and allowance but no KGEN still cannot mint.
   const outsider = await f.outsider.getAddress();
+  const requiredKgen = input / 1000n;
   await mined(f.kaios.transfer(outsider, input));
   await mined(f.kaios.connect(f.outsider).approve(await f.furnace.getAddress(), input));
-  await assert.rejects(f.furnace.connect(f.outsider).burnForKufo.staticCall(input, beneficiary, life));
+  await assert.rejects(f.furnace.connect(f.outsider).burnForKufo.staticCall(input, beneficiary, life), (error) => {
+    const parsed = f.furnace.interface.parseError(error.data);
+    assert.equal(parsed.name, "InsufficientKgenBalance");
+    assert.deepEqual(Array.from(parsed.args), [0n, requiredKgen]);
+    return true;
+  });
   assert.equal(await f.kaios.balanceOf(outsider), input);
   assert.equal(await f.kgen.balanceOf(outsider), 0n);
+  await mined(f.kgen.transfer(outsider, requiredKgen - 1n));
+  await assert.rejects(f.furnace.connect(f.outsider).burnForKufo.staticCall(input, beneficiary, life), (error) => {
+    const parsed = f.furnace.interface.parseError(error.data);
+    assert.equal(parsed.name, "InsufficientKgenBalance");
+    assert.deepEqual(Array.from(parsed.args), [requiredKgen - 1n, requiredKgen]);
+    return true;
+  });
+  await mined(f.kgen.transfer(outsider, 1n));
+  const preSimulationSupply = await f.kaios.totalSupply();
+  const simulated = await f.furnace.connect(f.outsider).burnForKufo.staticCall(input, beneficiary, life);
+  assert.equal(simulated[1], E18, "the exact KGEN threshold permits the complete alchemy path");
+  assert.equal(await f.kgen.balanceOf(outsider), requiredKgen);
+  assert.equal(await f.kaios.balanceOf(outsider), input);
+  assert.equal(await f.kaios.allowance(outsider, await f.furnace.getAddress()), input);
+  assert.equal(await f.kaios.totalSupply(), preSimulationSupply);
+  assert.equal(await f.kaios.alchemyBurnCount(), 0n);
+  assert.equal(await f.kufo.totalSupply(), 0n);
   const beforeKaios = await f.kaios.balanceOf(owner);
   const beforeKaiosSupply = await f.kaios.totalSupply();
   const beforeKgen = await f.kgen.balanceOf(owner);
@@ -530,7 +566,7 @@ test("a real consumed KAIOS proof cannot mint a second KUFO instance", async (t)
   assert.equal(await f.kufo.totalSupply(), 1000n);
   assert.equal(await second.totalSupply(), 0n);
   assert.equal(await second.proofMinted(proof), false);
-  assert.deepEqual(await f.kufo.mintOrigin(proof), firstOrigin);
+  assert.deepEqual(Array.from(await f.kufo.mintOrigin(proof)), Array.from(firstOrigin));
   await conservation(f);
 });
 
@@ -578,8 +614,8 @@ test("birth windows and financial years split immutable groups without resetting
   assert.equal(nextOrigin.calendarHash, await f.kufo.calendarHash());
   const groupBefore = await f.kufo.groupMetadata(1);
   await mined(f.kufo.transferGroups(await f.victim.getAddress(), 317n, [1]));
-  assert.deepEqual(await f.kufo.groupMetadata(1), groupBefore);
-  assert.deepEqual(await f.kufo.mintOrigin(early), earlyOrigin);
+  assert.deepEqual(Array.from(await f.kufo.groupMetadata(1)), Array.from(groupBefore));
+  assert.deepEqual(Array.from(await f.kufo.mintOrigin(early)), Array.from(earlyOrigin));
   assert.equal(await f.kufo.totalDecayedForKship(), 0n);
   await at(f, BASE + STEP);
   const changedYear = await mint(f, 1000n, f.recipient, "financial-boundary-inside-birth-window");
@@ -592,8 +628,8 @@ test("birth windows and financial years split immutable groups without resetting
   assert.equal(await f.kufo.claimableDecay(await f.recipient.getAddress(), FIRST_YEAR + 1), 0n);
   await at(f, BASE + 20 * STEP);
   await mined(f.converter.convertGroups(await f.kufo.balanceOf(owner), owner, [1, 2]));
-  assert.deepEqual(await f.kufo.mintOrigin(early), earlyOrigin);
-  assert.deepEqual(await f.kufo.groupMetadata(1), groupBefore);
+  assert.deepEqual(Array.from(await f.kufo.mintOrigin(early)), Array.from(earlyOrigin));
+  assert.deepEqual(Array.from(await f.kufo.groupMetadata(1)), Array.from(groupBefore));
   await conservation(f);
 });
 
@@ -663,8 +699,8 @@ test("33 active groups require explicit batches and selected transfer/convert re
 test("the 32-year and 512-window candidate maximum deploys under Shanghai and settles selected groups forever", async (t) => {
   const starts = boundaries(32);
   const windows = Array.from({ length: 512 }, (_, i) => ({
-    start: BASE + Math.floor(i * (32 * STEP) / 512),
-    end: BASE + Math.floor((i + 1) * (32 * STEP) / 512),
+    start: BASE + Math.floor(i * (32 * STEP) / 512) + (i === 0 ? 0 : 1),
+    end: BASE + Math.floor((i + 1) * (32 * STEP) / 512) + (i === 511 ? 0 : 1),
     zodiac: (i % 12) + 1,
     constellation: ((i + 5) % 12) + 1,
   }));
@@ -675,6 +711,7 @@ test("the 32-year and 512-window candidate maximum deploys under Shanghai and se
   assert.ok(deployment.gasUsed < 30_000_000n, "synthetic local block bound remains conservative");
   assert.equal(await f.kufo.MAX_BIRTH_WINDOWS(), 512n);
   assert.equal(await f.kufo.issuanceCohorts(), 32n);
+  assert.equal(await f.kufo.groupCount(), 543n, "all 31 internal financial boundaries split a birth window");
   const ids = [];
   for (let i = 480; i < 512; i += 1) {
     await at(f, windows[i].start + 1);

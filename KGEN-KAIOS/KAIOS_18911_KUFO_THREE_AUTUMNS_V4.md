@@ -47,6 +47,9 @@ Registry 的 `code.length` 與治理延遲並不認證路由邏輯；授權 Conv
 
 商家用自有 KUFO 庫存、補貼及利潤報價，不改協議鑄造比例。「10 KAIOS 購餐後交付 500 KUFO」及「100 萬維持量」只屬討論例子；本輪不把它們寫入合約或活動力規則。
 餐廳付款、庫存交付、退款／交付證據及活動力投影仍需獨立需求與授權，不能以本次合約測試宣稱已可使用。
+可對齊的流程是顧客將KAIOS付給餐廳，餐廳從已持有的KUFO庫存交付議定數量，該次購餐不呼叫協議鑄幣。若商家另用自己的KAIOS補庫存，仍須本人授權銷毀並滿足KGEN資格，固定10 KAIOS會鑄出10,000 KUFO；交付500與保留其餘庫存是另一步庫存分配，不能把協議比例改為10:500。交付時仍搬移原出生分組與年度權利。
+活動力可在既有生命功能中讀取核定鏈／角色地址於明確區塊的實際KUFO持有量作輸入；持有量如何換算活動力、更新頻率、門檻及付款後交付保障尚未核定，本輪未新增公式、庫存帳冊或餐廳合約。
+差異必須保留：候選到共同年界只增加可轉化資格，實際KUFO持有量在本人轉化前不下降。因此活動力若只依實際持有量，年界本身也不會自動降低活動力；是否另以其他已核定量作投影，須由Human明確定義，不能藉活動力需求偷改為自動扣幣。
 
 ## 可審核部署清單（尚不能送部署交易）
 
@@ -58,7 +61,7 @@ Registry 的 `code.length` 與治理延遲並不認證路由邏輯；授權 Conv
 | 既有 Registry | 原 Genesis 記錄 `0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D`；須以當時 code、owner、bootstrap、minimumDelay、pending 與實際權限核對，不能當已授權可改 |
 | 已部署 Furnace V1 | `0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1`，tx `0x4dae645b4b40348fc06bd65f08d238919c20011924bf54da82c3d7e5f0fd6343`，block115628629；保留歷史，不原址覆蓋、不稱新 KUFO |
 | 新 KUFO／Furnace／Output／KSHIP／Converter | 地址全部待部署回執，不以 18911／168888／511111 世界點位代替；原 manifest 將 KUFO／KSHIP 標為 NOT_DEPLOYED/FUTURE |
-| 曆法參數 | effective timestamp、正式曆法名稱／版本與時區、N 年發行期限、N+3 年界、生肖邊界、星座精確窗口、跨年／閏年解釋，全部待 Human 定值與完整校驗 |
+| 曆法參數 | effective timestamp、正式曆法名稱／版本與時區、N 年發行期限、N+3 年界、生肖邊界、星座精確窗口、生肖／星座ID1..12對應名稱、跨年／閏年解釋，全部待 Human 定值與完整校驗 |
 | KUFO constructor | `(registry, kaiosToken, CalendarConfig)`；cfg 包含 version、firstFinancialYear、yearStarts、packedBirthWindows |
 | Furnace constructor | `(kaiosToken, kgenToken, registry, canonicalKufo)` |
 | Output constructor | `(furnace, kufo)`，讀回 immutable 綁定 |
@@ -74,6 +77,32 @@ Registry 的 `code.length` 與治理延遲並不認證路由邏輯；授權 Conv
 此編碼避免512個四欄ABI tuple超出初始化大小；仍須以實際完整constructor交易資料核 [EIP-3860](https://eips.ethereum.org/EIPS/eip-3860) 的49,152 bytes及 [EIP-170](https://eips.ethereum.org/EIPS/eip-170) 的24,576 bytes runtime上限。測試不能開unlimited size或放寬blockgas冒充可部署。
 既有compiler另輸出自足的 `KGEN-KAIOS/artifacts/solidity-standard-input.json` 與其SHA256，含精確依賴來源；這是忽略的編譯產物，不是新Runtime。`artifacts/*LegacyBaseline.json` 只用歷史回歸，不能列入部署包。
 最終固定提交的測試與獨立審查結果會累積於本節後，不將舊 LIVE、舊 CI 或舊 gas 數字充作新驗收。
+
+## 2026-11-13 固定原碼驗證紀錄
+
+程式固定提交 `e03ef59e1e5981ea2dcd6f6657fd18d877be1be4`。34合約／21顯式來源編譯PASS，0 warnings；既有optimizer等設定不變。
+自足standard-input SHA256為 `0fa10cc351d86377ae5f58e7250cd18a1ec4623cf09174bdeb2667b1bd6b65a7`。
+來源內的legacy baseline只為保留原main安全回歸，未列為新部署合約。
+
+| 合約 | creation template bytes（未附實參） | runtime template bytes |
+|---|---:|---:|
+| KUFO | 16255 | 12753 |
+| KAIOSAlchemyFurnace | 6847 | 5826 |
+| KUFOOutputJindouyun168888 | 1089 | 849 |
+| KSHIP | 4153 | 3118 |
+| KSHIPConverter | 1663 | 1379 |
+
+以上均為編譯template，不是主網含immutable的code hash。正式calendar與地址未定前不填正式交易位元碼。
+原main archive KAIOS來源另作ABI核對，KGEN／ORGAN_REGISTRY／burnForAlchemy／alchemyBurnRecord／totalSupply／balanceOf／allowance七項均相容；這不是新的主網runtime證明。
+`node tools/validate-templeheart-storage.mjs` PASS（58 preserved、15 appended）、`verify-current-lineage.mjs` PASS、`validate-integration-artifacts.mjs` PASS；未使用任何testnet旗標。
+
+第一輪執行原七套`tests/*.test.mjs`及原research：218 tests，216 PASS、2 FAIL、0 skipped/cancelled，671020.3528ms。
+兩個失敗均為新測試將ethers Result代理直接作deepStrictEqual；stack確認實值相同，跨代幣proof拒絕斷言已通過。
+修復只將兩案例全部原始Result比較轉成實值陣列，所有欄位及安全斷言保留（[ethers Result文件](https://docs.ethers.org/v6/api/abi/#Result-toArray)）；另補精度及KGEN資格exact門檻。
+原始首輪log SHA256 `25ad335cbe0189e239728fb7b35525c7678edaaac629b184c0e596397edf0968` 保留於 `artifacts/kufo637-test.log`，不覆寫為成功紀錄。
+原首輪最大512窗口案例的31個年界恰好重合，只有512groups，constructor15,960,735gas、initcode34047bytes；這項只算對齊案例，不冒稱最大交集。
+唯一修復重跑改用不重合內界：最多32年×512窗口交集為543groups，保持首尾、內窗口界各加1秒並精確核543。測試仍使用Shanghai限制、30M本機blockgas及8M單批操作上限。
+目前最終EVM重跑待執行；尚不能將本節第一輪寫成整體PASS。非EVM198項來源未變且本輪已通過，後續只重跑已修改的20項EVM，不為未變指紋重跑其他套件。
 
 ## 前版完整工程紀錄（SUPERSEDED historical evidence）
 

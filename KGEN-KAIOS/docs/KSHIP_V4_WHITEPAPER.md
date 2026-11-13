@@ -14,7 +14,7 @@ KUFO 的 financial year 與出生生肖／星座窗口分別明確配置；現�
 任何 proof、路由、授權或輸出失配須原子回滾，不能將路由回傳 tuple 當實際 KUFO/KSHIP 產出。
 Registry 現任 Converter 是受信任 spender，並不因此獲得未授權持有人的餘額。
 
-KSHIP 的 `carrierBurnRecord` ABI 保留；KSHIP 及 Converter 的 immutable KUFO／KSHIP 地址不可被 ABI 相容性改接。
+KUFO 的 `carrierBurnRecord` 供 KSHIP 讀取的 ABI 保留；KSHIP 及 Converter 的 immutable KUFO／KSHIP 地址不可被 ABI 相容性改接。
 舊部署與舊49 Epoch proof 保留，沒有隱含遷移或重複領取。當前主網 manifest 將 KUFO／KSHIP列為 NOT_DEPLOYED/FUTURE，Furnace V1 的 LIVE 歷史不能代表本版部署。
 正式曆法、時區、生效時間、年界、生肖／星座窗口與發行期限尚待 Human 核准；工程合成 fixture 不作正式參數。
 餐廳庫存交付及活動力討論例子不改協議比例，也不是本版已部署功能。
