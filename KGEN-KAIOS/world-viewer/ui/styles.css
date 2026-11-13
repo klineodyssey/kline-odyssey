@@ -645,6 +645,27 @@ button:focus-visible, canvas:focus-visible, [tabindex]:focus-visible {
 .consent-dialog__footer .primary-button { border-color: var(--accent); background: var(--accent); color: #07150c; font-weight: 750; }
 .consent-dialog__footer button:disabled { opacity: 0.45; }
 
+.mine-dialog { width: min(560px, calc(100vw - 24px)); }
+.mine-dialog[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.mine-dialog__inventory { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 0 14px; }
+.mine-dialog__inventory div { min-width: 0; padding: 8px 4px; border-radius: 6px; background: var(--surface-2); text-align: center; }
+.mine-dialog__inventory dt { color: var(--muted); font-size: 12px; }
+.mine-dialog__inventory dd { margin: 2px 0 0; color: var(--amber); font-size: 1.35rem; font-weight: 750; }
+.mine-dialog__budget-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin: 5px 0 10px; }
+.mine-dialog input, .mine-dialog__body button { min-height: var(--touch); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; }
+.mine-dialog input { width: 100%; min-width: 0; background: var(--surface-2); color: var(--text); }
+.mine-dialog input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.mine-dialog__body button { background: var(--accent); color: var(--bg); font-weight: 750; cursor: pointer; }
+.mine-dialog__body button:disabled { opacity: 0.45; cursor: not-allowed; }
+.mine-dialog #mine-invest { width: 100%; }
+.mine-dialog #mine-proposal-summary { margin: 0 0 8px; color: var(--text); line-height: 1.5; }
+.mine-dialog .mine-dialog__feedback { margin: 8px 0; color: var(--accent-strong); font-weight: 650; }
+.mine-dialog__feedback[data-error="true"] { color: var(--coral); }
+.mine-dialog #mine-history { padding: 8px 10px; margin: 0 0 10px; border-radius: 6px; background: var(--surface-2); }
+.mine-dialog #mine-history h3 { margin: 0; font-size: 0.9rem; }
+.mine-dialog #mine-runs { margin: 6px 0 0; padding-inline-start: 22px; font-size: 0.85rem; line-height: 1.5; }
+.mine-dialog #mine-rules { margin: 0; }
+
 .toast-region { position: fixed; right: calc(16px + var(--safe-right)); bottom: calc(16px + var(--safe-bottom)); z-index: 150; max-width: min(360px, calc(100vw - 32px)); padding: 10px 13px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 140ms ease, transform 140ms ease; }
 .toast-region.is-visible { opacity: 1; transform: translateY(0); }
 .toast-region[data-tone="warning"] { border-color: var(--amber); }

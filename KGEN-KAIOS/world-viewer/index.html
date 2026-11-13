@@ -299,6 +299,43 @@
       aria-label="KAIOS Civilization Genesis"
     ></dialog>
 
+    <dialog class="consent-dialog mine-dialog" id="mine-dialog" aria-labelledby="mine-title" aria-describedby="mine-rules">
+      <header class="consent-dialog__header">
+        <div>
+          <span class="eyebrow">遊戲模擬 · KAIOS 完整世界</span>
+          <h2 id="mine-title">K5168 金山銀礦</h2>
+        </div>
+        <button class="icon-button consent-dialog__close" id="mine-close" type="button" aria-label="返回世界檢視器">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </header>
+      <div class="consent-dialog__body mine-dialog__body">
+        <p>已定位宇宙地圖上的 K5168 財富礦脈。</p>
+        <dl class="mine-dialog__inventory" aria-label="目前模擬資源">
+          <div><dt>可用模擬能源</dt><dd id="mine-energy">—</dd></div>
+          <div><dt>黃金庫存</dt><dd id="mine-gold">—</dd></div>
+          <div><dt>礦脈剩餘輪次</dt><dd id="mine-remaining">—</dd></div>
+        </dl>
+        <form id="mine-budget-form">
+          <label for="mine-budget">模擬預算上限（能源單位）</label>
+          <div class="mine-dialog__budget-row">
+            <input id="mine-budget" type="number" min="0" step="1" inputmode="numeric" required>
+            <button id="mine-propose" type="submit">提出開發</button>
+          </div>
+        </form>
+        <div id="mine-review" hidden>
+          <p id="mine-proposal-summary"></p>
+          <button id="mine-invest" type="button">確認投入並採礦</button>
+        </div>
+        <p class="mine-dialog__feedback" id="mine-feedback" role="status" aria-live="polite"></p>
+        <section id="mine-history" hidden aria-labelledby="mine-history-title">
+          <h3 id="mine-history-title">採礦紀錄</h3>
+          <ol id="mine-runs"></ol>
+        </section>
+        <p id="mine-rules">採礦使用遊戲內模擬能源與資源庫存。正式礦種及經濟規則待確認。</p>
+      </div>
+    </dialog>
+
     <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
     <div class="visually-hidden" id="a11y-live" aria-live="polite" aria-atomic="true"></div>
     <div class="fatal-error" id="fatal-error" role="alert" hidden></div>

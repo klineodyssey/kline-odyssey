@@ -727,6 +727,18 @@ export function createCivilizationRuntime({
     return getSnapshot();
   }
 
+  function quoteMineDevelopment(budget) {
+    usable();
+    return nation.quoteMineDevelopment(budget);
+  }
+
+  function developMine(proposal) {
+    usable();
+    const run = nation.developMine(proposal);
+    notifier.emit("MINE_DEVELOPMENT_COMPLETED", { run_id: run.run_id });
+    return run;
+  }
+
   function proposeNationDiplomacy(type, counterpartyId = "nation-partner-alpha") {
     usable();
     born();
@@ -1001,6 +1013,8 @@ export function createCivilizationRuntime({
     allocateNationBudget,
     tradeNationResource,
     exchangeNationResources,
+    quoteMineDevelopment,
+    developMine,
     proposeNationDiplomacy,
     reviewNationDiplomacy,
     setNationCurrencyPolicy,

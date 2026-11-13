@@ -4,6 +4,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createBuildingRuntime } from "../building/building-runtime.js";
 import { createCivilizationRuntime } from "../civilization/civilization-runtime.js";
 import { createLifeRuntime } from "../life/life-runtime.js";
+import { createResourceEconomyRuntime } from "../nation/resource-economy-runtime.js";
 
 const world = JSON.parse(await readFile(new URL("../data/synthetic-world.json", import.meta.url), "utf8"));
 const canonicalBefore = JSON.stringify(world);
@@ -73,6 +74,67 @@ assert.equal(state.nation.resources.trades.at(-1).real_trade, false);
 state = civilization.tradeNationResource("STONE", "IMPORT", 1);
 assert.equal(state.nation.resources.resources.find(({ resource_id: id }) => id === "STONE").quantity, stoneBefore - 1);
 
+const resourceKey = "sprint-009-civilization-test.nation.resources";
+const legacySave = JSON.parse(storage.getItem(resourceKey));
+delete legacySave.state.mining_rounds;
+storage.setItem(resourceKey, JSON.stringify(legacySave));
+const beforeMining = storage.getItem(resourceKey);
+assert.throws(() => civilization.quoteMineDevelopment(9), { code: "MINE_BUDGET_INSUFFICIENT" });
+const firstProposal = civilization.quoteMineDevelopment(12);
+assert.equal(storage.getItem(resourceKey), beforeMining, "A proposal must not spend or save inventory");
+const firstRun = civilization.developMine(firstProposal);
+assert.equal(firstRun.point_id, "P_5168p0_金山銀礦_R22");
+assert.equal(firstRun.energy_used, 10);
+assert.equal(firstRun.gold_produced, 1);
+assert.throws(() => civilization.developMine(firstProposal), { code: "MINE_ALREADY_COMMITTED" });
+const resourceConfig = world.nation_timeline_alpha.resources;
+const reloadedResources = createResourceEconomyRuntime({ config: resourceConfig, storage, storageKey: resourceKey });
+const afterFirst = reloadedResources.getSnapshot();
+assert.equal(afterFirst.resources.length, 11);
+assert.equal(afterFirst.resources.find(({ resource_id }) => resource_id === "GOLD").quantity, 81);
+assert.equal(afterFirst.resources.find(({ resource_id }) => resource_id === "ENERGY").quantity, 890);
+assert.equal(afterFirst.mine.remaining, 2);
+assert.equal(afterFirst.trades.length, legacySave.state.trades.length, "Mining is not a resource trade");
+assert.deepEqual(afterFirst.movements.slice(-2).map(({ cause, delta }) => [cause, delta]),
+  [["MINE_ENERGY_SPENT", -10], ["MINE_OUTPUT", 1]]);
+assert.throws(() => reloadedResources.developMine(firstProposal), { code: "MINE_ALREADY_COMMITTED" });
+
+const secondProposal = civilization.quoteMineDevelopment(10);
+reloadedResources.developMine(secondProposal);
+assert.throws(() => civilization.developMine(secondProposal), { code: "MINE_ALREADY_COMMITTED" });
+civilization.developMine(civilization.quoteMineDevelopment(10));
+const depleted = storage.getItem(resourceKey);
+assert.throws(() => reloadedResources.quoteMineDevelopment(10), { code: "MINE_DEPLETED" });
+assert.equal(storage.getItem(resourceKey), depleted, "A depleted mine must not write inventory");
+for (let i = 0; i < 161; i++) reloadedResources.executeTrade({ direction: "IMPORT", resourceId: "WATER", quantity: 1 });
+assert.equal(reloadedResources.getSnapshot().mine.remaining, 0, "Truncating trade history must not replenish the mine");
+assert.equal(reloadedResources.getSnapshot().mine.rounds.length, 3);
+assert.equal(reloadedResources.integrityReport().ok, true);
+reloadedResources.destroy();
+
+const recoveryKey = "mine-storage-recovery-test";
+let canWrite = false;
+const recoveryStorage = {
+  ...storage,
+  setItem(key, value) {
+    if (!canWrite) throw new Error("Storage quota");
+    storage.setItem(key, value);
+  }
+};
+const recoverable = createResourceEconomyRuntime({ config: resourceConfig, storage: recoveryStorage, storageKey: recoveryKey });
+const unsaved = recoverable.quoteMineDevelopment(10);
+assert.throws(() => recoverable.developMine(unsaved), { code: "RESOURCE_STORAGE_FAILED" });
+assert.equal(recoverable.getSnapshot().mine.remaining, 3);
+assert.equal(storage.getItem(recoveryKey), null);
+canWrite = true;
+recoverable.developMine(unsaved);
+assert.equal(recoverable.getSnapshot().mine.remaining, 2);
+recoverable.executeTrade({ direction: "EXPORT", resourceId: "ENERGY", quantity: 485 });
+const lowEnergy = storage.getItem(recoveryKey);
+assert.throws(() => recoverable.quoteMineDevelopment(10), { code: "MINE_BUDGET_INSUFFICIENT" });
+assert.equal(storage.getItem(recoveryKey), lowEnergy);
+recoverable.destroy();
+
 state = civilization.proposeNationDiplomacy("TRADE_AGREEMENT");
 const agreementId = state.nation.diplomacy.pending_review.at(-1).agreement_id;
 assert.equal(state.nation.diplomacy.pending_review.at(-1).land_ownership_change, false);
@@ -118,6 +180,7 @@ const output = {
     balanced_treasury_ledger: true,
     official_currency_kgen_isolated: true,
     eleven_resource_conservation: true,
+    k5168_native_mining_persistence_and_replay: true,
     reviewed_diplomacy: true,
     nine_era_timeline: true,
     sole_transport_gate: true,

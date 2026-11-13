@@ -260,6 +260,18 @@ export function createNationRuntime({
     return getSnapshot();
   }
 
+  function quoteMineDevelopment(budget) {
+    usable();
+    return resources.quoteMineDevelopment(budget);
+  }
+
+  function developMine(proposal) {
+    usable();
+    const run = resources.developMine(proposal);
+    notifier.emit("MINE_DEVELOPMENT_COMPLETED", { run_id: run.run_id });
+    return run;
+  }
+
   function proposeDiplomacy(type, counterpartyId) {
     usable();
     established();
@@ -321,6 +333,8 @@ export function createNationRuntime({
     allocateBudget,
     tradeResource,
     exchangeResources,
+    quoteMineDevelopment,
+    developMine,
     proposeDiplomacy,
     reviewDiplomacy,
     setCurrencyPolicy,
