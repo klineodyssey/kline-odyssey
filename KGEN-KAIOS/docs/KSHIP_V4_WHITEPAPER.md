@@ -1,5 +1,27 @@
 # KSHIP Whitepaper — cumulative KUFO annual conversion edition
 
+## 2026-11-14 權威接續：持續煉丹的分段年界（LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED）
+
+依 Human 最新持續煉丹及萬年航程要求，沿原 #637 修正 KUFO 曆法維護方式，KSHIP 沿用原核心與既有 Converter。
+**舊 32 年終身停鑄設計已被取代，2039 停鑄草案未採用。** 下方完整保留的固定發行期、前輪 35 項通過及另 185 項歷史結果均不能充當本次候選的驗收。
+持續煉丹不取消原供應 cap，也不增加任意鑄幣、轉帳或自動簽署權限。
+
+KUFO 本機候選採用只能在末端追加的分段 calendar：初始 constructor 最多 32 年／512 個出生窗口，治理 append 每次最多 32 年／256 個窗口（MAX_APPEND_BIRTH_WINDOWS），均不再是終身上限。分段跨度須同時符合窗口數限制；32年／256窗／287交集分組的append實測propose428,852、execute7,555,818 gas，低於8M，沒有套用30M部署預算。
+現任 Organ Registry owner 提案精確 payload hash，沿 Registry 的 minimumDelay（至少一小時）等待；任何帳戶到期執行仍須核對同一 owner、parent hash 與 payload，現任 owner 可取消。
+追加段須完全匹配既有末三個年界，不得變更舊出生 group、年界或已取得的成熟權利。可以補齊未覆蓋的過期空窗，但新 mint 不得追溯到過去；缺當下正式覆蓋時暫拒新 mint，合法追加後可恢復，不能承諾無人維護仍永久出料。
+
+初始 calendarHash／version 保留，latestCalendarHash 鏈接追加段，groupCalendarHash 固定出生來源；origin、轉讓與年度補結均不改寫出生年、生肖、星座或來源 hash。
+年／cohort／group 採 uint32 候選範圍，活躍持有人有序 bitmap 與年度 aggregate 供有界查找。一般轉讓／burn 超過單筆 32 個分組時整筆拒絕，改走 selected-group 分批；claimableTotal 超過單批範圍則用 heldGroups／claimableForGroups 分頁讀取。
+既有 KUFO → KSHIP 1:1,000、年度累計 50%／75%／100%、永久補結與尾差、供應 cap、持有人 allowance、真 burn／proof、實際產出增量及原子回滾防線保持。
+
+萬年是資料延長、數值與操作活性的設計，不是已批准萬年曆表。香港天文台公開年曆對照為 1901–2100，遠期日界計算可能有日期差異，不能自行外推精確生肖／星座窗口。Human 已選生肖年界沿用**地球農曆新年**，不得改用元旦或宣稱精準萬年預測；正式生效時間、時區、財務年界、星座窗口及各期具體表仍須依原定案程序核定。
+本輪純 policy suite **20/20 PASS**，0 failed/skipped/cancelled，7471.6809ms；原 bounded-policy log 已讀回，包含萬年合成分段與 constructor／append 的257窗口差異案例，不代表鏈上 gas 或正式年曆已驗收。
+最終固定程式／測試提交 `0bf33c4b1ed61da5ddd08c4f426e3e6a5408fd9b`：36合約編譯、0 warnings，248620.5081ms；最終31/31 EVM PASS，0 failed/skipped/cancelled，625773.2286ms。前述純policy20項未重跑；第一輪4 ABI＋10 main lineage通過，34份未變artifact的creation/runtime/ABI及KUFO ABI一致，未重跑這14項。合計65項組合矩陣，不是一次65項全跑。
+第一輪45項曾44 PASS／1 FAIL（718824.4665ms），唯一dust transfer未達原300k；保留原log／archive後，用六處global-zero bitmap祖先guard修復，不改門檻。最終dust transfer264,105<300k、settle340,037<500k；dormant32一般transfer／settle4,820,020／1,400,028，selected32 transfer／convert2,783,334／1,014,984 gas，仍在8M內。最大constructor18,216,737<30M gas，initcode40,242<49,152 bytes；完整編譯輸入、log雜湊及gas表見同一KUFO白皮書本輪接續段。
+四層bitmap actor只驗uint32索引，不代表建立65,536個真鏈上cohort；10,000年／120,000分組是純資料測試，不是天文預測。獨立NO_BLOCKER是工程原碼複核，不是外部安全審計。
+本版origin groupId由uint16改uint32、issuanceCohorts由uint8改uint32，Furnace新增groupCalendarHash依賴。需配套五合約候選／新ABI／地址及綁定核驗，不能與舊Furnace任意混綁、原地升級或覆寫既有LIVE合約。
+狀態為 **LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED**；正式參數、地址、綁定、授權與成本仍待核定，UI／實體手機／真錢包為 **NOT_VERIFIED**，沒有主網生效、部署或簽署。本輪未新增支出，不承諾未來續曆與治理上鏈免費；實際gas與成本仍由合法持有人依原限制確認。
+
 ## 2026-11-13 KUFO #637 工程接續
 
 正式代號沿用 KSHIP，KUFO 的正式名稱及入口不附版本。

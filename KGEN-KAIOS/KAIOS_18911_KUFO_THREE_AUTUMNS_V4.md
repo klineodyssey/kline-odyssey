@@ -1,4 +1,53 @@
-# KUFO 工程接續與部署準備（2026-11-13）
+# KUFO 持續煉丹與農曆生肖長程接續（2026-11-14）
+
+狀態：`LOCAL_CODE_AND_TESTS_VERIFIED / NOT_DEPLOYED / PRODUCTION_PARAMETERS_PENDING`。
+固定程式/測試提交：`0bf33c4b1ed61da5ddd08c4f426e3e6a5408fd9b`；KUFO來源SHA256 `7226aac7ec0f48405a33f3ab17f64eb57bf1cc5d8c390d1d89dd9cd7f220d415`。後續工程交付只更新文件與審核證據，不能當成鏈上部署。
+WORK_ID `KUFO-637-CONTINUOUS-ALCHEMY-20261114-01`。Human明確要求「好改到好，星座和生肖能配合到1萬年航程嗎」，並於本頁選擇「沿用地球農曆新年」。來源main `33967045ed725848a6b814af0e9b10eac64f2ec7`、原PR637交付 `e85a5fef1e1157df7e42ab6a0fdef846c6a2ddb8`；沿同一程式/工單/保存位置施工。舊2039停鑄是未採納草案，舊32年度終身發行期是被本施工令修正的候選限制；下方原文完整保留為歷史。
+
+## 本輪施工與邊界
+
+- 在原KUFO增加只能接末端的calendar segment，不另建代幣、Runtime、bootstrap或發薪/治理排程。每段最多32年度；constructor最多512出生窗，之後append另限256窗以維持8M操作驗證界，不能套用30M部署block預算。這些是單段工作上限，並非整個航程的停鑄年份；原累計發行總額上限仍有效。
+- 原Registry當時實際`owner()`提出精確payload hash，沿`minimumDelay()`（不得少於一小時）等待，再由任何人執行；執行重核提案者仍為現任owner、parent與完整payload。owner可取消；沒有新role/organ，也不代持有人操作治理。
+- 新段首三年界必須逐值等於舊末三年界，舊group/日期永不回改。缺表期間未覆蓋的空窗可逐段補齊以恢復現在的煉丹；出生時間仍是當下block，不能倒填鑄造。尚無核定的未來表時新煉丹會拒絕且整筆回滾，故不宣稱無人維護也永不停。
+- `calendarHash`/`calendarVersion`保留初始承諾；`latestCalendarHash = keccak256(abi.encode(parentHash,dataHash))`。每個segment只保存終止group索引與承諾，`groupCalendarHash(id)`二分查其永久出生承諾；後續追加不改舊origin。Furnace改核該group承諾。
+- `MintOrigin.groupId`與累積`issuanceCohorts`擴為uint32；這是候選ABI變更，須使用新ABI及配套Furnace，不宣稱能與已部署舊Furnace直接混綁或原地升級。舊LIVE合約不覆蓋。
+- 持有人四層有序bitmap按活躍group找下一筆，年度aggregate與索引同步更新。一般轉讓/轉化每次最多檢視32個活躍group，selected入口同樣最多32；`claimableTotal`超過32個活躍group改用`heldGroups(owner,afterId,limit)`及`claimableForGroups(owner,ids)`分頁。零額/自身/部分轉讓/轉化與失敗回滾都須維持索引、年度與總額一致。
+- 真KAIOS銷毀、只讀KGEN資格、1:1000鑄造、50/75/100%年度權利、1:1000轉化、尾差/補結/allowance、72兆KUFO累計上限與原安全防線全部保留；本輪未新增支出、費用設定、稅率、錢包或秘密操作。未來每次合法曆表送鏈仍須由持有人核當時gas與原成本限制，不宣稱免費。
+
+## 本輪已實測與尚未驗證
+
+原policy擴充後初輪18/18；加入Human已選地球農曆新年的真日期fixture後19/19 PASS（5995.0741ms），最後加入constructor512/append256工作界限及257窗拒絕案後20/20 PASS（7471.6809ms）。三輪不是相加為57項。實際生成2027起10000個發行年度、10003年界、120000個分組，檢查每組起訖、groupId120000、舊出生承諾/轉讓/終局尾差、ISO extended year +010000、公曆2100/2400/10000閏年與400年146097日週期。這是離線資料/邏輯驗證，並非部署萬年資料或每年逐筆EVM實驗。
+
+生肖fixture核HKO 2027-02-06、2028-01-26當地UTC+8農曆新年，與公曆財務年界、固定民用日期星座分開；人類已選農曆語義，不代表其他正式部署值已採納。HKO公開對照表涵蓋1901..2100，且明列遠期月相/節氣接近午夜可能有一日差；不能宣稱已有精準10000年農曆或天文星座表。來源：[HKO對照表](https://www.hko.gov.hk/tc/gts/time/conversion.htm)。
+
+最終20項原log `kufo637-continuous-policy-bounded-20261113T2100.log` SHA256 `69ffb5ac41aedd7e6e62313df661256ed98bf26eb429836189f5e03f31abea71`保存在原kaios接續目錄；前19項log `ef3cc4649857f30fb982a3530dc04696bf63bdc5f93951d585afb292b80095f6`也保留。原artifacts/reports已83檔完整封存`kufo637-before-continuous-20261113T204519Z.zip`、SHA256 `053519737f9a4862e09191a3014f8a652b4928854f176524f59f1c6baba9977e`並逐項讀回。
+
+### 固定來源最終驗證
+
+- 首次36合約編譯PASS、0warnings，256831.5979ms；首次真EVM/ABI/main回歸45項為44PASS/1FAIL（718824.4665ms，未skip/cancel），唯一失敗為原dust單組完整transfer的300000gas門檻。這個失敗不是改寫成全過；62檔原輸入/artifacts/log封存`kufo637-continuous-first-red-20261113T2118.zip`，SHA256 `95317f8594ade09052ba663bef85a827bdc1e0615f37a022a6b4307f00478857`。
+- 最小修復只在`_setHeld/_clearHeld`六處略去exclusive successor永不經由的global zero祖先寫入；leaf與所有非零tier不省略，`_nextHeld`逐字未變，不做型別/ABI/供應/權利變更，也未調高原300k/500k/8M/30M門檻。獨立實際差異複查NO_BLOCKER；這不是外部audit認證。
+- 最終36合約再次編譯PASS、0warnings、248620.5081ms；solc0.8.24/OZ5.0.2/runs1/viaIR/paris/metadata hash none，EIP170無超限。KUFOcreation22450/runtime18692bytes，自足`solidity-standard-input.json` SHA256 `1bd0e40d4ec2bacb6c00abc08322e0b4625604c54b1ad3874ea0053130a43df0`。
+- 最終受影響真EVM **31/31 PASS**，625773.2286ms，fail/skip/cancel0；UTC2026-11-13T21:25:41.8189383Z至21:36:07.8460147Z。原log `kufo637-continuous-evm-final-20261113.log` SHA256 `4acb192b8c4a44f43584b4f97f2c11d62b973f204a6918f194904abadc13ec02`。
+- 34個未改合約creation/runtime/ABI逐項與首次編譯一致，KUFO ABI也一致，見`artifacts/kufo637-continuous-equivalence.json`。原4項ABI及10項main lineage在首次45項內已通過；連同同指紋純20項與最終EVM31項形成65項驗證矩陣，**不是一次65項單次全過**。其他套件未重跑，不能借舊35+185聲稱本次全repo通過。
+
+| 最終實際案例 | gas/結果 | 保留界限 |
+| --- | --- | --- |
+| 256 dust後完整transfer / terminal settlement | 264105 / 340037 | <300000 / <500000 |
+| 32 dormant年度普通transfer / settlement | 4820020 / 1400028 | 每次<8000000 |
+| 32 selected groups transfer / conversion | 2783334 / 1014984 | 每次<8000000 |
+| 32年512窗/543交集constructor | 18216737gas；40242bytes initcode | <30000000；<=49152bytes |
+| 32年256窗/287交集append提案 / 執行 | 428852 / 7555818 | 每次<8000000 |
+| 100/1000/10000年延遲後單組transfer | 264105 / 264105 / 264105 | 不掃經過年度；<8000000 |
+
+31EVM保留原22安全/權利案例，新增9項覆蓋完整payload/延遲/owner更替/取消/錯overlap、真Furnace跨32及64年新鑄、過期補表不追溯、萬年延遲補結、年12027時間戳、全uint32 bitmap與真holder group/year aggregate、append最大工作量。BitmapHarness僅測內部索引，沒有假裝建立65536個真鏈上group；10000年/120000組是純資料驗證。手機/真錢包/真農曆萬年表及真部署均未由此驗收。
+
+## 正式部署前仍需完成
+
+最終固定來源編譯、EVM與有界gas、獨立原碼審查、具體初始與接續曆表/正式時區/生效與財務年界/星座窗口定案，以及當時鏈、canonical runtime/地址、Registry owner/minimumDelay/角色與原成本限制核對。只有真正有權的持有人用本人既有錢包確認部署/啟用/曆表治理。AI本輪0真鏈讀取、0簽署、0送單、0主網或測試網部署；無新正式constructor/地址/proposal/receipt/executableAt，保持未定。UI/手機/真錢包/真轉化也未由此源碼候選驗收。
+
+---
+
+# 前輪KUFO工程接續與部署準備（2026-11-13，完整歷史）
 
 狀態：`CONVERTER_HARDENING_VERIFIED / NOT_DEPLOYED / FORMAL_CALENDAR_PENDING`。
 本檔沿原 #637 累積維護；檔名是工程沿革，正式產品、代幣及合約入口均為 KUFO。

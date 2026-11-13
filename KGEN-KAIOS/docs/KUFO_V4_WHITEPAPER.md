@@ -1,5 +1,61 @@
 # KUFO 仙丹白皮書
 
+## 2026-11-14 權威接續：持續煉丹與分段出生曆法（LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED）
+
+依 Human「好改到好，星座和生肖能配合到1萬年航程嗎」及持續煉丹要求，沿原 PR #637、既有 KUFO 核心與文件接續。
+**取消舊候選把 32 個發行年當作終身停鑄期限的設計；2039 停鑄草案未採用。** 下方保留的固定 N 年關閉、終身 32 年限制及前輪測試均屬歷史，與本段衝突時以本段為準；不另發代幣、Runtime 或平行產品。
+持續煉丹指不因預設曆法年限永久關閉，仍受原終身發行 cap、真 burn、資格與安全條件限制，不是無上限增發。
+
+### 只附加的分段治理
+
+本機候選已改為 append-only calendar：初始 constructor 最多 32 年／512 個出生窗口；之後治理 append 每次最多 32 年／256 個窗口（MAX_APPEND_BIRTH_WINDOWS）。具體分段跨度須同時符合窗口數量限制，這些是單次工程界限，不是 KUFO 的終身年數或窗口上限。
+append 沿用既有 8M 操作 gas 預算，不能套用 constructor 的 30M 部署預算；32年／256窗口形成287交集分組的本機實測 execution 為7,555,818 gas，低於8M，完整界限見下表，不是主網費用或可用性保證。
+只有現任 Organ Registry owner 可提案精確延長 payload hash；等待該 Registry 的 minimumDelay（不得少於一小時）。到期雖可由任何帳戶呼叫執行，仍須重新核對同一 owner、parent calendar hash 與精確 payload；取消由現任 owner 辦理。
+新段只能接在既有末端，並完全匹配舊段最後三個年界，不能改寫既有年界、group、出生屬性或成熟權利。這項執行資格不是 AI 的自動送交易授權，真實治理仍由合法持有人確認。
+若維護落後，可補齊末端以後尚未覆蓋的過期空窗，但當下新 mint 一律以當下時間歸屬，不可追溯補鑄到已過的出生窗口。
+缺少覆蓋當下的正式未來年界／窗口時，先拒絕新 mint；完成合法追加後可恢復。不得宣稱無人維護、沒有資料或沒有治理交易仍能永不停止。
+
+### 不改寫出生與有界操作
+
+初始 calendarHash／calendarVersion 保留；latestCalendarHash 逐段鏈接，groupCalendarHash 永久綁定該出生段。
+mintOrigin 的 bornAt、出生年、生肖、星座、group 與其來源 hash 不因續段、轉讓、合併或補結而重設。
+年、cohort 與 group 識別採 uint32 候選範圍；以持有人活躍分組的有序 bitmap 與年度 aggregate 查找，不掃描全部萬年歷史或逐筆收款清單。
+一般 transfer／burn 單筆仍最多處理 32 個分組，超出須整筆拒絕並改用 selected-group 入口分批接續；未選份額保留。claimableTotal 超過單批範圍時，改用 heldGroups／claimableForGroups 分頁核對，不以無界迴圈讀完所有歷史。
+原 50%／75%／100% 共同年界、永久補結、尾差結清、KUFO／KSHIP 供應 cap、1:1,000 比例、holder allowance、真 KAIOS burn、KGEN 餘額資格及原子失敗回滾均不變。
+
+### 萬年範圍與驗收界線
+
+一萬年是數值範圍、資料分段與操作活性的設計目標，不是已核定一萬年的農曆、生肖或天文星座表。香港天文台公開對照資料覆蓋 1901–2100 年，遠期靠近日界的計算可能有日期差異；不能將這份資料外推為萬年精確表。
+Human 已確認生肖年界沿用**地球農曆新年**，不能改成元旦，亦不代表核定精準萬年預測。正式生效時間、時區、財務年界、星座窗口及各期具體年曆／生肖表，仍須依原定案程序核定；不得用合成 fixture、2039 草案或預估日期填入正式參數。
+本輪純 policy suite **20/20 PASS**，0 failed/skipped/cancelled，7471.6809ms；已讀回原 `kufo637-continuous-policy-bounded-20261113T2100.log`。其中包括萬年合成資料分段、出生 group ID 超過65535，以及 constructor 可容257窗口、append 拒絕257窗口的獨立上限案例。這是本機純投影證據，不是正式萬年曆表或鏈上 gas 驗收。
+本次狀態為 **LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED**。固定程式／測試提交為 `0bf33c4b1ed61da5ddd08c4f426e3e6a5408fd9b`，不是已部署地址；下方舊35項與另185項結果仍按原來源保存，不混入本次計數。
+
+### 本輪固定來源、分開驗證與操作界限
+
+最終編譯36合約、0 warnings，248620.5081ms；KUFO 編譯artifact的creation／runtime大小為22,450／18,692 bytes，並非正式參數完成後的runtime hash。
+standard-input SHA256 為 `1bd0e40d4ec2bacb6c00abc08322e0b4625604c54b1ad3874ea0053130a43df0`；KUFO原碼SHA256為 `7226aac7ec0f48405a33f3ab17f64eb57bf1cc5d8c390d1d89dd9cd7f220d415`，Furnace為 `4d1f841fc2b6cc30f8ff805947b5b990153bdddcab5953bc74eb23697b82b4ed`。
+
+| 驗證批次 | 實際結果與適用來源 |
+| --- | --- |
+| 最終受影響 EVM | 31/31 PASS，0 failed/skipped/cancelled，625773.2286ms |
+| 純policy | 20/20 PASS，7471.6809ms，沿前述本輪原log，未重跑 |
+| ABI／main lineage | 第一輪4 ABI＋10 legacy lineage通過；34份未變artifact的creation/runtime/ABI逐一相同，KUFO ABI亦相同，未重跑這14項 |
+
+這是**65項組合矩陣，不是一次65項全跑**。最終EVM原log為 `kufo637-continuous-evm-final-20261113.log`，SHA256 `4acb192b8c4a44f43584b4f97f2c11d62b973f204a6918f194904abadc13ec02`，已讀回31項終態。
+第一輪45項為44 PASS／1 FAIL，718824.4665ms；唯一失敗是dust transfer超過原300k門檻，原log與archive保留。其後只以六處global-zero祖先guard省去bitmap冗餘寫入，set/clear對稱，搜尋函式不變；未放寬300k／500k／8M門檻，才執行上述最終31項。
+
+| 最終本機量測 | 實際gas／大小及界限 |
+| --- | --- |
+| 256次dust後單組transfer／settle | 264,105 < 300,000／340,037 < 500,000 gas |
+| dormant32一般transfer／settle | 4,820,020／1,400,028 gas，維持8M操作界限 |
+| selected32 transfer／convert | 2,783,334／1,014,984 gas，維持8M操作界限 |
+| 最大constructor | 18,216,737 gas < 30M；initcode 40,242 bytes < 49,152 |
+| 32年／256窗／287新增分組append | propose 428,852／execute 7,555,818 gas，均 < 8M |
+
+全uint32 bitmap actor只驗四層內部索引，沒有真的建立65,536個鏈上cohort；10,000年／120,000分組是純資料測試，兩者都不是萬年天文預測。獨立原碼審查結果NO_BLOCKER是本輪工程複核，不是外部安全審計。
+本版候選ABI將origin的groupId由uint16改為uint32、issuanceCohorts由uint8改為uint32；Furnace另依賴groupCalendarHash。必須交付配套五合約候選、新ABI與新地址／綁定核驗，不能混接舊Furnace、聲稱原地升級或覆寫既有LIVE合約。
+正式生效、時區、財務年界、各期窗口、綁定、地址、授權及成本仍待核定；部署維持 **NOT_DEPLOYED**，UI／實體手機／真錢包驗收為 **NOT_VERIFIED**。本輪未新增支出不代表未來曆表與治理上鏈免費；屆時gas及支出須由合法持有人依原限制確認，AI未部署、代簽或送交易。
+
 ## 2026-11-13 累積工程接續：共同年界與正式入口
 
 文件沿原 #637 與 Human 提供的 V5.0 年度批次定案累積更新。正式名稱／代號為 **KUFO**；

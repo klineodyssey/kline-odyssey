@@ -1,5 +1,18 @@
 # KGEN AI Operating System
 
+## KUFO #637 持續煉丹權威接續（2026-11-14，LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED）
+
+Human 最新要求「好改到好，星座和生肖能配合到1萬年航程嗎」。沿原穩定 KUFO 入口改為 append-only 分段 calendar；**舊 32 年終身停鑄設計已被取代，2039 停鑄草案未採用**，不另建代幣、Runtime 或產品。
+初始 constructor 最多32年／512出生窗口，治理 append 每次最多32年／256窗口（MAX_APPEND_BIRTH_WINDOWS），跨度須同時符合窗口數限制，不再是終身上限；供應 cap 及原比例保持。最大32年／256窗／287交集分組append實測propose428,852、execute7,555,818 gas<8M，未套用constructor的30M部署預算。現任 Organ Registry owner 提案精確 payload hash，沿 minimumDelay（至少一小時）等待；到期可由任何帳戶執行，但須核同一 owner、parent hash、payload，取消由現任 owner 辦理。僅接末端，完全匹配舊末三年界，不修改舊 group。
+可補未覆蓋的過期空窗，但當下 mint 不得追溯；缺當下正式未來表時暫拒新 mint，合法追加後可恢復。持續出料仍需持續資料與治理維護，不保證無人維護也永不停止。
+初始 calendarHash／version 不變，latestCalendarHash 逐段鏈接，groupCalendarHash 固定出生段；origin／轉讓不重設出生屬性。uint32 年／cohort／group、活躍持有人有序 bitmap 與年度 aggregate 是長期候選設計；一般 transfer／burn 每批最多 32 個 group，更多用 selected-group 分批，claimableTotal 超批則用 heldGroups／claimableForGroups 分頁。
+萬年目標不等於已批准萬年農曆／天文表；香港天文台公開對照為 1901–2100，遠期日界可能有日期差異。Human 已確認生肖年界沿用**地球農曆新年**，不能改元旦或宣稱精準萬年預測；正式生效時間、時區、財務年界、星座窗口及各期具體表仍須依原定案程序核定，不能用合成數值或2039草案代填。
+原年度50%／75%／100%、永久補結、尾差、供應 cap、真 burn、KGEN、allowance 與實際 KUFO／KSHIP 產出核驗保持。固定程式／測試提交為 `0bf33c4b1ed61da5ddd08c4f426e3e6a5408fd9b`：36合約編譯、0 warnings，248620.5081ms；最終 **31/31 EVM PASS**（0 failed/skipped/cancelled，625773.2286ms）。純policy20/20 PASS（7471.6809ms）未重跑；首輪4 ABI＋10 main lineage通過，34份未變artifact的creation/runtime/ABI與KUFO ABI相同，這14項未重跑。**65項組合矩陣，不是一次65項全跑**；下方35項與另185項僅屬前輪歷史。
+第一輪45項為44 PASS／1 FAIL（718824.4665ms），原dust transfer超過300k。六個global-zero祖先guard修正保留原log與archive、未放寬門檻；最終dust transfer264,105<300k、settle340,037<500k。dormant32一般transfer／settle4,820,020／1,400,028、selected32 transfer／convert2,783,334／1,014,984 gas；最大constructor18,216,737<30M、initcode40,242<49,152 bytes。完整固定指紋、編譯輸入與gas／log證據見原[KUFO白皮書](docs/KUFO_V4_WHITEPAPER.md)與工程報告。
+uint32 bitmap actor是內部索引單元，不是建立65,536個真cohort；10,000年／120,000分組是純資料測試，不是萬年天文預測。獨立原碼NO_BLOCKER不是外部安全審計。origin groupId由uint16改uint32、issuanceCohorts由uint8改uint32，Furnace新增groupCalendarHash依賴；必須配套五合約新ABI／地址／綁定核驗，不能混接舊Furnace、原地升級或覆寫既有LIVE。
+**狀態 LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED**；正式參數、地址、綁定、授權及成本仍待核定，UI／實體手機／真錢包未驗。本輪未新增支出不代表未來年曆與治理上鏈免費，合法持有人仍須核准當次gas及費用。
+完整規格及證據仍沿下方既有白皮書與工程報告累積，合法持有人負責真實治理確認；AI 未部署、未簽署或送資產交易。
+
 ## KUFO 原 #637 正式工程入口（2026-11-13）
 
 Human 已指定沿既有年度候選與最新 main 整合。正式名稱固定 KUFO；唯一原碼入口為

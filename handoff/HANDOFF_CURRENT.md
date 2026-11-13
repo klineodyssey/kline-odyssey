@@ -884,3 +884,13 @@ UTC 2026-11-13T15:54:54.242Z；台灣 2026-11-13T23:54:54.244+08:00。WORK_ID KU
 舊artifact已重現1項預期RED：無KSHIP實際mint卻未拒絕。只改原Converter，核canonical KUFO/Registry/code、真burn record與proof/三精確鑄幣增量，兩入口失配整筆回滾，比例/年度/token核心不改。35合約編譯PASS/0warnings；35/35 PASS（22 EVM＋10 legacy lineage＋3 ABI），0 failed/skipped/cancelled，482912.2407ms。新logSHA 941c9f057c03c5cee483146a276a73a84d9147b9d8cbc6e44a9c5c0aa4289ef6。其餘185同指紋歷史驗證保留，非重跑220；獨立source/test/build審查NO_BLOCKER，getter-liar仍須canonical runtime attestation。新審核包以交付SHA命名；舊ZIP/red保留原kaios歸檔。
 
 實際變更：原Converter、原harness/EVMtest、編譯/整合報告、工程文件、兩白皮書、KGEN-KAIOS/README及本handoff。原dirty checkout、guardian、#19/#523/HOLD、成本與手動用量規則保留。0真鏈查/簽署/送單/部署；手機/真錢包NOT_VERIFIED。唯一下一步：Human核定完整曆法/年界/窗口/期限後，合法持有人依原清單核當時鏈/code/地址/角色及成本，使用本人錢包確認原部署流程；目前維持Draft/NOT_DEPLOYED。
+
+## 2026-11-14 KUFO 持續煉丹／農曆生肖長程交付
+
+記錄UTC 2026-11-13T21:43:06.027Z；台灣 2026-11-14T05:43:06.027+08:00。
+
+WORK_ID KUFO-637-CONTINUOUS-ALCHEMY-20261114-01；原PR637，source main33967045ed725848a6b814af0e9b10eac64f2ec7，固定程式/測試0bf33c4b1ed61da5ddd08c4f426e3e6a5408fd9b。Human要求改好持續煉丹並選地球農曆新年；2039停鑄草案未採用，32年界限改成每段工作界而非永久發行截止。calendar只接末端、舊末三年界鎖定，沿原Registry owner/minimumDelay/fullpayload/parent核准，缺表可補齊恢復但不倒填出生，舊權利/供應上限/1:1000/50-75-100保留。constructor32年512窗；後續append32年256窗；持有人有序索引、年度aggregate與32group分頁維持操作活性。
+
+最終36合約0warnings編譯PASS（248620.5081ms），KUFO source SHA7226aac7ec0f48405a33f3ab17f64eb57bf1cc5d8c390d1d89dd9cd7f220d415，standardinput1bd0e40d4ec2bacb6c00abc08322e0b4625604c54b1ad3874ea0053130a43df0。最終31/31 EVM PASS625773.2286ms；pure20/20 PASS7471.6809ms；首次ABI4/mainlineage10保留且34未變artifact模板/ABI及KUFOABI逐項等同，不重跑。65項矩陣不是單次65全過。首輪45項44PASS/1FAIL（dust原300kgas門檻）原log與62檔red zip95317f85…保留；修復只省六處冗餘索引寫入，不放寬門檻。最終dust transfer264105/settle340037，maxappend proposal428852/execute7555818<8M；最大constructor18216737gas/40242initbytes<30M/49152。內部獨立reviewNO_BLOCKER，非外部audit。
+
+本機對10000年度/120000分組與高groupID已做純資料檢查，EVM做萬年延遲、年12027時間戳及全tier索引；不是已有精準一萬年農曆/天文表，也沒有建立65536真EVMcohorts。正式初始曆表/時區/生效/財年界/星座窗口/實際地址角色code與原費用仍待核，只有合法持有人用本人錢包確認部署/啟用/後續曆表治理。0真鏈讀寫/簽署/部署；UI、手機及真錢包NOT_VERIFIED。唯一下一步：Human核定具體初始資料與當時合法綁定/成本後，由合法持有人依原流程確認；未定值或無新證據時不重造工程或重跑未變套件。詳細逐項證據沿KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md及原kaios checkpoint/current_continuity讀回。
