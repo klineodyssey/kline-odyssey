@@ -1082,3 +1082,8 @@ has only shared governance data and accepts only CAP_PROPOSE/CAP_APPROVE/
 CAP_EXECUTE intents. No new contract/source path, authority or deployment is
 introduced. Existing fixed-case IDs and calldata were independently checked
 against all three original cases; current65-test offline regression passes.
+
+
+## 宇宙生命體徵規格 V2.0 文件索引
+
+`docs/KGEN_COSMIC_VITALS_SOP.md` — Human要求的體溫、心跳、血壓與各宇宙／樓層序列規格；定義每小時／每分鐘讀價的需求、活動、權限、費用門檻及離線驗收。狀態為 ENGINEERING_SPEC_NOT_DEPLOYED，參數待校準。此索引不啟用Runtime、排程、付費資料、交易或付款；既有Owner、Registry、Queue和HOLD保持適用。
