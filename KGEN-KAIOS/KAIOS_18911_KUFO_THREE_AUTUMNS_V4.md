@@ -1,8 +1,17 @@
 # KUFO 工程接續與部署準備（2026-11-13）
 
-狀態：`REVIEW_READY / NOT_DEPLOYED / FORMAL_CALENDAR_PENDING`。
+狀態：`CONVERTER_OUTPUT_HARDENING_IN_PROGRESS / NOT_DEPLOYED / FORMAL_CALENDAR_PENDING`。
 本檔沿原 #637 累積維護；檔名是工程沿革，正式產品、代幣及合約入口均為 KUFO。
 下方完整保留前輪工程紀錄；其中舊版本、測試數量、gas、未配置星座及「主線檔不變」均為歷史證據，不是本輪完成或部署聲明。
+
+## Human「繼續」：Converter 實際產出檢查（2026-11-13）
+
+WORK_ID `KUFO-637-CONVERTER-ATOMIC-OUTPUT-20261113-01`；來源仍為main33967045與原#637交付6bedaec3，Owner／claim／HOLD核對無新衝突。沿既有Converter、harness與EVM測試修一件實際缺口，不增加產品、曆法或經濟規則。
+獨立複查發現Converter只核非零依賴及KSHIP回傳tuple：錯綁的KSHIP可讀真KUFO carrierBurnRecord，回正確受益人／金額卻不實際mint，令持有人正常授權的KUFO被燒而無產出。原KSHIP自身proof防線只保護真的傳入該core的路徑，不能代替Converter的固定綁定與完成檢查。
+已先核舊Converter creation template hash `0xe472cf3be3404c0754ad7a44217190bd0a5f76ca4f5ee7265ddb70aa422c0bc2`，只編譯新增的本機adversarial測試actor後，針對唯一no-mint反例執行：1 test、1預期FAIL，7484.9142ms，原因`Missing expected rejection`。此為舊行為反例，不算修復通過。
+原18項審核ZIP保持原hash，先於compiler清理artifacts前另存`C:/Users/mydg0/.codex/automations/kaios/kufo637-review-6bedaec3.zip`；red原log另存同目錄`kufo637-converter-red-6bedaec3.log`。既有218項與6bedaec3的驗收範圍不含此新增故障模式，不能以舊PASS取代新驗證。
+本次最小修法為constructor核token／Registry綁定，兩入口共用burn前KSHIP快照、真KUFO burn record及mint後proof／供應量／累計鑄造／受益人餘額精確增量；失配整筆回滾。正式runtime來源核對仍由合法持有人完成，getter吻合不能認證任意會說謊的bytecode。
+下一步為固定修正原碼後執行受影響22項EVM＋10項主線lineage＋3項ABI相容性驗證，獨立審查後更新原#637與新審核包；不重跑無關未變指紋套件。
 
 ## 本輪來源、Writer 與唯一實作
 

@@ -384,6 +384,21 @@ test("calendar is explicit, immutable, bounded and hash-addressable; invalid con
   await assert.rejects(deploy("KUFO", f.owner, [registry, ZeroAddress, f.calendar]));
   const otherRegistry = await deploy("KUFOV4MockOrganRegistry", f.owner);
   await rejectsCanonicalBinding(deploy("KUFO", f.owner, [await otherRegistry.getAddress(), kaios, f.calendar]), f.kufo);
+  const otherKufo = await deploy("KUFO", f.owner, [registry, kaios, f.calendar]);
+  const otherRegistryKship = await deploy("KSHIP", f.owner, [await otherRegistry.getAddress(), await f.kufo.getAddress()]);
+  await rejectsCanonicalBinding(deploy("KSHIPConverter", f.owner, [await otherKufo.getAddress(), await f.kship.getAddress()]), f.converter);
+  await rejectsCanonicalBinding(deploy("KSHIPConverter", f.owner, [await f.kufo.getAddress(), await otherRegistryKship.getAddress()]), f.converter);
+  const eoa = await f.owner.getAddress();
+  const invalidDependencies = [[eoa, await f.kship.getAddress()], [await f.kufo.getAddress(), eoa]];
+  for (const args of invalidDependencies) {
+    await assert.rejects(deploy("KSHIPConverter", f.owner, args), (error) => {
+      const data = error.data ?? error.info?.error?.data?.result;
+      const parsed = f.converter.interface.parseError(data);
+      assert.equal(parsed.name, "NotAContract");
+      assert.deepEqual(Array.from(parsed.args), [eoa]);
+      return true;
+    });
+  }
 });
 
 test("lifetime issuance cap cannot be recycled after terminal burn", async (t) => {
@@ -729,4 +744,92 @@ test("the 32-year and 512-window candidate maximum deploys under Shanghai and se
   assert.equal(await f.kship.balanceOf(await f.beneficiary.getAddress()), 32_000_000n);
   t.diagnostic(`candidate maximum: initcode=${initBytes} bytes; constructor gas=${deployment.gasUsed}; selected32 transfer gas=${move.gasUsed}; selected32 conversion gas=${convert.gasUsed}`);
   await conservation(f);
+});
+
+async function adversarialCarrierFixture(t) {
+  const f = await fixture(t);
+  const adversarialKship = await deploy("KUFOV4AdversarialKship", f.owner, [
+    await f.registry.getAddress(), await f.kufo.getAddress(), await f.victim.getAddress(),
+  ]);
+  const adversarialConverter = await deploy("KSHIPConverter", f.owner, [await f.kufo.getAddress(), await adversarialKship.getAddress()]);
+  await mint(f, 1000n, f.owner, "adversarial-carrier-real-burn-origin");
+  await mined(f.registry.setOrgan(CONVERTER_ID, await adversarialConverter.getAddress()));
+  await mined(f.kufo.approve(await adversarialConverter.getAddress(), 1000n));
+  await at(f, f.starts[3]);
+  return { ...f, adversarialKship, adversarialConverter };
+}
+
+async function carrierRollbackState(f, proofId) {
+  const owner = await f.owner.getAddress();
+  const beneficiary = await f.beneficiary.getAddress();
+  const wrongRecipient = await f.victim.getAddress();
+  const converter = await f.adversarialConverter.getAddress();
+  return {
+    kufoOwner: await f.kufo.balanceOf(owner),
+    kufoBeneficiary: await f.kufo.balanceOf(beneficiary),
+    cohort: tranches(await f.kufo.cohort(owner, FIRST_YEAR)),
+    birthGroup: tranches(await f.kufo.birthGroup(owner, 1)),
+    allowance: await f.kufo.allowance(owner, converter),
+    kufoSupply: await f.kufo.totalSupply(),
+    kufoMinted: await f.kufo.totalMintedFromAlchemy(),
+    decayed: await f.kufo.totalDecayedForKship(),
+    conversionCount: await f.adversarialConverter.conversionCount(),
+    carrierRecord: Array.from(await f.kufo.carrierBurnRecord(proofId)),
+    kshipSupply: await f.adversarialKship.totalSupply(),
+    kshipBalances: await Promise.all([owner, beneficiary, wrongRecipient, converter].map((address) => f.adversarialKship.balanceOf(address))),
+    kshipMinted: await f.adversarialKship.totalMintedFromKufo(),
+    proofMinted: await f.adversarialKship.carrierProofMinted(proofId),
+    fault: await f.adversarialKship.fault(),
+  };
+}
+
+async function rejectsAtomicCarrierRelease(f, entrypoint) {
+  const owner = await f.owner.getAddress();
+  const beneficiary = await f.beneficiary.getAddress();
+  const number = await f.adversarialConverter.conversionCount() + 1n;
+  const chainId = (await f.provider.getNetwork()).chainId;
+  const proofId = keccak256(AbiCoder.defaultAbiCoder().encode(
+    ["uint256", "address", "uint256", "address", "address", "uint256"],
+    [chainId, await f.adversarialConverter.getAddress(), number, owner, beneficiary, 1000n],
+  ));
+  const before = await carrierRollbackState(f, proofId);
+  const args = [1000n, beneficiary];
+  if (entrypoint === "convertGroups") args.push([1]);
+  const method = f.adversarialConverter[entrypoint];
+  await assert.rejects(method.staticCall(...args), (error) => {
+    const data = error.data ?? error.info?.error?.data?.result;
+    const parsed = f.adversarialConverter.interface.parseError(data);
+    if (before.fault === 5n) {
+      assert.equal(parsed.name, "Error");
+      assert.deepEqual(Array.from(parsed.args), ["LINEAGE_MISMATCH"]);
+    } else {
+      assert.equal(parsed.name, "CanonicalKshipReleaseMissing");
+      assert.deepEqual(Array.from(parsed.args), [proofId]);
+    }
+    return true;
+  });
+  await assert.rejects(mined(method(...args, { gasLimit: GAS_BOUND })));
+  assert.deepEqual(await carrierRollbackState(f, proofId), before);
+  await conservation(f);
+}
+
+test("converter rejects no-mint KSHIP output and rolls back real KUFO", async (t) => {
+  const f = await adversarialCarrierFixture(t);
+  for (const entrypoint of ["convert", "convertGroups"]) await rejectsAtomicCarrierRelease(f, entrypoint);
+});
+
+test("converter rejects inconsistent KSHIP release modes and preserves all state", async (t) => {
+  const f = await adversarialCarrierFixture(t);
+  const faults = [
+    { mode: 1, name: "wrong recipient" },
+    { mode: 2, name: "short amount" },
+    { mode: 3, name: "wrong cumulative minted amount" },
+    { mode: 4, name: "carrier proof not marked minted" },
+    { mode: 5, name: "mismatched returned tuple" },
+  ];
+  for (const fault of faults) {
+    await mined(f.adversarialKship.setFault(fault.mode));
+    for (const entrypoint of ["convert", "convertGroups"]) await rejectsAtomicCarrierRelease(f, entrypoint);
+    t.diagnostic(`atomic rejection verified for ${fault.name} through both converter entrypoints`);
+  }
 });

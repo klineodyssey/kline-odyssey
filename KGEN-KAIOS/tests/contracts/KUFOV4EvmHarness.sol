@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 interface IKUFOV4Mintable {
     function mintFromImmediateProof(bytes32 proofId, address beneficiary, uint256 amount) external returns (uint256 lotId);
 }
@@ -22,6 +24,18 @@ interface IKAIOSV4TestBurnSource {
 
 interface IKUFOV4TestFurnace {
     function consumeImmediateProof(bytes32 proofId) external returns (address beneficiary, uint256 amount);
+}
+
+interface IKUFOV4CarrierRecord {
+    struct CarrierBurnRecord {
+        address owner;
+        address beneficiary;
+        address converter;
+        uint256 kufoBurned;
+        uint256 expectedKship;
+    }
+
+    function carrierBurnRecord(bytes32 proofId) external view returns (CarrierBurnRecord memory);
 }
 
 contract KUFOV4MockOrganRegistry {
@@ -135,5 +149,50 @@ contract KUFOV4ReplayConverter {
 
     function mintAgain(address kship, bytes32 proofId) external {
         IKSHIPV4TestMinter(kship).mintFromCarrierProof(proofId);
+    }
+}
+
+// Test-only adversarial carrier. It consumes a genuine KUFO carrier-burn record
+// and lies about one release postcondition at a time. Its immutable dependencies
+// deliberately match the real token and registry so binding checks alone pass.
+contract KUFOV4AdversarialKship is ERC20 {
+    enum Fault { NoMint, WrongRecipient, ShortAmount, WrongCounter, ProofNotMarked, TupleMismatch }
+
+    IKUFOV4CarrierRecord public immutable kufo;
+    address public immutable organRegistry;
+    address public immutable wrongRecipient;
+    Fault public fault;
+    uint256 public totalMintedFromKufo;
+    mapping(bytes32 => bool) public carrierProofMinted;
+
+    constructor(address registry, address kufoToken, address otherRecipient)
+        ERC20("Adversarial KSHIP Test Fixture", "TESTKSHIP")
+    {
+        organRegistry = registry;
+        kufo = IKUFOV4CarrierRecord(kufoToken);
+        wrongRecipient = otherRecipient;
+    }
+
+    function setFault(Fault selected) external {
+        fault = selected;
+    }
+
+    function mintFromCarrierProof(bytes32 proofId) external returns (address beneficiary, uint256 amount) {
+        IKUFOV4CarrierRecord.CarrierBurnRecord memory record = kufo.carrierBurnRecord(proofId);
+        require(record.owner != address(0) && record.beneficiary != address(0), "REAL_BURN_REQUIRED");
+        require(record.converter == msg.sender && record.kufoBurned > 0, "REAL_CONVERTER_REQUIRED");
+        require(record.expectedKship == record.kufoBurned * 1000, "EXACT_RATIO_REQUIRED");
+        require(!carrierProofMinted[proofId], "PROOF_ALREADY_MINTED");
+        beneficiary = record.beneficiary;
+        amount = record.expectedKship;
+
+        if (fault != Fault.ProofNotMarked) carrierProofMinted[proofId] = true;
+        totalMintedFromKufo += fault == Fault.WrongCounter ? amount - 1 : amount;
+        if (fault != Fault.NoMint) {
+            address receiver = fault == Fault.WrongRecipient ? wrongRecipient : beneficiary;
+            uint256 minted = fault == Fault.ShortAmount ? amount - 1 : amount;
+            _mint(receiver, minted);
+        }
+        if (fault == Fault.TupleMismatch) amount -= 1;
     }
 }
