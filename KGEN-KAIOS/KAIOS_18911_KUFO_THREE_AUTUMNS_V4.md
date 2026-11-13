@@ -1,6 +1,6 @@
 # KUFO 工程接續與部署準備（2026-11-13）
 
-狀態：`ENGINEERING_IN_PROGRESS / NOT_DEPLOYED / FORMAL_CALENDAR_PENDING`。
+狀態：`REVIEW_READY / NOT_DEPLOYED / FORMAL_CALENDAR_PENDING`。
 本檔沿原 #637 累積維護；檔名是工程沿革，正式產品、代幣及合約入口均為 KUFO。
 下方完整保留前輪工程紀錄；其中舊版本、測試數量、gas、未配置星座及「主線檔不變」均為歷史證據，不是本輪完成或部署聲明。
 
@@ -102,7 +102,42 @@ Registry 的 `code.length` 與治理延遲並不認證路由邏輯；授權 Conv
 原始首輪log SHA256 `25ad335cbe0189e239728fb7b35525c7678edaaac629b184c0e596397edf0968` 保留於 `artifacts/kufo637-test.log`，不覆寫為成功紀錄。
 原首輪最大512窗口案例的31個年界恰好重合，只有512groups，constructor15,960,735gas、initcode34047bytes；這項只算對齊案例，不冒稱最大交集。
 唯一修復重跑改用不重合內界：最多32年×512窗口交集為543groups，保持首尾、內窗口界各加1秒並精確核543。測試仍使用Shanghai限制、30M本機blockgas及8M單批操作上限。
-目前最終EVM重跑待執行；尚不能將本節第一輪寫成整體PASS。非EVM198項來源未變且本輪已通過，後續只重跑已修改的20項EVM，不為未變指紋重跑其他套件。
+第一輪結束時最終EVM重跑待執行；第一輪本身不能寫成整體PASS。非EVM198項來源未變且本輪已通過，後續只重跑已修改的20項EVM，不為未變指紋重跑其他套件。
+
+### 最終收斂（UTC 2026-11-13T14:55:18Z／台灣22:55:18）
+
+測試固定提交 `cc466c58d2dde5c124dfbb917159f29d28d03897`，EVM測試SHA256 `b2ddb4821cf45bcbed9fbcdd821c960c002b77694a78c345d50d41f47f851cb5`。
+此提交與程式固定提交e03之間，合約、policy、compiler、harness、helper及其餘測試均0差異。
+唯一修復重跑 `node --test --test-isolation=none --test-concurrency=1 --test-reporter=spec tests/kufo-v4-evm.behavior.test.mjs`：**20/20 PASS、0 FAIL、0 skipped/cancelled，368864.2668ms**。
+最終驗證矩陣為未變指紋的非EVM **198/198** 加本次EVM **20/20**，共218項；不是宣稱第一次單一suite全過。兩份原始log分別保留。
+
+| 最終實測 | 結果 |
+|---|---:|
+| 32發行年／512精確窗口交集 | **543 groups** |
+| 包含合成constructor實參的initcode | **34047 bytes**，小於49152 |
+| 543groups constructor | **16692221 gas**，小於30M本機blockgas |
+| 最大設定selected32 transferFrom | **2370476 gas** |
+| 最大設定selected32 conversion | **903884 gas** |
+| 33groups standard transfer／conversion | 兩者整筆拒絕且餘額／tranches／allowance／proof計數回滾；selected32+1可完成 |
+| 真Furnace資格 | KGEN為0或差1wei拒絕、正好門檻成功；KGEN不扣不鎖，KAIOS holder與totalSupply真減少 |
+| 惡意路由 | 無真burn／未consumed／跨KUFO／正確tuple未mint／未授權converter均拒絕或原子回滾 |
+
+gas為合成本機Ganache Shanghai測量，不是當時BSC費率、鏈上回執或已核准支出。Ganache因本機Node24缺nativeµWS使用原套件NodeJS fallback，未安裝額外依賴、未放寬限制。
+獨立Reviewer `restore_review`對e03完整source／最後constructor及e03..cc測試差異均回報NO_BLOCKER；這是本輪獨立工程審查，不冒稱外部審計認證。
+
+### 合法持有人部署順序與審核包
+
+先核定完整calendar與ID名稱表，再以固定source及實參重建：KUFO → Furnace → Output，另部署綁KUFO的KSHIP，最後部署Converter。
+逐項讀回immutable與精確runtime/code，再由實際Registry Owner按當時bootstrap封存／治理延遲處理FURNACE18911、OUTPUT168888與KSHIP_CONVERTER；不假定某帳戶現在仍有權限，不重開bootstrap。
+只有Furnace能呼叫固定Output；KUFO mint還核Registry當值Output與真burn proof；KUFO burn核當值Converter和holder allowance；KSHIP核immutable KUFO的carrierBurnRecord。
+核對所有地址、code、綁定與角色後才啟用原站操作；舊V1及舊proof另存原歷史，不移植、不原址覆蓋。
+
+本機審核產物沿編譯器既有`artifacts/`保存：`KUFO.deployment-review.json`、`kufo-deployment-review.zip`。
+ZIP只列KUFO／Furnace／Output／KSHIP／Converter五份正式artifact、自足standard-input、編譯證據、兩份實測log與本工程／白皮書；不列Mock或LegacyBaseline部署artifact，不含密鑰或交易送出腳本。
+creation/runtime template的keccak256、來源與artifact SHA256、constructor ABI及immutable參照在審核JSON中；所有新主網地址、正式constructor值、含實參位元碼／runtime hash、proposal／receipt與executableAt保持null。
+未新增CI workflow；既有舊CI／LIVE不被當新版驗證。未改UI，手機、真錢包、實際部署、真轉化與餐廳交付仍未驗收。
+
+**未完成與唯一下一步：** Human核定正式calendar／時區／生效年界／生肖星座窗口及發行期限後，合法持有人依本清單核當時鏈、地址、角色與原成本限制，完成原流程的部署確認。AI本輪0鏈查、0簽署、0鏈寫入、0主網或測試網部署；原#19／#523與其他具體HOLD未解除。
 
 ## 前版完整工程紀錄（SUPERSEDED historical evidence）
 

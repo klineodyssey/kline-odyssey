@@ -854,3 +854,24 @@ no actual agent transaction, payment, contract deployment or quota reset occurre
 Player faucet candidate still NOT_DEPLOYED / formal source NOT_CONFIGURED.
 The same cloud shared memory will carry the verified source and this closeout;
 DOT's actual read/write or ACK remains unconfirmed. No duplicate memory file.
+
+## KUFO #637 工程接續：候選已驗證，正式參數待定（2026-11-13）
+
+UTC `2026-11-13T14:57:16Z`／台灣`2026-11-13T22:57:16+08:00`。
+RUN_ID `KAIOS-ENGINEERING-20261113T145716000Z`；WORK_ID `KUFO-637-ANNUAL-FINALIZATION-20261113`。
+Human本頁知蘭轉達沈英明定稿指令，沿原#637／原產品；單一整合Writer衡曜/root，分離來源、policy、EVM與獨立Reviewer檔案範圍已保存原checkpoint，未虛構原子claim。
+來源main `33967045ed725848a6b814af0e9b10eac64f2ec7`、原PR637 head `9dc0260543005597d2d02f9b3b8c9dbe5a6be0a6`；先純整合`82dea461`保留main安全測試。
+程式固定`e03ef59e1e5981ea2dcd6f6657fd18d877be1be4`；最終EVM測試固定`cc466c58d2dde5c124dfbb917159f29d28d03897`，兩者core/policy/compiler/harness/helper均無差異。
+
+既有KUFO／Furnace／Output／Converter與policy改唯一正式名稱；真burn、實際mint後置條件、holder allowance、跨KUFO proof及錯KGEN／Registry綁定均設防。
+不可變出生年／生肖／星座分組與32-group分批轉讓／補結沿原候選完成；未另建Runtime、bootstrap、產品或排程。
+主線舊49Epoch安全斷言以pinned Git baseline完整保留，歷史V1與archive未改。實際檔案、ABI、編譯設定與部署順序見既有`KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`、兩白皮書及README/index。
+
+驗證：編譯34合約、0warnings；storage/CURRENT/integration與archive KAIOS七項ABI核對PASS。
+首輪218項216PASS/2FAIL（ethers Result代理比較）；一次修復後20EVM全部PASS，368864.2668ms，另198未變指紋項本輪已PASS。
+最壞32年×512窗口為543groups，initcode34047bytes、constructor16692221gas、selected32 transfer2370476／conversion903884gas；Shanghai/30M blockgas/8M batch上限未放寬。
+獨立source與修復差異審查NO_BLOCKER，非外部審計認證。
+首log SHA256 `25ad335cbe0189e239728fb7b35525c7678edaaac629b184c0e596397edf0968`；最終log `82f9ed650400df8c70384dc199ed078b5ff953b3799b69d086bc2162c6041019`，均保留。
+未改UI，手機／真錢包／部署／真轉化仍NOT_VERIFIED；0鏈查、0簽署、0鏈寫入。#19／#523及具體HOLD、成本與Human手動用量政策均保留。
+
+唯一下一步：Human核定正式calendar、時區、生效／年界、生肖星座窗口及發行期限後，合法持有人核當時鏈、地址、Registry角色與原成本限制，依原流程確認部署。新地址／正式constructor／proposal／receipt／executableAt目前均未產生，不把舊LIVE或舊CI當新部署。

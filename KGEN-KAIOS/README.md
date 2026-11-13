@@ -11,6 +11,8 @@ Human 已指定沿既有年度候選與最新 main 整合。正式名稱固定 K
 [`KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)。
 帶版本測試與文件路徑是沿革，不是另一正式代幣。
 正式曆法、時區、年界、生肖／星座窗口與發行期限未定；尚未部署。
+本輪固定程式e03ef59e、測試修訂cc466c58；編譯34合約0warnings，最終矩陣198非EVM＋20EVM通過。
+部署審核包為本機生成的`KGEN-KAIOS/artifacts/kufo-deployment-review.zip`，用途是審核五份正式artifact／完整編譯輸入／測試log／待定constructor清單，不能直接送部署交易。
 以下較早的 49 Epoch 與 V4 候選路徑表保留為歷史，不構成現行入口或新驗收。
 
 **System ID:** KAIOS

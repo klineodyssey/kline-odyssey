@@ -1,17 +1,19 @@
 {
   "status": "PASS",
   "checks": {
-    "files": 22,
+    "files": 23,
     "json": 2,
-    "markdown": 6,
-    "utf8": 22,
+    "markdown": 7,
+    "utf8": 23,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,
     "brokenLinks": 0
   },
   "protectedChanges": {
-    "currentFiles": [],
+    "currentFiles": [
+      "handoff/HANDOFF_CURRENT.md"
+    ],
     "constitutionFiles": [],
     "bootSequenceChanged": false,
     "walletOrPrivateKeyFiles": [],
