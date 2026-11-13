@@ -1,6 +1,6 @@
 # KUFO 工程接續與部署準備（2026-11-13）
 
-狀態：`CONVERTER_OUTPUT_HARDENING_IN_PROGRESS / NOT_DEPLOYED / FORMAL_CALENDAR_PENDING`。
+狀態：`CONVERTER_HARDENING_VERIFIED / NOT_DEPLOYED / FORMAL_CALENDAR_PENDING`。
 本檔沿原 #637 累積維護；檔名是工程沿革，正式產品、代幣及合約入口均為 KUFO。
 下方完整保留前輪工程紀錄；其中舊版本、測試數量、gas、未配置星座及「主線檔不變」均為歷史證據，不是本輪完成或部署聲明。
 
@@ -11,7 +11,25 @@ WORK_ID `KUFO-637-CONVERTER-ATOMIC-OUTPUT-20261113-01`；來源仍為main3396704
 已先核舊Converter creation template hash `0xe472cf3be3404c0754ad7a44217190bd0a5f76ca4f5ee7265ddb70aa422c0bc2`，只編譯新增的本機adversarial測試actor後，針對唯一no-mint反例執行：1 test、1預期FAIL，7484.9142ms，原因`Missing expected rejection`。此為舊行為反例，不算修復通過。
 原18項審核ZIP保持原hash，先於compiler清理artifacts前另存`C:/Users/mydg0/.codex/automations/kaios/kufo637-review-6bedaec3.zip`；red原log另存同目錄`kufo637-converter-red-6bedaec3.log`。既有218項與6bedaec3的驗收範圍不含此新增故障模式，不能以舊PASS取代新驗證。
 本次最小修法為constructor核token／Registry綁定，兩入口共用burn前KSHIP快照、真KUFO burn record及mint後proof／供應量／累計鑄造／受益人餘額精確增量；失配整筆回滾。正式runtime來源核對仍由合法持有人完成，getter吻合不能認證任意會說謊的bytecode。
-下一步為固定修正原碼後執行受影響22項EVM＋10項主線lineage＋3項ABI相容性驗證，獨立審查後更新原#637與新審核包；不重跑無關未變指紋套件。
+上述施工計畫已完成固定原碼、受影響22項EVM＋10項主線lineage＋3項ABI驗證及獨立審查，結果見下節；原#637與新審核包沿同一工程交付，未重跑無關未變指紋套件。
+
+### 本次固定原碼與實測結果
+
+記錄 UTC 2026-11-13T15:54:54.242Z；台灣 2026-11-13T23:54:54.244+08:00。固定程式及測試提交 86ee4e8ec93a458b607d162a80342a462ccc72f0；下列結果不是舊 CI 或舊 LIVE。
+- Converter SHA256 84312dc5b92669ffd4db02e0cc63c2cb044093633876ad61c1702221c3a296c4；harness bcc4bda1f835c150032f78fe13625db3a7e36cae73cb1c66eda18b9c2ccd3971；EVM test 516599b3ffe6fb3cee392feea4c3d415de650c03ea56101029e4bdd07feebefc。
+- solc0.8.24／OZ5.0.2／optimizer1／viaIR／paris：35合約、0warnings、無EIP-170超限。新Converter creation/runtime template為3714／2881 bytes；standard-input SHA256 35d77f244ec99bf4dab6a9a46703c927e89f2f3a9b5932a3442c1471c71eca32。
+- 受影響驗證：35/35 PASS（22 EVM＋10 legacy lineage＋3 ABI），0 failed/skipped/cancelled，482912.2407ms。命令：node --test --test-isolation=none --test-concurrency=1 --test-reporter=spec tests/kufo-v4-evm.behavior.test.mjs tests/token-lineage.unit.test.mjs tests/kufo-v4-kship-interface.unit.test.mjs；cwd KGEN-KAIOS。
+- 原始log artifacts/kufo637-converter-final.log，SHA256 941c9f057c03c5cee483146a276a73a84d9147b9d8cbc6e44a9c5c0aa4289ef6。兩新增案驗no-mint、wrong recipient、short amount、wrong counter、proof not marked、tuple mismatch；兩入口皆做明確錯誤staticCall與實際reverting tx、完整狀態相等。
+- 原20 EVM斷言保留。前輪非EVM198中13項本次重驗，其餘185保留相同來源指紋的既有PASS；矩陣為185歷史未變＋35本次＝220獨立項目，不宣稱本輪重跑220項或單次220全過。
+- 最大32年／512窗口／543交集分組：initcode 34047 bytes、constructor 16692221 gas；selected32 transfer 2370476、conversion 913044 gas。Shanghai／30M block／8M操作上限未放寬，未開unlimited size。
+- 獨立read-only審查 restore_review 對固定原碼、測試差異、constructor ABI及編譯來源 NO_BLOCKER；不是外部安全審計認證。持有人仍須核canonical runtime，getter吻合不能認證任意惡意bytecode。
+
+新審核JSON／ZIP沿原artifacts目錄以最終交付提交前8碼命名：KUFO.deployment-review-<deliverySHA8>.json、kufo-deployment-review-<deliverySHA8>.zip。保存五個正式artifact、新standard-input、新red/green與歷史log、報告／完整白皮書／README／handoff及來源指紋；生成後逐項讀回SHA。舊kufo-deployment-review.zip保持6bedaec3歷史包與原hash，不作新Converter通過證據。
+
+未定事項仍為正式曆法、時區、生效時間、共同年界、生肖／星座窗口及發行期限；新部署地址／constructor實參／含immutable runtime／角色授權／治理proposal與回執均待核。本次0真鏈查／簽署／送單／部署，手機與真錢包NOT_VERIFIED。
+唯一下一步：Human核定完整參數後，合法持有人以原清單核當時鏈、canonical code／地址、角色及原成本限制，使用本人錢包確認原部署流程。未核定前保留原PR637 Draft與NOT_DEPLOYED。
+
+以下保留6bedaec3及更早完整交付紀錄；其中「本輪」、34合約、218項及舊位元碼／gas均指各自歷史階段。
 
 ## 本輪來源、Writer 與唯一實作
 

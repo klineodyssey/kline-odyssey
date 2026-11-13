@@ -11,9 +11,12 @@ Human 已指定沿既有年度候選與最新 main 整合。正式名稱固定 K
 [`KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)。
 帶版本測試與文件路徑是沿革，不是另一正式代幣。
 正式曆法、時區、年界、生肖／星座窗口與發行期限未定；尚未部署。
-本輪固定程式e03ef59e、測試修訂cc466c58；編譯34合約0warnings，最終矩陣198非EVM＋20EVM通過。
-部署審核包為本機生成的`KGEN-KAIOS/artifacts/kufo-deployment-review.zip`，用途是審核五份正式artifact／完整編譯輸入／測試log／待定constructor清單，不能直接送部署交易。
+先前固定程式e03ef59e、測試修訂cc466c58／PR head6bedaec3的218項通過結果（198非EVM＋20EVM）保留為歷史；該20項EVM未覆蓋本次新發現的Converter no-mint缺口，不能替代新修正驗證。
+舊`KGEN-KAIOS/artifacts/kufo-deployment-review.zip`僅保留6bedaec3歷史包；本次新包依最終交付SHA命名為`kufo-deployment-review-<deliverySHA8>.zip`，沿原artifacts保存五份正式artifact／完整編譯輸入／測試log／待定constructor清單，不能直接送部署交易。
 以下較早的 49 Epoch 與 V4 候選路徑表保留為歷史，不構成現行入口或新驗收。
+
+原 `contracts/KSHIPConverter.sol` 固定來源 `86ee4e8e` 補強兩個既有入口的原子產出驗證：constructor 保留兩地址 ABI，要求兩 token 有合約程式碼、KSHIP 綁定正確 KUFO 且 Registry 一致；burn 前保存 KSHIP proof 未用及供應量／累計鑄造／受益人餘額，burn 後核真 KUFO carrier record，mint 後核 proof 與三項精確增量。失配整筆回滾，不以回傳 tuple 取代實際 KSHIP 產出。
+任意 getter-liar 位元碼仍須由合法持有人核實 canonical runtime／immutable／地址與治理綁定。本輪受影響35/35 PASS（22 EVM＋10 legacy lineage＋3 ABI），0 failed/skipped/cancelled，482912.2407ms；指紋與新交付SHA命名的審核包由原工程報告保存。正式參數仍待核定，狀態保持 `NOT_DEPLOYED`，AI 未部署或簽署。
 
 **System ID:** KAIOS
 **Version:** V10.0 Operating System

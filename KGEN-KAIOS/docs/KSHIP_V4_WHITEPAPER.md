@@ -23,6 +23,18 @@ KUFO 的 `carrierBurnRecord` 供 KSHIP 讀取的 ABI 保留；KSHIP 及 Converte
 `KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md` 累積記錄。
 AI 未部署、未代簽或送治理交易。正式參數及合法授權完成後，才由有權持有人確認。
 
+### Converter 實際鑄造驗證補強（2026-11-13，固定來源 86ee4e8e）
+
+既有 `KSHIPConverter.sol` 的兩個地址 constructor 及 `convert`／`convertGroups` 入口不變，原 proof 公式保留。
+constructor 核對兩個 token 地址均有合約程式碼、`KSHIP.kufo()` 等於所綁 KUFO，並要求兩者 Organ Registry 一致且非零。
+兩個入口共用同一快照與完成驗證：在燒 KUFO 前確認 KSHIP proof 未用，保存總供應量、`totalMintedFromKufo` 及受益人餘額；其後讀取真 KUFO carrier burn record，核對 owner、beneficiary、converter、kufoBurned 及 `expectedKship = kufoBurned × 1,000`。
+呼叫 KSHIP 後，除了原回傳 tuple 核對，還要求 proof 已使用與上述三個量的精確增量。缺少鑄造、錯誤收款人、錯誤數量、累計量或 proof 均不能只靠回傳數字通過。
+任一步不一致，整筆同步回滾 KUFO、授權額度、分組權利、proof 與 Converter counter；這不是新的經濟規則或第二套付款流程。
+
+getter 與狀態回讀不能認證能偽造所有回傳值的任意程式碼；canonical runtime、地址、immutable 與治理綁定仍由合法持有人依原審核包確認。
+先前 `6bedaec3` 的 218 項通過結果（198 非 EVM＋20 EVM）未覆蓋本次 no-mint 缺口，僅保留為歷史；本輪受影響35/35 PASS（22 EVM＋10 legacy lineage＋3 ABI），0 failed/skipped/cancelled，482912.2407ms；另185項同指紋歷史通過未重跑，非本次單次220項全過。
+固定來源與結果沿原工程報告保存。正式曆法及部署參數仍未核定，維持 `NOT_DEPLOYED`，沒有主網鑄造、部署或簽署。
+
 ## 前版完整正文（SUPERSEDED historical evidence）
 
 # KSHIP V4 Whitepaper — cumulative annual-cohort compatibility edition

@@ -20,11 +20,11 @@
     "contracts/KAIOSOrganRegistry.sol": "00590b53a8c07530f9a32029cae0616127c12a372684b1a0e8e40ac9908ec424",
     "contracts/KAIOSPairRegistry.sol": "59aa7b73c5992318ede286a7521f8a7b83518499d4e4c5e237b68c2362fbf2b6",
     "contracts/KSHIP.sol": "985f7c0bfee3b926f60443700876a4a3e5a0767236659776e62eb357f2372927",
-    "contracts/KSHIPConverter.sol": "65e1eba1c4c5d424f21825ef4e0ec7b7c60f5030b1ef7fef8427a613640b7bf8",
+    "contracts/KSHIPConverter.sol": "84312dc5b92669ffd4db02e0cc63c2cb044093633876ad61c1702221c3a296c4",
     "contracts/KUFO.sol": "40351e60eb3d1e9269723a17589b566d43af894f228a291abaec4bb7690b104e",
     "contracts/KUFOClaimWormhole.sol": "0633be5aa2d07dce66b781a9973ee8b6418aae183bae8fbde5e3824a1cac1295",
     "contracts/KUFOOutputJindouyun168888.sol": "4a58c7b12e8acd67b4206fa88d77e712898d8d9f5db5caf1ac179aba0286920d",
-    "tests/contracts/KUFOV4EvmHarness.sol": "c05f433ccb40075dd5b23c2e54650d3b89485eb3ef3975dc7ee4fc9fd159d08c",
+    "tests/contracts/KUFOV4EvmHarness.sol": "bcc4bda1f835c150032f78fe13625db3a7e36cae73cb1c66eda18b9c2ccd3971",
     "tests/contracts/MockKGEN.sol": "36c498bf0f4a2bd2c8b8087be6fbf14d198c5533faaf45057519f25adc81417e",
     "tests/contracts/MockMintOrgan.sol": "c8f78f8b1b3f1df350fae39cdff9e9ce2c82f49f704342137ee599f43d6f8ef8",
     "tests/contracts/MockOrgan.sol": "45dccd5402838e324173fb6b9ff856a1833f64f6e3e6627d85f9246e6c039be0",
@@ -36,7 +36,7 @@
   },
   "standardInput": {
     "path": "artifacts/solidity-standard-input.json",
-    "sha256": "0fa10cc351d86377ae5f58e7250cd18a1ec4623cf09174bdeb2667b1bd6b65a7"
+    "sha256": "35d77f244ec99bf4dab6a9a46703c927e89f2f3a9b5932a3442c1471c71eca32"
   },
   "legacyLineageRegression": {
     "sourceRef": "33967045ed725848a6b814af0e9b10eac64f2ec7",
@@ -45,7 +45,7 @@
       "KAIOSAlchemyFurnaceLegacyBaseline"
     ]
   },
-  "contractCount": 34,
+  "contractCount": 35,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
@@ -167,8 +167,8 @@
     {
       "contractName": "KSHIPConverter",
       "sourceName": "contracts/KSHIPConverter.sol",
-      "bytecodeBytes": 1663,
-      "deployedBytecodeBytes": 1379
+      "bytecodeBytes": 3714,
+      "deployedBytecodeBytes": 2881
     },
     {
       "contractName": "KUFO",
@@ -199,6 +199,12 @@
       "sourceName": "tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol",
       "bytecodeBytes": 18513,
       "deployedBytecodeBytes": 18298
+    },
+    {
+      "contractName": "KUFOV4AdversarialKship",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 4291,
+      "deployedBytecodeBytes": 3295
     },
     {
       "contractName": "KUFOV4MockOrganRegistry",

@@ -875,3 +875,12 @@ Human本頁知蘭轉達沈英明定稿指令，沿原#637／原產品；單一�
 未改UI，手機／真錢包／部署／真轉化仍NOT_VERIFIED；0鏈查、0簽署、0鏈寫入。#19／#523及具體HOLD、成本與Human手動用量政策均保留。
 
 唯一下一步：Human核定正式calendar、時區、生效／年界、生肖星座窗口及發行期限後，合法持有人核當時鏈、地址、Registry角色與原成本限制，依原流程確認部署。新地址／正式constructor／proposal／receipt／executableAt目前均未產生，不把舊LIVE或舊CI當新部署。
+
+
+## KUFO #637 Converter actual-output hardening / 2026-11-13T15:54:54.242Z
+
+UTC 2026-11-13T15:54:54.242Z；台灣 2026-11-13T23:54:54.244+08:00。WORK_ID KUFO-637-CONVERTER-ATOMIC-OUTPUT-20261113-01；來源main33967045、舊交付6bedaec3；固定程式/測試86ee4e8e，原授權與單一Writer範圍。
+
+舊artifact已重現1項預期RED：無KSHIP實際mint卻未拒絕。只改原Converter，核canonical KUFO/Registry/code、真burn record與proof/三精確鑄幣增量，兩入口失配整筆回滾，比例/年度/token核心不改。35合約編譯PASS/0warnings；35/35 PASS（22 EVM＋10 legacy lineage＋3 ABI），0 failed/skipped/cancelled，482912.2407ms。新logSHA 941c9f057c03c5cee483146a276a73a84d9147b9d8cbc6e44a9c5c0aa4289ef6。其餘185同指紋歷史驗證保留，非重跑220；獨立source/test/build審查NO_BLOCKER，getter-liar仍須canonical runtime attestation。新審核包以交付SHA命名；舊ZIP/red保留原kaios歸檔。
+
+實際變更：原Converter、原harness/EVMtest、編譯/整合報告、工程文件、兩白皮書、KGEN-KAIOS/README及本handoff。原dirty checkout、guardian、#19/#523/HOLD、成本與手動用量規則保留。0真鏈查/簽署/送單/部署；手機/真錢包NOT_VERIFIED。唯一下一步：Human核定完整曆法/年界/窗口/期限後，合法持有人依原清單核當時鏈/code/地址/角色及成本，使用本人錢包確認原部署流程；目前維持Draft/NOT_DEPLOYED。
