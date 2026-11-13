@@ -26,12 +26,13 @@ interface ICanonicalKUFO {
         uint32 birthYear;
         uint8 birthZodiac;
         uint8 birthConstellation;
-        uint16 groupId;
+        uint32 groupId;
         bytes32 calendarHash;
     }
     function kaios() external view returns (address);
     function organRegistry() external view returns (address);
     function calendarHash() external view returns (bytes32);
+    function groupCalendarHash(uint256 groupId) external view returns (bytes32);
     function proofMinted(bytes32 proofId) external view returns (bool);
     function mintOrigin(bytes32 proofId) external view returns (MintOrigin memory);
     function totalMintedFromAlchemy() external view returns (uint256);
@@ -142,7 +143,7 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
         ICanonicalKUFO.MintOrigin memory origin = canonicalKufo.mintOrigin(proofId);
         if (!_proofs[proofId].consumed || !canonicalKufo.proofMinted(proofId) ||
             origin.beneficiary != beneficiary || origin.amount != amount || origin.bornAt != block.timestamp ||
-            origin.groupId == 0 || origin.calendarHash != canonicalKufo.calendarHash() ||
+            origin.groupId == 0 || origin.calendarHash != canonicalKufo.groupCalendarHash(origin.groupId) ||
             canonicalKufo.totalMintedFromAlchemy() != before.totalMinted + amount ||
             canonicalKufo.totalSupply() != before.kufoSupply + amount ||
             canonicalKufo.balanceOf(beneficiary) != before.beneficiaryKufo + amount) revert CanonicalKufoReleaseMissing(proofId);

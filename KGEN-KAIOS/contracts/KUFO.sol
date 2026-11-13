@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
-// Engineering revision 2026-11-13: original PR637 9dc02605 / integrated main33967045.
+// Engineering continuation 2026-11-14: append-only calendars and bounded holder indexes.
 // Exact build commit, source hashes and deployment gates: KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md.
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -41,13 +41,17 @@ interface IAlchemyFurnaceProofSource {
     function kaios() external view returns (address);
     function organRegistry() external view returns (address);
 }
+interface IKUFOCalendarGovernance {
+    function owner() external view returns (address);
+    function minimumDelay() external view returns (uint64);
+}
 
 /**
  * @title KUFO
  * @notice Burn-backed KUFO with immutable financial-year and birth-window groups.
  * @dev Calendar values require explicit deployment review; none are selected here.
- * The 32-year, 512-window and 32-group bounds are engineering candidate limits,
- * not an approved issuance horizon. Final tranches remain convertible forever.
+ * The 32-year/512-window bounds apply to each append segment, not a lifetime
+ * expiry. Missing calendar coverage fails closed; past rights settle forever.
  */
 contract KUFO is ERC20, ERC20Capped {
     bytes32 public constant ORGAN_OUTPUT_168888 = keccak256("KAIOS.ORGAN.KUFO.OUTPUT.168888");
@@ -60,6 +64,9 @@ contract KUFO is ERC20, ERC20Capped {
     uint256 public constant MAX_SUPPLY = 72_000_000_000_000 ether;
     uint256 public constant MAX_ISSUANCE_COHORTS = 32;
     uint256 public constant MAX_BIRTH_WINDOWS = 512;
+    // Deployment has its own block/initcode budget. Later append transactions
+    // retain the existing8M operation budget with a smaller storage-work bound.
+    uint256 public constant MAX_APPEND_BIRTH_WINDOWS = 256;
     uint256 public constant MAX_BATCH_GROUPS = 32;
 
     struct CalendarConfig {
@@ -85,7 +92,7 @@ contract KUFO is ERC20, ERC20Capped {
         uint32 birthYear;
         uint8 birthZodiac;
         uint8 birthConstellation;
-        uint16 groupId;
+        uint32 groupId;
         bytes32 calendarHash;
     }
     // Field order remains compatible with the existing KSHIP proof interface.
@@ -96,16 +103,35 @@ contract KUFO is ERC20, ERC20Capped {
         uint256 kufoBurned;
         uint256 expectedKship;
     }
+    struct PendingCalendarAppend {
+        bytes32 dataHash;
+        bytes32 parentHash;
+        address proposer;
+        uint64 executableAt;
+    }
+    struct SegmentCommitment { uint32 groupEndIndex; bytes32 hash; }
 
     IKAIOSOrganRegistry public immutable organRegistry;
     IKAIOSBurnRecordSource public immutable kaios;
     bytes32 public immutable calendarVersion;
     bytes32 public immutable calendarHash;
     uint32 public immutable firstBirthYear;
-    uint8 public immutable issuanceCohorts;
+    uint32 public issuanceCohorts;
+    bytes32 public latestCalendarHash;
+    PendingCalendarAppend public pendingCalendarAppend;
     uint64[] private _yearStarts;
     GroupMetadata[] private _groups;
+    SegmentCommitment[] private _segments;
     mapping(address => mapping(uint256 => Cohort)) private _birthGroups;
+    mapping(address => mapping(uint32 => Cohort)) private _yearCohorts;
+    mapping(address => uint256) private _heldGroupCount;
+    mapping(address => uint256) private _heldYearCount;
+    // Four sparse 256-way levels cover every nonzero uint32 group ID. Finding
+    // an active successor never scans the global calendar or empty history.
+    mapping(address => mapping(uint256 => uint256)) private _heldBits0;
+    mapping(address => mapping(uint256 => uint256)) private _heldBits1;
+    mapping(address => mapping(uint256 => uint256)) private _heldBits2;
+    mapping(address => uint256) private _heldBits3;
     mapping(bytes32 => MintOrigin) private _mintOrigins;
     mapping(bytes32 => CarrierBurnRecord) private _carrierBurnRecords;
     mapping(bytes32 => bool) public proofMinted;
@@ -132,12 +158,23 @@ contract KUFO is ERC20, ERC20Capped {
     error LineageBalanceMismatch(address owner, uint256 missing);
     error InsufficientMaturedDecay(address owner, uint256 requested, uint256 available);
     error InsufficientHolderAllowance(uint256 currentAllowance, uint256 requiredAllowance);
+    error OnlyCalendarOwner();
+    error InvalidCalendarDelay();
+    error CalendarAppendPending();
+    error CalendarAppendNotReady();
+    error CalendarAppendMismatch();
+    error CalendarParentChanged();
+    error CalendarOwnerChanged();
+    error InvalidPageLimit();
 
     event ImmediateAlchemyMinted(bytes32 indexed proofId, uint256 indexed groupId, address indexed beneficiary, uint256 kufoAmount, uint64 bornAt);
     event BirthOriginRecorded(bytes32 indexed proofId, uint32 indexed birthYear, uint8 zodiac, uint8 constellation, uint256 groupId, bytes32 calendarHash);
     event CohortTransferred(address indexed from, address indexed to, uint256 indexed groupId, uint256 first, uint256 second, uint256 terminal);
     event AnnualConversion(uint256 indexed groupId, uint32 indexed birthYear, address indexed owner, address beneficiary, uint256 kufoBurned, uint256 expectedKship, uint8 stage);
     event CarrierBurnRecorded(bytes32 indexed proofId, address indexed owner, address indexed beneficiary, address converter, uint256 kufoBurned, uint256 expectedKship);
+    event CalendarAppendProposed(bytes32 indexed dataHash, bytes32 indexed parentHash, address indexed proposer, uint64 executableAt);
+    event CalendarAppendCancelled(bytes32 indexed dataHash, address indexed owner);
+    event CalendarAppendExecuted(bytes32 indexed dataHash, bytes32 indexed parentHash, bytes32 latestHash, uint32 issuanceYears, uint32 groupEndIndex);
 
     constructor(address registry, address kaiosToken, CalendarConfig memory cfg)
         ERC20("KUFO", "KUFO") ERC20Capped(MAX_SUPPLY)
@@ -146,6 +183,79 @@ contract KUFO is ERC20, ERC20Capped {
         if (registry.code.length == 0) revert NotAContract(registry);
         if (kaiosToken.code.length == 0) revert NotAContract(kaiosToken);
         if (IKAIOSBurnRecordSource(kaiosToken).ORGAN_REGISTRY() != registry) revert CanonicalBindingMismatch();
+        uint256 issuanceCount = _validateCalendarConfig(cfg);
+        for (uint256 i; i < cfg.yearStarts.length; ++i) _yearStarts.push(cfg.yearStarts[i]);
+        _writeGroups(cfg);
+        organRegistry = IKAIOSOrganRegistry(registry);
+        kaios = IKAIOSBurnRecordSource(kaiosToken);
+        calendarVersion = cfg.version;
+        bytes32 initialHash = calendarAppendHash(cfg);
+        calendarHash = initialHash;
+        latestCalendarHash = initialHash;
+        _segments.push(SegmentCommitment(uint32(_groups.length), initialHash));
+        firstBirthYear = cfg.firstFinancialYear;
+        issuanceCohorts = uint32(issuanceCount);
+    }
+
+    function calendarAppendHash(CalendarConfig memory cfg) public pure returns (bytes32) {
+        return keccak256(abi.encode(cfg.version, cfg.firstFinancialYear, cfg.yearStarts, cfg.packedBirthWindows));
+    }
+
+    function proposeCalendarAppend(CalendarConfig calldata cfg) external {
+        _onlyCalendarOwner();
+        if (pendingCalendarAppend.proposer != address(0)) revert CalendarAppendPending();
+        _validateAppend(cfg);
+        uint64 delay = IKUFOCalendarGovernance(address(organRegistry)).minimumDelay();
+        if (delay < 1 hours || block.timestamp > uint256(type(uint64).max) - delay) revert InvalidCalendarDelay();
+        uint64 eta = uint64(block.timestamp + delay);
+        bytes32 dataHash = calendarAppendHash(cfg);
+        pendingCalendarAppend = PendingCalendarAppend(dataHash, latestCalendarHash, msg.sender, eta);
+        emit CalendarAppendProposed(dataHash, latestCalendarHash, msg.sender, eta);
+    }
+
+    function cancelCalendarAppend() external {
+        _onlyCalendarOwner();
+        bytes32 dataHash = pendingCalendarAppend.dataHash;
+        if (pendingCalendarAppend.proposer == address(0)) revert CalendarAppendNotReady();
+        delete pendingCalendarAppend;
+        emit CalendarAppendCancelled(dataHash, msg.sender);
+    }
+
+    function executeCalendarAppend(CalendarConfig calldata cfg) external {
+        PendingCalendarAppend memory pending = pendingCalendarAppend;
+        if (pending.proposer == address(0) || block.timestamp < pending.executableAt) revert CalendarAppendNotReady();
+        if (IKUFOCalendarGovernance(address(organRegistry)).owner() != pending.proposer) revert CalendarOwnerChanged();
+        if (latestCalendarHash != pending.parentHash) revert CalendarParentChanged();
+        if (calendarAppendHash(cfg) != pending.dataHash) revert CalendarAppendMismatch();
+        uint256 count = _validateAppend(cfg);
+        delete pendingCalendarAppend;
+        // The old final three boundaries are the new segment's first three.
+        // They are checked, never overwritten or reinterpreted.
+        for (uint256 i = 3; i < cfg.yearStarts.length; ++i) _yearStarts.push(cfg.yearStarts[i]);
+        _writeGroups(cfg);
+        issuanceCohorts += uint32(count);
+        bytes32 nextHash = keccak256(abi.encode(pending.parentHash, pending.dataHash));
+        latestCalendarHash = nextHash;
+        _segments.push(SegmentCommitment(uint32(_groups.length), nextHash));
+        emit CalendarAppendExecuted(pending.dataHash, pending.parentHash, nextHash, issuanceCohorts, uint32(_groups.length));
+    }
+
+    function _onlyCalendarOwner() private view {
+        if (msg.sender != IKUFOCalendarGovernance(address(organRegistry)).owner()) revert OnlyCalendarOwner();
+    }
+
+    function _validateAppend(CalendarConfig memory cfg) private view returns (uint256 count) {
+        if (cfg.packedBirthWindows.length > MAX_APPEND_BIRTH_WINDOWS) revert InvalidCalendar();
+        count = _validateCalendarConfig(cfg);
+        if (uint256(cfg.firstFinancialYear) != uint256(firstBirthYear) + issuanceCohorts) revert InvalidCalendar();
+        for (uint256 i; i < 3; ++i) {
+            if (cfg.yearStarts[i] != _yearStarts[uint256(issuanceCohorts) + i]) revert InvalidCalendar();
+        }
+        // Late updates may fill uncovered intervals, in bounded segments. No
+        // proof can backdate minting: bornAt always uses the current block.
+    }
+
+    function _validateCalendarConfig(CalendarConfig memory cfg) private pure returns (uint256 issuanceCount) {
         uint256 boundaries = cfg.yearStarts.length;
         if (cfg.version == bytes32(0) || cfg.firstFinancialYear == 0 || boundaries < 4 ||
             boundaries > MAX_ISSUANCE_COHORTS + 3 ||
@@ -155,12 +265,10 @@ contract KUFO is ERC20, ERC20Capped {
         for (uint256 i; i < boundaries; ++i) {
             uint64 boundary = cfg.yearStarts[i];
             if (boundary <= previous) revert InvalidCalendar();
-            _yearStarts.push(boundary);
             previous = boundary;
         }
-        uint256 issuanceCount = boundaries - 3;
+        issuanceCount = boundaries - 3;
         uint64 nextStart = cfg.yearStarts[0];
-        uint256 yearIndex;
         for (uint256 i; i < cfg.packedBirthWindows.length; ++i) {
             uint256 packed = cfg.packedBirthWindows[i];
             uint64 start = uint64(packed);
@@ -170,22 +278,28 @@ contract KUFO is ERC20, ERC20Capped {
             if (packed >> 144 != 0 || start != nextStart || end <= start ||
                 end > cfg.yearStarts[issuanceCount] || zodiac == 0 || zodiac > 12 ||
                 constellation == 0 || constellation > 12) revert InvalidCalendar();
+            nextStart = end;
+        }
+        if (nextStart != cfg.yearStarts[issuanceCount]) revert InvalidCalendar();
+    }
+
+    function _writeGroups(CalendarConfig memory cfg) private {
+        uint256 yearIndex;
+        for (uint256 i; i < cfg.packedBirthWindows.length; ++i) {
+            uint256 packed = cfg.packedBirthWindows[i];
+            uint64 start = uint64(packed);
+            uint64 end = uint64(packed >> 64);
+            uint8 zodiac = uint8(packed >> 128);
+            uint8 constellation = uint8(packed >> 136);
             uint64 cursor = start;
             while (cursor < end) {
                 while (cursor >= cfg.yearStarts[yearIndex + 1]) ++yearIndex;
                 uint64 groupEnd = end < cfg.yearStarts[yearIndex + 1] ? end : cfg.yearStarts[yearIndex + 1];
+                if (_groups.length == type(uint32).max) revert InvalidCalendar();
                 _groups.push(GroupMetadata(cursor, groupEnd, uint32(uint256(cfg.firstFinancialYear) + yearIndex), zodiac, constellation));
                 cursor = groupEnd;
             }
-            nextStart = end;
         }
-        if (nextStart != cfg.yearStarts[issuanceCount]) revert InvalidCalendar();
-        organRegistry = IKAIOSOrganRegistry(registry);
-        kaios = IKAIOSBurnRecordSource(kaiosToken);
-        calendarVersion = cfg.version;
-        calendarHash = keccak256(abi.encode(cfg.version, cfg.firstFinancialYear, cfg.yearStarts, cfg.packedBirthWindows));
-        firstBirthYear = cfg.firstFinancialYear;
-        issuanceCohorts = uint8(issuanceCount);
     }
 
     function mintFromImmediateProof(bytes32 proofId, address beneficiary, uint256 amount)
@@ -202,19 +316,17 @@ contract KUFO is ERC20, ERC20Capped {
         }
         _verifyBurnProof(proofId, beneficiary, amount);
         GroupMetadata memory group = _groups[groupId - 1];
-        Cohort storage item = _birthGroups[beneficiary][groupId];
         uint256 first = amount / 2;
         uint256 firstAndSecond = Math.mulDiv(amount, 3, 4);
-        item.first += first;
-        item.second += firstAndSecond - first;
-        item.terminal += amount - firstAndSecond;
+        _creditGroup(beneficiary, groupId, first, firstAndSecond - first, amount - firstAndSecond);
         proofMinted[proofId] = true;
         totalMintedFromAlchemy += amount;
+        bytes32 groupHash = groupCalendarHash(groupId);
         _mintOrigins[proofId] = MintOrigin(beneficiary, amount, uint64(block.timestamp), group.financialYear,
-            group.zodiac, group.constellation, uint16(groupId), calendarHash);
+            group.zodiac, group.constellation, uint32(groupId), groupHash);
         _mint(beneficiary, amount);
         emit ImmediateAlchemyMinted(proofId, groupId, beneficiary, amount, uint64(block.timestamp));
-        emit BirthOriginRecorded(proofId, group.financialYear, group.zodiac, group.constellation, groupId, calendarHash);
+        emit BirthOriginRecorded(proofId, group.financialYear, group.zodiac, group.constellation, groupId, groupHash);
     }
 
     function _verifyBurnProof(bytes32 proofId, address beneficiary, uint256 amount) private view {
@@ -239,45 +351,72 @@ contract KUFO is ERC20, ERC20Capped {
     function calendarBoundary(uint256 index) external view returns (uint64) { return _yearStarts[index]; }
     function groupCount() external view returns (uint256) { return _groups.length; }
     function groupMetadata(uint256 id) external view returns (GroupMetadata memory) { return _groups[_groupIndex(id)]; }
+    function groupCalendarHash(uint256 id) public view returns (bytes32) {
+        _groupIndex(id);
+        uint256 low;
+        uint256 high = _segments.length;
+        while (low < high) {
+            uint256 middle = (low + high) / 2;
+            if (id > _segments[middle].groupEndIndex) low = middle + 1; else high = middle;
+        }
+        return _segments[low].hash;
+    }
     function birthGroup(address owner, uint256 id) external view returns (Cohort memory) { _groupIndex(id); return _birthGroups[owner][id]; }
     function birthGroupAt(uint256 timestamp) external view returns (uint256 id, GroupMetadata memory metadata) {
         id = _groupAt(timestamp);
         metadata = _groups[id - 1];
     }
-    // Compatibility view: a year aggregates, and never rewrites, its birth groups.
+    // A derived aggregate is updated in the same atomic mutation as every group.
     function cohort(address owner, uint32 year) external view returns (Cohort memory result) {
         _issuanceIndex(year);
-        for (uint256 i; i < _groups.length; ++i) if (_groups[i].financialYear == year) {
-            Cohort storage item = _birthGroups[owner][i + 1];
-            result.first += item.first; result.second += item.second; result.terminal += item.terminal;
-        }
+        return _yearCohorts[owner][year];
     }
     function currentYear() public view returns (uint32) {
-        uint256 index;
-        uint256 last = _yearStarts.length - 1;
-        while (index < last && block.timestamp >= _yearStarts[index + 1]) ++index;
+        uint256 low;
+        uint256 high = _yearStarts.length;
+        while (low < high) {
+            uint256 middle = (low + high) / 2;
+            if (block.timestamp >= _yearStarts[middle]) low = middle + 1; else high = middle;
+        }
+        uint256 index = low == 0 ? 0 : low - 1;
         return uint32(uint256(firstBirthYear) + index);
     }
     function currentAnnualStage(uint32 year) public view returns (uint8) { return _annualStage(_issuanceIndex(year)); }
     function claimableDecay(address owner, uint32 year) public view returns (uint256 amount) {
-        uint8 stage = currentAnnualStage(year);
-        for (uint256 i; i < _groups.length; ++i) if (_groups[i].financialYear == year) amount += _claimable(_birthGroups[owner][i + 1], stage);
+        return _claimable(_yearCohorts[owner][year], currentAnnualStage(year));
     }
     function claimableTotal(address owner) external view returns (uint256 amount) {
-        for (uint256 i; i < _groups.length; ++i) amount += _claimable(_birthGroups[owner][i + 1], _annualStage(uint256(_groups[i].financialYear) - firstBirthYear));
-    }
-    function activeCohortCount(address owner) external view returns (uint256 count) {
-        uint32 counted;
-        for (uint256 i; i < _groups.length; ++i) {
-            Cohort storage item = _birthGroups[owner][i + 1];
-            uint32 year = _groups[i].financialYear;
-            if (year != counted && item.first + item.second + item.terminal != 0) { ++count; counted = year; }
+        if (_heldGroupCount[owner] > MAX_BATCH_GROUPS) revert GroupBatchRequired(MAX_BATCH_GROUPS);
+        uint256 id = _nextHeld(owner, 0);
+        uint256 examined;
+        while (id != 0) {
+            if (++examined > MAX_BATCH_GROUPS) revert GroupBatchRequired(MAX_BATCH_GROUPS);
+            amount += _claimable(_birthGroups[owner][id], _annualStage(uint256(_groups[id - 1].financialYear) - firstBirthYear));
+            id = _nextHeld(owner, id);
         }
     }
+    function activeCohortCount(address owner) external view returns (uint256 count) {
+        return _heldYearCount[owner];
+    }
     function activeGroupCount(address owner) external view returns (uint256 count) {
-        for (uint256 i; i < _groups.length; ++i) {
-            Cohort storage item = _birthGroups[owner][i + 1];
-            if (item.first + item.second + item.terminal != 0) ++count;
+        return _heldGroupCount[owner];
+    }
+    function heldGroups(address owner, uint256 afterId, uint256 limit) external view returns (uint256[] memory ids) {
+        if (limit == 0 || limit > MAX_BATCH_GROUPS) revert InvalidPageLimit();
+        ids = new uint256[](limit);
+        uint256 count;
+        uint256 id = _nextHeld(owner, afterId);
+        while (id != 0 && count < limit) {
+            ids[count++] = id;
+            id = _nextHeld(owner, id);
+        }
+        assembly ("memory-safe") { mstore(ids, count) }
+    }
+    function claimableForGroups(address owner, uint256[] calldata ids) external view returns (uint256 amount) {
+        _validateSelection(ids);
+        for (uint256 i; i < ids.length; ++i) {
+            uint256 id = ids[i];
+            amount += _claimable(_birthGroups[owner][id], _annualStage(uint256(_groups[id - 1].financialYear) - firstBirthYear));
         }
     }
 
@@ -304,16 +443,17 @@ contract KUFO is ERC20, ERC20Capped {
         _authorizeBurn(owner, beneficiary, amount, proofId);
         uint256 remaining = amount;
         uint256 available;
-        uint256 touched;
-        for (uint256 i; i < _groups.length && remaining != 0; ++i) {
-            uint8 stage = _annualStage(uint256(_groups[i].financialYear) - firstBirthYear);
-            uint256 claimable = _claimable(_birthGroups[owner][i + 1], stage);
-            if (claimable == 0) continue;
-            if (++touched > MAX_BATCH_GROUPS) revert GroupBatchRequired(MAX_BATCH_GROUPS);
+        uint256 examined;
+        uint256 id = _nextHeld(owner, 0);
+        while (id != 0 && remaining != 0) {
+            if (++examined > MAX_BATCH_GROUPS) revert GroupBatchRequired(MAX_BATCH_GROUPS);
+            uint8 stage = _annualStage(uint256(_groups[id - 1].financialYear) - firstBirthYear);
+            uint256 claimable = _claimable(_birthGroups[owner][id], stage);
             available += claimable;
             uint256 take = Math.min(claimable, remaining);
-            _takeConversion(owner, beneficiary, i + 1, take, stage);
+            if (take != 0) _takeConversion(owner, beneficiary, id, take, stage);
             remaining -= take;
+            if (remaining != 0) id = _nextHeld(owner, id);
         }
         if (remaining != 0) revert InsufficientMaturedDecay(owner, amount, available);
         return _finishBurn(owner, beneficiary, amount, proofId);
@@ -359,9 +499,11 @@ contract KUFO is ERC20, ERC20Capped {
     function _takeConversion(address owner, address beneficiary, uint256 id, uint256 take, uint8 stage) private {
         Cohort storage item = _birthGroups[owner][id];
         uint256 unpaid = take;
-        if (stage >= 1) { uint256 first = Math.min(item.first, unpaid); item.first -= first; unpaid -= first; }
-        if (stage >= 2) { uint256 second = Math.min(item.second, unpaid); item.second -= second; unpaid -= second; }
-        if (stage == 3) item.terminal -= unpaid;
+        uint256 first;
+        uint256 second;
+        if (stage >= 1) { first = Math.min(item.first, unpaid); unpaid -= first; }
+        if (stage >= 2) { second = Math.min(item.second, unpaid); unpaid -= second; }
+        _debitGroup(owner, id, first, second, stage == 3 ? unpaid : 0);
         emit AnnualConversion(id, _groups[id - 1].financialYear, owner, beneficiary, take, take * KSHIP_PER_KUFO, stage);
     }
     function conservationInvariantHolds() external view returns (bool) { return totalSupply() + totalDecayedForKship == totalMintedFromAlchemy; }
@@ -374,14 +516,15 @@ contract KUFO is ERC20, ERC20Capped {
     function _moveAll(address from, address to, uint256 amount) private {
         uint256 remaining = amount;
         uint256 touched;
-        for (uint256 i; i < _groups.length && remaining != 0; ++i) {
-            Cohort storage source = _birthGroups[from][i + 1];
+        uint256 id = _nextHeld(from, 0);
+        while (id != 0 && remaining != 0) {
+            Cohort storage source = _birthGroups[from][id];
             uint256 live = source.first + source.second + source.terminal;
-            if (live == 0) continue;
             if (++touched > MAX_BATCH_GROUPS) revert GroupBatchRequired(MAX_BATCH_GROUPS);
             uint256 take = Math.min(live, remaining);
-            _moveOne(from, to, i + 1, take, live);
+            _moveOne(from, to, id, take, live);
             remaining -= take;
+            if (remaining != 0) id = _nextHeld(from, id);
         }
         if (remaining != 0) revert LineageBalanceMismatch(from, remaining);
     }
@@ -404,10 +547,117 @@ contract KUFO is ERC20, ERC20Capped {
         uint256 firstAndSecond = Math.mulDiv(source.first + source.second, take, live);
         uint256 second = firstAndSecond - first;
         uint256 terminal = take - firstAndSecond;
-        source.first -= first; source.second -= second; source.terminal -= terminal;
-        Cohort storage target = _birthGroups[to][id];
-        target.first += first; target.second += second; target.terminal += terminal;
+        _debitGroup(from, id, first, second, terminal);
+        _creditGroup(to, id, first, second, terminal);
         emit CohortTransferred(from, to, id, first, second, terminal);
+    }
+    function _creditGroup(address owner, uint256 id, uint256 first, uint256 second, uint256 terminal) private {
+        Cohort storage item = _birthGroups[owner][id];
+        bool emptyGroup = item.first + item.second + item.terminal == 0;
+        item.first += first; item.second += second; item.terminal += terminal;
+        if (emptyGroup) {
+            _setHeld(owner, id);
+            ++_heldGroupCount[owner];
+        }
+        uint32 year = _groups[id - 1].financialYear;
+        Cohort storage annual = _yearCohorts[owner][year];
+        bool emptyYear = annual.first + annual.second + annual.terminal == 0;
+        annual.first += first; annual.second += second; annual.terminal += terminal;
+        if (emptyYear) ++_heldYearCount[owner];
+    }
+    function _debitGroup(address owner, uint256 id, uint256 first, uint256 second, uint256 terminal) private {
+        Cohort storage item = _birthGroups[owner][id];
+        item.first -= first; item.second -= second; item.terminal -= terminal;
+        if (item.first + item.second + item.terminal == 0) {
+            _clearHeld(owner, id);
+            --_heldGroupCount[owner];
+        }
+        uint32 year = _groups[id - 1].financialYear;
+        Cohort storage annual = _yearCohorts[owner][year];
+        annual.first -= first; annual.second -= second; annual.terminal -= terminal;
+        if (annual.first + annual.second + annual.terminal == 0) --_heldYearCount[owner];
+    }
+
+    // Internal visibility permits a test-only derived actor to exercise all
+    // uint32 bit boundaries without creating millions of calendar records.
+    function _setHeld(address owner, uint256 id) internal {
+        if (id == 0 || id > type(uint32).max) revert UnknownBirthGroup(id);
+        uint256 leaf = id >> 8;
+        uint256 mask = uint256(1) << (id & 255);
+        uint256 word = _heldBits0[owner][leaf];
+        assert((word & mask) == 0);
+        _heldBits0[owner][leaf] = word | mask;
+        // Successor search reads global zero branches directly before ascending;
+        // it never descends to them via a parent's bit0. Do not store redundant
+        // ancestors for those branches (global index0, not every low-byte0).
+        if (word != 0 || leaf == 0) return;
+        uint256 page1 = leaf >> 8;
+        mask = uint256(1) << (leaf & 255);
+        word = _heldBits1[owner][page1];
+        _heldBits1[owner][page1] = word | mask;
+        if (word != 0 || page1 == 0) return;
+        uint256 page2 = page1 >> 8;
+        mask = uint256(1) << (page1 & 255);
+        word = _heldBits2[owner][page2];
+        _heldBits2[owner][page2] = word | mask;
+        if (word != 0 || page2 == 0) return;
+        _heldBits3[owner] |= uint256(1) << page2;
+    }
+    function _clearHeld(address owner, uint256 id) internal {
+        if (id == 0 || id > type(uint32).max) revert UnknownBirthGroup(id);
+        uint256 leaf = id >> 8;
+        uint256 mask = uint256(1) << (id & 255);
+        uint256 previous = _heldBits0[owner][leaf];
+        assert((previous & mask) != 0);
+        uint256 word = previous & ~mask;
+        _heldBits0[owner][leaf] = word;
+        if (word != 0 || leaf == 0) return;
+        uint256 page1 = leaf >> 8;
+        mask = uint256(1) << (leaf & 255);
+        word = _heldBits1[owner][page1] & ~mask;
+        _heldBits1[owner][page1] = word;
+        if (word != 0 || page1 == 0) return;
+        uint256 page2 = page1 >> 8;
+        mask = uint256(1) << (page1 & 255);
+        word = _heldBits2[owner][page2] & ~mask;
+        _heldBits2[owner][page2] = word;
+        if (word != 0 || page2 == 0) return;
+        _heldBits3[owner] &= ~(uint256(1) << page2);
+    }
+    function _lowestBit(uint256 word) private pure returns (uint256) {
+        assert(word != 0);
+        return Math.log2(word & (~word + 1));
+    }
+    function _firstFromPage1(address owner, uint256 page1, uint256 word) private view returns (uint256) {
+        uint256 leaf = (page1 << 8) | _lowestBit(word);
+        return (leaf << 8) | _lowestBit(_heldBits0[owner][leaf]);
+    }
+    function _firstFromPage2(address owner, uint256 page2, uint256 word) private view returns (uint256) {
+        uint256 page1 = (page2 << 8) | _lowestBit(word);
+        return _firstFromPage1(owner, page1, _heldBits1[owner][page1]);
+    }
+    function _nextHeld(address owner, uint256 afterId) internal view returns (uint256) {
+        if (afterId >= type(uint32).max) return 0;
+        uint256 target = afterId + 1;
+        uint256 leaf = target >> 8;
+        uint256 word = _heldBits0[owner][leaf] & (type(uint256).max << (target & 255));
+        if (word != 0) return (leaf << 8) | _lowestBit(word);
+        uint256 nextLeaf = leaf + 1;
+        if (nextLeaf > 0xffffff) return 0;
+        uint256 page1 = nextLeaf >> 8;
+        word = _heldBits1[owner][page1] & (type(uint256).max << (nextLeaf & 255));
+        if (word != 0) return _firstFromPage1(owner, page1, word);
+        uint256 nextPage1 = page1 + 1;
+        if (nextPage1 > 0xffff) return 0;
+        uint256 page2 = nextPage1 >> 8;
+        word = _heldBits2[owner][page2] & (type(uint256).max << (nextPage1 & 255));
+        if (word != 0) return _firstFromPage2(owner, page2, word);
+        uint256 nextPage2 = page2 + 1;
+        if (nextPage2 > 0xff) return 0;
+        word = _heldBits3[owner] & (type(uint256).max << nextPage2);
+        if (word == 0) return 0;
+        page2 = _lowestBit(word);
+        return _firstFromPage2(owner, page2, _heldBits2[owner][page2]);
     }
     function _validateSelection(uint256[] calldata ids) private view {
         if (ids.length == 0 || ids.length > MAX_BATCH_GROUPS) revert InvalidGroupSelection();

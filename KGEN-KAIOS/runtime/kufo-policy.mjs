@@ -6,14 +6,18 @@ export const ZODIAC = Object.freeze(["鼠","牛","虎","兔","龍","蛇","馬","
 export const KAIOS_PER_KGEN = 1000n;
 export const KUFO_PER_KAIOS = 1000n;
 export const KSHIP_PER_KUFO = 1000n;
+// Per-segment work bound, never a lifetime issuance deadline.
 export const MAX_ISSUANCE_COHORTS = 32;
 export const MAX_BIRTH_WINDOWS = 512;
+export const MAX_APPEND_BIRTH_WINDOWS = 256;
 export const MAX_BATCH_GROUPS = 32;
 const U64 = (1n << 64n) - 1n;
 const configuredBirthCalendars = new WeakSet();
+const configuredAnnualCalendars = new WeakSet();
 
 function utcSeconds(text) {
-  if (typeof text !== "string" || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/.test(text)) throw new TypeError("UTC_TIMESTAMP_REQUIRED");
+  // ISO 8601 extended positive years are needed for a journey beyond year9999.
+  if (typeof text !== "string" || !/^(?:\d{4}|\+\d{6})-\d\d-\d\dT\d\d:\d\d:\d\dZ$/.test(text)) throw new TypeError("UTC_TIMESTAMP_REQUIRED");
   const value = Date.parse(text);
   if (!Number.isFinite(value) || new Date(value).toISOString() !== text.replace("Z", ".000Z")) throw new RangeError("INVALID_UTC_TIMESTAMP");
   return BigInt(value / 1000);
@@ -60,7 +64,9 @@ export function makeAnnualCohortCalendar(version, years) {
     throw new RangeError("INVALID_BOUNDED_ISSUANCE_CALENDAR");
   }
   // Historical annual helper's zodiac labels do not configure mint identities.
-  return Object.freeze({version, entries:Object.freeze(entries), issuanceCohorts});
+  const calendar=Object.freeze({version, entries:Object.freeze(entries), issuanceCohorts});
+  configuredAnnualCalendars.add(calendar);
+  return calendar;
 }
 
 // Mirrors KUFO CalendarConfig. Bounds are candidate complexity limits, not an
@@ -96,26 +102,71 @@ export function makeBirthGroupCalendar(config) {
     yearStarts:Object.freeze(starts), birthWindows:Object.freeze(windows),
     packedBirthWindows,
     entries:Object.freeze(starts.map((start,i)=>Object.freeze({year:first+i,start}))),
-    issuanceCohorts, groups:Object.freeze(groups)});
+    issuanceCohorts, latestCalendarHash:calendarHash,
+    groups:Object.freeze(groups.map(group=>Object.freeze({...group,calendarHash})))});
   configuredBirthCalendars.add(calendar);
   return calendar;
 }
 
 export function constructorCalendarConfig(calendar) {
   if (!configuredBirthCalendars.has(calendar)) throw new TypeError("BIRTH_WINDOWS_REQUIRED");
+  if(calendar.latestCalendarHash!==calendar.calendarHash)throw new RangeError("SEGMENT_CONFIG_REQUIRED");
   return Object.freeze({version:calendar.version,firstFinancialYear:calendar.firstFinancialYear,
     yearStarts:calendar.yearStarts,packedBirthWindows:calendar.packedBirthWindows});
+}
+
+// Mirrors the contract's hash-bound, append-only calendar DATA operation. This
+// pure helper neither grants Registry permission nor proposes/executes on-chain.
+export function calendarAppendHash(config) {
+  const segment=makeBirthGroupCalendar(config);
+  return segment.calendarHash;
+}
+
+export function appendBirthGroupCalendar(calendar, config) {
+  if (!configuredBirthCalendars.has(calendar)) throw new TypeError("BIRTH_WINDOWS_REQUIRED");
+  const segment=makeBirthGroupCalendar(config);
+  if(segment.birthWindows.length>MAX_APPEND_BIRTH_WINDOWS)throw new RangeError("CALENDAR_APPEND_WINDOW_BOUND");
+  if(segment.firstFinancialYear!==calendar.firstFinancialYear+calendar.issuanceCohorts ||
+    segment.yearStarts.slice(0,3).some((start,i)=>start!==calendar.yearStarts.at(i-3))) {
+    throw new RangeError("CALENDAR_APPEND_OVERLAP_MISMATCH");
+  }
+  const count=calendar.issuanceCohorts+segment.issuanceCohorts;
+  if(calendar.firstFinancialYear+count+2>0xffffffff || calendar.groups.length+segment.groups.length>0xffffffff) {
+    throw new RangeError("CALENDAR_IDENTIFIER_OVERFLOW");
+  }
+  const latestCalendarHash=keccak256(AbiCoder.defaultAbiCoder().encode(
+    ["bytes32","bytes32"],[calendar.latestCalendarHash,segment.calendarHash]));
+  const starts=Object.freeze([...calendar.yearStarts,...segment.yearStarts.slice(3)]);
+  const result=Object.freeze({version:calendar.version,firstFinancialYear:calendar.firstFinancialYear,
+    calendarHash:calendar.calendarHash,latestCalendarHash,yearStarts:starts,
+    // Construction payload belongs only to a segment; never re-encode the entire
+    // accumulated voyage as one constructor transaction.
+    birthWindows:Object.freeze([...calendar.birthWindows,...segment.birthWindows]),
+    packedBirthWindows:Object.freeze([...calendar.packedBirthWindows,...segment.packedBirthWindows]),
+    entries:Object.freeze(starts.map((start,i)=>Object.freeze({year:calendar.firstFinancialYear+i,start}))),
+    issuanceCohorts:count,groups:Object.freeze([...calendar.groups,...segment.groups.map(group=>
+      Object.freeze({...group,groupId:calendar.groups.length+group.groupId,calendarHash:latestCalendarHash}))])});
+  configuredBirthCalendars.add(result);
+  return result;
+}
+
+export function groupCalendarHash(groupId,calendar) {
+  if(!configuredBirthCalendars.has(calendar))throw new TypeError("BIRTH_WINDOWS_REQUIRED");
+  if(!Number.isInteger(groupId)||groupId<1||groupId>calendar.groups.length)throw new RangeError("INVALID_BIRTH_GROUP");
+  return calendar.groups[groupId-1].calendarHash;
 }
 
 export function birthGroupAt(bornAtSec, calendar) {
   if (!configuredBirthCalendars.has(calendar)) throw new TypeError("BIRTH_WINDOWS_REQUIRED");
   if (typeof bornAtSec !== "bigint" || bornAtSec < calendar.yearStarts[0] || bornAtSec >= calendar.yearStarts[calendar.issuanceCohorts]) throw new RangeError("ISSUANCE_CALENDAR_CLOSED");
-  return calendar.groups.find(group=>bornAtSec >= group.start && bornAtSec < group.end);
+  let low=0,high=calendar.groups.length;
+  while(low<high){const mid=Math.floor((low+high)/2);if(bornAtSec>=calendar.groups[mid].end)low=mid+1;else high=mid;}
+  return calendar.groups[low];
 }
 
 function validateCalendar(calendar) {
-  if (!calendar || !Number.isInteger(calendar.issuanceCohorts) ||
-      calendar.issuanceCohorts < 1 || calendar.issuanceCohorts > MAX_ISSUANCE_COHORTS ||
+  if ((!configuredBirthCalendars.has(calendar) && !configuredAnnualCalendars.has(calendar)) || !Number.isInteger(calendar.issuanceCohorts) ||
+      calendar.issuanceCohorts < 1 ||
       calendar.entries?.length !== calendar.issuanceCohorts + 3) throw new TypeError("CALENDAR_REQUIRED");
 }
 
@@ -123,9 +174,9 @@ export function cohortYear(asOfSec, calendar) {
   validateCalendar(calendar);
   if (typeof asOfSec !== "bigint" || asOfSec < calendar.entries[0].start) throw new RangeError("TIME_BEFORE_CALENDAR");
   // Settlement stays available forever after the last configured boundary.
-  for (let i = calendar.entries.length - 1; i >= 0; i--) {
-    if (asOfSec >= calendar.entries[i].start) return calendar.entries[i].year;
-  }
+  let low=0,high=calendar.entries.length;
+  while(low<high){const mid=Math.floor((low+high)/2);if(asOfSec>=calendar.entries[mid].start)low=mid+1;else high=mid;}
+  return calendar.entries[low-1].year;
 }
 
 function birthIndex(birthYear, calendar) {
@@ -139,7 +190,7 @@ export function mintOrigin(bornAtSec, calendar) {
   const group = birthGroupAt(bornAtSec, calendar);
   return Object.freeze({birthYear:group.financialYear, bornAtSec, birthZodiac:group.zodiac,
     birthConstellation:group.constellation, groupId:group.groupId, calendarVersion:calendar.version,
-    calendarHash:calendar.calendarHash});
+    calendarHash:group.calendarHash});
 }
 
 export function currentAutumn(birthYear, asOfSec, calendar) {

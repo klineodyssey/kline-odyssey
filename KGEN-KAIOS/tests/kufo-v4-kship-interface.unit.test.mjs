@@ -52,9 +52,26 @@ test('stable KUFO has one explicit packed calendar and matching bounded carrier/
   assert.deepEqual(method('groupMetadata').outputs[0].components.map(item=>[item.name,item.type]),[
     ['start','uint64'],['end','uint64'],['financialYear','uint32'],['zodiac','uint8'],['constellation','uint8']]);
   const origin=method('mintOrigin').outputs[0].components;
-  for(const [name,type] of [['bornAt','uint64'],['birthYear','uint32'],['birthZodiac','uint8'],['birthConstellation','uint8'],['groupId','uint16'],['calendarHash','bytes32']])assert.ok(origin.some(item=>item.name===name&&item.type===type),name);
+  for(const [name,type] of [['bornAt','uint64'],['birthYear','uint32'],['birthZodiac','uint8'],['birthConstellation','uint8'],['groupId','uint32'],['calendarHash','bytes32']])assert.ok(origin.some(item=>item.name===name&&item.type===type),name);
   for(const name of ['groupCount','activeGroupCount','currentAnnualStage','calendarHash'])method(name);
   assert.equal(functionNames(abi).has('currentAutumn'),false,'formal annual API has no second maturity implementation');
   const convert=converter.abi.find(item=>item.type==='function'&&item.name==='convertGroups');
   assert.ok(convert);assert.deepEqual(convert.inputs.map(item=>item.type),['uint256','address','uint256[]']);
+});
+
+test('calendar continuation and bounded holder queries share one stable KUFO interface',()=>{
+  const {abi}=artifact('KUFO');
+  const method=name=>{const f=abi.find(item=>item.type==='function'&&item.name===name);assert.ok(f,name);return f;};
+  for(const name of ['proposeCalendarAppend','executeCalendarAppend','calendarAppendHash']){
+    assert.deepEqual(method(name).inputs.map(p=>p.type),['tuple']);
+    assert.deepEqual(method(name).inputs[0].components.map(p=>p.type),['bytes32','uint32','uint64[]','uint256[]']);
+  }
+  assert.deepEqual(method('pendingCalendarAppend').outputs.map(p=>p.type),['bytes32','bytes32','address','uint64']);
+  assert.equal(method('issuanceCohorts').outputs[0].type,'uint32');
+  assert.equal(method('latestCalendarHash').outputs[0].type,'bytes32');
+  assert.deepEqual(method('groupCalendarHash').inputs.map(p=>p.type),['uint256']);
+  assert.deepEqual(method('heldGroups').inputs.map(p=>p.type),['address','uint256','uint256']);
+  assert.deepEqual(method('heldGroups').outputs.map(p=>p.type),['uint256[]']);
+  assert.deepEqual(method('claimableForGroups').inputs.map(p=>p.type),['address','uint256[]']);
+  assert.equal(method('claimableForGroups').outputs[0].type,'uint256');
 });

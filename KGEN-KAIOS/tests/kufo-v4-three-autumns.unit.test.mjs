@@ -4,7 +4,8 @@ import {AbiCoder,keccak256} from "ethers";
 import { alchemyQuote, makeAnnualCohortCalendar, mintOrigin, cohortYear, currentAutumn,
   threeAutumnState, newCohortTranches, splitCohortTranches, claimableTranches, ZODIAC,
   makeBirthGroupCalendar, birthGroupAt, transferBirthGroups, settleBirthGroups, MAX_BATCH_GROUPS,
-  packBirthWindow,unpackBirthWindow,constructorCalendarConfig,currentAnnualStage,annualConversionState
+  packBirthWindow,unpackBirthWindow,constructorCalendarConfig,currentAnnualStage,annualConversionState,
+  appendBirthGroupCalendar,calendarAppendHash,groupCalendarHash
 } from "../runtime/kufo-policy.mjs";
 
 // Deliberately noncanonical January 1 fixture. Production calendar remains absent.
@@ -190,4 +191,128 @@ test('more than one bounded batch remains movable and settleable without new gro
   assert.equal(settledFirst.expectedKshipWei+settledLast.expectedKshipWei,33000n);
   for(const selection of [[],[0],[34],[2,1],[1,1]])assert.throws(()=>transferBirthGroups(all,1n,selection,cal),/INVALID_GROUP_SELECTION/);
   assert.throws(()=>transferBirthGroups([all[0],all[0]],1n,[1],cal),/INVALID_GROUP_HOLDINGS/);
+});
+
+// Synthetic civil fixtures test capacity, not an asserted millennial lunar or
+// astronomical ephemeris. Production birth identities still need reviewed data.
+const civilStart=year=>BigInt(Date.UTC(year,0,1)/1000);
+function voyageSegment(first,count=32){
+  const yearStarts=Array.from({length:count+3},(_,i)=>civilStart(first+i));
+  const birthWindows=[];
+  for(let year=first;year<first+count;year++)for(let month=0;month<12;month++){
+    birthWindows.push({start:BigInt(Date.UTC(year,month,1)/1000),end:BigInt(Date.UTC(year,month+1,1)/1000),
+      zodiac:(year-4)%12+1,constellation:month+1});
+  }
+  return {version:'0x'+'77'.repeat(32),firstFinancialYear:first,yearStarts,birthWindows};
+}
+
+test('calendar continuation commits exact new data without rewriting original rights or constructor identity',()=>{
+  const cfg=voyageSegment(2027,2),original=makeBirthGroupCalendar(cfg);
+  const born=mintOrigin(civilStart(2027),original),next=voyageSegment(2029,2);
+  const extended=appendBirthGroupCalendar(original,next);
+  const expected=keccak256(AbiCoder.defaultAbiCoder().encode(['bytes32','bytes32'],[original.calendarHash,calendarAppendHash(next)]));
+  assert.equal(extended.latestCalendarHash,expected);
+  assert.equal(extended.calendarHash,original.calendarHash);
+  assert.deepEqual(mintOrigin(civilStart(2027),extended),born);
+  assert.equal(groupCalendarHash(born.groupId,extended),born.calendarHash);
+  assert.equal(mintOrigin(civilStart(2029),extended).calendarHash,expected);
+  assert.equal(original.issuanceCohorts,2);assert.equal(extended.issuanceCohorts,4);
+  assert.throws(()=>birthGroupAt(civilStart(2029),original),/ISSUANCE_CALENDAR_CLOSED/);
+  assert.equal(birthGroupAt(civilStart(2029),extended).financialYear,2029);
+  assert.equal(currentAnnualStage(2027,civilStart(2030),extended),3);
+  assert.throws(()=>constructorCalendarConfig(extended),/SEGMENT_CONFIG_REQUIRED/);
+  assert.throws(()=>appendBirthGroupCalendar({...original},next),/BIRTH_WINDOWS_REQUIRED/);
+});
+
+test('calendar continuation rejects changed shared maturity boundaries, labels, gaps and excessive segment work',()=>{
+  const original=makeBirthGroupCalendar(voyageSegment(2027,2));
+  for(const mutate of [
+    c=>c.firstFinancialYear++,c=>c.yearStarts[0]++,c=>c.yearStarts[1]++,c=>c.yearStarts[2]++,
+    c=>c.birthWindows[1].start++,c=>c.birthWindows[0].zodiac=0,
+    c=>c.version='0x'+'00'.repeat(32),
+  ]){const cfg=voyageSegment(2029,2);mutate(cfg);assert.throws(()=>appendBirthGroupCalendar(original,cfg));}
+  assert.throws(()=>appendBirthGroupCalendar(original,voyageSegment(2029,33)),/BOUNDED_ISSUANCE/);
+  assert.equal(original.groups.length,24);assert.equal(original.issuanceCohorts,2);
+});
+
+test('civil year10000 is representable and Gregorian century/leap rules remain exact across400-year cycles',()=>{
+  for(const y of [2027,2100,2400,10000,12027])assert.equal(civilStart(y+400)-civilStart(y),146097n*86400n);
+  for(const [y,days] of [[2100,365],[2400,366],[10000,366]])assert.equal(civilStart(y+1)-civilStart(y),BigInt(days)*86400n);
+  const rows=Array.from({length:5},(_,i)=>({year:9999+i,zodiac:ZODIAC[i],
+    startUtc:new Date(Number(civilStart(9999+i))*1000).toISOString().replace('.000Z','Z')}));
+  assert.ok(rows[1].startUtc.startsWith('+010000-'));
+  const cal=makeAnnualCohortCalendar('TEST_ONLY_EXTENDED_ISO',rows);
+  assert.equal(cohortYear(civilStart(10000),cal),10000);
+  const invalid=rows.map(row=>({...row}));invalid[1].startUtc='+010000-02-30T00:00:00Z';
+  assert.throws(()=>makeAnnualCohortCalendar('TEST_ONLY_INVALID_DATE',invalid),/INVALID_UTC_TIMESTAMP/);
+});
+
+test('ten-thousand-year explicit continuation keeps IDs above65535, hashes, ages and selected rights intact',()=>{
+  let cal=makeBirthGroupCalendar(voyageSegment(2027,32));
+  const first=mintOrigin(civilStart(2027),cal),baseHash=cal.calendarHash;
+  for(let count=32;count<10000;count+=16)cal=appendBirthGroupCalendar(cal,voyageSegment(2027+count,Math.min(16,10000-count)));
+  assert.equal(cal.issuanceCohorts,10000);assert.equal(cal.yearStarts.length,10003);
+  assert.equal(cal.groups.length,120000);assert.equal(cal.yearStarts[10000],civilStart(12027));
+  assert.equal(cal.calendarHash,baseHash);assert.deepEqual(mintOrigin(civilStart(2027),cal),first);
+  const last=mintOrigin(civilStart(12027)-1n,cal);
+  assert.equal(last.groupId,120000);assert.ok(last.groupId>65535);
+  assert.equal(last.birthYear,12026);assert.equal(last.birthConstellation,12);
+  for(const g of cal.groups){
+    assert.equal(birthGroupAt(g.start,cal).groupId,g.groupId);
+    assert.equal(birthGroupAt(g.end-1n,cal).groupId,g.groupId);
+  }
+  const future=civilStart(12029);
+  const holdings=[{groupId:first.groupId,...newCohortTranches(1003n)},{groupId:last.groupId,...newCohortTranches(1001n)}];
+  const moved=transferBirthGroups(holdings,2004n,[first.groupId,last.groupId],cal);
+  const settled=settleBirthGroups(moved.child,2004n,[first.groupId,last.groupId],future,cal);
+  assert.equal(settled.expectedKshipWei,2004000n);
+  assert.equal(settled.parent.reduce((sum,g)=>sum+g.first+g.second+g.terminal,0n),0n);
+  assert.equal(currentAnnualStage(2027,civilStart(12027),cal),3);
+  assert.equal(currentAnnualStage(12026,civilStart(12027),cal),1);
+  assert.equal(currentAnnualStage(12026,civilStart(12028),cal),2);
+  assert.equal(currentAnnualStage(12026,future,cal),3);
+});
+
+test('Earth lunar new year remains independent from civil financial years across appended2027-2028 data',()=>{
+  // HKO T2027e/T2028e: Feb6 and Jan26, localUTC+8 midnight. Civil star
+  // labels here are test fixtures, not astronomical solar-ingress predictions.
+  const local=(year,month,day)=>BigInt(Date.UTC(year,month-1,day)/1000)-28800n;
+  function lunarSegment(year,month,day,beforeZodiac){
+    const starts=Array.from({length:4},(_,i)=>local(year+i,1,1));
+    const newYear=local(year,month,day);
+    const edges=[starts[0],local(year,1,20),local(year,2,19),local(year,3,21),local(year,4,20),
+      local(year,5,21),local(year,6,22),local(year,7,23),local(year,8,23),local(year,9,23),
+      local(year,10,24),local(year,11,23),local(year,12,22),starts[1],newYear]
+      .sort((a,b)=>a<b?-1:a>b?1:0).filter((v,i,a)=>!i||v!==a[i-1]);
+    const starEdges=[starts[0],local(year,1,20),local(year,2,19),local(year,3,21),local(year,4,20),
+      local(year,5,21),local(year,6,22),local(year,7,23),local(year,8,23),local(year,9,23),
+      local(year,10,24),local(year,11,23),local(year,12,22)];
+    const stars=[10,11,12,1,2,3,4,5,6,7,8,9,10];
+    return {version:'0x'+'88'.repeat(32),firstFinancialYear:year,yearStarts:starts,
+      birthWindows:edges.slice(0,-1).map((start,i)=>({start,end:edges[i+1],
+        zodiac:start<newYear?beforeZodiac:beforeZodiac%12+1,
+        constellation:stars[starEdges.findLastIndex(edge=>edge<=start)]}))};
+  }
+  const original=makeBirthGroupCalendar(lunarSegment(2027,2,6,7));
+  const early=mintOrigin(local(2027,1,1),original);
+  const extended=appendBirthGroupCalendar(original,lunarSegment(2028,1,26,8));
+  assert.deepEqual(mintOrigin(local(2027,1,1),extended),early);
+  for(const [y,m,d,before,after] of [[2027,2,6,7,8],[2028,1,26,8,9]]){
+    const atNewYear=local(y,m,d),a=mintOrigin(atNewYear-1n,extended),b=mintOrigin(atNewYear,extended);
+    assert.equal(a.birthZodiac,before);assert.equal(b.birthZodiac,after);
+    assert.equal(a.birthYear,y);assert.equal(b.birthYear,y);
+    assert.equal(a.birthConstellation,b.birthConstellation);
+  }
+  assert.equal(mintOrigin(local(2028,1,1),extended).birthZodiac,8);
+  assert.equal(mintOrigin(local(2028,2,29),extended).birthConstellation,12);
+  assert.equal(currentAnnualStage(2027,local(2028,1,1),extended),1);
+});
+
+test('post-deployment append bounds storage work independently of constructor capacity',()=>{
+  const parent=makeBirthGroupCalendar(voyageSegment(2027,2));
+  const config=voyageSegment(2029,2),start=config.yearStarts[0],end=config.yearStarts[2];
+  config.birthWindows=Array.from({length:257},(_,i)=>({
+    start:start+(end-start)*BigInt(i)/257n,end:start+(end-start)*BigInt(i+1)/257n,zodiac:1,constellation:i%12+1}));
+  assert.equal(makeBirthGroupCalendar(config).birthWindows.length,257,'constructor retains its existing512-window bound');
+  assert.throws(()=>appendBirthGroupCalendar(parent,config),/CALENDAR_APPEND_WINDOW_BOUND/);
 });

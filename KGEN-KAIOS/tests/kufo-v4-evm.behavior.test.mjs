@@ -25,8 +25,8 @@ const annualWindows = (starts) => Array.from({ length: starts.length - 3 }, (_, 
 }));
 const packWindow = ({ start, end, zodiac, constellation }) => BigInt(start) | (BigInt(end) << 64n)
   | (BigInt(zodiac) << 128n) | (BigInt(constellation) << 136n);
-const calendarConfig = (starts, windows) => ({
-  version: VERSION, firstFinancialYear: FIRST_YEAR, yearStarts: starts, packedBirthWindows: windows.map(packWindow),
+const calendarConfig = (starts, windows, firstYear = FIRST_YEAR) => ({
+  version: VERSION, firstFinancialYear: firstYear, yearStarts: starts, packedBirthWindows: windows.map(packWindow),
 });
 const tranches = (c) => [c.first, c.second, c.terminal];
 const sum = (values) => values.reduce((a, b) => a + b, 0n);
@@ -50,12 +50,13 @@ async function rejectsCanonicalBinding(operation, contract) {
 }
 
 async function fixture(t, years = 4, options = {}) {
-  const starts = boundaries(years);
+  const starts = options.starts ?? boundaries(years);
+  const firstYear = options.firstYear ?? FIRST_YEAR;
   const windows = options.windows ?? annualWindows(starts);
-  const calendar = calendarConfig(starts, windows);
+  const calendar = calendarConfig(starts, windows, firstYear);
   const eip1193 = ganache.provider({
     logging: { quiet: true },
-    chain: { chainId: 1337, time: new Date((BASE + 10) * 1000), hardfork: "shanghai" },
+    chain: { chainId: 1337, time: new Date((starts[0] + 10) * 1000), hardfork: "shanghai" },
     miner: { timestampIncrement: 0, blockGasLimit: 30_000_000 },
     wallet: { totalAccounts: 6 },
   });
@@ -79,10 +80,11 @@ async function fixture(t, years = 4, options = {}) {
   for (const holder of [owner, beneficiary, recipient, victim, outsider]) {
     await mined(kufo.connect(holder).approve(await converter.getAddress(), MaxUint256));
   }
-  return { eip1193, provider, starts, windows, calendar, owner, beneficiary, recipient, victim, outsider, registry, kgen, kaios, kufo, output, kship, converter };
+  return { eip1193, provider, starts, windows, firstYear, calendar, owner, beneficiary, recipient, victim, outsider, registry, kgen, kaios, kufo, output, kship, converter };
 }
 
 async function at(f, timestamp) {
+  assert.ok(Number.isSafeInteger(timestamp * 1000), "test clock must preserve every timestamp bit");
   await f.eip1193.request({ method: "evm_setTime", params: [timestamp * 1000] });
   await f.eip1193.request({ method: "evm_mine", params: [timestamp] });
   const block = await f.eip1193.request({ method: "eth_getBlockByNumber", params: ["latest", false] });
@@ -290,7 +292,7 @@ test("256 unsolicited dust transfers coalesce and cannot lock the victim's full 
   await conservation(f);
 });
 
-test("32 dormant annual cohorts transfer within a fixed gas bound and settle forever after issuance ends", async (t) => {
+test("32 dormant annual cohorts transfer within a fixed gas bound and settle beyond their covered segment", async (t) => {
   const f = await fixture(t, 32);
   assert.equal(await f.kufo.issuanceCohorts(), 32n);
   for (let i = 0; i < 32; i += 1) {
@@ -424,14 +426,60 @@ test("lifetime issuance cap cannot be recycled after terminal burn", async (t) =
   await conservation(f);
 });
 
-async function alchemyFixture(t) {
-  const f = await fixture(t, 4, { production: true });
+async function alchemyFixture(t, options = {}) {
+  const f = await fixture(t, options.years ?? 4, { ...options, production: true });
   const { kgen, kaios } = f;
   const furnace = await deploy("KAIOSAlchemyFurnace", f.owner, [await kaios.getAddress(), await kgen.getAddress(), await f.registry.getAddress(), await f.kufo.getAddress()]);
   const realOutput = await deploy("KUFOOutputJindouyun168888", f.owner, [await furnace.getAddress(), await f.kufo.getAddress()]);
   await mined(f.registry.setOrgan(FURNACE_ID, await furnace.getAddress()));
   await mined(f.registry.setOrgan(OUTPUT_ID, await realOutput.getAddress()));
   return { ...f, kgen, kaios, furnace, realOutput };
+}
+
+async function nextCalendarSegment(f, years = 4) {
+  const issued = Number(await f.kufo.issuanceCohorts());
+  const starts = await Promise.all([issued, issued + 1, issued + 2].map(async (index) => Number(await f.kufo.calendarBoundary(index))));
+  const step = starts[1] - starts[0];
+  while (starts.length < years + 3) starts.push(starts.at(-1) + step);
+  const windows = annualWindows(starts).map((window, index) => ({
+    ...window, zodiac: ((FIRST_ZODIAC - 1 + issued + index) % 12) + 1,
+  }));
+  return calendarConfig(starts, windows, f.firstYear + issued);
+}
+
+async function executeCalendarSegment(f, config) {
+  const parentHash = await f.kufo.latestCalendarHash();
+  const dataHash = await f.kufo.calendarAppendHash(config);
+  await mined(f.kufo.proposeCalendarAppend(config));
+  const pending = await f.kufo.pendingCalendarAppend();
+  assert.equal(pending.dataHash, dataHash);
+  assert.equal(pending.parentHash, parentHash);
+  assert.equal(pending.proposer, await f.owner.getAddress());
+  await at(f, Number(pending.executableAt));
+  await mined(f.kufo.connect(f.outsider).executeCalendarAppend(config));
+  const segmentHash = keccak256(AbiCoder.defaultAbiCoder().encode(["bytes32", "bytes32"], [parentHash, dataHash]));
+  assert.equal(await f.kufo.latestCalendarHash(), segmentHash);
+  return segmentHash;
+}
+
+async function rejectsKufoError(operation, f, name) {
+  await assert.rejects(operation, (error) => {
+    const data = error.data ?? error.info?.error?.data?.result;
+    const parsed = f.kufo.interface.parseError(data);
+    assert.equal(parsed.name, name);
+    return true;
+  });
+}
+
+async function mintFromFurnace(f, input, receiver, label) {
+  const beneficiary = typeof receiver === "string" ? receiver : await receiver.getAddress();
+  await mined(f.kaios.approve(await f.furnace.getAddress(), input));
+  const receipt = await mined(f.furnace.burnForKufo(input, beneficiary, hash(label)));
+  const created = receipt.logs.map((log) => {
+    try { return f.furnace.interface.parseLog(log); } catch { return null; }
+  }).find((log) => log?.name === "ImmediateAlchemyCreated");
+  assert.ok(created);
+  return created.args.proofId;
 }
 
 test("real main KAIOS spends holder allowance; KGEN is balance-only; outlet beneficiary is fixed", async (t) => {
@@ -530,7 +578,7 @@ test("real main KAIOS spends holder allowance; KGEN is balance-only; outlet bene
   await conservation(f);
 });
 
-test("outside the configured issuance interval the entire alchemy burn rolls back", async (t) => {
+test("without a covered calendar segment the entire alchemy burn rolls back", async (t) => {
   const f = await alchemyFixture(t);
   const input = parseEther("0.001");
   const owner = await f.owner.getAddress();
@@ -664,6 +712,12 @@ test("33 active groups require explicit batches and selected transfer/convert re
     await mint(f, 1000n, f.owner, `bounded-group-${i}`);
   }
   const ids = Array.from({ length: 32 }, (_, i) => i + 1);
+  assert.deepEqual(Array.from(await f.kufo.heldGroups(owner, 0, 32)), ids.map(BigInt));
+  assert.deepEqual(Array.from(await f.kufo.heldGroups(owner, 32, 32)), [33n]);
+  for (const limit of [0, 33]) await rejectsKufoError(f.kufo.heldGroups(owner, 0, limit), f, "InvalidPageLimit");
+  await rejectsKufoError(f.kufo.claimableTotal(owner), f, "GroupBatchRequired");
+  await rejectsKufoError(f.converter.convert.staticCall(1n, recipient), f, "GroupBatchRequired");
+  assert.equal(await f.kufo.claimableForGroups(owner, ids), 0n);
   const invalid = [[], [0], [2, 1], [1, 1], [...ids, 33], [65_535]];
   for (const selected of invalid) await assert.rejects(f.kufo.transferGroups.staticCall(recipient, 1n, selected));
   await assert.rejects(f.kufo.transfer.staticCall(recipient, 33_000n), /GroupBatchRequired/);
@@ -671,6 +725,7 @@ test("33 active groups require explicit batches and selected transfer/convert re
   assert.equal(await f.kufo.balanceOf(owner), 33_000n);
   assert.equal(await f.kufo.balanceOf(recipient), 0n);
   await at(f, f.starts.at(-1) + 1_000_000);
+  assert.equal(await f.kufo.claimableForGroups(owner, ids), 32_000n);
   const beforeRejectedConversion = {
     allowance: await f.kufo.allowance(owner, await f.converter.getAddress()),
     count: await f.converter.conversionCount(),
@@ -696,6 +751,8 @@ test("33 active groups require explicit batches and selected transfer/convert re
   assert.ok(move.gasUsed < GAS_BOUND);
   assert.equal(await f.kufo.balanceOf(owner), 1000n);
   assert.equal(await f.kufo.balanceOf(recipient), 32_000n);
+  assert.deepEqual(Array.from(await f.kufo.heldGroups(owner, 0, 32)), [33n]);
+  assert.deepEqual(Array.from(await f.kufo.heldGroups(recipient, 0, 32)), ids.map(BigInt));
   await at(f, f.starts.at(-1) + 1_000_000);
   const allowance = await f.kufo.allowance(recipient, await f.converter.getAddress());
   const count = await f.converter.conversionCount();
@@ -711,7 +768,7 @@ test("33 active groups require explicit batches and selected transfer/convert re
   await conservation(f);
 });
 
-test("the 32-year and 512-window candidate maximum deploys under Shanghai and settles selected groups forever", async (t) => {
+test("a 32-year 512-window segment deploys under Shanghai and settles selected groups forever", async (t) => {
   const starts = boundaries(32);
   const windows = Array.from({ length: 512 }, (_, i) => ({
     start: BASE + Math.floor(i * (32 * STEP) / 512) + (i === 0 ? 0 : 1),
@@ -832,4 +889,397 @@ test("converter rejects inconsistent KSHIP release modes and preserves all state
     for (const entrypoint of ["convert", "convertGroups"]) await rejectsAtomicCarrierRelease(f, entrypoint);
     t.diagnostic(`atomic rejection verified for ${fault.name} through both converter entrypoints`);
   }
+});
+
+test("calendar append requires the registry owner, the full delay and the exact proposed payload", async (t) => {
+  const f = await fixture(t);
+  const config = await nextCalendarSegment(f);
+  const initial = await f.kufo.calendarHash();
+  await rejectsKufoError(f.kufo.connect(f.outsider).proposeCalendarAppend.staticCall(config), f, "OnlyCalendarOwner");
+  await rejectsKufoError(f.kufo.connect(f.outsider).cancelCalendarAppend.staticCall(), f, "OnlyCalendarOwner");
+  await mined(f.registry.setMinimumDelay(3599));
+  await rejectsKufoError(f.kufo.proposeCalendarAppend.staticCall(config), f, "InvalidCalendarDelay");
+  await mined(f.registry.setMinimumDelay(3600));
+  const proposedAt = await f.eip1193.request({ method: "eth_getBlockByNumber", params: ["latest", false] });
+  await mined(f.kufo.proposeCalendarAppend(config));
+  const pending = await f.kufo.pendingCalendarAppend();
+  assert.equal(pending.dataHash, await f.kufo.calendarAppendHash(config));
+  assert.equal(pending.parentHash, initial);
+  assert.equal(pending.proposer, await f.owner.getAddress());
+  assert.equal(pending.executableAt, BigInt(proposedAt.timestamp) + 3600n);
+  await rejectsKufoError(f.kufo.proposeCalendarAppend.staticCall(config), f, "CalendarAppendPending");
+  await at(f, Number(pending.executableAt) - 1);
+  await rejectsKufoError(f.kufo.connect(f.outsider).executeCalendarAppend.staticCall(config), f, "CalendarAppendNotReady");
+  assert.equal(await f.kufo.latestCalendarHash(), initial);
+  assert.equal(await f.kufo.issuanceCohorts(), 4n);
+  await at(f, Number(pending.executableAt));
+  const different = { ...config, version: hash("different-calendar-payload") };
+  await rejectsKufoError(f.kufo.connect(f.outsider).executeCalendarAppend.staticCall(different), f, "CalendarAppendMismatch");
+  assert.deepEqual(Array.from(await f.kufo.pendingCalendarAppend()), Array.from(pending));
+  await mined(f.kufo.connect(f.outsider).executeCalendarAppend(config));
+  assert.equal(await f.kufo.issuanceCohorts(), 8n);
+  assert.equal(await f.kufo.calendarHash(), initial);
+  assert.notEqual(await f.kufo.latestCalendarHash(), initial);
+  assert.equal((await f.kufo.pendingCalendarAppend()).dataHash, ZeroHash);
+  await assert.rejects(f.kufo.connect(f.outsider).executeCalendarAppend.staticCall(config));
+  assert.equal(await f.kufo.totalSupply(), 0n);
+  assert.equal(await f.kaios.alchemyBurnCount(), 0n);
+});
+
+test("calendar append cancellation, owner changes and invalid overlap cannot rewrite existing rights", async (t) => {
+  const f = await fixture(t);
+  const originProof = await mint(f, 1000n);
+  const original = Array.from(await f.kufo.mintOrigin(originProof));
+  const initial = await f.kufo.calendarHash();
+  const metadata = Array.from(await f.kufo.groupMetadata(1));
+  const config = await nextCalendarSegment(f);
+  const invalid = [
+    { ...config, firstFinancialYear: config.firstFinancialYear + 1 },
+    { ...config, version: ZeroHash },
+    await nextCalendarSegment(f, 33),
+  ];
+  for (const offset of [0, 1, 2]) {
+    const starts = [...config.yearStarts];
+    starts[offset] += 1;
+    invalid.push(calendarConfig(starts, annualWindows(starts), config.firstFinancialYear));
+  }
+  for (const candidate of invalid) await rejectsKufoError(f.kufo.proposeCalendarAppend.staticCall(candidate), f, "InvalidCalendar");
+  await mined(f.kufo.proposeCalendarAppend(config));
+  await mined(f.kufo.cancelCalendarAppend());
+  assert.equal((await f.kufo.pendingCalendarAppend()).dataHash, ZeroHash);
+  await assert.rejects(f.kufo.connect(f.outsider).executeCalendarAppend.staticCall(config));
+  await mined(f.kufo.proposeCalendarAppend(config));
+  const pending = await f.kufo.pendingCalendarAppend();
+  await mined(f.registry.setOwner(await f.recipient.getAddress()));
+  await at(f, Number(pending.executableAt));
+  await rejectsKufoError(f.kufo.connect(f.outsider).executeCalendarAppend.staticCall(config), f, "CalendarOwnerChanged");
+  await rejectsKufoError(f.kufo.cancelCalendarAppend.staticCall(), f, "OnlyCalendarOwner");
+  await mined(f.kufo.connect(f.recipient).cancelCalendarAppend());
+  assert.equal((await f.kufo.pendingCalendarAppend()).dataHash, ZeroHash);
+  assert.equal(await f.kufo.latestCalendarHash(), initial);
+  assert.equal(await f.kufo.groupCalendarHash(1), initial);
+  assert.equal(await f.kufo.issuanceCohorts(), 4n);
+  assert.deepEqual(Array.from(await f.kufo.mintOrigin(originProof)), original);
+  assert.deepEqual(Array.from(await f.kufo.groupMetadata(1)), metadata);
+  assert.equal(await f.kufo.balanceOf(await f.owner.getAddress()), 1000n);
+  await conservation(f);
+});
+
+test("continuous real alchemy crosses 32 and 64 years without rewriting prior segment origins", async (t) => {
+  const f = await alchemyFixture(t, { years: 32 });
+  const owner = await f.owner.getAddress();
+  const initialHash = await f.kufo.calendarHash();
+  const input = parseEther("0.001");
+  const firstProof = await mintFromFurnace(f, input, f.owner, "initial-segment-birth");
+  const firstOrigin = await f.kufo.mintOrigin(firstProof);
+  const initialMetadata = Array.from(await f.kufo.groupMetadata(firstOrigin.groupId));
+  const firstAppend = await nextCalendarSegment(f, 32);
+  const secondHash = await executeCalendarSegment(f, firstAppend);
+  await at(f, firstAppend.yearStarts[0] + 10);
+  const secondProof = await mintFromFurnace(f, input, f.owner, "second-segment-birth");
+  const secondOrigin = await f.kufo.mintOrigin(secondProof);
+  assert.equal(secondOrigin.birthYear, BigInt(FIRST_YEAR + 32));
+  assert.ok(secondOrigin.groupId > 32n);
+  assert.equal(secondOrigin.calendarHash, secondHash);
+  assert.equal(await f.kufo.groupCalendarHash(secondOrigin.groupId), secondHash);
+  assert.equal(await f.kufo.claimableForGroups(owner, [firstOrigin.groupId]), E18);
+  assert.equal(await f.kufo.claimableForGroups(owner, [secondOrigin.groupId]), 0n);
+  const secondAppend = await nextCalendarSegment(f, 32);
+  const thirdHash = await executeCalendarSegment(f, secondAppend);
+  await at(f, secondAppend.yearStarts[0] + 10);
+  const thirdProof = await mintFromFurnace(f, input, f.owner, "third-segment-birth");
+  const thirdOrigin = await f.kufo.mintOrigin(thirdProof);
+  assert.equal(await f.kufo.issuanceCohorts(), 96n);
+  assert.equal(thirdOrigin.birthYear, BigInt(FIRST_YEAR + 64));
+  assert.equal(thirdOrigin.calendarHash, thirdHash);
+  assert.equal(await f.kufo.calendarHash(), initialHash);
+  assert.equal(await f.kufo.groupCalendarHash(firstOrigin.groupId), initialHash);
+  assert.equal(await f.kufo.groupCalendarHash(secondOrigin.groupId), secondHash);
+  assert.deepEqual(Array.from(await f.kufo.mintOrigin(firstProof)), Array.from(firstOrigin));
+  assert.deepEqual(Array.from(await f.kufo.groupMetadata(firstOrigin.groupId)), initialMetadata);
+  assert.equal(await f.kufo.totalDecayedForKship(), 0n);
+  await mined(f.kufo.transferGroups(await f.recipient.getAddress(), 317n, [firstOrigin.groupId]));
+  await mined(f.converter.convertGroups(E18 - 317n, owner, [firstOrigin.groupId]));
+  await mined(f.converter.connect(f.recipient).convertGroups(317n, await f.recipient.getAddress(), [firstOrigin.groupId]));
+  assert.equal(await f.kufo.totalSupply(), 2n * E18);
+  assert.equal(await f.kship.totalSupply(), E18 * 1000n);
+  assert.deepEqual(Array.from(await f.kufo.mintOrigin(firstProof)), Array.from(firstOrigin));
+  await conservation(f);
+});
+
+test("an expired calendar can catch up through governance without retroactive minting", async (t) => {
+  const f = await alchemyFixture(t);
+  const input = parseEther("0.001");
+  const owner = await f.owner.getAddress();
+  await mined(f.kaios.approve(await f.furnace.getAddress(), input));
+  const originalBalance = await f.kaios.balanceOf(owner);
+  const originalSupply = await f.kaios.totalSupply();
+  await at(f, f.starts[4] + 100);
+  await rejectsKufoError(f.furnace.burnForKufo.staticCall(input, owner, hash("missing-calendar-segment")), f, "IssuanceCalendarClosed");
+  assert.equal(await f.kaios.balanceOf(owner), originalBalance);
+  assert.equal(await f.kaios.totalSupply(), originalSupply);
+  assert.equal(await f.kaios.allowance(owner, await f.furnace.getAddress()), input);
+  const config = await nextCalendarSegment(f);
+  const segmentHash = await executeCalendarSegment(f, config);
+  const current = await f.eip1193.request({ method: "eth_getBlockByNumber", params: ["latest", false] });
+  const proof = await mintFromFurnace(f, input, f.owner, "caught-up-current-birth");
+  const origin = await f.kufo.mintOrigin(proof);
+  assert.equal(origin.bornAt, BigInt(current.timestamp));
+  assert.ok(origin.bornAt > BigInt(config.yearStarts[0]));
+  assert.equal(origin.birthYear, BigInt(FIRST_YEAR + 7));
+  assert.equal(origin.calendarHash, segmentHash);
+  assert.equal(await f.kufo.groupCalendarHash(origin.groupId), segmentHash);
+  assert.equal(await f.kaios.balanceOf(owner), originalBalance - input);
+  assert.equal(await f.kaios.totalSupply(), originalSupply - input);
+  await conservation(f);
+});
+
+test("century, millennium and ten-thousand-year old cohorts remain movable and settleable within a fixed gas bound", async (t) => {
+  const f = await fixture(t);
+  const holders = [f.owner, f.beneficiary, f.outsider];
+  const proofs = [];
+  for (const [index, holder] of holders.entries()) proofs.push(await mint(f, 1000n, holder, `long-voyage-${index}`));
+  const origins = await Promise.all(proofs.map(async (proof) => Array.from(await f.kufo.mintOrigin(proof))));
+  await mined(f.kufo.transfer(await f.victim.getAddress(), 1n));
+  const horizons = [100, 1000, 10_000];
+  // Synthetic long delays only. These 366-day steps do not define lunar years.
+  const transferGas = [];
+  for (let i = 0; i < holders.length; i += 1) {
+    await at(f, f.starts[0] + horizons[i] * 366 * 24 * 60 * 60);
+    const amount = await f.kufo.balanceOf(await holders[i].getAddress());
+    const moved = await mined(f.kufo.connect(holders[i]).transfer(await f.recipient.getAddress(), amount, { gasLimit: GAS_BOUND }));
+    const settled = await mined(f.converter.connect(f.recipient).convert(amount, await holders[i].getAddress(), { gasLimit: GAS_BOUND }));
+    assert.ok(moved.gasUsed < GAS_BOUND);
+    assert.ok(settled.gasUsed < GAS_BOUND);
+    transferGas.push(moved.gasUsed);
+    assert.equal(await f.kufo.balanceOf(await f.recipient.getAddress()), 0n);
+  }
+  assert.ok(transferGas[2] <= transferGas[0] + 100_000n, "elapsed years must not become a transfer traversal");
+  await mined(f.kufo.connect(f.victim).transfer(await f.recipient.getAddress(), 1n));
+  await mined(f.converter.connect(f.recipient).convert(1n, await f.victim.getAddress()));
+  assert.equal(await f.kufo.totalSupply(), 0n);
+  assert.equal(await f.kship.totalSupply(), 3_000_000n);
+  await assert.rejects(f.converter.connect(f.recipient).convert.staticCall(1n, await f.recipient.getAddress()));
+  for (let i = 0; i < proofs.length; i += 1) assert.deepEqual(Array.from(await f.kufo.mintOrigin(proofs[i])), origins[i]);
+  t.diagnostic(`100/1000/10000-year synthetic voyage transfer gas=${transferGas.join(",")}`);
+  await conservation(f);
+});
+
+test("an independent year-12027 calendar preserves wide timestamps and final settlement", async (t) => {
+  const firstYear = 12_027;
+  // Gregorian January points stress timestamp width, not the formal lunar calendar.
+  const starts = Array.from({ length: 7 }, (_, index) => Date.UTC(firstYear + index, 0, 1) / 1000);
+  const f = await alchemyFixture(t, { firstYear, starts });
+  const owner = await f.owner.getAddress();
+  const proof = await mintFromFurnace(f, parseEther("0.001"), f.owner, "far-year-current-birth");
+  const origin = await f.kufo.mintOrigin(proof);
+  assert.equal(origin.birthYear, BigInt(firstYear));
+  assert.ok(origin.bornAt > 0xffff_ffffn);
+  assert.equal(origin.bornAt, BigInt(starts[0] + 10));
+  assert.equal(origin.calendarHash, await f.kufo.groupCalendarHash(origin.groupId));
+  await at(f, starts[1]);
+  assert.equal(await f.kufo.claimableForGroups(owner, [origin.groupId]), E18 / 2n);
+  await mined(f.converter.convertGroups(E18 / 2n, owner, [origin.groupId]));
+  await at(f, starts[3]);
+  await mined(f.converter.convertGroups(E18 / 2n, owner, [origin.groupId]));
+  assert.equal(await f.kufo.totalSupply(), 0n);
+  assert.equal(await f.kship.totalSupply(), E18 * 1000n);
+  assert.deepEqual(Array.from(await f.kufo.mintOrigin(proof)), Array.from(origin));
+  await conservation(f);
+});
+
+test("the internal held-group bitmap orders all uint32 tiers without creating calendar rights", async (t) => {
+  const f = await fixture(t);
+  const actor = await deploy("KUFOV4BitmapHarness", f.owner, [await f.registry.getAddress(), await f.kaios.getAddress(), f.calendar]);
+  const holder = await f.owner.getAddress();
+  const other = await f.recipient.getAddress();
+  const maximum = 0xffff_ffffn;
+  const ids = [1n, 255n, 256n, 257n, 65_535n, 65_536n, 65_537n, 16_777_215n, 16_777_216n, 16_777_217n, maximum - 1n, maximum];
+  const shuffled = [...ids];
+  let seed = 0x637;
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    seed = (Math.imul(seed, 1_664_525) + 1_013_904_223) >>> 0;
+    const index = seed % (i + 1);
+    [shuffled[i], shuffled[index]] = [shuffled[index], shuffled[i]];
+  }
+  const queries = new Set([0n, maximum + 1n]);
+  for (let i = 0; i < ids.length; i += 1) {
+    queries.add(ids[i] - 1n);
+    queries.add(ids[i]);
+    queries.add(ids[i] + 1n);
+    if (i + 1 < ids.length) queries.add(ids[i] + (ids[i + 1] - ids[i]) / 2n);
+  }
+  const present = new Set();
+  async function checkSuccessors() {
+    const sorted = [...present].sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+    for (const after of queries) {
+      const expected = sorted.find((id) => id > after) ?? 0n;
+      assert.equal(await actor.testNextHeld(holder, after), expected, `successor after ${after}`);
+    }
+    assert.equal(await actor.testNextHeld(other, 0), 0n, "holder indexes remain independent");
+  }
+  for (const id of shuffled) {
+    await mined(actor.testSetHeld(holder, id));
+    present.add(id);
+  }
+  await checkSuccessors();
+  await assert.rejects(actor.testSetHeld.staticCall(holder, ids[0]), (error) => {
+    const parsed = actor.interface.parseError(error.data);
+    assert.equal(parsed.name, "Panic");
+    assert.deepEqual(Array.from(parsed.args), [1n]);
+    return true;
+  });
+  for (const id of [0n, maximum + 1n]) {
+    for (const method of [actor.testSetHeld, actor.testClearHeld]) {
+      await assert.rejects(method.staticCall(holder, id), (error) => {
+        const parsed = actor.interface.parseError(error.data);
+        assert.equal(parsed.name, "UnknownBirthGroup");
+        assert.deepEqual(Array.from(parsed.args), [id]);
+        return true;
+      });
+    }
+  }
+  for (const id of [...shuffled].reverse()) {
+    await mined(actor.testClearHeld(holder, id));
+    present.delete(id);
+    await checkSuccessors();
+  }
+  await assert.rejects(actor.testClearHeld.staticCall(holder, ids[0]), (error) => {
+    const parsed = actor.interface.parseError(error.data);
+    assert.equal(parsed.name, "Panic");
+    assert.deepEqual(Array.from(parsed.args), [1n]);
+    return true;
+  });
+  const reinserted = [maximum, 65_536n, 1n, 16_777_216n, 256n];
+  for (const id of reinserted) {
+    await mined(actor.testSetHeld(holder, id));
+    present.add(id);
+    await checkSuccessors();
+  }
+  for (const id of reinserted) {
+    await mined(actor.testClearHeld(holder, id));
+    present.delete(id);
+    await checkSuccessors();
+  }
+  assert.equal(await actor.groupCount(), 4n, "index unit inputs do not create real calendar groups");
+  assert.equal(await actor.totalSupply(), 0n);
+  assert.equal(await actor.totalMintedFromAlchemy(), 0n);
+  assert.equal(await actor.balanceOf(holder), 0n);
+  assert.equal(await actor.activeGroupCount(holder), 0n);
+});
+
+test("real holder indexes and annual aggregates match every birth group through transfers and settlement", async (t) => {
+  const windows = [
+    { start: BASE, end: BASE + 500, zodiac: 7, constellation: 2 },
+    { start: BASE + 500, end: BASE + 1500, zodiac: 8, constellation: 3 },
+    { start: BASE + 1500, end: BASE + 4000, zodiac: 9, constellation: 4 },
+  ];
+  const f = await fixture(t, 4, { windows });
+  const holders = [f.owner, f.recipient, f.victim, f.beneficiary, f.outsider];
+  const count = Number(await f.kufo.groupCount());
+  const metadata = await Promise.all(Array.from({ length: count }, (_, i) => f.kufo.groupMetadata(i + 1)));
+  const years = [...new Set(metadata.map((group) => group.financialYear))];
+  async function checkPortfolios() {
+    const state = [];
+    let allBalances = 0n;
+    for (const holder of holders) {
+      const address = await holder.getAddress();
+      const rows = await Promise.all(metadata.map(async (_, i) => tranches(await f.kufo.birthGroup(address, i + 1))));
+      const expectedIds = [];
+      const annual = new Map(years.map((year) => [year, [0n, 0n, 0n]]));
+      for (let i = 0; i < rows.length; i += 1) {
+        if (sum(rows[i]) !== 0n) expectedIds.push(BigInt(i + 1));
+        const aggregate = annual.get(metadata[i].financialYear);
+        for (let field = 0; field < 3; field += 1) aggregate[field] += rows[i][field];
+      }
+      const indexed = [];
+      let after = 0n;
+      while (true) {
+        const page = Array.from(await f.kufo.heldGroups(address, after, 2));
+        if (page.length === 0) break;
+        assert.ok(page[0] > after, "pagination must advance");
+        indexed.push(...page);
+        assert.ok(indexed.length <= count, "index traversal must terminate");
+        after = page.at(-1);
+      }
+      assert.deepEqual(indexed, expectedIds);
+      assert.equal(await f.kufo.activeGroupCount(address), BigInt(expectedIds.length));
+      let activeYears = 0n;
+      for (const [year, expected] of annual) {
+        assert.deepEqual(tranches(await f.kufo.cohort(address, year)), expected);
+        if (sum(expected) !== 0n) activeYears += 1n;
+      }
+      assert.equal(await f.kufo.activeCohortCount(address), activeYears);
+      const balance = await f.kufo.balanceOf(address);
+      assert.equal(rows.reduce((total, row) => total + sum(row), 0n), balance);
+      allBalances += balance;
+      state.push({ address, rows, indexed, balance, annual: [...annual], activeYears });
+    }
+    assert.equal(allBalances, await f.kufo.totalSupply());
+    await conservation(f);
+    return state;
+  }
+  await mint(f, 1000n, f.owner, "index-origin-first");
+  await mint(f, 1000n, f.recipient, "index-recipient-first");
+  await at(f, BASE + 600);
+  await mint(f, 2000n, f.owner, "index-origin-second-window");
+  await at(f, BASE + 1100);
+  await mint(f, 1000n, f.owner, "index-origin-next-year");
+  await checkPortfolios();
+  await mined(f.kufo.transfer(await f.victim.getAddress(), 317n));
+  const beforeSelf = await checkPortfolios();
+  await mined(f.kufo.transfer(await f.owner.getAddress(), 123n));
+  await mined(f.kufo.transfer(await f.beneficiary.getAddress(), 0n));
+  assert.deepEqual(await checkPortfolios(), beforeSelf);
+  await mined(f.kufo.transferGroups(await f.recipient.getAddress(), 113n, [2]));
+  await checkPortfolios();
+  await mined(f.converter.convertGroups(100n, await f.beneficiary.getAddress(), [1]));
+  const beforeRevert = await checkPortfolios();
+  await assert.rejects(mined(f.kufo.transferGroups(await f.recipient.getAddress(), 1001n, [3], { gasLimit: GAS_BOUND })));
+  assert.deepEqual(await checkPortfolios(), beforeRevert);
+  await at(f, f.starts[4]);
+  for (const holder of holders) {
+    const address = await holder.getAddress();
+    const balance = await f.kufo.balanceOf(address);
+    if (balance === 0n) continue;
+    const ids = Array.from(await f.kufo.heldGroups(address, 0, 32));
+    await mined(f.converter.connect(holder).convertGroups(balance, address, ids));
+    await checkPortfolios();
+    assert.equal(await f.kufo.activeGroupCount(address), 0n);
+    assert.equal(await f.kufo.activeCohortCount(address), 0n);
+  }
+  assert.equal(await f.kufo.totalSupply(), 0n);
+  assert.equal(await f.kship.totalSupply(), 5_000_000n);
+});
+
+test("a 32-year 256-window append creates 287 groups within the fixed operation gas bound", async (t) => {
+  const f = await fixture(t);
+  const config = await nextCalendarSegment(f, 32);
+  const start = config.yearStarts[0];
+  const span = config.yearStarts[32] - start;
+  function packedWindows(count) {
+    return Array.from({ length: count }, (_, index) => packWindow({
+      start: start + Math.floor(index * span / count) + (index === 0 ? 0 : 1),
+      end: start + Math.floor((index + 1) * span / count) + (index === count - 1 ? 0 : 1),
+      zodiac: (index % 12) + 1,
+      constellation: ((index + 3) % 12) + 1,
+    }));
+  }
+  assert.equal(await f.kufo.MAX_APPEND_BIRTH_WINDOWS(), 256n);
+  const tooMany = { ...config, packedBirthWindows: packedWindows(257) };
+  await rejectsKufoError(f.kufo.proposeCalendarAppend.staticCall(tooMany), f, "InvalidCalendar");
+  const bounded = { ...config, packedBirthWindows: packedWindows(256) };
+  const beforeGroups = await f.kufo.groupCount();
+  const beforeIssued = await f.kufo.issuanceCohorts();
+  const proposed = await mined(f.kufo.proposeCalendarAppend(bounded, { gasLimit: GAS_BOUND }));
+  assert.ok(proposed.gasUsed < GAS_BOUND);
+  const pending = await f.kufo.pendingCalendarAppend();
+  assert.equal(pending.dataHash, await f.kufo.calendarAppendHash(bounded));
+  await at(f, Number(pending.executableAt));
+  const executed = await mined(f.kufo.connect(f.outsider).executeCalendarAppend(bounded, { gasLimit: GAS_BOUND }));
+  assert.ok(executed.gasUsed < GAS_BOUND);
+  assert.equal(await f.kufo.groupCount() - beforeGroups, 287n);
+  assert.equal(await f.kufo.issuanceCohorts(), beforeIssued + 32n);
+  assert.equal(await f.kufo.totalSupply(), 0n);
+  t.diagnostic(`32-year/256-window append: proposal gas=${proposed.gasUsed}; execution gas=${executed.gasUsed}; new groups=287; bound=${GAS_BOUND}`);
 });

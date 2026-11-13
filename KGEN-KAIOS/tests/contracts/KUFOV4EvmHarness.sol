@@ -2,6 +2,7 @@
 pragma solidity 0.8.24;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {KUFO} from "../../contracts/KUFO.sol";
 
 interface IKUFOV4Mintable {
     function mintFromImmediateProof(bytes32 proofId, address beneficiary, uint256 amount) external returns (uint256 lotId);
@@ -40,6 +41,24 @@ interface IKUFOV4CarrierRecord {
 
 contract KUFOV4MockOrganRegistry {
     mapping(bytes32 => address) private _organs;
+    address public owner;
+    uint64 public minimumDelay;
+
+    constructor() {
+        owner = msg.sender;
+        minimumDelay = 1 hours;
+    }
+
+    // Local governance fixtures only. Production Registry owns its own policy.
+    function setOwner(address nextOwner) external {
+        require(msg.sender == owner, "ONLY_TEST_OWNER");
+        owner = nextOwner;
+    }
+
+    function setMinimumDelay(uint64 delay) external {
+        require(msg.sender == owner, "ONLY_TEST_OWNER");
+        minimumDelay = delay;
+    }
 
     function setOrgan(bytes32 organId, address organAddress) external {
         _organs[organId] = organAddress;
@@ -194,5 +213,25 @@ contract KUFOV4AdversarialKship is ERC20 {
             _mint(receiver, minted);
         }
         if (fault == Fault.TupleMismatch) amount -= 1;
+    }
+}
+
+// Internal-index unit actor only. Setting a bitmap bit here creates no calendar
+// group, mint, proof or holder entitlement. Never deploy this actor as KUFO.
+contract KUFOV4BitmapHarness is KUFO {
+    constructor(address registry, address kaiosToken, CalendarConfig memory cfg)
+        KUFO(registry, kaiosToken, cfg)
+    {}
+
+    function testSetHeld(address holder, uint256 id) external {
+        _setHeld(holder, id);
+    }
+
+    function testClearHeld(address holder, uint256 id) external {
+        _clearHeld(holder, id);
+    }
+
+    function testNextHeld(address holder, uint256 afterId) external view returns (uint256) {
+        return _nextHeld(holder, afterId);
     }
 }
