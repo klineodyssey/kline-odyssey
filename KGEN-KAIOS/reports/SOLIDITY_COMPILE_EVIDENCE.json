@@ -10,8 +10,42 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 16,
-  "contractCount": 27,
+  "sourceCount": 21,
+  "sourceSha256": {
+    "contracts/interfaces/IKAIOSOrganRegistry.sol": "de1bb3f67563ca094ddc7123e6d4b23ddb42d55481ad8c8d1c09d299faf180ee",
+    "contracts/KAIOS.sol": "0c9d04d4ab620770fe559d813fc686dcf4d98e0262ecd3e0d04ed92b59af9ce5",
+    "contracts/KAIOSAlchemyFurnace.sol": "fd6805977958c708800fcafbca3a979c8446e2dafce5fa63cb3be99c7471eacc",
+    "contracts/KAIOSEventHorizonVaultV01.sol": "0eac0e490697ec69e716225502cab9d01b8cfec2a04f9fdcdaa28bd51f51435e",
+    "contracts/KAIOSGenesisInscription.sol": "d29e35915b8494fb179ed783aa01776dd8b071f9181cfe21ac706a4fa75eb845",
+    "contracts/KAIOSOrganRegistry.sol": "00590b53a8c07530f9a32029cae0616127c12a372684b1a0e8e40ac9908ec424",
+    "contracts/KAIOSPairRegistry.sol": "59aa7b73c5992318ede286a7521f8a7b83518499d4e4c5e237b68c2362fbf2b6",
+    "contracts/KSHIP.sol": "6fd85f79ab6900a38f828b27f9d8a041567a16d0c5e737e7f42955f4baa9a17d",
+    "contracts/KSHIPConverter.sol": "6718c9912359e4889d46ce42bb6f1d3c6fb58f889a2d77c5174a3a5ac2087351",
+    "contracts/KUFO.sol": "6b1fc6aedb2c23b33de7a20cd833774004c3389fa249aeb81840455552351f5f",
+    "contracts/KUFOClaimWormhole.sol": "0633be5aa2d07dce66b781a9973ee8b6418aae183bae8fbde5e3824a1cac1295",
+    "contracts/KUFOOutputJindouyun168888.sol": "376f914ee3ed01876b1356e87f0a6ef2328cbc8835990a4d4edf846989ff829e",
+    "tests/contracts/KUFOV4EvmHarness.sol": "7a1c33d2df2e1bb7f98f9bcc353b81842b96a3d95c5436f6a3602d18e414a1cc",
+    "tests/contracts/MockKGEN.sol": "36c498bf0f4a2bd2c8b8087be6fbf14d198c5533faaf45057519f25adc81417e",
+    "tests/contracts/MockMintOrgan.sol": "c8f78f8b1b3f1df350fae39cdff9e9ce2c82f49f704342137ee599f43d6f8ef8",
+    "tests/contracts/MockOrgan.sol": "45dccd5402838e324173fb6b9ff856a1833f64f6e3e6627d85f9246e6c039be0",
+    "tests/contracts/TestERC1967Proxy.sol": "f17ecca14134ebcbf1aef4aed2e075547449ddf116ba2ee1fc9f965751626524",
+    "../KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol": "5403a53213e42961897e1837b1dfce8a48d5b699fcbad4285db8829c0a4c8266",
+    "tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol": "af4ceb7f7e021d83dc5643fb3b5ee03cee8f3473800b2e143723430d38d20a76",
+    "contracts/KUFOLegacyBaseline.sol": "3b9f81f21aed8a49263c237625a387bdc8059b45b26fbe0aca73a3e5811133b2",
+    "contracts/KAIOSAlchemyFurnaceLegacyBaseline.sol": "29b10b33c016d5a8441e409b12769288cb22e44cd173c8963658638c5a658414"
+  },
+  "standardInput": {
+    "path": "artifacts/solidity-standard-input.json",
+    "sha256": "db9467bafa46902343481a4ec0eb6ce5d8b1926a50a3f9c5973f8309f76b5057"
+  },
+  "legacyLineageRegression": {
+    "sourceRef": "33967045ed725848a6b814af0e9b10eac64f2ec7",
+    "testOnlyContracts": [
+      "KUFOLegacyBaseline",
+      "KAIOSAlchemyFurnaceLegacyBaseline"
+    ]
+  },
+  "contractCount": 36,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
@@ -91,6 +125,12 @@
     {
       "contractName": "KAIOSAlchemyFurnace",
       "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
+      "bytecodeBytes": 6871,
+      "deployedBytecodeBytes": 5850
+    },
+    {
+      "contractName": "KAIOSAlchemyFurnaceLegacyBaseline",
+      "sourceName": "contracts/KAIOSAlchemyFurnaceLegacyBaseline.sol",
       "bytecodeBytes": 2381,
       "deployedBytecodeBytes": 2084
     },
@@ -121,20 +161,20 @@
     {
       "contractName": "KSHIP",
       "sourceName": "contracts/KSHIP.sol",
-      "bytecodeBytes": 4153,
-      "deployedBytecodeBytes": 3118
+      "bytecodeBytes": 4194,
+      "deployedBytecodeBytes": 3159
     },
     {
       "contractName": "KSHIPConverter",
       "sourceName": "contracts/KSHIPConverter.sol",
-      "bytecodeBytes": 1221,
-      "deployedBytecodeBytes": 950
+      "bytecodeBytes": 3755,
+      "deployedBytecodeBytes": 2922
     },
     {
       "contractName": "KUFO",
       "sourceName": "contracts/KUFO.sol",
-      "bytecodeBytes": 6051,
-      "deployedBytecodeBytes": 4992
+      "bytecodeBytes": 20763,
+      "deployedBytecodeBytes": 17468
     },
     {
       "contractName": "KUFOClaimWormhole",
@@ -143,10 +183,58 @@
       "deployedBytecodeBytes": 765
     },
     {
+      "contractName": "KUFOLegacyBaseline",
+      "sourceName": "contracts/KUFOLegacyBaseline.sol",
+      "bytecodeBytes": 6051,
+      "deployedBytecodeBytes": 4992
+    },
+    {
+      "contractName": "KUFOOutputJindouyun168888",
+      "sourceName": "contracts/KUFOOutputJindouyun168888.sol",
+      "bytecodeBytes": 1070,
+      "deployedBytecodeBytes": 831
+    },
+    {
       "contractName": "KGEN_TempleHeart_V3_3_2_Baseline",
       "sourceName": "tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol",
       "bytecodeBytes": 18513,
       "deployedBytecodeBytes": 18298
+    },
+    {
+      "contractName": "KUFOV4AdversarialKship",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 4291,
+      "deployedBytecodeBytes": 3295
+    },
+    {
+      "contractName": "KUFOV4BitmapHarness",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 20911,
+      "deployedBytecodeBytes": 17616
+    },
+    {
+      "contractName": "KUFOV4MockOrganRegistry",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 626,
+      "deployedBytecodeBytes": 561
+    },
+    {
+      "contractName": "KUFOV4MockOutput",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 3744,
+      "deployedBytecodeBytes": 3517
+    },
+    {
+      "contractName": "KUFOV4NoMintOutput",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 526,
+      "deployedBytecodeBytes": 385
+    },
+    {
+      "contractName": "KUFOV4ReplayConverter",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 616,
+      "deployedBytecodeBytes": 588
     },
     {
       "contractName": "MockKGEN",

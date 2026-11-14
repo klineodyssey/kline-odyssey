@@ -18,6 +18,11 @@ on:
       - "K線西遊記/data/kgen-5d-world-map.json"
       - "KGEN-KAIOS/contracts/KAIOS.sol"
       - "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol"
+      - "KGEN-KAIOS/contracts/**"
+      - "KGEN-KAIOS/tests/**"
+      - "KGEN-KAIOS/tools/compile-contracts.mjs"
+      - "KGEN-KAIOS/package.json"
+      - "KGEN-KAIOS/package-lock.json"
 
 permissions:
   contents: read
@@ -42,17 +47,19 @@ jobs:
       - name: Confirm exact pull request head
         shell: bash
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
-      - name: Enforce review-only boundary
+      - name: Inspect contract inputs and preserve historical archives
+        id: change_scope
         shell: bash
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          changed="$(git diff --name-only "$BASE_SHA" HEAD)"
+          changed="$(git diff --no-renames --name-only "$BASE_SHA" HEAD)"
           printf '%s\n' "$changed"
-          if grep -E '\.sol$' <<<"$changed"; then
-            echo "Solidity changes are outside this review-only workflow." >&2
-            exit 1
+          if grep -Eq '\.sol$|^KGEN-KAIOS/(tests/|tools/compile-contracts\.mjs$|package(-lock)?\.json$)' <<<"$changed"; then
+            echo "contracts=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "contracts=false" >> "$GITHUB_OUTPUT"
           fi
           if grep -E '(^|/)(archive|archives)(/|$)|_ARCHIVE' <<<"$changed"; then
             echo "Historical archive changes are outside this review-only workflow." >&2
@@ -69,6 +76,22 @@ jobs:
         run: node KGEN-KAIOS/tools/verify-current-lineage.mjs
       - name: Require reproducible committed report
         run: git diff --exit-code -- KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json
+      - name: Install pinned contract dependencies
+        if: steps.change_scope.outputs.contracts == 'true'
+        working-directory: KGEN-KAIOS
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Compile existing lineage contracts
+        if: steps.change_scope.outputs.contracts == 'true'
+        working-directory: KGEN-KAIOS
+        run: npm run compile
+      - name: Verify KUFO interface and sequential product lineage
+        if: steps.change_scope.outputs.contracts == 'true'
+        working-directory: KGEN-KAIOS
+        run: >-
+          node --test --test-concurrency=1 --test-reporter=spec
+          --test-name-pattern="world points 18911/168888/511111|stable KUFO|KSHIP and KSHIPConverter|civil calendar getters"
+          tests/kufo-v4-evm.behavior.test.mjs
+          tests/kufo-v4-kship-interface.unit.test.mjs
       - name: Check patch whitespace
         shell: bash
         env:

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import solc from "solc";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -36,6 +37,21 @@ const templeHeartV332Source = execFileSync("git", ["show", `${templeHeartV332Ref
 );
 sources["tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol"] = { content: templeHeartV332Source };
 
+// Preserve main's complete 49-epoch regression against its actual pinned source.
+// These are test-only virtual inputs, never successor deployment artifacts.
+const legacyLineageRef = "33967045ed725848a6b814af0e9b10eac64f2ec7";
+const legacyBaselines = ["KUFO", "KAIOSAlchemyFurnace"];
+for (const name of legacyBaselines) {
+  const source = execFileSync("git", ["show", `${legacyLineageRef}:KGEN-KAIOS/contracts/${name}.sol`], {
+    cwd: path.resolve(root, ".."), encoding: "utf8",
+  }).replace(`contract ${name} is`, `contract ${name}LegacyBaseline is`)
+    .replace(`contract ${name} {`, `contract ${name}LegacyBaseline {`);
+  sources[`contracts/${name}LegacyBaseline.sol`] = { content: source };
+}
+const sourceSha256 = Object.fromEntries(Object.entries(sources).map(([name, source]) => [
+  name, createHash("sha256").update(source.content).digest("hex"),
+]));
+
 const input = {
   language: "Solidity",
   sources,
@@ -58,13 +74,18 @@ const input = {
   },
 };
 
+const resolvedImports = {};
 function findImports(importPath) {
   const candidates = [
     path.join(root, importPath),
     path.join(root, "node_modules", importPath),
   ];
   for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) return { contents: fs.readFileSync(candidate, "utf8") };
+    if (fs.existsSync(candidate)) {
+      const contents = fs.readFileSync(candidate, "utf8");
+      resolvedImports[importPath] = { content: contents };
+      return { contents };
+    }
   }
   return { error: `Import not found: ${importPath}` };
 }
@@ -80,6 +101,10 @@ if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) process.e
 fs.rmSync(artifactsDir, { recursive: true, force: true });
 fs.mkdirSync(artifactsDir, { recursive: true });
 fs.mkdirSync(reportsDir, { recursive: true });
+// Self-contained verification input, including the exact resolved dependencies.
+// Constructor values are deliberately separate until Human adopts real values.
+const standardInput = `${JSON.stringify({ ...input, sources: { ...sources, ...resolvedImports } }, null, 2)}\n`;
+fs.writeFileSync(path.join(artifactsDir, "solidity-standard-input.json"), standardInput);
 
 const contracts = [];
 for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {})) {
@@ -118,7 +143,10 @@ const evidence = {
   evmVersion: "paris",
   openzeppelinContracts: "5.0.2",
   openzeppelinContractsUpgradeable: "5.0.2",
-  sourceCount: sourceFiles.length,
+  sourceCount: Object.keys(sources).length,
+  sourceSha256,
+  standardInput: { path: "artifacts/solidity-standard-input.json", sha256: createHash("sha256").update(standardInput).digest("hex") },
+  legacyLineageRegression: { sourceRef: legacyLineageRef, testOnlyContracts: legacyBaselines.map(name => `${name}LegacyBaseline`) },
   contractCount: contracts.length,
   eip170MaximumDeployedBytecodeBytes: 24_576,
   oversizedContracts,

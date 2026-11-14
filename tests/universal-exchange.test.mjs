@@ -3295,7 +3295,9 @@ test("V3.8 Physics CURRENT is the byte-identical authoritative Thought Organ", a
   const inspected = await inspectPhysicsThoughtOrgan({ seed, checkedAt: "2026-08-16T23:27:18.851Z" });
   assert.equal(inspected.observation.document_id, "PF-PHYSICS-CURRENT-V3-8");
   assert.equal(inspected.observation.version, "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE");
-  assert.equal(inspected.observation.sha256, "d01d6fc1347582b7177986a1f09b0fd0a1d6ffa6d1ed733371f04ed2f7834469");
+  assert.equal(inspected.observation.sha256, "00fc7849d79e595bc7246126f6acb885c9fcbe13e40ff8c77cb2a012388a77e1");
+  assert.equal(seed.next_stage.thought_organ_binding_v3_8.sha256, inspected.observation.sha256);
+  assert.equal(seed.lives.find((life) => life.life_id === "DIGITAL_ANT_0001").thought_organs[0].sha256, inspected.observation.sha256);
   assert.equal(inspected.health.status, "HEALTHY");
   assert.equal(assertThoughtOrganReadyForPlanning(inspected.health), true);
   assert.equal(CANONICAL_TRUTH_PRIORITY[0], "DEPLOYED_CHAIN_TRUTH");
