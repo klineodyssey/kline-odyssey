@@ -1,6 +1,9 @@
 import {WORLD_REGISTRY,BANK_SERVICE,findWorld,isPlayable,isNavigable,playableDestination,resumeDestination,portalBase,worldUrl} from './kaios-world-registry.mjs';
 import {createLocalPlayerStore} from '../K線西遊記/temples/11520/runtime/player-life-runtime.mjs';
 
+/** A separate holder-wallet service, not a playable world or player destination. */
+export const ALCHEMY_SERVICE=Object.freeze({entryUrl:'K線西遊記/temples/18911/index.html'});
+
 /** Read-only, privacy-minimal projection of the existing validated Player Life. */
 export function readPortalPlayer(storage){
  try{
@@ -14,6 +17,7 @@ function el(document,tag,className,text){const node=document.createElement(tag);
 export function renderPortal(document,{storage,base=portalBase()}={}){
  const link=(text,path,className='')=>{const a=el(document,'a',className,text);a.href=new URL(path,base).href;return a};
  const status=world=>el(document,'span','world-status',world.status==='PLAYABLE'?'● PLAYABLE · 可玩':world.status==='BETA'?'BETA · 候選入口':'研究 / 資訊');
+ const alchemy=document.querySelector('#alchemyService');if(alchemy)alchemy.href=new URL(ALCHEMY_SERVICE.entryUrl,base).href;
  const bankHost=document.querySelector('#bankEntry');bankHost.replaceChildren();
  const bank=link('',BANK_SERVICE.entryUrl,'bank-service');bank.id='bankEntryLink';
  const bankCopy=el(document,'span','bank-service-copy');bankCopy.append(el(document,'strong','bank-service-name',BANK_SERVICE.name),el(document,'span','bank-service-description',BANK_SERVICE.description));

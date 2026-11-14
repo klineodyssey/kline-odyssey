@@ -510,3 +510,14 @@ new canonical flow/role/epoch/runtime/receipt boundaries (65/65 overall). Existi
 `tests/kaios-portal-browser.mjs --funding-only` adds Mother/Jade shared-cap drafts
 with empty case fields, no file/RPC/writes, and portrait/landscape images. No
 new frontend file, Runtime, bootstrap or public beneficiary mapping is added.
+
+## K18911 煉丹爐
+
+- `K線西遊記/temples/18911/index.html`：唯一玩家可見18911服務頁；玩家煉丹、王母部署/啟用、交易預覽、原回執恢復。
+- `K線西遊記/temples/18911/panel.mjs`：DOM與provider選擇整合，沿既有 `KGEN_Wallet.getEthereum()`，使用原vendored ethers5，不另造錢包系統。
+- `K線西遊記/temples/18911/kufo-client.mjs`：受控EIP1193原合約操作，明確click後本人錢包核費/確認；原Registry三keys/五合約回執及immutable核對，無計時自動送單。
+- `K線西遊記/temples/18911/contracts.json`：原五合約ABI/位元碼/immutableRefs與三既有依賴公開code pin；不是新Runtime或新合約。
+- `index.html#alchemyEntry`、既有 `assets/kaios-portal.mjs`：首頁卡片沿原Portal base填入單一獨立服務連結，不設worldId/PLAYABLE或玩家目的地；未改#523保護的world-registry或11520 Navigator。
+- `tests/kaios-18911.test.mjs`、`tests/kaios-18911-browser.mjs`：隔離provider功能測試與原Linux CI手機390×844/桌面真Chromium截圖。
+
+新頁不自稱已上鏈；只有canonical receipt/程式/綁定核實才往下，未啟用時玩家保留明確原因，不冒用舊49Epoch爐。Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記；不改Boot V1.4。App來源7164ce08769c60ac9439ab0c6b97d103c92c0642：原Portal CI43633664165及WorldViewer43633664170 SUCCESS；18911單元18/18、原入口/音訊59/59、原離線錢包/PWA153/153 PASS；36合約編譯且原5份公開payload ABI/creation/runtime/immutableRefs精確比對。390×844與1280×900各8情境，共16情境/64張viewport與fullPage截圖，32次skip裁切座標及鍵盤132×47.59px可達驗證；直接視覺複核通過。均為CI合成provider，不代表實體手機、真錢包或真BFCache；中段viewport須與有模擬標示的fullPage及report成組引用。Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記；原站發布與主網部署分別依原工作流及本人錢包實際回執核實，本候選未上鏈，沒有新部署地址或回執。
