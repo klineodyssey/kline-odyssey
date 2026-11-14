@@ -20,8 +20,24 @@ test("stable KUFO exposes the existing KSHIPConverter carrier interface", () => 
 
 test("KSHIP and KSHIPConverter remain compatible with stable KUFO proof lineage", () => {
   const kufo = artifact("KUFO");
+  const furnace = artifact("KAIOSAlchemyFurnace");
+  const output = artifact("KUFOOutputJindouyun168888");
   const kship = artifact("KSHIP");
   const converter = artifact("KSHIPConverter");
+
+  const pointGetter = (contract, name) => {
+    const getter = contract.abi.find(item => item.type === "function" && item.name === name);
+    assert.ok(getter, name);
+    assert.deepEqual(getter.inputs, []);
+    assert.deepEqual(getter.outputs.map(item => item.type), ["uint256"]);
+    assert.equal(getter.stateMutability, "view");
+  };
+  pointGetter(kufo, "TOKEN_POINT_18911");
+  assert.equal(functionNames(kufo.abi).has("TOKEN_POINT_511111"), false, "the undeployed KUFO candidate must not advertise the KSHIP birthplace");
+  for (const name of ["FURNACE_POINT", "TOKEN_POINT", "OUTPUT_POINT"]) pointGetter(furnace, name);
+  for (const name of ["SOURCE_FURNACE_POINT", "TOKEN_POINT", "OUTPUT_POINT"]) pointGetter(output, name);
+  pointGetter(kship, "TOKEN_POINT_511111");
+  pointGetter(converter, "WORMHOLE_POINT_511111");
 
   const burn = kufo.abi.find((item) => item.type === "function" && item.name === "burnForCarrier");
   assert.deepEqual(burn.inputs.map((item) => item.type), ["address", "address", "uint256", "bytes32"]);

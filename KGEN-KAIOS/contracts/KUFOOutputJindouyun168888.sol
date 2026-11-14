@@ -17,16 +17,16 @@ interface IKUFOMinter {
 contract KUFOOutputJindouyun168888 is ReentrancyGuard {
     uint256 public constant OUTPUT_POINT = 168_888;
     uint256 public constant SOURCE_FURNACE_POINT = 18_911;
-    uint256 public constant TOKEN_POINT = 511_111;
+    uint256 public constant TOKEN_POINT = 18_911;
     IAlchemyFurnaceOutputSource public immutable furnace;
     IKUFOMinter public immutable kufo;
     error ZeroAddress();
     error OnlyFurnace(address caller);
     event KUFOReleased(bytes32 indexed proofId, address indexed beneficiary, uint256 amount, uint256 indexed groupId);
-    constructor(address furnace18911, address kufoToken511111) {
-        if (furnace18911 == address(0) || kufoToken511111 == address(0)) revert ZeroAddress();
+    constructor(address furnace18911, address kufoToken) {
+        if (furnace18911 == address(0) || kufoToken == address(0)) revert ZeroAddress();
         furnace = IAlchemyFurnaceOutputSource(furnace18911);
-        kufo = IKUFOMinter(kufoToken511111);
+        kufo = IKUFOMinter(kufoToken);
     }
     function releaseImmediate(bytes32 proofId) external nonReentrant returns (address beneficiary, uint256 amount) {
         if (msg.sender != address(furnace)) revert OnlyFurnace(msg.sender);

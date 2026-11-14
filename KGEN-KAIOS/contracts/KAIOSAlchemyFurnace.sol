@@ -50,7 +50,7 @@ contract KAIOSAlchemyFurnace is ReentrancyGuard {
     bytes32 public constant ORGAN_OUTPUT_168888 = keccak256("KAIOS.ORGAN.KUFO.OUTPUT.168888");
     bytes32 public constant DESTINATION_168888 = keccak256("KAIOS.POINT.168888.JINDOUYUN.KUFO.OUTLET");
     uint256 public constant FURNACE_POINT = 18_911;
-    uint256 public constant TOKEN_POINT = 511_111;
+    uint256 public constant TOKEN_POINT = 18_911;
     uint256 public constant OUTPUT_POINT = 168_888;
     uint256 public constant KAIOS_PER_KGEN = 1_000;
     uint256 public constant KUFO_PER_KAIOS = 1_000;

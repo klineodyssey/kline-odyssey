@@ -52,7 +52,8 @@ contract KUFO is ERC20, ERC20Capped {
     bytes32 public constant ORGAN_OUTPUT_168888 = keccak256("KAIOS.ORGAN.KUFO.OUTPUT.168888");
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
     bytes32 public constant DESTINATION_168888 = keccak256("KAIOS.POINT.168888.JINDOUYUN.KUFO.OUTLET");
-    uint256 public constant TOKEN_POINT_511111 = 511_111;
+    // World entry point only; the ERC20 address is distinct from the furnace.
+    uint256 public constant TOKEN_POINT_18911 = 18_911;
     uint256 public constant OUTPUT_POINT_168888 = 168_888;
     uint256 public constant KUFO_PER_KAIOS = 1_000;
     uint256 public constant KSHIP_PER_KUFO = 1_000;

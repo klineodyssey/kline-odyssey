@@ -459,8 +459,23 @@ async function mintFromFurnace(f, input, receiver, label) {
   return created.args.proofId;
 }
 
-test("real main KAIOS spends holder allowance; KGEN is balance-only; outlet beneficiary is fixed", async (t) => {
+test("real main KAIOS spends holder allowance; KGEN is balance-only; world points 18911/168888/511111 preserve lineage", async (t) => {
   const f = await alchemyFixture(t);
+  assert.equal(await f.kufo.TOKEN_POINT_18911(), 18_911n);
+  assert.equal(await f.furnace.FURNACE_POINT(), 18_911n);
+  assert.equal(await f.furnace.TOKEN_POINT(), 18_911n);
+  assert.equal(await f.furnace.OUTPUT_POINT(), 168_888n);
+  assert.equal(await f.realOutput.SOURCE_FURNACE_POINT(), 18_911n);
+  assert.equal(await f.realOutput.TOKEN_POINT(), 18_911n);
+  assert.equal(await f.realOutput.OUTPUT_POINT(), 168_888n);
+  assert.equal(await f.kship.TOKEN_POINT_511111(), 511_111n);
+  assert.equal(await f.converter.WORMHOLE_POINT_511111(), 511_111n);
+  assert.equal(await f.furnace.canonicalKufo(), await f.kufo.getAddress());
+  assert.equal(await f.realOutput.furnace(), await f.furnace.getAddress());
+  assert.equal(await f.realOutput.kufo(), await f.kufo.getAddress());
+  assert.equal(await f.kship.kufo(), await f.kufo.getAddress());
+  assert.equal(await f.converter.kufo(), await f.kufo.getAddress());
+  assert.equal(await f.converter.kship(), await f.kship.getAddress());
   const otherKgen = await deploy("MockKGEN", f.owner, [await f.owner.getAddress()]);
   const otherRegistry = await deploy("KUFOV4MockOrganRegistry", f.owner);
   await rejectsCanonicalBinding(deploy("KAIOSAlchemyFurnace", f.owner, [
@@ -541,6 +556,23 @@ test("real main KAIOS spends holder allowance; KGEN is balance-only; outlet bene
   assert.equal(await f.kgen.balanceOf(await f.furnace.getAddress()), 0n);
   assert.equal(await f.kufo.balanceOf(beneficiary), E18);
   assert.equal(await f.kufo.balanceOf(owner), 0n);
+  const canonicalBurn = await f.kaios.alchemyBurnRecord(proof);
+  assert.equal(canonicalBurn.owner, owner);
+  assert.equal(canonicalBurn.beneficiary, beneficiary);
+  assert.equal(canonicalBurn.furnace, await f.furnace.getAddress());
+  assert.equal(canonicalBurn.kaiosBurned, input);
+  assert.equal(canonicalBurn.expectedKufo, E18);
+  assert.equal(canonicalBurn.destinationCode, await f.furnace.DESTINATION_168888());
+  const origin = await f.kufo.mintOrigin(proof);
+  assert.equal(origin.beneficiary, beneficiary);
+  assert.equal(origin.amount, E18);
+  const outletReceipt = receipt.logs.map(log => { try { return f.realOutput.interface.parseLog(log); } catch { return null; } })
+    .find(log => log?.name === "KUFOReleased");
+  assert.ok(outletReceipt, "the actual fixed outlet must release this same real burn proof");
+  assert.equal(outletReceipt.args.proofId, proof);
+  assert.equal(outletReceipt.args.beneficiary, beneficiary);
+  assert.equal(outletReceipt.args.amount, E18);
+  assert.equal(outletReceipt.args.groupId, origin.groupId);
   await assert.rejects(f.realOutput.connect(f.outsider).releaseImmediate.staticCall(proof));
   await assert.rejects(f.furnace.connect(f.outsider).consumeImmediateProof.staticCall(proof));
   await assert.rejects(f.eip1193.request({ method: "eth_call", params: [{
@@ -548,7 +580,23 @@ test("real main KAIOS spends holder allowance; KGEN is balance-only; outlet bene
     data: f.furnace.interface.encodeFunctionData("consumeImmediateProof", [proof]),
   }, "latest"] }));
   await at(f, f.starts[3]);
-  await mined(f.converter.connect(f.beneficiary).convert(E18, beneficiary));
+  const conversion = await mined(f.converter.connect(f.beneficiary).convert(E18, beneficiary));
+  const carrierReceipt = conversion.logs.map(log => { try { return f.converter.interface.parseLog(log); } catch { return null; } })
+    .find(log => log?.name === "KSHIPConversion");
+  assert.ok(carrierReceipt, "the existing converter is the single KSHIP birth route");
+  const carrierProof = carrierReceipt.args.proofId;
+  assert.equal(carrierReceipt.args.owner, beneficiary);
+  assert.equal(carrierReceipt.args.beneficiary, beneficiary);
+  assert.equal(carrierReceipt.args.kufoBurned, E18);
+  assert.equal(carrierReceipt.args.kshipMinted, E18 * 1000n);
+  const carrierBurn = await f.kufo.carrierBurnRecord(carrierProof);
+  assert.equal(carrierBurn.owner, beneficiary);
+  assert.equal(carrierBurn.beneficiary, beneficiary);
+  assert.equal(carrierBurn.converter, await f.converter.getAddress());
+  assert.equal(carrierBurn.kufoBurned, E18);
+  assert.equal(carrierBurn.expectedKship, E18 * 1000n);
+  assert.equal(await f.kship.carrierProofMinted(carrierProof), true);
+  assert.deepEqual(Array.from(await f.kufo.mintOrigin(proof)), Array.from(origin));
   assert.equal(await f.kaios.conservationInvariantHolds(), true);
   assert.equal(await f.kufo.balanceOf(beneficiary), 0n);
   assert.equal(await f.kship.balanceOf(beneficiary), parseEther("1000"));

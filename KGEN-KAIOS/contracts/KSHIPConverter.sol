@@ -29,10 +29,12 @@ interface IKSHIPMinter {
 }
 
 /** @title KSHIPConverter
- * @notice Holder-authorized KUFO conversion, including selected immutable birth groups.
+ * @notice Point 511111 KSHIP birth wormhole; holder-authorized KUFO conversion.
  * @dev Every conversion consumes the holder's KUFO allowance to this converter.
  */
 contract KSHIPConverter is ReentrancyGuard {
+    // World point metadata; it does not replace the historical WORMHOLE organ key.
+    uint256 public constant WORMHOLE_POINT_511111 = 511_111;
     uint256 private constant KSHIP_PER_KUFO = 1_000;
     struct MintBaseline {
         uint256 supply;
