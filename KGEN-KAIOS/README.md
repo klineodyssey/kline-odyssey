@@ -878,3 +878,10 @@ been copied into main pending bounded Boot-registration authority. No Bank
 copy, new Runtime, bootstrap, package replacement, deployment or real payment
 is included in this existing-file frontend change. Underground growth remains
 available independently of the disabled underground micro-claim path.
+
+
+## 2026-11-14 Human世界點位與單一年度轉化接續
+
+最新正式世界流程：18911煉KUFO（KUFO入口與Furnace各自0x實址分列）→168888金斗雲產出KUFO→511111原Converter蟲洞出生KSHIP→K108000點石成金KGOD→111111如來神掌→12345五指山做空玩法。後三段是未實作/未配置的世界接續，不列本次五合約已完成功能；不觸發真實交易。
+
+原五合約保留單一共同跨年50/75/100、第三結清，按需計算、不逐毫秒衰變。KUFO getter改TOKEN_POINT_18911；KSHIP TOKEN_POINT_511111、Converter WORMHOLE_POINT_511111；需新ABI，不能用c428舊包。下方/上方歷史KUFOClaimWormhole只屬舊KUFO領取器官，其key與舊LIVE未改。最新固定來源/實測/下載依[工程報告](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)、[KUFO完整白皮書](docs/KUFO_V4_WHITEPAPER.md)、[KSHIP完整白皮書](docs/KSHIP_V4_WHITEPAPER.md)，尚未部署。

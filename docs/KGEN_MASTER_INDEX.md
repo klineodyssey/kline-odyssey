@@ -1114,3 +1114,8 @@ has only shared governance data and accepts only CAP_PROPOSE/CAP_APPROVE/
 CAP_EXECUTE intents. No new contract/source path, authority or deployment is
 introduced. Existing fixed-case IDs and calldata were independently checked
 against all three original cases; current65-test offline regression passes.
+
+
+## 2026-11-14 KUFO／KSHIP世界點位最新接續
+
+沿原`KGEN-KAIOS/contracts/KUFO.sol`、`KAIOSAlchemyFurnace.sol`、`KUFOOutputJindouyun168888.sol`、`KSHIP.sol`、`KSHIPConverter.sol`：18911為KUFO煉丹/幣世界入口，168888為KUFO出料，511111為KSHIP出生蟲洞（原Converter）；實址各自綁定，不以點位數字代替。K108000→KGOD→111111→12345只列待實作世界接續；歷史KUFOClaimWormhole不改成新器官。正式三年只採UTC+8共同跨年50/75/100、不設第二套連續衰變。原[工程報告](../KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)、[KUFO白皮書](../KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md)、[KSHIP白皮書](../KGEN-KAIOS/docs/KSHIP_V4_WHITEPAPER.md)保留累積全文與新ABI/驗證/部署邊界；無新Runtime/bootstrap/版本檔。本版尚未部署。

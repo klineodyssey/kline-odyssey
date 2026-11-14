@@ -827,3 +827,70 @@ This whitepaper describes a repository candidate. It does not assert deployment,
 The required flow is:
 
 玄曜 Product Engineering -> exact-head CI / EVM tests -> Codex/衡曜 GM independent review -> human-authorized deployment process.
+
+---
+
+## Human 2026-11-14 最終更正：單一簡化年度轉化
+
+記錄UTC 2026-11-14T05:40:20.735Z，台灣 2026-11-14T13:40:20.735+08:00；WORK_ID KUFO-637-SINGLE-ANNUAL-DECAY-20261114-01，Writer Codex衡曜/root，非原子人工派工。
+
+本節依本頁 Human 明確指令「衰變沒有第二套，只有一套，就是簡化版，統一跨年後轉，三年完全轉換」定案。它取代較早連續指數半衰期、食用儲備另設連續衰變，以及要求 Human 在兩套算法間選擇的提案。這些舊內容只供歷史追溯，不再是本工程的可執行規則；不得由後續 heartbeat 恢復為待選方案。
+
+唯一的 KUFO→KSHIP 規則：
+
+- 沿既有台灣 UTC+8 公曆共同年界計算：首次跨年累計可轉50%，第二次75%，第三次100%，第三次結清餘額與最小單位尾差。
+- 以最初1 KUFO且權利未移轉的例子，三階段累計可轉產物為500、750、1,000 KSHIP；每次只結算尚未轉過的差額，不能重複發放。
+- 「三年」是三次共同跨年，不是每位持有人都必須持滿1,095日。年底出生的批次可很快跨第一次年界。
+- 年界只增加可轉資格。持有人或明確授權流程仍需發起原轉化；日期到達不會自動扣款、簽署或送鏈上交易。
+- 不設逐毫秒／每秒連續衰變 tick，不設食用儲備的第二套指數產出。按需查詢時才從年界計算階段，依同一份權利結算。
+- 轉讓保留剩餘年度權利，漏年可補結；同一份 KUFO 不得再經另一條衰變路徑重發 KSHIP。對「1→0.5→0.25→0.125」的舊指數算例，不再用作 KUFO 執行政策。
+- 食用量限制速度與載具耗料屬後續使用規則；不得藉此建立第二次 KUFO→KSHIP 產出。反物質速度的10%效率算例只是展示，未採為費率、效率、燃料定價或實際推力。
+
+Human 聚寶盆交接仍保留，但其成本目前依 Human 指示不凍結。KGOD在本次配方代表正物質；KSHIP正／反通道的實際配給仍未配置。K108000基本KSHIP→KGOD不需要KGOD母版；聚寶盆配方則保留母版，n KGOD＋n KSHIP→2n KGOD，淨KGOD+n／KSHIP−n。指定反物質通道時需明記KSHIP−，不把未分類餘額直接當負通道。
+
+觸媒僅KDNA（藍圖）＋KRNA（次序）＋KSTART（點火）；KLINE（畫線能力）另列。這些能力按本頁Human定義，不冒稱歷史分支已完整核實。其他物品X保留原物、淨增一份同規格X，但各項燃料、時間、費用、權限及觸媒持有／鎖定／消耗／回收方式未配置，不自行套1 KSHIP或燃燒代幣。配方點火前核條件，完成時輸入、輸出與證明原子結算並防重，使用固定精度整數及明定餘數保存；KUFO轉帳不自動鑄KGOD。
+
+既有c428ac0d候選已採上述共同年界及按需計算，可保持程式不改。本節是既有CURRENT／白皮書／工程報告的完整累積澄清；舊原文全部保留。未執行新suite，原69項仍僅屬舊候選範圍；未宣稱聚寶盆／食用速度／正反通道實作或部署完成。合約、既有下載包、鏈上資產及角色未由本次文件更正改動。
+
+---
+
+## Human 2026-11-14 KUFO／KSHIP前後接續產物鏈與世界點位定稿
+
+Human 本頁指定 KUFO 和 KSHIP 是同一條前後接續的產物鏈，按可理解的世界創作連接。此處「接續」沿用唯一共同跨年50%／75%／100%的簡化轉化，第三次結清；不恢復指數連續衰變或第二套產出。
+
+| 世界功能點 | 本次正式角色 | 實作與地址綁定 |
+|---|---|---|
+| K18911 | 煉丹爐煉KUFO；KUFO幣的世界入口 | Furnace與KUFO ERC20是兩個合約，各有自己的0x地址；入口應展示並核對兩者，數字18911本身不是鏈上地址 |
+| K168888 | 金斗雲／筋斗雲，KUFO產出地 | 原Output器官用同一真實KAIOS銷毀證明，向固定受益人產出KUFO |
+| K511111 | 蟲洞，KSHIP出生地 | 沿原KSHIPConverter把可轉KUFO實際burn，再依同份carrier proof產出KSHIP；不新增第二個轉化器 |
+| K108000 | 點石成金，KSHIP反物質石頭轉KGOD金塊 | 本頁Human世界配方；成本目前先不凍結，精確資產／通道／數量／權限／守恆未配置，尚未實作部署 |
+| K111111 | 如來神掌，黃金水／黃金手掌的世界場景 | 敘事／玩法接續，尚未由本KUFO／KSHIP核心實作或驗收 |
+| K12345 | 五指山，接續做空玩法 | 原場景／交易軟體範圍另核；本條敘事不觸發或授權真實做空交易 |
+
+正式代幣名稱仍為KUFO；Human同段「KUFI」按原上下文沿用KUFO，不另造代幣。KGOD、K108000、111111與12345可以接續世界故事；本次可交付的五個合約仍只限 KUFO、Furnace、Output、KSHIP、Converter，不把全條故事宣稱為已完成主網系統。
+
+### 原碼對齊與相容性
+
+舊c428ac0d候選曾在KUFO／Furnace／Output把511111標為KUFO token point，與本頁定稿不符。本次沿原五個合約更正：
+
+- KUFO：TOKEN_POINT_18911()＝18911，取代未部署候選的TOKEN_POINT_511111()；須更新ABI，外部新消費者不能再用舊getter。
+- Furnace與Output：TOKEN_POINT()＝18911；Furnace仍是18911，Output仍是168888。
+- Output constructor的KUFO參數中性命名為kufoToken，型別、順序與實際immutable綁定不變。
+- KSHIP：TOKEN_POINT_511111()＝511111。
+- 既有KSHIPConverter：WORMHOLE_POINT_511111()＝511111，作為同一產物鏈的出生蟲洞。
+
+以上是世界點位標記，不把Furnace的實址當KUFO token實址，也不把點位當0x地址。Registry key、owner／角色、KAIOS真burn、鑄造比率、供應額度、三年規則、持有人授權及單一路徑防重保持原設計。歷史KUFOClaimWormhole.sol是舊KUFO成熟領取，沒有改名冒充新KSHIP蟲洞，其Registry key與舊LIVE保持歷史。
+
+新增驗證只針對新原碼／ABI／出生鏈：原真實alchemy案例讀回各點位與immutable，核同一KAIOS burn、168888出料事件、KUFO出生及第三共同年界轉化、KSHIP carrier proof與受益人數量守恆。實際編譯／EVM結果與固定提交以本節後的交付證據及新審核manifest為準；舊69項與舊包不作本次新指紋通過證據。
+
+### 部署狀態
+
+此為上鏈前審核候選。尚無本版正式部署地址、constructor實參、簽署、交易回執、proposal或executableAt。舊LIVE與舊CI不證明新版部署。應先完成來源與Writer核對、相稱驗證、實址／角色／既有權利切換與原費用核驗，再由合法持有人本人既有錢包確認部署及原Registry啟用；AI不代簽、送部署或自行開真單。原身份核對兩次停止與其他具體HOLD不變。
+
+### 本次固定程式與相稱驗證（世界點位對齊）
+
+固定程式／測試提交：`b0823224273b3b7cadd421086284dcb86adc1ce1`。solc0.8.24、OZ5.0.2、optimizer runs1、viaIR、paris、metadataHash none；新36合約編譯PASS、0warnings，standard-input SHA256 `db9467bafa46902343481a4ec0eb6ce5d8b1926a50a3f9c5973f8309f76b5057`。compile log SHA256 `37342aad0a619bd2b34fbb561066fa4c9c84b4537575b6a9972ba9a8e6ad6353`。
+
+一次受影響suite選取1項真實alchemy／KSHIP EVM與4項ABI，**5/5 PASS，0fail/skip/cancel，21784.8102ms**；本次實測UTC2026-11-14T06:09:16.431Z。原其餘30個EVM案例未選取，不稱全部重驗；舊69項仍按舊提交分列。Windows Ganache的µWS原生binary不匹配，原log保留NodeJS fallback，實際EVM案例執行成功，未改環境或依賴。測試log SHA256 `aa4ed57774af1d9e0bba9184eaddf8a41457f01442072f27dc7152cb495d6843`。獨立靜態diff審查NO_BLOCKER，非外部審計認證。
+
+新getter／ABI須配套新artifact，不可套用c428舊ABI或舊gas估價。未新增RPC、runtime／immutable身份重試、簽署或公共交易；原身份核對兩次停止保持NOT_VERIFIED。正式constructor、activation timestamp、deployer／nonce、新合約地址、proposal、receipt、executableAt仍未配置／null。K108000／KGOD／111111／12345屬未實作世界接續。交付head與新包逐檔SHA由原工程窗口保存；仍是未部署候選。
