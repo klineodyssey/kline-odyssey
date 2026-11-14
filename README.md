@@ -1485,7 +1485,7 @@ activation still require the lawful Human holder and canonical chain results.
 
 ## 18911 煉丹爐面板（候選驗收中）
 
-`K線西遊記/temples/18911/index.html` 是唯一18911玩家可見入口；首頁 `index.html#alchemyEntry` 提供服務連結。玩家煉丹與王母本人錢包部署分開，皆需先預覽再由本人錢包確認，不讀取私鑰或自動送單。新爐未由原Registry啟用前，不改用舊49 Epoch爐。
+`K線西遊記/temples/18911/index.html` 是唯一18911玩家可見入口；首頁 `index.html#alchemyEntry` 由既有 `assets/kaios-portal.mjs` 沿原base填入獨立服務連結，不設為遊戲世界或玩家目的地。玩家煉丹與王母本人錢包部署分開，皆需先預覽再由本人錢包確認，不讀取私鑰或自動送單。新爐未由原Registry啟用前，不改用舊49 Epoch爐。
 
 - `K線西遊記/temples/18911/panel.mjs`：同頁呈現、費用上限/明確確認、pending恢復與公開紀錄匯出。
 - `K線西遊記/temples/18911/kufo-client.mjs`：沿既有EIP1193 provider，驗chain56/Owner/固定代碼、原五合約的逐筆回執與immutable綁定、Registry三器官和玩家approve/burn；不建立另一套WalletConnect、Runtime或bootstrap。

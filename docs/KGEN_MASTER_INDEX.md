@@ -1122,6 +1122,6 @@ against all three original cases; current65-test offline regression passes.
 
 ## K18911 玩家煉丹與本人錢包部署入口（候選驗收中）
 
-唯一頁面 `K線西遊記/temples/18911/index.html`（18911煉丹爐，與18921斬妖台不同點）；首頁 `index.html#alchemyEntry` 可見。`panel.mjs` 為同頁UI，`kufo-client.mjs` 是原五合約的EIP1193/回執驗證client，`contracts.json` 是原合約已編譯公開payload，均位於 `K線西遊記/temples/18911/`。不建立新Runtime、bootstrap、WalletConnect或簽署服務。
+唯一頁面 `K線西遊記/temples/18911/index.html`（18911煉丹爐，與18921斬妖台不同點）；首頁 `index.html#alchemyEntry` 由既有 `assets/kaios-portal.mjs` 以原base填入獨立服務連結，與遊戲世界/玩家目的地分開。`panel.mjs` 為同頁UI，`kufo-client.mjs` 是原五合約的EIP1193/回執驗證client，`contracts.json` 是原合約已編譯公開payload，均位於 `K線西遊記/temples/18911/`。不建立新Runtime、bootstrap、WalletConnect或簽署服務。
 
 驗證：`tests/kaios-18911.test.mjs` 隔離provider狀態及安全測試；`tests/kaios-18911-browser.mjs` 僅原Linux Portal CI真Chromium與模擬錢包截圖。既有 `.github/workflows/kaios-portal-product-qa.yml` 對原五編譯artifact與公開payload逐份比對並保存獨立18911截圖artifact。部署及煉丹需本人錢包確認，AI不讀秘密、不送單；原#523/#19及費用/AST停止保留。Boot CURRENT新增路徑登記待Human明確答覆。功能/視覺未驗收前不宣稱完成或已上鏈。
