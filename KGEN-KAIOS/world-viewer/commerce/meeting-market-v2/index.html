@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KAIOS｜K11520 數位牛創生・走路成交 V2</title>
+<style>
+:root{color-scheme:dark;font-family:ui-sans-serif,system-ui,"Noto Sans TC",sans-serif;background:#0c1320;color:#eef3f6}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 90% -10%,#193957 0%,#101b2b 35%,#09111d 85%);min-height:100vh}main{max-width:1050px;padding:28px 16px 64px;margin:auto}h1{font-size:clamp(1.6rem,4.2vw,2.4rem);margin:0 0 4px}.intro{margin:0;color:#a6c3d5;font-size:.9rem}h2{font-size:1.08rem;margin:0 0 16px}.tag{display:inline-block;font-size:.73rem;border:1px solid #417582;color:#a0eef0;border-radius:40px;padding:5px 10px;margin-bottom:14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{border:1px solid #294257;background:#102034e8;border-radius:16px;padding:18px;margin-top:16px;box-shadow:0 8px 28px #0002}label{display:flex;flex-direction:column;gap:6px;color:#b8d1de;font-size:.84rem;margin:0 0 13px}input,select{width:100%;border-radius:9px;border:1px solid #3a5a6c;background:#0a1725;color:#eaf6f8;padding:12px;font-size:1rem;min-height:44px}button{border:1px solid #397a87;background:#11627d;color:white;font:inherit;padding:12px 15px;border-radius:10px;cursor:pointer;min-height:44px}button:hover{background:#1d829b}button:disabled{opacity:.38;cursor:not-allowed}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.secondary{background:#17283d}.price{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.stat{padding:14px;background:#0b1928;border-radius:12px;border:1px solid #274254}.stat small{display:block;color:#abc4d3;margin-bottom:7px}.stat strong{font-size:1.32rem}.notice{color:#f4d49e;font-size:.85rem;line-height:1.6}.good{color:#81ebbe}.bad{color:#ffbcae}.muted{color:#a4bac7}.progress{height:9px;background:#193042;border-radius:50px;overflow:hidden;margin:8px 0}.progress>span{display:block;height:100%;background:#58d9bd;width:0%;transition:width .2s}#status{white-space:pre-line;line-height:1.7;font-size:.9rem}#log{white-space:pre-wrap;word-break:break-word;min-height:90px;max-height:260px;overflow:auto;font:12px/1.65 ui-monospace,Consolas,monospace;color:#b6d6de}.footer{font-size:.8rem;color:#86a6b4;margin-top:16px}@media(max-width:620px){.grid,.price{grid-template-columns:1fr}.card{padding:14px}main{padding:16px 12px 46px}button{flex:1}}
+ .pasture{height:190px;position:relative;overflow:hidden;background:linear-gradient(#274962 0%,#577f83 54%,#336d4e 55%,#367443 100%);border:1px solid #447a6a;border-radius:14px;margin:14px 0}.grass{position:absolute;bottom:25px;font-size:24px;z-index:3}.g1{left:8%}.g2{left:38%}.g3{left:65%}.g4{left:89%}.cow{position:absolute;bottom:33px;left:22%;font-size:54px;z-index:4;animation:cowWalk 7s ease-in-out infinite alternate}.cow[hidden]{display:none!important}.barn{position:absolute;top:36px;right:10%;font-size:50px}.ground{position:absolute;bottom:0;height:32px;left:0;right:0;background:#225638}@keyframes cowWalk{0%{transform:translateX(0) rotate(0deg)}50%{transform:translateX(26px) rotate(-3deg)}100%{transform:translateX(55px) rotate(2deg)}}
+</style>
+</head>
+<body><main>
+<div class="tag">KAIOS V2 · K11520 數位生命施工交貨 · NO REAL TX</div>
+<h1>🐄 K11520｜數位牛創生交易</h1>
+<p class="intro">你在指定 XYZ 開買單；萬獸生命公司帶數位牛設計包前來，走路／載具抵達，護送打怪、施工驗收後，一隻牛在牧草地活動吃草。</p>
+<section class="card"><h2>① 開單：買方、賣方與交易點位</h2>
+<div class="grid"><label>買方 A／文明<input id="buyer" value="K11520 買方玩家" maxlength="80"></label><label>賣方 B／文明<input id="seller" value="萬獸生命公司" maxlength="80"></label></div>
+<div class="grid"><label>買方起點（Point ID）<select id="buyerPoint"></select></label><label>賣方起點（Point ID）<select id="sellerPoint"></select></label></div>
+<label>雙方約定的集合點（Point ID）<select id="meetingPoint"></select></label>
+<div class="grid"><label>商品／工程名稱<input id="asset" value="數位牛創生服務" maxlength="80"></label><label>計價幣別<select id="currency"><option>KAIOS</option><option>KGEN</option></select></label></div>
+<div class="price"><label>買價 BID<input id="bid" inputmode="decimal" value="1200"></label><label>賣價 ASK<input id="ask" inputmode="decimal" value="1100"></label><label>成交價 DEAL<input id="deal" inputmode="decimal" value="1150"></label></div>
+<div class="actions"><button id="quote">建立三價公文</button><button class="secondary" id="acceptBuyer" disabled>A 方同意</button><button class="secondary" id="acceptSeller" disabled>B 方同意</button></div>
+<div class="notice">若 BID 低於 ASK，須重新議價；即使價格相容，也需要雙方各自確認。範例數字並非正式工單報價。</div></section>
+<section class="card"><h2>② 會合地點｜K11520 本地 XYZ（公尺）</h2>
+<div class="grid"><label>出生 X<input id="cowX" type="number" step="1" value="12"></label><label>地面高度 Y<input id="cowY" type="number" step="1" value="0"></label></div>
+<label>出生 Z<input id="cowZ" type="number" step="1" value="8"></label>
+<p class="notice">K11520 是宇宙點位 ID；這裡的 XYZ 是該點位內的局部三維座標（公尺），不把 K11520 當成笛卡兒的 Z=11520。牧草點設在 X+5、Z+1；遊戲中使用具體場景與草量資料驗證，現在只是一個有界原型。</p>
+</section>
+<section class="card"><h2>③ 賣方攜創生材料、買方到集合點（模擬移動）</h2>
+<div class="grid"><label>買方交通<select id="buyerTransport"><option value="WALK">走路（試算 5km/h）</option><option value="VEHICLE">載具（試算 100C）</option></select></label><label>賣方交通<select id="sellerTransport"><option value="VEHICLE">載具（試算 100C）</option><option value="WALK">走路（試算 5km/h）</option></select></label></div>
+<div class="actions"><button id="startMove" disabled>雙方開始前往</button><button id="advance" class="secondary" disabled>時間前進 1 小時（遊戲模擬）</button></div>
+<div class="grid"><div class="stat"><small>A 方行程</small><div id="bTravel">尚未出發</div><div class="progress"><span id="bBar"></span></div></div><div class="stat"><small>B 方行程</small><div id="sTravel">尚未出發</div><div class="progress"><span id="sBar"></span></div></div></div>
+<p class="notice">此版只用 K 座標差做一維航程試算。真實遊戲的 XY／XYZ 移動、GPS 權限、載具能源及實際抵達確認，仍須由現有 K11520/World Viewer 接線驗證；相同 K 的不同 Point ID 不能視為同地。</p></section>
+<section class="card"><h2>④ 打怪、施工、驗貨、正式出現一隻數位牛</h2><div id="status">請先完成雙方報價。</div>
+<div class="actions"><label>工程護送策略<select id="monsterAction"><option value="FOLLOW">跟怪護送</option><option value="HARD_FIGHT">原倉硬幹（遊戲攻防）</option><option value="REVERSE_ATTACK">反向打怪（遊戲攻防）</option><option value="AVOID">迴避怪物（尚不能驗收）</option></select></label></div>
+<div class="actions"><button id="build" disabled>⛏ 施工＋護送 1 小時</button><button id="deliver" class="secondary" disabled>✅ 買方驗貨接受</button><button id="birth" disabled>🐄 創生一隻數位牛</button></div>
+<div class="stat"><small>工程／護送狀態</small><div id="cowMissionStatus">等待買賣雙方到場；尚無牛出現</div></div>
+<div class="pasture" id="pasture"><span class="grass g1">🌱</span><span class="grass g2">🌿</span><span class="grass g3">🌱</span><span class="grass g4">🌿</span><span class="cow" id="visibleCow" hidden>🐄</span><span class="barn">⛺</span><div class="ground"></div></div>
+<div class="actions"><button id="feedCow" disabled>🌿 讓牛走動吃草 1 小時</button></div>
+<div class="stat"><small>數位牛生活狀態</small><div id="cowLife">尚未出生；正式 Life ID 不會憑空核發</div></div>
+<p class="notice">牛的本機活動會暫存於瀏覽器（不是正式雲端生命登記）。沒有鏈上收據時，只有 <b>遊戲交付</b>，不會顯示「真實付款完成」；不存取錢包、不扣除或鑄造 KAIOS／KGEN。</p></section>
+<section class="card"><h2>⑤ 工程與生命事件簿</h2><div id="log">載入宇宙地圖中…</div></section>
+<div class="footer">牛生命為 GAME_COW_ONLY / NO_ONCHAIN_SETTLEMENT，交易付款仍須正式錢包、合約與收據；本頁不可核發真實數位生命 ID 或直接扣 KAIOS。<p></p>來源：UniverseMap V10.2 正典 123 筆點位；本頁為獨立可玩候選，非 #585 HUD 或正式主網交易介面。</div>
+</main>
+<script>
+/**
+ * KAIOS Meeting Market V1 — isolated off-chain gameplay candidate.
+ * Source of point identity: docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json.
+ * No signer, escrow, blockchain, or real-world GPS capability is implemented here.
+ */
+const K_INDEX_KM = 384400 / 16888;
+const C_SPEED_K_PER_SECOND = 0.001;
+const TOKEN_DECIMALS = 18;
+const SETTLEMENT_STATUS = 'NO_ONCHAIN_SETTLEMENT';
+
+function parseAtomic(input) {
+  const value=String(input ?? '').trim();
+  if(!/^(?:0|[1-9]\d*)(?:\.\d{1,18})?$/.test(value)) throw new Error('PRICE_FORMAT_INVALID');
+  const [whole,fraction='']=value.split('.');
+  return BigInt(whole)*10n**18n + BigInt(fraction.padEnd(18,'0')||'0');
+}
+function displayAtomic(value) {
+  const v=BigInt(value);
+  const neg=v<0n?'-':'';
+  const abs=v<0n?-v:v;
+  const tail=(abs%10n**18n).toString().padStart(18,'0').replace(/0+$/,'');
+  return neg+(abs/10n**18n).toString()+(tail?'.'+tail:'');
+}
+function loadPoints(map) {
+  if(!map || !Array.isArray(map.point_index_sorted)) throw new Error('CANON_MAP_REQUIRED');
+  const ids=new Set();
+  const list=map.point_index_sorted.map(p=>{
+    if(!p.id || typeof p.coord!=='number' || !Number.isFinite(p.coord) || !p.name) throw new Error('POINT_INVALID');
+    if(ids.has(p.id)) throw new Error('POINT_ID_DUPLICATE');
+    ids.add(p.id);
+    return Object.freeze({id:p.id,k:p.coord,name:p.name});
+  });
+  return Object.freeze(list);
+}
+function getPoint(points,id) {
+  const point=points.find(p=>p.id===id);
+  if(!point) throw new Error('POINT_NOT_FOUND');
+  return point;
+}
+function createRequest({orderId,buyer,buyerPointId,seller,sellerPointId,meetingPointId,asset,quantity=1,currency='KAIOS',buyerBid,sellerAsk,dealPrice=null,points}) {
+  if(!/^[A-Za-z0-9][A-Za-z0-9_-]{0,100}$/.test(orderId||'')) throw new Error('ORDER_ID_INVALID');
+  if(!buyer || !seller || buyer===seller) throw new Error('TRADING_PARTIES_DISTINCT_REQUIRED');
+  if(!asset || !String(asset).trim()) throw new Error('ASSET_REQUIRED');
+  if(!Number.isSafeInteger(quantity)||quantity<=0) throw new Error('QUANTITY_INVALID');
+  if(!['KAIOS','KGEN'].includes(currency)) throw new Error('CURRENCY_UNSUPPORTED');
+  const buyerPoint=getPoint(points,buyerPointId),sellerPoint=getPoint(points,sellerPointId),meetingPoint=getPoint(points,meetingPointId);
+  const bid=parseAtomic(buyerBid),ask=parseAtomic(sellerAsk);
+  if(bid<=0n||ask<=0n) throw new Error('PRICE_MUST_BE_POSITIVE');
+  const deal=dealPrice===null?null:parseAtomic(dealPrice);
+  if(deal!==null && (deal<ask||deal>bid)) throw new Error('DEAL_OUTSIDE_ACCEPTED_RANGE');
+  const quoteStatus=deal===null?'AWAITING_DEAL_PRICE':'AWAITING_DUAL_ACCEPTANCE';
+  return Object.freeze({
+    orderId,buyer,seller,buyerPointId:buyerPoint.id,sellerPointId:sellerPoint.id,
+    meetingPointId:meetingPoint.id,asset:String(asset).trim(),quantity,currency,
+    buyerBidAtomic:bid.toString(),sellerAskAtomic:ask.toString(),dealPriceAtomic:deal?.toString()??null,
+    quoteStatus,buyerAccepted:false,sellerAccepted:false,deliveryStatus:'NOT_STARTED',
+    paymentStatus:SETTLEMENT_STATUS,claimable:false,receipt:null
+  });
+}
+function acceptPrice(order,who){
+  if(order.quoteStatus==='AWAITING_DEAL_PRICE') throw new Error('DEAL_PRICE_PENDING');
+  if(!['buyer','seller'].includes(who)) throw new Error('PARTY_INVALID');
+  const next={...order,[who+'Accepted']:true};
+  next.quoteStatus=next.buyerAccepted&&next.sellerAccepted?'AGREED_MEETING_PENDING':'AWAITING_DUAL_ACCEPTANCE';
+  return Object.freeze(next);
+}
+function makeTrip(points,fromId,toId,{mode,walkKmh=null,vehicleC=null}){
+  const from=getPoint(points,fromId),to=getPoint(points,toId);
+  if(from.id!==to.id && from.k===to.k) return Object.freeze({fromId,toId,mode,status:'LOCAL_XYZ_REQUIRED',distanceK:null,etaSeconds:null});
+  const distanceK=Math.abs(to.k-from.k);
+  let speedKPerSec;
+  if(mode==='WALK') {
+    if(!(walkKmh>0&&walkKmh<=10)) throw new Error('WALK_SPEED_REQUIRED');
+    speedKPerSec=walkKmh/(K_INDEX_KM*3600);
+  } else if(mode==='VEHICLE') {
+    if(!(vehicleC>0&&vehicleC<=100)) throw new Error('VEHICLE_C_CAPABILITY_REQUIRED');
+    speedKPerSec=vehicleC*C_SPEED_K_PER_SECOND;
+  } else throw new Error('TRANSPORT_MODE_INVALID');
+  return Object.freeze({fromId,toId,mode,status:distanceK===0?'ARRIVED_SIMULATED':'SIMULATED_ROUTE',distanceK,etaSeconds:distanceK/speedKPerSec,speedKPerSec,elapsedSeconds:0,progressK:0,arrivalProof:'SIMULATION_ONLY'});
+}
+function advanceTrip(trip,seconds){
+  if(trip.status==='LOCAL_XYZ_REQUIRED') throw new Error('LOCAL_XYZ_REQUIRED');
+  if(!Number.isFinite(seconds)||seconds<=0||seconds>86400*30) throw new Error('ADVANCE_TIME_INVALID');
+  if(trip.status==='ARRIVED_SIMULATED')return trip;
+  const elapsed=Math.min(trip.etaSeconds,trip.elapsedSeconds+seconds);
+  return Object.freeze({...trip,elapsedSeconds:elapsed,progressK:Math.min(trip.distanceK,trip.speedKPerSec*elapsed),status:elapsed>=trip.etaSeconds?'ARRIVED_SIMULATED':'SIMULATED_ROUTE'});
+}
+function deliveryPreview(order,buyerTrip,sellerTrip,{goodsChecked=false,buyerDeliveryAccepted=false}={}){
+  if(order.quoteStatus!=='AGREED_MEETING_PENDING') return Object.freeze({status:'DEAL_NOT_ACCEPTED',receipt:null,paymentStatus:SETTLEMENT_STATUS});
+  if(!buyerTrip||!sellerTrip||buyerTrip.toId!==order.meetingPointId||sellerTrip.toId!==order.meetingPointId)return Object.freeze({status:'MEETING_ROUTE_UNBOUND',receipt:null,paymentStatus:SETTLEMENT_STATUS});
+  if(buyerTrip.status!=='ARRIVED_SIMULATED'||sellerTrip.status!=='ARRIVED_SIMULATED')return Object.freeze({status:'PARTIES_NOT_AT_MEETING',receipt:null,paymentStatus:SETTLEMENT_STATUS});
+  if(!goodsChecked||!buyerDeliveryAccepted)return Object.freeze({status:'DELIVERY_NOT_ACCEPTED',receipt:null,paymentStatus:SETTLEMENT_STATUS});
+  return Object.freeze({status:'GAME_DELIVERY_ACCEPTED_PAYMENT_PENDING',receipt:null,paymentStatus:SETTLEMENT_STATUS,gameOnly:true});
+}
+
+/**
+ * KAIOS Meeting Market V2: digital cow construction, on-site delivery and grazing.
+ * This is an off-chain, deterministic game-world simulation, NOT a Life ID authority,
+ * financial settlement, wallet, GPS, or physical-world animal registry.
+ */
+const COW_FRAME='LOCAL_XYZ_METERS';
+const COW_WORK_SECONDS=3600;
+const TOLERANCE_METERS=2.5;
+const finite=value=>typeof value==='number'&&Number.isFinite(value);
+const vec=v=>v && ['x','y','z'].every(k=>finite(v[k]));
+const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
+const freeze=obj=>Object.freeze(obj);
+function createCowOrderSpec({order,site,grassPatch,blueprintId='DIGITAL_COW_V1',cowName='花果山牛牛',materialUnits=1}) {
+  if(!order||order.asset!=='數位牛創生服務'||order.quantity!==1)throw Error('COW_ORDER_REQUIRES_ONE_COW');
+  if(!site||site.pointId!==order.meetingPointId||site.pointId!==order.buyerPointId||site.frame!==COW_FRAME||!vec(site))throw Error('COW_SITE_XYZ_INVALID');
+  if(!grassPatch||grassPatch.pointId!==site.pointId||grassPatch.frame!==COW_FRAME||!vec(grassPatch)||distance(site,grassPatch)>50)throw Error('COW_GRASS_RESOURCE_REQUIRED');
+  if(!Number.isSafeInteger(materialUnits)||materialUnits!==1)throw Error('COW_SINGLE_BLUEPRINT_REQUIRED');
+  if(!/^[A-Za-z0-9_-]{3,80}$/.test(blueprintId))throw Error('COW_BLUEPRINT_INVALID');
+  return freeze({orderId:order.orderId,site:freeze({...site}),grassPatch:freeze({...grassPatch}),cowName:String(cowName).slice(0,50),blueprintId,materialUnits,productType:'COW_CREATION_SERVICE',lifeId:null,status:'PENDING_CONSTRUCTION',owner:order.buyer});
+}
+function createCowMission(spec,{timeToBuildSeconds=COW_WORK_SECONDS,enemyCount=1}={}) {
+  if(!spec||spec.status!=='PENDING_CONSTRUCTION') throw Error('COW_SPEC_REQUIRED');
+  if(!Number.isSafeInteger(timeToBuildSeconds)||timeToBuildSeconds<=0||timeToBuildSeconds>86400)throw Error('COW_BUILD_DURATION_INVALID');
+  if(!Number.isSafeInteger(enemyCount)||enemyCount<0||enemyCount>5)throw Error('COW_ENEMY_COUNT_INVALID');
+  return freeze({spec,elapsedSeconds:0,buildDuration:timeToBuildSeconds,enemyCount,monstersHandled:0,constructionReady:false,goodsChecked:false,buyerAccepted:false,status:'AWAITING_MEETING',cow:null,paymentStatus:SETTLEMENT_STATUS,receipt:null});
+}
+function advanceCowMission(mission,{order,buyerTrip,sellerTrip,seconds,monsterAction='FOLLOW'}={}) {
+  if(!mission||mission.status==='COW_ACTIVE_GAME'||mission.cow)throw Error('COW_ALREADY_CREATED');
+  if(!['FOLLOW','HARD_FIGHT','REVERSE_ATTACK','AVOID'].includes(monsterAction))throw Error('INVALID_MONSTER_ACTION');
+  if(!Number.isSafeInteger(seconds)||seconds<=0||seconds>86400)throw Error('GAME_TIME_INVALID');
+  if(!order||order.orderId!==mission.spec.orderId||order.quoteStatus!=='AGREED_MEETING_PENDING')throw Error('COW_PRICE_NOT_ACCEPTED');
+  const meeting=deliveryPreview(order,buyerTrip,sellerTrip,{});
+  if(meeting.status!=='DELIVERY_NOT_ACCEPTED')throw Error('COW_BOTH_PARTIES_MUST_ARRIVE');
+  const elapsed=Math.min(mission.buildDuration,mission.elapsedSeconds+seconds);
+  const monstersHandled=monsterAction==='AVOID'?mission.monstersHandled:Math.min(mission.enemyCount,mission.monstersHandled+1);
+  const constructionReady=elapsed===mission.buildDuration&&monstersHandled===mission.enemyCount;
+  return freeze({...mission,elapsedSeconds:elapsed,monstersHandled,constructionReady,status:constructionReady?'READY_FOR_INSPECTION':'IN_CONSTRUCTION'});
+}
+function inspectCowMission(mission,{goodsChecked=false,buyerAccepted=false,buyerPosition,sellerPosition}={}){
+  if(!mission||mission.status==='COW_ACTIVE_GAME')throw Error('COW_ALREADY_CREATED');
+  if(!mission.constructionReady)throw Error('COW_CONSTRUCTION_NOT_READY');
+  const loc=mission.spec.site;
+  if(!vec(buyerPosition)||!vec(sellerPosition)||distance(buyerPosition,loc)>TOLERANCE_METERS||distance(sellerPosition,loc)>TOLERANCE_METERS)throw Error('COW_LOCAL_XYZ_MEETING_REQUIRED');
+  if(!goodsChecked||!buyerAccepted)throw Error('COW_INSPECTION_OR_ACCEPTANCE_REQUIRED');
+  return freeze({...mission,goodsChecked,buyerAccepted,status:'DELIVERY_ACCEPTED_BIRTH_PENDING'});
+}
+function activateCow(mission,{existingCowIds=[],grassAvailable=true}={}) {
+  if(!mission||mission.status!=='DELIVERY_ACCEPTED_BIRTH_PENDING'||!mission.goodsChecked||!mission.buyerAccepted)throw Error('COW_DELIVERY_NOT_ACCEPTED');
+  if(!Array.isArray(existingCowIds))throw Error('COW_REGISTRY_REQUIRED');
+  const id='COW-'+mission.spec.orderId;
+  if(existingCowIds.includes(id))throw Error('COW_DUPLICATE_BIRTH');
+  if(!grassAvailable)throw Error('COW_GRASS_NOT_AVAILABLE');
+  const {site,grassPatch}=mission.spec;
+  const cow=freeze({cowId:id,lifeId:null,identityStatus:'GAME_COW_ONLY_NOT_FORMAL_LIFE',name:mission.spec.cowName,owner:mission.spec.owner,pointId:site.pointId,frame:COW_FRAME,position:freeze({x:site.x,y:site.y,z:site.z}),grassPatch,ageSeconds:0,hunger:80,energy:90,activity:'GRAZING',health:100,originWorkId:mission.spec.orderId,duplicated:false});
+  return freeze({...mission,status:'COW_ACTIVE_GAME',cow,materialConsumed:true,lifeId:null,receipt:null,paymentStatus:SETTLEMENT_STATUS});
+}
+function tickCow(cow,{seconds,grassAvailable=true,grassUnits=1}={}) {
+  if(!cow||cow.activity==='DEAD')throw Error('COW_UNAVAILABLE');
+  if(!Number.isSafeInteger(seconds)||seconds<=0||seconds>86400)throw Error('COW_TIME_INVALID');
+  if(!Number.isSafeInteger(grassUnits)||grassUnits<0||grassUnits>100)throw Error('COW_GRASS_UNITS_INVALID');
+  const hasFood=grassAvailable&&grassUnits>0;
+  const eating=hasFood&&cow.hunger>0;
+  const foodConsumed=eating?1:0;
+  const hunger=eating?Math.max(0,cow.hunger-25):Math.min(100,cow.hunger+10);
+  const energy=eating?Math.min(100,cow.energy+5):Math.max(0,cow.energy-5);
+  const position=freeze(eating?{...cow.position,x:cow.grassPatch.x,z:cow.grassPatch.z}:{...cow.position,x:cow.position.x+0.2,z:cow.position.z+0.1});
+  return freeze({...cow,position,activity:eating?'GRAZING':(hunger>=90?'HUNGRY':'ROAMING'),hunger,energy,ageSeconds:cow.ageSeconds+seconds,foodConsumed});
+}
+
+/** A local-only snapshot is never chain settlement or formal Life identity evidence. */
+function restoreCowSnapshot(data){
+  if(!data||data.version!==1||!Array.isArray(data.cowIds)||data.cowIds.length>1000||new Set(data.cowIds).size!==data.cowIds.length)throw Error('COW_SNAPSHOT_INVALID');
+  if(data.cowIds.some(x=>typeof x!=='string'||!/^COW-[A-Za-z0-9_-]{1,101}$/.test(x)))throw Error('COW_SNAPSHOT_INVALID');
+  const cow=data.cow;
+  if(cow!==null){
+    if(!cow||!data.cowIds.includes(cow.cowId)||cow.identityStatus!=='GAME_COW_ONLY_NOT_FORMAL_LIFE'||cow.lifeId!==null||!vec(cow.position)||!vec(cow.grassPatch)||cow.frame!==COW_FRAME||cow.pointId!==cow.grassPatch.pointId)throw Error('COW_SNAPSHOT_INVALID');
+    if(!Number.isFinite(cow.hunger)||!Number.isFinite(cow.energy)||!Number.isSafeInteger(cow.ageSeconds))throw Error('COW_SNAPSHOT_INVALID');
+  }
+  return freeze({cowIds:freeze([...data.cowIds]),cow:cow?freeze({...cow,position:freeze({...cow.position}),grassPatch:freeze({...cow.grassPatch})}):null});
+}
+
+const __EMBEDDED_POINTS__={"point_index_sorted":[{"id":"P_m37p63_石油_R2","coord":-37.63,"name":"石油"},{"id":"P_m1p0_宇宙_R3","coord":-1.0,"name":"宇宙"},{"id":"P_0p0_恐龍_R4","coord":0.0,"name":"恐龍"},{"id":"P_1p0_玩家創建_R5","coord":1.0,"name":"玩家創建"},{"id":"P_72p0_最輕恐龍_R6","coord":72.0,"name":"最輕恐龍"},{"id":"P_144p0_一四四時間之門_R7","coord":144.0,"name":"一四四時間之門"},{"id":"P_188p0_地嶽_R8","coord":188.0,"name":"地嶽"},{"id":"P_188p0_地獄門_Rjson","coord":188.0,"name":"地獄門"},{"id":"P_233p0_二三三波動門_R9","coord":233.0,"name":"二三三波動門"},{"id":"P_280p0_地球表面_R10","coord":280.0,"name":"地球表面"},{"id":"P_377p0_三七七銀河峽谷_R11","coord":377.0,"name":"三七七銀河峽谷"},{"id":"P_411p0_大氣層_R12","coord":411.0,"name":"大氣層"},{"id":"P_720p0_七二零轉生門_R13","coord":720.0,"name":"七二零轉生門"},{"id":"P_1111p0_閻王殿_R14","coord":1111.0,"name":"閻王殿"},{"id":"P_1852p0_人造衛星高度_R15","coord":1852.0,"name":"人造衛星高度"},{"id":"P_3141p0_影像迷宮_R16","coord":3141.0,"name":"影像迷宮"},{"id":"P_4040p0_暗網交易所_R17","coord":4040.0,"name":"暗網交易所"},{"id":"P_4168p0_奈何橋_R18","coord":4168.0,"name":"奈何橋"},{"id":"P_4444p0_地府_R19","coord":4444.0,"name":"地府"},{"id":"P_5048p0_九齒釘耙_R20","coord":5048.0,"name":"九齒釘耙"},{"id":"P_5048p0_降妖寶杖_R21","coord":5048.0,"name":"降妖寶杖"},{"id":"P_5168p0_金山銀礦_R22","coord":5168.0,"name":"金山銀礦"},{"id":"P_5555p0_南海龍房_R23","coord":5555.0,"name":"南海龍房"},{"id":"P_6128p0_斜月三星洞_R24","coord":6128.0,"name":"斜月三星洞"},{"id":"P_6666p0_東海龍房_R25","coord":6666.0,"name":"東海龍房"},{"id":"P_6888p0_松樹國_R26","coord":6888.0,"name":"松樹國"},{"id":"P_7200p0_畫杆方天戟_R27","coord":7200.0,"name":"畫杆方天戟"},{"id":"P_7744p0_流沙河_R28","coord":7744.0,"name":"流沙河"},{"id":"P_7777p0_西海龍房_R29","coord":7777.0,"name":"西海龍房"},{"id":"P_8888p0_高老莊_R30","coord":8888.0,"name":"高老莊"},{"id":"P_8895p0_雲棧洞_R31","coord":8895.0,"name":"雲棧洞"},{"id":"P_9444p0_黑風谷_R32","coord":9444.0,"name":"黑風谷"},{"id":"P_9995p0_龍珠綠_R33","coord":9995.0,"name":"龍珠綠"},{"id":"P_9999p0_北海龍房_R34","coord":9999.0,"name":"北海龍房"},{"id":"P_11111p0_定海神針_R35","coord":11111.0,"name":"定海神針"},{"id":"P_11520p0_花果山_R36","coord":11520.0,"name":"花果山"},{"id":"P_12345p0_五指山_R37","coord":12345.0,"name":"五指山"},{"id":"P_12345p0_小五指山_Rjson","coord":12345.0,"name":"小五指山"},{"id":"P_12682p0_阿斗起飛_R38","coord":12682.0,"name":"阿斗起飛"},{"id":"P_12800p0_靈台方寸山_R39","coord":12800.0,"name":"靈台方寸山"},{"id":"P_13500p0_金箍棒_R40","coord":13500.0,"name":"金箍棒"},{"id":"P_13888p0_東土大唐_R41","coord":13888.0,"name":"東土大唐"},{"id":"P_14520p0_大仙女_巧雲__R43","coord":14520.0,"name":"大仙女(巧雲)"},{"id":"P_14520p0_巧雲_R42","coord":14520.0,"name":"巧雲"},{"id":"P_14866p0_二仙女_巧虹__R45","coord":14866.0,"name":"二仙女(巧虹)"},{"id":"P_14866p0_巧虹_R44","coord":14866.0,"name":"巧虹"},{"id":"P_16184p0_三仙女_巧芝__R47","coord":16184.0,"name":"三仙女(巧芝)"},{"id":"P_16184p0_巧芝_R46","coord":16184.0,"name":"巧芝"},{"id":"P_16888p0_四仙女_巧仙__R50","coord":16888.0,"name":"四仙女(巧仙)"},{"id":"P_16888p0_巧仙_R49","coord":16888.0,"name":"巧仙"},{"id":"P_16888p0_月球_Rjson","coord":16888.0,"name":"月球"},{"id":"P_16888p0_白骨洞_廣寒宮_R48","coord":16888.0,"name":"白骨洞 / 廣寒宮"},{"id":"P_17347p0_五仙女_巧蘭__R52","coord":17347.0,"name":"五仙女(巧蘭)"},{"id":"P_17347p0_巧蘭_R51","coord":17347.0,"name":"巧蘭"},{"id":"P_18000p0_黑洞層_R53","coord":18000.0,"name":"黑洞層"},{"id":"P_18056p0_六仙女_巧梅__R55","coord":18056.0,"name":"六仙女(巧梅)"},{"id":"P_18056p0_巧梅_R54","coord":18056.0,"name":"巧梅"},{"id":"P_18319p0_四大天門_R56","coord":18319.0,"name":"四大天門"},{"id":"P_18459p0_七仙女_巧靈__R58","coord":18459.0,"name":"七仙女(巧靈)"},{"id":"P_18459p0_巧靈_R57","coord":18459.0,"name":"巧靈"},{"id":"P_18520p0_四大天王_R59","coord":18520.0,"name":"四大天王"},{"id":"P_18888p0_凌霄寶殿_R60","coord":18888.0,"name":"凌霄寶殿"},{"id":"P_18889p0_敖欽_R61","coord":18889.0,"name":"敖欽"},{"id":"P_18890p0_敖廣_R62","coord":18890.0,"name":"敖廣"},{"id":"P_18891p0_敖順_R63","coord":18891.0,"name":"敖順"},{"id":"P_18892p0_敖吉_R64","coord":18892.0,"name":"敖吉"},{"id":"P_18893p0_總卒元將府_R65","coord":18893.0,"name":"總卒元將府"},{"id":"P_18894p0_總兵元帥府_R66","coord":18894.0,"name":"總兵元帥府"},{"id":"P_18911p0_煉丹爐_R67","coord":18911.0,"name":"煉丹爐"},{"id":"P_18921p0_斬妖台_R68","coord":18921.0,"name":"斬妖台"},{"id":"P_18999p0_玉帝_R69","coord":18999.0,"name":"玉帝"},{"id":"P_20000p0_女兒國_R70","coord":20000.0,"name":"女兒國"},{"id":"P_20732p0_創世之門_R71","coord":20732.0,"name":"創世之門"},{"id":"P_20888p0_火焰山_R72","coord":20888.0,"name":"火焰山"},{"id":"P_21319p0_雷音寺_R73","coord":21319.0,"name":"雷音寺"},{"id":"P_21344p0_參軍將_R74","coord":21344.0,"name":"參軍將"},{"id":"P_21444p0_五丈原界碑_R75","coord":21444.0,"name":"五丈原界碑"},{"id":"P_21520p0_大雄寶殿_R76","coord":21520.0,"name":"大雄寶殿"},{"id":"P_21588p0_如來佛_R77","coord":21588.0,"name":"如來佛"},{"id":"P_21666p0_佛光普照之地_R78","coord":21666.0,"name":"佛光普照之地"},{"id":"P_21777p0_白龍門下層_R79","coord":21777.0,"name":"白龍門下層"},{"id":"P_21888p0_恐懼女鬼_R80","coord":21888.0,"name":"恐懼女鬼"},{"id":"P_22188p0_貪婪魔影_R81","coord":22188.0,"name":"貪婪魔影"},{"id":"P_22200p0_魔影之谷_R82","coord":22200.0,"name":"魔影之谷"},{"id":"P_22400p0_幻市魔影之門_R83","coord":22400.0,"name":"幻市魔影之門"},{"id":"P_22888p0_白龍門_R84","coord":22888.0,"name":"白龍門"},{"id":"P_23333p0_靈山_R85","coord":23333.0,"name":"靈山"},{"id":"P_24449p0_雲端神將_R86","coord":24449.0,"name":"雲端神將"},{"id":"P_24888p0_佛祖金鋼殿_R87","coord":24888.0,"name":"佛祖金鋼殿"},{"id":"P_33333p0_黃金鑽石_R88","coord":33333.0,"name":"黃金鑽石"},{"id":"P_36000p0_白洞層_R89","coord":36000.0,"name":"白洞層"},{"id":"P_44444p0_南海龍宮_R90","coord":44444.0,"name":"南海龍宮"},{"id":"P_55555p0_東海龍宮_R91","coord":55555.0,"name":"東海龍宮"},{"id":"P_66666p0_西海龍宮_R92","coord":66666.0,"name":"西海龍宮"},{"id":"P_72000p0_大爆炸奇點_R93","coord":72000.0,"name":"大爆炸奇點"},{"id":"P_77777p0_北海龍宮_R94","coord":77777.0,"name":"北海龍宮"},{"id":"P_80000p0_多重宇宙邊界_R95","coord":80000.0,"name":"多重宇宙邊界"},{"id":"P_88888p0_美州大陸_R96","coord":88888.0,"name":"美州大陸"},{"id":"P_88888p0_美洲大陸_Rjson","coord":88888.0,"name":"美洲大陸"},{"id":"P_88895p0_蟠桃園_R97","coord":88895.0,"name":"蟠桃園"},{"id":"P_99995p0_龍珠紅_R98","coord":99995.0,"name":"龍珠紅"},{"id":"P_99999p0_命運之神_R99","coord":99999.0,"name":"命運之神"},{"id":"P_99999p0_銀河主脈_R100","coord":99999.0,"name":"銀河主脈"},{"id":"P_100000p0_玉皇宮_R101","coord":100000.0,"name":"玉皇宮"},{"id":"P_108000p0_點石成金_R102","coord":108000.0,"name":"點石成金"},{"id":"P_111111p0_如來神掌_R103","coord":111111.0,"name":"如來神掌"},{"id":"P_123456p0_時間輪盤_R104","coord":123456.0,"name":"時間輪盤"},{"id":"P_126500p0_最重的恐龍_R105","coord":126500.0,"name":"最重的恐龍"},{"id":"P_126588p0_平天大聖宮_R106","coord":126588.0,"name":"平天大聖宮"},{"id":"P_168000p0_月球基地L2_R107","coord":168000.0,"name":"月球基地L2"},{"id":"P_168888p0_筋斗雲_R108","coord":168888.0,"name":"筋斗雲"},{"id":"P_188888p0_地球神域_R109","coord":188888.0,"name":"地球神域"},{"id":"P_511111p0_齊天大聖宮_R110","coord":511111.0,"name":"齊天大聖宮"},{"id":"P_555550p0_東海龍宮_深淵殿_R111","coord":555550.0,"name":"東海龍宮·深淵殿"},{"id":"P_654321p0_大五指山_Rjson","coord":654321.0,"name":"大五指山"},{"id":"P_1000000p0_玉皇大宇宙殿_R112","coord":1000000.0,"name":"玉皇大宇宙殿"},{"id":"P_1234567p0_變形金鋼_R113","coord":1234567.0,"name":"變形金鋼"},{"id":"P_1800000p0_金星_R114","coord":1800000.0,"name":"金星"},{"id":"P_6570000p0_太陽_R115","coord":6570000.0,"name":"太陽"},{"id":"P_7200000p0_天規石碑_R116","coord":7200000.0,"name":"天規石碑"},{"id":"P_28100000p0_木星_R117","coord":28100000.0,"name":"木星"},{"id":"P_87654321p0_天堂_R118","coord":87654321.0,"name":"天堂"},{"id":"P_87654321p0_天庭_Rjson","coord":87654321.0,"name":"天庭"}]};
+
+const $=id=>document.getElementById(id);
+const store={points:null,order:null,bTrip:null,sTrip:null,cowMission:null,cowRegistry:new Set()};let eventIndex=0;
+const snapshotKey='KAIOS_MEETING_COW_GAME_V2';
+const saveCow=()=>{try{if(store.cowMission?.cow)localStorage.setItem(snapshotKey,JSON.stringify({version:1,cowIds:[...store.cowRegistry],cow:store.cowMission.cow}))}catch{note('本機儲存暫不可用，牛仍在本次遊戲內活動')}};
+const restoreCow=()=>{try{const raw=localStorage.getItem(snapshotKey);if(!raw)return;const saved=restoreCowSnapshot(JSON.parse(raw));store.cowRegistry=new Set(saved.cowIds);if(saved.cow){store.cowMission={status:'COW_ACTIVE_GAME',cow:saved.cow,elapsedSeconds:3600,buildDuration:3600,monstersHandled:1,enemyCount:1,paymentStatus:'NO_ONCHAIN_SETTLEMENT',receipt:null,goodsChecked:true,buyerAccepted:true};note('🐄 找回本機數位牛：'+saved.cow.cowId+'（非正式 Life ID）')} }catch{note('本機牛紀錄無法驗證，不當成真實資產')}};
+const notes=[];const note=(text)=>{notes.unshift(String(++eventIndex).padStart(2,'0')+' · '+text);$('log').textContent=notes.join('\n')};
+const showTrip=(name,trip)=>{const node=$(name+'Travel'),bar=$(name+'Bar');if(!trip){node.textContent='尚未出發';bar.style.width='0%';return}if(trip.status==='LOCAL_XYZ_REQUIRED'){node.textContent='同 K 不同地點，缺該點位 XYZ';bar.style.width='0%';return;}const pct=trip.distanceK===0?100:Math.min(100,trip.progressK/trip.distanceK*100);node.textContent=(trip.status==='ARRIVED_SIMULATED'?'已到達（模擬）':'移動中')+' · '+pct.toFixed(1)+'% · 行程 '+(trip.distanceK).toFixed(3)+'K';bar.style.width=pct+'%';};
+const refresh=()=>{showTrip('b',store.bTrip);showTrip('s',store.sTrip);const order=store.order;
+$('acceptBuyer').disabled=!order||order.buyerAccepted;
+$('acceptSeller').disabled=!order||order.sellerAccepted;
+$('startMove').disabled=!order||order.quoteStatus!=='AGREED_MEETING_PENDING'||!!store.bTrip;
+$('advance').disabled=!store.bTrip||!store.sTrip||[store.bTrip.status,store.sTrip.status].includes('LOCAL_XYZ_REQUIRED')||[store.bTrip.status,store.sTrip.status].every(x=>x==='ARRIVED_SIMULATED');
+const decision=order&&store.bTrip&&store.sTrip?deliveryPreview(order,store.bTrip,store.sTrip):null;
+$('deliver').disabled=!store.cowMission||store.cowMission.status!=='READY_FOR_INSPECTION';
+$('build').disabled=!store.cowMission||!decision||decision.status!=='DELIVERY_NOT_ACCEPTED'||store.cowMission.status==='DELIVERY_ACCEPTED_BIRTH_PENDING'||store.cowMission.status==='COW_ACTIVE_GAME';
+$('birth').disabled=!store.cowMission||store.cowMission.status!=='DELIVERY_ACCEPTED_BIRTH_PENDING';
+$('feedCow').disabled=!store.cowMission?.cow;
+if(store.cowMission){const m=store.cowMission;$('cowMissionStatus').textContent=`工程：${m.status}｜施工 ${m.elapsedSeconds}/${m.buildDuration} 秒｜怪物關卡 ${m.monstersHandled}/${m.enemyCount}｜真實付款 ${m.paymentStatus}`;
+  $('visibleCow').hidden=!m.cow;
+  $('cowLife').textContent=m.cow?`🐄 ${m.cow.name}｜${m.cow.cowId}｜XYZ (${m.cow.position.x.toFixed(1)}, ${m.cow.position.y.toFixed(1)}, ${m.cow.position.z.toFixed(1)})｜${m.cow.activity}｜飢餓 ${m.cow.hunger}/100｜牧草消耗 ${m.cow.foodConsumed??0}｜生命狀態 GAME_ONLY`: '尚未出生，必須雙方碰面、施工／打怪、驗貨驗收。';
+} else {$('cowMissionStatus').textContent='等待買賣雙方到場；尚無牛出現';$('visibleCow').hidden=true;$('cowLife').textContent='尚未出生；正式 Life ID 不會憑空核發';}
+if(order){$('status').textContent=`商品：${order.asset}｜${order.currency}\nBID ${displayAtomic(order.buyerBidAtomic)} / ASK ${displayAtomic(order.sellerAskAtomic)} / DEAL ${order.dealPriceAtomic?displayAtomic(order.dealPriceAtomic):'待談'}\n報價：${order.quoteStatus}｜雙方集合：${order.meetingPointId}\n驗收：${decision?.status||'WAITING_FOR_TRAVEL'}｜真實付款：${order.paymentStatus}`}
+};
+const get=id=>$(id).value;
+(()=>{try{const map=__EMBEDDED_POINTS__;const points=store.points=loadPoints(map);for(const id of ['buyerPoint','sellerPoint','meetingPoint'])for(const p of points){const option=document.createElement('option');option.value=p.id;option.textContent=`K${p.k} · ${p.name}｜${p.id}`;$(id).append(option)};const one=k=>points.find(p=>p.k===k)?.id;$('buyerPoint').value=one(11520);$('sellerPoint').value=one(12345);$('meetingPoint').value=one(11520);note(`點位載入：${points.length} 筆，不刪除同 K 的不同 Point ID`);restoreCow();refresh();}catch(e){note('載入失敗：'+e.message);$('quote').disabled=true}})();
+$('quote').addEventListener('click',()=>{try{store.order=createRequest({orderId:'DEMO'+Date.now(),buyer:get('buyer').trim(),seller:get('seller').trim(),buyerPointId:get('buyerPoint'),sellerPointId:get('sellerPoint'),meetingPointId:get('meetingPoint'),asset:get('asset').trim(),quantity:1,currency:get('currency'),buyerBid:get('bid'),sellerAsk:get('ask'),dealPrice:get('deal')||null,points:store.points});store.bTrip=null;store.sTrip=null;store.cowMission=null;note('建立公文：BID '+get('bid')+' / ASK '+get('ask')+' / DEAL '+(get('deal')||'待談')+' '+get('currency'));refresh()}catch(e){note('無法開單：'+e.message)}});
+for(const [button,side] of [['acceptBuyer','buyer'],['acceptSeller','seller']])$(button).addEventListener('click',()=>{try{store.order=acceptPrice(store.order,side);note((side==='buyer'?'A 方':'B 方')+'接受成交價');refresh()}catch(e){note(e.message)}});
+$('startMove').addEventListener('click',()=>{try{const mode=(side)=>get(side+'Transport'),opt=mode=>mode==='WALK'?{mode,walkKmh:5}:{mode,vehicleC:100};const o=store.order;store.bTrip=makeTrip(store.points,o.buyerPointId,o.meetingPointId,opt(mode('buyer')));store.sTrip=makeTrip(store.points,o.sellerPointId,o.meetingPointId,opt(mode('seller')));if(o.asset==='數位牛創生服務'&&o.quantity===1){
+ const site={pointId:o.meetingPointId,frame:COW_FRAME,x:Number(get('cowX')),y:Number(get('cowY')),z:Number(get('cowZ'))};
+ const grassPatch={...site,x:site.x+5,z:site.z+1};
+ const spec=createCowOrderSpec({order:o,site,grassPatch});store.cowMission=createCowMission(spec);
+ note('賣方帶著數位牛創生包出發；牛尚未生成，目的地 XYZ '+JSON.stringify([site.x,site.y,site.z]));
+} else note('雙方出發；非數位牛商品沿原一般交易流程');refresh()}catch(e){note('無法出發：'+e.message)}});
+$('advance').addEventListener('click',()=>{try{store.bTrip=advanceTrip(store.bTrip,3600);store.sTrip=advanceTrip(store.sTrip,3600);note('模擬時間前進 3600 秒；A '+store.bTrip.status+' / B '+store.sTrip.status);refresh()}catch(e){note(e.message)}});
+$('build').addEventListener('click',()=>{try{store.cowMission=advanceCowMission(store.cowMission,{order:store.order,buyerTrip:store.bTrip,sellerTrip:store.sTrip,seconds:3600,monsterAction:get('monsterAction')});note('完成施工時間與護送／打怪：'+store.cowMission.status);refresh()}catch(e){note('尚不能施工：'+e.message)}});
+$('deliver').addEventListener('click',()=>{try{const pos=store.cowMission.spec.site;store.cowMission=inspectCowMission(store.cowMission,{goodsChecked:true,buyerAccepted:true,buyerPosition:{x:pos.x,y:pos.y,z:pos.z},sellerPosition:{x:pos.x+1,y:pos.y,z:pos.z}});note('雙方局部 XYZ 同地（遊戲模擬），買方已驗貨；等待創生');refresh()}catch(e){note('驗貨失敗：'+e.message)}});
+$('birth').addEventListener('click',()=>{try{store.cowMission=activateCow(store.cowMission,{existingCowIds:[...store.cowRegistry],grassAvailable:true});store.cowRegistry.add(store.cowMission.cow.cowId);saveCow();note('🐄 創生成功：一隻數位牛在 K11520 XYZ 登場，走路吃草；真實付款仍待收據');refresh()}catch(e){note('創生失敗：'+e.message)}});
+$('feedCow').addEventListener('click',()=>{try{store.cowMission=Object.freeze({...store.cowMission,cow:tickCow(store.cowMission.cow,{seconds:3600,grassAvailable:true,grassUnits:1})});saveCow();note('🌿 牛走向牧草，吃草並更新體力／飢餓；遊戲時間+1h');refresh()}catch(e){note('餵草失敗：'+e.message)}});
+</script></body></html>
