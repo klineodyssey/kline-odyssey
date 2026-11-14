@@ -1,3 +1,109 @@
+# KSHIP 白皮書 — KUFO 年度轉化完整累積整合版
+
+## 2026-11-14 現行完整規格：十二等整月輪換與持續煉丹
+
+狀態：**本機原碼與測試已驗證，尚未部署**。本系列仙丹幣名稱與代號為 **KUFO**，本文件的載體幣代號為 **KSHIP**；V4／V5 等字樣只保留在既有檔名、來源、測試及工程沿革，不是另一種幣。此完整章節依本頁 Human 最新更正整理，讀者可直接由此理解現行協議；下方歷史全文保留，但其中農曆表、36年循環、13個月、2039停鑄、舊測試及舊LIVE均不構成本版規則或部署證據。
+
+### 1. 產品與世界流程
+
+既有流程為 **KAIOS → K18911 太上老君煉丹爐 → K168888 筋斗雲出料 → K511111 KUFO → KSHIP**。
+18911、168888、511111 是世界功能點，不是鏈上地址。正式部署清單必須另記 chainId、合約地址、runtime code／immutable、Registry 及其角色綁定。
+不另建代幣、平行產品、Runtime 或 bootstrap；既有已部署合約不原地覆寫。原工程仍為 [PR #637](https://github.com/klineodyssey/kline-odyssey/pull/637)。
+規格來源含 Human 提供的[KUFO 白皮書](https://docs.google.com/document/d/1LgTiHx7yjE_nqgSFiDz5hCOBEXp5YDOo7h1P50Hbv_o/edit)與本頁後續更正；本頁已更正的規則優先適用。
+
+### 2. 每年十二個月，每個月固定一等與一個星座
+
+Human 已確認一年12個月、整月輪換；對真實日期交由工程判斷採台灣 UTC+8 公曆，並確認下表星座順序。
+每月第一日00:00台灣時間為共同換月時刻，也就是前一個UTC日期16:00；同一月份內不再按20日、21日等傳統星座日期切換。
+這是KAIOS自訂整月對照，不宣稱天文星座入宮日期；公曆閏年及各月實際長度按算法處理，不把每月硬設30日或365/12日。
+
+| 台灣公曆整月 | 輪值等級 | 整月星座 | 內部星座ID |
+| --- | --- | --- | --- |
+| 1月 | 1 修練佛 | 摩羯 | 10 |
+| 2月 | 2 魔王 | 水瓶 | 11 |
+| 3月 | 3 凡人 | 雙魚 | 12 |
+| 4月 | 4 龍 | 牡羊 | 1 |
+| 5月 | 5 神仙 | 金牛 | 2 |
+| 6月 | 6 神明 | 雙子 | 3 |
+| 7月 | 7 神君（玉皇大帝） | 巨蟹 | 4 |
+| 8月 | 8 外星人 | 獅子 | 5 |
+| 9月 | 9 變形金剛 | 處女 | 6 |
+| 10月 | 10 十三生肖 | 天秤 | 7 |
+| 11月 | 11 人類 | 天蠍 | 8 |
+| 12月 | 12 萬靈 | 射手 | 9 |
+
+星座ID是本版內部編碼：牡羊1至雙魚12；月份映射固定為 [10,11,12,1,2,3,4,5,6,7,8,9]。等級ID與星座ID各有欄位，不混用。
+第10等「十三生肖」包含鼠、牛、虎、兔、龍、蛇、馬、羊、猴、雞、狗、豬與AI類，共13個子類；**人類獨立為第11等，全年仍只有12個月**。
+不以亂數、錢包雜湊或時間自動替個人指定子類，不因月份改寫玩家既有境界、物種、舊出生承諾或資產。
+每年1月回第1等，12月為萬靈；500年只作相對紀元標記，不重置規則、不停機，也不在第501年改亂數。
+「1天堂日＝365 K280日」另記為世界時間換算，不把一年公曆成熟改成天堂日或假定K280日的鏈上秒數；Physics CURRENT 未被本工作任意改寫。
+
+### 3. 持續煉丹與不可變時間來源
+
+同一KUFO候選以鏈上 block.timestamp、固定 UTC+8 及公曆算法按需計算年／月，不預先儲存一萬年曆表，也不依賴AI、母機或Owner每年送補表交易。
+2039不再是終身停鑄期限；到2039年及更遠年份，仍按同一算法判定月份。持續煉丹仍須滿足有效啟用、供應額度、真銷毀、餘額資格、角色綁定與鏈本身可用。
+只讀月份判定不需要定時簽署；**鑄造與轉化仍是持有人發起的交易**。時間到達不自行扣幣、不自動轉帳，也不讓AI取得錢包權限。
+正式啟用時間 activationTime 尚須在部署前由本人確認，不能自動沿用2027年測試fixture或舊2039草案。
+constructor 固定 version、activationTime、utcOffsetSeconds=28800 及上述12個星座映射，整體calendarHash不可回改；本候選沒有未來年曆append或改時區／星座setter。
+公曆換算採有界整數算法，參考[作者的日期算法說明](https://howardhinnant.github.io/date_algorithms.html)；這是確定性民用曆法，不是精準萬年農曆或天文預測。
+
+### 4. 鑄造、資格與供應
+
+- 真實銷毀 **1 KAIOS，同筆即時產出1,000 KUFO**。同時核對持有人KAIOS餘額及KAIOS總供應量確實減少，不以送到任意地址或成功回傳tuple代替burn。
+- KGEN只查持有人當下餘額，至少為投入KAIOS量÷1,000；**不扣除、不鎖定、不轉移KGEN**，不要求為此授權KGEN allowance。
+- 原碼採18位精度。最小KAIOS投入1,000 wei，且投入wei須可被1,000整除，確保資格與產出整數精確；這不是最少投入1,000枚KAIOS。
+- KUFO零創世、原生零稅；累計從煉丹發行上限72,000,000,000,000枚（72兆）。後續銷毀不恢復已用過的終身發行額度，不增加任意管理員鑄幣入口。
+- KSHIP零創世、原生零稅，原供應上限72,000,000,000,000,000枚（72,000兆），每1 KUFO最終對應1,000 KSHIP。
+- 「餐廳10 KAIOS／500 KUFO」是商家以自有庫存、補貼或利潤交付的討論例子，不改協議鑄造1:1,000；100萬維持量及生命活動力公式未定，不實作成強制資產規則。
+
+### 5. 共同年度成熟、永久補結與轉讓守恆
+
+年度成熟按台灣公曆1月1日00:00共同年界，**不是持有滿週年，也不是每過一個月成熟一批**。
+出生年跨過第一個年界，原始份額累計可轉化50%；第二個年界75%；第三個年界100%。例如12月31日出生，可在次日年界取得50%資格，應在操作介面清楚說明。
+實際轉化需由持有人或其明確授權的既有Converter流程發起；取得資格與執行交易分開。漏年可補結，第三年清掉剩餘餘額與尾差，不因舊發行期或曆表末端失效。
+每筆出生數量分成 first=floor(amount/2)、second=floor(3amount/4)-first、terminal=amount-floor(3amount/4)，保留逐筆wei尾差。
+轉讓按剩餘三段權利比例拆分，父子各段總和保持，既有出生年、月份、輪值等級、星座及來源hash不重設；年度aggregate只是同一批權利的衍生索引，不能重新計算或創造成熟額度。
+普通transfer與burn單筆最多處理32個活躍分組；更多分組須用原selected-group入口分批，選組嚴格遞增、不重複，失配整筆回滾。查詢可用有界分頁，不掃描萬年歷史。
+groupId為相對第一個出生年的月份編碼，沒有鑄造也可按需計算；虛擬月序上界不等於真實已鑄組數。實際權利只在真mint後記入持有人索引。
+uint32分組／年度與uint64時間皆須在轉型前核邊界；新鑄範圍限制與既有份額永久補結分開處理，不能用未來新鑄上界取消既有結清權利。
+
+### 6. 合約分工與持有人授權
+
+唯一正式候選原碼在 KGEN-KAIOS/contracts/ 下：
+
+| 合約 | 工作 |
+| --- | --- |
+| KUFO.sol | 固定時間規則、真burn proof、出生／三段權利、轉讓與授權轉化燒毀 |
+| KAIOSAlchemyFurnace.sol | 當下KGEN資格、持有人KAIOS burn、同筆原子出料與精確增量核驗 |
+| KUFOOutputJindouyun168888.sol | 沿Registry現任output路由消耗proof，保留受益人與數量 |
+| KSHIP.sol | 驗證KUFO carrier burn record並防重鑄造KSHIP |
+| KSHIPConverter.sol | 持有人授權轉化，核KUFO真burn、KSHIP proof／餘額／供應及累計鑄造精確增量 |
+
+既有KAIOS、KGEN及KAIOSOrganRegistry是必須核對的依賴，不以world point替代地址。KUFO/Furnace本版MintOrigin新增明確 birthMonth／birthTierId；不得與舊birthZodiac ABI混接。
+Registry owner依既有bootstrap狀態、minimumDelay及合法治理程序管理角色；delay不得繞過。修改路由不是修改原比例、供應cap或新時間常數的權限。
+持有人只對實際核對過的Furnace／Converter設定必要allowance，核對受益人、數量與呼叫參數後本人確認。Output／Converter／getter均不應單靠名稱被信任；部署前須核實位元碼、immutable、Registry綁定及權限。
+AI可撰寫、離線測試、準備操作與唯讀核回執，不能取得私鑰／助記詞、代簽、送部署／治理／真交易或解除具體HOLD。
+
+本次固定程式／測試提交e483fa03d8a2b5dafe5fc27dd23f804274fa4236；36合約編譯0warnings，65/65完整矩陣＋4/4選取安全檢查，共69項分兩次suite通過。精確時間、hash、gas、部署前唯讀快照及未驗範圍見同包工程報告與manifest；不能將本機通過當成主網部署。
+
+### 7. 上鏈部署準備與完成判準
+
+依原工程流程準備同一候選，部署次序為KUFO → Furnace → Output → KSHIP → Converter，再由有權持有人按既有Registry流程核實與綁定；不得部署測試Mock、Harness、LegacyBaseline或研究候選。
+若現有KAIOS／Registry不具備本版所需burn／output角色介面，先保留阻塞，不能假裝相容、另選舊地址、直接升級或越過治理。
+原main歷史Furnace／KUFO的舊proof領取沿WORMHOLE key，不能在本版部署時任意換掉其原immutable路由。共享CONVERTER key則會影響舊KUFO／KSHIP後續轉化：新Converter只綁本版兩個token，若尚有舊權利／舊資產，直接切換會阻斷舊轉化。啟用前必須核當期route、舊proof與未結清資產；不能以歷史manifest的NOT_DEPLOYED推定沒有義務，也不能宣稱三個key一換即可無損啟用。
+目前chain、既有Registry／KAIOS／KGEN正式地址、owner、delay、五個新地址、啟用時間、正式constructor、交易hash、receipt與executableAt均應依審核清單填入已核實值；未核實欄位保持null，不用舊LIVE補空。
+編譯固定Solidity0.8.24、OpenZeppelin5.0.2、optimizer runs1、viaIR、paris、metadata.bytecodeHash=none。審核包須含精確原碼／lockfile／標準編譯輸入／五份ABI與creation bytecode／runtime模板及immutable參照／測試log／source與artifact雜湊／constructor與角色清單。
+runtime模板含immutable位置，不能直接拿未綁定模板hash當正式鏈上runtime；部署後需重建實際immutable並比對explorer驗證與receipt。
+實際費用依當時精確constructor、gas估算、gasPrice／fee上限及BNB／台幣匯率另核，不能拿8522舊曆表gas當本版費用；任何新支出仍須符合本人原限制。
+完成程式／本機測試、發布PR／CI、主網部署、真錢包煉丹／轉化、UI／實體手機可玩與資金入帳各有獨立證據，不互相代替。
+本章驗證與交付指紋以同包工程報告及manifest的最新固定結果為準；尚未產生的新結果不能提前寫為PASS。原失敗log、舊checkpoint、guardian、舊包及其hash保留。
+本產品由Human稱為自有宇宙算法／專利構想；沒有申請或核准文件時，不宣稱取得專利認證。
+
+
+---
+
+## 歷史完整原文（保留來源，不作本版部署或現行參數證據）
+
 # KSHIP Whitepaper — cumulative KUFO annual conversion edition
 
 ## 2026-11-14 權威接續：持續煉丹的分段年界（LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED）

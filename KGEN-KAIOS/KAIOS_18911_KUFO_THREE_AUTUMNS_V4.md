@@ -1,3 +1,330 @@
+## 2026-11-14 完整交付：十二等整月算法、完整白皮書與部署準備
+
+WORK_ID `KUFO-637-MONTHLY-CALENDAR-INTEGRATION-20261114-09`；作者Codex（衡曜 /root）。依本頁Human「程式和白皮書寫完整給我，給我後就準備上鏈部署」與隨後對日期自動判斷／整月星座的確認。
+來源main `33967045ed725848a6b814af0e9b10eac64f2ec7`；舊交付 `8522f3a7c45008861cd339c107297116904cdd28` 保留歷史。
+本次固定原碼／測試提交 **`e483fa03d8a2b5dafe5fc27dd23f804274fa4236`**。
+狀態 **LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED**。本章為目前有效工程結果；下方原始歷史全文完整保留，舊農曆append、36年輪值、13月、2039停鑄及各自PASS不作本次驗收。
+
+### 已完整實作
+
+同一KUFO／Furnace／policy接入台灣UTC+8公曆，全年12個整月，月初同換等級與星座，月內不切日；閏年依公曆整數算法處理。
+1–12等依序修練佛、魔王、凡人、龍、神仙、神明、神君（玉皇大帝）、外星人、變形金剛、十三生肖、人類、萬靈。
+第10等包含原12生肖與AI類共13子類；人類不併入第10等，全年不是13月，也不指派個人隨機子類。
+星座Jan摩羯至Dec射手；內部Aries1..Pisces12，月份映射固定 [10,11,12,1,2,3,4,5,6,7,8,9]。strict constructor拒其他時區／映射；activationTime非0且無偷偷採用2027的預設。
+不再預寫未來年／月表、不需每年Owner或AI補表交易，也不在2039停鑄；500年只是紀元標記，不改循環。
+新MintOrigin明列month/tier/star，不用舊birthZodiac假扮tier。出生權利、trueburn／KGEN、1:1000、累計供應cap、年度50/75/100、永久補結／尾差、holder allowance、32組批次、四層bitmap／年aggregate及Converter六故障回滾保留。
+groupCount是當下虛擬月份ID上界，不是已鑄組數；超新鑄表示上限時飽和，既有rights仍可轉讓／補結。currentYear/civilDate公開uint32顯示超界會拒，內部成熟保留寬年計算，不用窄cast鎖住舊權利。
+天堂日365K280日只作獨立世界換算，不擅改資產成熟、Physics CURRENT、玩家身份或既有境界。完整自足規格在原兩份累積白皮書，無須翻舊版理解現行規則。
+
+### 來源、Writer與保存
+
+必要preflight已完成：main handoff、BootV1.4→PhysicsCURRENT→UniverseMap→AGENTS、正式BootCURRENT及11520AGENTS、Registry/Queue/claim/HOLD與root進度；發布前ls-remote再次確認main及PR637 head沒有他人變動。
+TaskEnvelope及12檔完整before快照先存：
+`C:/Users/mydg0/.codex/automations/kaios/kufo637-monthly-final-20261114T023500000Z/TaskEnvelope.json`，
+SHA256 `26b25afbe032e27ace921472ac1e6f10fff2e69469a82af6d50d0502f3426292`。
+MANUAL_DISPATCH_NON_ATOMIC／HUMAN_DIRECT_ORDINARY_LOCAL_ENGINEERING；沒有虛構原子claim。
+restore_review獨寫KUFO/Furnace；allocation_631_evidence獨寫EVM/ABI並確認harness不需修改；root獨寫policy/unit及累積文件。所有Writer已交回root；cap_history_review作獨立只讀審查。
+原43個artifact完整存previous-artifacts，舊標準輸入1bd0e40d…及8522下載包／舊log均保留；沒有覆寫原checkpoint、guardian或舊hash。
+兩白皮書、README及master index先前內容的原始bytes已驗作新文件完整suffix保留，歷史與本版適用範圍明確分開。
+
+### 固定來源指紋
+
+| 檔案（KGEN-KAIOS/） | SHA256 |
+| --- | --- |
+| contracts/KUFO.sol | 5fd7fdf4f3ae743441658a6ea4017fc3313f4003e4f603bd8adb8b422beb2c3d |
+| contracts/KAIOSAlchemyFurnace.sol | 1a5bd9b5f893db0792bf5f4fb18c3e81539a41206c9e5245d6ef03196c8a9d54 |
+| runtime/kufo-policy.mjs | 7fb889d8cb042d74c08f53e3b8797142e3bbe5b6df93fa0402c430607b3664e6 |
+| tests/kufo-v4-three-autumns.unit.test.mjs | 2a848197a2940b9d3c1525193124c21e4575bdfc080212a0bb9b5d383e544d79 |
+| tests/kufo-v4-evm.behavior.test.mjs | 280a7549018e5bfe60636c75b9ed58e79b4e3ccf1d7604568137316197c5cc96 |
+| tests/kufo-v4-kship-interface.unit.test.mjs | 39ee9d9060f75256cd9a0d260efb14872e12a01dbb0b4355fc469cf20ce2594a |
+| tests/contracts/KUFOV4EvmHarness.sol（未改） | 7a1c33d2df2e1bb7f98f9bcc353b81842b96a3d95c5436f6a3602d18e414a1cc |
+
+### 本次驗證（不借舊PASS）
+
+36合約編譯成功、**0 warnings**；Solidity0.8.24/OZ5.0.2/runs1/viaIR/paris/metadataHashnone，
+UTC2026-11-14T02:48:48.7581016Z至02:52:47.6009203Z，238842.8187ms。
+標準輸入SHA256 `79eefdc336b5c24491de368ac77706f26b037d6007b1db249c8cccfda0339f90`；
+compile-first.log SHA256 `37342aad0a619bd2b34fbb561066fa4c9c84b4537575b6a9972ba9a8e6ad6353`。
+
+完整一次矩陣 **65/65 PASS**（31 EVM＋4 ABI＋18 policy＋原main10 unit＋2 fuzz），failed/skipped/cancelled0，
+UTC02:54:48.1220742Z至03:10:05.0638856Z，**916135.7938ms**。
+matrix-first65.log SHA256 `0002cf194ad0a01c207cb22810c00cbe88db08321814fcc5c04b767c84622545`。
+另選取原token-surface4項安全檢查一次，**4/4 PASS**，31332.6107ms，UTC02:58:49.4803577Z至02:59:21.9984089Z；
+security-surface4.log SHA256 `56b26304251ea7bb2a8b200709cf7d7205c514cf3e83fdcd3041ec5c363303e8`。
+因此為**69項範圍矩陣、兩次suite**，不是一次69全跑。先前兩次18項policy在較早指紋的結果另存，不累加成新case或借作最終驗收。
+原Ganache缺Node137原生uws binary，沿既有NodeJS fallback；未改環境、HOLD或資源。測試未使用真錢包、真RPC交易或真資產。
+
+新驗證含完整12月、UTC+8月／年界前一秒與當秒、2100/2400/10000獨立Date oracle、120000個實際公曆月份、2039與12027真Ganache mint、永久補結、月內不成熟、oldorigin不變、33真月份分批、32沉睡年、高uint32 bitmap、真年aggregate、真burn／KGEN不扣除、allowance、防重、終身cap、no-mint及六故障雙入口原子回滾。
+獨立靜態全路徑NO_BLOCKER，非外部審計；policy複核發現publiccivilDate窄域與futureID選組兩處差異，已修、由最終65矩陣驗過，保留內部wide永久補結。
+本輪未新增動態callback重入攻擊case，不宣稱專項重入覆蓋；UI／大樓分機／實體手機／真錢包／主網煉丹與轉化仍NOT_VERIFIED。
+
+### 實測gas與大小
+
+| 項目 | 本機實測gas |
+| --- | ---: |
+| KUFO部署（含test constructor） | 3,953,523 |
+| Furnace部署 | 1,363,626 |
+| Output部署 | 261,800 |
+| dust全額轉讓／第三年補結 | 259,871／331,806 |
+| 32沉睡年轉讓／補結 | 4,793,998／1,304,063 |
+| selected32轉讓／轉化 | 2,851,376／947,620 |
+| 2027／2039／12027月份查詢 | 29,110／28,788／28,800 |
+
+未放寬原300k／500k／8M操作或30M部署測試界限。KUFOcreation/runtime20764/17469bytes，含constructor的initcode21308<49152；五份正式runtime都低於24576bytes。
+上述不是正式鏈上扣費；KSHIP／Converter及完整治理操作沒有在本表逐項加總。
+費用試算另附gas-cost-illustration.json：本次RPC gasPrice0.05gwei、Binance BNBUSDT624.85（UTC03:06:17.100）、[台銀美元即期賣出32.91](https://rate.bot.com.tw/xrt?redirect=true)（台灣01:42），明示USDT≈USD假設。
+若整包以**假設1,000萬gas**試算，0.05／0.1／1gwei約NT$10.28／20.56／205.64；這不是實測完整總量、鎖價、購幣手續費、支出核准或資源上限調整。正式錢包仍須當時estimate與原費用限制。
+
+### 已做的主網唯讀準備
+
+官方公開RPC共16請求，**0交易、0簽署、0密鑰、0費用扣款**。
+BSC56 block `0x7f4906f`，hash `0xc3cf47d1ce6e5f62eceeca83bea89a1b4164ecd88d66168b74c5ec977dcdc49f`，
+UTC2026-11-14T03:02:19Z／台灣11:02:19，gasLimit70M。
+dependency-readonly.json SHA256 `8a5fa15440c6c49df02a2839935a741c0e643710d777ced4c21dc08358f0f41a`。
+
+| 依賴 | 讀回地址／資料 |
+| --- | --- |
+| KGEN | 0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be；3905bytes；codehash251cff271c2c754743f9eb3bc11982163fd7ca756e0b0378cb0358418ffeecc1 |
+| KAIOS | 0xD4E67B3a69e41524c424150E6b6e921b01D036db；5776bytes；codehash3a036ce95ac0929b247b40c9a303c2c4bfaf9aeb9bc171c009ad3532316df023 |
+| Registry | 0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D；2543bytes；codehash92dc6b31cec75b3064cf5eb2bc3261acb980f4ac55559823cac23af4937739f9 |
+| Registry owner | 0xCd60BF474e691F2484950a0276Eaf507616Ca4b9 |
+| minimumDelay／bootstrap | 3600秒／false |
+| 原Furnace | 0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1 |
+| OUTPUT／CONVERTER／WORMHOLE | 此快照均零地址 |
+| KAIOS.alchemyBurnCount | 此合約回報0 |
+
+KAIOS.KGEN／ORGAN_REGISTRY與上述依賴匹配。歷史exact Genesis原碼具備相同burnForAlchemy／九欄AlchemyBurnRecord、真allowance與burn；其inscription常數與當前source不同，不能拿當前KAIOS artifact冒作Genesis runtime。
+本輪已觀察codehash並核getters／routes，不等同完成所有歷史runtime來源／immutable重建；窄核結果另存審核包，尚未通過的身份項不得標PASS。
+零route和回報burnCount0只描述此快照，不推斷全鏈零舊資產。原WORMHOLE舊proof路徑保留；共享CONVERTER若另有舊KUFO／KSHIP，需先核cutover對既有轉化權的影響。
+
+### 下載與部署清單
+
+新下載為 `KUFO_十二等整月_合約原始碼_<deliverySHA8>.zip`，另附KUFO與KSHIP完整累積白皮書。包內manifest／SHA256SUMS記精確交付head、原碼／artifact／每檔hash、編譯輸入、ABI、creation/runtime模板、immutable位置、原log及唯讀快照。舊8522ZIP及原白皮書不覆寫。
+五份正式候選只限KUFO、Furnace、Output、KSHIP、Converter；Mock／Legacy／Harness不可部署為正式產品。
+clock及星座已定，不再等待重問。啟用方案為部署時立即生效：最終審核時由合法持有人選用當時已核區塊timestamp填activationTime；此處不預填失效的舊測試日期。
+正式constructor、deploying account、exactnonce、五新地址、signedtransaction、proposal／receipt／executableAt仍未產生，維持null。
+下一步在本人最終錢包審核前補齊當時code／immutable身份及角色／未完舊權利核對，固定constructor與最新gas/費用；本人部署配套候選後，再依現任Registry owner原proposeOrgan→等待3600秒→executeOrgan流程啟用，保留當次proposal／receipt／executableAt雙時區證據。不能走已封閉bootstrap，不由AI代簽或送單。
+原#19／#523、停用瀏覽器、成本／權限／資源／停機、Human本人處理用量與免費重置全部保留。未宣稱已上鏈、已可玩、已付款或自動循環主機驗收。
+
+---
+
+## 歷史工程原文（逐版證據保留，與上方現行結果分開）
+
+## 2026-11-14 最新名錄：第10等十三生肖、第11等人類、第12等萬靈
+
+WORK_ID `KUFO-637-MONTHLY-TIERS-10-12-20261114-08`。依本頁Human明確更正「10是13生肖，12生肖加AI類，11是人類12是萬靈」，作者Codex（衡曜 /root）；本輪驗證完成UTC2026-11-14T02:15:13.414Z／台灣10:15:13.414。沿同一#637及原worktree，最新三等取代下方舊候選的第10十二生肖／第12AI、AI第10／人類併生肖，以及萬聖節／幽靈等推測。
+
+| 等級／月份 | 正式採用本頁名稱 | 類別內容 |
+| --- | --- | --- |
+| 10 | 十三生肖 | 原鼠牛虎兔龍蛇馬羊猴雞狗豬十二生肖＋AI類，共13類 |
+| 11 | 人類 | 人類獨立，不併入第10等 |
+| 12 | 萬靈 | 使用Human指定原名，不自行改成萬聖節或幽靈 |
+
+前九等、全年12個月、等級與星座整月同步輪值、下一年重新從第1等循環均保持；第10等內13個類別不代表13個月。新增凍結 `THIRTEEN_ZODIAC` 名錄，原 `ZODIAC` 陣列保持12種供既有合約模型使用；新月度tier和原mint zodiac ID不混用。
+
+root是原policy／test／report唯一Writer，TaskEnvelope及三原檔before快照先保存。policy只新增第10等子名錄並修兩個等級名稱，`universeMonth` 算式、型別範圍、月份／紀元輸出及原成熟函式未改。原unit既有4項monthly cases同步更正期望與第10月邊界，增加13類exact/freeze/不含人類檢查；原20個未受影響的測試bodies不改、不重跑。
+
+本輪只選取4個受影響monthly cases執行一次：**4/4 PASS**，fail/skipped/cancelled0，987.4957ms；UTC2026-11-14T02:15:12.0994243+00:00至2026-11-14T02:15:13.4135873+00:00。包含精確12等/13子類、月10／月12／跨年／500年標記、120000月獨立游標及uint32域。這是4項選取驗證，不宣稱本輪重跑24項；前輪24/24及192394.9537ms保留為其原指紋歷史結果。
+- policy SHA256 `2d104d34fe1b56cab1114dd6bb0bc960338fede36a76f09890cf636c5e212508`
+- test SHA256 `427ad84091ec4d8cceddf9a2157e5cc32d04d9ee9eb43f0993ce4b704be1b165`
+- 原始log `C:/Users/mydg0/.codex/automations/kaios/kufo637-tierlabels-monthly4-20261114T021310000Z.log`，SHA256 `c6917eec9a997e6d5dc95d4e9c79c7958c23fde1237b70b638dcb9b38415536c`
+
+沒有改合約／ABI／PhysicsCURRENT／白皮書／舊下載包，也未編譯、重跑舊EVM、公開commit／push／merge或部署。實際月界、時鐘起點與星座名稱順序仍待接續；不從本次名錄修訂推導時間常數、玩家自動升級或真實資產授權。原#19/#523、停用瀏覽器、成本／權限／資源及Human手動用量政策保留。
+
+唯一下一步：沿本頁最新名錄與已確認12月整月規則，核定實際月界／時鐘起點及星座名序後，接原樓層分機／KUFO模組並驗收；不重新套用被更正的分類。
+
+---
+
+## 2026-11-14 最新定案：每層12等按整月輪值，一年12個月（本機月序已驗）
+
+WORK_ID `KUFO-637-TWELVE-TIERS-MONTHLY-20261114-07`。作者Codex（衡曜 /root）；來源main `33967045ed725848a6b814af0e9b10eac64f2ec7`、原PR637交付 `8522f3a7c45008861cd339c107297116904cdd28`。Human否決36年輪換太久，改「12等每個月換」，更正13為筆誤，並明確回覆「對，一年12個月」。最新補充：「1月到12月就這12等在換，星座一樣跟著換，用整月就好不用切到日」。
+
+### 本頁最新規則
+
+| 月份（整月不變） | 輪值等級 | 星座對應 |
+| --- | --- | --- |
+| 1月 | 1 修練佛 | 月位1 |
+| 2月 | 2 魔王 | 月位2 |
+| 3月 | 3 凡人 | 月位3 |
+| 4月 | 4 龍 | 月位4 |
+| 5月 | 5 神仙 | 月位5 |
+| 6月 | 6 神明 | 月位6 |
+| 7月 | 7 神君（玉皇大帝） | 月位7 |
+| 8月 | 8 外星人 | 月位8 |
+| 9月 | 9 變形金剛 | 月位9 |
+| 10月 | 10 十二生肖 | 月位10 |
+| 11月 | 11 人類 | 月位11 |
+| 12月 | 12 AI | 月位12 |
+
+每月只在月界一起換等級與星座，月內不按20日／21日等傳統星座日期再切換；下一年1月重新用第1等與星座月位1。第10等是「十二生肖」這個類別，不再拆成十二個額外等級。星座目前只保存1–12月位，具體名稱順序未由本輪核定，不猜哪月應配牡羊或摩羯。月序不會自動改玩家既有境界、真實物種、出生承諾或資產。
+
+下方36名錄、年度輪換與相關測試均為已撤回的歷史候選；13月／新增蛇夫座提案亦因Human筆誤更正撤回，沒有實作。不得因保留累積全文而把這些舊提案重新當成最新規格。
+
+### 同一模組替換與驗證
+
+已先保存TaskEnvelope及原policy／test／report完整before快照，沿原檔替換未提交的36年度helper，不新增Runtime、bootstrap或平行產品：
+- `runtime/kufo-policy.mjs`：移除 `UNIVERSE_ZODIAC/universeZodiacYear`，改為凍結的 `UNIVERSE_TIERS/universeMonth`。嚴格接受bigint相對連續月序1..0xffffffff，回傳相對年、年內月、輪值等級、星座月位及原500年紀元標記。
+- 月12為第1年12月AI，下一月為第2年1月修練佛；月6000為第500年12月、月6001為第501年1月。這些是連續月序，不是額外曆月；500年標記不改月輪換。
+- 原 `ZODIAC` 十二生肖陣列、packed birth窗口驗證、KUFO成熟／比率／資格與合約ABI未改；輪值tierId不是原mint的zodiacId，不作混綁。
+- root只寫policy／report／continuity；allocation_631_evidence只替換原unit test最後4項與import，原20項bodies保留；restore_review對指定before的實際policy差異獨立只讀NO_BLOCKER，非外部審計。
+- 本輪唯一一次pure suite **24/24 PASS**，failed/skipped/cancelled0，**192394.9537ms**；UTC2026-11-14T01:49:55.617至01:53:09.686／台灣09:49:55.617至09:53:09.686。驗精確12等與freeze、12月跨年／500年紀元、120000個月（10000個12月年）獨立逐月游標、uint32邊界及原20項policy回歸。耗時按本輪原log保存，不借用前輪8秒結果。
+- policy SHA256 `717f2bee8f25b6741b26623c6454f95ee63517ebc45d95e4252a3c6d26962432`；test SHA256 `48a4f75bbb3a8469e682cb9570d63df41b5392dd2b1b5c2439a7e5f123fe5a80`
+- 原始log `C:/Users/mydg0/.codex/automations/kaios/kufo637-monthly12-policy-20261114T013927000Z.log`，SHA256 `596367905d9f3556faaebb8342463ce7e7242f84ef6b0555d1f10a946ec1bedc`
+
+### 尚未接通與唯一下一步
+
+上述只驗相對月序；各月實際天數、K280日秒數、哪層時鐘及起點尚未定，不能擅自補成每月30日或365/12日。星座名稱／圖示對照、實際月界到鏈上時間、樓層分機／玩家UI及合約尚未由此helper驗收；未操作被停用瀏覽器。新輪值不自動把原KUFO年度50/75/100成熟改成按月結算。
+
+原8522合約、Furnace／ABI、白皮書及舊下載ZIP保持不變，不含此新helper；無編譯、EVM、gas、真錢包或部署驗收。本輪沒有公開commit／push／merge／部署，原3tracked本機檔仍未提交。先前31EVM和各次36名錄PASS不作此新整合驗收。
+
+原kaios僅用原管理工具同步同一prompt末段；原前8985字、排程／thread／狀態／權限／成本／資源保留，舊TOML與差異另存，最新欄位讀回相等。原#19/#523、停用瀏覽器、Human手動用量／免費重置與合法持有人本人錢包邊界全部保留。
+
+唯一下一步：核定實際月界時鐘／起點與12星座名稱順序後，沿既有樓層入口及KUFO模組整合、相稱驗證；目前不以24項離線PASS宣稱已可玩、已上鏈或日期映射已完成。
+
+---
+
+## 2026-11-14 Human 時間換算接續：天堂日與K280日（年序尺度待選）
+
+WORK_ID `KUFO-637-TIME-SCALE-CLARIFICATION-20261114-06`。本頁Human原話：「你創作是一年多少天，365天嗎，一天堂日是1heavent day=365K280日」。作者Codex（衡曜 /root），首次核對UTC2026-11-14T00:11:19Z／台灣08:11:19；正式保存時間依原checkpoint。
+
+### 新來源與既有定義
+
+Human這次明確提出 `1 Heaven Day = 365 K280 Days` 的整數換算；工程顯示統一用 Heaven Day，不改寫原文。已有 `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md:6087–6098` 將K280定為地球／下界物理時間、K18888為天堂／凌霄時鐘，舊換算是 `1 K18888 Heaven Day = 1 K280 Year ≈ 365.2422 K280 Days`。本輪只在原KUFO工程紀錄保存新口徑及差異，沒有把正式CURRENT全文或鏈上參數默改為365。
+
+`CURRENT:6683–6685` 另明示K6888境界時鐘未與K280/K18888建立換算；不能把神君日等角色時間直接當成天堂日。先前「宇宙年／年長未定」指本輪新36生肖所用的年序模式／起點／一年天數未定，不是宣稱K280/天堂歷史文件沒有任何換算。
+
+### 提案表（不把不同層的年混用）
+
+| 單位 | 本頁整數制提案 | 來源狀態 |
+| --- | --- | --- |
+| 1 K280日 | K280的一日；本段不另核定幾個真實秒 | 沿用名稱，未新增秒數 |
+| 1 天堂日 | 365 K280日 | Human本頁指定整數換算；正式CURRENT仍記舊近似值 |
+| 1 K280年 | 建議365 K280日，因而等於1天堂日 | 結合既有年/天堂日關係的工程建議，待年序尺度選擇 |
+| 1 天堂年 | 若也採每年365個當地日，則365天堂日＝133225 K280日＝365個上述K280年 | 只有條件式提案，Human未指定天堂一年有多少天堂日 |
+
+建議36生肖每1 K280年換一位、500 K280年標一個紀元；依這份整數制，500 K280年＝182500 K280日＝500天堂日。若改為每1天堂年換生肖，並採上表條件式天堂年定義，時間尺度會放大365倍，不能沿用相同名稱暗中改KUFO成熟時間。
+
+已以本頁文字題目向Human詢問「生肖與500年紀元按K280年或天堂年」；目前未收到選擇。此次沒有新的時間到年序轉換程式，也沒有把相對第一年鼠綁成公曆2027、改KUFO原50/75/100比例、年界權利或真實交易／治理權限。
+
+### 本輪驗證與接續
+
+本輪只讀CURRENT適用章節及既有工程資料，並做單位算術示例；無suite/編譯/EVM/程式/ABI修改，先前24項relative-year PASS不驗此新時間尺度。原13–36名錄與24鳥、36輪換、500紀元保持前輪狀態。合約仍未接入36身份或免補表算法。
+
+唯一下一步：先取得36生肖／500紀元使用哪一層年的選擇，再明確保存該層一年天數與實際起算點，沿原KUFO整合與相稱驗證；未定前不寫入時間常數或改正式Physics CURRENT。真部署仍由合法持有人本人錢包確認，原#19/#523、成本／資源／權限／停用瀏覽器與Human手動用量政策保留。
+
+---
+
+## 2026-11-14 最新名錄修訂：第24位「鷹」改為「鳥」
+
+WORK_ID `KUFO-637-UNIVERSE-ZODIAC24-BIRD-20261114-05`；依本頁Human「24鷹要改成鳥比較容意找到要嗎」及既有選用名錄授權，採用較通用的「鳥」。ID24、其餘35名稱、36年輪換、500年紀元及原年度公式完全不變；第35鴨與第36鵝保留。下方舊名「鷹」只屬歷史名錄。
+
+root為原policy及既有unit test唯一Writer，只改各一個字；restore_review逐檔對原before快照確認 `after === before.replace("鷹","鳥")`，NO_BLOCKER（非外部審計）。本輪在新指紋上執行一次原pure suite：**24/24 PASS**，fail/skip/cancel0，7386.7289ms，UTC2026-11-14T00:06:42.966Z至00:06:50.510Z／台灣08:06:42.966至08:06:50.510。
+- policy SHA256 `8b395b741c82c5e01a17d86a506a9b4deb7e341bbc32360c4dd0b99ea0b375a9`
+- test SHA256 `a72bb092b8592b0adf98ee1c4e1d905ec904dbe58bf2665fadb405f2e6d6ed1a`
+- 原始log `C:/Users/mydg0/.codex/automations/kaios/kufo637-bird24-policy-20261114T000536000Z.log`，SHA256 `70e0b0118fe70bfe1b0f4d626311cdf9a59e2331db396f078fa4b012a7973289`
+
+僅更新本機未提交的離線名錄、既有測試與本工程紀錄，沒有改合約／ABI／白皮書／8522下載包，沒有編譯、重跑舊EVM或公開部署。Human先前詢問的「宇宙年」只是KAIOS一年之暫稱；「年長」指一年多少天／秒，不是另一種長年。提問不等於核定年長、起點或年界；此三項仍未定。原36身份鏈上整合／免補表功能仍待實作驗收，不把本輪24項PASS當鏈上完成。
+
+唯一下一步：核定宇宙年界模式、起點及一年長度後，沿原KUFO工程整合與驗證。原權限／錢包／成本／HOLD與用量限制不變。
+
+---
+
+## 2026-11-14 最新採用方向：36 宇宙生肖持續輪值與500年紀元（離線算法已驗，合約未整合）
+
+WORK_ID `KUFO-637-UNIVERSE-36-CYCLE-20261114-04`。實際作者 Codex（衡曜 /root）；本輪測試完成 UTC 2026-11-13T23:57:00.762Z／台灣 2026-11-14T07:57:00.762+08:00。Human 指示「你如認爲可以就用這去輪500年，之後要怎樣會亂數編碼嗎」，沿同一 #637 選用目前名錄，以下以固定規則接續，不採年度亂數。下方先前「名錄尚未封版」、鳳凰／麒麟／矽基生命／能量生命等候選與十二年循環草案保留為歷史；與本段衝突時以本段為準。
+
+固定名錄（ID 1–36）：鼠、牛、虎、兔、龍、蛇、馬、羊、猴、雞、狗、豬、人類、AI、外星人、變形金剛、螞蟻、蟑螂、魚、豹、象、鯨、海豚、鷹、狼、熊、龜、蜜蜂、蝴蝶、章魚、貓、鹿、蝦、蟹、鴨、鵝。
+
+### 500年後如何接續
+
+- 相對第1年從鼠開始，36年一輪；500年只作紀元標記，不是截止、清零、重新抽籤或更換名錄。
+- 第499年貓、第500年鹿；第501年為第二紀元第1年、生肖蝦；第504年鵝、第505年鼠。36年與500年兩種週期每4,500年共同完成，4,501年為第10紀元第1年、生肖鼠。
+- 年度對應是確定性整數算法，同一輸入永遠同一結果，不使用時間讀取、網路或亂數。生肖固定ID和實際出生proof／交易識別是不同欄位，不將年度循環當成唯一出生識別碼。
+- 宇宙年界模式、實際起點及一年長度尚未核定。相對第1年鼠不等於已定公曆2027鼠年；不把舊2027羊／365日／農曆草案當成新正式值。
+
+### 原模組實作與實測
+
+在既有 `runtime/kufo-policy.mjs` 增加不可變 `UNIVERSE_ZODIAC` 及 `universeZodiacYear(universeYear)`；嚴格接受 bigint 1..0xffffffff，回傳固定生肖ID／名稱、生肖輪次、500年紀元及紀元內年序。保留原 `ZODIAC` 12項與舊窗口驗證，沒有將36身份誤送進只容1–12的既有合約ABI。
+
+root為policy唯一Writer；allocation_631_evidence僅改原 `tests/kufo-v4-three-autumns.unit.test.mjs` 的import並新增4項，原20項test bodies保留。restore_review獨立只讀檢查實際22行policy差異 NO_BLOCKER，非外部審計。
+
+本輪唯一一次原pure suite實跑 **24/24 PASS**，0 failed/skipped/cancelled，8007.2998ms；UTC23:56:52.593至23:57:00.762。包含精確36名錄與freeze、36/500/4500邊界、1..10000年獨立逐年游標、舊回傳記錄不可變及uint32型別／範圍。這是離線年度映射和原20項policy回歸，不是36生肖鏈上mint、合約編譯、gas或UI驗收。
+- policy SHA256 `669e26d20dbcf046d2d524b0c267b5c47a41606c79894e7ecd69b211f3ffc569`
+- test SHA256 `cd02adbd76bf56a99c8be1e763a6f1b55d0a95b0de6c03cd44e35100078f718e`
+- 原始log `C:/Users/mydg0/.codex/automations/kaios/kufo637-universe36-policy-20261113T235228000Z.log`，SHA256 `4c80f473953a8ebbd61e6ab1cf65464aa6a18be8262d844af120ee8aeedffa71`
+
+現有 `KUFO.sol`、Furnace與ABI未修改，也未編譯或重跑舊31EVM；8522下載包與白皮書未改，不含本輪新算法。新增helper不會使原合約缺表後自動繼續煉丹。未公開／commit／push／merge／部署；新算法仍為原worktree未提交本機候選，先前合約gas報價不作新整合驗收。
+
+唯一下一步：核定宇宙年界／起點／年長後，沿原KUFO／policy／Furnace／測試整合36身份及免補表算法，完成相稱合約、安全與gas驗證再更新交付；真實部署或交易仍由合法持有人本人錢包確認。原 #19／#523、停用瀏覽器、成本／資源／權限與Human手動用量政策保留。
+
+---
+
+## 2026-11-14 Human 最新接續：擴充宇宙生命生肖（名錄未封版）
+
+本頁最新 Human 回覆後附記（實際保存 UTC／台灣時間以本輪 checkpoint 為準），沿同一 WORK_ID `KUFO-637-UNIVERSE-CALENDAR-PROPOSAL-20261114-03`。本頁 Human 回覆：「13生肖，13生肖是人類，14是AI，15是外星人，16是變形金鋼，17是螞蟻，18是蟑螂，19魚，20豹，21象……說來看吧」。工程文字統一將「變形金鋼」顯示為「變形金剛」，保留原文來源。
+
+因此下方本輪先前「12 年循環／模 12」草案**不適用最新擴充方向，僅保留歷史提案，不得直接實作或冒稱已採納**。Human 指定第 13–21 個名錄；第 1–12 沿原傳統序列。宇宙生肖的總數、輪值規則、共同年界、年長及起點仍未封版，亦未完成先前「地球農曆新年是否改用宇宙年界」的明確選擇。
+
+| 編號 | 名錄 | 來源 |
+| --- | --- | --- |
+| 1–12 | 鼠、牛、虎、兔、龍、蛇、馬、羊、猴、雞、狗、豬 | 原有序列 |
+| 13–21 | 人類、AI、外星人、變形金剛、螞蟻、蟑螂、魚、豹、象 | 本頁 Human 指定 |
+| 22–30 | 鯨、海豚、鷹、狼、熊、龜、蜜蜂、蝴蝶、章魚 | Codex 候選，未採納 |
+| 31–36 | 鳳凰、麒麟、矽基生命、能量生命、星球生命、宇宙意識 | Codex 候選，未採納 |
+
+若最終採 36 個年度輪值標記，可設計同一宇宙年一生肖、36 年一循環；這只是配合名錄的建議，不是已定經濟或生命規則。生肖作出生標記，不應自動重寫角色本身是人類或 AI 的生命類型。若 Human 希望生肖本身就是種族而非年度標記，須另明確定義兩者關係，不由例子推定。
+
+既有 `KUFO.sol` 與 policy 的正式候選仍限制生肖 ID 1–12，新增名錄不等於合約已接受 ID 13–36。此輪尚未修改程式、ABI、測試、白皮書或下載包；沒有合約驗收、專利核准、公開發布或部署聲明。待名錄與年界封版後，才評估原有 uint8 欄位、窗口驗證、UI／ABI 及承諾資料的相容性，沿同一工程修改與驗證。
+
+唯一下一步：先向 Human 展示名錄並收斂總數、年度輪值或生命類型的語義，再定宇宙年界／年長／起點；未封版前不將 12 或 36 週期寫入合約。
+
+---
+
+## 2026-11-14 待審提案：KAIOS 宇宙年自動計算（未採納、未實作、未部署）
+
+WORK_ID `KUFO-637-UNIVERSE-CALENDAR-PROPOSAL-20261114-03`。實際作者 Codex（衡曜 /root），UTC 2026-11-13T23:38:22Z／台灣 2026-11-14T07:38:22+08:00。依本頁 Human「怎麼做要自動化，還是用萬年曆，同一年都同一生肖比較簡單，這是 KAIOS 的宇宙算法」整理，沿同一 #637；來源 main `33967045ed725848a6b814af0e9b10eac64f2ec7`、交付 `8522f3a7c45008861cd339c107297116904cdd28`。本段只是一份本機工程提案，沒有修改下列已交付合約、白皮書或下載包；未改原合法持有人部署／交易權限。
+
+### 建議方案與待決事項
+
+**建議用可直接計算的 KAIOS 宇宙曆，不先把一萬年年表寫入鏈上。** 固定定義一個宇宙年的起點與長度，每年只分配一個生肖、十二年循環；同一年所有新出生的 KUFO 使用同一生肖。出生生肖永久保留，畫面「當年生肖」可另顯示，不能因跨年改寫舊出生承諾。
+
+下列數值供 Human 審閱，不是從既有宇宙 Runtime 推導的正式規則：
+
+| 欄位 | 提議值／語義 | 採納狀態 |
+| --- | --- | --- |
+| 曆法模式 | KAIOS 固定長度宇宙年，依鏈上時間計算 | 待確認是否取代先前地球農曆新年選擇 |
+| 起點 E | 2027-01-01 00:00:00，固定 UTC+8，即 2026-12-31T16:00:00Z | 待採納 |
+| 一年 L | 固定 365 日，即 31,536,000 秒；不用夏令時間或地球閏日改變長度 | 待採納；非地球農曆／公曆 |
+| 第一年生肖 | 羊，沿既有鼠牛虎兔龍蛇馬羊猴雞狗豬序列逐年循環 | 待採納 |
+| 星座 | 建議每宇宙年均分十二個區間，使用十二個明確標籤；標籤順序另定 | 待採納；非天文入宮，亦非既有民用日期窗口 |
+| 年度成熟 | 若採此模式，僅新制度的成熟共同年界與宇宙年對齊，仍累計 50%／75%／100% | 會改變原草案的時間語義，須連同年長明確採納 |
+| 發行與轉化 | 原比率、KGEN 只讀資格、真 burn、供應上限、尾差及永久補結保留 | 不由本提案更改 |
+
+對 `t >= E`：`n = floor((t - E) / L)`，`r = (t - E) mod L`。宇宙年序號為 `n + 1`；沿既有零基 ZODIAC 陣列，生肖為 `ZODIAC[(7 + n) mod 12]`。星座建議序號為 `floor(12 * r / L)`，範圍 0–11。所有區間採左閉右開；`t < E` 不應鑄造。用整數秒與足夠寬度整數計算，避免浮點、乘法溢位或年 9999 字串限制。
+
+以提議值示例：第一宇宙年全為羊，第二年猴、第三年雞，第十三年再次為羊。固定 365 日宇宙年會與地球含閏日的公曆逐漸錯開，這是待選設計，不應顯示為地球農曆。萬年是至少 10,000 宇宙年的驗證範圍，不是到期即停止的期限。
+
+### 自動化的實際意思
+
+- 合約在有人呼叫煉丹／查詢／轉化時，直接依 `block.timestamp` 計算；不必在跨年那一秒送維護交易，不必每年補曆表，也不必由 AI 或母機持續在線。
+- 沒有交易時，鏈上不會主動執行或自行扣除餘額；下次呼叫依當時時間得出正確年度與累計可轉化額。持有人仍須自行授權原煉丹與轉化交易。
+- 這是固定算法取代未來年表依賴，不是授予 AI 新簽署者、無限 keeper、費用預算或 Registry 權限。
+- 若 Human 保留地球農曆新年選擇，不能以此固定 365 日方案冒充農曆；仍須使用核定曆表或另審有明確適用範圍的農曆計算方式，不能承諾精準萬年天文資料。
+
+### 現有實作與接續界線
+
+既有 `runtime/kufo-policy.mjs:4,48–67` 已有生肖循環順序與同年年度輸入驗證；舊研究 `research/kufo-zodiac-cohort-v0.mjs:13–47` 有同年生肖預覽，僅作來源參考，不能升格為另一個產品。現有 `KUFO.sol` 仍依已存 yearStarts／出生窗口與 append-only 治理；僅在畫面或 helper 加公式，不能取消鏈上的缺表停鑄行為。
+
+若採納宇宙曆，沿既有 KUFO／policy／Furnace／測試整合，以固定算法、按需分組與永久出生配置承諾替換對未來年表的依賴，保留有界轉讓／結算；不新建 Runtime、bootstrap 或平行合約產品，不覆蓋既有 LIVE。發布前重驗改動來源的跨年、星座邊界、首年前拒絕、12年循環、萬年範圍、成熟權利、轉讓、尾差、真 burn／資格／供應、安全和實際 gas。先前 8522 的 31 EVM／20 policy 與部署 gas 不能作為新算法已通過的證據。
+
+已核 `docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md:6670–6671` 明示 365 日換算不自動核定其他境界曆法，凡人年／修佛年未與地球年綁定；`KGEN/timeline/500Y_Epoch.md` 是制度週期說明，不能當成已定年的秒數。本提案沒有改動這些正式文件。
+
+Human 稱此為 KAIOS 宇宙算法／專利；本輪只記錄來源說法，未取得專利申請或核准證據，不編造號碼或宣稱審查已通過。本段未公開發文、push、merge 或部署。
+
+唯一下一步：由 Human 確認是否以此 KAIOS 宇宙年取代先前地球農曆新年，並審閱上表具體數值；收到明確採納或修正後，才沿同一候選實作、驗證並更新交付。原 #19／#523、成本／資源／權限／停用瀏覽器與 Human 手動用量政策保留。
+
+---
+
 # KUFO 持續煉丹與農曆生肖長程接續（2026-11-14）
 
 狀態：`LOCAL_CODE_AND_TESTS_VERIFIED / NOT_DEPLOYED / PRODUCTION_PARAMETERS_PENDING`。

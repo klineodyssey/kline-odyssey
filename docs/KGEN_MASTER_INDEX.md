@@ -1,3 +1,8 @@
+## 2026-11-14 KUFO 原#637完整整合入口
+
+同一未部署候選已接續Human最新12等整月規格：10十三生肖（原12+AI類）、11人類、12萬靈；台灣公曆UTC+8與12星座整月映射，固定算法不逐年補表。正式啟用及地址／角色／費用仍須部署前本人核實，AI不送部署。完整累積規格沿用既有 [KUFO白皮書](../KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md)、[KSHIP白皮書](../KGEN-KAIOS/docs/KSHIP_V4_WHITEPAPER.md)、[工程證據／部署清單](../KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)及[README](../KGEN-KAIOS/README.md)。這些是原檔接續，不新增Runtime、bootstrap或版本檔；實際驗證及交付狀態以工程報告最新固定指紋為準。
+
+---
 # KGEN MASTER_INDEX
 
 ## KUFO #637 正式名稱與部署準備接續（2026-11-13）

@@ -1,5 +1,18 @@
 # KGEN AI Operating System
 
+## KUFO 最新工程入口：12整月自動輪值（2026-11-14，本機69項驗證／未部署）
+
+Human已確認一年12個月，月初一起換輪值等級與星座，整月不切日。採台灣UTC+8公曆，閏年由算法處理；正式啟用時間另填constructor，不默認2027。1月至12月為修練佛、魔王、凡人、龍、神仙、神明、神君（玉皇大帝）、外星人、變形金剛、十三生肖、人類、萬靈；第10等含原12生肖+AI類共13子類，全年仍12月。星座為摩羯、水瓶、雙魚、牡羊、金牛、雙子、巨蟹、獅子、處女、天秤、天蠍、射手，各整月固定。
+
+同一KUFO候選以不可變公曆算法取代農曆補表；2039不停新鑄、不需AI或Owner逐年補表交易。煉丹／轉化仍由持有人本人授權發起，不隨月界自動扣資產。真burn1KAIOS→1000KUFO、KGEN只查餘額、年度累計50/75/100、永久補結／尾差、供應cap、32組批次及原Registry／Converter安全保留。天堂日365K280日不改資產成熟時間。
+
+完整自足規格與歷史分別在 [KUFO白皮書](docs/KUFO_V4_WHITEPAPER.md)、[KSHIP白皮書](docs/KSHIP_V4_WHITEPAPER.md)，精確來源、驗證／失敗log、下載與部署清單在既有 [工程報告](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)。正式入口仍是contracts/KUFO.sol、KAIOSAlchemyFurnace.sol、KUFOOutputJindouyun168888.sol、KSHIP.sol及KSHIPConverter.sol；policy仍是runtime/kufo-policy.mjs。新ABI需配套，舊LIVE及8522下載包不能充當本版部署證據。AI不簽署、送部署或真交易。
+
+下方完整保留舊README，其農曆、append、36年輪值、2039停鑄及舊PASS均限定於各自歷史來源。
+
+---
+# KGEN AI Operating System
+
 ## KUFO #637 持續煉丹權威接續（2026-11-14，LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED）
 
 Human 最新要求「好改到好，星座和生肖能配合到1萬年航程嗎」。沿原穩定 KUFO 入口改為 append-only 分段 calendar；**舊 32 年終身停鑄設計已被取代，2039 停鑄草案未採用**，不另建代幣、Runtime 或產品。
