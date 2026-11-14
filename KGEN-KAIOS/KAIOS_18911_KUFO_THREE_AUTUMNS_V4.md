@@ -1,3 +1,26 @@
+## 2026-11-14 Human直接修正：追溯原作者並解除不適用的文件審查限制
+
+WORK_ID `KUFO-637-CI-SCOPE-20261114T124917Z`；實際修改者 Codex（衡曜 /root），來源main `33967045ed725848a6b814af0e9b10eac64f2ec7`，施工起點/舊交付 `c2ab2ce3ffd0c3e86c4cfa12d5437502adc72f8a`。本頁Human直接要求查明#637的頁名、撰寫者；若無法查明則改掉阻擋上鏈的規定。此項新指示只修正下列原CI規則，不授權AI簽署或送交易。
+
+### 可核來源及不能推定的作者
+
+- 本頁Codex原題名為「衡曜總工程師」，thread `01a1a18a-b4b1-7242-8574-f9478f21c5ed`；後續KUFO整合作者為本頁Codex（衡曜 /root）。
+- [原PR637](https://github.com/klineodyssey/kline-odyssey/pull/637)於UTC2026-11-05T21:56:46Z／台灣11月6日05:56:46建立，帳號 `klineodyssey`。可核原題名「docs(kufo): V5.0 年度批次白皮書與既有程式改版交接」，目前題名為「KUFO: whole-month births, annual conversion and KSHIP point511111 lineage」。[原白皮書提交99937636](https://github.com/klineodyssey/kline-odyssey/commit/999376368721bf02811e0afcbc58b6f14f0c8322)及原核心3c92efd7均使用共用帳號；沒有可核原開立對話頁連結，不能推定為Human親手寫或本頁當時開立。
+- 「任何.sol差異一律失敗」原句首次見於[04dc9269](https://github.com/klineodyssey/kline-odyssey/commit/04dc92698d6ae164ccbb13d84e65a9db2efac9c5)，UTC2026-08-24T17:02:22Z／台灣8月25日01:02:22；author/committer/login均為共用帳號 `klineodyssey`，無法核出實際個人或原對話頁。經[PR173](https://github.com/klineodyssey/kline-odyssey/pull/173)於641c1559（UTC9月13日07:09:45／台灣15:09:45）進main。
+- PR173原本是CURRENT累積文件與驗證器複核，不改Solidity；該workflow只有contents:read，沒有鏈上部署步驟。它的舊PR差異門檻不是整個專案永久禁止主網部署。先前籠統要求「原Owner處理」而未給頁名/規則來源，不能充當對個別作者或權限的證明。
+
+### 本次修改與驗證
+
+沿原 `.github/workflows/kaios-current-lineage-review.yml`，移除只憑.sol副檔名就拒絕的限制，改用實際git diff識別合約/測試/編譯器/鎖定依賴輸入。有相關變更時，在同一既有workflow安裝鎖定依賴（ignore-scripts/no-audit/no-fund）、執行原編譯工具及既有KUFO代表EVM/ABI檢查。保留exact-head、contents:read、archive拒改、CURRENT語義/報告重現、patch空白及原10分鐘限制，且--no-renames確保archive搬出仍被檢查；沒有自動部署、簽署、資產或秘密步驟，未另建PR/Runtime/排程。
+
+同步既有 `docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md` 為已交付CURRENT的完整累積全文，兩者SHA256均為 `00fc7849d79e595bc7246126f6acb885c9fcbe13e40ff8c77cb2a012388a77e1`。未增加新版本檔、未刪歷史，CURRENT本身與五合約/測試/依賴均未修改。
+
+本機驗證：實際從workflow抽出scope shell，首次使用8個獨立Git差異fixture；Solidity/文件/編譯器/測試/lockfile五項正例與archive/archives/_ARCHIVE三項拒絕例均符合預期，8/8 PASS；依靜態審查加上--no-renames後，最終9項包含archive搬出拒絕例皆PASS。兩次scope驗證對應不同workflow指紋，不合寫為單次17項。原CURRENT lineage verifier及語法檢查PASS，重現報告無差異，git diff --check PASS。本輪未重跑未變合約suite或編譯器；新head的CI另讀回，不借舊5/5或69項結果。
+
+原TaskEnvelope、四檔before快照與scope-validation.json／scope-validation-final.json保存於既有kaios證據目錄 `kufo637-world-points-20261114T055720000Z/ci-scope-20261114T124917Z`。首次測試包裝的JavaScript字串語法錯誤發生在工具執行前，沒有執行fixture或寫入；修正包裝後首版scope suite實際執行一次；後續--no-renames新版另跑9例。
+
+原CI43565306651/43565306589及舊c2ab下載包保留歷史。另一全Node失敗根因仍未核，原joblog兩次停止、依賴身份兩次停止及Owner查詢兩次停止不重試。規則修正不是自動宣告全部CI通過；尚無正式部署constructor、啟用時刻、deployer/nonce、新地址、proposal或receipt。剩餘實參/依賴/舊權利/角色/費用由合法持有人核對，合格後本人既有錢包確認部署及原Registry timelock啟用。K108000/KGOD/食用速度等仍未在本次五核心實作。下方既有完整工程史與失敗/停止證據全部保留。
+
 ## 2026-11-14 完整交付：十二等整月算法、完整白皮書與部署準備
 
 WORK_ID `KUFO-637-MONTHLY-CALENDAR-INTEGRATION-20261114-09`；作者Codex（衡曜 /root）。依本頁Human「程式和白皮書寫完整給我，給我後就準備上鏈部署」與隨後對日期自動判斷／整月星座的確認。
