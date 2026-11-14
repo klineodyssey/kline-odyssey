@@ -68,11 +68,11 @@ async function isolatedContext(browser,profile){
       const response=await route.fetch({maxRedirects:0});
       // Preserve the actual document and scripts. CSP adds only an offline
       // network boundary; it never substitutes a mock page or application.
-      // The unrelated portal is inspected as a real document/link only; its
-      // other games and wallet features are outside this focused acceptance.
+      // The real local Portal renderer owns service URLs. Permit that module;
+      // external requests and every non-GET/HEAD request remain blocked above.
       const portal=url.pathname===ROOT.pathname||url.pathname===new URL('index.html',ROOT).pathname;
       await route.fulfill({response,headers:{...response.headers(),
-        'content-security-policy':`${portal?"script-src 'none'; ":''}connect-src 'self'; frame-src 'none'; object-src 'none'; form-action 'none'`}});
+        'content-security-policy':`${portal?"script-src 'self'; ":''}connect-src 'self'; frame-src 'none'; object-src 'none'; form-action 'none'`}});
       return;
     }
     await route.continue();
@@ -330,8 +330,9 @@ async function runScenario(browser,profile,name,options,fn){
       const portal=new URL('index.html',ROOT).href;
       const rootResponse=await page.goto(portal,{waitUntil:'load'});assert.ok(rootResponse?.ok(),'real portal document loads');
       assert.equal(await page.locator('#alchemyService').count(),1,'one canonical 18911 portal link');
-      assert.equal(await page.locator('#alchemyService').getAttribute('href'),'K線西遊記/temples/18911/index.html');
-      row.entryLink={from:page.url(),geometry:await touchTarget(page,'#alchemyService'),to:ENTRY,portalScripts:'DISABLED_DOCUMENT_LINK_CHECK_ONLY'};
+      await page.waitForFunction(expected=>document.querySelector('#alchemyService')?.href===expected,ENTRY);
+      assert.equal(await page.locator('#alchemyService').getAttribute('href'),ENTRY);
+      row.entryLink={from:page.url(),geometry:await touchTarget(page,'#alchemyService'),to:ENTRY,portalScripts:'REAL_LOCAL_RENDERER_OFFLINE_NETWORK_ONLY'};
       [response]=await Promise.all([
         page.waitForResponse(item=>item.request().isNavigationRequest()&&item.url()===ENTRY),
         page.waitForURL(ENTRY,{waitUntil:'load'}),page.locator('#alchemyService').click(),
@@ -487,7 +488,7 @@ async function runProfile(browser,width,height){
 let browser;
 try{
   report.sourceSha256=Object.fromEntries(await Promise.all([
-    'tests/kaios-18911-browser.mjs','index.html','K線西遊記/temples/18911/index.html','K線西遊記/temples/18911/panel.mjs',
+    'tests/kaios-18911-browser.mjs','index.html','assets/kaios-portal.mjs','K線西遊記/temples/18911/index.html','K線西遊記/temples/18911/panel.mjs',
     'K線西遊記/temples/18911/kufo-client.mjs','K線西遊記/temples/18911/contracts.json',
     'K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js','K線西遊記/modules/kgen-game-core.js',
   ].map(async path=>[path,await sourceFingerprint(path)])));
