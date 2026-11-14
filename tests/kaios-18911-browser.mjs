@@ -219,9 +219,15 @@ async function capture(page,row,label){
   assert.equal(await page.locator('#mockNotice').textContent(),NOTICE);
   assert.ok(await page.locator('#mockNotice').isVisible(),'synthetic wallet notice remains visible in the real page');
   row.overflow=await noOverflow(page);
+  const skip=await page.locator('a.skip').evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {focused:document.activeElement===el,top:r.top,bottom:r.bottom,width:r.width,height:r.height,clipPath:s.clipPath};});
+  assert.equal(skip.focused,false,'ordinary screenshots do not retain keyboard skip-link focus');
+  assert.ok(skip.width<=1&&skip.height<=1&&skip.clipPath==='inset(50%)','unfocused skip link is clipped, not an offscreen floating overlay');
+  (row.skipVisibility??=[]).push({label,...skip});
   const filename=`${row.profile}-${row.name}-${label}.png`;
+  const viewport=`${row.profile}-${row.name}-${label}-viewport.png`;
+  await page.screenshot({path:`${OUT}/${viewport}`,fullPage:false});
   await page.screenshot({path:`${OUT}/${filename}`,fullPage:true});
-  row.screenshots.push(filename);
+  row.screenshots.push(viewport,filename);
 }
 
 async function connect(page){
@@ -370,6 +376,11 @@ async function runProfile(browser,width,height){
     assert.equal(await page.locator('#deploySteps li').count(),5,'all five real deployment steps are presented');
     assert.match(await page.locator('#chainState').textContent(),/未|尚/);
     assert.equal(row.rpc.length,0,'guest page does not request accounts or chain access');
+    await page.keyboard.press('Tab');
+    assert.equal(await page.locator('a.skip').evaluate(el=>document.activeElement===el),true,'keyboard users can focus the first skip link');
+    row.keyboardSkip=await touchTarget(page,'a.skip');
+    await page.locator('#connectWallet').focus();
+    assert.equal(row.rpc.length,0,'keyboard focus does not connect a wallet');
     for(const control of ['#connectWallet','#kaiosAmount','#lifeId','#activationTime','#activationNow'])await touchTarget(page,control);
     await capture(page,row,'overview');
   });
@@ -497,6 +508,7 @@ try{
   report.checks.push('Actual 18911 HTML, panel, client, shared wallet selector and ethers5; synthetic provider only; no fabricated mined receipt.');
   report.checks.push('Guest, wrong chain, non-owner, owner preview/cancel, wallet rejection, durable pending/resume/reload, disconnect and account switch at both viewports.');
   report.checks.push('Constructor preview shows actual Registry/KAIOS/version/timestamp/UTC+8/month IDs. Synthetic persisted pagehide/pageshow handler smoke only; actual BFCache and physical phone restoration remain NOT_TESTED.');
+  report.checks.push('Keyboard skip link is reachable when focused and clipped when unfocused; each state includes an actual viewport shot and full-page shot, with bounding-rectangle evidence.');
   report.checks.push('Unresolved synthetic refresh survives persisted lifecycle reconstruction; old late resolve/reject cannot override a new in-flight operation or alter an existing financial pending intent.');
   report.functional='PASS';
 }catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));process.exitCode=1;}
