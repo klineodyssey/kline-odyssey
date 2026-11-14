@@ -969,3 +969,11 @@ Human 本頁指定 KUFO 和 KSHIP 是同一條前後接續的產物鏈，按可�
 一次受影響suite選取1項真實alchemy／KSHIP EVM與4項ABI，**5/5 PASS，0fail/skip/cancel，21784.8102ms**；本次實測UTC2026-11-14T06:09:16.431Z。原其餘30個EVM案例未選取，不稱全部重驗；舊69項仍按舊提交分列。Windows Ganache的µWS原生binary不匹配，原log保留NodeJS fallback，實際EVM案例執行成功，未改環境或依賴。測試log SHA256 `aa4ed57774af1d9e0bba9184eaddf8a41457f01442072f27dc7152cb495d6843`。獨立靜態diff審查NO_BLOCKER，非外部審計認證。
 
 新getter／ABI須配套新artifact，不可套用c428舊ABI或舊gas估價。未新增RPC、runtime／immutable身份重試、簽署或公共交易；原身份核對兩次停止保持NOT_VERIFIED。正式constructor、activation timestamp、deployer／nonce、新合約地址、proposal、receipt、executableAt仍未配置／null。K108000／KGOD／111111／12345屬未實作世界接續。交付head與新包逐檔SHA由原工程窗口保存；仍是未部署候選。
+
+### 同一CI修正的實際新結果與鎖定依賴補正
+
+提交af12b438已推原PR637；新CI43597270544在exact-head、變更scope、verifier語法、CURRENT/V3.8一致、CURRENT語義及報告重現全部PASS。接著npm10.8.2於新job132454351354安裝時發生EBADPLATFORM：fsevents@2.3.2僅支援darwin，Linux停止；編譯與代表EVM因前置失敗未執行。這是新增檢查第一次發現的技術問題，不是舊review-only規則仍拒絕。新job log只讀取一次並保存；舊停止job未重試。
+
+沿同一WORK_ID追加最小範圍KGEN-KAIOS/package-lock.json：Ganache內chokidar已宣告fsevents為optionalDependencies，對應lock entry卻漏optional:true，僅補此一欄。版本/URL/integrity與其他lock欄位逐項JSON對照完全相同，獨立只讀複核NO_BLOCKER。沒有--force、放寬平台限制或版本升級。
+
+本機npm11.6.2以隔離fixture執行npm ci --ignore-scripts --no-audit --no-fund --dry-run --os=linux，exit0、53秒、未建立node_modules；log SHA256 9acee076bec656b0dc2dd205d35e5fdc58db35f1a2bcfef897cb96213e1b4113。這只證明本機dry-run，實際Linux/npm10.8.2編譯與EVM仍以修後原CI結果為準。首次失敗log保留。另一43597270706仍在全Node步驟失敗，未因本次規則修正宣稱已修復或移除該檢查。新head及後續實際CI結果沿原checkpoint/handoff保存，不以文件敘述或舊下載包當作全部驗收通過。
