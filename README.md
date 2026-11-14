@@ -1483,7 +1483,7 @@ regression passes65/65; mobile visual verification uses the existing isolated
 Portal CI before publication. Wallet connection/signing and actual limit
 activation still require the lawful Human holder and canonical chain results.
 
-## 18911 煉丹爐面板（候選驗收中）
+## 18911 煉丹爐面板
 
 `K線西遊記/temples/18911/index.html` 是唯一18911玩家可見入口；首頁 `index.html#alchemyEntry` 由既有 `assets/kaios-portal.mjs` 沿原base填入獨立服務連結，不設為遊戲世界或玩家目的地。玩家煉丹與王母本人錢包部署分開，皆需先預覽再由本人錢包確認，不讀取私鑰或自動送單。新爐未由原Registry啟用前，不改用舊49 Epoch爐。
 
@@ -1493,4 +1493,4 @@ activation still require the lawful Human holder and canonical chain results.
 - `tests/kaios-18911.test.mjs`：隔離模擬provider與儲存/鎖/角色/回執故障測試。
 - `tests/kaios-18911-browser.mjs`：既有Linux Portal CI的手機/桌面真Chromium模擬錢包驗收與截圖，禁止本機停用瀏覽器或真鏈交易。
 
-共用樣式與 provider 選擇沿 `K線西遊記/modules/kgen-game-core.css`、`kgen-game-core.js`，ABI工具沿原 `K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js`。不觸碰#523保護的11520 Navigator/world-registry；Boot CURRENT路徑登記待本頁Human明確答覆，不改Boot V1.4/Physics/經濟規則。FUNCTIONAL_QA與VISUAL_QA尚未完成，不宣稱已部署、已可煉丹、手機或真錢包驗收。
+共用樣式與 provider 選擇沿 `K線西遊記/modules/kgen-game-core.css`、`kgen-game-core.js`，ABI工具沿原 `K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js`。不觸碰#523保護的11520 Navigator/world-registry；Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記，不改Boot V1.4/Physics/經濟規則。App來源7164ce08769c60ac9439ab0c6b97d103c92c0642：原Portal CI43633664165及WorldViewer43633664170 SUCCESS；18911單元18/18、原入口/音訊59/59、原離線錢包/PWA153/153 PASS；36合約編譯且原5份公開payload ABI/creation/runtime/immutableRefs精確比對。390×844與1280×900各8情境，共16情境/64張viewport與fullPage截圖，32次skip裁切座標及鍵盤132×47.59px可達驗證；直接視覺複核通過。均為CI合成provider，不代表實體手機、真錢包或真BFCache；中段viewport須與有模擬標示的fullPage及report成組引用。Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記；原站發布與主網部署分別依原工作流及本人錢包實際回執核實，本候選未上鏈，沒有新部署地址或回執。

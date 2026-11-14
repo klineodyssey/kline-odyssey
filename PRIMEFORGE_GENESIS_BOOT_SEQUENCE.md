@@ -1176,3 +1176,13 @@ Where the Market Becomes the Myth.
 - `K線西遊記/temples/11520/index.html`: Taiwan quote entry with an explicit link to that same game.
 - Product status is BETA. KGEN/WBNB and derived USDT values are periodic read-only references, not settlement quotes or a continuous background service.
 - This navigation registration changes no Physics CURRENT, Boot V1.4, UniverseMap, private calibration, financial authority, or player-save schema.
+
+
+## K18911 KUFO furnace panel
+- K線西遊記/temples/18911/index.html: one player-visible 18911 furnace and holder-wallet deployment entry.
+- K線西遊記/temples/18911/panel.mjs: frontend rendering and controller integration; no keys/signers outside the connected holder wallet.
+- K線西遊記/temples/18911/kufo-client.mjs: chain/account validation, reviewed unsigned transactions, holder-wallet requests and receipt recovery.
+- K線西遊記/temples/18911/contracts.json: pinned public ABI/creation/runtime payload exported from the existing five reviewed contracts; no new contract or Runtime.
+- tests/kaios-18911.test.mjs: offline mocked-provider safety and state-transition tests.
+- tests/kaios-18911-browser.mjs: existing Portal QA Chromium visual/function acceptance with clearly marked mocks.
+- index.html: discoverable first-party service link. Protected #523 Navigator/world-registry paths unchanged.
