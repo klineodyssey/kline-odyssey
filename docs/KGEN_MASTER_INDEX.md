@@ -1,4 +1,36 @@
+## 2026-11-14 KUFO 原#637完整整合入口
+
+同一未部署候選已接續Human最新12等整月規格：10十三生肖（原12+AI類）、11人類、12萬靈；台灣公曆UTC+8與12星座整月映射，固定算法不逐年補表。正式啟用及地址／角色／費用仍須部署前本人核實，AI不送部署。完整累積規格沿用既有 [KUFO白皮書](../KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md)、[KSHIP白皮書](../KGEN-KAIOS/docs/KSHIP_V4_WHITEPAPER.md)、[工程證據／部署清單](../KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)及[README](../KGEN-KAIOS/README.md)。這些是原檔接續，不新增Runtime、bootstrap或版本檔；實際驗證及交付狀態以工程報告最新固定指紋為準。
+
+---
 # KGEN MASTER_INDEX
+
+## KUFO #637 正式名稱與部署準備接續（2026-11-13）
+
+原 Product05 / #637 已接 Human 同範圍普通工程指令；唯一正式合約入口沿
+`KGEN-KAIOS/contracts/KUFO.sol`、`KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol`、
+`KGEN-KAIOS/contracts/KUFOOutputJindouyun168888.sol`、`KGEN-KAIOS/contracts/KSHIP.sol`、
+`KGEN-KAIOS/contracts/KSHIPConverter.sol`，原純投影沿 `KGEN-KAIOS/runtime/kufo-policy.mjs`。
+完整用途、已部署 V1 歷史、legacy source baseline、年度出生權利、安全修正及部署前待決
+保存於 `KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md` 與原模組 README。
+正式曆法等實參未定前不部署。既有 CURRENT Boot → master-library → 本索引的路徑不變；
+未新增 Boot、Runtime、排程或同功能版本。下節是前輪候選沿革。
+
+## KUFO Product 05 source continuation (review candidate)
+
+The existing #201 alchemy paths and all three exact #600 research blobs are
+indexed in `KGEN-KAIOS/README.md` and
+`KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`, including full repository
+paths and purposes. The candidate implements annual cohort 50/75/100% terminal
+conversion with bounded dust-resistant transfer; no parallel Runtime, ledger,
+product or new versioned filename is introduced. Deployed V1, main KAIOS/KSHIP,
+Physics CURRENT, Boot, registry and claims stay unchanged. Formal calendar,
+finite issuance horizon and deployment authority remain unconfigured.
+
+Existing navigation: `PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md` ->
+`KGEN_MASTER_LIBRARY_INDEX.md` -> this index -> `KGEN-KAIOS/README.md`.
+The original PR #201 owner/lease must be verified before adopting the isolated
+review branch into that PR. #600 is preserved, not closed; #211/#212 are downstream.
 
 ## K11520 three-plane joystick filename (2026-10-19)
 
@@ -1082,3 +1114,8 @@ has only shared governance data and accepts only CAP_PROPOSE/CAP_APPROVE/
 CAP_EXECUTE intents. No new contract/source path, authority or deployment is
 introduced. Existing fixed-case IDs and calldata were independently checked
 against all three original cases; current65-test offline regression passes.
+
+
+## 2026-11-14 KUFO／KSHIP世界點位最新接續
+
+沿原`KGEN-KAIOS/contracts/KUFO.sol`、`KAIOSAlchemyFurnace.sol`、`KUFOOutputJindouyun168888.sol`、`KSHIP.sol`、`KSHIPConverter.sol`：18911為KUFO煉丹/幣世界入口，168888為KUFO出料，511111為KSHIP出生蟲洞（原Converter）；實址各自綁定，不以點位數字代替。K108000→KGOD→111111→12345只列待實作世界接續；歷史KUFOClaimWormhole不改成新器官。正式三年只採UTC+8共同跨年50/75/100、不設第二套連續衰變。原[工程報告](../KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)、[KUFO白皮書](../KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md)、[KSHIP白皮書](../KGEN-KAIOS/docs/KSHIP_V4_WHITEPAPER.md)保留累積全文與新ABI/驗證/部署邊界；無新Runtime/bootstrap/版本檔。本版尚未部署。

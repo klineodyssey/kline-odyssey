@@ -26,6 +26,9 @@ export async function deploy(name, signer, args = []) {
 }
 
 export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAccounts = 10 } = {}) {
+  // Historical main 49-epoch lineage regression, not the annual KUFO deployment.
+  // Compiler loads these sources byte-for-byte from pinned main before renaming
+  // only their contract declarations; assertions and adversarial cases stay intact.
   const eip1193 = ganache.provider({
     chain: { chainId: 31337, hardfork: "shanghai" },
     logging: { quiet: true },
@@ -44,9 +47,9 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAcco
     await treasury.getAddress(),
     await registry.getAddress(),
   ]);
-  const kufo = await deploy("KUFO", owner, [await registry.getAddress(), await kaios.getAddress()]);
+  const kufo = await deploy("KUFOLegacyBaseline", owner, [await registry.getAddress(), await kaios.getAddress()]);
   const kship = await deploy("KSHIP", owner, [await registry.getAddress(), await kufo.getAddress()]);
-  const furnace = await deploy("KAIOSAlchemyFurnace", owner, [
+  const furnace = await deploy("KAIOSAlchemyFurnaceLegacyBaseline", owner, [
     await kaios.getAddress(),
     await registry.getAddress(),
     epochSeconds,

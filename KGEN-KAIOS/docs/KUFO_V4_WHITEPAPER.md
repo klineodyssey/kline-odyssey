@@ -1,0 +1,896 @@
+# KUFO 仙丹幣白皮書 — 完整累積工程整合版
+
+## 2026-11-14 現行完整規格：十二等整月輪換與持續煉丹
+
+狀態：**本機原碼與測試已驗證，尚未部署**。正式代幣名稱與代號為 **KUFO**；V4／V5 等字樣只保留在既有檔名、來源、測試及工程沿革，不是另一種幣。此完整章節依本頁 Human 最新更正整理，讀者可直接由此理解現行協議；下方歷史全文保留，但其中農曆表、36年循環、13個月、2039停鑄、舊測試及舊LIVE均不構成本版規則或部署證據。
+
+### 1. 產品與世界流程
+
+既有流程為 **KAIOS → K18911 太上老君煉丹爐 → K168888 筋斗雲出料 → K511111 KUFO → KSHIP**。
+18911、168888、511111 是世界功能點，不是鏈上地址。正式部署清單必須另記 chainId、合約地址、runtime code／immutable、Registry 及其角色綁定。
+不另建代幣、平行產品、Runtime 或 bootstrap；既有已部署合約不原地覆寫。原工程仍為 [PR #637](https://github.com/klineodyssey/kline-odyssey/pull/637)。
+規格來源含 Human 提供的[KUFO 白皮書](https://docs.google.com/document/d/1LgTiHx7yjE_nqgSFiDz5hCOBEXp5YDOo7h1P50Hbv_o/edit)與本頁後續更正；本頁已更正的規則優先適用。
+
+### 2. 每年十二個月，每個月固定一等與一個星座
+
+Human 已確認一年12個月、整月輪換；對真實日期交由工程判斷採台灣 UTC+8 公曆，並確認下表星座順序。
+每月第一日00:00台灣時間為共同換月時刻，也就是前一個UTC日期16:00；同一月份內不再按20日、21日等傳統星座日期切換。
+這是KAIOS自訂整月對照，不宣稱天文星座入宮日期；公曆閏年及各月實際長度按算法處理，不把每月硬設30日或365/12日。
+
+| 台灣公曆整月 | 輪值等級 | 整月星座 | 內部星座ID |
+| --- | --- | --- | --- |
+| 1月 | 1 修練佛 | 摩羯 | 10 |
+| 2月 | 2 魔王 | 水瓶 | 11 |
+| 3月 | 3 凡人 | 雙魚 | 12 |
+| 4月 | 4 龍 | 牡羊 | 1 |
+| 5月 | 5 神仙 | 金牛 | 2 |
+| 6月 | 6 神明 | 雙子 | 3 |
+| 7月 | 7 神君（玉皇大帝） | 巨蟹 | 4 |
+| 8月 | 8 外星人 | 獅子 | 5 |
+| 9月 | 9 變形金剛 | 處女 | 6 |
+| 10月 | 10 十三生肖 | 天秤 | 7 |
+| 11月 | 11 人類 | 天蠍 | 8 |
+| 12月 | 12 萬靈 | 射手 | 9 |
+
+星座ID是本版內部編碼：牡羊1至雙魚12；月份映射固定為 [10,11,12,1,2,3,4,5,6,7,8,9]。等級ID與星座ID各有欄位，不混用。
+第10等「十三生肖」包含鼠、牛、虎、兔、龍、蛇、馬、羊、猴、雞、狗、豬與AI類，共13個子類；**人類獨立為第11等，全年仍只有12個月**。
+不以亂數、錢包雜湊或時間自動替個人指定子類，不因月份改寫玩家既有境界、物種、舊出生承諾或資產。
+每年1月回第1等，12月為萬靈；500年只作相對紀元標記，不重置規則、不停機，也不在第501年改亂數。
+「1天堂日＝365 K280日」另記為世界時間換算，不把一年公曆成熟改成天堂日或假定K280日的鏈上秒數；Physics CURRENT 未被本工作任意改寫。
+
+### 3. 持續煉丹與不可變時間來源
+
+同一KUFO候選以鏈上 block.timestamp、固定 UTC+8 及公曆算法按需計算年／月，不預先儲存一萬年曆表，也不依賴AI、母機或Owner每年送補表交易。
+2039不再是終身停鑄期限；到2039年及更遠年份，仍按同一算法判定月份。持續煉丹仍須滿足有效啟用、供應額度、真銷毀、餘額資格、角色綁定與鏈本身可用。
+只讀月份判定不需要定時簽署；**鑄造與轉化仍是持有人發起的交易**。時間到達不自行扣幣、不自動轉帳，也不讓AI取得錢包權限。
+正式啟用時間 activationTime 尚須在部署前由本人確認，不能自動沿用2027年測試fixture或舊2039草案。
+constructor 固定 version、activationTime、utcOffsetSeconds=28800 及上述12個星座映射，整體calendarHash不可回改；本候選沒有未來年曆append或改時區／星座setter。
+公曆換算採有界整數算法，參考[作者的日期算法說明](https://howardhinnant.github.io/date_algorithms.html)；這是確定性民用曆法，不是精準萬年農曆或天文預測。
+
+### 4. 鑄造、資格與供應
+
+- 真實銷毀 **1 KAIOS，同筆即時產出1,000 KUFO**。同時核對持有人KAIOS餘額及KAIOS總供應量確實減少，不以送到任意地址或成功回傳tuple代替burn。
+- KGEN只查持有人當下餘額，至少為投入KAIOS量÷1,000；**不扣除、不鎖定、不轉移KGEN**，不要求為此授權KGEN allowance。
+- 原碼採18位精度。最小KAIOS投入1,000 wei，且投入wei須可被1,000整除，確保資格與產出整數精確；這不是最少投入1,000枚KAIOS。
+- KUFO零創世、原生零稅；累計從煉丹發行上限72,000,000,000,000枚（72兆）。後續銷毀不恢復已用過的終身發行額度，不增加任意管理員鑄幣入口。
+- KSHIP零創世、原生零稅，原供應上限72,000,000,000,000,000枚（72,000兆），每1 KUFO最終對應1,000 KSHIP。
+- 「餐廳10 KAIOS／500 KUFO」是商家以自有庫存、補貼或利潤交付的討論例子，不改協議鑄造1:1,000；100萬維持量及生命活動力公式未定，不實作成強制資產規則。
+
+### 5. 共同年度成熟、永久補結與轉讓守恆
+
+年度成熟按台灣公曆1月1日00:00共同年界，**不是持有滿週年，也不是每過一個月成熟一批**。
+出生年跨過第一個年界，原始份額累計可轉化50%；第二個年界75%；第三個年界100%。例如12月31日出生，可在次日年界取得50%資格，應在操作介面清楚說明。
+實際轉化需由持有人或其明確授權的既有Converter流程發起；取得資格與執行交易分開。漏年可補結，第三年清掉剩餘餘額與尾差，不因舊發行期或曆表末端失效。
+每筆出生數量分成 first=floor(amount/2)、second=floor(3amount/4)-first、terminal=amount-floor(3amount/4)，保留逐筆wei尾差。
+轉讓按剩餘三段權利比例拆分，父子各段總和保持，既有出生年、月份、輪值等級、星座及來源hash不重設；年度aggregate只是同一批權利的衍生索引，不能重新計算或創造成熟額度。
+普通transfer與burn單筆最多處理32個活躍分組；更多分組須用原selected-group入口分批，選組嚴格遞增、不重複，失配整筆回滾。查詢可用有界分頁，不掃描萬年歷史。
+groupId為相對第一個出生年的月份編碼，沒有鑄造也可按需計算；虛擬月序上界不等於真實已鑄組數。實際權利只在真mint後記入持有人索引。
+uint32分組／年度與uint64時間皆須在轉型前核邊界；新鑄範圍限制與既有份額永久補結分開處理，不能用未來新鑄上界取消既有結清權利。
+
+### 6. 合約分工與持有人授權
+
+唯一正式候選原碼在 KGEN-KAIOS/contracts/ 下：
+
+| 合約 | 工作 |
+| --- | --- |
+| KUFO.sol | 固定時間規則、真burn proof、出生／三段權利、轉讓與授權轉化燒毀 |
+| KAIOSAlchemyFurnace.sol | 當下KGEN資格、持有人KAIOS burn、同筆原子出料與精確增量核驗 |
+| KUFOOutputJindouyun168888.sol | 沿Registry現任output路由消耗proof，保留受益人與數量 |
+| KSHIP.sol | 驗證KUFO carrier burn record並防重鑄造KSHIP |
+| KSHIPConverter.sol | 持有人授權轉化，核KUFO真burn、KSHIP proof／餘額／供應及累計鑄造精確增量 |
+
+既有KAIOS、KGEN及KAIOSOrganRegistry是必須核對的依賴，不以world point替代地址。KUFO/Furnace本版MintOrigin新增明確 birthMonth／birthTierId；不得與舊birthZodiac ABI混接。
+Registry owner依既有bootstrap狀態、minimumDelay及合法治理程序管理角色；delay不得繞過。修改路由不是修改原比例、供應cap或新時間常數的權限。
+持有人只對實際核對過的Furnace／Converter設定必要allowance，核對受益人、數量與呼叫參數後本人確認。Output／Converter／getter均不應單靠名稱被信任；部署前須核實位元碼、immutable、Registry綁定及權限。
+AI可撰寫、離線測試、準備操作與唯讀核回執，不能取得私鑰／助記詞、代簽、送部署／治理／真交易或解除具體HOLD。
+
+本次固定程式／測試提交e483fa03d8a2b5dafe5fc27dd23f804274fa4236；36合約編譯0warnings，65/65完整矩陣＋4/4選取安全檢查，共69項分兩次suite通過。精確時間、hash、gas、部署前唯讀快照及未驗範圍見同包工程報告與manifest；不能將本機通過當成主網部署。
+
+### 7. 上鏈部署準備與完成判準
+
+依原工程流程準備同一候選，部署次序為KUFO → Furnace → Output → KSHIP → Converter，再由有權持有人按既有Registry流程核實與綁定；不得部署測試Mock、Harness、LegacyBaseline或研究候選。
+若現有KAIOS／Registry不具備本版所需burn／output角色介面，先保留阻塞，不能假裝相容、另選舊地址、直接升級或越過治理。
+原main歷史Furnace／KUFO的舊proof領取沿WORMHOLE key，不能在本版部署時任意換掉其原immutable路由。共享CONVERTER key則會影響舊KUFO／KSHIP後續轉化：新Converter只綁本版兩個token，若尚有舊權利／舊資產，直接切換會阻斷舊轉化。啟用前必須核當期route、舊proof與未結清資產；不能以歷史manifest的NOT_DEPLOYED推定沒有義務，也不能宣稱三個key一換即可無損啟用。
+目前chain、既有Registry／KAIOS／KGEN正式地址、owner、delay、五個新地址、啟用時間、正式constructor、交易hash、receipt與executableAt均應依審核清單填入已核實值；未核實欄位保持null，不用舊LIVE補空。
+編譯固定Solidity0.8.24、OpenZeppelin5.0.2、optimizer runs1、viaIR、paris、metadata.bytecodeHash=none。審核包須含精確原碼／lockfile／標準編譯輸入／五份ABI與creation bytecode／runtime模板及immutable參照／測試log／source與artifact雜湊／constructor與角色清單。
+runtime模板含immutable位置，不能直接拿未綁定模板hash當正式鏈上runtime；部署後需重建實際immutable並比對explorer驗證與receipt。
+實際費用依當時精確constructor、gas估算、gasPrice／fee上限及BNB／台幣匯率另核，不能拿8522舊曆表gas當本版費用；任何新支出仍須符合本人原限制。
+完成程式／本機測試、發布PR／CI、主網部署、真錢包煉丹／轉化、UI／實體手機可玩與資金入帳各有獨立證據，不互相代替。
+本章驗證與交付指紋以同包工程報告及manifest的最新固定結果為準；尚未產生的新結果不能提前寫為PASS。原失敗log、舊checkpoint、guardian、舊包及其hash保留。
+本產品由Human稱為自有宇宙算法／專利構想；沒有申請或核准文件時，不宣稱取得專利認證。
+
+
+---
+
+## 歷史完整原文（保留來源，不作本版部署或現行參數證據）
+
+# KUFO 仙丹白皮書
+
+## 2026-11-14 權威接續：持續煉丹與分段出生曆法（LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED）
+
+依 Human「好改到好，星座和生肖能配合到1萬年航程嗎」及持續煉丹要求，沿原 PR #637、既有 KUFO 核心與文件接續。
+**取消舊候選把 32 個發行年當作終身停鑄期限的設計；2039 停鑄草案未採用。** 下方保留的固定 N 年關閉、終身 32 年限制及前輪測試均屬歷史，與本段衝突時以本段為準；不另發代幣、Runtime 或平行產品。
+持續煉丹指不因預設曆法年限永久關閉，仍受原終身發行 cap、真 burn、資格與安全條件限制，不是無上限增發。
+
+### 只附加的分段治理
+
+本機候選已改為 append-only calendar：初始 constructor 最多 32 年／512 個出生窗口；之後治理 append 每次最多 32 年／256 個窗口（MAX_APPEND_BIRTH_WINDOWS）。具體分段跨度須同時符合窗口數量限制，這些是單次工程界限，不是 KUFO 的終身年數或窗口上限。
+append 沿用既有 8M 操作 gas 預算，不能套用 constructor 的 30M 部署預算；32年／256窗口形成287交集分組的本機實測 execution 為7,555,818 gas，低於8M，完整界限見下表，不是主網費用或可用性保證。
+只有現任 Organ Registry owner 可提案精確延長 payload hash；等待該 Registry 的 minimumDelay（不得少於一小時）。到期雖可由任何帳戶呼叫執行，仍須重新核對同一 owner、parent calendar hash 與精確 payload；取消由現任 owner 辦理。
+新段只能接在既有末端，並完全匹配舊段最後三個年界，不能改寫既有年界、group、出生屬性或成熟權利。這項執行資格不是 AI 的自動送交易授權，真實治理仍由合法持有人確認。
+若維護落後，可補齊末端以後尚未覆蓋的過期空窗，但當下新 mint 一律以當下時間歸屬，不可追溯補鑄到已過的出生窗口。
+缺少覆蓋當下的正式未來年界／窗口時，先拒絕新 mint；完成合法追加後可恢復。不得宣稱無人維護、沒有資料或沒有治理交易仍能永不停止。
+
+### 不改寫出生與有界操作
+
+初始 calendarHash／calendarVersion 保留；latestCalendarHash 逐段鏈接，groupCalendarHash 永久綁定該出生段。
+mintOrigin 的 bornAt、出生年、生肖、星座、group 與其來源 hash 不因續段、轉讓、合併或補結而重設。
+年、cohort 與 group 識別採 uint32 候選範圍；以持有人活躍分組的有序 bitmap 與年度 aggregate 查找，不掃描全部萬年歷史或逐筆收款清單。
+一般 transfer／burn 單筆仍最多處理 32 個分組，超出須整筆拒絕並改用 selected-group 入口分批接續；未選份額保留。claimableTotal 超過單批範圍時，改用 heldGroups／claimableForGroups 分頁核對，不以無界迴圈讀完所有歷史。
+原 50%／75%／100% 共同年界、永久補結、尾差結清、KUFO／KSHIP 供應 cap、1:1,000 比例、holder allowance、真 KAIOS burn、KGEN 餘額資格及原子失敗回滾均不變。
+
+### 萬年範圍與驗收界線
+
+一萬年是數值範圍、資料分段與操作活性的設計目標，不是已核定一萬年的農曆、生肖或天文星座表。香港天文台公開對照資料覆蓋 1901–2100 年，遠期靠近日界的計算可能有日期差異；不能將這份資料外推為萬年精確表。
+Human 已確認生肖年界沿用**地球農曆新年**，不能改成元旦，亦不代表核定精準萬年預測。正式生效時間、時區、財務年界、星座窗口及各期具體年曆／生肖表，仍須依原定案程序核定；不得用合成 fixture、2039 草案或預估日期填入正式參數。
+本輪純 policy suite **20/20 PASS**，0 failed/skipped/cancelled，7471.6809ms；已讀回原 `kufo637-continuous-policy-bounded-20261113T2100.log`。其中包括萬年合成資料分段、出生 group ID 超過65535，以及 constructor 可容257窗口、append 拒絕257窗口的獨立上限案例。這是本機純投影證據，不是正式萬年曆表或鏈上 gas 驗收。
+本次狀態為 **LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED**。固定程式／測試提交為 `0bf33c4b1ed61da5ddd08c4f426e3e6a5408fd9b`，不是已部署地址；下方舊35項與另185項結果仍按原來源保存，不混入本次計數。
+
+### 本輪固定來源、分開驗證與操作界限
+
+最終編譯36合約、0 warnings，248620.5081ms；KUFO 編譯artifact的creation／runtime大小為22,450／18,692 bytes，並非正式參數完成後的runtime hash。
+standard-input SHA256 為 `1bd0e40d4ec2bacb6c00abc08322e0b4625604c54b1ad3874ea0053130a43df0`；KUFO原碼SHA256為 `7226aac7ec0f48405a33f3ab17f64eb57bf1cc5d8c390d1d89dd9cd7f220d415`，Furnace為 `4d1f841fc2b6cc30f8ff805947b5b990153bdddcab5953bc74eb23697b82b4ed`。
+
+| 驗證批次 | 實際結果與適用來源 |
+| --- | --- |
+| 最終受影響 EVM | 31/31 PASS，0 failed/skipped/cancelled，625773.2286ms |
+| 純policy | 20/20 PASS，7471.6809ms，沿前述本輪原log，未重跑 |
+| ABI／main lineage | 第一輪4 ABI＋10 legacy lineage通過；34份未變artifact的creation/runtime/ABI逐一相同，KUFO ABI亦相同，未重跑這14項 |
+
+這是**65項組合矩陣，不是一次65項全跑**。最終EVM原log為 `kufo637-continuous-evm-final-20261113.log`，SHA256 `4acb192b8c4a44f43584b4f97f2c11d62b973f204a6918f194904abadc13ec02`，已讀回31項終態。
+第一輪45項為44 PASS／1 FAIL，718824.4665ms；唯一失敗是dust transfer超過原300k門檻，原log與archive保留。其後只以六處global-zero祖先guard省去bitmap冗餘寫入，set/clear對稱，搜尋函式不變；未放寬300k／500k／8M門檻，才執行上述最終31項。
+
+| 最終本機量測 | 實際gas／大小及界限 |
+| --- | --- |
+| 256次dust後單組transfer／settle | 264,105 < 300,000／340,037 < 500,000 gas |
+| dormant32一般transfer／settle | 4,820,020／1,400,028 gas，維持8M操作界限 |
+| selected32 transfer／convert | 2,783,334／1,014,984 gas，維持8M操作界限 |
+| 最大constructor | 18,216,737 gas < 30M；initcode 40,242 bytes < 49,152 |
+| 32年／256窗／287新增分組append | propose 428,852／execute 7,555,818 gas，均 < 8M |
+
+全uint32 bitmap actor只驗四層內部索引，沒有真的建立65,536個鏈上cohort；10,000年／120,000分組是純資料測試，兩者都不是萬年天文預測。獨立原碼審查結果NO_BLOCKER是本輪工程複核，不是外部安全審計。
+本版候選ABI將origin的groupId由uint16改為uint32、issuanceCohorts由uint8改為uint32；Furnace另依賴groupCalendarHash。必須交付配套五合約候選、新ABI與新地址／綁定核驗，不能混接舊Furnace、聲稱原地升級或覆寫既有LIVE合約。
+正式生效、時區、財務年界、各期窗口、綁定、地址、授權及成本仍待核定；部署維持 **NOT_DEPLOYED**，UI／實體手機／真錢包驗收為 **NOT_VERIFIED**。本輪未新增支出不代表未來曆表與治理上鏈免費；屆時gas及支出須由合法持有人依原限制確認，AI未部署、代簽或送交易。
+
+## 2026-11-13 累積工程接續：共同年界與正式入口
+
+文件沿原 #637 與 Human 提供的 V5.0 年度批次定案累積更新。正式名稱／代號為 **KUFO**；
+V4/V5 僅是本文件及來源沿革，不加入代幣名稱或合約入口。
+本節是現行工程規格；下方前版正文完整保留，其「三秋」、未配置星座、V4 檔名及歷史測試數量均須依本節修正解讀，不構成新版已驗收或部署。
+
+### 完整協議規格
+
+世界流程為 KAIOS → K18911 太上老君煉丹爐 → K168888 筋斗雲出料 → K511111 KUFO → KSHIP。
+點位是世界功能識別；實際合約、收款／受益人地址與鏈別必須另外核實，不能以數字點位送款。
+持有人授權 Furnace 銷毀 KAIOS，同一筆成功交易按 1 KAIOS = 1,000 KUFO 即時出料至指定受益人。
+KGEN 只查當下餘額，至少為 KAIOS 投入量 / 1,000；不扣除、不鎖定、不要求 KGEN 授權。
+Furnace 須證明 KAIOS 餘額與總供應量實際下降；路由回傳數值不能代替 canonical KUFO 的實際鑄幣證據。
+任一步出錯，包含關閉發行期、額度不足或錯誤／惡意出料路由，整筆回滾。
+
+跨共同年界後，第一年累計可轉化原發行額 50%，第二年 75%，第三年 100%，第三年結清所有餘額與尾差。
+共同年界不是各筆持有滿週年；年末出生也依共同邊界計算。每 1 KUFO 最終對應 1,000 KSHIP。
+到期只產生可轉化資格；候選由持有人或明確授權流程送出轉化交易，年界不自動掃描、扣幣或代簽。
+漏年可永久補結；發行期結束不取消補結權。轉讓同時搬移剩餘第一／第二／終局三段權利，不能重設出生年或重算已耗用額。
+每段以整數精度計算，終局吸收全部尾差；轉讓以累計比例切分後相減，父子分組守恆。
+KUFO 終身發行候選上限為 72,000,000,000,000 枚；轉化銷毀不恢復可重發額度。KSHIP 比例固定為其 1,000 倍，不新增稅率或任意鑄幣權。
+
+### 出生標識、曆法與有界操作
+
+每筆鑄造不可變記錄 bornAt、共同出生年、出生生肖、出生星座及 calendarHash。
+financial yearStarts 與生肖／星座精確窗口分開提交；不得默認財務年界等於生肖年界，不以每月一星座代替精確窗口。
+窗口必須連續、無重疊、完整覆蓋發行區間，且生肖與星座均已配置。calendarHash 綁定全部時間與窗口資料。
+轉讓權利按共同年與出生窗口交集分組；同分組可合併，不能為每次收款無界新增 lot，也不能只靠歷史事件宣稱當前持有人出生屬性完整。
+出生時間是每筆原始證據；現存份額保留其出生分組／生肖／星座與剩餘年度權利。
+
+工程候選限制最多 32 個發行年、512 個出生窗口，每筆批次處理最多 32 個選定 group。
+這些是待驗證的複雜度上限，不是 Human 已核定的正式發行期限、曆法或經濟參數。
+一般轉讓／轉化若需要超過單次限額會整筆拒絕，持有人可用升序唯一 group IDs 分批轉讓或轉化，未處理份額的權利保留。
+這種明確批次是同一核心的操作入口，不是第二個代幣或獨立帳冊。
+
+### 餐廳與生命活動力
+
+商家可以用自有 KUFO 庫存、補貼及利潤提供不同數量，不改變協議 1:1,000 鑄造比例。
+「餐廳收 10 KAIOS，吃後給 500 KUFO」只描述待研究的庫存交付流程；不等於以 10 KAIOS 協議鑄出 500 KUFO。
+「100 萬維持量」尚不是已核定活動力門檻。付款、交付、退款、庫存來源與活動力依持有量變動的公式均待需求定案，不能在本輪偷渡為合約參數或已部署功能。
+候選到年界只增加可轉化資格，持有人送出轉化前實際KUFO餘額不下降；活動力若僅依實際持有量，年界本身也不會降低活動力。這項需求差異仍須Human明定，不能自行改成自動扣除或代送交易。
+
+### 正式來源與部署關卡
+
+唯一正式來源為 `KGEN-KAIOS/contracts/KUFO.sol`、`KAIOSAlchemyFurnace.sol`、
+`KUFOOutputJindouyun168888.sol` 與既有 KSHIP／Converter；純投影為 `KGEN-KAIOS/runtime/kufo-policy.mjs`。
+版本／SHA 留在原始碼與工程證據。main 舊制與候選安全案例都必須保留並驗證固定最終提交。
+Registry 更新不是安全認證：真 burn proof、canonical mint 後置條件與 holder allowance 不能因路由是「現任」就略過。
+合法 holder 仍須核准精確 Converter 地址與相稱 allowance，不能向未知 spender 無限授權。
+
+生效時間、正式曆法／時區、N 年發行期限、N+3 年界、生肖邊界及星座精確窗口全部尚待 Human 核定。
+曆法未定前 constructor 編碼、正式 creation bytecode、含 immutable 的 runtime hash、部署地址與治理 executableAt 留空，不用合成測試值冒充。
+原部署 Furnace V1 保留為歷史，舊 proof 不自動移入年度 KUFO。ABI 相容不能改寫舊 KSHIP／Converter 的 immutable 綁定。
+最終編譯、測試、安全審查與參數核准通過後，由有實際權限的合法持有人按原流程使用本人錢包確認部署／治理；AI 只準備與唯讀核對，不持有秘密、不簽署、不送交易。
+完整地址盤點、constructor／角色／編譯設定／位元碼驗證清單及本輪證據，累積保存於 `KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`。
+
+### Converter 實際產出補強（2026-11-13，固定來源 86ee4e8e）
+
+原 `KSHIPConverter.sol` 進一步補強既有 `convert` 與 `convertGroups`，兩個 constructor 地址參數與原 proof 公式不變。
+constructor 要求 KUFO、KSHIP 地址均有合約程式碼，回讀 `KSHIP.kufo()` 必須等於所綁 KUFO，兩者的 Organ Registry 必須一致且非零。
+每次先確認 KSHIP proof 未使用並保存其總供應量、`totalMintedFromKufo` 與受益人餘額；KUFO 真銷毀後，核對其 carrier burn record 的持有人、受益人、Converter、銷毀量及固定 1:1,000 預期產出。
+KSHIP 呼叫回傳的受益人／數量相符仍不足以完成：proof 必須已標記使用，且總供應量、累計鑄造量、該受益人餘額均須精確增加相同預期量。
+任一條件失配，兩個入口都在同一交易回滾 KUFO、allowance、分組權利、proof 與 Converter counter，不接受「已燒 KUFO、只有回傳 tuple、沒有 KSHIP」的結果。
+
+這些回讀與後置條件不構成對任意位元碼的認證；能偽造所有 getter 的不可信程式仍須由合法持有人依審核包核實 canonical 地址、runtime、immutable 與治理綁定，不能僅因地址有程式碼便授權。
+先前 `6bedaec3` 的 218 項通過結果（198 非 EVM＋20 EVM）是歷史證據，未覆蓋本次新發現的 no-mint 缺口，不能延用為此修正的通過結果。
+本輪受影響35/35 PASS（22 EVM＋10 legacy lineage＋3 ABI），0 failed/skipped/cancelled，482912.2407ms；固定指紋及log由原工程報告累積保存。其餘185項為同指紋歷史通過，沒有重跑。
+正式參數仍待核定，狀態保持 `NOT_DEPLOYED`；本節沒有部署、代簽、治理送單或資產操作。
+
+## 前版完整正文（SUPERSEDED 工程沿革，保留不刪）
+
+共用年界三秋轉化制 · 完整規格與工程交接
+
+文件版 V5.0 · 2026-11-06｜候選核心 4.1.0-candidate｜狀態：工程審查候選，尚未部署。
+
+### 一、定位與主流程
+
+KUFO 仙丹是由 KAIOS 煉化產生的新候選代幣，承載文明世界中的質量與能量敘事。它與既有 KAIOS 分工不同；本版完整定義即時煉丹、出生標識、年度轉化及 KSHIP 接續關係。遊戲中的仙丹、反物質與能量均為系統表徵，不構成真實物質生成、健康或延壽功效。
+
+仙丹的公開幣名與代號固定為 KUFO，不加版本尾碼。正式合約、檔案、模組及 ABI／產品入口也使用無版本的穩定名稱，如 KUFO.sol、KAIOSAlchemyFurnace.sol；不得以 V4、V5 另開正式產品。版本資訊只留在來源標頭、Git 提交、文件修訂及稽核沿革。既有帶版本的檔案是候選歷史來源，不是最終正式入口。若 main 已有同名舊制檔案，先盤點依賴、相容性及歷史保存，再遷移到唯一正式入口，不可直接覆蓋或讓兩套同時自稱 CURRENT。
+
+> KAIOS → K18911 煉丹爐 → K168888 筋斗雲出料 → K511111 KUFO → KSHIP
+
+K18911、K168888 與 K511111 是世界座標與功能點，正式部署時另綁定實際鏈上合約地址。KSHIP 沿用程式庫中的正式代號；口語中的反物質或其他音譯，不構成另發新幣或更名決議。
+
+| 項目 | 本版規則 |
+| --- | --- |
+| 協議產出 | 銷毀 1 KAIOS，產出 1,000 KUFO |
+| KGEN 條件 | 當下錢包餘額至少為 KAIOS 投入量 ÷ 1,000 |
+| KGEN 的處理 | 僅查核餘額，不移轉、不銷毀、不鎖定 |
+| 出料時間 | 成功交易中即時出料，沒有 49 Epoch 等待 |
+| 三秋轉化 | 共用年界後，累計可轉化 50%／75%／100% |
+| 終局比例 | 每 1 KUFO 最終對應 1,000 KSHIP |
+
+年度轉化規則已確定；正式曆法、時區、年界與出生生肖錨點等參數仍需在部署清單中定值。白皮書確立的完整產品要求與候選程式目前完成的範圍，於第八節分別列明。
+
+## 二、即時煉丹與來源證明
+
+### 2.1 固定協議公式
+
+> 設投入量為 A KAIOS：
+> 所需 KGEN 餘額 G ≥ A ÷ 1,000
+> 銷毀 KAIOS = A；即時鑄造 KUFO = 1,000 × A
+
+投入者授權既有 KAIOS 核心使用指定額度，再由目前登錄的煉丹爐提交煉化。KGEN 只做同次執行中的餘額觀察；它不是另外一筆成本、抵押品或催化劑存款，也沒有持有天數與稅額累積條件。餘額查核不代表已證明長期持有或排除借入資金。
+
+### 2.2 以 3 KAIOS 為例
+
+| 步驟 | 數量與結果 |
+| --- | --- |
+| 投入 | 3 KAIOS |
+| 餘額資格 | 錢包至少持有 0.003 KGEN |
+| 煉化 | 銷毀 3 KAIOS；KGEN 餘額不因本步驟扣減 |
+| 出料 | 同筆成功交易向指定受益人產出 3,000 KUFO |
+
+小額範例同樣成立：0.001 KAIOS 搭配至少 0.000001 KGEN 的當下餘額，可產出 1 KUFO。數量按代幣最小單位運算；候選爐目前要求 KAIOS 原子單位投入至少 1,000，且為 1,000 的整數倍，並非要求最少投入 1,000 枚 KAIOS。
+
+### 2.3 一次證明、固定受益人、原子完成
+
+KAIOS 銷毀紀錄是上游依據。煉丹爐建立 proofId，出料器只能消耗該證明一次，並依既定受益人與數量發料；KUFO 鑄造端再次拒絕重用 proofId。出料器不得更換受益人或額度。
+
+若驗證、出料、曆法開放狀態或供給上限任一環節失敗，整筆同步交易回復，包含上游 KAIOS 銷毀。不得形成「已付 KAIOS，卻因下游失敗沒有 KUFO」的半完成狀態。
+
+## 三、共用年界與三秋轉化
+
+同一已設定出生年度內鑄造的 KUFO 使用共同年界。年齡由出生年度與共用邊界計算，並非從每筆收款時間另外倒數一年。年末出生者可能很快到第一個年界；同年度的較早出生者也在該邊界取得第一秋資格。
+
+| 跨越的共同年界 | 本次新增資格 | 累計資格 | 全額結算後 KUFO |
+| --- | --- | --- | --- |
+| 尚未跨越 | 0% | 0% | 原始量 100% |
+| 第一年界 | 原始量 50% | 50% | 原始量 50% |
+| 第二年界 | 原始量 25% | 75% | 原始量 25% |
+| 第三年界及以後 | 全部剩餘，含尾差 | 100% | 0 |
+
+> 沒有 10 秒、10 分鐘或 10 小時的強制轉化倒數，也不做逐秒、逐分轉化。每次年界到達後，當年應到期的整份額立即具備結算資格。
+
+### 3.1 資格到期與實際交易
+
+時間經過會改變可結算額；鏈上仍需持有人或其明確授權的流程送出交易。協議不會自行逐一掃描全球錢包。一般轉帳、買賣及新鑄造均不會偷偷替持有人結算。候選核心目前由持有人呼叫既有 KSHIPConverter.convert(amount, beneficiary) 結算。
+
+### 3.2 漏年補結與重複操作
+
+以尚未拆分的出生量 M 示意：累計目標依序為 floor(M÷2)、floor(3M÷4)、M；本次可結算量為累計目標減去已轉化量。跳過第一年、第二年再操作，可補結累計 75%；第三年才操作，可一次處理全部剩餘。相同資格不會重複給付。拆分或轉讓後則必須依持有人實際承接的剩餘分期帳結算，不可重用原始量重新領取。
+
+### 3.3 3,000 KUFO 的完整結果
+
+第一秋 1,500 KUFO → 1,500,000 KSHIP；第二秋再 750 → 750,000；第三秋結清剩餘 750 → 750,000。總計 3,000,000 KSHIP，該批 KUFO 歸零。最小單位尾差一律歸入最後一期，第三秋結清時不得留下永久殘值。
+
+## 四、出生生肖、星座與轉讓
+
+### 4.1 出生標識應永久固定
+
+每次 KUFO 鑄造均應記錄出生時間、出生年度、出生生肖與十二星座標識，並綁定不可變的曆法版本。生肖按正式出生年份及錨點推導；星座按正式出生日期與時間窗判定。所有持有人共用相同定義，不因國籍、所在地或介面語言改變。
+
+| 欄位 | 規則 |
+| --- | --- |
+| bornAt | 實際鑄造區塊時間；轉讓不重置 |
+| birthYear | 按已核定年界取得；轉讓保留 |
+| birthZodiac | 按已核定生肖年曆及首年錨點取得 |
+| birthConstellation | 依已核定十二星座精確時間窗取得 |
+| calendarVersion／Hash | 可重現計算的規格版本與完整設定摘要 |
+| proofId／amount／beneficiary | 不可變的原始鑄造來源紀錄 |
+
+十二星座不得簡化成「一個月份固定一個星座」。日期界線、時間精度、時區、跨年窗口、閏日及邊界瞬間的歸屬，都要有明確、可測試的共同表。財務年界可與生肖年曆分別定義，但必須明載兩者的對應，不得暗中把不同曆法混成同一個年份。
+
+### 4.2 轉讓保留權利與年齡
+
+買賣、拆分、送禮、跨錢包及同年度合併，均不得讓 KUFO 變年輕、重新產生已消耗的轉化額，或改寫出生生肖與星座。成熟但未領取的分期權利隨所轉讓份額移轉。出生屬性與依現在年份顯示的當年生肖是兩種資料，後者不得覆寫前者。
+
+### 4.3 候選程式目前的缺口
+
+現有核心已有不可變 mintOrigin，生肖依 firstBirthZodiac 與年份偏移取得；birthConstellation 仍為 0／UNCONFIGURED。按年合併的可替代餘額也無法證明後來每一枚幣來自哪筆鑄造。僅補寫來源事件，不足以宣稱轉讓後的每枚星座均可追蹤。工程須補齊可保留出生星座的有界餘額／轉讓模型及測試，再宣告本節完整實現。
+
+## 五、有界帳本、尾差與守恆
+
+### 5.1 三份剩餘權利
+
+候選核心對每個持有人、出生年度存放 first、second、terminal 三份剩餘量。每次鑄造 M，增加 floor(M÷2)、floor(3M÷4)−floor(M÷2)、M−floor(3M÷4)。同年收到多筆直接累加，已消耗的份額不重新計算。
+
+部分轉讓以完整精度比例分配既存分期，先算累計，再用相減求各期份額；寄件人扣除的每一個原子單位，必須恰好等於收件人增加量。實際煉丹爐輸出的 KUFO 原子量可被四整除；人造最小單位測試仍需驗證第三期能清除所有尾差。
+
+### 5.2 交易成本必須有上界
+
+不得讓每次小額收款新增必須永久遍歷的獨立批號。候選 4.1.0 目前採最多 32 個發行年度槽位，且使用 N+3 個明確邊界，讓最後一個發行年度仍能走完三秋。槽位不循環重用；發行窗口關閉後，已到期權利仍可永久結算。
+
+> 32 年是目前候選程式的複雜度設計，不是已經同意的永久宇宙規則。是否採納此發行期限，必須在部署參數中明確決定；不得把它包裝成無限期發行。
+
+加入星座後，工程可沿用既有核心設計有界的出生年×星座分組，並提供持有人授權的分批結算／移轉入口。具體資料結構必須以最壞歷史與最壞分組實測證明活性；不能因星座細分而恢復灰塵攻擊，也不能僅用「超過上限就失敗」令合法餘額永久無法移動。
+
+### 5.3 供給與來源守恆
+
+> KUFO 流通量 + 已轉化銷毀量 = 累計煉丹鑄造量
+> 每份已完成承載證明：KSHIP 產出 = KUFO 銷毀量 × 1,000
+
+候選核心的 KUFO 上限為 72,000,000,000,000，且同時限制終身累計鑄造量；轉化銷毀不會釋放重新鑄造額度。其對應 KSHIP 上限為 72,000,000,000,000,000。此產品不新增 KSHIP 半衰期。供給常數仍應與最終部署清單及下游承載上限逐項一致。
+
+## 六、市場使用與信任邊界
+
+### 6.1 協議鑄造與餐廳報價分帳
+
+協議始終按 1 KAIOS → 1,000 KUFO 鑄造。餐廳或其他商家可依自有庫存、利潤及補貼，報價 1 KAIOS 兌 100、1,000 或 2,000 KUFO；商家必須自己備妥應付數量並記錄補貼來源。報價不是修改協議產出倍率的權限。
+
+| 帳目 | 必須辨認的內容 |
+| --- | --- |
+| 協議發行 | KAIOS 銷毀證明、固定產出比率、KUFO 鑄造 |
+| 商家庫存 | 取得來源、實際交付數量、出生分期 |
+| 商業差額 | 收入、成本、補貼與利潤分別記錄 |
+| 持有人畫面 | 可用餘額、已到期額、出生年／生肖／星座 |
+
+### 6.2 不可變代幣與可更換路由
+
+候選 KUFO 沒有任意管理員鑄造、黑名單、沒收、原生轉帳稅或代理升級入口。但授權出料器與轉換器仍由外部 Organ Registry 決定。代幣位元碼不變，不等於登錄路由沒有管理信任；部署包必須列明治理者、角色、延遲機制與目前綁定地址。
+
+### 6.3 必測的濫用情境
+
+重放鑄造或轉換證明、未授權呼叫、受益人替換、投入與產出比率偏差、到期前搶領、轉讓重置年齡、反覆拆分重複領取、同年灰塵轟炸、長期休眠後一次結算、最小單位尾差、終身供給耗盡與下游上限，均須有會實際失敗的對抗測試。
+
+### 6.4 未來自願活動的界線
+
+未來可另設人工發起、持有人自願參加的短秒數煉丹活動，例如 10 秒活動提示；本版不實作該功能。活動參加條件、資金來源及使用者授權需獨立定義，不能取代、延後或提前扣除本白皮書的強制年度分期，也不能偷偷改變協議鑄造比率。
+
+## 七、衡曜工程改版交接
+
+沿用既有 Product 05 與 review/kufo-annual-cohort-core-20261106 候選核心，確認原負責者與工作權限後續作。保留既有 V1、原 PR 與研究歷史，不重開同功能產品，不覆蓋舊分支，也不將下游 #211／#212 當作重複案件關閉。
+
+| 正式穩定位置 | 需完成的改動 |
+| --- | --- |
+| contracts/KUFO.sol | 來源 contracts/KUFOV4.sol；保留年界三分期、終身上限與證明守恆，補精確星座及可轉讓的有界帳。 |
+| contracts/KAIOSAlchemyFurnace.sol | 來源 KAIOSAlchemyFurnaceV4.sol；維持 KGEN 餘額證明、1:1000 即時產出及失敗原子回復。 |
+| contracts/KUFOOutputJindouyun168888.sol | 來源 KUFOOutputJindouyun168888V4.sol；維持固定受益人、數量與一次 proof，驗證登錄綁定。 |
+| runtime/kufo-policy.mjs | 來源 runtime/kufo-v4-policy.mjs；共用年界／生肖／星座規格，僅做投影，不另建權威帳本。 |
+| 既有 KSHIP／Converter | 沿用正式代號與 proof ABI；驗證新增分組或分批入口仍只轉換已到期份額。 |
+| tests 與 reports | 擴充既有年度、轉讓、星座、尾差、灰塵、長期休眠、gas 與來源相容性測試。 |
+
+以上相對路徑均以 KGEN-KAIOS/ 為根。既有周年生日、逐秒連續半衰、49 Epoch、催化劑銀行及 64 獨立批號限制只保留為歷史；不得再接回新產品執行路徑。候選共用年界已完成的部分應保留並重測，不必重寫。
+
+### 7.1 必交付的可審查成果
+
+交付同一產品的精確差異、完整曆法設定與 hash、出生欄位與分組設計、轉讓／補結演算法、最壞 gas 上界、測試輸出，以及確切來源提交 SHA。UI 如有變動，另附實際瀏覽器功能與畫面驗證。文件須明確標示已完成與仍待補實作的條目。
+
+### 7.2 從確認到上鏈準備
+
+改版完成後重跑該提交的編譯、EVM、安全與既有回歸；備妥鏈別、地址、建構參數、角色、路由延遲、供給上限、位元碼摘要、驗證指令及部署順序，交由已授權簽署者審查執行。沒有曆法與星座定值、部署沿革和精確測試證據，不得標記為可上鏈。本文及文件推送本身不代表已完成部署。
+
+## 八、部署參數與證據狀態
+
+| 項目 | 目前狀態／部署前工作 |
+| --- | --- |
+| 財務年界 | 年度整份到期已確定；正式曆法、時區、邊界時間與版本待定值。 |
+| 出生生肖 | 候選有年份偏移；須核定生肖曆法、12生肖順序與首年錨點。 |
+| 十二星座 | 候選為 UNCONFIGURED；須核定時間窗並補實作及轉讓保存。 |
+| 發行期限 | 最多32年度是候選設計；採納或修改後須重新驗證成本與活性。 |
+| 正式部署 | 尚無本版已核定地址、建構參數或鏈上收據；不得宣稱已啟用。 |
+| CURRENT 對齊 | Physics CURRENT V3.8 的舊連續半衰敘述須依正式變更程序調和。 |
+
+### 8.1 已知工程證據
+
+候選核心來源提交：3c92efd72a12404f95d95c573e428434d8c26e55。既有工程報告記錄：33 個合約編譯、14 項 EVM 行為測試、20 項策略／介面／研究測試，以及 91 項既有回歸均通過。這是該來源報告的結果；本白皮書編製並未重新執行上述程式測試，也未宣稱目前 main 或新增星座實作已通過。
+
+報告中的灰塵後轉讓為 118,590 gas、32 年度全部轉讓為 2,331,812 gas。這些數字只適用於既有候選資料結構；加入星座分組後必須重新量測，不能沿用為新結構的通過證據。文件本身經可編輯檔產出與逐頁版面驗證。
+
+### 8.2 正式來源與沿革
+
+[S1] KGEN-KAIOS/contracts/KUFOV4.sol：年度分期、來源欄位、上限與轉讓。
+[S2] KGEN-KAIOS/contracts/KAIOSAlchemyFurnaceV4.sol：餘額證明、比率及即時輸出。
+[S3] KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md：候選整合與驗證報告。
+[S4] KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md：累積式候選規格及保留的舊版。
+[S5] docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md：既有物理 CURRENT。
+
+S1～S4 以本頁來源提交固定版本查核；S5 仍為目前 CURRENT，本文沒有修改它。#201 是原產品工程沿革；#600 的獨有研究須保留後整合；#158 是舊設計留存。既有下游與部署歷史應維持可追溯。
+
+
+### 固定來源連結
+- [S1](https://github.com/klineodyssey/kline-odyssey/blob/3c92efd72a12404f95d95c573e428434d8c26e55/KGEN-KAIOS/contracts/KUFOV4.sol)
+- [S2](https://github.com/klineodyssey/kline-odyssey/blob/3c92efd72a12404f95d95c573e428434d8c26e55/KGEN-KAIOS/contracts/KAIOSAlchemyFurnaceV4.sol)
+- [S3](https://github.com/klineodyssey/kline-odyssey/blob/3c92efd72a12404f95d95c573e428434d8c26e55/KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)
+- [S4](https://github.com/klineodyssey/kline-odyssey/blob/3c92efd72a12404f95d95c573e428434d8c26e55/KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md)
+- [S5](https://github.com/klineodyssey/kline-odyssey/blob/main/docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md)
+
+
+---
+
+## 完整保留：4.1.0 候選技術版及其歷史附錄
+
+以下來源全文原樣保留，供技術細節與歷史追溯。V5.0 的共用年界、完整出生生肖／星座要求及本文件的狀態說明優先。下文關於星座未設定不阻擋候選核心的敘述，只描述當時完成範圍；不代表 V5.0 完整產品已實作或已具部署條件。舊周年生日與64批次設計仍僅屬歷史。文件V5.0不變更程式版本4.1.0-candidate。
+
+# KUFO V4 Whitepaper — cumulative annual-cohort candidate
+
+Status: REVIEW CANDIDATE / NOT DEPLOYED / NO LIVE ACTIVATION
+Current candidate core version: `4.1.0-candidate`
+Solidity: `0.8.24`; OpenZeppelin Contracts: `5.0.2`
+Architecture: non-upgradeable token; no proxy or calendar setter
+Primary lineage: KAIOS → K18911 furnace → K168888 outlet → K511111 KUFO → KSHIP
+
+This is a complete current description followed by the preserved historical edition.
+It integrates the existing PR #201 candidate at
+`8b4ccd8c008886f82853ba0f0c064b9217e73894` and the calendar/zodiac research from
+PR #600 at `2062b7b94959cf5e0d4aaf408677505bb4bcb6e1`. It does not replace a
+deployed V1 contract, rewrite historical KAIOS, or assert that candidate addresses
+are live. The current main `KAIOS.sol`, `KSHIP.sol` and `KSHIPConverter.sol` sources
+are retained. K511111 and K168888 are world coordinates, not literal EVM addresses.
+
+## 1. Immediate protocol issuance
+
+The holder supplies KAIOS and authorizes the current furnace through a KAIOS
+allowance. KAIOS verifies that furnace, spends that allowance, burns the holder's
+authorized KAIOS and records its alchemy proof. The V4 furnace requires the
+holder's current KGEN balance to be at least `KAIOS input / 1000` and immediately
+outputs `KAIOS input × 1000` KUFO to the beneficiary chosen for that proof.
+
+For example, `0.001 KAIOS` plus a current balance of at least `0.000001 KGEN`
+produces `1 KUFO`. KGEN is observed only: no KGEN transfer, burn, lock, allowance,
+holding-age or tax-history requirement is introduced. There is no 49-epoch or
+130-day delivery wait. Current-balance observation proves neither durable
+ownership nor that the balance was not borrowed.
+
+The K168888 output consumes the furnace's proof once. Its release API cannot
+substitute another beneficiary or amount. KUFO separately rejects a reused mint
+proof. Reverts anywhere in the synchronous furnace/output/mint path roll back
+the KAIOS burn and all associated state, including a closed-calendar or cap failure.
+
+The furnace accepts at least 1,000 KAIOS wei in multiples of 1,000. Consequently
+protocol-issued KUFO amounts are multiples of 1,000,000 wei and divisible by four.
+
+## 2. Shared annual cohorts and terminal Three-Autumn rule
+
+Every issuance within the same configured birth-year interval belongs to the
+same annual cohort. Birth-year boundaries are common calendar timestamps, not
+the anniversary of each receipt. Conversion becomes eligible as follows:
+
+| Configured boundary crossed since birth year | Cumulative original KUFO eligible | Remaining after full eligible conversion |
+|---|---:|---:|
+| None | 0% | 100% |
+| First | 50% | 50% |
+| Second | 75% | 25% |
+| Third or later | 100% | 0, including every integer remainder |
+
+A receipt issued one second before a year boundary reaches its first Autumn one
+second later. A receipt issued earlier in the same birth year reaches that same
+Autumn. This consequence is intentional in the candidate and must be understood
+before production approval.
+
+Time passing changes eligibility only. Ordinary transfers, purchases, sales and
+new mints do not burn KUFO or mint KSHIP. The holder explicitly calls the existing
+`KSHIPConverter.convert(amount, beneficiary)` to settle eligible material; the
+converter binds the KUFO owner to its caller. A holder may convert partially,
+repeat with newly eligible amounts later, or skip a year and catch up. After the
+third boundary, converting the full remaining balance leaves zero KUFO. Previously
+consumed tranches cannot be consumed again.
+
+## 3. Explicit immutable calendar and bounded issuance horizon
+
+The constructor takes the registry address plus these calendar inputs:
+
+| Input | Meaning |
+|---|---|
+| `calendarVersion` | Nonzero version identifier chosen for the reviewed configuration |
+| `firstBirthYear` | First year label; year labels increase consecutively |
+| `firstBirthZodiac` | Explicit zodiac anchor index in the shared twelve-zodiac order |
+| `yearStarts` | Strictly increasing, nonzero `uint64` timestamps |
+
+For `N` issuance years, `1 ≤ N ≤ 32`, the array contains `N + 3` timestamps.
+Issuance year `i` uses `[yearStarts[i], yearStarts[i+1])`; its three maturity
+boundaries are indices `i+1`, `i+2`, `i+3`. New issuance closes permanently at
+`yearStarts[N]`. The last issuance year, index `N-1`, becomes terminal at
+`yearStarts[N+2]`. Final conversion remains available forever after that timestamp.
+No year index wraps, no old cohort slot is reused, and no calendar can be appended
+or changed after construction.
+
+The source fixes a complexity ceiling, not an approved economic duration.
+**This finite issuance horizon is a candidate design choice requiring explicit
+production approval.** It is how this implementation bounds dormant historical
+cohorts as well as currently active ones. It must not be silently presented as
+perpetual issuance or an already approved universe rule.
+
+`calendarHash = keccak256(abi.encode(calendarVersion, firstBirthYear,
+firstBirthZodiac, yearStarts))`; the registry address is excluded from that calendar
+hash. Reviewers can reproduce it from the complete configuration. No Gregorian,
+lunar or fixed K280 year boundary is selected by this source. Test calendar dates
+and accelerated clocks are fixtures, not canon. Formal production configuration
+is absent and deployment remains blocked until it is approved and verified.
+
+Before calendar activation, contract `currentYear()` reports the first year and
+`currentAutumn()` reports zero; minting still rejects. Pure policy helpers instead
+reject times before their calendar with `TIME_BEFORE_CALENDAR`. After the final
+boundary, the contract and policy projections clamp their settlement year to the
+final configured year so expired issuance never expires the conversion right.
+
+## 4. One cohort balance, exact tranches and transfer behavior
+
+Each holder/year stores only three remaining integer tranches: `first`, `second`
+and `terminal`. A mint of amount `A` adds `floor(A/2)`,
+`floor(3A/4)-floor(A/2)`, and `A-floor(3A/4)` respectively. Same-year receipts merge
+by addition. Already settled state and incoming unsettled state can therefore
+merge without recalculating old targets or recreating consumed entitlement.
+
+Rounding is fixed per mint proof and never recomputed from a merged balance.
+For real furnace outputs, divisibility by four makes the 50% and 75% targets exact.
+Artificial smallest-unit test mints can round early targets down, and all remaining
+units still belong to the third tranche. For example, a one-wei proof becomes
+fully convertible at the third boundary rather than persisting forever.
+
+For a partial transfer of `x` from live balance `L`, let remaining tranches be
+`F`, `S`, `T`, with `L = F+S+T`. The recipient receives:
+
+```text
+childFirst = floor(F × x / L)
+childFirstPlusSecond = floor((F+S) × x / L)
+childSecond = childFirstPlusSecond - childFirst
+childTerminal = x - childFirstPlusSecond
+```
+
+The sender subtracts exactly those amounts. `Math.mulDiv` handles intermediate
+products safely. Every child tranche stays within the corresponding parent
+tranche, every tranche total is conserved, and the child balance sums to `x`.
+Transfers keep the birth-year key, never settle decay, and never reset age. The
+receiver's same-year balance coalesces by addition, including partial or mature
+receipts. Self-transfers and zero-value ERC-20 transfers create no extra cohort.
+
+No operation walks a receipt list. A transfer or carrier burn examines at most
+the immutable `N ≤ 32` issuance-year slots, even after malicious repeated dusting
+or decades of skipped settlement. More than 64 receipts therefore cannot create
+the old 64-lot lock. Repeated receipts increase immutable proof history, but proof
+history is not traversed by transfer or conversion.
+
+## 5. Birth metadata and provenance limits
+
+Each mint proof permanently records its original beneficiary, amount, timestamp,
+birth year, birth zodiac and birth constellation. The birth zodiac follows the
+configured anchor and remains source information. An active zodiac can be derived
+offchain from the configured anchor and `currentYear()` reference; it does not
+rewrite birth zodiac. After the configured horizon that reference is clamped,
+not a claim that the real-world calendar stopped.
+
+`birthConstellation = 0` means **UNCONFIGURED**, not a guessed star sign. Missing
+precise constellation boundaries does not block this candidate token core.
+
+The immutable proof origin and emitted events preserve issuance provenance.
+Balances are fungible within birth-year cohorts: coalescing does not provide a
+cryptographic per-coin trail from each later recipient back to one particular
+mint proof. No such tracing guarantee is claimed.
+
+`threeAutumnState` in the pure policy module projects an unsplit origin proof.
+Actual holder entitlement after transfers or coalescing is calculated from
+remaining tranches (`claimableTranches` offchain, `claimableDecay` or
+`claimableTotal` on the contract), not by projecting the original proof again.
+
+## 6. Carrier conversion, conservation and supply
+
+The existing holder-authorized converter creates a unique carrier proof and asks
+KUFO to consume only eligible tranches. KUFO verifies the current registered
+converter, rejects replay and records `owner`, `beneficiary`, `converter`,
+`kufoBurned`, `expectedKship`. Existing main KSHIP independently reads that record,
+checks the current converter and exact `expectedKship = kufoBurned × 1000`, and
+marks the carrier proof consumed before minting to its recorded beneficiary.
+The converter checks the returned beneficiary and amount in the same transaction.
+
+The accounting laws are:
+
+```text
+KUFO totalSupply + totalDecayedForKship = totalMintedFromAlchemy
+Every accepted carrier proof: KSHIP minted = KUFO burned × 1000
+Completed converter path: KSHIP totalMintedFromKufo = KUFO totalDecayedForKship × 1000
+Terminal lineage: 1 KUFO → 1000 KSHIP
+```
+
+`MAX_SUPPLY = 72,000,000,000,000 KUFO`. This candidate also limits **lifetime**
+`totalMintedFromAlchemy` to that amount. Decay does not free new issuance capacity;
+otherwise repeated burning and reminting could exhaust KSHIP's fixed cap and lock
+future conversion. The corresponding KSHIP maximum is
+`72,000,000,000,000,000 KSHIP`. Product_05 introduces no KSHIP half-life.
+
+## 7. Protocol ratio, merchant prices and trust boundary
+
+The protocol furnace ratio is fixed at 1,000 KUFO per KAIOS. A restaurant or other
+merchant may quote 100, 1,000 or 2,000 KUFO for 1 KAIOS using its own inventory,
+margin or subsidy. Such a quote does not modify protocol minting. Inventory
+acquisition, profit, subsidy and protocol issuance must be accounted separately.
+This candidate adds no restaurant UI or merchant settlement mechanism.
+
+The KUFO token has no owner/admin mint API, blacklist, seizure function, native
+transfer tax or proxy upgrade mechanism. Its authorized output and converter are
+still resolved through a **mutable external Organ Registry**. Registering a
+malicious output or converter can violate issuance or holder-authorization
+assumptions. Bytecode immutability does not remove that registry trust. Production
+requires reviewed bindings, roles, governance delays and receipt evidence.
+
+## 8. Deployment prerequisites and verification status
+
+No deployment, asset movement, signer use, registry change, real mint/burn,
+governance action or main merge is asserted by this edition. Exact candidate
+compile and local EVM results are recorded in the product implementation report;
+historical CI is not evidence that this candidate passed.
+
+Before production activation, require:
+
+1. Approved calendar, version/hash, zodiac anchor and finite issuance horizon.
+2. Reconciliation of Physics CURRENT V3.8 §238, whose continuous decay illustration
+   leaves 12.5% after three years, with the user's latest annual 50/75/100% rule.
+   This candidate follows the latest explicit engineering instruction; CURRENT
+   has not been edited or silently superseded as a deployed constitution.
+3. Exact-source compilation and local EVM tests covering boundaries, replay,
+   allowance burn, beneficiary binding, partial transfers, dormant years, hostile
+   dust, bounded gas, lifetime cap and terminal smallest-unit cleanup.
+4. Verified existing KAIOS compatibility and complete KUFO/output/converter/KSHIP
+   deployment bindings, with immutable V1 history and deployment lineage retained.
+5. Action-specific human authorization and technical checks for deployment,
+   registry/governance changes or any live asset operation.
+
+PR #600's unique research files remain preserved. PR #158's old catalyst and
+continuous-decay design is not reinstated. PRs #211 and #212 are downstream
+products, not duplicate alchemy cases. This edition closes none of them.
+
+## Preserved historical source edition — superseded candidate mechanics
+
+The original PR #201 whitepaper follows verbatim. Its per-receipt anniversary,
+31,556,926-second year, linked-list lots, 64-lot traversal behavior, source-overwrite
+implications and historical review flow are archival descriptions, not the current
+candidate's behavior or additional mandatory approval gates.
+
+---
+
+# KUFO V4 Whitepaper
+
+Status: DRAFT PRODUCT CANDIDATE
+Version: 4.0.0
+Solidity: 0.8.24
+Upgradeable: NO
+Mainnet status: NOT DEPLOYED / NOT LIVE
+Primary lineage: KAIOS -> K18911 -> K168888 -> K511111 KUFO -> KSHIP
+
+## 1. Purpose
+
+KUFO is the KAIOS civilization mass produced by the K18911 alchemy product and delivered through the K168888 output organ to the K511111 KUFO world coordinate. K511111 is a KAIOS world coordinate and must not be interpreted as a literal EVM address.
+
+KUFO V4 is designed as a non-upgradeable ERC-20 capped material token whose physical law is fixed at deployment. Organ routing remains replaceable through the KAIOS Organ Registry, but the deployed KUFO token implementation itself has no proxy upgrade path.
+
+## 2. Immediate alchemy rule
+
+The current Product_05 rule is:
+
+- INPUT = KAIOS
+- KGEN role = current wallet BALANCE PROOF ONLY
+- required KGEN balance = KAIOS input / 1000
+- KGEN transfer = NO
+- KGEN burn = NO
+- KGEN lock = NO
+- KGEN holding days = 0
+- KUFO output = KAIOS input * 1000
+
+Example:
+
+0.001 KAIOS input + wallet balance >= 0.000001 KGEN -> immediate 1 KUFO.
+
+Old tax-proof, 49-epoch wait and 130-day hold requirements are superseded in this Product_05 lineage.
+
+## 3. Three-Autumn decay law
+
+KUFO V4 does not use an infinite exponential half-life. Each lineage lot has a terminal three-autumn schedule.
+
+K280_YEAR_SECONDS = 31,556,926.
+
+For each original KUFO lot:
+
+- Before Year 1: 0% converted.
+- First Autumn: cumulative 50% of the original lot converts to KSHIP.
+- Second Autumn: cumulative 75% of the original lot converts to KSHIP.
+- Third Autumn: 100% cumulative conversion; every remaining smallest unit is terminally consumed.
+
+Final material relation:
+
+1 KUFO -> 1000 KSHIP total.
+
+No nine-autumn KUFO dust is permitted.
+
+## 4. Transfer and market behavior
+
+KUFO is transferable. Transfer does not reset decay age.
+
+Each mint creates a lineage lot recording:
+
+- owner
+- initialAmount
+- convertedAmount
+- firstAutumnTarget
+- secondAutumnTarget
+- bornAt
+- sourceProof
+
+When a holder transfers or sells only part of a lot, the contract partitions the lot. The child lot inherits the original bornAt timestamp. First- and second-autumn cumulative targets are partitioned from the already committed original targets instead of being recomputed from scratch.
+
+This is required so repeated buying, selling, splitting, or wallet movement cannot make KUFO younger and cannot defer its required decay.
+
+Core invariant:
+
+TRANSFER MUST NOT RESET DECAY AGE.
+
+## 5. KSHIP conversion lineage
+
+Matured KUFO can be burned only through the current Organ Registry KSHIP converter.
+
+The converter creates a unique carrier proof. KUFO records:
+
+- owner
+- beneficiary
+- converter
+- kufoBurned
+- expectedKship
+
+KSHIP then independently reads that KUFO carrier record and mints only when the proof lineage matches the current converter and the exact 1:1000 relation.
+
+Proof reuse is rejected.
+
+## 6. Conservation
+
+KUFO V4 tracks:
+
+- totalMintedFromAlchemy
+- totalDecayedForKship
+- current totalSupply
+
+The token exposes the invariant:
+
+totalSupply + totalDecayedForKship == totalMintedFromAlchemy
+
+A normal holder cannot arbitrarily burn KUFO outside the controlled decay path.
+
+## 7. Supply and administrative surface
+
+MAX_SUPPLY = 72,000,000,000,000 KUFO.
+
+KUFO V4 has no owner mint, no arbitrary admin mint, no native transfer tax, no blacklist, no seizure function and no upgradeTo/upgradeToAndCall proxy mechanism.
+
+The Organ Registry can change which external organ is authorized as the current output or KSHIP converter. This changes routing authority; it does not replace the KUFO token bytecode.
+
+## 8. Bounded lineage traversal
+
+One transfer or decay operation traverses at most 64 lots.
+
+MAX_LOTS_PER_OPERATION = 64.
+
+If the required operation would exceed that traversal bound, the operation fails closed instead of silently omitting lineage or decay accounting. High-frequency market use may therefore require future organ-level batching or safe lot-consolidation design, but no consolidation mechanism may reset bornAt or alter already committed decay targets.
+
+## 9. Security boundaries
+
+The V4 candidate requires review for:
+
+- immediate proof replay protection
+- current-output authorization
+- current-KSHIP-converter authorization
+- beneficiary binding
+- partial-lot conservation
+- Year 1 / Year 2 rounding preservation
+- Year 3 terminal dust removal
+- 64-lot fail-closed behavior
+- KUFO/KSHIP exact conservation
+- transfer-age preservation
+
+## 10. Deployment boundary
+
+This whitepaper describes a repository candidate. It does not assert deployment, Mainnet activation, registry mutation, signer execution, token transfer, governance approval or chain write.
+
+The required flow is:
+
+玄曜 Product Engineering -> exact-head CI / EVM tests -> Codex/衡曜 GM independent review -> human-authorized deployment process.
+
+---
+
+## Human 2026-11-14 最終更正：單一簡化年度轉化
+
+記錄UTC 2026-11-14T05:40:20.735Z，台灣 2026-11-14T13:40:20.735+08:00；WORK_ID KUFO-637-SINGLE-ANNUAL-DECAY-20261114-01，Writer Codex衡曜/root，非原子人工派工。
+
+本節依本頁 Human 明確指令「衰變沒有第二套，只有一套，就是簡化版，統一跨年後轉，三年完全轉換」定案。它取代較早連續指數半衰期、食用儲備另設連續衰變，以及要求 Human 在兩套算法間選擇的提案。這些舊內容只供歷史追溯，不再是本工程的可執行規則；不得由後續 heartbeat 恢復為待選方案。
+
+唯一的 KUFO→KSHIP 規則：
+
+- 沿既有台灣 UTC+8 公曆共同年界計算：首次跨年累計可轉50%，第二次75%，第三次100%，第三次結清餘額與最小單位尾差。
+- 以最初1 KUFO且權利未移轉的例子，三階段累計可轉產物為500、750、1,000 KSHIP；每次只結算尚未轉過的差額，不能重複發放。
+- 「三年」是三次共同跨年，不是每位持有人都必須持滿1,095日。年底出生的批次可很快跨第一次年界。
+- 年界只增加可轉資格。持有人或明確授權流程仍需發起原轉化；日期到達不會自動扣款、簽署或送鏈上交易。
+- 不設逐毫秒／每秒連續衰變 tick，不設食用儲備的第二套指數產出。按需查詢時才從年界計算階段，依同一份權利結算。
+- 轉讓保留剩餘年度權利，漏年可補結；同一份 KUFO 不得再經另一條衰變路徑重發 KSHIP。對「1→0.5→0.25→0.125」的舊指數算例，不再用作 KUFO 執行政策。
+- 食用量限制速度與載具耗料屬後續使用規則；不得藉此建立第二次 KUFO→KSHIP 產出。反物質速度的10%效率算例只是展示，未採為費率、效率、燃料定價或實際推力。
+
+Human 聚寶盆交接仍保留，但其成本目前依 Human 指示不凍結。KGOD在本次配方代表正物質；KSHIP正／反通道的實際配給仍未配置。K108000基本KSHIP→KGOD不需要KGOD母版；聚寶盆配方則保留母版，n KGOD＋n KSHIP→2n KGOD，淨KGOD+n／KSHIP−n。指定反物質通道時需明記KSHIP−，不把未分類餘額直接當負通道。
+
+觸媒僅KDNA（藍圖）＋KRNA（次序）＋KSTART（點火）；KLINE（畫線能力）另列。這些能力按本頁Human定義，不冒稱歷史分支已完整核實。其他物品X保留原物、淨增一份同規格X，但各項燃料、時間、費用、權限及觸媒持有／鎖定／消耗／回收方式未配置，不自行套1 KSHIP或燃燒代幣。配方點火前核條件，完成時輸入、輸出與證明原子結算並防重，使用固定精度整數及明定餘數保存；KUFO轉帳不自動鑄KGOD。
+
+既有c428ac0d候選已採上述共同年界及按需計算，可保持程式不改。本節是既有CURRENT／白皮書／工程報告的完整累積澄清；舊原文全部保留。未執行新suite，原69項仍僅屬舊候選範圍；未宣稱聚寶盆／食用速度／正反通道實作或部署完成。合約、既有下載包、鏈上資產及角色未由本次文件更正改動。
+
+---
+
+## Human 2026-11-14 KUFO／KSHIP前後接續產物鏈與世界點位定稿
+
+Human 本頁指定 KUFO 和 KSHIP 是同一條前後接續的產物鏈，按可理解的世界創作連接。此處「接續」沿用唯一共同跨年50%／75%／100%的簡化轉化，第三次結清；不恢復指數連續衰變或第二套產出。
+
+| 世界功能點 | 本次正式角色 | 實作與地址綁定 |
+|---|---|---|
+| K18911 | 煉丹爐煉KUFO；KUFO幣的世界入口 | Furnace與KUFO ERC20是兩個合約，各有自己的0x地址；入口應展示並核對兩者，數字18911本身不是鏈上地址 |
+| K168888 | 金斗雲／筋斗雲，KUFO產出地 | 原Output器官用同一真實KAIOS銷毀證明，向固定受益人產出KUFO |
+| K511111 | 蟲洞，KSHIP出生地 | 沿原KSHIPConverter把可轉KUFO實際burn，再依同份carrier proof產出KSHIP；不新增第二個轉化器 |
+| K108000 | 點石成金，KSHIP反物質石頭轉KGOD金塊 | 本頁Human世界配方；成本目前先不凍結，精確資產／通道／數量／權限／守恆未配置，尚未實作部署 |
+| K111111 | 如來神掌，黃金水／黃金手掌的世界場景 | 敘事／玩法接續，尚未由本KUFO／KSHIP核心實作或驗收 |
+| K12345 | 五指山，接續做空玩法 | 原場景／交易軟體範圍另核；本條敘事不觸發或授權真實做空交易 |
+
+正式代幣名稱仍為KUFO；Human同段「KUFI」按原上下文沿用KUFO，不另造代幣。KGOD、K108000、111111與12345可以接續世界故事；本次可交付的五個合約仍只限 KUFO、Furnace、Output、KSHIP、Converter，不把全條故事宣稱為已完成主網系統。
+
+### 原碼對齊與相容性
+
+舊c428ac0d候選曾在KUFO／Furnace／Output把511111標為KUFO token point，與本頁定稿不符。本次沿原五個合約更正：
+
+- KUFO：TOKEN_POINT_18911()＝18911，取代未部署候選的TOKEN_POINT_511111()；須更新ABI，外部新消費者不能再用舊getter。
+- Furnace與Output：TOKEN_POINT()＝18911；Furnace仍是18911，Output仍是168888。
+- Output constructor的KUFO參數中性命名為kufoToken，型別、順序與實際immutable綁定不變。
+- KSHIP：TOKEN_POINT_511111()＝511111。
+- 既有KSHIPConverter：WORMHOLE_POINT_511111()＝511111，作為同一產物鏈的出生蟲洞。
+
+以上是世界點位標記，不把Furnace的實址當KUFO token實址，也不把點位當0x地址。Registry key、owner／角色、KAIOS真burn、鑄造比率、供應額度、三年規則、持有人授權及單一路徑防重保持原設計。歷史KUFOClaimWormhole.sol是舊KUFO成熟領取，沒有改名冒充新KSHIP蟲洞，其Registry key與舊LIVE保持歷史。
+
+新增驗證只針對新原碼／ABI／出生鏈：原真實alchemy案例讀回各點位與immutable，核同一KAIOS burn、168888出料事件、KUFO出生及第三共同年界轉化、KSHIP carrier proof與受益人數量守恆。實際編譯／EVM結果與固定提交以本節後的交付證據及新審核manifest為準；舊69項與舊包不作本次新指紋通過證據。
+
+### 部署狀態
+
+此為上鏈前審核候選。尚無本版正式部署地址、constructor實參、簽署、交易回執、proposal或executableAt。舊LIVE與舊CI不證明新版部署。應先完成來源與Writer核對、相稱驗證、實址／角色／既有權利切換與原費用核驗，再由合法持有人本人既有錢包確認部署及原Registry啟用；AI不代簽、送部署或自行開真單。原身份核對兩次停止與其他具體HOLD不變。
+
+### 本次固定程式與相稱驗證（世界點位對齊）
+
+固定程式／測試提交：`b0823224273b3b7cadd421086284dcb86adc1ce1`。solc0.8.24、OZ5.0.2、optimizer runs1、viaIR、paris、metadataHash none；新36合約編譯PASS、0warnings，standard-input SHA256 `db9467bafa46902343481a4ec0eb6ce5d8b1926a50a3f9c5973f8309f76b5057`。compile log SHA256 `37342aad0a619bd2b34fbb561066fa4c9c84b4537575b6a9972ba9a8e6ad6353`。
+
+一次受影響suite選取1項真實alchemy／KSHIP EVM與4項ABI，**5/5 PASS，0fail/skip/cancel，21784.8102ms**；本次實測UTC2026-11-14T06:09:16.431Z。原其餘30個EVM案例未選取，不稱全部重驗；舊69項仍按舊提交分列。Windows Ganache的µWS原生binary不匹配，原log保留NodeJS fallback，實際EVM案例執行成功，未改環境或依賴。測試log SHA256 `aa4ed57774af1d9e0bba9184eaddf8a41457f01442072f27dc7152cb495d6843`。獨立靜態diff審查NO_BLOCKER，非外部審計認證。
+
+新getter／ABI須配套新artifact，不可套用c428舊ABI或舊gas估價。未新增RPC、runtime／immutable身份重試、簽署或公共交易；原身份核對兩次停止保持NOT_VERIFIED。正式constructor、activation timestamp、deployer／nonce、新合約地址、proposal、receipt、executableAt仍未配置／null。K108000／KGOD／111111／12345屬未實作世界接續。交付head與新包逐檔SHA由原工程窗口保存；仍是未部署候選。

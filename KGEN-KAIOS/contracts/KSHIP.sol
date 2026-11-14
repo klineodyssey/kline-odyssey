@@ -23,6 +23,7 @@ interface IKUFOBurnRecordSource {
  */
 contract KSHIP is ERC20, ERC20Capped {
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
+    uint256 public constant TOKEN_POINT_511111 = 511_111;
     uint256 public constant MAX_SUPPLY = 72_000_000_000_000_000 ether;
 
     IKAIOSOrganRegistry public immutable organRegistry;

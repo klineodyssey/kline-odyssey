@@ -1,5 +1,49 @@
 # KGEN AI Operating System
 
+## KUFO 最新工程入口：12整月自動輪值（2026-11-14，本機69項驗證／未部署）
+
+Human已確認一年12個月，月初一起換輪值等級與星座，整月不切日。採台灣UTC+8公曆，閏年由算法處理；正式啟用時間另填constructor，不默認2027。1月至12月為修練佛、魔王、凡人、龍、神仙、神明、神君（玉皇大帝）、外星人、變形金剛、十三生肖、人類、萬靈；第10等含原12生肖+AI類共13子類，全年仍12月。星座為摩羯、水瓶、雙魚、牡羊、金牛、雙子、巨蟹、獅子、處女、天秤、天蠍、射手，各整月固定。
+
+同一KUFO候選以不可變公曆算法取代農曆補表；2039不停新鑄、不需AI或Owner逐年補表交易。煉丹／轉化仍由持有人本人授權發起，不隨月界自動扣資產。真burn1KAIOS→1000KUFO、KGEN只查餘額、年度累計50/75/100、永久補結／尾差、供應cap、32組批次及原Registry／Converter安全保留。天堂日365K280日不改資產成熟時間。
+
+完整自足規格與歷史分別在 [KUFO白皮書](docs/KUFO_V4_WHITEPAPER.md)、[KSHIP白皮書](docs/KSHIP_V4_WHITEPAPER.md)，精確來源、驗證／失敗log、下載與部署清單在既有 [工程報告](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)。正式入口仍是contracts/KUFO.sol、KAIOSAlchemyFurnace.sol、KUFOOutputJindouyun168888.sol、KSHIP.sol及KSHIPConverter.sol；policy仍是runtime/kufo-policy.mjs。新ABI需配套，舊LIVE及8522下載包不能充當本版部署證據。AI不簽署、送部署或真交易。
+
+下方完整保留舊README，其農曆、append、36年輪值、2039停鑄及舊PASS均限定於各自歷史來源。
+
+---
+# KGEN AI Operating System
+
+## KUFO #637 持續煉丹權威接續（2026-11-14，LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED）
+
+Human 最新要求「好改到好，星座和生肖能配合到1萬年航程嗎」。沿原穩定 KUFO 入口改為 append-only 分段 calendar；**舊 32 年終身停鑄設計已被取代，2039 停鑄草案未採用**，不另建代幣、Runtime 或產品。
+初始 constructor 最多32年／512出生窗口，治理 append 每次最多32年／256窗口（MAX_APPEND_BIRTH_WINDOWS），跨度須同時符合窗口數限制，不再是終身上限；供應 cap 及原比例保持。最大32年／256窗／287交集分組append實測propose428,852、execute7,555,818 gas<8M，未套用constructor的30M部署預算。現任 Organ Registry owner 提案精確 payload hash，沿 minimumDelay（至少一小時）等待；到期可由任何帳戶執行，但須核同一 owner、parent hash、payload，取消由現任 owner 辦理。僅接末端，完全匹配舊末三年界，不修改舊 group。
+可補未覆蓋的過期空窗，但當下 mint 不得追溯；缺當下正式未來表時暫拒新 mint，合法追加後可恢復。持續出料仍需持續資料與治理維護，不保證無人維護也永不停止。
+初始 calendarHash／version 不變，latestCalendarHash 逐段鏈接，groupCalendarHash 固定出生段；origin／轉讓不重設出生屬性。uint32 年／cohort／group、活躍持有人有序 bitmap 與年度 aggregate 是長期候選設計；一般 transfer／burn 每批最多 32 個 group，更多用 selected-group 分批，claimableTotal 超批則用 heldGroups／claimableForGroups 分頁。
+萬年目標不等於已批准萬年農曆／天文表；香港天文台公開對照為 1901–2100，遠期日界可能有日期差異。Human 已確認生肖年界沿用**地球農曆新年**，不能改元旦或宣稱精準萬年預測；正式生效時間、時區、財務年界、星座窗口及各期具體表仍須依原定案程序核定，不能用合成數值或2039草案代填。
+原年度50%／75%／100%、永久補結、尾差、供應 cap、真 burn、KGEN、allowance 與實際 KUFO／KSHIP 產出核驗保持。固定程式／測試提交為 `0bf33c4b1ed61da5ddd08c4f426e3e6a5408fd9b`：36合約編譯、0 warnings，248620.5081ms；最終 **31/31 EVM PASS**（0 failed/skipped/cancelled，625773.2286ms）。純policy20/20 PASS（7471.6809ms）未重跑；首輪4 ABI＋10 main lineage通過，34份未變artifact的creation/runtime/ABI與KUFO ABI相同，這14項未重跑。**65項組合矩陣，不是一次65項全跑**；下方35項與另185項僅屬前輪歷史。
+第一輪45項為44 PASS／1 FAIL（718824.4665ms），原dust transfer超過300k。六個global-zero祖先guard修正保留原log與archive、未放寬門檻；最終dust transfer264,105<300k、settle340,037<500k。dormant32一般transfer／settle4,820,020／1,400,028、selected32 transfer／convert2,783,334／1,014,984 gas；最大constructor18,216,737<30M、initcode40,242<49,152 bytes。完整固定指紋、編譯輸入與gas／log證據見原[KUFO白皮書](docs/KUFO_V4_WHITEPAPER.md)與工程報告。
+uint32 bitmap actor是內部索引單元，不是建立65,536個真cohort；10,000年／120,000分組是純資料測試，不是萬年天文預測。獨立原碼NO_BLOCKER不是外部安全審計。origin groupId由uint16改uint32、issuanceCohorts由uint8改uint32，Furnace新增groupCalendarHash依賴；必須配套五合約新ABI／地址／綁定核驗，不能混接舊Furnace、原地升級或覆寫既有LIVE。
+**狀態 LOCAL_CODE_AND_TESTS_VERIFIED_NOT_DEPLOYED**；正式參數、地址、綁定、授權及成本仍待核定，UI／實體手機／真錢包未驗。本輪未新增支出不代表未來年曆與治理上鏈免費，合法持有人仍須核准當次gas及費用。
+完整規格及證據仍沿下方既有白皮書與工程報告累積，合法持有人負責真實治理確認；AI 未部署、未簽署或送資產交易。
+
+## KUFO 原 #637 正式工程入口（2026-11-13）
+
+Human 已指定沿既有年度候選與最新 main 整合。正式名稱固定 KUFO；唯一原碼入口為
+`KGEN-KAIOS/contracts/KUFO.sol`、`KAIOSAlchemyFurnace.sol`、
+`KUFOOutputJindouyun168888.sol`、`KSHIP.sol`、`KSHIPConverter.sol`，
+原有純投影遷移至 `KGEN-KAIOS/runtime/kufo-policy.mjs`，不另建 Runtime。
+其中 Output 檔完整路徑為 `KGEN-KAIOS/contracts/KUFOOutputJindouyun168888.sol`。
+完整來源／歷史相容性／規格與部署檢核，沿用
+[`KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)。
+帶版本測試與文件路徑是沿革，不是另一正式代幣。
+正式曆法、時區、年界、生肖／星座窗口與發行期限未定；尚未部署。
+先前固定程式e03ef59e、測試修訂cc466c58／PR head6bedaec3的218項通過結果（198非EVM＋20EVM）保留為歷史；該20項EVM未覆蓋本次新發現的Converter no-mint缺口，不能替代新修正驗證。
+舊`KGEN-KAIOS/artifacts/kufo-deployment-review.zip`僅保留6bedaec3歷史包；本次新包依最終交付SHA命名為`kufo-deployment-review-<deliverySHA8>.zip`，沿原artifacts保存五份正式artifact／完整編譯輸入／測試log／待定constructor清單，不能直接送部署交易。
+以下較早的 49 Epoch 與 V4 候選路徑表保留為歷史，不構成現行入口或新驗收。
+
+原 `contracts/KSHIPConverter.sol` 固定來源 `86ee4e8e` 補強兩個既有入口的原子產出驗證：constructor 保留兩地址 ABI，要求兩 token 有合約程式碼、KSHIP 綁定正確 KUFO 且 Registry 一致；burn 前保存 KSHIP proof 未用及供應量／累計鑄造／受益人餘額，burn 後核真 KUFO carrier record，mint 後核 proof 與三項精確增量。失配整筆回滾，不以回傳 tuple 取代實際 KSHIP 產出。
+任意 getter-liar 位元碼仍須由合法持有人核實 canonical runtime／immutable／地址與治理綁定。本輪受影響35/35 PASS（22 EVM＋10 legacy lineage＋3 ABI），0 failed/skipped/cancelled，482912.2407ms；指紋與新交付SHA命名的審核包由原工程報告保存。正式參數仍待核定，狀態保持 `NOT_DEPLOYED`，AI 未部署或簽署。
+
 **System ID:** KAIOS
 **Version:** V10.0 Operating System
 **Status:** Active / Read-only Operating Center
@@ -24,7 +68,36 @@ No deployment script or Mainnet address is included.
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
 
-## Purpose
+## KUFO Product 05 annual-cohort review continuation
+
+Candidate only; no deployment or original task-lease claim. The complete source
+crosswalk, preserved #201/#600 heads, gas-bound design, validation and deployment
+prerequisites are in
+[`KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md`](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md).
+This uses existing candidate paths, leaves deployed V1/main KAIOS and KSHIP
+unchanged, and does not create another Runtime or ledger.
+
+| Full repository path | Purpose |
+|---|---|
+| `KGEN-KAIOS/contracts/KUFOV4.sol` | Annual shared-cohort KUFO candidate; immutable explicit bounded calendar and terminal settlement. |
+| `KGEN-KAIOS/contracts/KAIOSAlchemyFurnaceV4.sol` | Immediate KAIOS burn and current KGEN balance proof. |
+| `KGEN-KAIOS/contracts/KUFOOutputJindouyun168888V4.sol` | Fixed-beneficiary immediate outlet. |
+| `KGEN-KAIOS/runtime/kufo-v4-policy.mjs` | Pure annual/tranche projection using preserved #600 calendar parsing. |
+| `KGEN-KAIOS/tests/contracts/KUFOV4EvmHarness.sol` | Local EVM adversarial actors. |
+| `KGEN-KAIOS/tests/kufo-v4-evm.behavior.test.mjs` | Cohort, dust, gas, allowance, proof and conservation tests. |
+| `KGEN-KAIOS/tests/kufo-v4-kship-interface.unit.test.mjs` | Existing main KSHIP carrier interface compatibility. |
+| `KGEN-KAIOS/tests/kufo-v4-three-autumns.unit.test.mjs` | Pure policy and integer-partition properties. |
+| `KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md` | Full cumulative KUFO candidate specification with preserved history. |
+| `KGEN-KAIOS/docs/KSHIP_V4_WHITEPAPER.md` | Full cumulative KSHIP integration specification with preserved history. |
+| `KGEN-KAIOS/research/kufo-zodiac-cohort-v0.mjs` | Unchanged #600 research, zodiac calendar and unique latency helper. |
+| `KGEN-KAIOS/research/kufo-zodiac-cohort-v0.test.mjs` | Unchanged nine-test research suite. |
+| `KGEN-KAIOS/research/README-kufo-zodiac-cohort-v0.md` | Unchanged research assumptions, noncanonical calendar and safety scope. |
+
+Boot navigation uses the existing CURRENT Boot -> master-library index ->
+`docs/KGEN_MASTER_INDEX.md` -> this module README. Boot and CURRENT remain
+unchanged because no Boot or physics update was requested.
+
+## Operating-system purpose (continued)
 
 KAIOS is the KGEN AI Operating System. It is not another document library and it is not a mass document expansion. It is the architecture layer that coordinates AI workers, tasks, claims, reports, reviews, recovery, dashboard state, and security policy.
 
@@ -805,3 +878,10 @@ been copied into main pending bounded Boot-registration authority. No Bank
 copy, new Runtime, bootstrap, package replacement, deployment or real payment
 is included in this existing-file frontend change. Underground growth remains
 available independently of the disabled underground micro-claim path.
+
+
+## 2026-11-14 Human世界點位與單一年度轉化接續
+
+最新正式世界流程：18911煉KUFO（KUFO入口與Furnace各自0x實址分列）→168888金斗雲產出KUFO→511111原Converter蟲洞出生KSHIP→K108000點石成金KGOD→111111如來神掌→12345五指山做空玩法。後三段是未實作/未配置的世界接續，不列本次五合約已完成功能；不觸發真實交易。
+
+原五合約保留單一共同跨年50/75/100、第三結清，按需計算、不逐毫秒衰變。KUFO getter改TOKEN_POINT_18911；KSHIP TOKEN_POINT_511111、Converter WORMHOLE_POINT_511111；需新ABI，不能用c428舊包。下方/上方歷史KUFOClaimWormhole只屬舊KUFO領取器官，其key與舊LIVE未改。最新固定來源/實測/下載依[工程報告](KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)、[KUFO完整白皮書](docs/KUFO_V4_WHITEPAPER.md)、[KSHIP完整白皮書](docs/KSHIP_V4_WHITEPAPER.md)，尚未部署。
