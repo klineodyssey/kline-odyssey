@@ -1,3 +1,15 @@
+## 2026-11-14 全倉庫Node失敗診斷已獲Human明確重開：同步既有Physics完整性綁定
+
+WORK_ID `KUFO-637-FULL-NODE-DIAGNOSIS-20261114-REOPEN-01`；實際修改者Codex（衡曜 /root）。來源main `33967045ed725848a6b814af0e9b10eac64f2ec7`、起點 `89362cf9c5eb8554f7c840d36fb441d759050024`。先前兩次Transport closed的停止與原回執保留；Human對本頁精確範圍問題明確回覆「允許重開這項診斷，最多兩次」後，先保存授權與新attempt1，再讀本提交run43597829820/job132456013262失敗日誌，第一次成功。這只重開全Node診斷，不重開身份/Owner查詢、不授權簽署或送部署。
+
+正式日誌顯示本次完整Node套件524項，523PASS／1FAIL；唯一失敗為tests/universal-exchange.test.mjs的V3.8 Physics CURRENT完整性案例，expected舊hash d01d6fc...，actual為已核CURRENT/V3.8新hash00fc7849...。core/data/canonical.json兩份active binding也仍舊hash，因此只改測試expected仍不能恢復真實worker完整性健康。
+
+沿既有canonical及原測試修正：兩份active SHA/evidence更新為 `00fc7849d79e595bc7246126f6acb885c9fcbe13e40ff8c77cb2a012388a77e1`；使用既有createThoughtOrganTimelineEvent追加第三筆PHYSICS_THOUGHT_ORGAN_UPDATED。既有dbb477...與d01d6fc...兩筆歷史逐項保留；JSON深比較確認其餘canonical資料完全不變。loaded_at、ID/version、權限、scheduler、資產、健康/錯配拒絕邏輯均未改，沒有新Runtime/系統或新經濟規則。
+
+既有測試固定新hash，另核兩份active binding與實際文件一致。第一次受影響三案例3/3PASS（805.4093ms），隨後universal-exchange完整單檔263/263PASS（5770.2262ms）；這是兩次分列驗證，不合寫成單次266項。本機root glob包含Python subprocess，依原停止條件未執行該glob或Python；全倉庫Linux原CI另讀實際結果，不借本機263項宣稱524全過。五合約及其測試/編譯器未修改、未本機重跑。
+
+只讀獨立審查NO_BLOCKER：舊歷史未刪、兩active pins一致、負例檢查仍拒絕錯配。授權、三檔before快照、完整失敗log、pin-repair深比較結果與兩測試log均保存原kaios證據目錄ci-scope-20261114T124917Z。新head及CI結果沿原checkpoint/handoff讀回保存；尚未合併或部署，所有正式constructor/啟用/帳號/費用/新址/回執保持待核，原身份及Owner兩次停止不變。以下既有完整工程史全部保留。
+
 ## 2026-11-14 Human直接修正：追溯原作者並解除不適用的文件審查限制
 
 WORK_ID `KUFO-637-CI-SCOPE-20261114T124917Z`；實際修改者 Codex（衡曜 /root），來源main `33967045ed725848a6b814af0e9b10eac64f2ec7`，施工起點/舊交付 `c2ab2ce3ffd0c3e86c4cfa12d5437502adc72f8a`。本頁Human直接要求查明#637的頁名、撰寫者；若無法查明則改掉阻擋上鏈的規定。此項新指示只修正下列原CI規則，不授權AI簽署或送交易。
