@@ -95,6 +95,7 @@ dependency-readonly.json SHA256 `8a5fa15440c6c49df02a2839935a741c0e643710d777ced
 
 KAIOS.KGEN／ORGAN_REGISTRY與上述依賴匹配。歷史exact Genesis原碼具備相同burnForAlchemy／九欄AlchemyBurnRecord、真allowance與burn；其inscription常數與當前source不同，不能拿當前KAIOS artifact冒作Genesis runtime。
 本輪已觀察codehash並核getters／routes，不等同完成所有歷史runtime來源／immutable重建；窄核結果另存審核包，尚未通過的身份項不得標PASS。
+窄核實際結果：第一次只選兩份歷史runtime的編譯成功（16.543秒，0errors/0warnings），其後因把codeKeccak256欄位誤讀為codeKeccak而失敗，未保留該compiler output；第二次在compile前誤查metadata.code欄位而停止。原dependency-readonly.json其實已在calls[].result保存eth_getCode原始回應，不能說原資料不存在。兩次後處理錯誤與log原樣保存，本輪不第三次嘗試、不改編譯設定、不另走端點；這不是鏈上權限拒絕。來源與immutable身份仍NOT_VERIFIED。部署前仍須依原流程完成此項機械對照、固定constructor／帳戶／費用並由合法持有人本人確認；不能用本機69PASS代替它。
 零route和回報burnCount0只描述此快照，不推斷全鏈零舊資產。原WORMHOLE舊proof路徑保留；共享CONVERTER若另有舊KUFO／KSHIP，需先核cutover對既有轉化權的影響。
 
 ### 下載與部署清單
