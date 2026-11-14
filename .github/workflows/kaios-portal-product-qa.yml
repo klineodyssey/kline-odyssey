@@ -9,6 +9,7 @@ on:
       - 'K線西遊記/temples/16888/**'
       - 'K線西遊記/temples/11520/**'
       - 'K線西遊記/temples/18888/**'
+      - 'K線西遊記/temples/18911/**'
       - 'KGEN-KAIOS/tests/token-surface.security.test.mjs'
       - 'KGEN-KAIOS/package*.json'
       - 'tests/kaios-*'
@@ -46,6 +47,7 @@ jobs:
       - name: Registry, audio and domain regressions
         run: |
           node --test tests/kaios-portal.test.mjs tests/kaios-audio.test.mjs
+          node --test tests/kaios-18911.test.mjs
           node tests/kaios-portal-link-audit.mjs
       - name: Offline human-wallet and PWA regressions
         run: |
@@ -53,6 +55,19 @@ jobs:
           # Ignore install scripts; force only permits that existing platform entry.
           npm ci --prefix KGEN-KAIOS --ignore-scripts --force --no-audit --no-fund
           npm run compile --prefix KGEN-KAIOS
+          node --input-type=module <<'K18911_PAYLOAD'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const panel=JSON.parse(fs.readFileSync('K線西遊記/temples/18911/contracts.json','utf8'));
+          for(const [name,contract] of Object.entries(panel.contracts)){
+            const compiled=JSON.parse(fs.readFileSync('KGEN-KAIOS/artifacts/'+name+'.json','utf8'));
+            assert.equal(contract.bytecode,compiled.bytecode,name+' creation payload must match actual compiler output');
+            assert.equal(contract.deployedBytecode,compiled.deployedBytecode,name+' runtime payload must match actual compiler output');
+            assert.deepEqual(contract.immutableReferences,compiled.immutableReferences,name+' immutable references must match');
+            assert.deepEqual(contract.abi,compiled.abi,name+' ABI must match');
+          }
+          console.log('18911 five-contract payload matches the actual existing compiler output');
+          K18911_PAYLOAD
           node --test --test-concurrency=1 KGEN-KAIOS/tests/token-surface.security.test.mjs 'K線西遊記/temples/11520/tests/11520-pwa-bgm.test.mjs'
       - name: Install Chromium
         run: |
@@ -69,10 +84,19 @@ jobs:
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" || true' EXIT
           sleep 2
+          node tests/kaios-18911-browser.mjs
           node tests/kaios-portal-browser.mjs --funding-only
           node tests/kaios-portal-browser.mjs
           node tests/kaios-world-audio-browser.mjs
           node 'K線西遊記/temples/11520/tests/11520-browser-audio-world.mjs'
+      - name: K18911 focused screenshots and results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: kaios-18911-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/kaios-18911-qa/
+          if-no-files-found: error
+          retention-days: 14
       - name: Reviewable screenshots and results
         if: always()
         uses: actions/upload-artifact@v7

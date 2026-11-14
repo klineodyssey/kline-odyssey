@@ -1482,3 +1482,15 @@ fixed cases and Guanyin pause remain available. The existing token-surface
 regression passes65/65; mobile visual verification uses the existing isolated
 Portal CI before publication. Wallet connection/signing and actual limit
 activation still require the lawful Human holder and canonical chain results.
+
+## 18911 煉丹爐面板（候選驗收中）
+
+`K線西遊記/temples/18911/index.html` 是唯一18911玩家可見入口；首頁 `index.html#alchemyEntry` 提供服務連結。玩家煉丹與王母本人錢包部署分開，皆需先預覽再由本人錢包確認，不讀取私鑰或自動送單。新爐未由原Registry啟用前，不改用舊49 Epoch爐。
+
+- `K線西遊記/temples/18911/panel.mjs`：同頁呈現、費用上限/明確確認、pending恢復與公開紀錄匯出。
+- `K線西遊記/temples/18911/kufo-client.mjs`：沿既有EIP1193 provider，驗chain56/Owner/固定代碼、原五合約的逐筆回執與immutable綁定、Registry三器官和玩家approve/burn；不建立另一套WalletConnect、Runtime或bootstrap。
+- `K線西遊記/temples/18911/contracts.json`：從原五合約編譯artifact匯出的公開ABI/creation/runtime/immutableReferences與來源指紋；既有Portal CI重新編譯後逐份比對，不是新合約。
+- `tests/kaios-18911.test.mjs`：隔離模擬provider與儲存/鎖/角色/回執故障測試。
+- `tests/kaios-18911-browser.mjs`：既有Linux Portal CI的手機/桌面真Chromium模擬錢包驗收與截圖，禁止本機停用瀏覽器或真鏈交易。
+
+共用樣式與 provider 選擇沿 `K線西遊記/modules/kgen-game-core.css`、`kgen-game-core.js`，ABI工具沿原 `K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js`。不觸碰#523保護的11520 Navigator/world-registry；Boot CURRENT路徑登記待本頁Human明確答覆，不改Boot V1.4/Physics/經濟規則。FUNCTIONAL_QA與VISUAL_QA尚未完成，不宣稱已部署、已可煉丹、手機或真錢包驗收。

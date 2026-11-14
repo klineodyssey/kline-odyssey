@@ -1119,3 +1119,9 @@ against all three original cases; current65-test offline regression passes.
 ## 2026-11-14 KUFO／KSHIP世界點位最新接續
 
 沿原`KGEN-KAIOS/contracts/KUFO.sol`、`KAIOSAlchemyFurnace.sol`、`KUFOOutputJindouyun168888.sol`、`KSHIP.sol`、`KSHIPConverter.sol`：18911為KUFO煉丹/幣世界入口，168888為KUFO出料，511111為KSHIP出生蟲洞（原Converter）；實址各自綁定，不以點位數字代替。K108000→KGOD→111111→12345只列待實作世界接續；歷史KUFOClaimWormhole不改成新器官。正式三年只採UTC+8共同跨年50/75/100、不設第二套連續衰變。原[工程報告](../KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md)、[KUFO白皮書](../KGEN-KAIOS/docs/KUFO_V4_WHITEPAPER.md)、[KSHIP白皮書](../KGEN-KAIOS/docs/KSHIP_V4_WHITEPAPER.md)保留累積全文與新ABI/驗證/部署邊界；無新Runtime/bootstrap/版本檔。本版尚未部署。
+
+## K18911 玩家煉丹與本人錢包部署入口（候選驗收中）
+
+唯一頁面 `K線西遊記/temples/18911/index.html`（18911煉丹爐，與18921斬妖台不同點）；首頁 `index.html#alchemyEntry` 可見。`panel.mjs` 為同頁UI，`kufo-client.mjs` 是原五合約的EIP1193/回執驗證client，`contracts.json` 是原合約已編譯公開payload，均位於 `K線西遊記/temples/18911/`。不建立新Runtime、bootstrap、WalletConnect或簽署服務。
+
+驗證：`tests/kaios-18911.test.mjs` 隔離provider狀態及安全測試；`tests/kaios-18911-browser.mjs` 僅原Linux Portal CI真Chromium與模擬錢包截圖。既有 `.github/workflows/kaios-portal-product-qa.yml` 對原五編譯artifact與公開payload逐份比對並保存獨立18911截圖artifact。部署及煉丹需本人錢包確認，AI不讀秘密、不送單；原#523/#19及費用/AST停止保留。Boot CURRENT新增路徑登記待Human明確答覆。功能/視覺未驗收前不宣稱完成或已上鏈。
