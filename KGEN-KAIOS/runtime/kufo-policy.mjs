@@ -1,222 +1,137 @@
-// KUFO review candidate. Pure projections; no wallet, ledger or execution.
-// All timestamps and identity windows are explicit inputs, never a guessed calendar.
+// KUFO monthly-calendar review candidate. Pure projections; no wallet or execution.
+// Gregorian algorithms: https://howardhinnant.github.io/date_algorithms.html
+// Production constructor values require Human adoption; no default is selected.
 import { AbiCoder, keccak256 } from "ethers";
 export const ZODIAC = Object.freeze(["鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬"]);
+export const THIRTEEN_ZODIAC = Object.freeze([...ZODIAC, "AI類"]);
+export const UNIVERSE_TIERS = Object.freeze([
+ "修練佛","魔王","凡人","龍","神仙","神明","神君（玉皇大帝）",
+ "外星人","變形金剛","十三生肖","人類","萬靈",
+]);
+// Reference IDs, not a chosen month mapping. Supply all12 explicitly.
+export const CONSTELLATIONS = Object.freeze(["牡羊","金牛","雙子","巨蟹","獅子","處女","天秤","天蠍","射手","摩羯","水瓶","雙魚"]);
+export const KAIOS_PER_KGEN=1000n, KUFO_PER_KAIOS=1000n, KSHIP_PER_KUFO=1000n;
+export const MAX_BATCH_GROUPS=32;
+const U32=0xffffffffn,U64=(1n<<64n)-1n,DAY=86400n;
+export const MONTH_CONSTELLATION_IDS=Object.freeze([10,11,12,1,2,3,4,5,6,7,8,9]);
+const configuredCalendars=new WeakSet();
+export function universeMonth(absoluteMonth) {
+ if(typeof absoluteMonth!=="bigint"||absoluteMonth<1n||absoluteMonth>U32)throw new RangeError("UNIVERSE_MONTH_UINT32_REQUIRED");
+ const elapsed=absoluteMonth-1n,monthInYear=Number(elapsed%12n)+1,year=elapsed/12n+1n;
+ return Object.freeze({absoluteMonth,year,monthInYear,tierId:monthInYear,tier:UNIVERSE_TIERS[monthInYear-1],
+  constellationSlot:monthInYear,epoch500:(year-1n)/500n+1n,yearInEpoch500:Number((year-1n)%500n)+1});
+}
+function seconds(value){if(typeof value!=="bigint"||value<0n||value>U64)throw new RangeError("INVALID_UINT64_TIMESTAMP");return value;}
+function offset(value){if(!Number.isInteger(value)||value< -43200||value>50400||value%60)throw new RangeError("INVALID_UTC_OFFSET");return BigInt(value);}
+const leap=y=>y%4n===0n&&(y%100n!==0n||y%400n===0n);
+const monthDays=(y,m)=>m===2?(leap(y)?29:28):([4,6,9,11].includes(m)?30:31);
+function civilDays(y,m,d){
+ y-=m<=2?1n:0n;const era=y/400n,yoe=y-era*400n;
+ const mp=BigInt(m+(m>2?-3:9)),doy=(153n*mp+2n)/5n+BigInt(d)-1n;
+ return era*146097n+yoe*365n+yoe/4n-yoe/100n+doy-719468n;
+}
+export function civilTimestamp(year,month,day=1,utcOffsetSeconds=0){
+ if(!Number.isInteger(year)||year<1970||year>0xffffffff||!Number.isInteger(month)||month<1||month>12||
+ !Number.isInteger(day)||day<1||day>monthDays(BigInt(year),month))throw new RangeError("INVALID_CIVIL_DATE");
+ return seconds(civilDays(BigInt(year),month,day)*DAY-offset(utcOffsetSeconds));
+}
+function wideCivilDate(timestamp,utcOffsetSeconds=0){
+ const local=seconds(timestamp)+offset(utcOffsetSeconds);
+ if(local<0n)throw new RangeError("TIME_BEFORE_CIVIL_EPOCH");
+ const z=local/DAY+719468n,era=z/146097n,doe=z-era*146097n;
+ const yoe=(doe-doe/1460n+doe/36524n-doe/146096n)/365n;
+ let year=yoe+era*400n;const doy=doe-(365n*yoe+yoe/4n-yoe/100n),mp=(5n*doy+2n)/153n;
+ const day=doy-(153n*mp+2n)/5n+1n,month=mp+(mp<10n?3n:-9n);
+ year+=month<=2n?1n:0n;
 
-export const KAIOS_PER_KGEN = 1000n;
-export const KUFO_PER_KAIOS = 1000n;
-export const KSHIP_PER_KUFO = 1000n;
-// Per-segment work bound, never a lifetime issuance deadline.
-export const MAX_ISSUANCE_COHORTS = 32;
-export const MAX_BIRTH_WINDOWS = 512;
-export const MAX_APPEND_BIRTH_WINDOWS = 256;
-export const MAX_BATCH_GROUPS = 32;
-const U64 = (1n << 64n) - 1n;
-const configuredBirthCalendars = new WeakSet();
-const configuredAnnualCalendars = new WeakSet();
-
-function utcSeconds(text) {
-  // ISO 8601 extended positive years are needed for a journey beyond year9999.
-  if (typeof text !== "string" || !/^(?:\d{4}|\+\d{6})-\d\d-\d\dT\d\d:\d\d:\d\dZ$/.test(text)) throw new TypeError("UTC_TIMESTAMP_REQUIRED");
-  const value = Date.parse(text);
-  if (!Number.isFinite(value) || new Date(value).toISOString() !== text.replace("Z", ".000Z")) throw new RangeError("INVALID_UTC_TIMESTAMP");
-  return BigInt(value / 1000);
+ return Object.freeze({year:Number(year),month:Number(month),day:Number(day)});
 }
-function seconds(value) {
-  if (typeof value !== "bigint" || value <= 0n || value > U64) throw new RangeError("INVALID_UINT64_TIMESTAMP");
-  return value;
+export function civilDate(timestamp,utcOffsetSeconds=0){
+ const result=wideCivilDate(timestamp,utcOffsetSeconds);
+ if(result.year>0xffffffff)throw new RangeError("CIVIL_YEAR_OVERFLOW");
+ return result;
 }
-
-export function packBirthWindow(row) {
-  if (!row || !Number.isInteger(row.zodiac) || row.zodiac < 1 || row.zodiac > 12 || !Number.isInteger(row.constellation) || row.constellation < 1 || row.constellation > 12) throw new RangeError("BIRTH_IDENTITY_UNCONFIGURED");
-  const start=seconds(row.start),end=seconds(row.end);
-  if(start>=end)throw new RangeError("INVALID_BIRTH_WINDOW");
-  return start | end<<64n | BigInt(row.zodiac)<<128n | BigInt(row.constellation)<<136n;
+export function makeMonthlyCalendar(config){
+ if(!config||typeof config.version!=="string"||!/^0x[0-9a-fA-F]{64}$/.test(config.version)||/^0x0{64}$/i.test(config.version))throw new TypeError("CALENDAR_VERSION_REQUIRED");
+ const activationTime=seconds(config.activationTime);if(!activationTime)throw new RangeError("ACTIVATION_REQUIRED");
+ offset(config.utcOffsetSeconds);
+ const mapping=config.constellationByMonth;
+ if(!Array.isArray(mapping)||mapping.length!==12||new Set(mapping).size!==12||
+ mapping.some(v=>!Number.isInteger(v)||v<1||v>12))throw new RangeError("CONSTELLATION_MAPPING_REQUIRED");
+ if(config.utcOffsetSeconds!==28800||mapping.some((v,i)=>v!==MONTH_CONSTELLATION_IDS[i]))throw new RangeError("UNAPPROVED_MONTHLY_RULES");
+ const firstDate=civilDate(activationTime,config.utcOffsetSeconds),firstBirthYear=firstDate.year,firstGroupId=firstDate.month;
+ if(firstBirthYear>0xffffffff-3)throw new RangeError("CALENDAR_YEAR_OVERFLOW");
+ const constellationByMonth=Object.freeze([...mapping]),version=config.version.toLowerCase();
+ const calendarHash=keccak256(AbiCoder.defaultAbiCoder().encode(
+ ["bytes32","uint64","int32","uint8[12]"],[version,activationTime,config.utcOffsetSeconds,constellationByMonth]));
+ const result=Object.freeze({version,activationTime,utcOffsetSeconds:config.utcOffsetSeconds,
+ constellationByMonth,firstBirthYear,firstGroupId,calendarHash});
+ configuredCalendars.add(result);return result;
 }
-export function unpackBirthWindow(word) {
-  if(typeof word!=="bigint" || word<0n || word>>144n!==0n)throw new RangeError("INVALID_PACKED_BIRTH_WINDOW");
-  const row={start:word&U64,end:word>>64n&U64,zodiac:Number(word>>128n&255n),constellation:Number(word>>136n&255n)};
-  packBirthWindow(row);
-  return Object.freeze(row);
+function validateCalendar(calendar){if(!configuredCalendars.has(calendar))throw new TypeError("MONTHLY_CALENDAR_REQUIRED");}
+export function constructorCalendarConfig(calendar){
+ validateCalendar(calendar);return Object.freeze({version:calendar.version,activationTime:calendar.activationTime,
+ utcOffsetSeconds:calendar.utcOffsetSeconds,constellationByMonth:calendar.constellationByMonth});
 }
-
-export function alchemyQuote(kaiosWei) {
-  if (typeof kaiosWei !== "bigint" || kaiosWei < 1000n || kaiosWei % KAIOS_PER_KGEN !== 0n) {
-    throw new RangeError("KAIOS_AMOUNT_MUST_BE_AT_LEAST_1000_WEI_AND_DIVISIBLE_BY_1000");
-  }
-  return Object.freeze({ requiredKgenWei: kaiosWei / KAIOS_PER_KGEN, kufoWei: kaiosWei * KUFO_PER_KAIOS });
+export function calendarBoundary(index,calendar){
+ validateCalendar(calendar);
+ if(!Number.isInteger(index)||index<0||calendar.firstBirthYear+index>0xffffffff)throw new RangeError("CALENDAR_YEAR_OVERFLOW");
+ return civilTimestamp(calendar.firstBirthYear+index,1,1,calendar.utcOffsetSeconds);
 }
-
-export function makeAnnualCohortCalendar(version, years) {
-  if (typeof version !== "string" || version.length < 3) throw new TypeError("CALENDAR_VERSION_REQUIRED");
-  if (!Array.isArray(years) || years.length < 4) throw new RangeError("CALENDAR_COVERAGE_REQUIRED");
-  const entries = years.map(row => {
-    if (!Number.isInteger(row.year) || row.year < 1 || !ZODIAC.includes(row.zodiac)) throw new RangeError("INVALID_COHORT");
-    return Object.freeze({year:row.year, zodiac:row.zodiac, start:utcSeconds(row.startUtc)});
-  });
-  for (let i = 1; i < entries.length; i++) {
-    if (entries[i].year !== entries[i-1].year + 1 || entries[i].start <= entries[i-1].start) throw new RangeError("INVALID_YEAR_ORDER");
-    if (ZODIAC.indexOf(entries[i].zodiac) !== (ZODIAC.indexOf(entries[i-1].zodiac) + 1) % 12) throw new RangeError("INVALID_ZODIAC_ORDER");
-  }
-  const issuanceCohorts = entries.length - 3;
-  if (issuanceCohorts < 1 || issuanceCohorts > MAX_ISSUANCE_COHORTS ||
-      entries[0].start <= 0n || entries.at(-1).year > 0xffffffff) {
-    throw new RangeError("INVALID_BOUNDED_ISSUANCE_CALENDAR");
-  }
-  // Historical annual helper's zodiac labels do not configure mint identities.
-  const calendar=Object.freeze({version, entries:Object.freeze(entries), issuanceCohorts});
-  configuredAnnualCalendars.add(calendar);
-  return calendar;
+export function birthGroupMetadata(groupId,calendar){
+ validateCalendar(calendar);
+ if(!Number.isInteger(groupId)||groupId<calendar.firstGroupId||BigInt(groupId)>U32)throw new RangeError("INVALID_BIRTH_GROUP");
+ const financialYear=calendar.firstBirthYear+Math.floor((groupId-1)/12),month=(groupId-1)%12+1;
+ if(financialYear>0xffffffff-3)throw new RangeError("CALENDAR_YEAR_OVERFLOW");
+ const monthStart=civilDays(BigInt(financialYear),month,1)*DAY-offset(calendar.utcOffsetSeconds), start=monthStart<calendar.activationTime?calendar.activationTime:monthStart,
+ end=civilTimestamp(month===12?financialYear+1:financialYear,month===12?1:month+1,1,calendar.utcOffsetSeconds);
+ return Object.freeze({groupId,start,end,financialYear,month,tierId:month,constellation:calendar.constellationByMonth[month-1]});
 }
-
-// Mirrors KUFO CalendarConfig. Bounds are candidate complexity limits, not an
-// approved civil/lunar calendar or an authorization to deploy these parameters.
-export function makeBirthGroupCalendar(config) {
-  if (!config || typeof config.version !== "string" || !/^0x[0-9a-fA-F]{64}$/.test(config.version) || /^0x0{64}$/i.test(config.version)) throw new TypeError("CALENDAR_VERSION_REQUIRED");
-  const {firstFinancialYear:first, yearStarts, birthWindows} = config;
-  if (!Number.isInteger(first) || first < 1 || !Array.isArray(yearStarts) || yearStarts.length < 4 || yearStarts.length > MAX_ISSUANCE_COHORTS + 3 || first + yearStarts.length - 1 > 0xffffffff) throw new RangeError("INVALID_BOUNDED_ISSUANCE_CALENDAR");
-  const starts = yearStarts.map(seconds);
-  if (starts.some((start, i) => i && start <= starts[i-1])) throw new RangeError("INVALID_YEAR_ORDER");
-  const issuanceCohorts = starts.length - 3;
-  if (!Array.isArray(birthWindows) || birthWindows.length < 1 || birthWindows.length > MAX_BIRTH_WINDOWS) throw new RangeError("BIRTH_WINDOWS_REQUIRED");
-  const windows = birthWindows.map(row => {
-    if (!row || !Number.isInteger(row.zodiac) || row.zodiac < 1 || row.zodiac > 12 || !Number.isInteger(row.constellation) || row.constellation < 1 || row.constellation > 12) throw new RangeError("BIRTH_IDENTITY_UNCONFIGURED");
-    const start=seconds(row.start), end=seconds(row.end);
-    if (start >= end) throw new RangeError("INVALID_BIRTH_WINDOW");
-    return Object.freeze({start,end,zodiac:row.zodiac,constellation:row.constellation});
-  });
-  if (windows[0].start !== starts[0] || windows.at(-1).end !== starts[issuanceCohorts] || windows.some((row,i)=>i && row.start !== windows[i-1].end)) throw new RangeError("BIRTH_WINDOW_COVERAGE_REQUIRED");
-  const groups=[];
-  let yearIndex=0, windowIndex=0;
-  while (yearIndex < issuanceCohorts && windowIndex < windows.length) {
-    const window=windows[windowIndex], start=starts[yearIndex] > window.start ? starts[yearIndex] : window.start;
-    const end=starts[yearIndex+1] < window.end ? starts[yearIndex+1] : window.end;
-    groups.push(Object.freeze({groupId:groups.length+1,start,end,financialYear:first+yearIndex,zodiac:window.zodiac,constellation:window.constellation}));
-    if (end === starts[yearIndex+1]) yearIndex++;
-    if (end === window.end) windowIndex++;
-  }
-  const packedBirthWindows=Object.freeze(windows.map(packBirthWindow));
-  const calendarHash=keccak256(AbiCoder.defaultAbiCoder().encode(
-    ["bytes32","uint32","uint64[]","uint256[]"],[config.version,first,starts,packedBirthWindows]));
-  const calendar=Object.freeze({version:config.version.toLowerCase(), firstFinancialYear:first, calendarHash,
-    yearStarts:Object.freeze(starts), birthWindows:Object.freeze(windows),
-    packedBirthWindows,
-    entries:Object.freeze(starts.map((start,i)=>Object.freeze({year:first+i,start}))),
-    issuanceCohorts, latestCalendarHash:calendarHash,
-    groups:Object.freeze(groups.map(group=>Object.freeze({...group,calendarHash})))});
-  configuredBirthCalendars.add(calendar);
-  return calendar;
+export function groupCalendarHash(groupId,calendar){birthGroupMetadata(groupId,calendar);return calendar.calendarHash;}
+export function birthGroupAt(timestamp,calendar){
+ validateCalendar(calendar);seconds(timestamp);
+ if(timestamp<calendar.activationTime)throw new RangeError("ISSUANCE_NOT_ACTIVE");
+ const date=wideCivilDate(timestamp,calendar.utcOffsetSeconds);
+ const id=BigInt(date.year-calendar.firstBirthYear)*12n+BigInt(date.month);
+ if(id<1n||id>U32)throw new RangeError("CALENDAR_IDENTIFIER_OVERFLOW");
+ return birthGroupMetadata(Number(id),calendar);
 }
-
-export function constructorCalendarConfig(calendar) {
-  if (!configuredBirthCalendars.has(calendar)) throw new TypeError("BIRTH_WINDOWS_REQUIRED");
-  if(calendar.latestCalendarHash!==calendar.calendarHash)throw new RangeError("SEGMENT_CONFIG_REQUIRED");
-  return Object.freeze({version:calendar.version,firstFinancialYear:calendar.firstFinancialYear,
-    yearStarts:calendar.yearStarts,packedBirthWindows:calendar.packedBirthWindows});
+export function cohortYear(timestamp,calendar){
+ validateCalendar(calendar);if(seconds(timestamp)<calendar.activationTime)throw new RangeError("TIME_BEFORE_CALENDAR");
+ return wideCivilDate(timestamp,calendar.utcOffsetSeconds).year;
 }
-
-// Mirrors the contract's hash-bound, append-only calendar DATA operation. This
-// pure helper neither grants Registry permission nor proposes/executes on-chain.
-export function calendarAppendHash(config) {
-  const segment=makeBirthGroupCalendar(config);
-  return segment.calendarHash;
+function birthYearCheck(year,calendar){
+ validateCalendar(calendar);
+ if(!Number.isInteger(year)||year<calendar.firstBirthYear||year>0xffffffff-3||
+ BigInt(year-calendar.firstBirthYear)*12n+1n>U32)throw new RangeError("INVALID_BIRTH_YEAR");
 }
-
-export function appendBirthGroupCalendar(calendar, config) {
-  if (!configuredBirthCalendars.has(calendar)) throw new TypeError("BIRTH_WINDOWS_REQUIRED");
-  const segment=makeBirthGroupCalendar(config);
-  if(segment.birthWindows.length>MAX_APPEND_BIRTH_WINDOWS)throw new RangeError("CALENDAR_APPEND_WINDOW_BOUND");
-  if(segment.firstFinancialYear!==calendar.firstFinancialYear+calendar.issuanceCohorts ||
-    segment.yearStarts.slice(0,3).some((start,i)=>start!==calendar.yearStarts.at(i-3))) {
-    throw new RangeError("CALENDAR_APPEND_OVERLAP_MISMATCH");
-  }
-  const count=calendar.issuanceCohorts+segment.issuanceCohorts;
-  if(calendar.firstFinancialYear+count+2>0xffffffff || calendar.groups.length+segment.groups.length>0xffffffff) {
-    throw new RangeError("CALENDAR_IDENTIFIER_OVERFLOW");
-  }
-  const latestCalendarHash=keccak256(AbiCoder.defaultAbiCoder().encode(
-    ["bytes32","bytes32"],[calendar.latestCalendarHash,segment.calendarHash]));
-  const starts=Object.freeze([...calendar.yearStarts,...segment.yearStarts.slice(3)]);
-  const result=Object.freeze({version:calendar.version,firstFinancialYear:calendar.firstFinancialYear,
-    calendarHash:calendar.calendarHash,latestCalendarHash,yearStarts:starts,
-    // Construction payload belongs only to a segment; never re-encode the entire
-    // accumulated voyage as one constructor transaction.
-    birthWindows:Object.freeze([...calendar.birthWindows,...segment.birthWindows]),
-    packedBirthWindows:Object.freeze([...calendar.packedBirthWindows,...segment.packedBirthWindows]),
-    entries:Object.freeze(starts.map((start,i)=>Object.freeze({year:calendar.firstFinancialYear+i,start}))),
-    issuanceCohorts:count,groups:Object.freeze([...calendar.groups,...segment.groups.map(group=>
-      Object.freeze({...group,groupId:calendar.groups.length+group.groupId,calendarHash:latestCalendarHash}))])});
-  configuredBirthCalendars.add(result);
-  return result;
+export function mintOrigin(timestamp,calendar){
+ const group=birthGroupAt(timestamp,calendar);
+ return Object.freeze({bornAtSec:timestamp,birthYear:group.financialYear,birthMonth:group.month,birthTierId:group.tierId,
+ birthConstellation:group.constellation,groupId:group.groupId,calendarVersion:calendar.version,calendarHash:calendar.calendarHash});
 }
-
-export function groupCalendarHash(groupId,calendar) {
-  if(!configuredBirthCalendars.has(calendar))throw new TypeError("BIRTH_WINDOWS_REQUIRED");
-  if(!Number.isInteger(groupId)||groupId<1||groupId>calendar.groups.length)throw new RangeError("INVALID_BIRTH_GROUP");
-  return calendar.groups[groupId-1].calendarHash;
+export function alchemyQuote(kaiosWei){
+ if(typeof kaiosWei!=="bigint"||kaiosWei<1000n||kaiosWei%1000n)throw new RangeError("KAIOS_AMOUNT_MUST_BE_AT_LEAST_1000_WEI_AND_DIVISIBLE_BY_1000");
+ return Object.freeze({requiredKgenWei:kaiosWei/1000n,kufoWei:kaiosWei*1000n});
 }
-
-export function birthGroupAt(bornAtSec, calendar) {
-  if (!configuredBirthCalendars.has(calendar)) throw new TypeError("BIRTH_WINDOWS_REQUIRED");
-  if (typeof bornAtSec !== "bigint" || bornAtSec < calendar.yearStarts[0] || bornAtSec >= calendar.yearStarts[calendar.issuanceCohorts]) throw new RangeError("ISSUANCE_CALENDAR_CLOSED");
-  let low=0,high=calendar.groups.length;
-  while(low<high){const mid=Math.floor((low+high)/2);if(bornAtSec>=calendar.groups[mid].end)low=mid+1;else high=mid;}
-  return calendar.groups[low];
+export function currentAnnualStage(birthYear,asOfSec,calendar){
+ birthYearCheck(birthYear,calendar);
+ return Math.min(3,Math.max(0,cohortYear(asOfSec,calendar)-birthYear));
 }
-
-function validateCalendar(calendar) {
-  if ((!configuredBirthCalendars.has(calendar) && !configuredAnnualCalendars.has(calendar)) || !Number.isInteger(calendar.issuanceCohorts) ||
-      calendar.issuanceCohorts < 1 ||
-      calendar.entries?.length !== calendar.issuanceCohorts + 3) throw new TypeError("CALENDAR_REQUIRED");
+export function annualConversionTarget(initialKufoWei,birthYear,asOfSec,calendar){
+ if(typeof initialKufoWei!=="bigint"||initialKufoWei<0n)throw new TypeError("initialKufoWei");
+ const stage=currentAnnualStage(birthYear,asOfSec,calendar);
+ return stage===0?0n:stage===1?initialKufoWei/2n:stage===2?initialKufoWei*3n/4n:initialKufoWei;
 }
-
-export function cohortYear(asOfSec, calendar) {
-  validateCalendar(calendar);
-  if (typeof asOfSec !== "bigint" || asOfSec < calendar.entries[0].start) throw new RangeError("TIME_BEFORE_CALENDAR");
-  // Settlement stays available forever after the last configured boundary.
-  let low=0,high=calendar.entries.length;
-  while(low<high){const mid=Math.floor((low+high)/2);if(asOfSec>=calendar.entries[mid].start)low=mid+1;else high=mid;}
-  return calendar.entries[low-1].year;
+export function annualConversionState(initialKufoWei,alreadyConvertedWei,birthYear,asOfSec,calendar){
+ const target=annualConversionTarget(initialKufoWei,birthYear,asOfSec,calendar);
+ if(typeof alreadyConvertedWei!=="bigint"||alreadyConvertedWei<0n||alreadyConvertedWei>target)throw new RangeError("CONVERTED_OUT_OF_RANGE");
+ const claimableKufoWei=target-alreadyConvertedWei;
+ return Object.freeze({targetConvertedKufoWei:target,claimableKufoWei,expectedKshipWei:claimableKufoWei*1000n,
+ projectedRemainingKufoWei:initialKufoWei-target,terminal:currentAnnualStage(birthYear,asOfSec,calendar)===3});
 }
-
-function birthIndex(birthYear, calendar) {
-  validateCalendar(calendar);
-  const index = birthYear - calendar.entries[0].year;
-  if (!Number.isInteger(index) || index < 0 || index >= calendar.issuanceCohorts) throw new RangeError("INVALID_BIRTH_YEAR");
-  return index;
-}
-
-export function mintOrigin(bornAtSec, calendar) {
-  const group = birthGroupAt(bornAtSec, calendar);
-  return Object.freeze({birthYear:group.financialYear, bornAtSec, birthZodiac:group.zodiac,
-    birthConstellation:group.constellation, groupId:group.groupId, calendarVersion:calendar.version,
-    calendarHash:group.calendarHash});
-}
-
-export function currentAutumn(birthYear, asOfSec, calendar) {
-  birthIndex(birthYear, calendar);
-  return Math.min(3, Math.max(0, cohortYear(asOfSec, calendar) - birthYear));
-}
-
-export function threeAutumnTarget(initialKufoWei, birthYear, asOfSec, calendar) {
-  if (typeof initialKufoWei !== "bigint" || initialKufoWei < 0n) throw new TypeError("initialKufoWei");
-  const autumn = currentAutumn(birthYear, asOfSec, calendar);
-  return autumn === 0 ? 0n : autumn === 1 ? initialKufoWei / 2n : autumn === 2 ? initialKufoWei * 3n / 4n : initialKufoWei;
-}
-
-// Projection for an unsplit origin proof. Holder balances after transfers/merges use
-// claimableTranches against their remaining tranche state, never this original-amount helper.
-export function threeAutumnState(initialKufoWei, alreadyConvertedWei, birthYear, asOfSec, calendar) {
-  const target = threeAutumnTarget(initialKufoWei, birthYear, asOfSec, calendar);
-  if (typeof alreadyConvertedWei !== "bigint" || alreadyConvertedWei < 0n || alreadyConvertedWei > target) {
-    throw new RangeError("CONVERTED_OUT_OF_RANGE");
-  }
-  const claimableKufoWei = target - alreadyConvertedWei;
-  return Object.freeze({ targetConvertedKufoWei: target, claimableKufoWei,
-    expectedKshipWei: claimableKufoWei * KSHIP_PER_KUFO,
-    projectedRemainingKufoWei: initialKufoWei - target,
-    terminal: currentAutumn(birthYear, asOfSec, calendar) === 3 });
-}
+// Historical source-compatible function names; all use this one annual policy.
+export const currentAutumn=currentAnnualStage,threeAutumnTarget=annualConversionTarget,threeAutumnState=annualConversionState;
 
 export function newCohortTranches(amount) {
   if (typeof amount !== "bigint" || amount <= 0n) throw new RangeError("POSITIVE_AMOUNT_REQUIRED");
@@ -245,24 +160,20 @@ export function splitCohortTranches(item, take) {
 
 export function claimableTranches(item, birthYear, asOfSec, calendar) {
   validateTranches(item);
-  const autumn = currentAutumn(birthYear, asOfSec, calendar);
+  const autumn = currentAnnualStage(birthYear, asOfSec, calendar);
   return (autumn >= 1 ? item.first : 0n) + (autumn >= 2 ? item.second : 0n) + (autumn >= 3 ? item.terminal : 0n);
 }
 
-// Historical source-compatible names above retain a single implementation.
-// New integrations use annual terminology; these are aliases, not another policy.
-export const currentAnnualStage = currentAutumn;
-export const annualConversionTarget = threeAutumnTarget;
-export const annualConversionState = threeAutumnState;
-
 function selectedHoldings(holdings, ids, calendar) {
-  if (!configuredBirthCalendars.has(calendar)) throw new TypeError("BIRTH_WINDOWS_REQUIRED");
-  if (!Array.isArray(ids) || ids.length < 1 || ids.length > MAX_BATCH_GROUPS || ids.some((id,i)=>!Number.isInteger(id) || id < 1 || id > calendar.groups.length || i && id <= ids[i-1])) throw new RangeError("INVALID_GROUP_SELECTION");
-  if (!Array.isArray(holdings) || holdings.length > calendar.groups.length) throw new RangeError("INVALID_GROUP_HOLDINGS");
+  validateCalendar(calendar);
+  if (!Array.isArray(ids) || ids.length < 1 || ids.length > MAX_BATCH_GROUPS || ids.some((id,i)=>!Number.isInteger(id) || id < 1 || BigInt(id) > U32 || i && id <= ids[i-1])) throw new RangeError("INVALID_GROUP_SELECTION");
+  if (!Array.isArray(holdings) || holdings.length > 0xffffffff) throw new RangeError("INVALID_GROUP_HOLDINGS");
+  for(const groupId of ids)birthGroupMetadata(groupId,calendar);
   const balances=new Map();
   for (const item of holdings) {
     validateTranches(item);
-    if (!Number.isInteger(item.groupId) || item.groupId < 1 || item.groupId > calendar.groups.length || balances.has(item.groupId)) throw new RangeError("INVALID_GROUP_HOLDINGS");
+    if (!Number.isInteger(item.groupId) || item.groupId < 1 || BigInt(item.groupId) > U32 || balances.has(item.groupId)) throw new RangeError("INVALID_GROUP_HOLDINGS");
+    birthGroupMetadata(item.groupId,calendar);
     balances.set(item.groupId,{groupId:item.groupId,first:item.first,second:item.second,terminal:item.terminal});
   }
   return balances;
@@ -270,7 +181,8 @@ function selectedHoldings(holdings, ids, calendar) {
 const freezeHoldings = balances => Object.freeze([...balances.values()].map(Object.freeze));
 
 // Selected groups are explicit, strictly ordered, and limited to the same finite
-// batch as the contract. No provider or mutation is performed by these helpers.
+// batch as the contract. Transfer is a holdings-construction projection without an
+// as-of clock; settlement additionally checks current virtual IDs. No provider or mutation.
 export function transferBirthGroups(holdings, amount, ids, calendar) {
   const parent=selectedHoldings(holdings,ids,calendar), child=[];
   if (typeof amount !== "bigint" || amount <= 0n) throw new RangeError("POSITIVE_AMOUNT_REQUIRED");
@@ -289,6 +201,12 @@ export function transferBirthGroups(holdings, amount, ids, calendar) {
 }
 
 export function settleBirthGroups(holdings, amount, ids, asOfSec, calendar) {
+  validateCalendar(calendar);
+  seconds(asOfSec);
+  const date=wideCivilDate(asOfSec,calendar.utcOffsetSeconds);
+  const virtualMaximum=Math.min(0xffffffff,(0xffffffff-3-calendar.firstBirthYear+1)*12);
+  const currentCount=asOfSec<calendar.activationTime?0:Math.min(virtualMaximum,(date.year-calendar.firstBirthYear)*12+date.month);
+  if(!Array.isArray(ids)||ids.some(id=>id>currentCount))throw new RangeError("INVALID_GROUP_SELECTION");
   const parent=selectedHoldings(holdings,ids,calendar);
   if (typeof amount !== "bigint" || amount <= 0n) throw new RangeError("POSITIVE_AMOUNT_REQUIRED");
   let remaining=amount;
@@ -296,7 +214,7 @@ export function settleBirthGroups(holdings, amount, ids, asOfSec, calendar) {
     if (!remaining) break;
     const item=parent.get(groupId);
     if (!item) continue;
-    const group=calendar.groups[groupId-1], autumn=currentAnnualStage(group.financialYear,asOfSec,calendar);
+    const group=birthGroupMetadata(groupId,calendar), autumn=currentAnnualStage(group.financialYear,asOfSec,calendar);
     const eligible=claimableTranches(item,group.financialYear,asOfSec,calendar), take=eligible < remaining ? eligible : remaining;
     let unpaid=take;
     for (const [key,mature] of [["first",autumn>=1],["second",autumn>=2],["terminal",autumn>=3]]) {

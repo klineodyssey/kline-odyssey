@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
-// Engineering continuation 2026-11-14: append-only calendars and bounded holder indexes.
+// Engineering continuation 2026-11-14: deterministic monthly calendar candidate.
 // Exact build commit, source hashes and deployment gates: KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md.
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -41,17 +41,12 @@ interface IAlchemyFurnaceProofSource {
     function kaios() external view returns (address);
     function organRegistry() external view returns (address);
 }
-interface IKUFOCalendarGovernance {
-    function owner() external view returns (address);
-    function minimumDelay() external view returns (uint64);
-}
-
 /**
  * @title KUFO
- * @notice Burn-backed KUFO with immutable financial-year and birth-window groups.
- * @dev Calendar values require explicit deployment review; none are selected here.
- * The 32-year/512-window bounds apply to each append segment, not a lifetime
- * expiry. Missing calendar coverage fails closed; past rights settle forever.
+ * @notice Burn-backed KUFO with immutable civil-month birth groups.
+ * @dev Adopted UTC+8 and whole-month stars are strictly validated; activation
+ * is an explicit deployment parameter. Dates need no future calendar tables.
+ * Representation bounds stop new issuance, never settlement of existing rights.
  */
 contract KUFO is ERC20, ERC20Capped {
     bytes32 public constant ORGAN_OUTPUT_168888 = keccak256("KAIOS.ORGAN.KUFO.OUTPUT.168888");
@@ -62,26 +57,22 @@ contract KUFO is ERC20, ERC20Capped {
     uint256 public constant KUFO_PER_KAIOS = 1_000;
     uint256 public constant KSHIP_PER_KUFO = 1_000;
     uint256 public constant MAX_SUPPLY = 72_000_000_000_000 ether;
-    uint256 public constant MAX_ISSUANCE_COHORTS = 32;
-    uint256 public constant MAX_BIRTH_WINDOWS = 512;
-    // Deployment has its own block/initcode budget. Later append transactions
-    // retain the existing8M operation budget with a smaller storage-work bound.
-    uint256 public constant MAX_APPEND_BIRTH_WINDOWS = 256;
+    uint256 public constant MAX_FINANCIAL_YEAR = uint256(type(uint32).max) - 3;
     uint256 public constant MAX_BATCH_GROUPS = 32;
 
     struct CalendarConfig {
         bytes32 version;
-        uint32 firstFinancialYear;
-        uint64[] yearStarts;
-        // start low64 | end <<64 | zodiac <<128 | constellation <<136.
-        uint256[] packedBirthWindows;
+        uint64 activationTime;
+        int32 utcOffsetSeconds;
+        uint8[12] constellationByMonth;
     }
-    // One storage slot; financial boundaries split a crossing birth window.
+    // Calculated from the month ID, never prewritten for future years.
     struct GroupMetadata {
         uint64 start;
         uint64 end;
         uint32 financialYear;
-        uint8 zodiac;
+        uint8 month;
+        uint8 tierId;
         uint8 constellation;
     }
     struct Cohort { uint256 first; uint256 second; uint256 terminal; }
@@ -90,7 +81,8 @@ contract KUFO is ERC20, ERC20Capped {
         uint256 amount;
         uint64 bornAt;
         uint32 birthYear;
-        uint8 birthZodiac;
+        uint8 birthMonth;
+        uint8 birthTierId;
         uint8 birthConstellation;
         uint32 groupId;
         bytes32 calendarHash;
@@ -103,25 +95,16 @@ contract KUFO is ERC20, ERC20Capped {
         uint256 kufoBurned;
         uint256 expectedKship;
     }
-    struct PendingCalendarAppend {
-        bytes32 dataHash;
-        bytes32 parentHash;
-        address proposer;
-        uint64 executableAt;
-    }
-    struct SegmentCommitment { uint32 groupEndIndex; bytes32 hash; }
-
     IKAIOSOrganRegistry public immutable organRegistry;
     IKAIOSBurnRecordSource public immutable kaios;
     bytes32 public immutable calendarVersion;
     bytes32 public immutable calendarHash;
     uint32 public immutable firstBirthYear;
-    uint32 public issuanceCohorts;
-    bytes32 public latestCalendarHash;
-    PendingCalendarAppend public pendingCalendarAppend;
-    uint64[] private _yearStarts;
-    GroupMetadata[] private _groups;
-    SegmentCommitment[] private _segments;
+    uint8 public immutable firstBirthMonth;
+    uint64 public immutable activationTime;
+    int32 public immutable utcOffsetSeconds;
+    uint32 public immutable maximumGroupId;
+    uint8[12] private _constellationByMonth;
     mapping(address => mapping(uint256 => Cohort)) private _birthGroups;
     mapping(address => mapping(uint32 => Cohort)) private _yearCohorts;
     mapping(address => uint256) private _heldGroupCount;
@@ -145,6 +128,8 @@ contract KUFO is ERC20, ERC20Capped {
     error NotAContract(address account);
     error ZeroAmount();
     error InvalidCalendar();
+    error InvalidCalendarTimestamp();
+    error CalendarIdentifierOverflow();
     error IssuanceCalendarClosed(uint256 timestamp);
     error UnknownBirthYear(uint32 birthYear);
     error UnknownBirthGroup(uint256 groupId);
@@ -158,23 +143,14 @@ contract KUFO is ERC20, ERC20Capped {
     error LineageBalanceMismatch(address owner, uint256 missing);
     error InsufficientMaturedDecay(address owner, uint256 requested, uint256 available);
     error InsufficientHolderAllowance(uint256 currentAllowance, uint256 requiredAllowance);
-    error OnlyCalendarOwner();
-    error InvalidCalendarDelay();
-    error CalendarAppendPending();
-    error CalendarAppendNotReady();
-    error CalendarAppendMismatch();
-    error CalendarParentChanged();
-    error CalendarOwnerChanged();
     error InvalidPageLimit();
 
     event ImmediateAlchemyMinted(bytes32 indexed proofId, uint256 indexed groupId, address indexed beneficiary, uint256 kufoAmount, uint64 bornAt);
-    event BirthOriginRecorded(bytes32 indexed proofId, uint32 indexed birthYear, uint8 zodiac, uint8 constellation, uint256 groupId, bytes32 calendarHash);
+    event BirthOriginRecorded(bytes32 indexed proofId, uint32 indexed birthYear, uint8 month, uint8 tierId, uint8 constellation, uint256 groupId, bytes32 calendarHash);
     event CohortTransferred(address indexed from, address indexed to, uint256 indexed groupId, uint256 first, uint256 second, uint256 terminal);
     event AnnualConversion(uint256 indexed groupId, uint32 indexed birthYear, address indexed owner, address beneficiary, uint256 kufoBurned, uint256 expectedKship, uint8 stage);
     event CarrierBurnRecorded(bytes32 indexed proofId, address indexed owner, address indexed beneficiary, address converter, uint256 kufoBurned, uint256 expectedKship);
-    event CalendarAppendProposed(bytes32 indexed dataHash, bytes32 indexed parentHash, address indexed proposer, uint64 executableAt);
-    event CalendarAppendCancelled(bytes32 indexed dataHash, address indexed owner);
-    event CalendarAppendExecuted(bytes32 indexed dataHash, bytes32 indexed parentHash, bytes32 latestHash, uint32 issuanceYears, uint32 groupEndIndex);
+    event CalendarConfigured(bytes32 indexed calendarHash, bytes32 version, uint64 activationTime, int32 utcOffsetSeconds);
 
     constructor(address registry, address kaiosToken, CalendarConfig memory cfg)
         ERC20("KUFO", "KUFO") ERC20Capped(MAX_SUPPLY)
@@ -183,123 +159,37 @@ contract KUFO is ERC20, ERC20Capped {
         if (registry.code.length == 0) revert NotAContract(registry);
         if (kaiosToken.code.length == 0) revert NotAContract(kaiosToken);
         if (IKAIOSBurnRecordSource(kaiosToken).ORGAN_REGISTRY() != registry) revert CanonicalBindingMismatch();
-        uint256 issuanceCount = _validateCalendarConfig(cfg);
-        for (uint256 i; i < cfg.yearStarts.length; ++i) _yearStarts.push(cfg.yearStarts[i]);
-        _writeGroups(cfg);
+        _validateCalendarConfig(cfg);
+        (uint256 firstYear, uint256 firstMonth,) = _civilDate(cfg.activationTime, cfg.utcOffsetSeconds);
+        if (firstYear > MAX_FINANCIAL_YEAR) revert CalendarIdentifierOverflow();
         organRegistry = IKAIOSOrganRegistry(registry);
         kaios = IKAIOSBurnRecordSource(kaiosToken);
         calendarVersion = cfg.version;
-        bytes32 initialHash = calendarAppendHash(cfg);
-        calendarHash = initialHash;
-        latestCalendarHash = initialHash;
-        _segments.push(SegmentCommitment(uint32(_groups.length), initialHash));
-        firstBirthYear = cfg.firstFinancialYear;
-        issuanceCohorts = uint32(issuanceCount);
+        calendarHash = keccak256(abi.encode(cfg.version, cfg.activationTime, cfg.utcOffsetSeconds, cfg.constellationByMonth));
+        activationTime = cfg.activationTime;
+        utcOffsetSeconds = cfg.utcOffsetSeconds;
+        _constellationByMonth = cfg.constellationByMonth;
+        firstBirthYear = uint32(firstYear);
+        firstBirthMonth = uint8(firstMonth);
+        maximumGroupId = uint32(Math.min(type(uint32).max, (MAX_FINANCIAL_YEAR - firstYear + 1) * 12));
+        emit CalendarConfigured(calendarHash, cfg.version, cfg.activationTime, cfg.utcOffsetSeconds);
     }
 
-    function calendarAppendHash(CalendarConfig memory cfg) public pure returns (bytes32) {
-        return keccak256(abi.encode(cfg.version, cfg.firstFinancialYear, cfg.yearStarts, cfg.packedBirthWindows));
-    }
-
-    function proposeCalendarAppend(CalendarConfig calldata cfg) external {
-        _onlyCalendarOwner();
-        if (pendingCalendarAppend.proposer != address(0)) revert CalendarAppendPending();
-        _validateAppend(cfg);
-        uint64 delay = IKUFOCalendarGovernance(address(organRegistry)).minimumDelay();
-        if (delay < 1 hours || block.timestamp > uint256(type(uint64).max) - delay) revert InvalidCalendarDelay();
-        uint64 eta = uint64(block.timestamp + delay);
-        bytes32 dataHash = calendarAppendHash(cfg);
-        pendingCalendarAppend = PendingCalendarAppend(dataHash, latestCalendarHash, msg.sender, eta);
-        emit CalendarAppendProposed(dataHash, latestCalendarHash, msg.sender, eta);
-    }
-
-    function cancelCalendarAppend() external {
-        _onlyCalendarOwner();
-        bytes32 dataHash = pendingCalendarAppend.dataHash;
-        if (pendingCalendarAppend.proposer == address(0)) revert CalendarAppendNotReady();
-        delete pendingCalendarAppend;
-        emit CalendarAppendCancelled(dataHash, msg.sender);
-    }
-
-    function executeCalendarAppend(CalendarConfig calldata cfg) external {
-        PendingCalendarAppend memory pending = pendingCalendarAppend;
-        if (pending.proposer == address(0) || block.timestamp < pending.executableAt) revert CalendarAppendNotReady();
-        if (IKUFOCalendarGovernance(address(organRegistry)).owner() != pending.proposer) revert CalendarOwnerChanged();
-        if (latestCalendarHash != pending.parentHash) revert CalendarParentChanged();
-        if (calendarAppendHash(cfg) != pending.dataHash) revert CalendarAppendMismatch();
-        uint256 count = _validateAppend(cfg);
-        delete pendingCalendarAppend;
-        // The old final three boundaries are the new segment's first three.
-        // They are checked, never overwritten or reinterpreted.
-        for (uint256 i = 3; i < cfg.yearStarts.length; ++i) _yearStarts.push(cfg.yearStarts[i]);
-        _writeGroups(cfg);
-        issuanceCohorts += uint32(count);
-        bytes32 nextHash = keccak256(abi.encode(pending.parentHash, pending.dataHash));
-        latestCalendarHash = nextHash;
-        _segments.push(SegmentCommitment(uint32(_groups.length), nextHash));
-        emit CalendarAppendExecuted(pending.dataHash, pending.parentHash, nextHash, issuanceCohorts, uint32(_groups.length));
-    }
-
-    function _onlyCalendarOwner() private view {
-        if (msg.sender != IKUFOCalendarGovernance(address(organRegistry)).owner()) revert OnlyCalendarOwner();
-    }
-
-    function _validateAppend(CalendarConfig memory cfg) private view returns (uint256 count) {
-        if (cfg.packedBirthWindows.length > MAX_APPEND_BIRTH_WINDOWS) revert InvalidCalendar();
-        count = _validateCalendarConfig(cfg);
-        if (uint256(cfg.firstFinancialYear) != uint256(firstBirthYear) + issuanceCohorts) revert InvalidCalendar();
-        for (uint256 i; i < 3; ++i) {
-            if (cfg.yearStarts[i] != _yearStarts[uint256(issuanceCohorts) + i]) revert InvalidCalendar();
+    function _validateCalendarConfig(CalendarConfig memory cfg) private pure {
+        if (cfg.version == bytes32(0) || cfg.activationTime == 0 ||
+            cfg.utcOffsetSeconds < -12 hours || cfg.utcOffsetSeconds > 14 hours ||
+            cfg.utcOffsetSeconds % 60 != 0 || cfg.utcOffsetSeconds != 8 hours) revert InvalidCalendar();
+        uint256 seen;
+        for (uint256 i; i < 12; ++i) {
+            uint8 value = cfg.constellationByMonth[i];
+            if (value == 0 || value > 12 || (seen & (uint256(1) << value)) != 0) revert InvalidCalendar();
+            // Human adopted whole civil months: January Capricorn(10) through
+            // December Sagittarius(9), using this candidate's Aries(1)..Pisces(12) IDs.
+            if (value != (i + 9) % 12 + 1) revert InvalidCalendar();
+            seen |= uint256(1) << value;
         }
-        // Late updates may fill uncovered intervals, in bounded segments. No
-        // proof can backdate minting: bornAt always uses the current block.
-    }
-
-    function _validateCalendarConfig(CalendarConfig memory cfg) private pure returns (uint256 issuanceCount) {
-        uint256 boundaries = cfg.yearStarts.length;
-        if (cfg.version == bytes32(0) || cfg.firstFinancialYear == 0 || boundaries < 4 ||
-            boundaries > MAX_ISSUANCE_COHORTS + 3 ||
-            uint256(cfg.firstFinancialYear) + boundaries - 1 > type(uint32).max ||
-            cfg.packedBirthWindows.length == 0 || cfg.packedBirthWindows.length > MAX_BIRTH_WINDOWS) revert InvalidCalendar();
-        uint64 previous;
-        for (uint256 i; i < boundaries; ++i) {
-            uint64 boundary = cfg.yearStarts[i];
-            if (boundary <= previous) revert InvalidCalendar();
-            previous = boundary;
-        }
-        issuanceCount = boundaries - 3;
-        uint64 nextStart = cfg.yearStarts[0];
-        for (uint256 i; i < cfg.packedBirthWindows.length; ++i) {
-            uint256 packed = cfg.packedBirthWindows[i];
-            uint64 start = uint64(packed);
-            uint64 end = uint64(packed >> 64);
-            uint8 zodiac = uint8(packed >> 128);
-            uint8 constellation = uint8(packed >> 136);
-            if (packed >> 144 != 0 || start != nextStart || end <= start ||
-                end > cfg.yearStarts[issuanceCount] || zodiac == 0 || zodiac > 12 ||
-                constellation == 0 || constellation > 12) revert InvalidCalendar();
-            nextStart = end;
-        }
-        if (nextStart != cfg.yearStarts[issuanceCount]) revert InvalidCalendar();
-    }
-
-    function _writeGroups(CalendarConfig memory cfg) private {
-        uint256 yearIndex;
-        for (uint256 i; i < cfg.packedBirthWindows.length; ++i) {
-            uint256 packed = cfg.packedBirthWindows[i];
-            uint64 start = uint64(packed);
-            uint64 end = uint64(packed >> 64);
-            uint8 zodiac = uint8(packed >> 128);
-            uint8 constellation = uint8(packed >> 136);
-            uint64 cursor = start;
-            while (cursor < end) {
-                while (cursor >= cfg.yearStarts[yearIndex + 1]) ++yearIndex;
-                uint64 groupEnd = end < cfg.yearStarts[yearIndex + 1] ? end : cfg.yearStarts[yearIndex + 1];
-                if (_groups.length == type(uint32).max) revert InvalidCalendar();
-                _groups.push(GroupMetadata(cursor, groupEnd, uint32(uint256(cfg.firstFinancialYear) + yearIndex), zodiac, constellation));
-                cursor = groupEnd;
-            }
-        }
+        // Validate signed local-time conversion before any narrowing cast.
+        _civilDate(cfg.activationTime, cfg.utcOffsetSeconds);
     }
 
     function mintFromImmediateProof(bytes32 proofId, address beneficiary, uint256 amount)
@@ -315,7 +205,7 @@ contract KUFO is ERC20, ERC20Capped {
             revert LifetimeIssuanceExceeded(amount, MAX_SUPPLY - totalMintedFromAlchemy);
         }
         _verifyBurnProof(proofId, beneficiary, amount);
-        GroupMetadata memory group = _groups[groupId - 1];
+        GroupMetadata memory group = _metadata(groupId);
         uint256 first = amount / 2;
         uint256 firstAndSecond = Math.mulDiv(amount, 3, 4);
         _creditGroup(beneficiary, groupId, first, firstAndSecond - first, amount - firstAndSecond);
@@ -323,10 +213,10 @@ contract KUFO is ERC20, ERC20Capped {
         totalMintedFromAlchemy += amount;
         bytes32 groupHash = groupCalendarHash(groupId);
         _mintOrigins[proofId] = MintOrigin(beneficiary, amount, uint64(block.timestamp), group.financialYear,
-            group.zodiac, group.constellation, uint32(groupId), groupHash);
+            group.month, group.tierId, group.constellation, uint32(groupId), groupHash);
         _mint(beneficiary, amount);
         emit ImmediateAlchemyMinted(proofId, groupId, beneficiary, amount, uint64(block.timestamp));
-        emit BirthOriginRecorded(proofId, group.financialYear, group.zodiac, group.constellation, groupId, groupHash);
+        emit BirthOriginRecorded(proofId, group.financialYear, group.month, group.tierId, group.constellation, groupId, groupHash);
     }
 
     function _verifyBurnProof(bytes32 proofId, address beneficiary, uint256 amount) private view {
@@ -348,40 +238,57 @@ contract KUFO is ERC20, ERC20Capped {
 
     function mintOrigin(bytes32 proofId) external view returns (MintOrigin memory) { return _mintOrigins[proofId]; }
     function carrierBurnRecord(bytes32 proofId) external view returns (CarrierBurnRecord memory) { return _carrierBurnRecords[proofId]; }
-    function calendarBoundary(uint256 index) external view returns (uint64) { return _yearStarts[index]; }
-    function groupCount() external view returns (uint256) { return _groups.length; }
-    function groupMetadata(uint256 id) external view returns (GroupMetadata memory) { return _groups[_groupIndex(id)]; }
+    function calendarConfig() external view returns (CalendarConfig memory) {
+        return CalendarConfig(calendarVersion, activationTime, utcOffsetSeconds, _constellationByMonth);
+    }
+    function constellationByMonth(uint8 month) external view returns (uint8) {
+        if (month == 0 || month > 12) revert InvalidCalendar();
+        return _constellationByMonth[month - 1];
+    }
+    function civilDate(uint256 timestamp) external view returns (uint32 year, uint8 month, uint8 day) {
+        (uint256 y, uint256 m, uint256 d) = _civilDate(timestamp, utcOffsetSeconds);
+        if (y > type(uint32).max) revert CalendarIdentifierOverflow();
+        return (uint32(y), uint8(m), uint8(d));
+    }
+    // Local January 1, not a table entry. An unrepresentable pre-Unix boundary
+    // reverts rather than wrapping into a far-future uint64 timestamp.
+    function calendarBoundary(uint256 index) external view returns (uint64) {
+        if (index > uint256(type(uint32).max) - firstBirthYear) revert CalendarIdentifierOverflow();
+        return _checkedTimestamp(_monthStart(uint256(firstBirthYear) + index, 1));
+    }
+    // Virtual month-ID upper bound through now, not the number of minted groups.
+    // It saturates at the representation limit so existing rights stay movable.
+    function groupCount() public view returns (uint256) {
+        if (block.timestamp < activationTime) return 0;
+        (uint256 year, uint256 month,) = _civilDate(block.timestamp, utcOffsetSeconds);
+        return Math.min(maximumGroupId, (year - firstBirthYear) * 12 + month);
+    }
+    // Metadata may be previewed for future, representable month IDs. Possession
+    // and selected mutations separately reject future or pre-activation IDs.
+    function groupMetadata(uint256 id) external view returns (GroupMetadata memory) { return _metadata(id); }
     function groupCalendarHash(uint256 id) public view returns (bytes32) {
-        _groupIndex(id);
-        uint256 low;
-        uint256 high = _segments.length;
-        while (low < high) {
-            uint256 middle = (low + high) / 2;
-            if (id > _segments[middle].groupEndIndex) low = middle + 1; else high = middle;
-        }
-        return _segments[low].hash;
+        _checkGroupRange(id);
+        return calendarHash;
     }
     function birthGroup(address owner, uint256 id) external view returns (Cohort memory) { _groupIndex(id); return _birthGroups[owner][id]; }
     function birthGroupAt(uint256 timestamp) external view returns (uint256 id, GroupMetadata memory metadata) {
         id = _groupAt(timestamp);
-        metadata = _groups[id - 1];
+        metadata = _metadata(id);
     }
     // A derived aggregate is updated in the same atomic mutation as every group.
     function cohort(address owner, uint32 year) external view returns (Cohort memory result) {
-        _issuanceIndex(year);
+        _checkYear(year);
         return _yearCohorts[owner][year];
     }
     function currentYear() public view returns (uint32) {
-        uint256 low;
-        uint256 high = _yearStarts.length;
-        while (low < high) {
-            uint256 middle = (low + high) / 2;
-            if (block.timestamp >= _yearStarts[middle]) low = middle + 1; else high = middle;
-        }
-        uint256 index = low == 0 ? 0 : low - 1;
-        return uint32(uint256(firstBirthYear) + index);
+        uint256 year = _currentCivilYear();
+        if (year > type(uint32).max) revert CalendarIdentifierOverflow();
+        return uint32(year);
     }
-    function currentAnnualStage(uint32 year) public view returns (uint8) { return _annualStage(_issuanceIndex(year)); }
+    function currentAnnualStage(uint32 year) public view returns (uint8) {
+        _checkYear(year);
+        return _annualStage(year, _currentCivilYear());
+    }
     function claimableDecay(address owner, uint32 year) public view returns (uint256 amount) {
         return _claimable(_yearCohorts[owner][year], currentAnnualStage(year));
     }
@@ -389,9 +296,10 @@ contract KUFO is ERC20, ERC20Capped {
         if (_heldGroupCount[owner] > MAX_BATCH_GROUPS) revert GroupBatchRequired(MAX_BATCH_GROUPS);
         uint256 id = _nextHeld(owner, 0);
         uint256 examined;
+        uint256 asOfYear = _currentCivilYear();
         while (id != 0) {
             if (++examined > MAX_BATCH_GROUPS) revert GroupBatchRequired(MAX_BATCH_GROUPS);
-            amount += _claimable(_birthGroups[owner][id], _annualStage(uint256(_groups[id - 1].financialYear) - firstBirthYear));
+            amount += _claimable(_birthGroups[owner][id], _annualStage(_groupYear(id), asOfYear));
             id = _nextHeld(owner, id);
         }
     }
@@ -414,9 +322,10 @@ contract KUFO is ERC20, ERC20Capped {
     }
     function claimableForGroups(address owner, uint256[] calldata ids) external view returns (uint256 amount) {
         _validateSelection(ids);
+        uint256 asOfYear = _currentCivilYear();
         for (uint256 i; i < ids.length; ++i) {
             uint256 id = ids[i];
-            amount += _claimable(_birthGroups[owner][id], _annualStage(uint256(_groups[id - 1].financialYear) - firstBirthYear));
+            amount += _claimable(_birthGroups[owner][id], _annualStage(_groupYear(id), asOfYear));
         }
     }
 
@@ -445,9 +354,10 @@ contract KUFO is ERC20, ERC20Capped {
         uint256 available;
         uint256 examined;
         uint256 id = _nextHeld(owner, 0);
+        uint256 asOfYear = _currentCivilYear();
         while (id != 0 && remaining != 0) {
             if (++examined > MAX_BATCH_GROUPS) revert GroupBatchRequired(MAX_BATCH_GROUPS);
-            uint8 stage = _annualStage(uint256(_groups[id - 1].financialYear) - firstBirthYear);
+            uint8 stage = _annualStage(_groupYear(id), asOfYear);
             uint256 claimable = _claimable(_birthGroups[owner][id], stage);
             available += claimable;
             uint256 take = Math.min(claimable, remaining);
@@ -465,9 +375,10 @@ contract KUFO is ERC20, ERC20Capped {
         _authorizeBurn(owner, beneficiary, amount, proofId);
         uint256 remaining = amount;
         uint256 available;
+        uint256 asOfYear = _currentCivilYear();
         for (uint256 i; i < ids.length && remaining != 0; ++i) {
             uint256 id = ids[i];
-            uint8 stage = _annualStage(uint256(_groups[id - 1].financialYear) - firstBirthYear);
+            uint8 stage = _annualStage(_groupYear(id), asOfYear);
             uint256 claimable = _claimable(_birthGroups[owner][id], stage);
             available += claimable;
             uint256 take = Math.min(claimable, remaining);
@@ -504,7 +415,7 @@ contract KUFO is ERC20, ERC20Capped {
         if (stage >= 1) { first = Math.min(item.first, unpaid); unpaid -= first; }
         if (stage >= 2) { second = Math.min(item.second, unpaid); unpaid -= second; }
         _debitGroup(owner, id, first, second, stage == 3 ? unpaid : 0);
-        emit AnnualConversion(id, _groups[id - 1].financialYear, owner, beneficiary, take, take * KSHIP_PER_KUFO, stage);
+        emit AnnualConversion(id, _groupYear(id), owner, beneficiary, take, take * KSHIP_PER_KUFO, stage);
     }
     function conservationInvariantHolds() external view returns (bool) { return totalSupply() + totalDecayedForKship == totalMintedFromAlchemy; }
 
@@ -559,7 +470,7 @@ contract KUFO is ERC20, ERC20Capped {
             _setHeld(owner, id);
             ++_heldGroupCount[owner];
         }
-        uint32 year = _groups[id - 1].financialYear;
+        uint32 year = _groupYear(id);
         Cohort storage annual = _yearCohorts[owner][year];
         bool emptyYear = annual.first + annual.second + annual.terminal == 0;
         annual.first += first; annual.second += second; annual.terminal += terminal;
@@ -572,7 +483,7 @@ contract KUFO is ERC20, ERC20Capped {
             _clearHeld(owner, id);
             --_heldGroupCount[owner];
         }
-        uint32 year = _groups[id - 1].financialYear;
+        uint32 year = _groupYear(id);
         Cohort storage annual = _yearCohorts[owner][year];
         annual.first -= first; annual.second -= second; annual.terminal -= terminal;
         if (annual.first + annual.second + annual.terminal == 0) --_heldYearCount[owner];
@@ -661,36 +572,90 @@ contract KUFO is ERC20, ERC20Capped {
     }
     function _validateSelection(uint256[] calldata ids) private view {
         if (ids.length == 0 || ids.length > MAX_BATCH_GROUPS) revert InvalidGroupSelection();
+        uint256 count = groupCount();
         uint256 previous;
         for (uint256 i; i < ids.length; ++i) {
-            if (ids[i] <= previous || ids[i] > _groups.length) revert InvalidGroupSelection();
+            if (ids[i] <= previous || ids[i] < firstBirthMonth || ids[i] > count) revert InvalidGroupSelection();
             previous = ids[i];
         }
     }
     function _groupIndex(uint256 id) private view returns (uint256) {
-        if (id == 0 || id > _groups.length) revert UnknownBirthGroup(id);
+        _checkGroupRange(id);
+        if (id > groupCount()) revert UnknownBirthGroup(id);
         return id - 1;
     }
+    function _checkGroupRange(uint256 id) private view {
+        if (id < firstBirthMonth || id > maximumGroupId) revert UnknownBirthGroup(id);
+    }
+    function _groupYear(uint256 id) private view returns (uint32) {
+        _checkGroupRange(id);
+        // maximumGroupId was bounded by MAX_FINANCIAL_YEAR in the constructor.
+        return uint32(uint256(firstBirthYear) + (id - 1) / 12);
+    }
+    function _metadata(uint256 id) private view returns (GroupMetadata memory) {
+        uint32 year = _groupYear(id);
+        uint8 month = uint8((id - 1) % 12 + 1);
+        int256 start = _monthStart(year, month);
+        int256 active = int256(uint256(activationTime));
+        if (start < active) start = active;
+        int256 end = month == 12 ? _monthStart(uint256(year) + 1, 1) : _monthStart(year, uint256(month) + 1);
+        return GroupMetadata(_checkedTimestamp(start), _checkedTimestamp(end), year, month, month,
+            _constellationByMonth[month - 1]);
+    }
     function _groupAt(uint256 timestamp) private view returns (uint256) {
-        if (timestamp < _yearStarts[0] || timestamp >= _yearStarts[issuanceCohorts]) revert IssuanceCalendarClosed(timestamp);
-        uint256 low;
-        uint256 high = _groups.length;
-        while (low < high) {
-            uint256 middle = (low + high) / 2;
-            if (timestamp >= _groups[middle].end) low = middle + 1; else high = middle;
-        }
-        return low + 1;
+        if (timestamp < activationTime) revert IssuanceCalendarClosed(timestamp);
+        (uint256 year, uint256 month,) = _civilDate(timestamp, utcOffsetSeconds);
+        if (year < firstBirthYear) revert IssuanceCalendarClosed(timestamp);
+        if (year > MAX_FINANCIAL_YEAR) revert CalendarIdentifierOverflow();
+        uint256 id = (year - firstBirthYear) * 12 + month;
+        if (id > maximumGroupId) revert CalendarIdentifierOverflow();
+        return id;
     }
-    function _issuanceIndex(uint32 year) private view returns (uint256 index) {
-        if (year < firstBirthYear) revert UnknownBirthYear(year);
-        index = uint256(year) - firstBirthYear;
-        if (index >= issuanceCohorts) revert UnknownBirthYear(year);
+    function _checkYear(uint32 year) private view {
+        if (year < firstBirthYear || year > _groupYear(maximumGroupId)) revert UnknownBirthYear(year);
     }
-    function _annualStage(uint256 index) private view returns (uint8) {
-        if (block.timestamp < _yearStarts[index + 1]) return 0;
-        if (block.timestamp < _yearStarts[index + 2]) return 1;
-        if (block.timestamp < _yearStarts[index + 3]) return 2;
-        return 3;
+    function _annualStage(uint256 birthYear, uint256 asOfYear) private pure returns (uint8) {
+        if (asOfYear <= birthYear) return 0;
+        return uint8(Math.min(3, asOfYear - birthYear));
+    }
+    function _currentCivilYear() private view returns (uint256 year) {
+        (year,,) = _civilDate(block.timestamp, utcOffsetSeconds);
+    }
+    // Gregorian civil_from_days, March-based 400-year eras. Source algorithm:
+    // https://howardhinnant.github.io/date_algorithms.html#civil_from_days
+    // Work is constant with respect to elapsed years; all math is wide before
+    // explicit public-ID guards. No Date API, oracle, year table or float.
+    function _civilDate(uint256 timestamp, int32 offset) private pure returns (uint256 year, uint256 month, uint256 day) {
+        if (timestamp > type(uint64).max) revert InvalidCalendarTimestamp();
+        int256 local = int256(timestamp) + int256(offset);
+        if (local < 0) revert InvalidCalendarTimestamp();
+        uint256 z = uint256(local) / 1 days + 719468;
+        uint256 era = z / 146097;
+        uint256 doe = z - era * 146097;
+        uint256 yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+        year = yoe + era * 400;
+        uint256 doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+        uint256 mp = (5 * doy + 2) / 153;
+        day = doy - (153 * mp + 2) / 5 + 1;
+        month = mp < 10 ? mp + 3 : mp - 9;
+        if (month <= 2) ++year;
+    }
+    // Inverse days_from_civil for the first of a month. Signed conversion is
+    // intentional: local January1970 with a positive offset begins before Unix.
+    // Only the activation month's start may be clipped to activationTime.
+    function _monthStart(uint256 year, uint256 month) private view returns (int256) {
+        uint256 y = month <= 2 ? year - 1 : year;
+        uint256 era = y / 400;
+        uint256 yoe = y - era * 400;
+        uint256 mp = month > 2 ? month - 3 : month + 9;
+        uint256 doy = (153 * mp + 2) / 5;
+        uint256 doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+        int256 daysSinceUnix = int256(era * 146097 + doe) - 719468;
+        return daysSinceUnix * 1 days - int256(utcOffsetSeconds);
+    }
+    function _checkedTimestamp(int256 timestamp) private pure returns (uint64) {
+        if (timestamp < 0 || uint256(timestamp) > type(uint64).max) revert InvalidCalendarTimestamp();
+        return uint64(uint256(timestamp));
     }
     function _claimable(Cohort storage item, uint8 stage) private view returns (uint256) {
         return (stage >= 1 ? item.first : 0) + (stage >= 2 ? item.second : 0) + (stage == 3 ? item.terminal : 0);

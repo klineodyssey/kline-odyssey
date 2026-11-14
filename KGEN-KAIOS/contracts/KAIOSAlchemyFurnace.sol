@@ -24,7 +24,8 @@ interface ICanonicalKUFO {
         uint256 amount;
         uint64 bornAt;
         uint32 birthYear;
-        uint8 birthZodiac;
+        uint8 birthMonth;
+        uint8 birthTierId;
         uint8 birthConstellation;
         uint32 groupId;
         bytes32 calendarHash;
