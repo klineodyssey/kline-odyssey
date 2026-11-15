@@ -6,8 +6,8 @@
 <meta name="color-scheme" content="dark">
 <meta name="k12345-frontend-version" content="12345-TEMPLE-V10.51.0-COCKPIT-ENTRY">
 <meta name="k12345-release-status" content="FRONTEND_RELEASE_NONFINANCIAL">
-<meta name="k12345-build-revision" content="2">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://esm.sh; style-src 'unsafe-inline'; img-src data: blob: https://*.walletconnect.com https://*.walletconnect.org https://*.reown.com https://imagedelivery.net; connect-src 'self' https://api.web3modal.org https://data-api.binance.vision https://esm.sh https://bsc-dataseed.binance.org https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://*.reown.com wss://*.reown.com; frame-src https://verify.walletconnect.com https://verify.walletconnect.org; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="k12345-build-revision" content="3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline'; img-src data: blob: https://*.walletconnect.com https://*.walletconnect.org https://*.reown.com https://imagedelivery.net; connect-src 'self' https://api.web3modal.org https://data-api.binance.vision https://esm.sh https://bsc-dataseed.binance.org https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://*.reown.com wss://*.reown.com; frame-src https://verify.walletconnect.com https://verify.walletconnect.org; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>12345 五指山悟空財神殿｜V10.51.0 駕駛艙試玩</title>
 <style>
 :root{--bg:#09131b;--panel:#0e1c26;--line:#29404a;--text:#edf6f2;--muted:#9fb7ba;--gold:#ecc98b;--mint:#78edd0;--deep:#07131b;--warn:#ffc283;font-family:"Microsoft JhengHei","PingFang TC",system-ui,sans-serif;color-scheme:dark}
@@ -54,6 +54,15 @@
  .map-live{font-size:10px}.market-board{gap:5px}.market-card{padding:9px 6px}.market-card b{font-size:13px}
  .cockpit-page[data-page=flight]>.flightDeck{padding:6px}.cockpit-page[data-page=flight] .deck-controls{margin-top:4px}
 }
+.cockpit-tabs-ready .cockpit-tabs button{min-height:44px}
+.hud11520 #gameShell #brake,.hud11520 #gameShell #openTrade,.hud11520 #gameShell #applyNumericThrust{min-width:44px;min-height:44px}
+.cockpit-world-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.cockpit-world-tools [data-kaios-return]{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 10px;text-decoration:none}
+#cockpitAudio{max-width:340px;min-width:0;font-size:11px}
+#cockpitAudio .kaios-audio{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+#cockpitAudio .kaios-audio-toggle,#cockpitAudio .kaios-audio-settings{min-width:44px;min-height:44px}
+#cockpitAudio .kaios-audio-summary{position:static;width:auto;max-width:100%;text-align:left;flex-basis:100%;font-size:10px;overflow-wrap:anywhere}
+#cockpitAudio .kaios-audio-panel{position:fixed;top:50%;left:50%;right:auto;transform:translate(-50%,-50%);max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px)}
 </style>
 <style id="k11520-interface-adaptation">
 /* UI adapted from 11520/game-5d.html:28–39,103–114 at cd49dbb8. No 11520 runtime or PWA. */
@@ -254,6 +263,10 @@ body.cockpit-tabs-ready{height:100vh;height:100dvh;overflow:hidden;display:grid;
  <div class="blood-hud" aria-label="本機試玩血量換算預覽，不是鏈上 KAIOS">
   <span>試玩血量 <b id="gameBloodValue">0 KAIOS</b></span><progress id="gameBloodBar" max="100000" value="0" aria-label="試玩血條，十萬 KAIOS 為百分之百"></progress>
   <small>換算預覽 1 KGEN＝1,000 KAIOS · 補血 1,000／秒 · 尚未轉幣</small>
+ </div>
+ <div class="cockpit-world-tools">
+  <div id="cockpitAudio" data-audio-state="pending" aria-label="KAIOS 聲音控制"><span>正在準備聲音控制</span></div>
+  <a class="ghost" href="../../../" data-kaios-return="PORTAL" aria-label="回 KAIOS 總世界">回 KAIOS</a>
  </div>
 </header>
 <section class="panel practice-panel" id="mainnetPanel" aria-labelledby="mainnetTitle">
@@ -3605,6 +3618,38 @@ $("gameShell").removeAttribute("inert");
 $("flightBootNotice").hidden=true;
 $("bootStatus").dataset.state="ready";
 $("bootStatus").textContent="駕駛艙已啟動 · 可離線操作 · 模擬交易";
+// Audio is optional: same-origin modules must never delay the inline cockpit.
+// The shared engine owns gesture unlock, visibility and BFCache suspension.
+void (async function mountCockpitAudio(){
+  const container=document.getElementById("cockpitAudio");
+  if(location.protocol==="file:"){
+    container.dataset.audioState="offline";
+    container.textContent="單檔離線版未附聲音模組；遊戲仍可操作。";
+    return;
+  }
+  try{
+    const {mountAudioControl}=await import(new URL("../../../assets/kaios-audio-ui.mjs",location.href).href);
+    container.replaceChildren();
+    const control=mountAudioControl({container,worldId:"12345"});
+    const audio=control.audio;
+    globalThis.KAIOS_AUDIO=audio;
+    globalThis.KAIOS_AUDIO_CONTROL=control;
+    container.dataset.audioState="ready";
+    const home=document.querySelector('[data-kaios-return="PORTAL"]');
+    home.addEventListener("click",async event=>{
+      if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||home.target)return;
+      event.preventDefault();
+      let timer;
+      try{
+        await Promise.race([audio.transitionToWorld("PORTAL"),new Promise(resolve=>{timer=setTimeout(resolve,450);})]);
+      }catch{}finally{clearTimeout(timer);}
+      location.assign(home.href);
+    });
+  }catch{
+    container.dataset.audioState="unavailable";
+    container.textContent="聲音模組未載入；遊戲仍可操作。";
+  }
+})();
 void refreshBtcReference();
 void refreshMarketStats();
 } catch (error) {

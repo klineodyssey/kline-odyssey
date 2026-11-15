@@ -527,3 +527,8 @@ new frontend file, Runtime, bootstrap or public beneficiary mapping is added.
 18911 原「連接本人錢包」在沒有注入 provider 時展開同頁錢包選擇，可沿既有 WalletConnect 2.12.2／原公開 Project ID／SRI 配對，或由 MetaMask、Trust 原生連結開啟原煉丹頁並進行一次帳戶連線。實作留在既有 `K線西遊記/temples/18911/panel.mjs`、`index.html`，不載入18888控制器、不共用其session/database，也不新增Runtime或bootstrap。
 
 連線僅取得帳戶/網路；取消、拒絕、逾時及遲到回覆不送金融交易，原pending/回執保持。WalletConnect須核本頁metadata、topic、expiry與BSC56帳戶權限；手機返頁只接續連線/唯讀，授權與煉丹仍由持有人本人逐筆確認。原生入口不要求使用者先手動開錢包再找網址。原有合約/payload/數量/費用限制未改。瀏覽器合成驗收與實體手機／真WalletConnect服務分開記錄，未取得真實證據者保持NOT_VERIFIED。
+## 2026-11-15｜原站驗收接續與12345共享聲音
+
+`K線西遊記/temples/12345/cockpit.html` 沿用 `assets/kaios-audio.mjs`、`assets/kaios-audio-ui.mjs` 與 `assets/kaios-audio.css`，在艙頂呈現單一共享聲音控制及返回 KAIOS。12345「心光」、四通道、靜音、手勢解鎖、背景／pagehide與BFCache生命週期均由原音訊器官管理；不載入舊商業MP3或舊Heart Runtime。CSP僅增加本站模組及樣式來源，沒有 `unsafe-eval`。聲音載入獨立於遊戲啟動，單檔 `file:` 下載不要求外部模組，失敗時保留可見說明與原離線試玩。
+
+原12345 `index.html`、`VERSION`、`MANIFEST.json` 與cockpit同步標記V10.51.0 build3；原入口的雜湊綁定replace／手動fallback不變，manifest歷史檔案hash仍明列為歷史快照。原 `tests/kaios-world-audio-browser.mjs` 依新版入口、只讀錢包、公開餘額、本機模擬、手機控制及共享聲音驗收；已退役的真幣Heart操作不再被宣稱為已通過。音訊PCM、單AudioContext／排程、靜音跨頁及0商業歌曲下載門檻維持原值。新版12345仍未開放真KGEN領取、入金、成交結算或出金；18911錢包授權與煉丹仍由持有人本人確認，UI發布不等於新增鏈上交易。
