@@ -12,14 +12,14 @@
     "live_financial_writes": false
   },
   "version": "12345-TEMPLE-V10.51.0-COCKPIT-ENTRY",
-  "build": "20261115-COCKPIT-ENTRY-R2",
+  "build": "20261115-COCKPIT-ENTRY-R3",
   "base_from": "12345-TEMPLE-V10.50.0-KAIOS-LINEAGE-TEMPLEHEART-V3.3.2-READY",
   "generated": "2026-11-15",
   "frontend_release": {
     "version": "12345-TEMPLE-V10.51.0-COCKPIT-ENTRY",
     "version_source": "VERSION",
     "status": "FRONTEND_RELEASE_NONFINANCIAL",
-    "build_revision": 2,
+    "build_revision": 3,
     "navigation_strategy": "CSP_HASHED_REPLACE_WITH_MANUAL_FALLBACK",
     "publication_channel": "GITHUB_PAGES",
     "source_branch": "main",
@@ -241,7 +241,7 @@
       "life_layer": "DNA",
       "life_type": "Genome DNA Record",
       "version": "12345-TEMPLE-V10.51.0-COCKPIT-ENTRY",
-      "build": "20261115-COCKPIT-ENTRY-R2",
+      "build": "20261115-COCKPIT-ENTRY-R3",
       "birth": "2026-05-25",
       "death": "ACTIVE",
       "growth_stage": "IMMORTAL_REGENERATION_STANDARDIZATION"

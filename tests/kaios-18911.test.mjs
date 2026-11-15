@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {createKufoClient} from '../K線西遊記/temples/18911/kufo-client.mjs';
+import {walletBridgeLanding,walletConnectSessionPermits} from '../K線西遊記/temples/18911/panel.mjs';
 
 // SYNTHETIC_EIP1193_NO_REAL_WALLET: the real public payload, ABI encoder and
 // client run against an in-memory provider. No fetch, RPC, signer or EVM exists.
@@ -695,4 +696,41 @@ test('18911 public evidence export includes the complete archive and pending int
   const before=[...h.storage.data],start=h.requests.length,output=h.client.exportEvidence();assert.deepEqual(Object.keys(output).sort(),['journal','pending','snapshot']);assert.equal(output.journal.evidence.length,1);assert.equal(output.journal.evidence[0].verification.status,'CONFIRMED_REVERTED');assert.equal(output.pending.hash,null);assert.ok(output.pending.submissionAnchor);assert.ok(output.pending.intentId);assert.equal(output.snapshot.evidenceKey,h.client.snapshot().evidenceKey);
   output.journal.evidence[0].receipt.status='forged';output.pending.hash=hash;output.snapshot.config.activationTime='1';
   const fresh=h.client.exportEvidence();assert.equal(fresh.journal.evidence[0].receipt.status,'0x0');assert.equal(fresh.pending.hash,null);assert.notEqual(fresh.snapshot.config.activationTime,'1');assert.deepEqual([...h.storage.data],before);assert.equal(h.requests.length,start);h.client.dispose();
+});
+
+test('18911 wallet bridge landing preserves the original page and query with one explicit player return marker',()=>{
+  const original='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18911/index.html?case=original&walletBridge=old#ownerPanel';
+  const result=walletBridgeLanding(original);
+  assert.ok(result instanceof URL);
+  assert.equal(result.origin,new URL(original).origin);assert.equal(result.pathname,new URL(original).pathname);
+  assert.equal(result.searchParams.get('case'),'original');assert.deepEqual(result.searchParams.getAll('walletBridge'),['1']);
+  assert.equal(result.hash,'#playerPanel');assert.equal(walletBridgeLanding(result.href).href,result.href);
+  assert.equal(walletBridgeLanding('http://localhost:4173/temples/18911/index.html').hostname,'localhost');
+  for(const href of ['javascript:alert(1)','data:text/html,test','file:///tmp/index.html','http://untrusted.example/18911/'])assert.throws(()=>walletBridgeLanding(href),'native handoff rejects non-site schemes and insecure remote HTTP');
+});
+
+test('18911 WalletConnect accepts only the current own-metadata topic and an unexpired BSC account namespace',()=>{
+  const metadata={name:'18911 煉丹爐 · KUFO',url:'https://klineodyssey.github.io/kline-odyssey/K線西遊記/temples/18911/index.html'};
+  const topic='synthetic-18911-topic';
+  const valid=()=>({session:{topic,expiry:Math.floor(Date.now()/1000)+3600,self:{metadata:{...metadata}},namespaces:{eip155:{accounts:['eip155:56:'+PAYLOAD.expectedOwner]}}}});
+  assert.equal(walletConnectSessionPermits(valid(),metadata,topic),true);
+  assert.equal(walletConnectSessionPermits(valid(),metadata,topic,PAYLOAD.expectedOwner.toLowerCase()),true);
+  const direct=valid();direct.session.namespaces={'eip155:56':direct.session.namespaces.eip155};assert.equal(walletConnectSessionPermits(direct,metadata,topic,PAYLOAD.expectedOwner),true);
+  for(const fault of ['missing','topic','blankTopic','metadataName','metadataUrl','missingMetadata','expired','fractionalExpiry','unsafeExpiry','wrongChain','badAddress','foreignAccount','emptyAccounts']){
+    const provider=valid();let expectedTopic=topic,account=PAYLOAD.expectedOwner;
+    if(fault==='missing')delete provider.session;
+    if(fault==='topic')provider.session.topic='another-application-topic';
+    if(fault==='blankTopic')expectedTopic='';
+    if(fault==='metadataName')provider.session.self.metadata.name='18888 other application';
+    if(fault==='metadataUrl')provider.session.self.metadata.url='https://untrusted.example/';
+    if(fault==='missingMetadata')delete provider.session.self.metadata;
+    if(fault==='expired')provider.session.expiry=Math.floor(Date.now()/1000)-1;
+    if(fault==='fractionalExpiry')provider.session.expiry+=0.5;
+    if(fault==='unsafeExpiry')provider.session.expiry=Number.MAX_SAFE_INTEGER+1;
+    if(fault==='wrongChain')provider.session.namespaces.eip155.accounts=['eip155:1:'+PAYLOAD.expectedOwner];
+    if(fault==='badAddress')provider.session.namespaces.eip155.accounts=['eip155:56:0x1234'];
+    if(fault==='foreignAccount')account=OTHER;
+    if(fault==='emptyAccounts')provider.session.namespaces.eip155.accounts=[];
+    assert.equal(walletConnectSessionPermits(provider,metadata,expectedTopic,account),false,fault+' must not bind this application to an unrelated or stale session');
+  }
 });
