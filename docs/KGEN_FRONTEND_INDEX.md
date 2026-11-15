@@ -521,3 +521,9 @@ new frontend file, Runtime, bootstrap or public beneficiary mapping is added.
 - `tests/kaios-18911.test.mjs`、`tests/kaios-18911-browser.mjs`：隔離provider功能測試與原Linux CI手機390×844/桌面真Chromium截圖。
 
 新頁不自稱已上鏈；只有canonical receipt/程式/綁定核實才往下，未啟用時玩家保留明確原因，不冒用舊49Epoch爐。Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記；不改Boot V1.4。App來源7164ce08769c60ac9439ab0c6b97d103c92c0642：原Portal CI43633664165及WorldViewer43633664170 SUCCESS；18911單元18/18、原入口/音訊59/59、原離線錢包/PWA153/153 PASS；36合約編譯且原5份公開payload ABI/creation/runtime/immutableRefs精確比對。390×844與1280×900各8情境，共16情境/64張viewport與fullPage截圖，32次skip裁切座標及鍵盤132×47.59px可達驗證；直接視覺複核通過。均為CI合成provider，不代表實體手機、真錢包或真BFCache；中段viewport須與有模擬標示的fullPage及report成組引用。Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記；原站發布與主網部署分別依原工作流及本人錢包實際回執核實，本候選未上鏈，沒有新部署地址或回執。
+
+## 2026-11-15｜18911 從頁面連接手機錢包
+
+18911 原「連接本人錢包」在沒有注入 provider 時展開同頁錢包選擇，可沿既有 WalletConnect 2.12.2／原公開 Project ID／SRI 配對，或由 MetaMask、Trust 原生連結開啟原煉丹頁並進行一次帳戶連線。實作留在既有 `K線西遊記/temples/18911/panel.mjs`、`index.html`，不載入18888控制器、不共用其session/database，也不新增Runtime或bootstrap。
+
+連線僅取得帳戶/網路；取消、拒絕、逾時及遲到回覆不送金融交易，原pending/回執保持。WalletConnect須核本頁metadata、topic、expiry與BSC56帳戶權限；手機返頁只接續連線/唯讀，授權與煉丹仍由持有人本人逐筆確認。原生入口不要求使用者先手動開錢包再找網址。原有合約/payload/數量/費用限制未改。瀏覽器合成驗收與實體手機／真WalletConnect服務分開記錄，未取得真實證據者保持NOT_VERIFIED。
