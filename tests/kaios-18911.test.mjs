@@ -552,3 +552,147 @@ test('18911 only automatic reads have RPC and whole-pass deadlines; late reads c
   wallet.sendOverride=()=>{walletWaiting=true;return consent.promise;};const confirmation=wallet.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'});while(!walletWaiting)await tick();
   t.mock.timers.tick(60001);assert.equal(wallet.client.snapshot().active,true);assert.ok(wallet.client.snapshot().pending);consent.resolve(ethers.utils.id('synthetic-wallet-confirmation-after-read-deadline'));await confirmation;assert.equal(wallet.client.snapshot().pending.phase,'SUBMITTED');assert.equal(wallet.sends.length,1);wallet.client.dispose();
 });
+
+async function lostHash(h=harness(),request={kind:'deploy',contract:'KUFO'},{mine=true,reload=true}={}) {
+  if(!h.client.snapshot().account)await connect(h);
+  const review=await reviewed(h,request);
+  h.requestHook=({method})=>{if(method==='eth_sendTransaction'){
+    const saved=JSON.parse(h.storage.getItem('kaios18911.pending.v1')),block=h.blocks.get(h.blockNumber);
+    assert.deepEqual(saved.submissionAnchor,{number:block.number,hash:block.hash,timestamp:String(h.timestamp)},'the sealed submission anchor must already be durable before opening the wallet request');
+    h.storage.failWrite=true;
+  }};
+  await assert.rejects(h.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'}),error=>error.code==='STORAGE_WRITE_FAILED');
+  h.requestHook=null;h.storage.failWrite=false;
+  const hash=[...h.transactions.keys()].at(-1);assert.equal(h.client.snapshot().pending.hash,hash,'the same page still exposes the real broadcast hash');
+  assert.equal(JSON.parse(h.storage.data.get('kaios18911.pending.v1')).hash,null,'the post-broadcast hash write really failed');
+  if(mine)h.mine(hash);
+  if(reload){h.client.dispose();h.client=h.makeClient();await h.client.connect();assert.equal(h.client.snapshot().pending.hash,null,'reload loses the RAM-only hash, not the pending intent');}
+  return {h,hash};
+}
+async function failedCreation() {
+  const h=harness();await connect(h);const hash=await submit(h,{kind:'deploy',contract:'KUFO'});h.mine(hash);h.deployed.delete('KUFO');
+  Object.assign(h.receipts.get(hash),{status:'0x0',contractAddress:null,logs:[]});await h.client.resume();
+  assert.equal(h.client.snapshot().phase,'CONFIRMED_REVERTED');assert.equal(h.client.snapshot().pending,null);return h;
+}
+
+test('18911 a holder recovers a RAM-only hash after reload using canonical anchored evidence without resending',async()=>{
+  const {h,hash}=await lostHash(),raw=h.storage.data.get('kaios18911.pending.v1'),start=h.requests.length;
+  const original=JSON.parse(raw),anchor=original.submissionAnchor;assert.equal(anchor.number,hex(100));assert.equal(anchor.hash,h.blocks.get(100).hash);assert.equal(BigInt(anchor.timestamp),BigInt(h.timestamp));
+  await assert.rejects(h.client.recoverPendingHash({hash,accepted:false}),error=>error.code==='RECOVERY_CONSENT_REQUIRED');assert.equal(h.storage.data.get('kaios18911.pending.v1'),raw);
+  const result=await h.client.recoverPendingHash({hash,accepted:true});assert.equal(result.phase,'VERIFIED_DEPLOYMENT');assert.equal(result.pending,null);assert.equal(result.deployments.KUFO.txHash,hash);assert.equal(h.sends.length,1);readonlyRequests(h,start);
+  const record=h.client.exportEvidence().journal.evidence[0];assert.equal(record.intent.intentId,original.intentId);assert.equal(record.intent.hash,hash);assert.deepEqual(record.intent.submissionAnchor,anchor);assert.equal(record.intent.recovery.assurance,'ANCHORED_HOLDER_ATTESTED');assert.equal(record.intent.recovery.holderAttested,true);assert.equal(record.intent.recovery.uniqueRequestProven,false);h.client.dispose();
+});
+
+test('18911 recovery cannot replace a known RAM or durable hash, or reuse another archived intent hash',async()=>{
+  for(const location of ['ram','durable','archived']){
+    let h,hash,candidate;
+    if(location==='ram'){({h,hash}=await lostHash(harness(),undefined,{reload:false}));candidate=ethers.utils.id('different-wallet-hash');}
+    else if(location==='durable'){h=harness();await connect(h);hash=await submit(h,{kind:'deploy',contract:'KUFO'});candidate=ethers.utils.id('different-wallet-hash');}
+    else{h=harness();await connect(h);await complete(h,{kind:'deploy',contract:'KUFO'});candidate=[...h.transactions.keys()][0];({hash}=await lostHash(h,{kind:'deploy',contract:'KAIOSAlchemyFurnace'}));}
+    const raw=h.storage.data.get('kaios18911.pending.v1'),start=h.requests.length;
+    await assert.rejects(h.client.recoverPendingHash({hash:candidate,accepted:true}),error=>error.code===(location==='archived'?'HASH_ALREADY_ARCHIVED':'KNOWN_HASH_MISMATCH'));
+    assert.equal(h.storage.data.get('kaios18911.pending.v1'),raw);assert.equal(h.requests.length,start);assert.equal(h.client.snapshot().pending.hash,location==='ram'?hash:location==='durable'?hash:null);h.client.dispose();
+  }
+});
+
+test('18911 candidate recovery cannot attach an unconfirmed, foreign, mismatched or noncanonical transaction',async()=>{
+  for(const fault of ['unmined','missingTx','sender','input','value','canonical','runtime','guest','foreign','chain','events']){
+    const seed=harness();if(fault==='events'){await connect(seed);activateFixture(seed);}
+    const {h,hash}=await lostHash(seed,fault==='events'?{kind:'approve',amount:'1'}:undefined,{mine:fault!=='unmined'});
+    if(fault==='missingTx')h.transactionOverride=()=>null;
+    if(fault==='sender')h.transactionOverride=tx=>({...tx,from:OTHER});
+    if(fault==='input')h.transactionOverride=tx=>({...tx,input:tx.input+'00'});
+    if(fault==='value')h.transactionOverride=tx=>({...tx,value:'0x1'});
+    if(fault==='canonical')h.receiptOverride=receipt=>({...receipt,blockHash:ethers.utils.id('unrelated-block')});
+    if(fault==='runtime')h.codeOverrides.set(normalize(h.addresses.KUFO),'0x6000');
+    if(fault==='events')h.receiptOverride=receipt=>({...receipt,logs:[]});
+    if(fault==='guest'||fault==='foreign'){h.client.dispose();h.account=fault==='guest'?null:OTHER;h.client=h.makeClient();}
+    if(fault==='chain')h.chainId=1;
+    const original=h.storage.data.get('kaios18911.pending.v1'),start=h.requests.length,before=h.sends.length;
+    await assert.rejects(h.client.recoverPendingHash({hash,accepted:true}),error=>fault==='unmined'||fault==='missingTx'?error.code==='RECOVERY_NOT_CONFIRMED':!!error.code);
+    assert.equal(h.storage.data.get('kaios18911.pending.v1'),original,`bad ${fault} must leave the original durable unknown intent`);assert.equal(h.sends.length,before);assert.equal(h.client.snapshot().review,null);readonlyRequests(h,start);h.client.dispose();
+  }
+});
+
+test('18911 recovery validates its submission anchor and labels the limited legacy clock-bound attestation',async()=>{
+  for(const mode of ['anchorReorg','notAfterAnchor','legacy','legacyOldReceipt','legacyMissingClock','legacyFutureClock']){
+    const {h,hash}=await lostHash();let item=JSON.parse(h.storage.data.get('kaios18911.pending.v1'));
+    if(mode==='anchorReorg')h.blocks.set(100,{...h.blocks.get(100),hash:ethers.utils.id('reorganized-anchor')});
+    if(mode==='notAfterAnchor'){const old=h.blocks.get(100);Object.assign(h.receipts.get(hash),{blockNumber:old.number,blockHash:old.hash});Object.assign(h.transactions.get(hash),{blockNumber:old.number,blockHash:old.hash});}
+    if(mode.startsWith('legacy')){delete item.submissionAnchor;if(mode==='legacyOldReceipt'){h.advance(2);item.createdAt=(h.timestamp-1)*1000;}if(mode==='legacyMissingClock')delete item.createdAt;if(mode==='legacyFutureClock')item.createdAt=h.timestamp*1000+1;h.storage.data.set('kaios18911.pending.v1',JSON.stringify(item));}
+    const original=h.storage.data.get('kaios18911.pending.v1');
+    if(mode==='legacy'){const result=await h.client.recoverPendingHash({hash,accepted:true});assert.equal(result.pending,null);const record=h.client.exportEvidence().journal.evidence[0];assert.equal(record.intent.recovery.assurance,'LEGACY_HOLDER_ATTESTED_CLOCK_BOUND');assert.equal(record.intent.recovery.uniqueRequestProven,false);}
+    else{await assert.rejects(h.client.recoverPendingHash({hash,accepted:true}),error=>['NON_CANONICAL_SUBMISSION_ANCHOR','RECOVERY_BEFORE_SUBMISSION','LEGACY_RECOVERY_UNBOUNDED'].includes(error.code));assert.equal(h.storage.data.get('kaios18911.pending.v1'),original);}
+    assert.equal(h.sends.length,1);h.client.dispose();
+  }
+});
+
+test('18911 recovery preserves the original intent through another hash or archive write failure',async()=>{
+  for(const stage of ['hash','archive','readback']){
+    const {h,hash}=await lostHash(),intentId=h.client.snapshot().pending.intentId,key=h.client.snapshot().evidenceKey;
+    const set=h.storage.setItem,get=h.storage.getItem;let archiveWritten=false;
+    h.storage.setItem=function(k,v){if(stage==='hash'||stage==='archive'&&k===key)throw Error('Synthetic recovery quota failure');set.call(this,k,v);if(k===key)archiveWritten=true;};
+    h.storage.getItem=function(k){return stage==='readback'&&archiveWritten&&k===key?null:get.call(this,k);};
+    await assert.rejects(h.client.recoverPendingHash({hash,accepted:true}),error=>['STORAGE_WRITE_FAILED','STORAGE_READBACK_FAILED'].includes(error.code));
+    assert.equal(JSON.parse(h.storage.data.get('kaios18911.pending.v1')).intentId,intentId);assert.equal(h.client.snapshot().pending.hash,hash,'the already verified candidate hash remains visible while resend stays blocked');assert.equal(h.sends.length,1);
+    h.storage.setItem=set;h.storage.getItem=get;await h.client.recoverPendingHash({hash,accepted:true});assert.equal(h.client.snapshot().pending,null);assert.equal(h.client.exportEvidence().journal.evidence.length,1,'a readback failure must recover idempotently, not duplicate evidence');assert.equal(h.sends.length,1);h.client.dispose();
+  }
+});
+
+test('18911 recovery stops on a changed intent, journal, identity or another tab holding the original lock',async()=>{
+  for(const change of ['intent','journal','account','tab']){
+    const {h,hash}=await lostHash(),gate=deferred();let waiting=false;
+    h.requestHook=({method})=>{if(method==='eth_getTransactionReceipt'){waiting=true;return gate.promise;}};
+    const recovering=h.client.recoverPendingHash({hash,accepted:true});const expected=change==='tab'?null:assert.rejects(recovering,error=>['PENDING_CHANGED','CONTEXT_CHANGED'].includes(error.code));while(!waiting)await tick();
+    if(change==='intent'){const p=JSON.parse(h.storage.data.get('kaios18911.pending.v1'));p.intentId='different-tab-intent';h.storage.data.set('kaios18911.pending.v1',JSON.stringify(p));}
+    if(change==='journal'){const key=h.client.snapshot().evidenceKey;h.storage.data.set(key,JSON.stringify({schemaVersion:1,payloadHash:h.client.snapshot().payloadHash,evidence:[],otherTabMarker:true}));}
+    if(change==='account'){h.account=OTHER;h.provider.emit('accountsChanged',[OTHER]);}
+    if(change==='tab'){const other=h.makeClient();await assert.rejects(other.recoverPendingHash({hash,accepted:true}),error=>error.code==='ANOTHER_TAB_ACTIVE');other.dispose();}
+    const retained=h.storage.data.get('kaios18911.pending.v1');gate.resolve();if(expected)await expected;else await recovering;
+    if(change!=='tab')assert.equal(h.storage.data.get('kaios18911.pending.v1'),retained);assert.equal(h.sends.length,1);h.client.dispose();
+  }
+});
+
+test('18911 canonical first-deployment failure permits an explicit config reset and a new preview without deleting history',async()=>{
+  const h=await failedCreation(),original=h.client.exportEvidence(),raw=h.storage.data.get(original.snapshot.evidenceKey),next=String(h.timestamp+60);
+  assert.throws(()=>h.client.setConfig({activationTime:next}),error=>error.code==='CONFIG_LOCKED','the original conservative setter still refuses a journal-based reset');
+  const start=h.requests.length,result=await h.client.resetFailedDeploymentConfig({activationTime:next});assert.equal(result.config.activationTime,next);assert.equal(result.phase,'STALE');assert.equal(result.review,null);assert.equal(h.storage.data.get(result.evidenceKey),raw);assert.deepEqual(h.client.exportEvidence().journal,original.journal);readonlyRequests(h,start);
+  await h.client.prepare({kind:'deploy',contract:'KUFO'});assert.equal(h.client.snapshot().review.config.activationTime,next);assert.equal(h.sends.length,1);h.client.dispose();
+});
+
+test('18911 config reset rejects success, unknown, mixed or forged failure records, foreign holders and active new routes',async()=>{
+  for(const fault of ['success','pending','mixed','forged','reorg','holder','partialRoute','fullRoute']){
+    const h=fault==='success'||fault==='forged'?harness():await failedCreation();
+    if(fault==='success'||fault==='forged'){await connect(h);await complete(h,{kind:'deploy',contract:'KUFO'});}
+    const key=h.client.snapshot().evidenceKey,archive=JSON.parse(h.storage.data.get(key));
+    if(fault==='pending'){const p={...archive.evidence[0].intent,intentId:'unknown-new-send',hash:null};h.storage.data.set('kaios18911.pending.v1',JSON.stringify(p));}
+    if(fault==='mixed'){archive.evidence.push({...structuredClone(archive.evidence[0]),verification:{status:'VERIFIED_DEPLOYMENT',address:h.addresses.KUFO}});h.storage.data.set(key,JSON.stringify(archive));}
+    if(fault==='forged'){archive.evidence[0].verification.status='CONFIRMED_REVERTED';archive.evidence[0].receipt.status='0x0';h.storage.data.set(key,JSON.stringify(archive));}
+    if(fault==='reorg'){const hash=archive.evidence[0].intent.hash;h.receipts.get(hash).blockHash=ethers.utils.id('changed-failure-block');}
+    if(fault==='holder'){h.client.dispose();h.account=OTHER;h.client=h.makeClient();}
+    if(fault==='partialRoute'){h.deployed.add('KAIOSAlchemyFurnace');h.routes.set(normalize(h.organIds.Furnace),h.addresses.KAIOSAlchemyFurnace);}
+    if(fault==='fullRoute')activateFixture(h);
+    const config=h.client.snapshot().config,raw=h.storage.data.get(key),pendingRaw=h.storage.data.get('kaios18911.pending.v1'),start=h.requests.length;
+    await assert.rejects(h.client.resetFailedDeploymentConfig({activationTime:String(h.timestamp+60)}));assert.deepEqual(h.client.snapshot().config,config);assert.equal(h.storage.data.get(key),raw);assert.equal(h.storage.data.get('kaios18911.pending.v1'),pendingRaw);assert.equal(h.sends.length,1);assert.equal(h.requests.slice(start).filter(x=>['eth_requestAccounts','eth_sendTransaction','eth_estimateGas'].includes(x.method)).length,0);h.client.dispose();
+  }
+});
+
+test('18911 config reset cannot commit after a late pending, evidence or account change',async()=>{
+  for(const change of ['pending','evidence','account']){
+    const h=await failedCreation(),before=h.client.snapshot().config,archive=h.client.exportEvidence().journal,gate=deferred();let waiting=false;
+    h.requestHook=({method})=>{if(method==='eth_getTransactionReceipt'){waiting=true;return gate.promise;}};
+    const reset=h.client.resetFailedDeploymentConfig({activationTime:String(h.timestamp+60)}),rejection=assert.rejects(reset,error=>['PENDING_CHANGED','CONTEXT_CHANGED'].includes(error.code));while(!waiting)await tick();
+    if(change==='pending')h.storage.data.set('kaios18911.pending.v1',JSON.stringify({...archive.evidence[0].intent,intentId:'new-unknown',hash:null}));
+    if(change==='evidence')h.storage.data.set(h.client.snapshot().evidenceKey,JSON.stringify({...archive,changedByOtherTab:true}));
+    if(change==='account'){h.account=OTHER;h.provider.emit('accountsChanged',[OTHER]);}
+    const pendingRaw=h.storage.data.get('kaios18911.pending.v1'),journalRaw=h.storage.data.get(h.client.snapshot().evidenceKey);gate.resolve();await rejection;
+    assert.deepEqual(h.client.snapshot().config,before);assert.equal(h.storage.data.get('kaios18911.pending.v1'),pendingRaw);assert.equal(h.storage.data.get(h.client.snapshot().evidenceKey),journalRaw);assert.equal(h.sends.length,1);h.client.dispose();
+  }
+});
+
+test('18911 public evidence export includes the complete archive and pending intent without writes or shared references',async()=>{
+  const h=await failedCreation();await h.client.resetFailedDeploymentConfig({activationTime:String(h.timestamp+1)});const {hash}=await lostHash(h,undefined,{mine:false});
+  const before=[...h.storage.data],start=h.requests.length,output=h.client.exportEvidence();assert.deepEqual(Object.keys(output).sort(),['journal','pending','snapshot']);assert.equal(output.journal.evidence.length,1);assert.equal(output.journal.evidence[0].verification.status,'CONFIRMED_REVERTED');assert.equal(output.pending.hash,null);assert.ok(output.pending.submissionAnchor);assert.ok(output.pending.intentId);assert.equal(output.snapshot.evidenceKey,h.client.snapshot().evidenceKey);
+  output.journal.evidence[0].receipt.status='forged';output.pending.hash=hash;output.snapshot.config.activationTime='1';
+  const fresh=h.client.exportEvidence();assert.equal(fresh.journal.evidence[0].receipt.status,'0x0');assert.equal(fresh.pending.hash,null);assert.notEqual(fresh.snapshot.config.activationTime,'1');assert.deepEqual([...h.storage.data],before);assert.equal(h.requests.length,start);h.client.dispose();
+});
