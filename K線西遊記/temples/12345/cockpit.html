@@ -56,13 +56,21 @@
 }
 .cockpit-tabs-ready .cockpit-tabs button{min-height:44px}
 .hud11520 #gameShell #brake,.hud11520 #gameShell #openTrade,.hud11520 #gameShell #applyNumericThrust{min-width:44px;min-height:44px}
-.cockpit-world-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.cockpit-world-tools{grid-column:1/-1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
 .cockpit-world-tools [data-kaios-return]{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 10px;text-decoration:none}
 #cockpitAudio{max-width:340px;min-width:0;font-size:11px}
 #cockpitAudio .kaios-audio{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 #cockpitAudio .kaios-audio-toggle,#cockpitAudio .kaios-audio-settings{min-width:44px;min-height:44px}
 #cockpitAudio .kaios-audio-summary{position:static;width:auto;max-width:100%;text-align:left;flex-basis:100%;font-size:10px;overflow-wrap:anywhere}
 #cockpitAudio .kaios-audio-panel{position:fixed;top:50%;left:50%;right:auto;transform:translate(-50%,-50%);max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px)}
+body.cockpit-tabs-ready .cockpit-page[data-page=flight]{overflow:auto}
+/* Short windows retain a selected page and scrollable header tools. */
+@media(max-height:500px){
+ .hud11520.cockpit-tabs-ready #gameShell{grid-template-rows:minmax(0,96px) 44px minmax(0,56px) minmax(120px,1fr)}
+ .hud11520.cockpit-tabs-ready .mast{min-height:0;max-height:96px;overflow:auto}
+ .hud11520.cockpit-tabs-ready .mast .eyebrow,.hud11520.cockpit-tabs-ready .mast .sub{display:none}
+ .hud11520.cockpit-tabs-ready .route-strip{min-height:0;max-height:56px;overflow:auto}
+}
 </style>
 <style id="k11520-interface-adaptation">
 /* UI adapted from 11520/game-5d.html:28–39,103–114 at cd49dbb8. No 11520 runtime or PWA. */

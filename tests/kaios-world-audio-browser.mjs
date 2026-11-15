@@ -39,6 +39,13 @@ async function until(read,accept,label,timeout=15000){
  throw new Error(label+' timed out; last='+JSON.stringify(value));
 }
 async function stable(page){await page.locator('#bootStatus[data-state=ready]').waitFor();await page.locator('#gameShell:not([inert])').waitFor();}
+async function failureGeometry(page){
+ return page.evaluate(()=>Object.fromEntries(['body','#bootStatus','#gameShell','.mast','#cockpitTabs','#routePanel','#cockpitPages','#page-trade','#page-flight'].map(selector=>{
+  const node=document.querySelector(selector);if(!node)return [selector,null];
+  const rect=node.getBoundingClientRect(),style=getComputedStyle(node);
+  return [selector,{hidden:node.hidden,x:rect.x,y:rect.y,width:rect.width,height:rect.height,scrollHeight:node.scrollHeight,display:style.display,overflow:style.overflow,rows:style.gridTemplateRows}];
+ })));
+}
 async function markSynthetic(page){
  await page.locator('#bootStatus').evaluate((el,notice)=>{if(!el.textContent.includes(notice))el.textContent+=' · '+notice;},NOTICE);
 }
@@ -206,7 +213,7 @@ async function walletRoundTripQA(){
    assert.equal(row.networkWrites.length,0);assert.deepEqual(row.runtimeErrors,[]);assert.deepEqual(row.commercialRequests,[]);
    reports.push({id:'12345-wallet',...row,functional:'PASS_CURRENT_NONFINANCIAL_CONTRACT',preciseBalances:true,pinnedBlock:'0x100',
     explicitSelection:true,accountAndChainRevocation:true,rejectedAndReconnected:true,manualAuthorizationBeforeReload:auth,realWallet:'NOT_TESTED',walletConnectRelay:'NOT_TESTED',broadcasts:0});
-  }catch(error){await shot(page,'12345-current-wallet-'+width+'-FAIL').catch(()=>{});throw error;}finally{await context.close();}
+  }catch(error){reports.push({id:'12345-wallet-failure-geometry',width,height,geometry:await failureGeometry(page).catch(()=>null)});await shot(page,'12345-current-wallet-'+width+'-FAIL').catch(()=>{});throw error;}finally{await context.close();}
  }
 }
 async function cockpitLayoutQA(){
@@ -255,7 +262,7 @@ async function cockpitLayoutQA(){
    await assertNoWrites(page,row);assert.deepEqual(row.runtimeErrors,[]);assert.deepEqual(row.commercialRequests,[]);
    reports.push({id:'12345-mobile',...row,functional:'PASS_CURRENT_COCKPIT',targets,currentMovement:true,brake:true,warpValueAndRuntime:true,
     tabs:true,mapExpansion:true,reload:true,rotation:width===390?'PASS':'NOT_APPLICABLE',retiredHeartLayout:'NOT_APPLICABLE_RETIRED_PRODUCT',broadcasts:0});
-  }catch(error){await shot(page,'12345-current-layout-'+width+'-FAIL').catch(()=>{});throw error;}finally{await context.close();}
+  }catch(error){reports.push({id:'12345-layout-failure-geometry',width,height,geometry:await failureGeometry(page).catch(()=>null)});await shot(page,'12345-current-layout-'+width+'-FAIL').catch(()=>{});throw error;}finally{await context.close();}
  }
 }
 async function instrumentAudio(context){
