@@ -30,7 +30,7 @@ function cancelWalletBridge(){
  const attempt=bridgeAttempt;bridgeAttempt=null;attempt?.cancel();
  try{mobileRaw?.modal?.closeModal?.();}catch{}
  rollbackBridgeClient(attempt);
- lastError=bridgePending||bridgeReadPending?'已取消接入；等待原錢包請求結束，遲到回覆不會連線或送交易。':'已取消錢包連線。';render();scheduleVerification(0);
+ lastError=bridgePending||bridgeReadPending?'已取消接入；等待原錢包請求結束，遲到回覆不會連線或送交易。':'已取消錢包連線。';render();scheduleVerification();
 }
 function rollbackBridgeClient(attempt){
  if(attempt?.client&&(client===attempt.client||provider===attempt.adoptedProvider)){
@@ -83,7 +83,7 @@ async function connectMobileWallet(){
   return {raw,topic};
  })();
  bridgePending=work;render();
- work.finally(()=>{if(bridgePending===work){bridgePending=null;render();scheduleVerification(0);}}).catch(()=>{});
+ work.finally(()=>{if(bridgePending===work){bridgePending=null;render();scheduleVerification();}}).catch(()=>{});
  try{
   const ready=await Promise.race([work,stopped]);if(!ready||bridgeAttempt!==attempt)return;
   // Wallet app approval can arrive while this browser is backgrounded. Resume only reads on return.
@@ -98,11 +98,11 @@ async function connectMobileWallet(){
   mobileMetadata=metadata;mobileTopic=ready.topic;mobileProvider=guardedMobile(ready.raw,metadata,ready.topic);
   initializeClient(mobileProvider);attempt.client=client;attempt.adoptedProvider=mobileProvider;
   const connection=run(current=>current.connect());bridgeReadPending=connection;
-  connection.finally(()=>{if(bridgeReadPending===connection){bridgeReadPending=null;render();scheduleVerification(0);}}).catch(()=>{});
+  connection.finally(()=>{if(bridgeReadPending===connection){bridgeReadPending=null;render();scheduleVerification();}}).catch(()=>{});
   await Promise.race([connection,stopped]);
   if(bridgeAttempt===attempt&&client===attempt.client&&view?.account)$('walletBridgePanel').hidden=true;
  }catch(error){if(bridgeAttempt===attempt){rollbackBridgeClient(attempt);lastError=Number(error.code)===4001?'錢包連線已取消；沒有送出交易。':message(error);render();}}
- finally{clearTimeout(timeout);attempt.cleanup?.();if(bridgeAttempt===attempt)bridgeAttempt=null;render();scheduleVerification(0);}
+ finally{clearTimeout(timeout);attempt.cleanup?.();if(bridgeAttempt===attempt)bridgeAttempt=null;render();scheduleVerification();}
 }
 const VERIFY_INTERVAL_MS=30000;
 const UNKNOWN_HASH_STOP='原交易尚無 hash，請從本人錢包取回此次原請求的 hash，再於下方唯讀核對。';
