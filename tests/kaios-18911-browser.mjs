@@ -658,6 +658,8 @@ async function downloadEvidence(page,row,label){
 }
 
 async function manuallyRecover(page,hash){
+  assert.equal(typeof hash,'string','manual recovery fixture must supply the concrete original transaction hash');
+  assert.match(hash,/^0x[0-9a-f]{64}$/i,'manual recovery fixture hash is a complete bytes32 value');
   await touchTarget(page,'#receiptHash');await page.locator('#receiptHash').fill(hash);
   const label='label:has(#acceptRecoveryHash)';await touchTarget(page,label);
   if(!await page.locator('#acceptRecoveryHash').isChecked())await page.locator(label).click();
@@ -670,6 +672,7 @@ async function runP1RecoveryScenarios(browser,profile){
   await runScenario(browser,profile,'p1-hash-recovery',{clock:true},async(page,row)=>{
     await ownerReview(page,row);await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
     const kufo=await mineReviewedPending(page,row);await automaticRead(page,row);
+    assert.match(kufo.hash,/^0x[0-9a-f]{64}$/i,'mined helper returns the actual archived KUFO transaction hash');
     assert.equal(await page.locator('#deploySteps .step-status').filter({hasText:'鏈上已核'}).count(),1);
     const originalJournal=await journalBytes(page);
     assert.equal(Object.keys(originalJournal).length,1,'first canonical synthetic deployment is already in the original product journal');
@@ -681,7 +684,8 @@ async function runP1RecoveryScenarios(browser,profile){
     assert.ok(BigInt(pending.submissionAnchor.number)>0n,'new intent keeps its original submission block');
     assert.match(pending.submissionAnchor.hash,/^0x[0-9a-f]{64}$/i);
     assert.ok(BigInt(pending.submissionAnchor.timestamp)>0n);
-    const furnaceHash=await page.evaluate(()=>window.__18911WalletQA.lastBroadcastHash());assert.notEqual(furnaceHash,kufo.hash);
+    const furnaceHash=await page.evaluate(()=>window.__18911WalletQA.lastBroadcastHash());
+    assert.match(furnaceHash,/^0x[0-9a-f]{64}$/i,'synthetic wallet retains the broadcast Furnace transaction hash');assert.notEqual(furnaceHash,kufo.hash);
     assert.equal(row.sendRequests.length,2,'only the two explicit original confirmations requested synthetic transactions');
     assert.equal(await page.locator('#activationTime').isEnabled(),false,'an unknown submission keeps immutable configuration locked');
     await capture(page,row,'unknown-locked-before-reload');
@@ -764,7 +768,7 @@ async function mineReviewedPending(page,row){
   assert.match(hash,/^0x[0-9a-f]{64}$/i,'only an explicitly submitted original intent can receive a synthetic receipt');
   const mined=await page.evaluate(value=>window.__18911WalletQA.mineDeployment(value),hash);
   (row.syntheticMinedDeployments??=[]).push({...mined,hash});
-  return mined;
+  return {...mined,hash};
 }
 
 async function runAutomaticScenarios(browser,profile){
