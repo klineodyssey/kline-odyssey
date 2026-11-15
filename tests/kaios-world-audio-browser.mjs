@@ -230,7 +230,8 @@ async function cockpitLayoutQA(){
    await tab(page,'flight');
    for(const selector of ['#brake','#openTrade','#applyNumericThrust'])targets.push({selector,...await target(page,selector)});
    await page.locator('#warpNumericInput').fill('0.5');await page.locator('#warpNumericInput').press('Tab');
-   assert.match(await page.locator('#speedSet').textContent(),/0\.5C/,'the displayed C value follows the real numeric control');
+   assert.equal(await page.locator('#speedSet').textContent(),'+0.1C','absolute C input snaps to the existing nearest canonical detent');
+   assert.equal(await page.locator('#warpNumericInput').inputValue(),'+0.1','the real input displays the canonical C value, not rail travel');
    const oldX=Number(await page.locator('#xNow').textContent());
    const stick=await target(page,'#xyStick');await page.mouse.move(stick.x+stick.w/2,stick.y+stick.h/2);await page.mouse.down();
    await page.mouse.move(stick.x+stick.w*.8,stick.y+stick.h*.35);await page.waitForTimeout(450);
