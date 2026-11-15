@@ -226,7 +226,7 @@ async function run(operation){
  clearVerificationTimer();
  const epoch=uiEpoch,current=client,isCurrent=()=>epoch===uiEpoch&&current===client;
  uiBusy=true;lastError='';render();
- try{await operation(current,isCurrent);}catch(error){if(isCurrent())lastError=message(error);}
+ try{await operation(current,isCurrent);}catch(error){if(isCurrent()){lastError=message(error);if(['RPC_PERMISSION_DENIED','RPC_QUOTA_LIMIT'].includes(error?.code))verifyStopped=lastError;}}
  finally{if(isCurrent()){uiBusy=false;view=current?.snapshot()||view;render();scheduleVerification(view?.pending?.hash?0:VERIFY_INTERVAL_MS);}}
 }
 async function verifyPayload(){

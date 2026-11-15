@@ -638,9 +638,13 @@ async function runAutomaticScenarios(browser,profile){
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','public permission/quota failures stop on their first response');
     assert.equal(row.publicRpc.length,1,'only the first exact public HTTP request is attempted');
     await page.clock.fastForward(120_000);assert.equal(row.publicRpc.length,1,'permission/quota refusal never falls back or retries automatically');
+    await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await autoSettled(page);await phase(page,'BLOCKED');
+    assert.equal(row.publicRpc.length,2,'an explicit manual query permits exactly one new read after the initial refusal');
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','a repeated manual permission/quota refusal immediately stops the automatic schedule again');
+    await page.clock.fastForward(120_000);assert.equal(row.publicRpc.length,2,'manual refusal must not schedule an automatic third request');
     assert.equal(await page.evaluate(()=>Boolean(window.ethereum)),false);assert.equal(row.sendRequests.length,0);
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);
-    row.automatic={httpStatus:status,attemptsBeforeStop:1,fallbackRequests:0,automaticWalletRequests:0};
+    row.automatic={httpStatus:status,attemptsBeforeStop:1,explicitManualReads:1,totalPublicHttpRequests:2,fallbackRequests:0,automaticWalletRequests:0};
     await capture(page,row,`http${status}-stopped`);
   });
   await runScenario(browser,profile,'auto-public-visible',{guest:true,clock:true},async(page,row)=>{
