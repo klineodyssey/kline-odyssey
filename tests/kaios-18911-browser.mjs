@@ -115,9 +115,15 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
     // The only application flag is a display-only notice. Authorization still
     // goes through the real client, real shared selector and real payload.
     window.__K18911_MOCK__=true;
-    const state={account,chainId,sendMode,authorized:sessionStorage.getItem('18911.qa.authorized')==='true',sendCount:0};
+    const qaLedgerKey='18911.qa.synthetic-chain.v1';
+    const storedLedger=JSON.parse(sessionStorage.getItem(qaLedgerKey)||'null');
+    if(storedLedger&&storedLedger.programCommit!==payload.programCommit)throw Error('Synthetic ledger belongs to another artifact set');
+    const state={account,chainId,sendMode,authorized:sessionStorage.getItem('18911.qa.authorized')==='true',sendCount:storedLedger?.sendCount||0};
     const listeners=new Map(),readGates=new Map(),zero='0x'+'0'.repeat(40);
-    const transactions=new Map(),receipts=new Map(),blocks=new Map(),deployed=new Map(),proposals=new Map(),codeOverrides=new Map();
+    // This QA-only chain ledger survives a real page reload. It is separate
+    // from every production localStorage pending/journal/archive key.
+    const transactions=new Map(storedLedger?.transactions),receipts=new Map(storedLedger?.receipts),blocks=new Map(storedLedger?.blocks),deployed=new Map(storedLedger?.deployed),proposals=new Map(storedLedger?.proposals),codeOverrides=new Map();
+    function persistLedger(){sessionStorage.setItem(qaLedgerKey,JSON.stringify({scope:'SYNTHETIC_CHAIN_ONLY',programCommit:payload.programCommit,sendCount:state.sendCount,transactions:[...transactions],receipts:[...receipts],blocks:[...blocks],deployed:[...deployed],proposals:[...proposals]}));}
     const counters=new Map();
     let qaVisibility='visible';
     let readFailure=null;
@@ -134,7 +140,9 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
     }
     function block(number=100){
       const E=window.ethers.utils;
-      return blocks.get(Number(number))||{number:hex(number),timestamp:hex(Math.floor(Date.now()/1000)),hash:E.id('18911 synthetic QA block '+number),parentHash:E.id('18911 synthetic QA block '+(number-1))};
+      const cached=blocks.get(Number(number));if(cached)return cached;
+      const created={number:hex(number),timestamp:hex(Math.floor(Date.now()/1000)),hash:E.id('18911 synthetic QA block '+number),parentHash:E.id('18911 synthetic QA block '+(number-1))};
+      blocks.set(Number(number),created);persistLedger();return created;
     }
     function values(name,method,args){
       const E=window.ethers.utils;
@@ -224,10 +232,11 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='eth_requestAccounts'){state.authorized=true;sessionStorage.setItem('18911.qa.authorized','true');return [state.account];}
         if(method==='eth_accounts')return qaLane!=='public'&&state.authorized?[state.account]:[];
         if(method==='eth_getBlockByNumber'){
-          if(params[0]!=='latest')return block(Number(BigInt(params[0])));
-          let number=Math.max(100,...blocks.keys()),latest=blocks.get(number);
+          // Numeric historical reads never invent a previously unknown block.
+          if(params[0]!=='latest')return blocks.get(Number(BigInt(params[0])))||null;
+          let number=blocks.size?Math.max(...blocks.keys()):100,latest=blocks.get(number);
           if(latest&&Number(BigInt(latest.timestamp))<Math.floor(Date.now()/1000))number++;
-          latest=block(number);blocks.set(number,latest);return latest;
+          return block(number);
         }
         if(method==='eth_getBlockByHash')return Array.from(blocks.values()).find(item=>item.hash===params[0])||null;
         if(method==='eth_getBalance')return hex(E.parseEther('0.5').toString());
@@ -254,6 +263,8 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
           state.sendCount++;
           const hash=E.id('18911 synthetic pending transaction '+state.sendCount),tx=JSON.parse(JSON.stringify(params[0]));
           transactions.set(hash,{...tx,input:tx.data,to:tx.to??null,value:tx.value??'0x0',hash,nonce:hex(state.sendCount-1),chainId:'0x38'});
+          persistLedger();
+          if(state.sendMode==='broadcast-unknown'){const error=new Error('Synthetic creation broadcast, wallet response lost before hash');error.code=-32000;throw error;}
           // Unmined by default. Only an explicit QA command creates a clearly
           // synthetic receipt, which the unchanged product verifier checks.
           return hash;
@@ -275,6 +286,8 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       },
       removeInjectedWallet(){delete window.ethereum;delete window.BinanceChain;},
       restoreInjectedWallet(){window.ethereum=provider;},
+      setSendMode(value){if(!['pending','reject','unknown','broadcast-unknown'].includes(value))throw Error('Unsupported synthetic send mode');state.sendMode=value;},
+      lastBroadcastHash(){return Array.from(transactions.keys()).at(-1)||null;},
       gateRead(id){
         if(readGates.has(id))throw Error('Synthetic read gate must be unique');
         readGates.set(id,{method:'eth_getBlockByNumber',waiting:false,settled:false});
@@ -282,23 +295,28 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       gateWalletSend(id){if(readGates.has(id))throw Error('Synthetic send gate must be unique');readGates.set(id,{method:'eth_sendTransaction',waiting:false,settled:false});},
       failReads(count){readFailure={remaining:count,method:'eth_getBlockByNumber'};},
       overrideDependencyCode(name,code){codeOverrides.set(normalized(payload.dependencies[name].address),code);},
-      mineDeployment(hash){
+      mineDeployment(hash,reverted=false){
         const tx=transactions.get(hash);if(!tx||tx.to!==null)throw Error('Synthetic mining requires an existing reviewed creation transaction');
         const E=window.ethers.utils,match=Object.entries(payload.contracts).find(([,item])=>tx.input.toLowerCase().startsWith(item.bytecode.toLowerCase()));
         if(!match)throw Error('Synthetic receipt must match one original artifact');
         const [name,artifact]=match,c=E.defaultAbiCoder.decode(interfaces[name].deploy.inputs,'0x'+tx.input.slice(artifact.bytecode.length));
         const address=E.getContractAddress({from:tx.from,nonce:Number(BigInt(tx.nonce))});
-        const number=Math.max(100,...blocks.keys())+1,b=block(number);blocks.set(number,b);
+        if(!blocks.size)throw Error('Synthetic mining requires the original submission chain to exist');
+        const number=Math.max(...blocks.keys())+1,b=block(number);
         Object.assign(tx,{blockNumber:b.number,blockHash:b.hash});
-        if(name==='KUFO')deployed.set(name,{address,config:{version:c[2][0],activationTime:c[2][1].toString(),utcOffsetSeconds:Number(c[2][2]),constellationByMonth:Array.from(c[2][3],Number)}});
-        else deployed.set(name,{address});
-        receipts.set(hash,{transactionHash:hash,status:'0x1',blockNumber:b.number,blockHash:b.hash,from:tx.from,to:null,contractAddress:address,logs:[]});
-        return {contract:name,address,blockNumber:b.number,scope:'SYNTHETIC_MINED_DEPLOYMENT_ONLY'};
+        if(!reverted){
+          if(name==='KUFO')deployed.set(name,{address,config:{version:c[2][0],activationTime:c[2][1].toString(),utcOffsetSeconds:Number(c[2][2]),constellationByMonth:Array.from(c[2][3],Number)}});
+          else deployed.set(name,{address});
+        }
+        receipts.set(hash,{transactionHash:hash,status:reverted?'0x0':'0x1',blockNumber:b.number,blockHash:b.hash,from:tx.from,to:null,contractAddress:reverted?null:address,logs:[]});
+        persistLedger();
+        return {contract:name,address:reverted?null:address,blockNumber:b.number,status:reverted?'0x0':'0x1',scope:'SYNTHETIC_MINED_DEPLOYMENT_ONLY'};
       },
       setPendingOrgan(organ,remainingSeconds){
         const names={Furnace:['KAIOSAlchemyFurnace','KAIOS.ORGAN.FURNACE.18911'],Output:['KUFOOutputJindouyun168888','KAIOS.ORGAN.KUFO.OUTPUT.168888'],Converter:['KSHIPConverter','KAIOS.ORGAN.KSHIP.CONVERTER']};
         const [name,key]=names[organ]||[];if(!deployed.has(name))throw Error('Pending proposal needs the verified synthetic contract');
         proposals.set(normalized(window.ethers.utils.id(key)),[deployed.get(name).address,Math.floor(Date.now()/1000)+remainingSeconds]);
+        persistLedger();
       },
       gateState(id){const gate=readGates.get(id);return gate?{method:gate.method,waiting:gate.waiting,settled:gate.settled}:null;},
       releaseRead(id,mode){
@@ -622,7 +640,123 @@ async function runProfile(browser,width,height){
     await capture(page,row,'switched');
   });
   await runAutomaticScenarios(browser,profile);
+  await runP1RecoveryScenarios(browser,profile);
   profile.functional='PASS';
+}
+
+async function journalBytes(page){
+  return page.evaluate(()=>Object.fromEntries(Object.entries(localStorage).filter(([key])=>key.startsWith('kaios18911.receipts.')).sort(([a],[b])=>a.localeCompare(b))));
+}
+
+async function downloadEvidence(page,row,label){
+  await touchTarget(page,'#exportEvidence');
+  const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#exportEvidence').click()]);
+  const filename=`${row.profile}-${row.name}-${label}.json`;
+  await download.saveAs(`${OUT}/${filename}`);
+  (row.evidenceDownloads??=[]).push(filename);
+  return JSON.parse(await fs.readFile(`${OUT}/${filename}`,'utf8'));
+}
+
+async function manuallyRecover(page,hash){
+  await touchTarget(page,'#receiptHash');await page.locator('#receiptHash').fill(hash);
+  const label='label:has(#acceptRecoveryHash)';await touchTarget(page,label);
+  if(!await page.locator('#acceptRecoveryHash').isChecked())await page.locator(label).click();
+  assert.ok(await page.locator('#acceptRecoveryHash').isChecked());
+  await touchTarget(page,'#recoverPendingHash');assert.ok(await page.locator('#recoverPendingHash').isEnabled());
+  await page.locator('#recoverPendingHash').click();await autoSettled(page);
+}
+
+async function runP1RecoveryScenarios(browser,profile){
+  await runScenario(browser,profile,'p1-hash-recovery',{clock:true},async(page,row)=>{
+    await ownerReview(page,row);await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    const kufo=await mineReviewedPending(page,row);await automaticRead(page,row);
+    assert.equal(await page.locator('#deploySteps .step-status').filter({hasText:'鏈上已核'}).count(),1);
+    const originalJournal=await journalBytes(page);
+    assert.equal(Object.keys(originalJournal).length,1,'first canonical synthetic deployment is already in the original product journal');
+    await page.evaluate(()=>window.__18911WalletQA.setSendMode('broadcast-unknown'));
+    await page.locator('#prepareDeploy').click();await phase(page,'REVIEW');await accept(page);
+    await page.locator('#confirmReview').click();await phase(page,'BLOCKED');
+    const pendingRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending=JSON.parse(pendingRaw);
+    assert.equal(pending.contract,'KAIOSAlchemyFurnace');assert.equal(pending.hash,null);
+    assert.ok(BigInt(pending.submissionAnchor.number)>0n,'new intent keeps its original submission block');
+    assert.match(pending.submissionAnchor.hash,/^0x[0-9a-f]{64}$/i);
+    assert.ok(BigInt(pending.submissionAnchor.timestamp)>0n);
+    const furnaceHash=await page.evaluate(()=>window.__18911WalletQA.lastBroadcastHash());assert.notEqual(furnaceHash,kufo.hash);
+    assert.equal(row.sendRequests.length,2,'only the two explicit original confirmations requested synthetic transactions');
+    assert.equal(await page.locator('#activationTime').isEnabled(),false,'an unknown submission keeps immutable configuration locked');
+    await capture(page,row,'unknown-locked-before-reload');
+    await page.reload({waitUntil:'load'});
+    await page.waitForFunction(()=>document.querySelector('#appStatus')?.dataset.state!=='LOADING');await autoSettled(page);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'real reload preserves the original unknown pending intent byte for byte');
+    const anchorAfterReload=await page.evaluate(number=>window.ethereum.request({method:'eth_getBlockByNumber',params:[number,false]}),pending.submissionAnchor.number);
+    assert.deepEqual({number:anchorAfterReload.number,hash:anchorAfterReload.hash,timestamp:BigInt(anchorAfterReload.timestamp).toString()},pending.submissionAnchor,'QA canonical submission header remains fixed across elapsed clock time and real reload');
+    assert.deepEqual(await journalBytes(page),originalJournal,'real reload preserves the existing verified deployment journal');
+    assert.equal(row.sendRequests.length,2,'reload does not resend an unknown transaction');
+    assert.ok(await page.locator('#receiptHash').isVisible(),'holder can paste the hash from this original wallet request');
+    assert.equal(await page.locator('#acceptRecoveryHash').isChecked(),false);
+    assert.equal(await page.locator('#recoverPendingHash').isEnabled(),false,'recovery requires both the original hash and explicit holder acknowledgement');
+    await connect(page);await autoSettled(page);
+    await manuallyRecover(page,kufo.hash);await phase(page,'BLOCKED');
+    assert.equal(await page.locator('#appStatus').getAttribute('data-error-code'),'HASH_ALREADY_ARCHIVED','the historical receipt is rejected as another archived intent, not an unrelated read failure');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'a historical successful KUFO hash cannot replace this Furnace intent');
+    assert.deepEqual(await journalBytes(page),originalJournal);assert.equal(row.sendRequests.length,2);
+    await capture(page,row,'historical-hash-rejected');
+    await manuallyRecover(page,furnaceHash);await phase(page,'BLOCKED');
+    assert.equal(await page.locator('#appStatus').getAttribute('data-error-code'),'RECOVERY_NOT_CONFIRMED','an exact but unmined hash must remain canonically unconfirmed');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'an unmined matching transaction does not release the canonical-evidence lock');
+    assert.deepEqual(await journalBytes(page),originalJournal);assert.equal(row.sendRequests.length,2);
+    const mined=await page.evaluate(hash=>window.__18911WalletQA.mineDeployment(hash),furnaceHash);
+    assert.ok(BigInt(mined.blockNumber)>BigInt(pending.submissionAnchor.number),'recovery receipt is strictly after the original submission anchor');
+    (row.syntheticMinedDeployments??=[]).push({...mined,hash:furnaceHash});
+    await manuallyRecover(page,furnaceHash);
+    await page.waitForFunction(()=>Array.from(document.querySelectorAll('#deploySteps .step-status')).filter(el=>el.textContent==='鏈上已核').length===2);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'only a fully matched canonical Furnace receipt completes the recovered original intent');
+    assert.doesNotMatch(await page.locator('#autoVerifyStatus').textContent(),/尚無 hash/,'successful recovery clears only the obsolete hashless stop reason');
+    assert.equal(row.sendRequests.length,2,'read-only recovery must never issue a third transaction');
+    const journalAfter=await journalBytes(page),beforeRecord=JSON.parse(Object.values(originalJournal)[0]).evidence[0],afterRecords=JSON.parse(Object.values(journalAfter)[0]).evidence;
+    assert.equal(afterRecords.length,2);assert.deepEqual(afterRecords[0],beforeRecord,'recovery appends without rewriting the first verified receipt');
+    assert.equal(afterRecords[1].intent.hash,furnaceHash);
+    assert.equal(afterRecords[1].intent.recovery.assurance,'ANCHORED_HOLDER_ATTESTED');
+    assert.equal(afterRecords[1].intent.recovery.holderAttested,true);
+    assert.equal(afterRecords[1].intent.recovery.uniqueRequestProven,false,'holder-attested recovery must not claim cryptographic proof of a unique wallet request');
+    assert.deepEqual(afterRecords[1].intent.submissionAnchor,pending.submissionAnchor);
+    const exported=await downloadEvidence(page,row,'recovered-cumulative-evidence');
+    assert.equal(exported.pending,null);assert.deepEqual(exported.journal.evidence,afterRecords,'download includes both original cumulative receipt records');
+    assert.equal(exported.snapshot.pending,null);
+    row.p1={unknownIntentPreservedAcrossRealReload:true,submissionAnchorStableAcrossReload:true,historicalHashRejected:'HASH_ALREADY_ARCHIVED',unminedHashRejected:'RECOVERY_NOT_CONFIRMED',canonicalOriginalIntentRecovered:true,recoveryAssurance:'ANCHORED_HOLDER_ATTESTED',uniqueRequestProven:false,explicitTransactionRequests:2,recoveryTransactionRequests:0,exportedCumulativeRecords:exported.journal.evidence.length};
+    await capture(page,row,'canonical-recovered-no-third-send');
+  });
+  await runScenario(browser,profile,'p1-first-failed-config',{clock:true},async(page,row)=>{
+    await ownerReview(page,row);const oldTime=await page.locator('#activationTime').inputValue();
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    const hash=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).hash,PENDING_KEY);
+    const reverted=await page.evaluate(value=>window.__18911WalletQA.mineDeployment(value,true),hash);
+    (row.syntheticMinedDeployments??=[]).push({...reverted,hash});
+    await automaticRead(page,row);await phase(page,'CONFIRMED_REVERTED');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
+    assert.equal(await page.locator('#deploySteps .step-status').filter({hasText:'鏈上已核'}).count(),0);
+    const failedJournal=await journalBytes(page),failedRecords=JSON.parse(Object.values(failedJournal)[0]).evidence;
+    assert.equal(failedRecords.length,1);assert.equal(failedRecords[0].intent.hash,hash);
+    assert.equal(failedRecords[0].verification.status,'CONFIRMED_REVERTED');
+    const failedExport=await downloadEvidence(page,row,'original-canonical-failure');
+    assert.equal(failedExport.pending,null);assert.deepEqual(failedExport.journal.evidence,failedRecords,'holder can download the actual saved failed receipt');
+    await capture(page,row,'canonical-failure-saved');
+    await page.clock.fastForward(86_400_000);
+    await touchTarget(page,'#activationNow');await page.locator('#activationNow').click();await autoSettled(page);
+    const newTime=await page.locator('#activationTime').inputValue();assert.notEqual(newTime,oldTime,'only a new explicit holder action chooses another activation time');
+    await touchTarget(page,'#prepareDeploy');await page.locator('#prepareDeploy').click();await phase(page,'REVIEW');
+    const fields=await page.locator('#reviewDetails').evaluate(host=>Object.fromEntries(Array.from(host.querySelectorAll('dt'),term=>[term.textContent,term.nextElementSibling?.textContent])));
+    assert.equal(fields['啟用 timestamp'],String(Math.floor(Date.parse(newTime+'+08:00')/1000)),'retry preview uses the newly accepted configuration');
+    assert.equal(row.sendRequests.length,1,'canonical failure and configuration reset never automatically retry deployment');
+    const retainedFailedRecords=JSON.parse(Object.values(await journalBytes(page))[0]).evidence;
+    assert.deepEqual(retainedFailedRecords,failedRecords,'manual reconfiguration never rewrites or discards the original failed receipt history');
+    const newExport=await downloadEvidence(page,row,'new-config-original-failure-retained');
+    assert.deepEqual(newExport.journal.evidence,failedRecords);assert.equal(newExport.pending,null);
+    assert.equal(newExport.snapshot.config.activationTime,fields['啟用 timestamp']);
+    row.p1={canonicalFirstDeploymentReverted:true,originalFailurePreserved:true,manualConfigurationChanged:true,manualPreviewOnly:true,explicitTransactionRequests:1,automaticRetryRequests:0,exportedFailureRecords:newExport.journal.evidence.length};
+    await capture(page,row,'manual-new-config-preview-no-send');
+  });
 }
 
 async function mineReviewedPending(page,row){
@@ -794,12 +928,17 @@ try{
   report.checks.push('Keyboard skip link is reachable when focused and clipped when unfocused; each state includes an actual viewport shot and full-page shot, with bounding-rectangle evidence.');
   report.checks.push('Unresolved synthetic refresh survives persisted lifecycle reconstruction; old late resolve/reject cannot override a new in-flight operation or alter an existing financial pending intent.');
   report.checks.push('Official Playwright Clock drives visible-only thirty-second reads; synthetic visibility, review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal stop. No automatic financial request.');
+  report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
+  report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.functional='PASS';
 }catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));process.exitCode=1;}
 finally{
   await browser?.close();
   report.syntheticTransactionRequests=report.profiles.flatMap(profile=>profile.scenarios).reduce((sum,row)=>sum+(row.sendRequests?.length||0),0);
-  report.syntheticMinedDeployments=report.profiles.flatMap(profile=>profile.scenarios).reduce((sum,row)=>sum+(row.syntheticMinedDeployments?.length||0),0);
+  const mined=report.profiles.flatMap(profile=>profile.scenarios).flatMap(row=>row.syntheticMinedDeployments||[]);
+  report.syntheticMinedCreationReceipts=mined.length;
+  report.syntheticMinedDeployments=mined.filter(item=>item.status!=='0x0').length;
+  report.syntheticConfirmedReverts=mined.filter(item=>item.status==='0x0').length;
   await fs.writeFile(`${OUT}/report.json`,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify({head:report.head,functional:report.functional,visual:report.visual,profiles:report.profiles.length,syntheticTransactionRequests:report.syntheticTransactionRequests,report:`${OUT}/report.json`}));
 }

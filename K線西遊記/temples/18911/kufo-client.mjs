@@ -255,11 +255,33 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   async function resumeInner(g,state) {
     review=null;const item=pendingOwned(restorePendingView());assert(state.account&&equal(state.account,item.account),'PENDING_ACCOUNT_MISMATCH','請使用原交易帳戶核對；原紀錄保留。');
     const d=await deployments(g);const evidence=await verifyTransaction(item,g,d);if(!evidence){view.phase='PENDING';view.status='原交易仍待確認；不重送，稍後由本人再核對。';return publish();}
-    current(g);assert(pending()?.intentId===item.intentId,'PENDING_CHANGED');const saved=journal(),existing=saved.evidence.find(x=>equal(x.intent?.hash,item.hash));
+    return finishEvidence(item,evidence,d,g);
+  }
+  function finishEvidence(item,evidence,d,g) {
+    current(g);assert(sameRecord(pending(),item),'PENDING_CHANGED');const saved=journal(),existing=saved.evidence.find(x=>equal(x.intent?.hash,item.hash));
     if(existing)assert(sameRecord({...existing,verifiedAt:undefined},{...evidence,verifiedAt:undefined}),'EVIDENCE_CONFLICT');else saved.evidence.push({...evidence,verifiedAt:timestamp()});
-    writeStorage(evidenceKey,saved);current(g);assert(pending()?.intentId===item.intentId,'PENDING_CHANGED');clearPending(item);
+    writeStorage(evidenceKey,saved);current(g);assert(sameRecord(pending(),item),'PENDING_CHANGED');clearPending(item);
     if(evidence.verification.status==='VERIFIED_DEPLOYMENT')view.deployments={...d,[item.contract]:{address:evidence.verification.address,txHash:item.hash,blockNumber:evidence.receipt.blockNumber}};
     view.phase=evidence.verification.status;view.status=evidence.verification.status==='CONFIRMED_REVERTED'?'原交易已確認失敗，證據已保存；請重新核對原因後再手動預覽。':'原交易與完整證據已保存並讀回；下一步仍須本人重新預覽。';return publish();
+  }
+  async function recoveryAssurance(item,evidence,g) {
+    if(item.submissionAnchor){
+      const anchor=item.submissionAnchor;
+      assert(HASH.test(anchor.hash)&&anchor.number!=null&&anchor.timestamp!=null&&integer(anchor.number)>=0n&&integer(anchor.timestamp)>0n,'INVALID_SUBMISSION_ANCHOR');
+      const block=await rpc('eth_getBlockByNumber',[quantity(anchor.number),false],g);
+      assert(block&&equal(block.hash,anchor.hash)&&integer(block.number)===integer(anchor.number)&&integer(block.timestamp)===integer(anchor.timestamp),'NON_CANONICAL_SUBMISSION_ANCHOR','原送出前區塊已無法核實；保留待確認紀錄。');
+      assert(integer(evidence.receipt.blockNumber)>integer(anchor.number),'RECOVERY_BEFORE_SUBMISSION','候選回執早於原送出前區塊；不能取代原交易。');
+      return 'ANCHORED_HOLDER_ATTESTED';
+    }
+    // Old v1 intents have no cryptographic link to a unique wallet request.
+    // The holder must attest the original hash; the saved clock only rejects older receipts.
+    assert(Number.isSafeInteger(item.createdAt)&&item.createdAt>0&&item.createdAt<=timestamp(),'LEGACY_RECOVERY_UNBOUNDED','原紀錄缺少可核對的送出時間界限；保留未知狀態，不能解鎖重送。');
+    assert(integer(evidence.block.timestamp)>=BigInt(Math.floor(item.createdAt/1000)),'RECOVERY_BEFORE_SUBMISSION','候選回執早於原交易紀錄；不能取代原交易。');
+    return 'LEGACY_HOLDER_ATTESTED_CLOCK_BOUND';
+  }
+  async function boundedRead(g,fn) {
+    const scope={generation:g,deadline:Date.now()+VERIFY_MS};verifyReads=scope;
+    try{return await fn();}finally{if(verifyReads===scope)verifyReads=null;}
   }
   async function withLock(fn) {assert(lockManager&&typeof lockManager.request==='function','WEB_LOCKS_REQUIRED','此瀏覽器缺少安全跨分頁鎖；不送交易。');return lockManager.request(KUFO_LOCK_NAME,{mode:'exclusive',ifAvailable:true},async lock=>{assert(lock,'ANOTHER_TAB_ACTIVE','另一分頁正在處理錢包操作。');return fn();});}
   const events=[];
@@ -269,6 +291,7 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   try{restorePendingView();}catch(error){view.error={code:error.code,message:error.message};view.blockedReasons=[error.code];view.phase='BLOCKED';}
   return Object.freeze({
     snapshot,
+    exportEvidence(){return copy({snapshot:snapshot(),journal:journal(),pending:pending()});},
     invalidate(reason){invalidate(reason);return snapshot();},
     subscribe(listener){assert(typeof listener==='function','INVALID_LISTENER');listeners.add(listener);try{listener(snapshot());}catch{}return ()=>listeners.delete(listener);},
     async connect(){return action(async g=>{review=null;connecting=true;try{const accounts=await rpc('eth_requestAccounts',[],g);assert(Array.isArray(accounts)&&accounts.length,'NOT_CONNECTED');view.account=address(accounts[0]);}finally{connecting=false;}return refreshInner(g);});},
@@ -276,9 +299,7 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
     async verify(){
       // Automatic reads must never replace a user's review or compete with a wallet action.
       if(disposed||active||review||!isVisible())return snapshot();
-      return action(async g=>{
-        const scope={generation:g,deadline:Date.now()+VERIFY_MS};verifyReads=scope;
-        try{
+      return action(g=>boundedRead(g,async()=>{
           const item=restorePendingView();
           if(item){
             pendingOwned(item);assert(HASH.test(item.hash),'SUBMISSION_UNKNOWN','原錢包送出狀態未知，保留紀錄，禁止重送。');
@@ -286,18 +307,55 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
             await withLock(()=>resumeInner(g,state));
             if(view.pending||view.phase==='CONFIRMED_REVERTED')return publish();
           }
-          return await refreshInner(g,{allowDisconnected:true});
-        }finally{if(verifyReads===scope)verifyReads=null;}
-      });
+          return refreshInner(g,{allowDisconnected:true});
+      }));
     },
     setConfig(value){assert(!disposed,'DISPOSED');assert(!active,'BUSY');assert(!pending(),'PENDING_INTENT','先核對原交易；不能改啟用設定。');assert(!journal().evidence.some(x=>x.intent?.kind==='deploy'),'CONFIG_LOCKED','已有部署紀錄，啟用時間不可改。');assert(value&&typeof value.activationTime==='string'&&/^[1-9][0-9]*$/.test(value.activationTime)&&BigInt(value.activationTime)<=2n**64n-1n,'INVALID_ACTIVATION');config={activationTime:value.activationTime};invalidate('啟用時間已變更，請重新預覽與確認。');return snapshot();},
+    async recoverPendingHash({hash:providedHash,accepted}={}){return action(g=>boundedRead(g,()=>withLock(async()=>{
+      review=null;assert(accepted===true,'RECOVERY_CONSENT_REQUIRED','請本人確認這是原錢包請求的交易 hash；核對不會重新送出。');assert(HASH.test(providedHash),'INVALID_RECOVERY_HASH');
+      const pendingRaw=readStorage(KUFO_PENDING_KEY),stored=parseStored(pendingRaw,'PENDING_CORRUPT'),item=pendingOwned(restorePendingView());
+      assert(stored?.intentId===item.intentId&&stored.payloadHash===payloadHash,'PENDING_CHANGED');assert(!item.hash||equal(item.hash,providedHash),'KNOWN_HASH_MISMATCH','原交易已有 hash，不能替換成另一筆。');
+      const journalRaw=readStorage(evidenceKey),saved=journal(),existing=saved.evidence.find(x=>equal(x.intent?.hash,providedHash));
+      assert(!existing||existing.intent?.intentId===item.intentId,'HASH_ALREADY_ARCHIVED','這個 hash 已屬於另一筆已保存交易；原待確認交易保持不變。');
+      const state=await base(g);assert(equal(state.account,item.account),'PENDING_ACCOUNT_MISMATCH','請使用原交易帳戶核對；原紀錄保留。');
+      const d=await deployments(g),candidate={...item,hash:providedHash,phase:'SUBMITTED'},evidence=await verifyTransaction(candidate,g,d);
+      assert(evidence,'RECOVERY_NOT_CONFIRMED','候選交易尚無完整已確認回執；原待確認紀錄保留，不會重送。');
+      const assurance=await recoveryAssurance(item,evidence,g);
+      if(!candidate.recovery&&!existing)candidate.recovery={assurance,holderAttested:true,attestedAt:timestamp(),uniqueRequestProven:false};
+      evidence.intent=copy(candidate);
+      assert(equal(await identity(g),item.account),'PENDING_ACCOUNT_MISMATCH');current(g);
+      assert(readStorage(KUFO_PENDING_KEY)===pendingRaw&&readStorage(evidenceKey)===journalRaw,'PENDING_CHANGED','原交易或證據已由另一個操作變更；本次不覆寫。');
+      try{changePending(item,{hash:providedHash,phase:'SUBMITTED',...(candidate.recovery?{recovery:candidate.recovery}:{})});}
+      catch(error){if(localPending?.hash)view.pending=copy(localPending);throw error;}
+      return finishEvidence(candidate,evidence,d,g);
+    })));},
+    async resetFailedDeploymentConfig(value){return action(g=>boundedRead(g,()=>withLock(async()=>{
+      review=null;assert(!restorePendingView(),'PENDING_INTENT','原交易尚未核實，不能變更啟用設定。');
+      const next=validateConfig({version:P.calendar.version,activationTime:value?.activationTime,utcOffsetSeconds:28800,constellationByMonth:months});
+      const journalRaw=readStorage(evidenceKey),saved=journal(),records=saved.evidence.filter(x=>x.intent?.kind==='deploy');
+      assert(records.length>0,'NO_FAILED_DEPLOYMENT');assert(records.every(x=>x.verification?.status==='CONFIRMED_REVERTED'),'CONFIG_LOCKED','已有成功或未核實的部署紀錄；啟用設定保持鎖定。');
+      const state=await base(g);ownerOnly(state);assert(records.every(x=>equal(x.intent?.account,state.account)),'PENDING_ACCOUNT_MISMATCH');
+      for(const [organ,[name]]of Object.entries(ORGANS)){
+        if(equal(state.routes[organ].address,ZERO))continue;
+        const code=await rpc('eth_getCode',[state.routes[organ].address,state.tag],g),artifact=P.contracts[name];assert(HEX.test(code),'INVALID_RUNTIME');
+        assert(code.length!==artifact.deployedBytecode.length||!equal(maskRuntime(code,artifact),maskRuntime(artifact.deployedBytecode,artifact)),'ALREADY_DEPLOYED','已有本版器官路由啟用，不能重設部署時間。');
+      }
+      assert(!await discover(state,g),'ALREADY_DEPLOYED','新版五合約已啟用；不能重設部署時間。');
+      for(const record of records){
+        const checked=await verifyTransaction(record.intent,g,{});
+        assert(checked?.verification.status==='CONFIRMED_REVERTED'&&sameRecord({...record,verifiedAt:undefined},{...checked,verifiedAt:undefined}),'FAILED_DEPLOYMENT_NOT_VERIFIED','失敗部署回執未能重新核實；啟用設定保持鎖定。');
+      }
+      assert(equal(await identity(g),state.account),'PENDING_ACCOUNT_MISMATCH');current(g);
+      assert(!pending()&&readStorage(evidenceKey)===journalRaw,'PENDING_CHANGED','原交易或證據已改變；不修改啟用設定。');
+      config={activationTime:next.activationTime};view.deployments={};invalidate('已重新核實原部署失敗並更新本地啟用時間；歷史回執保留，請重新預覽。');return snapshot();
+    })));},
     async prepare(request){return action(async g=>{review=null;const state=await base(g);const p=restorePendingView();assert(!p,'PENDING_INTENT','先核對原待確認交易，不重送。');const d=['approve','burn'].includes(request?.kind)?{}:await deployments(g),item=await candidate(copy(request),state,d,g),fees=await quote(item,g);current(g);review={...item,...fees,request:copy(request),reviewId:uniqueId(),generation:g,preparedAt:timestamp(),owner:state.owner,payloadHash};view.phase='REVIEW';view.status='請核對本筆內容與最高 BNB 費用，再由本人錢包確認。';return publish();});},
     async confirm(reviewId,{accepted,maxCostBNB}={}){return action(async g=>withLock(async()=>{
       assert(accepted===true,'EXPLICIT_CONSENT_REQUIRED');const original=review;assert(original&&original.reviewId===reviewId&&original.generation===g,'REVIEW_INVALID');assert(timestamp()-original.preparedAt>=0&&timestamp()-original.preparedAt<=REVIEW_MS,'REVIEW_EXPIRED');const limit=decimal(maxCostBNB,'MAX_COST');assert(limit>0n,'MAX_COST_REQUIRED','請明確填入本人可接受的最高 BNB 費用。');
       assert(!restorePendingView(),'PENDING_INTENT');const state=await base(g);const d=['approve','burn'].includes(original.kind)?{}:await deployments(g),fresh=await candidate(original.request,state,d,g);
       assert(sameRecord(fresh,{kind:original.kind,config:original.config,account:original.account,...Object.fromEntries(['contract','organ','organKey','candidate','minimumDelay','amountWei','spender','deploymentAddresses','lifeId'].filter(k=>original[k]!==undefined).map(k=>[k,original[k]])),tx:original.tx}),'FRESH_STATE_CHANGED','送交前狀態已變更，請重新預覽。');
       const fee=await quote(fresh,g);assert(BigInt(fee.maxCostWei)<=limit,'COST_LIMIT_EXCEEDED','估算費用超過本人輸入上限；未送交易。');assert(BigInt(fee.nativeBalanceWei)>=BigInt(fee.maxCostWei),'BNB_BALANCE_INSUFFICIENT');
-      const item={...fresh,schemaVersion:1,intentId:uniqueId(),payloadHash,chainId:56,owner:state.owner,hash:null,phase:'AWAITING_WALLET',createdAt:timestamp(),fee,maxCostWei:limit.toString()};let requested=false;
+      const item={...fresh,schemaVersion:1,intentId:uniqueId(),payloadHash,chainId:56,owner:state.owner,hash:null,phase:'AWAITING_WALLET',createdAt:timestamp(),submissionAnchor:{number:state.block.number,hash:state.block.hash,timestamp:integer(state.block.timestamp).toString()},fee,maxCostWei:limit.toString()};let requested=false;
       localPending=item;view.pending=item;writeStorage(KUFO_PENDING_KEY,item);review=null;view.phase='WAITING_WALLET';view.status='等待本人錢包確認此一筆交易；請勿重複送出。';publish();
       try{
         await finalGuard(item,g);assert(timestamp()-original.preparedAt<=REVIEW_MS,'REVIEW_EXPIRED');current(g);const saved=parseStored(readStorage(KUFO_PENDING_KEY),'PENDING_CORRUPT');assert(saved?.intentId===item.intentId&&sameRecord(saved,item),'PENDING_CHANGED');

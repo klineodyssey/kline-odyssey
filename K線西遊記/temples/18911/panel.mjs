@@ -7,8 +7,9 @@ const ORGAN_LABELS={Furnace:'18911 煉丹爐',Output:'168888 金斗雲',Converte
 const KIND_LABELS={deploy:'部署合約',propose:'提出器官啟用提案',execute:'執行到期提案',approve:'授權這次 KAIOS 數量',burn:'煉丹：銷毀 KAIOS 並取得 KUFO'};
 const ZERO='0x'+'0'.repeat(40),ZERO_ID='0x'+'0'.repeat(64);
 const $=id=>document.getElementById(id),lower=x=>String(x||'').toLowerCase(),same=(a,b)=>!!a&&!!b&&lower(a)===lower(b);
-let payload=null,client=null,provider=null,unsubscribe=null,view=null,uiBusy=false,lastError='',reviewDecodeFailed=false,uiEpoch=0;
+let payload=null,client=null,provider=null,unsubscribe=null,view=null,uiBusy=false,lastError='',reviewDecodeFailed=false,uiEpoch=0,recoveryIntentId=null;
 const VERIFY_INTERVAL_MS=30000;
+const UNKNOWN_HASH_STOP='原交易尚無 hash，請從本人錢包取回此次原請求的 hash，再於下方唯讀核對。';
 let verifyTimer=null,verifyFailures=0,verifyStopped='',lastVerifiedAt=null,pageAway=false;
 const errors={
  WRONG_CHAIN:'請在錢包切換至 BNB Smart Chain 主網（56）。',
@@ -33,7 +34,11 @@ const errors={
  STORAGE_READBACK_FAILED:'交易紀錄讀回不一致，停止送出。',
  AMOUNT_DECIMAL:'請填入精確 KAIOS 數量，最多 18 位小數。',
  INVALID_ALCHEMY_RATIO:'數量須至少 1000 wei，且可精確按原比例轉化。',
- CONFIG_LOCKED:'已有合約部署紀錄，啟用時間不能再變更。',
+ CONFIG_LOCKED:'已有部署紀錄，需先核實是否全部確定失敗；成功或結果不明的部署不能變更時間。',
+ RECOVERY_CONSENT_REQUIRED:'請確認這是本人錢包此次原請求的交易 hash。',
+ RECOVERY_NOT_CONFIRMED:'這筆交易尚未取得可核實的鏈上回執，原紀錄保留，不能重送。',
+ RECOVERY_HASH_CONFLICT:'此 hash 已屬於另一份已保存交易，不能替換原請求。',
+ LEGACY_RECOVERY_UNBOUNDED:'舊紀錄缺少可核對的送出時界，無法安全接回 hash；請保留紀錄人工核對。',
  NO_INJECTED_WALLET:'請使用本人錢包的 DApp 瀏覽器開啟本站，或安裝相容的錢包擴充套件。',
 };
 function message(error){
@@ -64,7 +69,7 @@ function scheduleVerification(delay=VERIFY_INTERVAL_MS){
 async function verifyAutomatically(){
  if(!client||pageAway||document.visibilityState==='hidden'||verifyStopped)return;
  if(uiBusy||view?.active||view?.review){scheduleVerification();return;}
- if(view?.pending&&!view.pending.hash){verifyStopped='原交易尚無 hash，保留紀錄並請先查看本人錢包。';renderVerification();return;}
+ if(view?.pending&&!view.pending.hash){verifyStopped=UNKNOWN_HASH_STOP;renderVerification();return;}
  const epoch=uiEpoch,current=client,isCurrent=()=>epoch===uiEpoch&&current===client;
  uiBusy=true;render();
  try{await current.verify();if(isCurrent()){lastError='';lastVerifiedAt=Date.now();}}
@@ -191,6 +196,7 @@ function render(){
  const owner=connected&&same(s.account,s.owner)&&same(s.owner,payload.expectedOwner);
  document.body.classList.toggle('loading',busy);
  text('appStatus',lastError||s.status||'先核對，再由本人錢包確認。');$('appStatus').dataset.state=s.phase||'IDLE';$('appStatus').classList.toggle('error',!!lastError||!!s.error);
+  $('appStatus').dataset.errorCode=s.error?.code||'';
  text('walletAccount',s.account||'尚未連接');
  text('walletChain',s.chainId?Number(s.chainId)===56?'BNB Smart Chain · 56':'目前網路 '+s.chainId+'，需要 BSC 56':'需要 BNB Smart Chain · 56');
  text('ownerAddress',s.owner||'尚未查核');
@@ -216,11 +222,22 @@ function render(){
   text('pendingState',s.pending.phase==='AWAITING_WALLET'?'正在等待本人錢包；送出結果未取得前不能重送。':'保留原交易，只查核原回執，不會自動送下一筆。');
   text('pendingHash',s.pending.hash||'尚未取得交易 hash；請先查看本人錢包的原請求。');
  }
- $('resumePending').disabled=busy||!pending;
+  const unknown=pending&&!s.pending.hash,identity=s.pending?.intentId||null;
+  if(identity!==recoveryIntentId){recoveryIntentId=identity;$('receiptHash').value='';$('acceptRecoveryHash').checked=false;}
+  $('hashRecovery').hidden=!unknown;
+  $('receiptHash').disabled=busy||!unknown;
+  $('acceptRecoveryHash').disabled=busy||!unknown;
+  $('recoverPendingHash').disabled=busy||!unknown||!connected||!$('acceptRecoveryHash').checked||!/^0x[0-9a-fA-F]{64}$/.test($('receiptHash').value.trim());
+  $('resumePending').disabled=busy||!s.pending?.hash;
  $('copyPending').disabled=!s.pending?.hash;
  renderVerification();
 }
 function resetConsent(){lastError='';$('acceptReview').checked=false;$('reviewCap').value='';}
+async function applyActivation(current,activationTime){
+ if(current.snapshot().config.activationTime===activationTime)return;
+ try{current.setConfig({activationTime});}
+ catch(error){if(error?.code!=='CONFIG_LOCKED')throw error;await current.resetFailedDeploymentConfig({activationTime});}
+}
 async function run(operation){
  if(uiBusy)return;
  clearVerificationTimer();
@@ -243,7 +260,6 @@ async function boot(){
  if(!window.ethers?.utils||!window.KGEN_Wallet?.getEthereum)throw new Error('既有錢包或 ABI 工具未載入。');
  payload=await verifyPayload();
  if(window.__K18911_MOCK__===true)$('mockNotice').hidden=false;
- $('receiptHash').closest('label').hidden=true;
  const month=new Date(Date.now()+28800000).getUTCMonth(),tier=payload.presentation.tierNames[month],star=payload.presentation.constellationNames[payload.calendar.constellationByMonth[month]-1];
  text('monthBadge',(month+1)+' 月 · '+tier+' · '+star+'（整月）');
  const table=$('monthTable');
@@ -252,19 +268,22 @@ async function boot(){
  initializeClient(chooseProvider()||makeReadonlyProvider());
  $('connectWallet').addEventListener('click',()=>{if(uiBusy)return;resetVerification();try{const selected=chooseProvider();if(selected&&selected!==provider)initializeClient(selected);run(async current=>{if(!selected)throw Object.assign(new Error('請使用本人錢包 DApp 瀏覽器。'),{code:'NO_INJECTED_WALLET'});await current.connect();});}catch(error){lastError=message(error);render();}});
  $('refreshStatus').addEventListener('click',()=>{if(uiBusy)return;resetVerification();run(async current=>{resetConsent();current.invalidate('正在重新查核鏈上狀態。');await current.verify();lastVerifiedAt=Date.now();});});
- $('activationNow').addEventListener('click',()=>{try{$('activationTime').value=localTW(Math.floor(Date.now()/1000));client.setConfig({activationTime:readActivation()});lastError='';}catch(error){lastError=message(error);}render();});
- $('activationTime').addEventListener('change',()=>{resetConsent();try{client.setConfig({activationTime:readActivation()});}catch(error){lastError=message(error);}render();});
+  $('activationNow').addEventListener('click',()=>run(async current=>{resetConsent();$('activationTime').value=localTW(Math.floor(Date.now()/1000));await applyActivation(current,readActivation());}));
+  $('activationTime').addEventListener('change',()=>run(async current=>{resetConsent();await applyActivation(current,readActivation());}));
  for(const id of ['kaiosAmount','lifeId'])$(id).addEventListener('input',()=>invalidate('煉丹內容已變更，請重新預覽。'));
- $('prepareDeploy').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();const time=readActivation();if(current.snapshot().config.activationTime!==time)current.setConfig({activationTime:time});await current.prepare({kind:'deploy'});if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
+  $('prepareDeploy').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();await applyActivation(current,readActivation());await current.prepare({kind:'deploy'});if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
  $('prepareAlchemy').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();const request={kind:'burn',amount:$('kaiosAmount').value.trim(),lifeId:$('lifeId').value.trim()||ZERO_ID};try{await current.prepare(request);}catch(error){if(!isCurrent())return;if(!['ALLOWANCE_REQUIRED','APPROVAL_REQUIRED'].includes(error.code))throw error;await current.prepare({...request,kind:'approve'});}if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
  $('cancelReview').addEventListener('click',()=>{resetConsent();invalidate('預覽已取消；沒有送交錢包。');});
  for(const id of ['acceptReview','reviewCap'])$(id).addEventListener('input',render);
  $('confirmReview').addEventListener('click',()=>run(async(current,isCurrent)=>{const s=current.snapshot();if(!s.review)throw Object.assign(new Error('請重新預覽。'),{code:'REVIEW_INVALID'});await current.confirm(s.review.reviewId,{accepted:$('acceptReview').checked,maxCostBNB:$('reviewCap').value.trim()});if(isCurrent()){$('acceptReview').checked=false;if(current.snapshot().pending)$('pendingPanel').scrollIntoView({behavior:'auto',block:'start'});}}));
  $('resumePending').addEventListener('click',()=>run(current=>current.resume()));
+  $('receiptHash').addEventListener('input',()=>{$('acceptRecoveryHash').checked=false;render();});
+  $('acceptRecoveryHash').addEventListener('change',render);
+  $('recoverPendingHash').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();await current.recoverPendingHash({hash:$('receiptHash').value.trim(),accepted:$('acceptRecoveryHash').checked});if(isCurrent()){$('acceptRecoveryHash').checked=false;if(verifyStopped===UNKNOWN_HASH_STOP)verifyStopped='';}}));
  $('copyPending').addEventListener('click',()=>run(async(current,isCurrent)=>{const hash=current.snapshot().pending?.hash;if(hash){await navigator.clipboard.writeText(hash);if(isCurrent())lastError='交易 hash 已複製，請保留原紀錄。';}}));
- $('exportEvidence').addEventListener('click',()=>{try{const data=JSON.stringify({sourceMain:payload.sourceMain,exportedUTC:new Date().toISOString(),snapshot:client.snapshot(),realWalletConfirmation:'Only the holder wallet can confirm transactions'},null,2);const blob=new Blob([data],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='KUFO-18911-public-progress.json';link.click();URL.revokeObjectURL(url);}catch(error){lastError=message(error);render();}});
+  $('exportEvidence').addEventListener('click',()=>{try{const data=JSON.stringify({sourceMain:payload.sourceMain,exportedUTC:new Date().toISOString(),...client.exportEvidence(),realWalletConfirmation:'Only the holder wallet can confirm transactions'},null,2);const blob=new Blob([data],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='KUFO-18911-public-progress.json';link.click();URL.revokeObjectURL(url);}catch(error){lastError=message(error);render();}});
  document.addEventListener('visibilitychange',()=>{clearVerificationTimer();if(document.visibilityState==='hidden'){renderVerification();return;}scheduleVerification(0);});
  window.addEventListener('pagehide',()=>{pageAway=true;clearVerificationTimer();uiEpoch++;uiBusy=false;unsubscribe?.();client?.dispose();renderVerification();});
  window.addEventListener('pageshow',event=>{pageAway=false;if(!event.persisted)return;try{resetConsent();initializeClient(chooseProvider()||makeReadonlyProvider());}catch(error){lastError=message(error);render();}});
 }
-boot().catch(error=>{text('appStatus',message(error));$('appStatus').dataset.state='BLOCKED';$('appStatus').classList.add('error');for(const id of ['connectWallet','refreshStatus','prepareDeploy','prepareAlchemy','activationNow','confirmReview','resumePending','exportEvidence'])$(id).disabled=true;});
+boot().catch(error=>{text('appStatus',message(error));$('appStatus').dataset.state='BLOCKED';$('appStatus').classList.add('error');for(const id of ['connectWallet','refreshStatus','prepareDeploy','prepareAlchemy','activationNow','confirmReview','resumePending','recoverPendingHash','exportEvidence'])$(id).disabled=true;});
