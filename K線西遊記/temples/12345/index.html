@@ -5,19 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="k12345-frontend-version" content="12345-TEMPLE-V10.51.0-COCKPIT-ENTRY">
 <meta name="k12345-release-status" content="FRONTEND_RELEASE_NONFINANCIAL">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta http-equiv="refresh" content="0;url=./cockpit.html">
+<meta name="k12345-build-revision" content="2">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-sicu+IhS0HPZ8Ff/roO8roeuHgs8jKtmw+FeVz1JROw='; style-src 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<script>
+"use strict";
+window.location.replace(new URL("./cockpit.html", window.location.href).href);
+</script>
 <title>12345 五指山悟空財神殿｜V10.51.0 駕駛艙入口</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,"Microsoft JhengHei",sans-serif;background:#09131b;color:#edf6f2}*{box-sizing:border-box}body{margin:0;min-height:100svh;display:grid;place-items:center;padding:20px}main{width:min(100%,560px);padding:24px;border:1px solid #29404a;border-radius:16px;background:#0e1c26}h1{font-size:clamp(23px,5vw,32px);margin:0 0 12px}p{line-height:1.6;overflow-wrap:anywhere}.version{color:#ecc98b}.notice{color:#9fb7ba;font-size:14px}a{display:inline-block;max-width:100%;padding:12px 18px;border-radius:8px;background:#78edd0;color:#09241c;font-weight:700;text-decoration:none}a:focus-visible{outline:3px solid #ecc98b;outline-offset:4px}
 </style>
 </head>
 <body>
-<!-- FILE_CERTIFICATE: original canonical entry; no second runtime or wallet code.
+<!-- FILE_CERTIFICATE: original canonical entry; navigation bootstrap only, no second runtime or wallet code.
      Frontend version only, NOT a deployed Heart/contract version.
      Exact former dirty index is retained in the external preimage checkpoint. -->
 <main aria-labelledby="title">
- <p class="version">前端 V10.51.0 · 公開行情模擬版</p>
+ <p class="version">前端 V10.51.0 · build 2 · 公開行情模擬版</p>
  <h1 id="title">12345 五指山悟空財神殿</h1>
  <p>正在前往原本的飛碟駕駛艙；若瀏覽器沒有自動切換，請按下方入口。</p>
  <p><a id="k12345-cockpit-entry" href="./cockpit.html">進入飛碟駕駛艙</a></p>
