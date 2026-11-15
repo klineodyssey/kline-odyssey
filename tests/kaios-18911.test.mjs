@@ -167,7 +167,7 @@ function harness({storage=memoryStorage(),lockManager=memoryLocks(),account=PAYL
     emit(name,value){for(const fn of handlers.get(name)??[])fn(value);},async request({method,params=[]}){
       h.requests.push({method,params});
       await h.requestHook?.({method,params});
-      if(method==='eth_chainId')return hex(h.chainId);if(method==='eth_requestAccounts'||method==='eth_accounts')return [h.account];
+      if(method==='eth_chainId')return hex(h.chainId);if(method==='eth_requestAccounts'||method==='eth_accounts')return h.account==null?[]:[h.account];
       if(method==='eth_getBlockByNumber')return h.blocks.get(params[0]==='latest'?h.blockNumber:Number(BigInt(params[0])))??null;
       if(method==='eth_getBlockByHash')return [...h.blocks.values()].find(b=>b.hash===params[0])??null;
       if(method==='eth_getBalance')return wei('0.5');if(method==='eth_gasPrice')return hex(50_000_000);if(method==='eth_estimateGas')return '0x100000';
@@ -425,4 +425,130 @@ test('18911 empty-journal owner cannot redeploy an already active chain or race 
       :h.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'}),/ALREADY_DEPLOYED|已.*部署|不.*重複/i);
     assert.equal(h.sends.length,0);assert.equal(h.storage.data.size,0,'chain discovery must not manufacture deployment receipts');h.client.dispose();
   }
+});
+
+function activateFixture(h) {
+  for(const name of NAMES)h.deployed.add(name);
+  for(const [organ,id]of Object.entries(h.organIds))h.routes.set(normalize(id),h.addresses[{Furnace:'KAIOSAlchemyFurnace',Output:'KUFOOutputJindouyun168888',Converter:'KSHIPConverter'}[organ]]);
+}
+function readonlyRequests(h,start) {
+  const requests=h.requests.slice(start);
+  assert.ok(requests.length>0,'verification must actually read the synthetic chain');
+  assert.equal(requests.filter(x=>['eth_requestAccounts','eth_sendTransaction','eth_estimateGas','eth_gasPrice'].includes(x.method)).length,0,'verification cannot prompt, estimate a future action or submit');
+  return requests;
+}
+function documentFixture(t) {
+  const original=Object.getOwnPropertyDescriptor(globalThis,'document'),handlers=new Set();let state='visible';
+  Object.defineProperty(globalThis,'document',{configurable:true,value:{get visibilityState(){return state;},addEventListener(type,fn){if(type==='visibilitychange')handlers.add(fn);},removeEventListener(type,fn){if(type==='visibilitychange')handlers.delete(fn);}}});
+  t.after(()=>{if(original)Object.defineProperty(globalThis,'document',original);else delete globalThis.document;});
+  return {set(value,dispatch=false){state=value;if(dispatch)for(const fn of handlers)fn();}};
+}
+
+test('18911 automatic verification supports a guest while preserving dependency, runtime and calendar checks',async()=>{
+  for(const activated of [false,true]){
+    const h=harness({account:null});if(activated)activateFixture(h);
+    const state=await h.client.verify();assert.equal(state.phase,'PUBLIC_VERIFIED');assert.equal(state.account,null);assert.equal(state.chainId,56);assert.equal(state.chainActive,activated);assert.equal(state.alchemy,null);
+    assert.equal(normalize(state.owner),normalize(PAYLOAD.expectedOwner));assert.equal(h.storage.data.size,0);assert.equal(state.review,null);assert.equal(state.active,false);
+    const reads=readonlyRequests(h,0);assert.ok(reads.some(x=>x.method==='eth_getCode'),'public verification still checks actual code');
+    for(const request of reads.filter(x=>x.method==='eth_call')){const to=normalize(request.params[0].to),iface=Object.entries(h.payload.dependencies).find(([,d])=>normalize(d.address)===to)?.[0];if(iface){const method=h.interfaces[iface].parseTransaction({data:request.params[0].data}).name;assert.ok(!['balanceOf','allowance'].includes(method),'a disconnected guest has no private account balance query');}}
+    h.client.dispose();
+  }
+  for(const fault of ['dependency','runtime','calendar']){
+    const h=harness({account:null});activateFixture(h);
+    if(fault==='dependency')h.codeOverrides.set(normalize(h.payload.dependencies.kgen.address),'0x6000');
+    if(fault==='runtime')h.codeOverrides.set(normalize(h.addresses.KSHIP),'0x6000');
+    if(fault==='calendar')h.callOverride=({name,method})=>name==='KUFO'&&method==='calendarConfig'?h.interfaces.KUFO.encodeFunctionResult(method,[{...h.config,utcOffsetSeconds:0}]):null;
+    await assert.rejects(h.client.verify());assert.equal(h.client.snapshot().chainActive,false);assert.equal(h.storage.data.size,0);readonlyRequests(h,0);h.client.dispose();
+  }
+});
+
+test('18911 automatic verification archives the exact mined intent and discovers newly activated routes without another send',async()=>{
+  const first=harness();await connect(first);const hash=await submit(first,{kind:'deploy',contract:'KUFO'});first.mine(hash);const start=first.requests.length;
+  const verified=await first.client.verify();assert.equal(verified.pending,null);assert.equal(verified.deployments.KUFO.txHash,hash);assert.equal(first.sends.length,1);assert.equal(verified.review,null);readonlyRequests(first,start);
+  const archived=JSON.parse(first.storage.data.get(verified.evidenceKey));assert.equal(archived.evidence.length,1);assert.equal(archived.evidence[0].verification.status,'VERIFIED_DEPLOYMENT');assert.equal(archived.evidence[0].receipt.transactionHash,hash);first.client.dispose();
+  const h=await deployed(harness());h.routes.set(normalize(h.organIds.Furnace),h.addresses.KAIOSAlchemyFurnace);h.routes.set(normalize(h.organIds.Output),h.addresses.KUFOOutputJindouyun168888);
+  h.proposals.set(normalize(h.organIds.Converter),[h.addresses.KSHIPConverter,h.timestamp]);
+  const execution=await submit(h,{kind:'execute',organ:'Converter'});h.mine(execution);const before=h.sends.length,readStart=h.requests.length;
+  const active=await h.client.verify();assert.equal(active.pending,null);assert.equal(active.chainActive,true);assert.equal(active.alchemy.active,true);assert.equal(active.review,null);assert.equal(h.sends.length,before);readonlyRequests(h,readStart);
+  assert.ok(JSON.parse(h.storage.data.get(active.evidenceKey)).evidence.some(x=>x.intent.hash===execution&&x.verification.status==='CONFIRMED'));h.client.dispose();
+});
+
+test('18911 automatic verification preserves a canonical reverted receipt as an explicit terminal failure',async()=>{
+  const h=harness();await connect(h);const hash=await submit(h,{kind:'deploy',contract:'KUFO'});h.mine(hash);
+  h.receiptOverride=receipt=>receipt?{...receipt,status:'0x0',contractAddress:null,logs:[]}:null;
+  const start=h.requests.length,state=await h.client.verify();
+  assert.equal(state.phase,'CONFIRMED_REVERTED');assert.match(state.status,/已確認失敗/);assert.equal(state.pending,null);assert.equal(state.review,null);assert.equal(state.active,false);
+  assert.equal(h.storage.data.has('kaios18911.pending.v1'),false);assert.equal(Object.keys(state.deployments).length,0,'a reverted creation cannot become a verified deployment');
+  const archive=JSON.parse(h.storage.data.get(state.evidenceKey));assert.equal(archive.evidence.length,1);assert.equal(archive.evidence[0].intent.hash,hash);assert.equal(archive.evidence[0].receipt.status,'0x0');assert.equal(archive.evidence[0].verification.status,'CONFIRMED_REVERTED');
+  const reads=readonlyRequests(h,start);assert.equal(reads.filter(x=>x.method==='eth_getBlockByNumber'&&x.params[0]==='latest').length,1,'failure is not overwritten by a new connected refresh');assert.equal(h.sends.length,1,'automatic failure handling never retries or prepares another transaction');h.client.dispose();
+});
+
+test('18911 automatic verification preserves unmined, unknown, disconnected, foreign-account and foreign-version intents',async()=>{
+  for(const mode of ['unmined','unknown','guest','foreign','version']){
+    const h=harness();await connect(h);
+    if(mode==='unknown')h.sendOverride=()=>Promise.resolve('unknown-wallet-result');
+    let hash;try{hash=await submit(h,{kind:'deploy',contract:'KUFO'});}catch{}
+    if(mode!=='unknown'&&mode!=='unmined')h.mine(hash);
+    if(mode==='guest'||mode==='foreign'){h.client.dispose();h.account=mode==='guest'?null:OTHER;h.client=h.makeClient();}
+    if(mode==='version'){const p=JSON.parse(h.storage.data.get('kaios18911.pending.v1'));p.payloadHash=ethers.utils.id('different-program');h.storage.data.set('kaios18911.pending.v1',JSON.stringify(p));}
+    const original=h.storage.data.get('kaios18911.pending.v1'),start=h.requests.length;
+    if(mode==='unmined'){const result=await h.client.verify();assert.equal(result.phase,'PENDING');assert.equal(result.pending.hash,hash);}
+    else await assert.rejects(h.client.verify(),error=>error.code===({unknown:'SUBMISSION_UNKNOWN',guest:'PENDING_ACCOUNT_MISMATCH',foreign:'PENDING_ACCOUNT_MISMATCH',version:'FOREIGN_PENDING'}[mode]));
+    assert.equal(h.storage.data.get('kaios18911.pending.v1'),original,'a read cannot replace or clear an unresolved intent');assert.equal(h.sends.length,1);assert.equal(h.client.snapshot().review,null);
+    const reads=h.requests.slice(start);assert.equal(reads.filter(x=>['eth_requestAccounts','eth_sendTransaction','eth_estimateGas'].includes(x.method)).length,0);
+    assert.equal(reads.filter(x=>x.method==='eth_getTransactionReceipt').length,mode==='unmined'?1:0);h.client.dispose();
+  }
+});
+
+test('18911 automatic verification skips active, reviewed, hidden and disposed clients without touching the current action',async t=>{
+  const doc=documentFixture(t),h=harness();await connect(h);await reviewed(h,{kind:'deploy',contract:'KUFO'});
+  let before=h.client.snapshot(),start=h.requests.length;assert.deepEqual(await h.client.verify(),before);assert.equal(h.requests.length,start);
+  doc.set('hidden');before=h.client.snapshot();assert.deepEqual(await h.client.verify(),before);assert.equal(h.requests.length,start);doc.set('visible');
+  h.client.invalidate('Synthetic explicit review cancellation');const gate=deferred();let waiting=false;
+  h.requestHook=({method})=>{if(method==='eth_getBlockByNumber'&&!waiting){waiting=true;return gate.promise;}};
+  const refresh=h.client.refresh();while(!waiting)await tick();before=h.client.snapshot();start=h.requests.length;
+  assert.deepEqual(await h.client.verify(),before);assert.equal(h.requests.length,start);gate.resolve();await refresh;
+  h.client.dispose();before=h.client.snapshot();start=h.requests.length;assert.deepEqual(await h.client.verify(),before);assert.equal(h.requests.length,start);
+});
+
+test('18911 automatic receipt verification retains pending on canonical, event and archive-readback failures',async()=>{
+  for(const fault of ['canonical','event','archive','readback']){
+    const h=harness();await connect(h);let hash;
+    if(fault==='event'){activateFixture(h);hash=await submit(h,{kind:'approve',amount:'1'});}
+    else hash=await submit(h,{kind:'deploy',contract:'KUFO'});
+    h.mine(hash);
+    if(fault==='canonical')h.receiptOverride=receipt=>({...receipt,blockHash:ethers.utils.id('wrong-canonical-block')});
+    if(fault==='event')h.receiptOverride=receipt=>({...receipt,logs:[]});
+    if(fault==='archive')h.storage.failWrite=true;
+    if(fault==='readback'){const original=h.storage.getItem;let archiveWritten=false;const set=h.storage.setItem;h.storage.setItem=function(key,value){set.call(this,key,value);if(key.startsWith('kaios18911.receipts.'))archiveWritten=true;};h.storage.getItem=function(key){return archiveWritten&&key.startsWith('kaios18911.receipts.')?null:original.call(this,key);};}
+    const original=h.storage.data.get('kaios18911.pending.v1'),start=h.requests.length;
+    await assert.rejects(h.client.verify());assert.equal(h.storage.data.get('kaios18911.pending.v1'),original);assert.equal(h.client.snapshot().pending.hash,hash);assert.equal(h.sends.length,1);readonlyRequests(h,start);h.client.dispose();
+  }
+});
+
+test('18911 automatic verification cannot archive or clear a pending receipt after background or identity invalidation',async t=>{
+  const doc=documentFixture(t);
+  for(const event of ['hidden','account','chain']){
+    doc.set('visible');const h=harness();await connect(h);const hash=await submit(h,{kind:'deploy',contract:'KUFO'});h.mine(hash);
+    const original=h.storage.data.get('kaios18911.pending.v1'),gate=deferred();let waiting=false;
+    h.requestHook=({method})=>{if(method==='eth_getTransactionReceipt'){waiting=true;return gate.promise;}};
+    const result=h.client.verify();while(!waiting)await tick();
+    if(event==='hidden')doc.set('hidden',true);else if(event==='account'){h.account=OTHER;h.provider.emit('accountsChanged',[OTHER]);}else{h.chainId=1;h.provider.emit('chainChanged','0x1');}
+    gate.resolve();await assert.rejects(result,error=>error.code==='CONTEXT_CHANGED');assert.equal(h.storage.data.get('kaios18911.pending.v1'),original);assert.equal(h.storage.data.has(h.client.snapshot().evidenceKey),false);assert.equal(h.sends.length,1);h.client.dispose();
+  }
+});
+
+test('18911 only automatic reads have RPC and whole-pass deadlines; late reads cannot clear pending or time out wallet consent',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});let clock=1000;t.mock.method(Date,'now',()=>clock);
+  const h=harness();await connect(h);const hash=await submit(h,{kind:'deploy',contract:'KUFO'});h.mine(hash);
+  const original=h.storage.data.get('kaios18911.pending.v1'),gate=deferred();let waiting=false;
+  h.requestHook=({method})=>{if(method==='eth_getTransactionReceipt'){waiting=true;return gate.promise;}};
+  const checking=h.client.verify();const rejection=assert.rejects(checking,error=>error.code==='TIMEOUT');while(!waiting)await tick();
+  t.mock.timers.tick(15000);await rejection;assert.equal(h.client.snapshot().active,false);assert.equal(h.storage.data.get('kaios18911.pending.v1'),original);
+  const stopped=h.client.snapshot();gate.resolve();await tick();assert.deepEqual(h.client.snapshot(),stopped);assert.equal(h.storage.data.has(stopped.evidenceKey),false);h.client.dispose();
+  const total=harness({account:null});total.requestHook=()=>{clock+=14000;};
+  await assert.rejects(total.client.verify(),error=>error.code==='TIMEOUT');assert.equal(total.client.snapshot().active,false);assert.ok(total.requests.length<=5,'the pass budget expires before a long series of sub-timeout reads');assert.equal(total.sends.length,0);total.client.dispose();
+  const wallet=harness();await connect(wallet);const review=await reviewed(wallet,{kind:'deploy',contract:'KUFO'}),consent=deferred();let walletWaiting=false;
+  wallet.sendOverride=()=>{walletWaiting=true;return consent.promise;};const confirmation=wallet.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'});while(!walletWaiting)await tick();
+  t.mock.timers.tick(60001);assert.equal(wallet.client.snapshot().active,true);assert.ok(wallet.client.snapshot().pending);consent.resolve(ethers.utils.id('synthetic-wallet-confirmation-after-read-deadline'));await confirmation;assert.equal(wallet.client.snapshot().pending.phase,'SUBMITTED');assert.equal(wallet.sends.length,1);wallet.client.dispose();
 });

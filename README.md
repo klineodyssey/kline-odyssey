@@ -1487,10 +1487,14 @@ activation still require the lawful Human holder and canonical chain results.
 
 `K線西遊記/temples/18911/index.html` 是唯一18911玩家可見入口；首頁 `index.html#alchemyEntry` 由既有 `assets/kaios-portal.mjs` 沿原base填入獨立服務連結，不設為遊戲世界或玩家目的地。玩家煉丹與王母本人錢包部署分開，皆需先預覽再由本人錢包確認，不讀取私鑰或自動送單。新爐未由原Registry啟用前，不改用舊49 Epoch爐。
 
-- `K線西遊記/temples/18911/panel.mjs`：同頁呈現、費用上限/明確確認、pending恢復與公開紀錄匯出。
-- `K線西遊記/temples/18911/kufo-client.mjs`：沿既有EIP1193 provider，驗chain56/Owner/固定代碼、原五合約的逐筆回執與immutable綁定、Registry三器官和玩家approve/burn；不建立另一套WalletConnect、Runtime或bootstrap。
+- `K線西遊記/temples/18911/panel.mjs`：同頁呈現、費用上限/明確確認、pending恢復與公開紀錄匯出；前景每30秒自動唯讀查核，背景、預覽及錢包操作期間暫停。
+- `K線西遊記/temples/18911/kufo-client.mjs`：沿既有EIP1193 provider，驗chain56/Owner/固定代碼、原五合約的逐筆回執與immutable綁定、Registry三器官和玩家approve/burn；`verify()`可匿名查公開狀態，保存hash仍須原連線帳戶才能完成本機回執保存；不建立另一套WalletConnect、Runtime或bootstrap。
 - `K線西遊記/temples/18911/contracts.json`：從原五合約編譯artifact匯出的公開ABI/creation/runtime/immutableReferences與來源指紋；既有Portal CI重新編譯後逐份比對，不是新合約。
 - `tests/kaios-18911.test.mjs`：隔離模擬provider與儲存/鎖/角色/回執故障測試。
 - `tests/kaios-18911-browser.mjs`：既有Linux Portal CI的手機/桌面真Chromium模擬錢包驗收與截圖，禁止本機停用瀏覽器或真鏈交易。
 
-共用樣式與 provider 選擇沿 `K線西遊記/modules/kgen-game-core.css`、`kgen-game-core.js`，ABI工具沿原 `K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js`。不觸碰#523保護的11520 Navigator/world-registry；Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記，不改Boot V1.4/Physics/經濟規則。App來源7164ce08769c60ac9439ab0c6b97d103c92c0642：原Portal CI43633664165及WorldViewer43633664170 SUCCESS；18911單元18/18、原入口/音訊59/59、原離線錢包/PWA153/153 PASS；36合約編譯且原5份公開payload ABI/creation/runtime/immutableRefs精確比對。390×844與1280×900各8情境，共16情境/64張viewport與fullPage截圖，32次skip裁切座標及鍵盤132×47.59px可達驗證；直接視覺複核通過。均為CI合成provider，不代表實體手機、真錢包或真BFCache；中段viewport須與有模擬標示的fullPage及report成組引用。Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記；原站發布與主網部署分別依原工作流及本人錢包實際回執核實，本候選未上鏈，沒有新部署地址或回執。
+自動查核只讀取BSC狀態、原交易回執及Registry路由，不開錢包、不預覽或送出下一筆交易。有保存hash且原帳戶連線時，沿原canonical receipt／程式／immutable核對及保存讀回流程完成確認；無hash、帳戶不符或驗證／儲存失敗會保留原pending。查核單次RPC至多15秒、整輪至多60秒；兩次一般讀查失敗停止自動查核，由本人按「查詢鏈上狀態」重開。背景、預覽與錢包忙碌期間不搶操作。
+
+2026-11-15五份已部署合約已經官方Sourcify公開原碼驗證，creation/runtime皆為`match`，不是`exact_match`：[KUFO](https://repo.sourcify.dev/56/0x874203C27888bBE4E8ee517E0950730E8940c366)、[18911 Furnace](https://repo.sourcify.dev/56/0x9C64eC007F9DFC28d7D25c1a9fDCbe73bbc93452)、[168888 Output](https://repo.sourcify.dev/56/0x941b9dd580B53ED15dBae6c4f0ff129cFC9e155A)、[KSHIP](https://repo.sourcify.dev/56/0x4f08c9D310A7AFaFC591cd7259c0A5FC547C9481)、[511111 Converter](https://repo.sourcify.dev/56/0x14c0ec394BF76231889075f87f18a6f2bbC9CBd2)。原Standard JSON、compiler與實際constructor資料逐份吻合，無新編譯或鏈上交易。Sourcify轉送BscScan五筆皆回共享服務每日500次提交額度已滿，已停止該轉送、沒有重試或增加費用；BscScan驗證尚未完成，與Sourcify公開驗證分開記錄。參見[官方外部驗證說明](https://docs.sourcify.dev/docs/external-verifiers/)。
+
+共用樣式與 provider 選擇沿 `K線西遊記/modules/kgen-game-core.css`、`kgen-game-core.js`，ABI工具沿原 `K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js`。不觸碰#523保護的11520 Navigator/world-registry；Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記，不改Boot V1.4/Physics/經濟規則。App來源7164ce08769c60ac9439ab0c6b97d103c92c0642：原Portal CI43633664165及WorldViewer43633664170 SUCCESS；18911單元18/18、原入口/音訊59/59、原離線錢包/PWA153/153 PASS；36合約編譯且原5份公開payload ABI/creation/runtime/immutableRefs精確比對。390×844與1280×900各8情境，共16情境/64張viewport與fullPage截圖，32次skip裁切座標及鍵盤132×47.59px可達驗證；直接視覺複核通過。均為CI合成provider，不代表實體手機、真錢包或真BFCache；中段viewport須與有模擬標示的fullPage及report成組引用。Boot CURRENT路徑已依本頁Human沈英明明確允許完成登記；原站發布與主網部署分別依原工作流及本人錢包實際回執核實，上述7164 App驗收時尚未部署；2026-11-15持有人提供的五部署及三提案回執現已獨立核實，啟用仍以原Registry三筆execute成功回執為準。

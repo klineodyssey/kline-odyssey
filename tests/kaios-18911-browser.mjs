@@ -16,6 +16,8 @@ for(const field of ['username','password','search','hash'])assert.equal(ROOT[fie
 const OUT='artifacts/kaios-18911-qa';
 const ENTRY=new URL('K線西遊記/temples/18911/index.html',ROOT).href;
 const NOTICE='模擬驗收／未連真錢包';
+const PUBLIC_RPC=new URL('https://bsc-dataseed.bnbchain.org').href;
+const PUBLIC_READS=new Set(['eth_chainId','eth_accounts','eth_getBlockByNumber','eth_getBlockByHash','eth_getCode','eth_call','eth_getBalance','eth_getTransactionReceipt','eth_getTransactionByHash']);
 const report={
   head:process.env.KAIOS_SOURCE_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
   trackedDirty:!!execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),
@@ -58,8 +60,20 @@ async function isolatedContext(browser,profile){
   const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},
     isMobile:profile.width<600,hasTouch:profile.width<600,reducedMotion:'reduce',serviceWorkers:'block'});
   context.setDefaultTimeout(10_000);context.setDefaultNavigationTimeout(20_000);
+  let page;
   await context.route('**/*',async route=>{
     const request=route.request(),url=new URL(request.url());
+    if(request.method()==='POST'&&url.href===PUBLIC_RPC){
+      const body=request.postDataJSON();
+      assert.ok(body&&!Array.isArray(body)&&body.jsonrpc==='2.0'&&PUBLIC_READS.has(body.method),'only the exact public read-only JSON-RPC endpoint is modeled');
+      (profile.publicRpc??=[]).push({method:body.method,url:url.href,mode:'ROUTE_FULFILLED_SYNTHETIC_NO_UPSTREAM'});
+      if(profile.publicHttpStatus){await route.fulfill({status:profile.publicHttpStatus,contentType:'application/json',body:JSON.stringify({error:'Synthetic permission or quota response'})});return;}
+      const result=await page.evaluate(async({method,params})=>{
+        try{return {result:await window.__18911RpcQA.request({method,params})};}
+        catch(error){return {error:{code:Number.isInteger(error.code)?error.code:-32000,message:String(error.message||error)}};}
+      },{method:body.method,params:body.params||[]});
+      await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({jsonrpc:'2.0',id:body.id??null,...result})});return;
+    }
     if(!['GET','HEAD'].includes(request.method())||url.origin!==ROOT.origin){
       profile.blockedRequests.push({origin:url.origin,method:request.method(),type:request.resourceType()});
       await route.abort('blockedbyclient');return;
@@ -72,12 +86,12 @@ async function isolatedContext(browser,profile){
       // external requests and every non-GET/HEAD request remain blocked above.
       const portal=url.pathname===ROOT.pathname||url.pathname===new URL('index.html',ROOT).pathname;
       await route.fulfill({response,headers:{...response.headers(),
-        'content-security-policy':`${portal?"script-src 'self'; ":''}connect-src 'self'; frame-src 'none'; object-src 'none'; form-action 'none'`}});
+        'content-security-policy':`${portal?"script-src 'self'; ":''}connect-src 'self' https://bsc-dataseed.bnbchain.org; frame-src 'none'; object-src 'none'; form-action 'none'`}});
       return;
     }
     await route.continue();
   });
-  const page=await context.newPage();
+  page=await context.newPage();
   page.on('pageerror',error=>{const message=String(error.stack||error);profile.runtimeErrors.push(message);report.runtimeErrors.push(message);});
   page.on('console',message=>{if(message.type()==='error')profile.consoleErrors.push(message.text());});
   return {context,page};
@@ -89,7 +103,7 @@ const OTHER='0x1111111111111111111111111111111111111111';
 const PENDING_KEY='kaios18911.pending.v1';
 report.payload={chainId:PAYLOAD.chainId,sourceMain:PAYLOAD.sourceMain,programCommit:PAYLOAD.programCommit,expectedOwner:OWNER,
   dependencyPins:Object.fromEntries(Object.entries(PAYLOAD.dependencies).map(([name,item])=>[name,{address:item.address,codeHash:item.codeHash}])),
-  scope:'SYNTHETIC_DEPENDENCY_READS_AND_UNMINED_DEPLOYMENT_ONLY',verifiedMinedDeployments:0};
+  scope:'SYNTHETIC_READS_AND_EXPLICIT_QA_MINED_DEPLOYMENTS_ONLY',realVerifiedMinedDeployments:0};
 
 async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,sendMode='pending',guest=false}={}){
   row.rpc=[];row.sendRequests=[];
@@ -101,9 +115,12 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
     // The only application flag is a display-only notice. Authorization still
     // goes through the real client, real shared selector and real payload.
     window.__K18911_MOCK__=true;
-    if(guest){delete window.ethereum;delete window.BinanceChain;return;}
     const state={account,chainId,sendMode,authorized:sessionStorage.getItem('18911.qa.authorized')==='true',sendCount:0};
     const listeners=new Map(),readGates=new Map(),zero='0x'+'0'.repeat(40);
+    const transactions=new Map(),receipts=new Map(),blocks=new Map(),deployed=new Map(),proposals=new Map(),codeOverrides=new Map();
+    const counters=new Map();
+    let qaVisibility='visible';
+    let readFailure=null;
     const hex=value=>'0x'+BigInt(value).toString(16);
     const normalized=value=>String(value).toLowerCase();
     let interfaces;
@@ -111,14 +128,15 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       if(interfaces)return interfaces;
       if(!window.ethers?.utils?.Interface)throw Error('Real vendored ethers5 must load before synthetic RPC');
       const E=window.ethers.utils;
-      interfaces={registry:new E.Interface(payload.registryABI),kaios:new E.Interface(payload.kaiosABI),kgen:new E.Interface(payload.kgenABI)};
+      interfaces={registry:new E.Interface(payload.registryABI),kaios:new E.Interface(payload.kaiosABI),kgen:new E.Interface(payload.kgenABI),
+        ...Object.fromEntries(Object.entries(payload.contracts).map(([name,item])=>[name,new E.Interface(item.abi)]))};
       return interfaces;
     }
-    function block(){
+    function block(number=100){
       const E=window.ethers.utils;
-      return {number:'0x64',timestamp:hex(Math.floor(Date.now()/1000)),hash:E.id('18911 synthetic unmined QA block 100'),parentHash:E.id('18911 synthetic QA block 99')};
+      return blocks.get(Number(number))||{number:hex(number),timestamp:hex(Math.floor(Date.now()/1000)),hash:E.id('18911 synthetic QA block '+number),parentHash:E.id('18911 synthetic QA block '+(number-1))};
     }
-    function values(name,method){
+    function values(name,method,args){
       const E=window.ethers.utils;
       if(name==='registry'){
         if(method==='owner')return [payload.expectedOwner];
@@ -126,7 +144,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='minimumDelay')return [3600];
         if(method==='bootstrapOpen')return [false];
         if(method==='organ')return [zero];
-        if(method==='pendingOrgans')return [zero,0];
+        if(method==='pendingOrgans')return proposals.get(normalized(args[0]))||[zero,0];
       }
       if(name==='kaios'){
         if(method==='KGEN')return [payload.dependencies.kgen.address];
@@ -137,14 +155,52 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='totalSupply')return [E.parseEther('10000')];
       }
       if(name==='kgen'&&method==='balanceOf')return [E.parseEther('10')];
+      const deployedAddress=contract=>deployed.get(contract)?.address;
+      const cfg=deployed.get('KUFO')?.config;
+      if(name==='KUFO'){
+        if(method==='kaios')return [payload.dependencies.kaios.address];
+        if(method==='organRegistry')return [payload.dependencies.registry.address];
+        if(method==='calendarVersion')return [cfg.version];
+        if(method==='calendarHash')return [E.keccak256(E.defaultAbiCoder.encode(['bytes32','uint64','int32','uint8[12]'],[cfg.version,cfg.activationTime,cfg.utcOffsetSeconds,cfg.constellationByMonth]))];
+        if(method==='activationTime')return [cfg.activationTime];
+        if(method==='utcOffsetSeconds')return [28800];
+        const date=new Date(Number(method==='civilDate'?args[0]:cfg.activationTime)*1000+28800000);
+        if(method==='civilDate')return [date.getUTCFullYear(),date.getUTCMonth()+1,date.getUTCDate()];
+        if(method==='firstBirthYear')return [date.getUTCFullYear()];
+        if(method==='firstBirthMonth')return [date.getUTCMonth()+1];
+        if(method==='maximumGroupId')return [Math.min(4294967295,(4294967292-date.getUTCFullYear()+1)*12)];
+        if(method==='calendarConfig')return [[cfg.version,cfg.activationTime,28800,cfg.constellationByMonth]];
+        if(method==='cap')return [E.parseEther('72000000000000')];
+        if(method==='balanceOf'||method==='totalSupply')return [0];
+      }
+      if(name==='KAIOSAlchemyFurnace'){
+        if(method==='kaios')return [payload.dependencies.kaios.address];
+        if(method==='kgen')return [payload.dependencies.kgen.address];
+        if(method==='organRegistry')return [payload.dependencies.registry.address];
+        if(method==='canonicalKufo')return [deployedAddress('KUFO')];
+      }
+      if(name==='KUFOOutputJindouyun168888'){
+        if(method==='furnace')return [deployedAddress('KAIOSAlchemyFurnace')];
+        if(method==='kufo')return [deployedAddress('KUFO')];
+      }
+      if(name==='KSHIP'){
+        if(method==='organRegistry')return [payload.dependencies.registry.address];
+        if(method==='kufo')return [deployedAddress('KUFO')];
+        if(method==='cap')return [E.parseEther('72000000000000000')];
+      }
+      if(name==='KSHIPConverter'){
+        if(method==='kufo')return [deployedAddress('KUFO')];
+        if(method==='kship')return [deployedAddress('KSHIP')];
+      }
       throw Error('Unmodeled synthetic read '+name+'.'+method);
     }
     const provider={isMetaMask:true,
       on(type,listener){if(!listeners.has(type))listeners.set(type,new Set());listeners.get(type).add(listener);return provider;},
       removeListener(type,listener){listeners.get(type)?.delete(listener);return provider;},
-      async request({method,params=[]}){
+      async request({method,params=[],qaLane='wallet'}){
         abi();
-        const E=window.ethers.utils,event={method};
+        const E=window.ethers.utils,event={method,lane:qaLane,at:Date.now()};
+        counters.set(method,(counters.get(method)||0)+1);
         if(method==='eth_sendTransaction'){
           const tx=params[0];
           event.transaction={from:tx.from,to:tx.to??null,value:tx.value??'0x0',chainId:tx.chainId,gas:tx.gas,gasPrice:tx.gasPrice,dataHash:E.keccak256(tx.data)};
@@ -157,47 +213,92 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
           }
         }
         await window.__record18911SyntheticRpc(event);
+        if(readFailure?.remaining>0&&method===readFailure.method){readFailure.remaining--;const error=new Error('Synthetic technical read failure');error.code=-32000;throw error;}
         const gate=Array.from(readGates.values()).find(item=>item.method===method&&!item.waiting&&!item.settled);
         if(gate){
           gate.waiting=true;
           try{await new Promise((resolve,reject)=>{gate.resolve=resolve;gate.reject=reject;});}
           finally{gate.settled=true;}
         }
-        if(method==='eth_chainId')return hex(state.chainId);
+        if(method==='eth_chainId')return hex(qaLane==='public'?56:state.chainId);
         if(method==='eth_requestAccounts'){state.authorized=true;sessionStorage.setItem('18911.qa.authorized','true');return [state.account];}
-        if(method==='eth_accounts')return state.authorized?[state.account]:[];
-        if(method==='eth_getBlockByNumber')return block();
+        if(method==='eth_accounts')return qaLane!=='public'&&state.authorized?[state.account]:[];
+        if(method==='eth_getBlockByNumber'){
+          if(params[0]!=='latest')return block(Number(BigInt(params[0])));
+          let number=Math.max(100,...blocks.keys()),latest=blocks.get(number);
+          if(latest&&Number(BigInt(latest.timestamp))<Math.floor(Date.now()/1000))number++;
+          latest=block(number);blocks.set(number,latest);return latest;
+        }
+        if(method==='eth_getBlockByHash')return Array.from(blocks.values()).find(item=>item.hash===params[0])||null;
         if(method==='eth_getBalance')return hex(E.parseEther('0.5').toString());
         if(method==='eth_gasPrice')return hex(50_000_000);
         if(method==='eth_estimateGas')return '0x100000';
         if(method==='eth_getTransactionCount')return hex(state.sendCount);
         if(method==='eth_getCode'){
+          if(codeOverrides.has(normalized(params[0])))return codeOverrides.get(normalized(params[0]));
           const dep=Object.values(payload.dependencies).find(item=>normalized(item.address)===normalized(params[0]));
-          return dep?dep.code:'0x';
+          if(dep)return dep.code;
+          const found=Array.from(deployed.entries()).find(([,item])=>normalized(item.address)===normalized(params[0]));
+          return found?payload.contracts[found[0]].deployedBytecode:'0x';
         }
         if(method==='eth_call'){
           const dep=Object.entries(payload.dependencies).find(([,item])=>normalized(item.address)===normalized(params[0].to));
-          if(!dep)throw Error('Unmodeled synthetic contract address '+params[0].to);
-          const iface=interfaces[dep[0]],parsed=iface.parseTransaction({data:params[0].data});
-          return iface.encodeFunctionResult(parsed.name,values(dep[0],parsed.name));
+          const contract=dep?.[0]||Array.from(deployed.entries()).find(([,item])=>normalized(item.address)===normalized(params[0].to))?.[0];
+          if(!contract)throw Error('Unmodeled synthetic contract address '+params[0].to);
+          const iface=interfaces[contract],parsed=iface.parseTransaction({data:params[0].data});
+          return iface.encodeFunctionResult(parsed.name,values(contract,parsed.name,parsed.args));
         }
         if(method==='eth_sendTransaction'){
           if(state.sendMode==='reject'){const error=new Error('Synthetic wallet: holder rejected');error.code=4001;throw error;}
+          if(state.sendMode==='unknown'){const error=new Error('Synthetic unknown submission outcome');error.code=-32000;throw error;}
           state.sendCount++;
-          // No receipt is fabricated. The real UI must keep this pending.
-          return E.id('18911 synthetic pending transaction '+state.sendCount);
+          const hash=E.id('18911 synthetic pending transaction '+state.sendCount),tx=JSON.parse(JSON.stringify(params[0]));
+          transactions.set(hash,{...tx,input:tx.data,to:tx.to??null,value:tx.value??'0x0',hash,nonce:hex(state.sendCount-1),chainId:'0x38'});
+          // Unmined by default. Only an explicit QA command creates a clearly
+          // synthetic receipt, which the unchanged product verifier checks.
+          return hash;
         }
-        if(method==='eth_getTransactionReceipt'||method==='eth_getTransactionByHash')return null;
+        if(method==='eth_getTransactionReceipt')return receipts.get(params[0])||null;
+        if(method==='eth_getTransactionByHash')return transactions.get(params[0])||null;
         throw Error('Unmodeled EIP1193 method; network fallback forbidden: '+method);
       },
     };
-    window.ethereum=provider;
+    if(guest){delete window.ethereum;delete window.BinanceChain;}else window.ethereum=provider;
+    window.__18911RpcQA={request:({method,params})=>provider.request({method,params,qaLane:'public'}),count:method=>counters.get(method)||0};
     window.__18911WalletQA={
       disconnect(){state.authorized=false;sessionStorage.removeItem('18911.qa.authorized');for(const listener of listeners.get('disconnect')||[])listener({code:4900,message:'Synthetic disconnect'});},
       changeAccount(next){state.account=next;for(const listener of listeners.get('accountsChanged')||[])listener([next]);},
+      setVisibility(value){
+        if(!['visible','hidden'].includes(value))throw Error('Unknown synthetic visibility');
+        qaVisibility=value;Object.defineProperty(document,'visibilityState',{configurable:true,get:()=>qaVisibility});
+        document.dispatchEvent(new Event('visibilitychange'));
+      },
+      removeInjectedWallet(){delete window.ethereum;delete window.BinanceChain;},
+      restoreInjectedWallet(){window.ethereum=provider;},
       gateRead(id){
         if(readGates.has(id))throw Error('Synthetic read gate must be unique');
         readGates.set(id,{method:'eth_getBlockByNumber',waiting:false,settled:false});
+      },
+      gateWalletSend(id){if(readGates.has(id))throw Error('Synthetic send gate must be unique');readGates.set(id,{method:'eth_sendTransaction',waiting:false,settled:false});},
+      failReads(count){readFailure={remaining:count,method:'eth_getBlockByNumber'};},
+      overrideDependencyCode(name,code){codeOverrides.set(normalized(payload.dependencies[name].address),code);},
+      mineDeployment(hash){
+        const tx=transactions.get(hash);if(!tx||tx.to!==null)throw Error('Synthetic mining requires an existing reviewed creation transaction');
+        const E=window.ethers.utils,match=Object.entries(payload.contracts).find(([,item])=>tx.input.toLowerCase().startsWith(item.bytecode.toLowerCase()));
+        if(!match)throw Error('Synthetic receipt must match one original artifact');
+        const [name,artifact]=match,c=E.defaultAbiCoder.decode(interfaces[name].deploy.inputs,'0x'+tx.input.slice(artifact.bytecode.length));
+        const address=E.getContractAddress({from:tx.from,nonce:Number(BigInt(tx.nonce))});
+        const number=Math.max(100,...blocks.keys())+1,b=block(number);blocks.set(number,b);
+        Object.assign(tx,{blockNumber:b.number,blockHash:b.hash});
+        if(name==='KUFO')deployed.set(name,{address,config:{version:c[2][0],activationTime:c[2][1].toString(),utcOffsetSeconds:Number(c[2][2]),constellationByMonth:Array.from(c[2][3],Number)}});
+        else deployed.set(name,{address});
+        receipts.set(hash,{transactionHash:hash,status:'0x1',blockNumber:b.number,blockHash:b.hash,from:tx.from,to:null,contractAddress:address,logs:[]});
+        return {contract:name,address,blockNumber:b.number,scope:'SYNTHETIC_MINED_DEPLOYMENT_ONLY'};
+      },
+      setPendingOrgan(organ,remainingSeconds){
+        const names={Furnace:['KAIOSAlchemyFurnace','KAIOS.ORGAN.FURNACE.18911'],Output:['KUFOOutputJindouyun168888','KAIOS.ORGAN.KUFO.OUTPUT.168888'],Converter:['KSHIPConverter','KAIOS.ORGAN.KSHIP.CONVERTER']};
+        const [name,key]=names[organ]||[];if(!deployed.has(name))throw Error('Pending proposal needs the verified synthetic contract');
+        proposals.set(normalized(window.ethers.utils.id(key)),[deployed.get(name).address,Math.floor(Date.now()/1000)+remainingSeconds]);
       },
       gateState(id){const gate=readGates.get(id);return gate?{method:gate.method,waiting:gate.waiting,settled:gate.settled}:null;},
       releaseRead(id,mode){
@@ -213,6 +314,22 @@ async function phase(page,expected){
   const list=Array.isArray(expected)?expected:[expected];
   await page.waitForFunction(states=>states.includes(document.querySelector('#appStatus')?.dataset.state)&&!document.body.classList.contains('loading'),list);
   return page.locator('#appStatus').getAttribute('data-state');
+}
+
+async function autoSettled(page){
+  // Natural timers continue under clock.install; a zero-delay task lets the
+  // application's scheduled immediate verification start before asserting idle.
+  for(let turn=0;turn<2;turn++){
+    await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,0)));
+    await page.waitForFunction(()=>!document.body.classList.contains('loading')&&document.querySelector('#autoVerifyStatus')?.dataset.state!=='BUSY');
+  }
+}
+
+async function automaticRead(page,row,milliseconds=31_000){
+  const before=row.rpc.filter(item=>item.method==='eth_getBlockByNumber').length;
+  await page.clock.fastForward(milliseconds);
+  await page.waitForFunction(count=>window.__18911RpcQA.count('eth_getBlockByNumber')>count,before);
+  await autoSettled(page);
 }
 
 async function capture(page,row,label){
@@ -283,15 +400,16 @@ async function delayedReadLifecycle(page,row,releaseMode){
   await page.waitForFunction(gateId=>window.__18911WalletQA.gateState(gateId)?.waiting,oldId);
   assert.ok(await page.locator('body').evaluate(el=>el.classList.contains('loading')),'old refresh is genuinely awaiting an unresolved provider read');
   const rpcBeforeRestore=row.rpc.length;
+  const authorizationsBefore=row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
   await page.evaluate(()=>{
     window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));
     window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));
   });
-  await phase(page,'IDLE');
-  assert.equal(row.rpc.length,rpcBeforeRestore,'synthetic persisted restoration never automatically queries a provider');
+  await autoSettled(page);await phase(page,['IDLE','CONNECTED','PUBLIC_VERIFIED','PENDING']);
+  assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,authorizationsBefore,'persisted automatic reads never request wallet authorization');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),savedPending,'restoration preserves the exact saved financial intent');
   assert.ok(await page.locator('#connectWallet').isEnabled(),'new client is usable while the old provider promise is unresolved');
-  if(savedPending){await connect(page);await phase(page,'PENDING');}
+  if(savedPending){await connect(page);await autoSettled(page);await phase(page,'PENDING');}
   else await ownerReview(page,row);
   assert.deepEqual(await page.evaluate(gateId=>window.__18911WalletQA.gateState(gateId),oldId),{method:'eth_getBlockByNumber',waiting:true,settled:false},'manual reconnect and preview do not depend on the old read settling');
   await page.evaluate(gateId=>window.__18911WalletQA.gateRead(gateId),newId);
@@ -319,17 +437,18 @@ async function delayedReadLifecycle(page,row,releaseMode){
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),savedPending);
   }else await ownerReview(page,row);
   (row.asyncLifecycleCases??=[]).push({kind:'SYNTHETIC_DELAYED_READ_PERSISTED_EVENTS',oldReadOutcome:releaseMode,
-    actualBFCache:'NOT_TESTED',automaticRestoreRpc:0,
+    actualBFCache:'NOT_TESTED',automaticRestoreReadRequests:row.rpc.length-rpcBeforeRestore,
     newClientUsableBeforeOldSettlement:true,newBusyProtected:true,oldLateUiUnchanged:true,savedPendingPreserved:true,transactionRequestsAdded:row.sendRequests.length-sendsBefore});
   await capture(page,row,`synthetic-late-${releaseMode}-${savedPending?'pending':'review'}`);
 }
 
 async function runScenario(browser,profile,name,options,fn){
-  const row={profile:profile.name,name,width:profile.width,height:profile.height,functional:'RUNNING',screenshots:[],touchTargets:[],blockedRequests:[],runtimeErrors:[],consoleErrors:[]};
+  const row={profile:profile.name,name,width:profile.width,height:profile.height,functional:'RUNNING',screenshots:[],touchTargets:[],blockedRequests:[],runtimeErrors:[],consoleErrors:[],publicHttpStatus:options.httpStatus||null};
   profile.scenarios.push(row);
   const {context,page}=await isolatedContext(browser,row);
   targetRecords.set(page,row.touchTargets);
   try{
+    if(options.clock){assert.ok(page.clock?.install,'existing CI Playwright supports the official Clock API');await page.clock.install({time:new Date('2026-11-15T04:00:00Z')});row.clock='PLAYWRIGHT_INSTALL_FAST_FORWARD';}
     await installSyntheticWallet(context,page,row,options);
     let response;
     if(options.guest){
@@ -347,6 +466,8 @@ async function runScenario(browser,profile,name,options,fn){
     }else response=await page.goto(ENTRY,{waitUntil:'load'});
     assert.ok(response?.ok(),'real 18911 HTML returns HTTP success');
     await page.waitForFunction(()=>document.querySelector('#appStatus')?.dataset.state!=='LOADING');
+    await page.waitForFunction(()=>document.querySelector('#autoVerifyStatus')?.dataset.state==='STOPPED'||document.querySelector('#autoVerifyStatus')?.textContent.includes('上次'));
+    await autoSettled(page);
     assert.equal(await page.title(),'18911 煉丹爐 · KUFO');
     assert.match(await page.locator('h1').textContent(),/18911/);
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0,'loading the real page never requests wallet authorization');
@@ -375,12 +496,13 @@ async function runProfile(browser,width,height){
     assert.equal(await page.locator('#prepareDeploy').isEnabled(),false);
     assert.equal(await page.locator('#deploySteps li').count(),5,'all five real deployment steps are presented');
     assert.match(await page.locator('#chainState').textContent(),/未|尚/);
-    assert.equal(row.rpc.length,0,'guest page does not request accounts or chain access');
+    assert.ok(row.publicRpc?.length>0,'guest automatically checks the exact synthetic public read endpoint');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts'||item.method==='eth_sendTransaction').length,0,'guest reads never authorize or send');
     await page.keyboard.press('Tab');
     assert.equal(await page.locator('a.skip').evaluate(el=>document.activeElement===el),true,'keyboard users can focus the first skip link');
     row.keyboardSkip=await touchTarget(page,'a.skip');
     await page.locator('#connectWallet').focus();
-    assert.equal(row.rpc.length,0,'keyboard focus does not connect a wallet');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts'||item.method==='eth_sendTransaction').length,0,'keyboard focus never authorizes or sends, while public automatic reads remain allowed');
     for(const control of ['#connectWallet','#kaiosAmount','#lifeId','#activationTime','#activationNow'])await touchTarget(page,control);
     await capture(page,row,'overview');
   });
@@ -422,7 +544,7 @@ async function runProfile(browser,width,height){
     await capture(page,row,'rejected');
   });
   await runScenario(browser,profile,'pending-reload',{},async(page,row)=>{
-    await ownerReview(page,row);await accept(page);await page.locator('#confirmReview').click();await phase(page,'SUBMITTED');
+    await ownerReview(page,row);await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
     assert.equal(row.sendRequests.length,1);
     const transaction=row.sendRequests[0].transaction;
     assert.equal(transaction.from.toLowerCase(),OWNER.toLowerCase());assert.equal(transaction.to,null);assert.equal(BigInt(transaction.value),0n);
@@ -437,18 +559,24 @@ async function runProfile(browser,width,height){
     assert.equal(await page.locator('#prepareAlchemy').isEnabled(),false);
     assert.equal(await page.locator('#reviewPanel').isVisible(),false);
     assert.ok(await page.locator('#pendingPanel').isVisible());
-    assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,0,'no automatic receipt polling after submission');
+    assert.ok(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length>0,'submitted hash is automatically checked without resending');
     await capture(page,row,'submitted');
-    await touchTarget(page,'#resumePending');await page.locator('#resumePending').click();await phase(page,'PENDING');
+    const receiptReadsBefore=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
+    await touchTarget(page,'#resumePending');await page.locator('#resumePending').click();await phase(page,'PENDING');await autoSettled(page);
     assert.equal(row.sendRequests.length,1,'resume only reads the saved receipt');
-    assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,1);
+    assert.ok(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length>receiptReadsBefore);
+    const authorizationBeforeReload=row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
+    const receiptReadsBeforeReload=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
     await page.reload({waitUntil:'load'});
     await page.waitForFunction(()=>document.querySelector('#appStatus')?.dataset.state!=='LOADING');
     assert.equal((await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),PENDING_KEY)).hash,pending.hash);
     assert.ok(await page.locator('#pendingPanel').isVisible(),'saved pending intent survives a real page reload');
     assert.equal(row.sendRequests.length,1,'reload never resubmits');
-    await connect(page);await phase(page,'PENDING');
-    await page.locator('#resumePending').click();await phase(page,'PENDING');
+    await autoSettled(page);await phase(page,'PENDING');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,authorizationBeforeReload,'reload passively discovers the previously authorized original account without another wallet prompt');
+    assert.ok(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length>receiptReadsBeforeReload,'reload automatically reads the original pending hash');
+    await connect(page);await autoSettled(page);await phase(page,'PENDING');
+    await page.locator('#resumePending').click();await phase(page,'PENDING');await autoSettled(page);
     assert.equal(row.sendRequests.length,1,'reconnected pending recovery never resubmits');
     assert.equal(await page.locator('#deploySteps .step-status').filter({hasText:/鏈上已核/}).count(),0,'no receipt means no verified deployment');
     await capture(page,row,'restored');
@@ -463,7 +591,7 @@ async function runProfile(browser,width,height){
     assert.equal(row.sendRequests.length,0,'disconnection invalidates an accepted but unsigned review');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
     await capture(page,row,'invalidated');
-    const rpcBefore=row.rpc.length;
+    const authorizationBefore=row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
     // Explicit synthetic lifecycle smoke: these untrusted DOM events exercise
     // the production persisted handler. They do not prove real BFCache entry
     // or restoration by any physical phone/browser.
@@ -471,14 +599,14 @@ async function runProfile(browser,width,height){
       window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));
       window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));
     });
-    await phase(page,'IDLE');
-    assert.equal(row.rpc.length,rpcBefore,'persisted lifecycle handler does not automatically query a wallet or chain');
+    await autoSettled(page);await phase(page,'PUBLIC_VERIFIED');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,authorizationBefore,'persisted public verification never requests wallet authorization');
     assert.equal(row.sendRequests.length,0,'persisted lifecycle handler never requests a transaction');
     assert.equal(await page.locator('#reviewPanel').isVisible(),false);
     assert.equal(await page.locator('#acceptReview').isChecked(),false,'persisted restoration clears the old consent');
     assert.equal(await page.locator('#reviewCap').inputValue(),'','persisted restoration clears the old spending cap');
     assert.equal(await page.locator('#playerBalance').textContent(),'連線並查詢後顯示');
-    row.lifecycle={kind:'SYNTHETIC_PERSISTED_PAGE_TRANSITION_EVENTS',actualBFCache:'NOT_TESTED',automaticRpcRequests:row.rpc.length-rpcBefore,automaticTransactionRequests:row.sendRequests.length};
+    row.lifecycle={kind:'SYNTHETIC_PERSISTED_PAGE_TRANSITION_EVENTS',actualBFCache:'NOT_TESTED',automaticReadsAllowed:true,automaticAuthorizationRequests:0,automaticTransactionRequests:row.sendRequests.length};
     await capture(page,row,'synthetic-persisted-restored');
     await ownerReview(page,row);
     assert.equal(row.sendRequests.length,0,'fresh explicit connect and preview work after safe client reconstruction');
@@ -493,7 +621,162 @@ async function runProfile(browser,width,height){
     assert.equal(await page.locator('#prepareDeploy').isEnabled(),false,'account switching cannot reuse the previous owner review');
     await capture(page,row,'switched');
   });
+  await runAutomaticScenarios(browser,profile);
   profile.functional='PASS';
+}
+
+async function mineReviewedPending(page,row){
+  const hash=await page.evaluate(key=>JSON.parse(localStorage.getItem(key))?.hash,PENDING_KEY);
+  assert.match(hash,/^0x[0-9a-f]{64}$/i,'only an explicitly submitted original intent can receive a synthetic receipt');
+  const mined=await page.evaluate(value=>window.__18911WalletQA.mineDeployment(value),hash);
+  (row.syntheticMinedDeployments??=[]).push({...mined,hash});
+  return mined;
+}
+
+async function runAutomaticScenarios(browser,profile){
+  for(const status of [403,429])await runScenario(browser,profile,`auto-public-http${status}`,{guest:true,clock:true,httpStatus:status},async(page,row)=>{
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','public permission/quota failures stop on their first response');
+    assert.equal(row.publicRpc.length,1,'only the first exact public HTTP request is attempted');
+    await page.clock.fastForward(120_000);assert.equal(row.publicRpc.length,1,'permission/quota refusal never falls back or retries automatically');
+    await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await autoSettled(page);await phase(page,'BLOCKED');
+    assert.equal(row.publicRpc.length,2,'an explicit manual query permits exactly one new read after the initial refusal');
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','a repeated manual permission/quota refusal immediately stops the automatic schedule again');
+    await page.clock.fastForward(120_000);assert.equal(row.publicRpc.length,2,'manual refusal must not schedule an automatic third request');
+    assert.equal(await page.evaluate(()=>Boolean(window.ethereum)),false);assert.equal(row.sendRequests.length,0);
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);
+    row.automatic={httpStatus:status,attemptsBeforeStop:1,explicitManualReads:1,totalPublicHttpRequests:2,fallbackRequests:0,automaticWalletRequests:0};
+    await capture(page,row,`http${status}-stopped`);
+  });
+  await runScenario(browser,profile,'auto-public-visible',{guest:true,clock:true},async(page,row)=>{
+    await phase(page,'PUBLIC_VERIFIED');
+    assert.equal(await page.evaluate(()=>Boolean(window.ethereum)),false,'public automatic verification needs no injected wallet');
+    assert.equal(await page.locator('#walletAccount').textContent(),'尚未連接');
+    assert.equal((await page.locator('#ownerAddress').textContent()).toLowerCase(),OWNER.toLowerCase());
+    assert.match(await page.locator('#autoVerifyStatus').textContent(),/自動唯讀查核.*上次/);
+    const firstRead=row.rpc.find(item=>item.method==='eth_getBlockByNumber').at;
+    await automaticRead(page,row);
+    const latestRead=row.rpc.filter(item=>item.method==='eth_getBlockByNumber').at(-1).at;
+    assert.ok(latestRead-firstRead>=30_000,'visible automatic reads follow the thirty-second schedule');
+    await page.evaluate(()=>window.__18911WalletQA.setVisibility('hidden'));
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'HIDDEN');
+    const hiddenReads=row.rpc.length;
+    await page.clock.fastForward(90_000);assert.equal(row.rpc.length,hiddenReads,'synthetic hidden page does not poll');
+    await page.evaluate(()=>window.__18911WalletQA.setVisibility('visible'));
+    await autoSettled(page);await phase(page,'PUBLIC_VERIFIED');
+    assert.ok(row.rpc.length>hiddenReads,'returning visible verifies immediately without a wallet prompt');
+    assert.equal(row.rpc.filter(item=>['eth_requestAccounts','eth_estimateGas','eth_sendTransaction'].includes(item.method)).length,0);
+    row.automatic={publicNoWallet:true,visibility:'SYNTHETIC_DOCUMENT_VISIBILITY_EVENT',physicalBackground:'NOT_TESTED',intervalMilliseconds:30_000};
+    await capture(page,row,'visible-resumed');
+  });
+  await runScenario(browser,profile,'auto-two-failure-stop',{guest:true,clock:true},async(page,row)=>{
+    await page.evaluate(()=>window.__18911WalletQA.failReads(2));
+    await automaticRead(page,row);
+    assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','first ordinary transport failure leaves one remaining attempt');
+    await automaticRead(page,row);
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
+    assert.match(await page.locator('#autoVerifyStatus').textContent(),/兩次/);
+    const stoppedReads=row.rpc.length;
+    await page.clock.fastForward(120_000);assert.equal(row.rpc.length,stoppedReads,'two technical failures stop further automatic reads');
+    await page.evaluate(()=>window.__18911WalletQA.setVisibility('hidden'));
+    await page.evaluate(()=>window.__18911WalletQA.setVisibility('visible'));
+    await autoSettled(page);assert.equal(row.rpc.length,stoppedReads,'visibility return does not reset the failed-attempt counter');
+    await capture(page,row,'technical-stopped');
+    await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await phase(page,'PUBLIC_VERIFIED');
+    await automaticRead(page,row);assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','manual query explicitly reopens automatic reads');
+    await page.evaluate(()=>window.__18911WalletQA.overrideDependencyCode('kgen','0x00'));
+    await automaticRead(page,row);assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','a dependency identity mismatch stops on its first occurrence');
+    const policyReads=row.rpc.length;await page.clock.fastForward(90_000);assert.equal(row.rpc.length,policyReads);
+    assert.equal(row.sendRequests.length,0);assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);
+    row.automatic={technicalAttemptsBeforeStop:2,policyAttemptsBeforeStop:1,visibilityDoesNotReset:true,manualQueryResets:true};
+    await capture(page,row,'identity-stopped');
+  });
+  await runScenario(browser,profile,'auto-review-wallet-pending',{clock:true},async(page,row)=>{
+    await ownerReview(page,row);
+    const reviewedReads=row.rpc.length;
+    await page.clock.fastForward(90_000);assert.equal(row.rpc.length,reviewedReads,'automatic timer never consumes or replaces an existing review');
+    assert.equal(await page.locator('#appStatus').getAttribute('data-state'),'REVIEW');
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'REVIEW');
+    assert.ok(await page.locator('#reviewPanel').isVisible());assert.equal(row.sendRequests.length,0);
+    await capture(page,row,'review-paused');
+    await ownerReview(page,row);await accept(page);
+    await page.evaluate(()=>window.__18911WalletQA.gateWalletSend('auto-wallet-prompt'));
+    await page.locator('#confirmReview').click();
+    await page.waitForFunction(()=>window.__18911WalletQA.gateState('auto-wallet-prompt')?.waiting);
+    const walletBusyReads=row.rpc.length;
+    await page.clock.fastForward(90_000);assert.equal(row.rpc.length,walletBusyReads,'automatic reads never compete with an outstanding wallet action');
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'BUSY');
+    assert.equal(row.sendRequests.length,1,'only the explicit confirm opened the synthetic wallet request');
+    await capture(page,row,'wallet-busy');
+    await page.evaluate(()=>window.__18911WalletQA.releaseRead('auto-wallet-prompt','resolve'));
+    await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    const pendingRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending=JSON.parse(pendingRaw);
+    assert.match(pending.hash,/^0x[0-9a-f]{64}$/i);
+    const originalReceiptReads=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
+    await page.evaluate(other=>window.__18911WalletQA.changeAccount(other),OTHER);
+    await page.clock.fastForward(31_000);await autoSettled(page);
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'another account cannot automatically resume the original financial hash');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
+    await capture(page,row,'original-account-required');
+    await page.evaluate(()=>{
+      window.__18911WalletQA.removeInjectedWallet();
+      window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));
+      window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));
+    });
+    await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await autoSettled(page);
+    assert.equal(await page.evaluate(()=>Boolean(window.ethereum)),false);
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'a public guest must not verify another account\'s financial receipt');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
+    await capture(page,row,'guest-pending-stopped');
+    await page.evaluate(owner=>{window.__18911WalletQA.restoreInjectedWallet();window.__18911WalletQA.changeAccount(owner);},OWNER);
+    await connect(page);await autoSettled(page);await phase(page,'PENDING');
+    assert.equal(row.sendRequests.length,1,'explicit original-account reconnection only reads the saved hash');
+    const mined=await mineReviewedPending(page,row);
+    await automaticRead(page,row);
+    await page.waitForFunction(address=>document.querySelector('#deploySteps .step-address')?.textContent.toLowerCase()===address.toLowerCase(),mined.address);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'complete automatic receipt verification clears only the original verified pending intent');
+    assert.equal(await page.locator('#deploySteps .step-status').filter({hasText:'鏈上已核'}).count(),1);
+    assert.equal(row.sendRequests.length,1,'a verified synthetic deployment never auto-submits its successor');
+    row.automatic={reviewPaused:true,walletBusyPaused:true,foreignAndGuestPendingStopped:true,originalAccountRequired:true,verifiedSyntheticDeploymentCount:1,automaticSendRequests:0};
+    await capture(page,row,'receipt-verified-no-successor-send');
+  });
+  await runScenario(browser,profile,'auto-timelock',{clock:true},async(page,row)=>{
+    await connect(page);await page.locator('#activationNow').click();
+    const names=['KUFO','KAIOSAlchemyFurnace','KUFOOutputJindouyun168888','KSHIP','KSHIPConverter'];
+    for(let index=0;index<names.length;index++){
+      await touchTarget(page,'#prepareDeploy');await page.locator('#prepareDeploy').click();await phase(page,'REVIEW');
+      await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+      const mined=await mineReviewedPending(page,row);assert.equal(mined.contract,names[index]);
+      await automaticRead(page,row);
+      await page.waitForFunction(count=>Array.from(document.querySelectorAll('#deploySteps .step-status')).filter(el=>el.textContent==='鏈上已核').length===count,index+1);
+      assert.equal(row.sendRequests.length,index+1,'each synthetic creation requires a separate explicit holder confirmation');
+    }
+    await page.evaluate(()=>window.__18911WalletQA.setPendingOrgan('Furnace',45));
+    await page.locator('#refreshStatus').click();await autoSettled(page);
+    const execute='.prepare-organ[data-action="execute"][data-organ="Furnace"]';
+    assert.equal(await page.locator(execute).isEnabled(),false,'previously proposed synthetic organ is not mature yet');
+    await automaticRead(page,row);assert.equal(await page.locator(execute).isEnabled(),false,'first thirty-second refresh remains before executableAt');
+    await automaticRead(page,row);assert.ok(await page.locator(execute).isEnabled(),'visible automatic refresh exposes a matured proposal for manual review');
+    await touchTarget(page,execute);
+    assert.equal(row.sendRequests.length,5,'maturity refresh never proposes or executes governance');
+    row.automatic={timelock:'PREVIOUS_SYNTHETIC_PROPOSAL_45_SECONDS_REMAINING',verifiedSyntheticDeployments:5,maturedButtonEnabled:true,automaticGovernanceRequests:0};
+    await capture(page,row,'mature-manual-review-only');
+  });
+  await runScenario(browser,profile,'auto-no-hash-stop',{clock:true,sendMode:'unknown'},async(page,row)=>{
+    await ownerReview(page,row);await accept(page);await page.locator('#confirmReview').click();await phase(page,'BLOCKED');
+    const saved=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
+    assert.equal(JSON.parse(saved).hash,null);assert.equal(row.sendRequests.length,1);
+    const reads=row.rpc.length;
+    await page.clock.fastForward(31_000);await autoSettled(page);
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
+    assert.match(await page.locator('#autoVerifyStatus').textContent(),/尚無 hash/);
+    assert.equal(row.rpc.length,reads,'hashless unknown submission stops before any automatic RPC');
+    await page.clock.fastForward(90_000);assert.equal(row.rpc.length,reads);assert.equal(row.sendRequests.length,1);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),saved);
+    row.automatic={unknownSubmissionPreserved:true,automaticRetries:0,automaticSendRequests:0};
+    await capture(page,row,'unknown-preserved-stopped');
+  });
 }
 
 let browser;
@@ -505,16 +788,18 @@ try{
   ].map(async path=>[path,await sourceFingerprint(path)])));
   browser=await chromium.launch({headless:true});
   for(const [width,height]of [[390,844],[1280,900]])await runProfile(browser,width,height);
-  report.checks.push('Actual 18911 HTML, panel, client, shared wallet selector and ethers5; synthetic provider only; no fabricated mined receipt.');
+  report.checks.push('Actual 18911 HTML, panel, client, shared wallet selector and ethers5. Original unmined scenarios stay pending; new explicit QA-mined creation receipts exercise the unchanged complete verifier. No real RPC, wallet, mined deployment or transaction.');
   report.checks.push('Guest, wrong chain, non-owner, owner preview/cancel, wallet rejection, durable pending/resume/reload, disconnect and account switch at both viewports.');
   report.checks.push('Constructor preview shows actual Registry/KAIOS/version/timestamp/UTC+8/month IDs. Synthetic persisted pagehide/pageshow handler smoke only; actual BFCache and physical phone restoration remain NOT_TESTED.');
   report.checks.push('Keyboard skip link is reachable when focused and clipped when unfocused; each state includes an actual viewport shot and full-page shot, with bounding-rectangle evidence.');
   report.checks.push('Unresolved synthetic refresh survives persisted lifecycle reconstruction; old late resolve/reject cannot override a new in-flight operation or alter an existing financial pending intent.');
+  report.checks.push('Official Playwright Clock drives visible-only thirty-second reads; synthetic visibility, review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal stop. No automatic financial request.');
   report.functional='PASS';
 }catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));process.exitCode=1;}
 finally{
   await browser?.close();
   report.syntheticTransactionRequests=report.profiles.flatMap(profile=>profile.scenarios).reduce((sum,row)=>sum+(row.sendRequests?.length||0),0);
+  report.syntheticMinedDeployments=report.profiles.flatMap(profile=>profile.scenarios).reduce((sum,row)=>sum+(row.syntheticMinedDeployments?.length||0),0);
   await fs.writeFile(`${OUT}/report.json`,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify({head:report.head,functional:report.functional,visual:report.visual,profiles:report.profiles.length,syntheticTransactionRequests:report.syntheticTransactionRequests,report:`${OUT}/report.json`}));
 }
