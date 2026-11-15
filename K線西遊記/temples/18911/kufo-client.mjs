@@ -5,6 +5,7 @@ const ORDER = ['KUFO','KAIOSAlchemyFurnace','KUFOOutputJindouyun168888','KSHIP',
 const ORGANS = Object.freeze({Furnace:['KAIOSAlchemyFurnace','KAIOS.ORGAN.FURNACE.18911'],Output:['KUFOOutputJindouyun168888','KAIOS.ORGAN.KUFO.OUTPUT.168888'],Converter:['KSHIPConverter','KAIOS.ORGAN.KSHIP.CONVERTER']});
 const ZERO = '0x'+'0'.repeat(40), HASH = /^0x[0-9a-f]{64}$/i, HEX = /^0x(?:[0-9a-f]{2})*$/i;
 const REVIEW_MS = 120000;
+const VERIFY_MS = 60000, VERIFY_RPC_MS = 15000;
 const ERC20_ABI = ['function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)','function approve(address,uint256) returns(bool)','event Approval(address indexed owner,address indexed spender,uint256 value)','event Transfer(address indexed from,address indexed to,uint256 value)'];
 const DESTINATION = 'KAIOS.POINT.168888.JINDOUYUN.KUFO.OUTLET';
 function failure(code, message=code) { const error = new Error(message); error.code=code; return error; }
@@ -43,7 +44,7 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   const expectedOwner=address(P.expectedOwner);
   assert(P.calendar?.utcOffsetSeconds===28800&&HASH.test(P.calendar.version)&&!/^0x0{64}$/i.test(P.calendar.version),'INVALID_CALENDAR');
   const months=[10,11,12,1,2,3,4,5,6,7,8,9];assert(json(P.calendar.constellationByMonth)===json(months),'INVALID_CALENDAR');
-  let disposed=false, generation=0, active=false, connecting=false, review=null, localPending=null, config={activationTime:null}, listeners=new Set();
+  let disposed=false, generation=0, active=false, connecting=false, review=null, localPending=null, config={activationTime:null}, listeners=new Set(), verifyReads=null;
   let view={phase:'IDLE',status:'尚未連接；所有操作先預覽，不會自動送交易。',account:null,chainId:null,owner:null,deployments:{},chainActive:false,chainConfig:null,chainDeployments:{},alchemy:null,pending:null,blockedReasons:[],error:null,block:null,routes:{}};
   const timestamp=()=>{const value=now();assert(Number.isFinite(value)&&value>=0,'INVALID_CLOCK');return value;};
   const isVisible=()=>typeof document==='undefined'||document.visibilityState!=='hidden';
@@ -51,7 +52,15 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   function publish() { const value=snapshot();for(const listener of listeners){try{listener(value);}catch{}}return value; }
   function invalidate(reason='錢包或頁面已變更，請重新預覽。') { ++generation;review=null;view.status=reason;view.phase=disposed?'DISPOSED':'STALE';publish(); }
   function current(g) { assert(!disposed&&g===generation&&isVisible(),'CONTEXT_CHANGED','錢包、設定或頁面已變更，原預覽作廢。'); }
-  async function rpc(method,params=[],g=generation) { current(g);const result=await provider.request({method,params});current(g);return result; }
+  async function rpc(method,params=[],g=generation) {
+    current(g);let result;
+    if(verifyReads?.generation===g){
+      const remaining=verifyReads.deadline-Date.now();assert(remaining>0,'TIMEOUT','自動唯讀查核逾時；原交易紀錄保留。');let timer;
+      try{result=await Promise.race([provider.request({method,params}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(failure('TIMEOUT','自動唯讀查核逾時；原交易紀錄保留。')),Math.min(VERIFY_RPC_MS,remaining));})]);}
+      finally{clearTimeout(timer);}
+    }else result=await provider.request({method,params});
+    current(g);return result;
+  }
   function readStorage(key) { try{return storage.getItem(key);}catch{throw failure('STORAGE_READ_FAILED','無法讀取原交易紀錄；停止送出。');} }
   function writeStorage(key,value) { const raw=JSON.stringify(value);try{storage.setItem(key,raw);assert(storage.getItem(key)===raw,'STORAGE_READBACK_FAILED');}catch(error){if(error.code)throw error;throw failure('STORAGE_WRITE_FAILED','紀錄保存或讀回失敗；保留原交易，禁止重送。');} }
   function parseStored(raw,code) { if(raw===null)return null;try{return JSON.parse(raw);}catch{throw failure(code);} }
@@ -63,10 +72,10 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   async function action(fn) { assert(!disposed,'DISPOSED');assert(!active,'BUSY','已有操作正在進行，請勿重複點按。');active=true;view.error=null;view.blockedReasons=[];publish();try{await fn(generation);}catch(error){view.error={code:typeof error.code==='string'?error.code:'PROVIDER_ERROR',message:error.message||'錢包讀查失敗。'};view.blockedReasons=[view.error.code];view.status=view.error.message;view.phase='BLOCKED';publish();throw error;}finally{active=false;publish();}return snapshot(); }
   async function call(to,iface,method,args,tag,g) { const data=iface.encodeFunctionData(method,args);const out=await rpc('eth_call',[{to,data},tag],g);try{return iface.decodeFunctionResult(method,out);}catch{throw failure('INVALID_CONTRACT_RESPONSE',method+' 回覆無法核對。');} }
   async function one(to,iface,method,args,tag,g) { return (await call(to,iface,method,args,tag,g))[0]; }
-  async function identity(g) { const chain=integer(await rpc('eth_chainId',[],g));view.chainId=chain===56n?56:chain.toString();assert(chain===56n,'WRONG_CHAIN','請切換至 BSC 主網 56。');const accounts=await rpc('eth_accounts',[],g);assert(Array.isArray(accounts)&&accounts.length&&accounts[0],'NOT_CONNECTED','請在本人錢包授權帳戶。');const account=address(accounts[0]);if(view.account&&!equal(account,view.account)){invalidate('目前帳戶已變更，請重新連接。');throw failure('ACCOUNT_CHANGED');}return account; }
-  async function base(g) {
+  async function identity(g,{allowDisconnected=false}={}) { const chain=integer(await rpc('eth_chainId',[],g));view.chainId=chain===56n?56:chain.toString();assert(chain===56n,'WRONG_CHAIN','請切換至 BSC 主網 56。');const accounts=await rpc('eth_accounts',[],g);if(allowDisconnected&&Array.isArray(accounts)&&accounts.length===0)return null;assert(Array.isArray(accounts)&&accounts.length&&accounts[0],'NOT_CONNECTED','請在本人錢包授權帳戶。');const account=address(accounts[0]);if(view.account&&!equal(account,view.account)){invalidate('目前帳戶已變更，請重新連接。');throw failure('ACCOUNT_CHANGED');}return account; }
+  async function base(g,{allowDisconnected=false}={}) {
     view.chainActive=false;view.chainConfig=null;view.chainDeployments={};view.alchemy=null;
-    const account=await identity(g);const block=await rpc('eth_getBlockByNumber',['latest',false],g);
+    const account=await identity(g,{allowDisconnected});const block=await rpc('eth_getBlockByNumber',['latest',false],g);
     assert(block&&HASH.test(block.hash)&&block.number&&block.timestamp,'INVALID_BLOCK');const tag=block.number;
     for(const key of Object.keys(D)){const code=await rpc('eth_getCode',[D[key].address,tag],g);assert(HEX.test(code)&&code!=='0x'&&equal(E.keccak256(code),D[key].codeHash),'DEPENDENCY_CODE_MISMATCH','既有 '+key+' 程式指紋不符，停止操作。');}
     const owner=address(await one(D.registry.address,registryInterface,'owner',[],tag,g));
@@ -192,8 +201,10 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
     assert(equal(cfg.version,P.calendar.version)&&BigInt(cfg.activationTime)>0n&&cfg.utcOffsetSeconds===28800&&cfg.constellationByMonth.join(',')===months.join(','),'CHAIN_CALENDAR_MISMATCH');
     for(const name of ORDER)await getters(name,d[name].address,cfg,d,state.tag,g);
     current(g);view.chainActive=true;view.chainConfig=cfg;view.chainDeployments=d;
-    const balances=await Promise.all([one(D.kaios.address,erc20,'balanceOf',[state.account],state.tag,g),one(D.kgen.address,erc20,'balanceOf',[state.account],state.tag,g),one(d.KUFO.address,erc20,'balanceOf',[state.account],state.tag,g),one(D.kaios.address,erc20,'allowance',[state.account,d.KAIOSAlchemyFurnace.address],state.tag,g)]);
-    view.alchemy={active:true,kaiosBalanceWei:balances[0].toString(),kgenBalanceWei:balances[1].toString(),kufoBalanceWei:balances[2].toString(),allowanceWei:balances[3].toString(),spender:d.KAIOSAlchemyFurnace.address,source:'VERIFIED_CHAIN_ROUTES'};
+    if(state.account){
+      const balances=await Promise.all([one(D.kaios.address,erc20,'balanceOf',[state.account],state.tag,g),one(D.kgen.address,erc20,'balanceOf',[state.account],state.tag,g),one(d.KUFO.address,erc20,'balanceOf',[state.account],state.tag,g),one(D.kaios.address,erc20,'allowance',[state.account,d.KAIOSAlchemyFurnace.address],state.tag,g)]);
+      view.alchemy={active:true,kaiosBalanceWei:balances[0].toString(),kgenBalanceWei:balances[1].toString(),kufoBalanceWei:balances[2].toString(),allowanceWei:balances[3].toString(),spender:d.KAIOSAlchemyFurnace.address,source:'VERIFIED_CHAIN_ROUTES'};
+    }
     return {deployments:d,config:cfg};
   }
   async function candidate(request,state,deployed,g) {
@@ -240,7 +251,16 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   }
   function uniqueId() { return E.hexlify(E.randomBytes(32)); }
   function restorePendingView() {const item=pending();view.pending=item;if(item?.payloadHash===payloadHash&&item.config?.activationTime)config={activationTime:item.config.activationTime};return item;}
-  async function refreshInner(g) {review=null;const state=await base(g);await deployments(g);await discover(state,g);restorePendingView();view.phase=view.pending?'PENDING':'CONNECTED';view.status=view.pending?'已有待確認交易；只核對原回執，不重送。':view.chainActive?'新版煉丹路由已核對；可由玩家本人預覽。':'既有依賴已讀查；新版五合約／路由尚未全部啟用。';return publish(); }
+  async function refreshInner(g,{allowDisconnected=false}={}) {review=null;const state=await base(g,{allowDisconnected});await deployments(g);await discover(state,g);restorePendingView();view.phase=view.pending?'PENDING':state.account?'CONNECTED':'PUBLIC_VERIFIED';view.status=view.pending?'已有待確認交易；只核對原回執，不重送。':view.chainActive?state.account?'新版煉丹路由已核對；可由玩家本人預覽。':'新版五合約與路由已公開唯讀核對；本人操作前仍須連接錢包。':'既有依賴已讀查；新版五合約／路由尚未全部啟用。';return publish(); }
+  async function resumeInner(g,state) {
+    review=null;const item=pendingOwned(restorePendingView());assert(state.account&&equal(state.account,item.account),'PENDING_ACCOUNT_MISMATCH','請使用原交易帳戶核對；原紀錄保留。');
+    const d=await deployments(g);const evidence=await verifyTransaction(item,g,d);if(!evidence){view.phase='PENDING';view.status='原交易仍待確認；不重送，稍後由本人再核對。';return publish();}
+    current(g);assert(pending()?.intentId===item.intentId,'PENDING_CHANGED');const saved=journal(),existing=saved.evidence.find(x=>equal(x.intent?.hash,item.hash));
+    if(existing)assert(sameRecord({...existing,verifiedAt:undefined},{...evidence,verifiedAt:undefined}),'EVIDENCE_CONFLICT');else saved.evidence.push({...evidence,verifiedAt:timestamp()});
+    writeStorage(evidenceKey,saved);current(g);assert(pending()?.intentId===item.intentId,'PENDING_CHANGED');clearPending(item);
+    if(evidence.verification.status==='VERIFIED_DEPLOYMENT')view.deployments={...d,[item.contract]:{address:evidence.verification.address,txHash:item.hash,blockNumber:evidence.receipt.blockNumber}};
+    view.phase=evidence.verification.status;view.status=evidence.verification.status==='CONFIRMED_REVERTED'?'原交易已確認失敗，證據已保存；請重新核對原因後再手動預覽。':'原交易與完整證據已保存並讀回；下一步仍須本人重新預覽。';return publish();
+  }
   async function withLock(fn) {assert(lockManager&&typeof lockManager.request==='function','WEB_LOCKS_REQUIRED','此瀏覽器缺少安全跨分頁鎖；不送交易。');return lockManager.request(KUFO_LOCK_NAME,{mode:'exclusive',ifAvailable:true},async lock=>{assert(lock,'ANOTHER_TAB_ACTIVE','另一分頁正在處理錢包操作。');return fn();});}
   const events=[];
   if(typeof provider.on==='function')for(const type of ['accountsChanged','chainChanged','disconnect']){const listener=()=>{if(!(connecting&&type==='accountsChanged'))invalidate('錢包連線已變更，請重新連接並預覽；原交易保留。');view.account=null;view.chainId=null;publish();};provider.on(type,listener);events.push([type,listener]);}
@@ -253,6 +273,23 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
     subscribe(listener){assert(typeof listener==='function','INVALID_LISTENER');listeners.add(listener);try{listener(snapshot());}catch{}return ()=>listeners.delete(listener);},
     async connect(){return action(async g=>{review=null;connecting=true;try{const accounts=await rpc('eth_requestAccounts',[],g);assert(Array.isArray(accounts)&&accounts.length,'NOT_CONNECTED');view.account=address(accounts[0]);}finally{connecting=false;}return refreshInner(g);});},
     async refresh(){return action(g=>refreshInner(g));},
+    async verify(){
+      // Automatic reads must never replace a user's review or compete with a wallet action.
+      if(disposed||active||review||!isVisible())return snapshot();
+      return action(async g=>{
+        const scope={generation:g,deadline:Date.now()+VERIFY_MS};verifyReads=scope;
+        try{
+          const item=restorePendingView();
+          if(item){
+            pendingOwned(item);assert(HASH.test(item.hash),'SUBMISSION_UNKNOWN','原錢包送出狀態未知，保留紀錄，禁止重送。');
+            const state=await base(g,{allowDisconnected:true});assert(state.account&&equal(state.account,item.account),'PENDING_ACCOUNT_MISMATCH','請使用原交易帳戶核對；原紀錄保留。');
+            await withLock(()=>resumeInner(g,state));
+            if(view.pending||view.phase==='CONFIRMED_REVERTED')return publish();
+          }
+          return await refreshInner(g,{allowDisconnected:true});
+        }finally{if(verifyReads===scope)verifyReads=null;}
+      });
+    },
     setConfig(value){assert(!disposed,'DISPOSED');assert(!active,'BUSY');assert(!pending(),'PENDING_INTENT','先核對原交易；不能改啟用設定。');assert(!journal().evidence.some(x=>x.intent?.kind==='deploy'),'CONFIG_LOCKED','已有部署紀錄，啟用時間不可改。');assert(value&&typeof value.activationTime==='string'&&/^[1-9][0-9]*$/.test(value.activationTime)&&BigInt(value.activationTime)<=2n**64n-1n,'INVALID_ACTIVATION');config={activationTime:value.activationTime};invalidate('啟用時間已變更，請重新預覽與確認。');return snapshot();},
     async prepare(request){return action(async g=>{review=null;const state=await base(g);const p=restorePendingView();assert(!p,'PENDING_INTENT','先核對原待確認交易，不重送。');const d=['approve','burn'].includes(request?.kind)?{}:await deployments(g),item=await candidate(copy(request),state,d,g),fees=await quote(item,g);current(g);review={...item,...fees,request:copy(request),reviewId:uniqueId(),generation:g,preparedAt:timestamp(),owner:state.owner,payloadHash};view.phase='REVIEW';view.status='請核對本筆內容與最高 BNB 費用，再由本人錢包確認。';return publish();});},
     async confirm(reviewId,{accepted,maxCostBNB}={}){return action(async g=>withLock(async()=>{
@@ -274,15 +311,7 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
         if(localPending?.hash)view.pending=copy(localPending);view.status=localPending?.hash?'原交易雜湊已取得但保存／讀查未完成；保留並禁止重送。':'原送出狀態未知；保留待確認紀錄，禁止重送。';throw error;
       }
     }));},
-    async resume(){return action(async g=>withLock(async()=>{
-      review=null;const state=await base(g),item=pendingOwned(restorePendingView());assert(equal(state.account,item.account),'PENDING_ACCOUNT_MISMATCH','請使用原交易帳戶核對；原紀錄保留。');
-      const d=await deployments(g);const evidence=await verifyTransaction(item,g,d);if(!evidence){view.phase='PENDING';view.status='原交易仍待確認；不重送，稍後由本人再核對。';return publish();}
-      current(g);assert(pending()?.intentId===item.intentId,'PENDING_CHANGED');const saved=journal(),existing=saved.evidence.find(x=>equal(x.intent?.hash,item.hash));
-      if(existing)assert(sameRecord({...existing,verifiedAt:undefined},{...evidence,verifiedAt:undefined}),'EVIDENCE_CONFLICT');else saved.evidence.push({...evidence,verifiedAt:timestamp()});
-      writeStorage(evidenceKey,saved);current(g);assert(pending()?.intentId===item.intentId,'PENDING_CHANGED');clearPending(item);
-      if(evidence.verification.status==='VERIFIED_DEPLOYMENT')view.deployments={...d,[item.contract]:{address:evidence.verification.address,txHash:item.hash,blockNumber:evidence.receipt.blockNumber}};
-      view.phase=evidence.verification.status;view.status=evidence.verification.status==='CONFIRMED_REVERTED'?'原交易已確認失敗，證據已保存；請重新核對原因後再手動預覽。':'原交易與完整證據已保存並讀回；下一步仍須本人重新預覽。';return publish();
-    }));},
+    async resume(){return action(async g=>withLock(async()=>{review=null;return resumeInner(g,await base(g));}));},
     dispose(){if(disposed)return;disposed=true;invalidate('此面板已關閉；原交易紀錄保留。');for(const [name,listener]of events)provider.removeListener?.(name,listener);if(typeof document!=='undefined')document.removeEventListener('visibilitychange',visibility);listeners.clear();}
   });
 }
