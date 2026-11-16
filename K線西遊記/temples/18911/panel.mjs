@@ -250,7 +250,7 @@ const VERIFY_INTERVAL_MS=30000;
 const UNKNOWN_HASH_STOP='原交易尚無 hash，請從本人錢包取回此次原請求的 hash，再於下方唯讀核對。';
 let verifyTimer=null,verifyFailures=0,verifyStopped='',lastVerifiedAt=null,pageAway=false;
 const errors={
- WRONG_CHAIN:'請在錢包切換至 BNB Smart Chain 主網（56）。',
+ WRONG_CHAIN:'錢包尚未切換至 BSC 主網（56），請在錢包確認後再連接。',
  NOT_CONNECTED:'請先連接本人錢包，再查核鏈上狀態。',
  OWNER_REQUIRED:'這是王母部署／啟用操作，普通玩家仍可使用已啟用的煉丹功能。',
  OWNER_CHANGED:'Registry Owner 已變更；請由合法持有人核定後再操作。',
