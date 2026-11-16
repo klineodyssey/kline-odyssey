@@ -1505,6 +1505,10 @@ activation still require the lawful Human holder and canonical chain results.
 
 ## 2026-11-15｜18911 從頁面連接手機錢包
 
+2026-11-16 Sony手機回報後，原入口改為先核准原瀏覽器頁的WalletConnect連線，再由本人點原MetaMask／Trust入口，直接開啟錢包內18911。開啟App內頁不會冒稱原頁已連線；兩個瀏覽器各自核對帳戶，沒有把query或儲存標記當成共享授權。原生入口等待有界的晚到錢包注入及EIP-6963公告，等待完成後才消耗一次性連線意圖；取消、拒絕與逾時不自動重試帳戶授權。
+
+原頁重載僅可恢復SDK自有且符合本頁metadata／topic／期限／BSC帳戶的session，非秘密hint只用來決定是否嘗試恢復。背景返回只接續原配對或唯讀現況；不接續金融交易。沿用同一pinned2.12.2與SRI，不另裝SDK。真SDK載入驗收與合成provider配對分列，實體Sony、MetaMask／Trust及真relay仍須實測；軟體測試不能冒充這些驗收。參考[官方provider流程](https://docs.reown.com/advanced/providers/ethereum)、[EIP-6963](https://eips.ethereum.org/EIPS/eip-6963)及[Trust原生入口](https://developer.trustwallet.com/developer/develop-for-trust/deeplinking)。
+
 18911 原「連接本人錢包」在沒有注入 provider 時展開同頁錢包選擇，可沿既有 WalletConnect 2.12.2／原公開 Project ID／SRI 配對，或由 MetaMask、Trust 原生連結開啟原煉丹頁並進行一次帳戶連線。實作留在既有 `K線西遊記/temples/18911/panel.mjs`、`index.html`，不載入18888控制器、不共用其session/database，也不新增Runtime或bootstrap。
 
 連線僅取得帳戶/網路；取消、拒絕、逾時及遲到回覆不送金融交易，原pending/回執保持。WalletConnect須核本頁metadata、topic、expiry與BSC56帳戶權限；手機返頁只接續連線/唯讀，授權與煉丹仍由持有人本人逐筆確認。原生入口不要求使用者先手動開錢包再找網址。原有合約/payload/數量/費用限制未改。瀏覽器合成驗收與實體手機／真WalletConnect服務分開記錄，未取得真實證據者保持NOT_VERIFIED。
