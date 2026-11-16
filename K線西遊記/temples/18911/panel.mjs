@@ -193,6 +193,7 @@ async function connectMobileWallet(){
   await Promise.race([connection,stopped]);
   if(bridgeAttempt===attempt&&client===attempt.client&&view?.account&&Number(view.chainId)===56){
    $('walletBridgePanel').hidden=!nextNativeWallet;
+   if(!nextNativeWallet&&document.visibilityState==='visible'&&!pageAway)$('originalPageConnection').scrollIntoView({behavior:'auto',block:'center'});
    bridgeMessage=nextNativeWallet?'原頁已連線。現在再點「在錢包內開啟18911」，錢包內頁也會請你確認連線。':'';
   }
  }catch(error){if(bridgeAttempt===attempt){rollbackBridgeClient(attempt);lastError=Number(error.code)===4001?'錢包連線已取消；沒有送出交易。':message(error);render();}}

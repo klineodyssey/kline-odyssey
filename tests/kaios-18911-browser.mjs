@@ -68,6 +68,18 @@ async function touchTarget(page,selector){
   return rect;
 }
 
+async function originalConnectionInView(page,row,label){
+  // The product must restore this status to the viewport after hiding the chooser.
+  // Do not scroll here: that would conceal a failed return-to-status transition.
+  await page.waitForFunction(()=>{
+    const el=document.querySelector('#originalPageConnection'),r=el?.getBoundingClientRect();
+    return r&&r.width>0&&r.height>0&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight&&/此頁已透過 WalletConnect 連線/.test(el.textContent);
+  });
+  const rect=await geometry(page,'#originalPageConnection');
+  assert.ok(rect.visible&&rect.inView&&rect.hit,'the product brings the original-page WalletConnect status fully into the viewport');
+  (row.originalPageConnectionViewport??=[]).push({label,...rect});
+}
+
 async function noOverflow(page){
   const dimensions=await page.evaluate(()=>({viewport:innerWidth,html:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
   assert.ok(dimensions.html<=dimensions.viewport&&dimensions.body<=dimensions.viewport,'18911 has no horizontal overflow '+JSON.stringify(dimensions));
@@ -1039,7 +1051,7 @@ async function runWalletBridgeScenarios(browser,profile){
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,1,'only the explicitly selected bridge connects the real client');
     assert.equal(row.sendRequests.length,0);assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
     row.walletBridge={scope:'SYNTHETIC_WALLETCONNECT_BOUNDARY_NO_SDK_RELAY',...bridge};
-    await page.locator('#walletAccount').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+    await originalConnectionInView(page,row,'connected-no-transaction');
     await capture(page,row,'connected-no-transaction');
   });
   await runScenario(browser,profile,'bridge-rejected-cancel-late',{guest:true,walletBridge:true},async(page,row)=>{
@@ -1192,6 +1204,7 @@ async function runWalletBridgeScenarios(browser,profile){
     assert.match(await page.locator('#originalPageConnection').textContent(),/此頁已透過 WalletConnect 連線/);
     const session=await page.evaluate(()=>window.__18911BridgeQA.storedSession());
     assert.ok(session?.topic,'the original external page holds its own approved SDK session');
+    await originalConnectionInView(page,row,'original-page-connected-after-return');
     await capture(page,row,'original-page-connected-after-return');
     const beforeNavigation=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
     assert.equal(beforeNavigation.initializations.length,1,'pending-enable persisted return keeps the same original pairing instead of initializing another one');
