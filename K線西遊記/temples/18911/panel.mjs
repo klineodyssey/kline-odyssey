@@ -151,6 +151,7 @@ async function restoreMobileSession(){
  let cancel,timeout;
  const stopped=new Promise((_,reject)=>{cancel=()=>reject(Object.assign(new Error('已取消恢復連線。'),{code:4001}));timeout=setTimeout(()=>reject(new Error('恢復連線逾時；原查核結束前不重複恢復，仍可查詢狀態。')),BRIDGE_MS);});
  const epoch=uiEpoch,metadata=walletMetadata(),attempt={cancel,previousProvider:provider,previousMobile:[mobileProvider,mobileRaw,mobileMetadata,mobileTopic]};restoreAttempt=attempt;
+ $('walletBridgePanel').hidden=false;
  const restoring=(async()=>{
   const factory=await loadWalletFactory();if(restoreAttempt!==attempt||epoch!==uiEpoch||pageAway||document.visibilityState!=='visible')return false;
   const raw=await factory.init({projectId:'ed256d3118a9c971d550ed5ee522b4d9',chains:[56],optionalMethods:['wallet_switchEthereumChain'],metadata,storageOptions:{database:'kaios18911-walletconnect'},showQrModal:true,qrModalOptions:{themeMode:'dark'}});
@@ -160,7 +161,9 @@ async function restoreMobileSession(){
   mobileRaw=raw;mobileMetadata=metadata;mobileTopic=topic;mobileProvider=guardedMobile(raw,metadata,topic);
   initializeClient(mobileProvider);attempt.client=client;attempt.adoptedProvider=mobileProvider;
   await run(current=>current.refresh());
-  return restoreAttempt===attempt&&client===attempt.client&&!!view?.account&&Number(view.chainId)===56;
+  const connected=restoreAttempt===attempt&&client===attempt.client&&!!view?.account&&Number(view.chainId)===56&&!view.error&&['CONNECTED','PENDING'].includes(view.phase)&&!pageAway&&document.visibilityState==='visible';
+  if(connected)$('walletBridgePanel').hidden=!nextNativeWallet;
+  return connected;
  })();
  restorePending=restoring;render();
  restoring.finally(()=>{if(restorePending===restoring){restorePending=null;render();scheduleVerification();}}).catch(()=>{});
