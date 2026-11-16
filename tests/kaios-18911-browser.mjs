@@ -139,13 +139,13 @@ report.payload={chainId:PAYLOAD.chainId,sourceMain:PAYLOAD.sourceMain,programCom
   dependencyPins:Object.fromEntries(Object.entries(PAYLOAD.dependencies).map(([name,item])=>[name,{address:item.address,codeHash:item.codeHash}])),
   scope:'SYNTHETIC_READS_AND_EXPLICIT_QA_MINED_DEPLOYMENTS_ONLY',realVerifiedMinedDeployments:0};
 
-async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false}={}){
+async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false}={}){
   row.rpc=[];row.sendRequests=[];
   await page.exposeFunction('__record18911SyntheticRpc',event=>{
     row.rpc.push(event);
     if(event.method==='eth_sendTransaction')row.sendRequests.push(event);
   });
-  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection})=>{
+  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy})=>{
     // The only application flag is a display-only notice. Authorization still
     // goes through the real client, real shared selector and real payload.
     window.__K18911_MOCK__=true;
@@ -172,6 +172,17 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       const E=window.ethers.utils;
       interfaces={registry:new E.Interface(payload.registryABI),kaios:new E.Interface(payload.kaiosABI),kgen:new E.Interface(payload.kgenABI),
         ...Object.fromEntries(Object.entries(payload.contracts).map(([name,item])=>[name,new E.Interface(item.abi)]))};
+      if(activeAlchemy&&!deployed.size){
+        // Only the two player-confirmation scenarios start with a synthetic
+        // active chain. The real client still verifies every payload runtime,
+        // immutable getter and route; no product journal or pending is seeded.
+        for(const [nonce,name]of ['KUFO','KAIOSAlchemyFurnace','KUFOOutputJindouyun168888','KSHIP','KSHIPConverter'].entries()){
+          const item={address:E.getContractAddress({from:payload.expectedOwner,nonce})};
+          if(name==='KUFO')item.config={...payload.calendar,activationTime:String(Math.floor(Date.now()/1000)-86400)};
+          deployed.set(name,item);
+        }
+        persistLedger();
+      }
       return interfaces;
     }
     function block(number=100){
@@ -187,14 +198,17 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='pendingOwner')return [zero];
         if(method==='minimumDelay')return [3600];
         if(method==='bootstrapOpen')return [false];
-        if(method==='organ')return [zero];
+        if(method==='organ'){
+          const route=activeAlchemy&&[['KAIOS.ORGAN.FURNACE.18911','KAIOSAlchemyFurnace'],['KAIOS.ORGAN.KUFO.OUTPUT.168888','KUFOOutputJindouyun168888'],['KAIOS.ORGAN.KSHIP.CONVERTER','KSHIPConverter']].find(([key])=>normalized(E.id(key))===normalized(args[0]));
+          return [route?deployed.get(route[1]).address:zero];
+        }
         if(method==='pendingOrgans')return proposals.get(normalized(args[0]))||[zero,0];
       }
       if(name==='kaios'){
         if(method==='KGEN')return [payload.dependencies.kgen.address];
         if(method==='ORGAN_REGISTRY')return [payload.dependencies.registry.address];
         if(method==='balanceOf')return [E.parseEther('100')];
-        if(method==='allowance')return [0];
+        if(method==='allowance')return [activeAlchemy&&normalized(args[0])===normalized(state.account)&&normalized(args[1])===normalized(deployed.get('KAIOSAlchemyFurnace')?.address)?E.parseEther('100'):0];
         if(method==='decimals')return [18];
         if(method==='totalSupply')return [E.parseEther('10000')];
       }
@@ -215,7 +229,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='maximumGroupId')return [Math.min(4294967295,(4294967292-date.getUTCFullYear()+1)*12)];
         if(method==='calendarConfig')return [[cfg.version,cfg.activationTime,28800,cfg.constellationByMonth]];
         if(method==='cap')return [E.parseEther('72000000000000')];
-        if(method==='balanceOf'||method==='totalSupply')return [0];
+        if(method==='balanceOf'||method==='totalSupply'||method==='totalMintedFromAlchemy')return [0];
       }
       if(name==='KAIOSAlchemyFurnace'){
         if(method==='kaios')return [payload.dependencies.kaios.address];
@@ -449,7 +463,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         else if(mode==='resolve')gate.resolve();else throw Error('Unknown synthetic gate release mode');
       },
     };
-  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection});
+  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy});
 }
 
 async function phase(page,expected){
@@ -540,13 +554,42 @@ async function ownerReview(page,row){
   assert.equal(row.sendRequests.length,0,'preview never opens a wallet transaction');
 }
 
-async function accept(page){
-  await touchTarget(page,'#reviewCap');await page.locator('#reviewCap').fill('0.1');
+async function accept(page,maxCostBNB='0.1'){
+  await touchTarget(page,'#reviewCap');await page.locator('#reviewCap').fill(maxCostBNB);
   // The native checkbox is 22px; the actual associated label supplies the
   // full 48px touch target and is what a phone user taps.
   const label='#reviewPanel label.check';await touchTarget(page,label);await page.locator(label).click();
   assert.ok(await page.locator('#acceptReview').isChecked());
   await touchTarget(page,'#confirmReview');assert.ok(await page.locator('#confirmReview').isEnabled());
+}
+
+async function confirmationInView(page,row,label,states,errorCode){
+  const expected=Array.isArray(states)?states:[states];
+  // Read geometry only: the product must bring its confirmation feedback back
+  // into view. A test scroll would conceal the reported "nothing happened" bug.
+  await page.waitForFunction(({expected,errorCode})=>{
+    const el=document.querySelector('#confirmStatus'),r=el?.getBoundingClientRect();
+    return el&&expected.includes(el.dataset.state)&&(errorCode===undefined||el.dataset.errorCode===errorCode)&&el.textContent.trim()&&r.width>0&&r.height>0&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;
+  },{expected,errorCode});
+  const rect=await geometry(page,'#confirmStatus');
+  assert.ok(rect.visible&&rect.inView&&rect.hit,'confirmation feedback is fully visible and unobstructed without a test scroll');
+  const status=await page.locator('#confirmStatus').evaluate(el=>({state:el.dataset.state,errorCode:el.dataset.errorCode||'',text:el.textContent.trim()}));
+  assert.ok(expected.includes(status.state));if(errorCode!==undefined)assert.equal(status.errorCode,errorCode);
+  (row.confirmationFeedback??=[]).push({label,...status,...rect});
+  return status;
+}
+
+async function playerBurnReview(page,row){
+  assert.ok(await page.locator('#prepareAlchemy').isEnabled(),'the real client discovered the synthetic active route for this non-owner player');
+  await touchTarget(page,'#kaiosAmount');await page.locator('#kaiosAmount').fill('100');
+  await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+  const fields=await page.locator('#reviewDetails').evaluate(host=>Object.fromEntries(Array.from(host.querySelectorAll('dt'),el=>[el.textContent,el.nextElementSibling.textContent])));
+  assert.equal(fields['操作'],'煉丹：銷毀 KAIOS 並取得 KUFO','an existing exact allowance must preview burn, not another approval');
+  assert.match(fields['KAIOS 數量'],/^100(?:\.0+)?$/);assert.match(fields['預計 KUFO'],/^100000(?:\.0+)?$/);
+  assert.match(fields['KGEN 持有量門檻'],/^0\.10*$/);assert.match(fields['lifeId'],/未指定/);
+  assert.equal(fields['本人帳戶'].toLowerCase(),OTHER.toLowerCase());
+  assert.equal(await page.locator('#reviewCap').inputValue(),'');assert.equal(await page.locator('#acceptReview').isChecked(),false);
+  assert.equal(row.sendRequests.length,0,'the approved player review still cannot send automatically');
 }
 
 async function delayedReadLifecycle(page,row,releaseMode){
@@ -766,6 +809,7 @@ async function runProfile(browser,width,height){
     assert.equal(row.sendRequests.length,1,'one deliberate confirm opens one synthetic wallet prompt');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'explicit wallet rejection clears only the unsigned pending intent');
     assert.equal(await page.locator('#pendingPanel').isVisible(),false);
+    await confirmationInView(page,row,'rejected','REJECTED');
     await capture(page,row,'rejected');
   });
   await runScenario(browser,profile,'pending-reload',{walletBridge:true},async(page,row)=>{
@@ -885,6 +929,7 @@ async function runProfile(browser,width,height){
     assert.equal(await page.locator('#prepareDeploy').isEnabled(),false,'account switching cannot reuse the previous owner review');
     await capture(page,row,'switched');
   });
+  await runPlayerConfirmationScenarios(browser,profile);
   await runAutomaticScenarios(browser,profile);
   await runP1RecoveryScenarios(browser,profile);
   profile.functional='PASS';
@@ -1476,6 +1521,97 @@ async function mineReviewedPending(page,row){
   return {...mined,hash};
 }
 
+async function runPlayerConfirmationScenarios(browser,profile){
+  await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');
+    assert.equal(await page.locator('#prepareDeploy').isEnabled(),false,'the player is not granted the Owner deployment role');
+    const originalJournal=await journalBytes(page);
+    await playerBurnReview(page,row);await accept(page,'0.6');
+    const readGate='player-burn-preflight',walletGate='player-burn-wallet';
+    await page.evaluate(({readGate,walletGate})=>{window.__18911WalletQA.gateRead(readGate);window.__18911WalletQA.gateWalletSend(walletGate);},{readGate,walletGate});
+    await page.locator('#confirmReview').click();
+    await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,readGate);
+    await confirmationInView(page,row,'checking-before-wallet','CHECKING');
+    assert.equal(await page.locator('#confirmReview').isEnabled(),false);assert.equal(row.sendRequests.length,0);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'preflight is not a broadcast or an unknown financial intent');
+    const waitingReads=row.rpc.length;
+    await page.locator('#confirmReview').evaluate(el=>el.click());
+    assert.equal(row.rpc.length,waitingReads,'a disabled native button cannot start another confirmation');
+    await capture(page,row,'checking-before-wallet');
+    await page.evaluate(id=>window.__18911WalletQA.releaseRead(id,'resolve'),readGate);
+    await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,walletGate);
+    await confirmationInView(page,row,'waiting-for-holder-wallet','PENDING');
+    assert.equal(row.sendRequests.length,1,'only the deliberate confirmation opens the synthetic burn request');
+    const pendingRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending=JSON.parse(pendingRaw);
+    assert.equal(pending.kind,'burn');assert.equal(pending.amountWei,'100000000000000000000');assert.equal(pending.account.toLowerCase(),OTHER.toLowerCase());
+    assert.equal(pending.phase,'AWAITING_WALLET');assert.equal(pending.hash,null);assert.equal(BigInt(pending.tx.value),0n);
+    const request=await page.evaluate(({abi,item,owner})=>{
+      const parsed=new window.ethers.utils.Interface(abi).parseTransaction({data:item.tx.data});
+      return {method:parsed.name,amount:parsed.args[0].toString(),beneficiary:parsed.args[1],lifeId:parsed.args[2],expectedFurnace:window.ethers.utils.getContractAddress({from:owner,nonce:1})};
+    },{abi:PAYLOAD.contracts.KAIOSAlchemyFurnace.abi,item:pending,owner:OWNER});
+    assert.equal(request.method,'burnForKufo');assert.equal(request.amount,pending.amountWei);assert.equal(request.beneficiary.toLowerCase(),OTHER.toLowerCase());
+    assert.equal(request.lifeId,'0x'+'0'.repeat(64));assert.equal(pending.tx.to.toLowerCase(),request.expectedFurnace.toLowerCase());
+    assert.equal(row.sendRequests[0].transaction.to.toLowerCase(),request.expectedFurnace.toLowerCase(),'no replacement ERC20 approve is sent for an already approved amount');
+    const walletWaitReads=row.rpc.length;
+    await page.clock.fastForward(61_000);
+    assert.equal(row.rpc.length,walletWaitReads,'the preflight deadline never times out or reads over a real wallet-confirmation wait');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);assert.equal(row.sendRequests.length,1);
+    await confirmationInView(page,row,'wallet-wait-beyond-read-deadline','PENDING');
+    await capture(page,row,'wallet-confirmation-pending');
+    await page.evaluate(id=>window.__18911WalletQA.releaseRead(id,'resolve'),walletGate);
+    await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    const submitted=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),PENDING_KEY);
+    assert.equal(submitted.intentId,pending.intentId);assert.match(submitted.hash,/^0x[0-9a-f]{64}$/i);assert.equal(submitted.phase,'SUBMITTED');
+    await confirmationInView(page,row,'hash-saved-not-yet-mined',['SUBMITTED','PENDING']);
+    assert.match(await page.locator('#confirmStatus').textContent(),/hash|雜湊|回執|待確認/);
+    assert.deepEqual(await journalBytes(page),originalJournal,'an unmined burn must not create a successful receipt record');
+    assert.equal(row.sendRequests.length,1);assert.equal(await page.locator('#prepareAlchemy').isEnabled(),false);
+    row.confirmation={scope:'SYNTHETIC_ACTIVE_ROUTES_AND_EXISTING_EXACT_ALLOWANCE',kaios:'100',expectedKufo:'100000',holderCostCapBNB:'0.6',existingAllowanceKAIOS:'100',preflightVisible:true,
+      explicitBurnRequests:1,approvalRequests:0,walletWaitBeyondReadDeadline:true,hashSaved:true,receiptVerified:false,realMintedKufo:0};
+    await capture(page,row,'burn-hash-saved-no-success-claim');
+  });
+  await runScenario(browser,profile,'confirm-expired-preflight-timeout',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');
+    const originalPending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalJournal=await journalBytes(page);
+    await playerBurnReview(page,row);await accept(page,'0.6');
+    await page.clock.fastForward(120_001);
+    await page.locator('#confirmReview').click();await phase(page,'BLOCKED');
+    await confirmationInView(page,row,'expired-preview-visible','ERROR','REVIEW_EXPIRED');
+    assert.match(await page.locator('#confirmStatus').textContent(),/到期|過期|重新預覽/);
+    assert.equal(await page.locator('#acceptReview').isChecked(),false);assert.equal(await page.locator('#confirmReview').isEnabled(),false);
+    assert.equal(await page.locator('#reviewCap').inputValue(),'0.6','failure cannot silently change the holder spending cap');
+    assert.equal(row.sendRequests.length,0);assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending);assert.deepEqual(await journalBytes(page),originalJournal);
+    await capture(page,row,'expired-preview-visible-no-wallet-request');
+    await playerBurnReview(page,row);await accept(page,'0.6');
+    const gate='confirm-preflight-timeout';await page.evaluate(id=>window.__18911WalletQA.gateRead(id),gate);
+    await page.locator('#confirmReview').click();await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,gate);
+    await confirmationInView(page,row,'read-before-timeout','CHECKING');
+    await page.clock.fastForward(15_001);await phase(page,'BLOCKED');
+    await confirmationInView(page,row,'preflight-timeout-visible','ERROR','TIMEOUT');
+    assert.match(await page.locator('#confirmStatus').textContent(),/逾時|未送|重新/);
+    assert.equal(await page.locator('#acceptReview').isChecked(),false);assert.equal(await page.locator('#confirmReview').isEnabled(),false);
+    assert.equal(await page.locator('#reviewCap').inputValue(),'0.6');assert.equal(await page.locator('#prepareAlchemy').isEnabled(),true);
+    assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('loading')),false,'a timed-out preflight releases UI busy without treating it as a sent transaction');
+    assert.equal(row.sendRequests.length,0);assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending);assert.deepEqual(await journalBytes(page),originalJournal);
+    await capture(page,row,'preflight-timeout-visible-no-wallet-request');
+    // A new explicit preview may proceed while the old provider read remains
+    // unresolved. Its late result must not replace the new review or consent.
+    await playerBurnReview(page,row);
+    const ui=()=>page.evaluate(()=>({state:document.querySelector('#appStatus').dataset.state,status:document.querySelector('#appStatus').textContent,
+      details:document.querySelector('#reviewDetails').textContent,cost:document.querySelector('#reviewCost').textContent,
+      feedback:document.querySelector('#confirmStatus').textContent,feedbackState:document.querySelector('#confirmStatus').dataset.state,
+      accepted:document.querySelector('#acceptReview').checked,cap:document.querySelector('#reviewCap').value,disabled:document.querySelector('#confirmReview').disabled}));
+    const newReview=await ui();assert.equal(newReview.state,'REVIEW');assert.equal(newReview.accepted,false);assert.equal(newReview.cap,'');
+    await page.evaluate(id=>window.__18911WalletQA.releaseRead(id,'resolve'),gate);await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.settled,gate);
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    assert.deepEqual(await ui(),newReview,'late preflight completion cannot overwrite a newer explicit review or restore old consent');
+    assert.equal(row.sendRequests.length,0);assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending);assert.deepEqual(await journalBytes(page),originalJournal);
+    row.confirmation={scope:'SYNTHETIC_PREWALLET_FAILURES_ONLY',originalReviewExpiryMs:120000,originalReadDeadlineMs:15000,expiryCode:'REVIEW_EXPIRED',timeoutCode:'TIMEOUT',visibleErrors:true,
+      pendingAndJournalUnchanged:true,newExplicitReviewProtectedFromLateRead:true,transactionRequests:0};
+    await capture(page,row,'late-preflight-cannot-replace-new-review');
+  });
+}
+
 async function runAutomaticScenarios(browser,profile){
   for(const status of [403,429])await runScenario(browser,profile,`auto-public-http${status}`,{guest:true,clock:true,httpStatus:status},async(page,row)=>{
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','public permission/quota failures stop on their first response');
@@ -1610,6 +1746,8 @@ async function runAutomaticScenarios(browser,profile){
     await ownerReview(page,row);await accept(page);await page.locator('#confirmReview').click();await phase(page,'BLOCKED');
     const saved=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
     assert.equal(JSON.parse(saved).hash,null);assert.equal(row.sendRequests.length,1);
+    await confirmationInView(page,row,'unknown-result-preserved','PENDING');
+    assert.match(await page.locator('#confirmStatus').textContent(),/未知|保留|原請求|尚未取得/);
     const reads=row.rpc.length;
     await page.clock.fastForward(31_000);await autoSettled(page);
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
@@ -1638,6 +1776,7 @@ try{
   report.checks.push('Keyboard skip link is reachable when focused and clipped when unfocused; each state includes an actual viewport shot and full-page shot, with bounding-rectangle evidence.');
   report.checks.push('Unresolved synthetic refresh survives persisted lifecycle reconstruction; old late resolve/reject cannot override a new in-flight operation or alter an existing financial pending intent.');
   report.checks.push('Official Playwright Clock drives visible-only thirty-second reads; synthetic visibility, review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal stop. No automatic financial request.');
+  report.checks.push('Two added scenarios per viewport discover synthetic active routes with the real payload and an existing exact100 KAIOS allowance. A100 KAIOS→100000 KUFO review with an explicit0.6 BNB cap shows confirmation preflight without a test scroll, requests only one burn, keeps the genuine wallet-response wait beyond the read deadline, then preserves its unmined hash without claiming minted KUFO. Review expiry and the original15-second preflight read timeout remain zero-send, clear consent, preserve the holder cap and pending/journal, and cannot overwrite a newer review when the provider replies late. Existing rejection and hashless unknown-intent scenarios also require visible confirmation feedback. These are synthetic-provider and viewport checks, not physical-wallet, mainnet-burn or mint acceptance.');
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.checks.push('Both viewports retain the original bridge rejection/cancellation/late reply and financial-pending guards. One dedicated case independently reads the exact pinned WalletConnect2.12.2 script, verifies SHA384/SRI and its actual browser global, then replaces only init/pairing before any SDK relay operation; every other pairing/session fixture is synthetic. This is loader acceptance, not real relay or wallet acceptance.');

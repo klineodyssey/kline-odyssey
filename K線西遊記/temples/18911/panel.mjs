@@ -11,6 +11,7 @@ let payload=null,client=null,provider=null,unsubscribe=null,view=null,uiBusy=fal
 let mobileProvider=null,mobileRaw=null,mobileMetadata=null,mobileTopic=null,sdkLoading=null,bridgePending=null,bridgeReadPending=null,bridgeAttempt=null;
 let publicProvider=null,nativeIntent=false,nativeAttempt=null,restorePending=null,restoreAttempt=null,nextNativeWallet='',bridgeMessage='';
 let mobileNetworkRaw=null;
+let confirmAttempt=null;
 const BRIDGE_MS=60000;
 const SESSION_HINT='kaios18911.walletconnect.hint.v1';
 const networkRequests=new WeakMap();
@@ -353,7 +354,7 @@ function chooseProvider(){
 }
 function initializeClient(selected){
  clearVerificationTimer();
- uiEpoch++;uiBusy=false;
+ uiEpoch++;uiBusy=false;confirmAttempt=null;
  unsubscribe?.();client?.dispose();provider=selected;
  let storage;
  try{storage=window.localStorage;}catch{throw Object.assign(new Error('瀏覽器拒絕存取交易紀錄，無法安全送單。'),{code:'STORAGE_READ_FAILED'});}
@@ -434,6 +435,26 @@ function renderSteps(s,owner,busy){
   box.append(controls);organHost.append(box);
  }
 }
+function renderConfirmFeedback(s){
+ const el=$('confirmStatus'),attempt=confirmAttempt;
+ if(!attempt||attempt.client!==client||attempt.epoch!==uiEpoch){el.hidden=true;return;}
+ let state,body,error=false,code=s.error?.code||'';
+ if(s.pending){
+  state=s.pending.hash?'SUBMITTED':'PENDING';
+  body=s.pending.hash?'已取得原交易 ID，仍須核對鏈上回執；不會自動送下一筆。':'原請求已保存，正在最後核對或等待本人錢包；尚未取得交易 ID，請勿重複點按。';
+  if(lastError){body+=' '+lastError;error=true;}
+ }else if(lastError||s.error){state='ERROR';body=lastError||message(s.error);error=true;}
+ else if(s.phase==='REJECTED'){state='REJECTED';body=s.status;}
+ else if(!attempt.finished){state='CHECKING';body='已收到確認，正在重新核對帳戶、授權及費用，尚未開啟錢包確認。請勿重複點按。';}
+ else{state=s.phase||'IDLE';body=s.status||'核對已結束；請查看這筆原紀錄，不會自動接續交易。';}
+ if(attempt.terminal&&!s.pending){({state,body,error,code}=attempt.terminal);}
+ else if(attempt.finished&&!s.pending&&['ERROR','REJECTED'].includes(state))attempt.terminal={state,body,error,code};
+ el.hidden=false;el.textContent=body;el.dataset.state=state;el.dataset.errorCode=code;el.classList.toggle('error',error);
+ if(attempt.stage!==state||attempt.code!==code){
+  attempt.stage=state;attempt.code=code;
+  if(!pageAway&&document.visibilityState==='visible')requestAnimationFrame(()=>{if(confirmAttempt===attempt&&client===attempt.client&&uiEpoch===attempt.epoch&&!pageAway&&document.visibilityState==='visible'&&!el.hidden)el.scrollIntoView({behavior:'auto',block:'center'});});
+ }
+}
 function render(){
  if(!client||!view)return;
  const s=view,busy=uiBusy||!!s.active||!!bridgeAttempt||!!nativeAttempt||!!restoreAttempt,pending=!!s.pending,connected=!!s.account&&Number(s.chainId)===56;
@@ -470,7 +491,7 @@ function render(){
  renderSteps({...s,deployments},owner,busy||pending);
  renderReview(s.review);
  const cap=$('reviewCap').value.trim(),validCap=/^(?:0|[1-9]\d*)(?:\.\d{1,18})?$/.test(cap)&&/[1-9]/.test(cap);
- $('confirmReview').disabled=busy||pending||!s.review||reviewDecodeFailed||!$('acceptReview').checked||!validCap;
+ $('confirmReview').disabled=busy||pending||!s.review||reviewDecodeFailed||!$('acceptReview').checked||!validCap||['REVIEW_EXPIRED','REVIEW_INVALID','FRESH_STATE_CHANGED','CONTEXT_CHANGED'].includes(s.error?.code);
  $('cancelReview').disabled=busy;
  $('pendingPanel').hidden=!pending;
  if(pending){
@@ -485,9 +506,9 @@ function render(){
   $('recoverPendingHash').disabled=busy||!unknown||!connected||!$('acceptRecoveryHash').checked||!/^0x[0-9a-fA-F]{64}$/.test($('receiptHash').value.trim());
   $('resumePending').disabled=busy||!s.pending?.hash;
  $('copyPending').disabled=!s.pending?.hash;
- renderVerification();
+ renderConfirmFeedback(s);renderVerification();
 }
-function resetConsent(){lastError='';$('acceptReview').checked=false;$('reviewCap').value='';}
+function resetConsent(){confirmAttempt=null;lastError='';$('acceptReview').checked=false;$('reviewCap').value='';}
 async function applyActivation(current,activationTime){
  if(current.snapshot().config.activationTime===activationTime)return;
  try{current.setConfig({activationTime});}
@@ -513,6 +534,16 @@ async function run(operation){
  uiBusy=true;lastError='';render();
  try{await operation(current,isCurrent);}catch(error){if(isCurrent()){lastError=message(error);if(['RPC_PERMISSION_DENIED','RPC_QUOTA_LIMIT','WALLET_NETWORK_TIMEOUT','WALLET_NETWORK_PENDING'].includes(error?.code))verifyStopped=lastError;}}
  finally{if(isCurrent()){uiBusy=false;view=current?.snapshot()||view;render();scheduleVerification(view?.pending?.hash?0:VERIFY_INTERVAL_MS);}}
+}
+async function confirmReviewed(){
+ if(uiBusy||!client)return;
+ const attempt={client,epoch:uiEpoch,finished:false,stage:null,code:null};confirmAttempt=attempt;
+ await run(async(current,isCurrent)=>{
+  try{
+   const s=current.snapshot();if(!s.review)throw Object.assign(new Error('請重新預覽。'),{code:'REVIEW_INVALID'});
+   await current.confirm(s.review.reviewId,{accepted:$('acceptReview').checked,maxCostBNB:$('reviewCap').value.trim()});
+  }finally{if(isCurrent()&&confirmAttempt===attempt){attempt.finished=true;$('acceptReview').checked=false;}}
+ });
 }
 async function verifyPayload(){
  const response=await fetch(new URL('./contracts.json',import.meta.url),{cache:'no-cache'});
@@ -551,7 +582,7 @@ async function boot(){
  $('prepareAlchemy').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();const request={kind:'burn',amount:$('kaiosAmount').value.trim(),lifeId:$('lifeId').value.trim()||ZERO_ID};try{await current.prepare(request);}catch(error){if(!isCurrent())return;if(!['ALLOWANCE_REQUIRED','APPROVAL_REQUIRED'].includes(error.code))throw error;await current.prepare({...request,kind:'approve'});}if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
  $('cancelReview').addEventListener('click',()=>{resetConsent();invalidate('預覽已取消；沒有送交錢包。');});
  for(const id of ['acceptReview','reviewCap'])$(id).addEventListener('input',render);
- $('confirmReview').addEventListener('click',()=>run(async(current,isCurrent)=>{const s=current.snapshot();if(!s.review)throw Object.assign(new Error('請重新預覽。'),{code:'REVIEW_INVALID'});await current.confirm(s.review.reviewId,{accepted:$('acceptReview').checked,maxCostBNB:$('reviewCap').value.trim()});if(isCurrent()){$('acceptReview').checked=false;if(current.snapshot().pending)$('pendingPanel').scrollIntoView({behavior:'auto',block:'start'});}}));
+ $('confirmReview').addEventListener('click',confirmReviewed);
  $('resumePending').addEventListener('click',()=>run(current=>current.resume()));
   $('receiptHash').addEventListener('input',()=>{$('acceptRecoveryHash').checked=false;render();});
   $('acceptRecoveryHash').addEventListener('change',render);
