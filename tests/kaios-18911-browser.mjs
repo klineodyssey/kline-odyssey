@@ -449,6 +449,23 @@ async function capture(page,row,label){
   assert.equal(await page.locator('#mockNotice').textContent(),NOTICE);
   assert.ok(await page.locator('#mockNotice').isVisible(),'synthetic wallet notice remains visible in the real page');
   row.overflow=await noOverflow(page);
+  if(row.width<600&&await page.locator('#walletBridgePanel').isVisible()){
+    const chooser=await page.locator('#walletBridgePanel .button-group').evaluate(group=>{
+      const parent=group.getBoundingClientRect();
+      return {width:parent.width,left:parent.left,right:parent.right,controls:['connectMobileWallet','openMetaMask','openTrustWallet','cancelWalletBridge'].map(id=>{
+        const el=document.getElementById(id),r=el.getBoundingClientRect();
+        return {id,text:el.textContent.trim(),left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};
+      })};
+    });
+    assert.ok(chooser.width>=240,'mobile wallet chooser retains readable content width');
+    for(const [index,control]of chooser.controls.entries()){
+      assert.ok(control.width>=chooser.width*.9&&control.width<=chooser.width+2,control.id+' occupies its own nearly full-width mobile row');
+      assert.ok(control.left>=chooser.left-1&&control.right<=chooser.right+1,control.id+' remains inside the chooser content');
+      assert.ok(control.height>=44&&control.height<=100,control.id+' has readable normal control height instead of a vertical column of text');
+      if(index)assert.ok(control.top>=chooser.controls[index-1].bottom+4,control.id+' is on a distinct following row');
+    }
+    (row.walletChooserLayout??=[]).push({label,...chooser});
+  }
   const skip=await page.locator('a.skip').evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {focused:document.activeElement===el,top:r.top,bottom:r.bottom,width:r.width,height:r.height,clipPath:s.clipPath};});
   assert.equal(skip.focused,false,'ordinary screenshots do not retain keyboard skip-link focus');
   assert.ok(skip.width<=1&&skip.height<=1&&skip.clipPath==='inset(50%)','unfocused skip link is clipped, not an offscreen floating overlay');
