@@ -13,13 +13,13 @@ let publicProvider=null,nativeIntent=false,nativeAttempt=null,restorePending=nul
 const BRIDGE_MS=60000;
 const SESSION_HINT='kaios18911.walletconnect.hint.v1';
 
-export function walletBridgeLanding(href){
+export function walletBridgeLanding(href,{connect=true}={}){
  const url=new URL(href);
  if(url.protocol!=='https:'&&!(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname)))throw new Error('錢包橋接需要正式 HTTPS 網址。');
- url.searchParams.set('walletBridge','1');url.hash='playerPanel';return url;
+ if(connect){url.searchParams.set('walletBridge','1');url.hash='playerPanel';}return url;
 }
-export function walletNativeLink(wallet,href){
- const landing=walletBridgeLanding(href);
+export function walletNativeLink(wallet,href,{connect=true}={}){
+ const landing=walletBridgeLanding(href,{connect});
  if(wallet==='metamask')return 'https://link.metamask.io/dapp/'+landing.href.replace(/^https:\/\//,'');
  if(wallet==='trust')return 'https://link.trustwallet.com/open_url?coin_id=20000714&url='+encodeURIComponent(landing.href);
  throw new Error('未知的錢包入口。');
@@ -71,6 +71,30 @@ function rollbackBridgeClient(attempt){
   [mobileProvider,mobileRaw,mobileMetadata,mobileTopic]=attempt.previousMobile;
   initializeClient(attempt.previousProvider);
  }
+}
+function setupWalletUrls(){
+ const furnace=new URL('index.html',window.location.href);furnace.search='';furnace.hash='';
+ const targets={furnace:furnace.href,site:new URL('../../../',furnace).href};let copyEpoch=0;
+ for(const [inputId,linkId,copyId,key,label]of [
+  ['officialSiteUrl','officialSiteLink','copyOfficialSiteUrl','site','官網'],
+  ['furnacePageUrl','furnacePageLink','copyFurnaceUrl','furnace','18911'],
+ ]){
+  const input=$(inputId);input.value=targets[key];$(linkId).href=targets[key];
+  $(copyId).addEventListener('click',async()=>{
+   const sequence=++copyEpoch,epoch=uiEpoch,current=()=>sequence===copyEpoch&&epoch===uiEpoch&&!pageAway&&document.visibilityState==='visible';
+   try{await navigator.clipboard.writeText(input.value);if(current())text('walletUrlStatus',label+'網址已複製，可貼到錢包的 DApp 瀏覽器。');}
+   catch{if(!current())return;input.focus();input.select();text('walletUrlStatus','已選取'+label+'網址，請長按或按 Ctrl+C 複製。');}
+  });
+ }
+ const update=()=>{
+  const key=$('walletDestination').value==='site'?'site':'furnace';
+  $('walletDestinationLink').href=targets[key];$('walletDestinationLink').textContent=targets[key];
+  for(const [id,wallet]of [['openMetaMask','metamask'],['openTrustWallet','trust']]){
+   $(id).href=walletNativeLink(wallet,targets[key],{connect:key==='furnace'});
+   $(id).textContent='用 '+(wallet==='metamask'?'MetaMask':'Trust Wallet')+' 開啟'+(key==='furnace'?'18911':'官網首頁');
+  }
+ };
+ $('walletDestination').addEventListener('change',update);update();
 }
 function walletFactory(){
  const sdk=window.WalletConnectEthereumProvider||window['@walletconnect/ethereum-provider'];
@@ -379,7 +403,7 @@ function renderSteps(s,owner,busy){
 function render(){
  if(!client||!view)return;
  const s=view,busy=uiBusy||!!s.active||!!bridgeAttempt||!!nativeAttempt||!!restoreAttempt,pending=!!s.pending,connected=!!s.account&&Number(s.chainId)===56;
- text('walletBridgeStatus',nativeAttempt?'正在等待錢包內18911連線，可隨時取消。':restoreAttempt?'正在恢復原頁已核准的連線，不會重新配對或送交易。':bridgeAttempt?'正在等待錢包連線；請在錢包確認，可隨時取消。':bridgePending||bridgeReadPending?'原連線請求尚未結束；遲到回覆不會自動接入。':restorePending?'原恢復查核尚未結束，同類請求不重複；仍可查詢狀態。':lastError||bridgeMessage||'先連接原頁，再開啟錢包內的18911；兩處都會核對本人帳戶。');
+ text('walletBridgeStatus',nativeAttempt?'正在等待錢包內18911連線，可隨時取消。':restoreAttempt?'正在恢復原頁已核准的連線，不會重新配對或送交易。':bridgeAttempt?'正在等待錢包連線；請在錢包確認，可隨時取消。':bridgePending||bridgeReadPending?'原連線請求尚未結束；遲到回覆不會自動接入。':restorePending?'原恢復查核尚未結束，同類請求不重複；仍可查詢狀態。':lastError||bridgeMessage||'選擇目標後點錢包，直接開啟官網或18911；目前瀏覽器可另選配對連線。');
  const deployments={...(s.chainActive?s.chainDeployments:{}),...s.deployments};
  const cfg=s.chainActive?s.chainConfig:s.config;
  const scheduled=s.chainActive&&s.chainConfig?.activationTime&&s.block?.timestamp&&BigInt(s.block.timestamp)<BigInt(s.chainConfig.activationTime);
@@ -448,6 +472,7 @@ async function verifyPayload(){
  return JSON.parse(raw);
 }
 async function boot(){
+ setupWalletUrls();
  if(!window.ethers||!window.KGEN_Wallet)await new Promise(resolve=>window.addEventListener('load',resolve,{once:true}));
  if(!window.ethers?.utils||!window.KGEN_Wallet?.getEthereum)throw new Error('既有錢包或 ABI 工具未載入。');
  payload=await verifyPayload();
@@ -464,13 +489,6 @@ async function boot(){
  $('chooseWallet').addEventListener('click',()=>{if(!uiBusy&&!bridgeAttempt&&!nativeAttempt&&!restoreAttempt){nextNativeWallet='';showWalletBridge();}});
  $('connectMobileWallet').addEventListener('click',connectMobileWallet);
  $('cancelWalletBridge').addEventListener('click',cancelWalletBridge);
- for(const [id,wallet]of [['openMetaMask','metamask'],['openTrustWallet','trust']]){
-  $(id).href=walletNativeLink(wallet,window.location.href);
-  $(id).addEventListener('click',event=>{
-   if(bridgeAttempt||bridgePending||bridgeReadPending||nativeAttempt||restorePending||(uiBusy&&provider!==publicProvider)){event.preventDefault();return;}
-   if(!view?.account||Number(view.chainId)!==56){event.preventDefault();if(uiBusy&&provider===publicProvider)initializeClient(publicProvider);nextNativeWallet=wallet;showWalletBridge();bridgeMessage='先在本人錢包核准原頁連線。成功後再點此入口，直接開啟錢包內的18911。';void connectMobileWallet();}
-  });
- }
  $('refreshStatus').addEventListener('click',()=>{if(uiBusy)return;resetVerification();run(async current=>{resetConsent();current.invalidate('正在重新查核鏈上狀態。');await current.verify();lastVerifiedAt=Date.now();});});
   $('activationNow').addEventListener('click',()=>run(async current=>{resetConsent();$('activationTime').value=localTW(Math.floor(Date.now()/1000));await applyActivation(current,readActivation());}));
   $('activationTime').addEventListener('change',()=>run(async current=>{resetConsent();await applyActivation(current,readActivation());}));

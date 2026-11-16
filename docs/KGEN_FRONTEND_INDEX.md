@@ -524,7 +524,7 @@ new frontend file, Runtime, bootstrap or public beneficiary mapping is added.
 
 ## 2026-11-15｜18911 從頁面連接手機錢包
 
-2026-11-16回報的原頁／App內頁連線修復仍位於上述原`panel.mjs`／`index.html`與兩份既有18911測試。流程先核准原頁WalletConnect，再由本人點MetaMask／Trust原生連結開啟錢包內18911；原生落地有界等待晚注入與EIP-6963，一次性意圖不會在provider出現前提早消耗。重載只恢復SDK自有且通過原metadata／topic／期限／BSC檢查的session；非秘密hint不是授權。兩處各自核對帳戶，背景返回不自動接續金融交易。原SDK2.12.2／SRI、client、payload、比例、費用上限與pending回執規則不變。真SDK載入、合成pairing與實體手機／真relay證據各自分列，未取得者維持NOT_VERIFIED。
+2026-11-16 Human補正後，既有`panel.mjs`／`index.html`與兩份18911測試涵蓋常駐官網／18911網址、直接連結、各自複製及clipboard失敗時選取欄位手動複製，沿12345既有模式而不載入其固定路由控制器。選擇官網或18911後，MetaMask／Trust原生連結直接開啟目標，不攔成原頁先配對；原頁WalletConnect另留明確按鈕獨立連線，兩個context各自核帳戶，導航不算授權。PR666先配對方案保存於歷史；現行操作以本段Human補正為準。18911原生落地仍有界等待晚注入與EIP-6963；重載只恢復SDK自有且通過原metadata／topic／期限／BSC檢查的session，非秘密hint不是授權。背景返回不接續金融交易。原SDK2.12.2／SRI、client、payload、比例、費用上限、pending、12345與共用wallet core不變。真SDK載入、合成pairing與實體手機／真relay各自分列，未取得者維持NOT_VERIFIED。
 
 18911 原「連接本人錢包」在沒有注入 provider 時展開同頁錢包選擇，可沿既有 WalletConnect 2.12.2／原公開 Project ID／SRI 配對，或由 MetaMask、Trust 原生連結開啟原煉丹頁並進行一次帳戶連線。實作留在既有 `K線西遊記/temples/18911/panel.mjs`、`index.html`，不載入18888控制器、不共用其session/database，也不新增Runtime或bootstrap。
 
