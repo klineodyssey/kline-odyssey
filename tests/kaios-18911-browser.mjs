@@ -127,20 +127,20 @@ report.payload={chainId:PAYLOAD.chainId,sourceMain:PAYLOAD.sourceMain,programCom
   dependencyPins:Object.fromEntries(Object.entries(PAYLOAD.dependencies).map(([name,item])=>[name,{address:item.address,codeHash:item.codeHash}])),
   scope:'SYNTHETIC_READS_AND_EXPLICIT_QA_MINED_DEPLOYMENTS_ONLY',realVerifiedMinedDeployments:0};
 
-async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,sendMode='pending',guest=false,walletBridge=false,lateInjection=false}={}){
+async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false}={}){
   row.rpc=[];row.sendRequests=[];
   await page.exposeFunction('__record18911SyntheticRpc',event=>{
     row.rpc.push(event);
     if(event.method==='eth_sendTransaction')row.sendRequests.push(event);
   });
-  await context.addInitScript(({payload,account,chainId,sendMode,guest,walletBridge,lateInjection})=>{
+  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection})=>{
     // The only application flag is a display-only notice. Authorization still
     // goes through the real client, real shared selector and real payload.
     window.__K18911_MOCK__=true;
     const qaLedgerKey='18911.qa.synthetic-chain.v1';
     const storedLedger=JSON.parse(sessionStorage.getItem(qaLedgerKey)||'null');
     if(storedLedger&&storedLedger.programCommit!==payload.programCommit)throw Error('Synthetic ledger belongs to another artifact set');
-    const state={account,chainId,sendMode,authorized:sessionStorage.getItem('18911.qa.authorized')==='true',sendCount:storedLedger?.sendCount||0};
+    const state={account,chainId,switchMode,sendMode,authorized:sessionStorage.getItem('18911.qa.authorized')==='true',sendCount:storedLedger?.sendCount||0};
     const listeners=new Map(),readGates=new Map(),zero='0x'+'0'.repeat(40);
     const reloadWalletGate=sessionStorage.getItem('18911.qa.wallet-read-gate');
     if(reloadWalletGate){readGates.set(reloadWalletGate,{method:'eth_getBlockByNumber',lane:'wallet',waiting:false,settled:false});sessionStorage.removeItem('18911.qa.wallet-read-gate');}
@@ -232,6 +232,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       async request({method,params=[],qaLane='wallet'}){
         abi();
         const E=window.ethers.utils,event={method,lane:qaLane,at:Date.now()};
+        if(method==='wallet_switchEthereumChain')event.requestedChain=params[0]?.chainId;
         counters.set(method,(counters.get(method)||0)+1);
         if(method==='eth_sendTransaction'){
           const tx=params[0];
@@ -253,6 +254,18 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
           finally{gate.settled=true;}
         }
         if(method==='eth_chainId')return hex(qaLane==='public'?56:state.chainId);
+        if(method==='wallet_switchEthereumChain'){
+          if(qaLane==='public')throw Error('Public read-only provider cannot switch a wallet');
+          if(params.length!==1||params[0]?.chainId!=='0x38')throw Error('Synthetic wallet accepts only the reviewed BSC56 switch');
+          const faults={reject:[4001,'Synthetic holder rejected BSC switch'],'unknown-chain':[4902,'Synthetic wallet has no BSC network'],unsupported:[4200,'Synthetic wallet does not support chain switching']};
+          if(faults[state.switchMode]){const [code,message]=faults[state.switchMode];throw Object.assign(new Error(message),{code});}
+          if(state.switchMode==='wrong-chain')return null;
+          state.chainId=56;
+          // Emit before this request resolves, as wallets can synchronously
+          // invalidate the client while the explicit switch is still pending.
+          for(const listener of listeners.get('chainChanged')||[])listener('0x38');
+          return null;
+        }
         if(method==='eth_requestAccounts'){state.authorized=true;sessionStorage.setItem('18911.qa.authorized','true');return [state.account];}
         if(method==='eth_accounts')return qaLane!=='public'&&state.authorized?[state.account]:[];
         if(method==='eth_getBlockByNumber'){
@@ -370,6 +383,9 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
     window.__18911WalletQA={
       disconnect(){state.authorized=false;sessionStorage.removeItem('18911.qa.authorized');for(const listener of listeners.get('disconnect')||[])listener({code:4900,message:'Synthetic disconnect'});},
       changeAccount(next){state.account=next;for(const listener of listeners.get('accountsChanged')||[])listener([next]);},
+      changeChain(next){state.chainId=next;for(const listener of listeners.get('chainChanged')||[])listener(hex(next));},
+      setSwitchMode(value){if(!['success','reject','unknown-chain','unsupported','wrong-chain'].includes(value))throw Error('Unknown synthetic chain-switch mode');state.switchMode=value;},
+      walletState(){return {chainId:state.chainId,switchMode:state.switchMode,authorized:state.authorized};},
       setVisibility(value){
         if(!['visible','hidden'].includes(value))throw Error('Unknown synthetic visibility');
         qaVisibility=value;Object.defineProperty(document,'visibilityState',{configurable:true,get:()=>qaVisibility});
@@ -387,6 +403,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       },
       gateWalletSend(id){if(readGates.has(id))throw Error('Synthetic send gate must be unique');readGates.set(id,{method:'eth_sendTransaction',waiting:false,settled:false});},
       gateWalletAuthorization(id){if(readGates.has(id))throw Error('Synthetic authorization gate must be unique');readGates.set(id,{method:'eth_requestAccounts',waiting:false,settled:false});},
+      gateWalletChain(id){if(readGates.has(id))throw Error('Synthetic chain-switch gate must be unique');readGates.set(id,{method:'wallet_switchEthereumChain',lane:'wallet',waiting:false,settled:false});},
       armReloadWalletReadGate(id){sessionStorage.setItem('18911.qa.wallet-read-gate',id);},
       failReads(count){readFailure={remaining:count,method:'eth_getBlockByNumber'};},
       overrideDependencyCode(name,code){codeOverrides.set(normalized(payload.dependencies[name].address),code);},
@@ -420,7 +437,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         else if(mode==='resolve')gate.resolve();else throw Error('Unknown synthetic gate release mode');
       },
     };
-  },{payload:PAYLOAD,account,chainId,sendMode,guest,walletBridge,lateInjection});
+  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection});
 }
 
 async function phase(page,expected){
@@ -697,14 +714,20 @@ async function runProfile(browser,width,height){
   });
   await runWalletBridgeScenarios(browser,profile);
   await runScenario(browser,profile,'wrong-chain',{chainId:1},async(page,row)=>{
-    await connect(page);await phase(page,'BLOCKED');
+    await phase(page,'BLOCKED');
+    await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await autoSettled(page);await phase(page,'BLOCKED');
     assert.match(await page.locator('#appStatus').textContent(),/BSC|56/);
+    assert.match(await page.locator('#walletChain').textContent(),/1/);
+    assert.match(await page.locator('#chainState').textContent(),/先切換.*BSC|先切.*56/,'wrong wallet network is distinguished from an undeployed furnace');
     assert.equal(await page.locator('#prepareDeploy').isEnabled(),false);
     assert.equal(await page.locator('#prepareAlchemy').isEnabled(),false);
+    await touchTarget(page,'#switchWalletChain');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0,'passive wrong-chain reads never open account permission');
     assert.equal(row.sendRequests.length,0);
-    assert.equal(row.rpc.some(item=>item.method==='wallet_switchEthereumChain'||item.method==='wallet_addEthereumChain'),false,'UI never silently changes wallet network');
+    assert.equal(row.rpc.some(item=>item.method==='wallet_switchEthereumChain'||item.method==='wallet_addEthereumChain'),false,'passive verification never silently changes wallet network');
     await capture(page,row,'blocked');
   });
+  await runBscConnectionScenarios(browser,profile);
   await runScenario(browser,profile,'non-owner',{account:OTHER},async(page,row)=>{
     await connect(page);await phase(page,'CONNECTED');
     assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OTHER.toLowerCase());
@@ -780,6 +803,20 @@ async function runProfile(browser,width,height){
     assert.equal(row.sendRequests.length,1,'reconnected pending recovery never resubmits');
     assert.equal(await page.locator('#deploySteps .step-status').filter({hasText:/鏈上已核/}).count(),0,'no receipt means no verified deployment');
     await capture(page,row,'restored');
+    const beforeChainPending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),beforeChainJournal=await journalBytes(page);
+    const beforeChainSwitches=row.rpc.filter(item=>item.method==='wallet_switchEthereumChain').length;
+    await page.evaluate(()=>window.__18911WalletQA.changeChain(1));
+    await page.locator('#refreshStatus').click();await autoSettled(page);await phase(page,'BLOCKED');
+    assert.equal(row.rpc.filter(item=>item.method==='wallet_switchEthereumChain').length,beforeChainSwitches,'pending receipt verification does not silently switch a wallet');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),beforeChainPending);
+    await touchTarget(page,'#switchWalletChain');await capture(page,row,'wrong-chain-retains-original-pending');
+    await page.locator('#switchWalletChain').click();await phase(page,'PENDING');
+    assert.equal(row.rpc.filter(item=>item.method==='wallet_switchEthereumChain').length,beforeChainSwitches+1);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),beforeChainPending,'switching back to BSC preserves the exact original transaction');
+    assert.deepEqual(await journalBytes(page),beforeChainJournal);
+    assert.equal(row.sendRequests.length,1,'explicit network correction cannot resubmit the original financial intent');
+    row.networkWhilePending={scope:'SYNTHETIC_EXISTING_PENDING_NETWORK_CORRECTION',passiveSwitches:0,explicitSwitches:1,originalPendingAndJournalPreserved:true,additionalTransactions:0};
+    await page.locator('#pendingPanel').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));await capture(page,row,'bsc-correction-keeps-original-pending');
     const bridgePendingRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
     await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
     assert.ok(await page.locator('#walletBridgePanel').isVisible());
@@ -863,6 +900,126 @@ async function manuallyRecover(page,hash){
   assert.ok(await page.locator('#acceptRecoveryHash').isChecked());
   await touchTarget(page,'#recoverPendingHash');assert.ok(await page.locator('#recoverPendingHash').isEnabled());
   await page.locator('#recoverPendingHash').click();await autoSettled(page);
+}
+
+async function runBscConnectionScenarios(browser,profile){
+  const switches=row=>row.rpc.filter(item=>item.method==='wallet_switchEthereumChain');
+  const authorizations=row=>row.rpc.filter(item=>item.method==='eth_requestAccounts');
+  const unchangedFinancial=async(page,row,pending,journal)=>{
+    assert.equal(row.sendRequests.length,0,'network authorization never sends a financial transaction');
+    assert.equal(row.rpc.filter(item=>item.method==='wallet_addEthereumChain').length,0,'unknown BSC configuration is not silently installed');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending);
+    assert.deepEqual(await journalBytes(page),journal,'network authorization never rewrites the financial journal');
+  };
+  const connectedOnBsc=async(page,row)=>{
+    assert.equal(switches(row).length,1);assert.equal(switches(row)[0].requestedChain,'0x38');
+    assert.equal(authorizations(row).length,1,'one explicit connect obtains account permission only after verified BSC readback');
+    const switchIndex=row.rpc.findIndex(item=>item.method==='wallet_switchEthereumChain');
+    const accountIndex=row.rpc.findIndex(item=>item.method==='eth_requestAccounts');
+    assert.ok(switchIndex<accountIndex);
+    assert.ok(row.rpc.slice(switchIndex+1,accountIndex).some(item=>item.method==='eth_chainId'&&item.lane==='wallet'),'BSC is re-read after the wallet switch and before account permission');
+    assert.equal(await page.evaluate(()=>window.__18911WalletQA.walletState().chainId),56);
+    assert.match(await page.locator('#walletChain').textContent(),/56/);
+    assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+    assert.equal(await page.locator('#reviewPanel').isVisible(),false);
+    row.networkSwitch={scope:'SYNTHETIC_EXPLICIT_BSC_SWITCH_NO_REAL_WALLET',chain:'0x38',switchRequests:1,accountRequests:1,synchronousChainChanged:true,financialRequests:0};
+  };
+  await runScenario(browser,profile,'bsc-explicit-connect',{chainId:1},async(page,row)=>{
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page);
+    assert.equal(switches(row).length,0);assert.equal(authorizations(row).length,0);
+    await touchTarget(page,'#switchWalletChain');await capture(page,row,'wrong-network-explicit-switch-control');
+    await page.locator('#switchWalletChain').click();await phase(page,'CONNECTED');
+    await connectedOnBsc(page,row);await unchangedFinancial(page,row,pending,journal);
+    assert.equal(await page.locator('#switchWalletChain').isVisible(),false,'BSC-only correction control disappears after independently read network56');
+    await page.locator('#walletChain').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));await capture(page,row,'bsc56-connected-no-transaction');
+  });
+  for(const [mode,expected]of [
+    ['reject',/取消切換網路/],['unknown-chain',/尚未加入.*BNB|加入.*BSC/],
+    ['unsupported',/不支援.*切網|手動選擇.*BSC/],['wrong-chain',/尚未切換.*BSC/],
+  ])await runScenario(browser,profile,'bsc-switch-'+mode,{chainId:1,switchMode:mode},async(page,row)=>{
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page);
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();await phase(page,'BLOCKED');
+    assert.equal(switches(row).length,1);assert.equal(switches(row)[0].requestedChain,'0x38');
+    assert.equal(authorizations(row).length,0,'rejected, unsupported or unverified network switching cannot advance to account permission');
+    assert.equal(await page.evaluate(()=>window.__18911WalletQA.walletState().chainId),1);
+    assert.match(await page.locator('#appStatus').textContent(),expected);
+    assert.equal(await page.locator('#prepareDeploy').isEnabled(),false);assert.equal(await page.locator('#prepareAlchemy').isEnabled(),false);
+    assert.equal(await page.locator('#reviewPanel').isVisible(),false);
+    await unchangedFinancial(page,row,pending,journal);await touchTarget(page,'#switchWalletChain');
+    row.networkSwitch={scope:'SYNTHETIC_REJECTED_OR_UNVERIFIED_NETWORK_SWITCH',mode,switchRequests:1,accountRequests:0,financialRequests:0};
+    await capture(page,row,'blocked-clear-network-reason');
+  });
+  await runScenario(browser,profile,'bsc-native-return',{nativeReturn:true,chainId:1},async(page,row)=>{
+    await connectedOnBsc(page,row);
+    assert.equal(new URL(page.url()).searchParams.has('walletBridge'),false,'the single native landing intent is consumed after the explicit return flow');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);assert.equal(row.sendRequests.length,0);
+    await page.locator('#walletChain').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));await capture(page,row,'native-bsc56-one-connect');
+  });
+  await runScenario(browser,profile,'bsc-mobile-bridge-connect',{guest:true,walletBridge:true,chainId:1},async(page,row)=>{
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page);
+    await page.locator('#connectWallet').click();await touchTarget(page,'#connectMobileWallet');await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await connectedOnBsc(page,row);await unchangedFinancial(page,row,pending,journal);
+    assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),1,'the original WalletConnect action is not re-paired during the switch');
+    await page.locator('#walletChain').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));await capture(page,row,'mobile-bridge-bsc56-no-transaction');
+  });
+  await runScenario(browser,profile,'bsc-switch-timeout-late',{chainId:1,clock:true},async(page,row)=>{
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page),gate='bsc-network-timeout';
+    await page.evaluate(id=>window.__18911WalletQA.gateWalletChain(id),gate);
+    await page.locator('#connectWallet').click();await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,gate);
+    assert.equal(switches(row).length,1);assert.equal(authorizations(row).length,0);
+    await page.clock.fastForward(60_100);await phase(page,'BLOCKED');
+    assert.match(await page.locator('#appStatus').textContent(),/逾時/);
+    assert.equal(await page.locator('#connectWallet').isEnabled(),false,'unresolved wallet switch blocks another connect request');
+    assert.equal(await page.locator('#switchWalletChain').isEnabled(),false,'unresolved network request is never duplicated');
+    assert.equal(await page.locator('#refreshStatus').isEnabled(),true,'bounded switch timeout releases unrelated read-only controls');
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
+    await unchangedFinancial(page,row,pending,journal);await capture(page,row,'timeout-original-request-still-pending');
+    await page.evaluate(id=>window.__18911WalletQA.releaseRead(id,'resolve'),gate);await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.settled,gate);
+    await autoSettled(page);await page.clock.fastForward(31_000);await autoSettled(page);
+    assert.equal(switches(row).length,1);assert.equal(authorizations(row).length,0,'late successful chainChanged cannot resume an expired account-authorization intent');
+    assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+    assert.equal(await page.locator('#connectWallet').isEnabled(),true,'only a new explicit click may connect after the original switch settles');
+    await unchangedFinancial(page,row,pending,journal);
+    row.networkSwitch={scope:'SYNTHETIC_NETWORK_TIMEOUT_AND_LATE_SUCCESS',original60SecondDeadline:true,switchRequests:1,lateAccountRequests:0,financialRequests:0};
+    await capture(page,row,'late-bsc-result-no-auto-authorization');
+  });
+  await runScenario(browser,profile,'bsc-switch-context-change',{chainId:1},async(page,row)=>{
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page),gate='bsc-network-account-change';
+    await page.evaluate(id=>window.__18911WalletQA.gateWalletChain(id),gate);
+    await page.locator('#connectWallet').click();await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,gate);
+    await page.evaluate(other=>window.__18911WalletQA.changeAccount(other),OTHER);
+    await page.evaluate(id=>window.__18911WalletQA.releaseRead(id,'resolve'),gate);await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.settled,gate);await phase(page,'BLOCKED');
+    assert.match(await page.locator('#appStatus').textContent(),/頁面或錢包已變更/);
+    assert.equal(switches(row).length,1);assert.equal(authorizations(row).length,0,'a changed wallet account invalidates the in-flight switch continuation');
+    await unchangedFinancial(page,row,pending,journal);
+    row.networkSwitch={scope:'SYNTHETIC_NETWORK_CONTEXT_INVALIDATION',accountChangedBeforeSwitchResult:true,accountRequests:0,financialRequests:0};
+    await touchTarget(page,'#refreshStatus');await capture(page,row,'account-change-no-continuation');
+  });
+  await runScenario(browser,profile,'bsc-mobile-switch-timeout-reselect',{guest:true,walletBridge:true,chainId:1,clock:true},async(page,row)=>{
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page),gate='bsc-mobile-network-timeout';
+    await page.locator('#connectWallet').click();await page.evaluate(id=>window.__18911WalletQA.gateWalletChain(id),gate);
+    await page.locator('#connectMobileWallet').click();await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,gate);
+    const originalBridge=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
+    assert.equal(originalBridge.initializations.length,1);assert.equal(originalBridge.enableCalls,1);assert.equal(switches(row).length,1);
+    await page.clock.fastForward(60_100);await page.waitForFunction(()=>!document.body.classList.contains('loading'));
+    assert.match(await page.locator('#appStatus').textContent(),/逾時/);
+    assert.equal(await page.locator('#chooseWallet').isEnabled(),false,'an unresolved raw WalletConnect switch prevents selecting a new wrapper');
+    assert.equal(await page.locator('#connectMobileWallet').isEnabled(),false,'the same unresolved raw provider cannot be re-enabled');
+    // Disabled controls cannot be activated by a user. Also exercise the
+    // handler boundary so reselecting/re-wrapping cannot bypass its lock.
+    await page.locator('#chooseWallet').dispatchEvent('click');await page.locator('#connectMobileWallet').dispatchEvent('click');
+    await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,0)));
+    const blockedBridge=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
+    assert.equal(blockedBridge.initializations.length,originalBridge.initializations.length);assert.equal(blockedBridge.enableCalls,originalBridge.enableCalls);
+    assert.equal(switches(row).length,1);assert.equal(authorizations(row).length,0);
+    await unchangedFinancial(page,row,pending,journal);await capture(page,row,'raw-network-request-blocks-reselection');
+    await page.evaluate(id=>window.__18911WalletQA.releaseRead(id,'resolve'),gate);await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.settled,gate);
+    await autoSettled(page);await page.clock.fastForward(31_000);await autoSettled(page);
+    assert.equal(authorizations(row).length,0,'a late raw-provider chain result cannot revive a timed-out WalletConnect account request');
+    assert.equal(switches(row).length,1);await unchangedFinancial(page,row,pending,journal);
+    row.networkSwitch={scope:'SYNTHETIC_WALLETCONNECT_RAW_PROVIDER_REWRAP_LOCK',sameRawAcrossInit:true,initializations:1,enableCalls:1,switchRequests:1,lateAccountRequests:0,financialRequests:0};
+    await capture(page,row,'late-raw-result-no-automatic-connect');
+  });
 }
 
 async function runWalletBridgeScenarios(browser,profile){
@@ -1411,6 +1568,7 @@ try{
   for(const [width,height]of [[390,844],[1280,900]])await runProfile(browser,width,height);
   report.checks.push('Actual 18911 HTML, panel, client, shared wallet selector and ethers5. Original unmined scenarios stay pending; new explicit QA-mined creation receipts exercise the unchanged complete verifier. No real RPC, wallet, mined deployment or transaction.');
   report.checks.push('Guest, wrong chain, non-owner, owner preview/cancel, wallet rejection, durable pending/resume/reload, disconnect and account switch at both viewports.');
+  report.checks.push('Passive wrong-chain verification never switches or authorizes. Explicit injected, native-return and WalletConnect connections request only BSC0x38, tolerate a synchronous chainChanged event, re-read network56 before account permission, and never send funds. Rejected/unknown/unsupported/unverified switches stop with specific messages. Original sixty-second timeout, late result, changed account and same-raw WalletConnect reselect locks preserve pending/journal and cannot revive authorization or resubmit. All chain switching is synthetic; real wallet acceptance remains NOT_TESTED.');
   report.checks.push('Constructor preview shows actual Registry/KAIOS/version/timestamp/UTC+8/month IDs. Synthetic persisted pagehide/pageshow handler smoke only; actual BFCache and physical phone restoration remain NOT_TESTED.');
   report.checks.push('Keyboard skip link is reachable when focused and clipped when unfocused; each state includes an actual viewport shot and full-page shot, with bounding-rectangle evidence.');
   report.checks.push('Unresolved synthetic refresh survives persisted lifecycle reconstruction; old late resolve/reject cannot override a new in-flight operation or alter an existing financial pending intent.');

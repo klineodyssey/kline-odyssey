@@ -10,8 +10,11 @@ const $=id=>document.getElementById(id),lower=x=>String(x||'').toLowerCase(),sam
 let payload=null,client=null,provider=null,unsubscribe=null,view=null,uiBusy=false,lastError='',reviewDecodeFailed=false,uiEpoch=0,recoveryIntentId=null;
 let mobileProvider=null,mobileRaw=null,mobileMetadata=null,mobileTopic=null,sdkLoading=null,bridgePending=null,bridgeReadPending=null,bridgeAttempt=null;
 let publicProvider=null,nativeIntent=false,nativeAttempt=null,restorePending=null,restoreAttempt=null,nextNativeWallet='',bridgeMessage='';
+let mobileNetworkRaw=null;
 const BRIDGE_MS=60000;
 const SESSION_HINT='kaios18911.walletconnect.hint.v1';
+const networkRequests=new WeakMap();
+const networkProviderRoots=new WeakMap();
 
 export function walletBridgeLanding(href,{connect=true}={}){
  const url=new URL(href);
@@ -23,6 +26,33 @@ export function walletNativeLink(wallet,href,{connect=true}={}){
  if(wallet==='metamask')return 'https://link.metamask.io/dapp/'+landing.href.replace(/^https:\/\//,'');
  if(wallet==='trust')return 'https://link.trustwallet.com/open_url?coin_id=20000714&url='+encodeURIComponent(landing.href);
  throw new Error('未知的錢包入口。');
+}
+export function walletNetworkRequestPending(selected){return !!selected&&networkRequests.has(networkProviderRoots.get(selected)||selected);}
+function mobileNetworkPending(){return walletNetworkRequestPending(mobileNetworkRaw);}
+export async function ensureWalletBsc(selected,{isCurrent=()=>true,timeoutMs=BRIDGE_MS,onSettled=()=>{}}={}){
+ if(typeof selected?.request!=='function')throw Object.assign(new Error('請先選擇本人錢包。'),{code:'NO_INJECTED_WALLET'});
+ const key=networkProviderRoots.get(selected)||selected;
+ if(networkRequests.has(key))throw Object.assign(new Error('原切網請求尚未結束，請先在錢包確認或取消。'),{code:'WALLET_NETWORK_PENDING'});
+ let live=true,timer;const slot={};networkRequests.set(key,slot);
+ const check=()=>{if(!live||!isCurrent())throw Object.assign(new Error('頁面或錢包已變更，請本人重新連接。'),{code:'CONTEXT_CHANGED'});};
+ const request=async args=>{check();const result=await selected.request(args);check();return result;};
+ const chain=async()=>{const value=await request({method:'eth_chainId'});try{return BigInt(value);}catch{throw Object.assign(new Error('錢包網路回覆無法核對。'),{code:'INVALID_CHAIN_ID'});}};
+ const work=(async()=>{
+  if(await chain()===56n)return;
+  try{await request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]});}
+  catch(error){
+   check();
+   const code=Number(error?.code);
+   if(code===4001)throw Object.assign(new Error('已取消切換網路；請在錢包選擇 BSC 56 後再連接，沒有送出交易。'),{code});
+   if(code===4902)throw Object.assign(new Error('錢包尚未加入 BNB Smart Chain；請先在錢包加入 BSC 主網（56），再回來連接。'),{code});
+   if(code===4200||code===-32601)throw Object.assign(new Error('此錢包不支援網頁切網；請在錢包手動選擇 BSC 主網（56），再回來連接。'),{code});
+   throw error;
+  }
+  if(await chain()!==56n)throw Object.assign(new Error('錢包尚未切換至 BSC 主網（56），請確認錢包網路後重新連接。'),{code:'WRONG_CHAIN'});
+ })();
+ work.finally(()=>{if(networkRequests.get(key)===slot)networkRequests.delete(key);try{onSettled();}catch{}}).catch(()=>{});
+ try{return await Promise.race([work,new Promise((_,reject)=>{timer=setTimeout(()=>{live=false;reject(Object.assign(new Error('切換網路等待逾時；原請求結束前不重複要求，請先查看錢包。'),{code:'WALLET_NETWORK_TIMEOUT'}));},timeoutMs);})]);}
+ finally{live=false;clearTimeout(timer);}
 }
 export function waitForWalletProvider(pick,{target=window,timeoutMs=4000,intervalMs=100,signal}={}){
  return new Promise((resolve,reject)=>{
@@ -115,16 +145,17 @@ async function loadWalletFactory(){
  const factory=walletFactory();if(!factory?.init)throw new Error('錢包橋接套件入口不可用。');return factory;
 }
 function guardedMobile(raw,metadata,topic){
- return {async request(args){
+ const guarded={async request(args){
   const sender=args.method==='eth_sendTransaction'?args.params?.[0]?.from:undefined;
   if(!walletConnectSessionPermits(raw,metadata,topic,sender))throw new Error('錢包連線已到期或未授權 BSC 帳戶，請重新連線。');
   const result=await raw.request(args);
   if(['eth_accounts','eth_requestAccounts'].includes(args.method)&&(!Array.isArray(result)||result.some(a=>!walletConnectSessionPermits(raw,metadata,topic,a))))throw new Error('錢包回傳的帳戶不在本次 BSC 授權內。');
   return result;
  },on:(...args)=>raw.on?.(...args),removeListener:(...args)=>raw.removeListener?.(...args)};
+ networkProviderRoots.set(guarded,raw);return guarded;
 }
 async function connectMobileWallet(){
- if(bridgePending||bridgeReadPending||bridgeAttempt||restorePending||nativeAttempt||uiBusy)return;
+ if(bridgePending||bridgeReadPending||bridgeAttempt||restorePending||nativeAttempt||uiBusy||walletNetworkRequestPending(provider)||mobileNetworkPending())return;
  resetVerification();resetConsent();invalidate('正在開啟錢包橋接，請選擇並確認連線。');
  const metadata=walletMetadata();
  let cancel,timeout;const stopped=new Promise((_,reject)=>{cancel=()=>reject(Object.assign(new Error('錢包連線已取消。'),{code:4001}));timeout=setTimeout(()=>reject(new Error('錢包連線等待逾時；原請求結束前不重複連線。')),BRIDGE_MS);});
@@ -155,7 +186,7 @@ async function connectMobileWallet(){
   if(bridgeAttempt!==attempt)return;
   mobileMetadata=metadata;mobileTopic=ready.topic;mobileProvider=guardedMobile(ready.raw,metadata,ready.topic);
   initializeClient(mobileProvider);attempt.client=client;attempt.adoptedProvider=mobileProvider;
-  const connection=run(current=>current.connect());bridgeReadPending=connection;
+  const connection=run(connectOnBsc);bridgeReadPending=connection;
   connection.finally(()=>{if(bridgeReadPending===connection){bridgeReadPending=null;render();scheduleVerification();}}).catch(()=>{});
   await Promise.race([connection,stopped]);
   if(bridgeAttempt===attempt&&client===attempt.client&&view?.account&&Number(view.chainId)===56){
@@ -207,7 +238,7 @@ async function connectNativeLanding(){
   nativeIntent=false;consumeNativeIntent();
   if(selected){
    initializeClient(selected);attempt.client=client;attempt.adoptedProvider=selected;
-   const connection=run(current=>current.connect());bridgeReadPending=connection;
+   const connection=run(connectOnBsc);bridgeReadPending=connection;
    connection.finally(()=>{if(bridgeReadPending===connection){bridgeReadPending=null;render();scheduleVerification();}}).catch(()=>{});
    await Promise.race([connection,stopped]);
    if(nativeAttempt===attempt&&client===attempt.client&&view?.account&&Number(view.chainId)===56)$('walletBridgePanel').hidden=true;
@@ -219,7 +250,7 @@ const VERIFY_INTERVAL_MS=30000;
 const UNKNOWN_HASH_STOP='原交易尚無 hash，請從本人錢包取回此次原請求的 hash，再於下方唯讀核對。';
 let verifyTimer=null,verifyFailures=0,verifyStopped='',lastVerifiedAt=null,pageAway=false;
 const errors={
- WRONG_CHAIN:'請在錢包切換至 BNB Smart Chain 主網（56）。',
+ WRONG_CHAIN:'錢包尚未切換至 BSC 主網（56），請在錢包確認後再連接。',
  NOT_CONNECTED:'請先連接本人錢包，再查核鏈上狀態。',
  OWNER_REQUIRED:'這是王母部署／啟用操作，普通玩家仍可使用已啟用的煉丹功能。',
  OWNER_CHANGED:'Registry Owner 已變更；請由合法持有人核定後再操作。',
@@ -232,7 +263,7 @@ const errors={
  WEB_LOCKS_REQUIRED:'瀏覽器不支援安全跨分頁鎖，無法送交易。請使用支援 Web Locks 的 HTTPS 錢包瀏覽器。',
  REVIEW_EXPIRED:'這份費用預覽已到期，請重新預覽。',
  REVIEW_INVALID:'原預覽已失效，請重新核對。',
- CONTEXT_CHANGED:'帳號、網路或頁面已變更，原預覽已失效。',
+ CONTEXT_CHANGED:'頁面或錢包已變更；請本人重新連接並重新預覽。',
  SUBMISSION_UNKNOWN:'錢包送出狀態未知。保留原紀錄，請先核對，不能重送。',
  PENDING_INTENT:'已有待確認交易，請先查核原交易回執。',
  PENDING_ACCOUNT_MISMATCH:'請使用原交易帳戶核對；原紀錄保留。',
@@ -409,15 +440,18 @@ function render(){
  const scheduled=s.chainActive&&s.chainConfig?.activationTime&&s.block?.timestamp&&BigInt(s.block.timestamp)<BigInt(s.chainConfig.activationTime);
  const owner=connected&&same(s.account,s.owner)&&same(s.owner,payload.expectedOwner);
  document.body.classList.toggle('loading',busy);
- text('appStatus',lastError||s.status||'先核對，再由本人錢包確認。');$('appStatus').dataset.state=s.phase||'IDLE';$('appStatus').classList.toggle('error',!!lastError||!!s.error);
+ text('appStatus',lastError||s.status||'先核對，再由本人錢包確認。');$('appStatus').dataset.state=lastError?'BLOCKED':s.phase||'IDLE';$('appStatus').classList.toggle('error',!!lastError||!!s.error);
   $('appStatus').dataset.errorCode=s.error?.code||'';
  text('walletAccount',s.account||'尚未連接');
  text('walletChain',s.chainId?Number(s.chainId)===56?'BNB Smart Chain · 56':'目前網路 '+s.chainId+'，需要 BSC 56':'需要 BNB Smart Chain · 56');
  text('ownerAddress',s.owner||'尚未查核');
- text('chainState',s.chainActive?(scheduled?'新版路由已核實，等待 '+dateTW(s.chainConfig.activationTime)+' 啟用':'新版五合約與原 Registry 路由已核實／已啟用'):Object.keys(s.deployments||{}).length?'已有核實部署，啟用狀態待查核':'新版尚未核實啟用，保留玩家說明');
- $('connectWallet').disabled=(busy&&provider!==publicProvider)||!!bridgePending||!!bridgeReadPending||!!nativeAttempt||!!restoreAttempt;$('refreshStatus').disabled=busy;
- $('chooseWallet').disabled=busy||!!bridgePending||!!bridgeReadPending;
- $('connectMobileWallet').disabled=busy||!!bridgePending||!!bridgeReadPending||!!restorePending;
+ const wrongChain=s.chainId!=null&&Number(s.chainId)!==56;
+ text('chainState',wrongChain?'目前網路無法查核；請先切換至 BSC 主網（56）。':s.chainActive?(scheduled?'新版路由已核實，等待 '+dateTW(s.chainConfig.activationTime)+' 啟用':'新版五合約與原 Registry 路由已核實／已啟用'):Object.keys(s.deployments||{}).length?'已有核實部署，啟用狀態待查核':'新版尚未核實啟用，保留玩家說明');
+ $('switchWalletChain').hidden=!wrongChain||provider===publicProvider;
+ $('switchWalletChain').disabled=busy||walletNetworkRequestPending(provider)||mobileNetworkPending()||!!bridgePending||!!bridgeReadPending;
+ $('connectWallet').disabled=(busy&&provider!==publicProvider)||walletNetworkRequestPending(provider)||mobileNetworkPending()||!!bridgePending||!!bridgeReadPending||!!nativeAttempt||!!restoreAttempt;$('refreshStatus').disabled=busy;
+ $('chooseWallet').disabled=busy||walletNetworkRequestPending(provider)||mobileNetworkPending()||!!bridgePending||!!bridgeReadPending;
+ $('connectMobileWallet').disabled=busy||walletNetworkRequestPending(provider)||mobileNetworkPending()||!!bridgePending||!!bridgeReadPending||!!restorePending;
  $('prepareDeploy').disabled=busy||pending||!owner||s.chainActive||Object.keys(deployments||{}).length===5;
  $('prepareAlchemy').disabled=busy||pending||!connected;
  $('activationTime').disabled=busy||pending||!!deployments.KUFO?.address;
@@ -454,12 +488,25 @@ async function applyActivation(current,activationTime){
  try{current.setConfig({activationTime});}
  catch(error){if(error?.code!=='CONFIG_LOCKED')throw error;await current.resetFailedDeploymentConfig({activationTime});}
 }
+async function connectOnBsc(current,isCurrent){
+ const selected=provider,native=nativeAttempt,bridge=bridgeAttempt,mobileRoot=networkProviderRoots.get(selected);let interrupted=false;
+ const stop=()=>{interrupted=true;};
+ const valid=()=>isCurrent()&&provider===selected&&!pageAway&&document.visibilityState==='visible'&&!interrupted&&nativeAttempt===native&&bridgeAttempt===bridge;
+ resetConsent();current.invalidate('正在核對錢包網路；需要時請在本人錢包確認切換至 BSC 56。');
+ selected.on?.('accountsChanged',stop);selected.on?.('disconnect',stop);
+ try{
+  if(mobileRoot)mobileNetworkRaw=mobileRoot;
+  await ensureWalletBsc(selected,{isCurrent:valid,onSettled:()=>{if(mobileNetworkRaw===mobileRoot&&!walletNetworkRequestPending(mobileRoot))mobileNetworkRaw=null;render();scheduleVerification();}});
+  if(!valid())throw Object.assign(new Error('頁面或錢包已變更，請本人重新連接。'),{code:'CONTEXT_CHANGED'});
+ }finally{selected.removeListener?.('accountsChanged',stop);selected.removeListener?.('disconnect',stop);}
+ return current.connect();
+}
 async function run(operation){
  if(uiBusy)return;
  clearVerificationTimer();
  const epoch=uiEpoch,current=client,isCurrent=()=>epoch===uiEpoch&&current===client;
  uiBusy=true;lastError='';render();
- try{await operation(current,isCurrent);}catch(error){if(isCurrent()){lastError=message(error);if(['RPC_PERMISSION_DENIED','RPC_QUOTA_LIMIT'].includes(error?.code))verifyStopped=lastError;}}
+ try{await operation(current,isCurrent);}catch(error){if(isCurrent()){lastError=message(error);if(['RPC_PERMISSION_DENIED','RPC_QUOTA_LIMIT','WALLET_NETWORK_TIMEOUT','WALLET_NETWORK_PENDING'].includes(error?.code))verifyStopped=lastError;}}
  finally{if(isCurrent()){uiBusy=false;view=current?.snapshot()||view;render();scheduleVerification(view?.pending?.hash?0:VERIFY_INTERVAL_MS);}}
 }
 async function verifyPayload(){
@@ -485,8 +532,10 @@ async function boot(){
  const incoming=new URL(window.location.href);nativeIntent=incoming.searchParams.get('walletBridge')==='1';
  publicProvider=makeReadonlyProvider();
  initializeClient(chooseProvider()||publicProvider);
- $('connectWallet').addEventListener('click',()=>{if((uiBusy&&provider!==publicProvider)||bridgePending||bridgeAttempt||nativeAttempt||restoreAttempt)return;resetVerification();try{const selected=chooseProvider();if(uiBusy&&provider===publicProvider)initializeClient(selected||publicProvider);if(!selected){nextNativeWallet='';showWalletBridge();return;}if(selected!==provider)initializeClient(selected);run(current=>current.connect());}catch(error){lastError=message(error);render();}});
- $('chooseWallet').addEventListener('click',()=>{if(!uiBusy&&!bridgeAttempt&&!nativeAttempt&&!restoreAttempt){nextNativeWallet='';showWalletBridge();}});
+ const connectSelected=()=>{if((uiBusy&&provider!==publicProvider)||walletNetworkRequestPending(provider)||mobileNetworkPending()||bridgePending||bridgeAttempt||nativeAttempt||restoreAttempt)return;resetVerification();try{const selected=chooseProvider();if(uiBusy&&provider===publicProvider)initializeClient(selected||publicProvider);if(!selected){nextNativeWallet='';showWalletBridge();return;}if(selected!==provider)initializeClient(selected);run(connectOnBsc);}catch(error){lastError=message(error);render();}};
+ $('connectWallet').addEventListener('click',connectSelected);
+ $('switchWalletChain').addEventListener('click',connectSelected);
+ $('chooseWallet').addEventListener('click',()=>{if(!uiBusy&&!walletNetworkRequestPending(provider)&&!mobileNetworkPending()&&!bridgeAttempt&&!nativeAttempt&&!restoreAttempt){nextNativeWallet='';showWalletBridge();}});
  $('connectMobileWallet').addEventListener('click',connectMobileWallet);
  $('cancelWalletBridge').addEventListener('click',cancelWalletBridge);
  $('refreshStatus').addEventListener('click',()=>{if(uiBusy)return;resetVerification();run(async current=>{resetConsent();current.invalidate('正在重新查核鏈上狀態。');await current.verify();lastVerifiedAt=Date.now();});});
