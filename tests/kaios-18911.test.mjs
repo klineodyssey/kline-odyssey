@@ -539,7 +539,7 @@ test('18911 automatic verification cannot archive or clear a pending receipt aft
   }
 });
 
-test('18911 only automatic reads have RPC and whole-pass deadlines; late reads cannot clear pending or time out wallet consent',async t=>{
+test('18911 read deadlines preserve pending and never time out a wallet confirmation',async t=>{
   t.mock.timers.enable({apis:['setTimeout']});let clock=1000;t.mock.method(Date,'now',()=>clock);
   const h=harness();await connect(h);const hash=await submit(h,{kind:'deploy',contract:'KUFO'});h.mine(hash);
   const original=h.storage.data.get('kaios18911.pending.v1'),gate=deferred();let waiting=false;
@@ -551,7 +551,52 @@ test('18911 only automatic reads have RPC and whole-pass deadlines; late reads c
   await assert.rejects(total.client.verify(),error=>error.code==='TIMEOUT');assert.equal(total.client.snapshot().active,false);assert.ok(total.requests.length<=5,'the pass budget expires before a long series of sub-timeout reads');assert.equal(total.sends.length,0);total.client.dispose();
   const wallet=harness();await connect(wallet);const review=await reviewed(wallet,{kind:'deploy',contract:'KUFO'}),consent=deferred();let walletWaiting=false;
   wallet.sendOverride=()=>{walletWaiting=true;return consent.promise;};const confirmation=wallet.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'});while(!walletWaiting)await tick();
-  t.mock.timers.tick(60001);assert.equal(wallet.client.snapshot().active,true);assert.ok(wallet.client.snapshot().pending);consent.resolve(ethers.utils.id('synthetic-wallet-confirmation-after-read-deadline'));await confirmation;assert.equal(wallet.client.snapshot().pending.phase,'SUBMITTED');assert.equal(wallet.sends.length,1);wallet.client.dispose();
+  const walletPending=wallet.storage.getItem('kaios18911.pending.v1');clock+=60001;t.mock.timers.tick(60001);
+  assert.equal(wallet.client.snapshot().active,true);assert.ok(wallet.client.snapshot().pending);assert.equal(wallet.storage.getItem('kaios18911.pending.v1'),walletPending);assert.equal(wallet.lockManager.held.size,1);
+  await assert.rejects(wallet.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'}),error=>error.code==='BUSY');assert.equal(wallet.sends.length,1);
+  consent.resolve(ethers.utils.id('synthetic-wallet-confirmation-after-read-deadline'));await confirmation;assert.equal(wallet.client.snapshot().pending.phase,'SUBMITTED');assert.equal(wallet.sends.length,1);assert.equal(wallet.lockManager.held.size,0);wallet.client.dispose();
+});
+
+test('18911 confirmation bounds pre-wallet identity, route and fee reads without sending after a late response',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});t.mock.method(Date,'now',()=>1000);
+  for(const stage of ['base','candidate','quote']){
+    const h=harness({account:PLAYER});activateFixture(h);h.allowances.set(normalize(PLAYER)+'/'+normalize(h.addresses.KAIOSAlchemyFurnace),BigInt(wei('100')));await connect(h);
+    const review=await reviewed(h,{kind:'burn',amount:'100',lifeId:ethers.utils.id('synthetic-confirm-read-timeout')}),before=[...h.storage.data],gate=deferred();let waiting=false;
+    h.requestHook=({method,params})=>{
+      const target=stage==='base'?method==='eth_chainId':stage==='candidate'?method==='eth_getCode'&&normalize(params[0])===normalize(h.addresses.KAIOSAlchemyFurnace):method==='eth_estimateGas';
+      if(target&&!waiting){waiting=true;return gate.promise;}
+    };
+    const confirmation=h.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'}),rejection=assert.rejects(confirmation,error=>error.code==='TIMEOUT');
+    for(let n=0;n<100&&!waiting;n++)await tick();assert.ok(waiting,'the real client must reach the deferred '+stage+' read');
+    assert.equal(h.client.snapshot().active,true);assert.equal(h.client.snapshot().pending,null);assert.equal(h.lockManager.held.size,1);assert.equal(h.sends.length,0);
+    t.mock.timers.tick(15000);await rejection;
+    const stopped=h.client.snapshot();assert.equal(stopped.active,false);assert.equal(stopped.phase,'BLOCKED');assert.equal(stopped.error.code,'TIMEOUT');assert.equal(stopped.review.reviewId,review.reviewId);assert.equal(stopped.pending,null);assert.equal(h.lockManager.held.size,0);assert.deepEqual([...h.storage.data],before);
+    const count=h.requests.length;gate.resolve();await tick();assert.deepEqual(h.client.snapshot(),stopped);assert.equal(h.requests.length,count);assert.equal(h.sends.length,0);h.client.dispose();
+  }
+});
+
+test('18911 final pre-wallet guard shares the read budget and clears only its unsubmitted intent on timeout',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});let clock=1000;t.mock.method(Date,'now',()=>clock);
+  for(const deadline of ['rpc','whole-pass']){
+    clock=1000;const h=harness();await connect(h);const review=await reviewed(h,{kind:'deploy',contract:'KUFO'}),before=[...h.storage.data],gate=deferred();let waiting=false;
+    h.requestHook=({method})=>{
+      if(deadline==='whole-pass'&&method==='eth_estimateGas')clock+=59000;
+      if(method==='eth_chainId'&&h.storage.data.has('kaios18911.pending.v1')){waiting=true;return gate.promise;}
+    };
+    let rejected=false;const confirmation=h.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'}),rejection=assert.rejects(confirmation,error=>error.code==='TIMEOUT').then(()=>{rejected=true;});
+    for(let n=0;n<100&&!waiting;n++)await tick();assert.ok(waiting,'the deferred read must be the final guard after pending persistence');
+    const pending=JSON.parse(h.storage.getItem('kaios18911.pending.v1'));assert.equal(pending.phase,'AWAITING_WALLET');assert.equal(pending.hash,null);assert.equal(h.client.snapshot().active,true);assert.equal(h.sends.length,0);
+    t.mock.timers.tick(deadline==='whole-pass'?1000:15000);await tick();assert.equal(rejected,true,'finalGuard must retain the same whole-pass deadline');await rejection;
+    const stopped=h.client.snapshot();assert.equal(stopped.active,false);assert.equal(stopped.error.code,'TIMEOUT');assert.equal(stopped.pending,null);assert.equal(stopped.review,null);assert.equal(h.lockManager.held.size,0);assert.deepEqual([...h.storage.data],before);
+    const count=h.requests.length;gate.resolve();await tick();assert.deepEqual(h.client.snapshot(),stopped);assert.equal(h.requests.length,count);assert.equal(h.sends.length,0);h.client.dispose();
+  }
+});
+
+test('18911 an account change in the read-scope exit microtask cannot reach the wallet send',async()=>{
+  const h=harness();await connect(h);const review=await reviewed(h,{kind:'deploy',contract:'KUFO'}),before=[...h.storage.data],get=h.storage.getItem;let changed=false;
+  h.storage.getItem=function(key){const value=get.call(this,key);if(key==='kaios18911.pending.v1'&&!changed&&h.client.snapshot().phase==='WAITING_WALLET'){changed=true;queueMicrotask(()=>{h.account=OTHER;h.provider.emit('accountsChanged',[OTHER]);});}return value;};
+  await assert.rejects(h.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'}),error=>error.code==='CONTEXT_CHANGED');
+  assert.equal(changed,true);assert.equal(h.sends.length,0);assert.equal(h.client.snapshot().active,false);assert.equal(h.client.snapshot().pending,null);assert.equal(h.lockManager.held.size,0);assert.deepEqual([...h.storage.data],before);h.client.dispose();
 });
 
 async function lostHash(h=harness(),request={kind:'deploy',contract:'KUFO'},{mine=true,reload=true}={}) {

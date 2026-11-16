@@ -56,7 +56,7 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
     current(g);let result;
     if(verifyReads?.generation===g){
       const remaining=verifyReads.deadline-Date.now();assert(remaining>0,'TIMEOUT','自動唯讀查核逾時；原交易紀錄保留。');let timer;
-      try{result=await Promise.race([provider.request({method,params}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(failure('TIMEOUT','自動唯讀查核逾時；原交易紀錄保留。')),Math.min(VERIFY_RPC_MS,remaining));})]);}
+      try{result=await Promise.race([provider.request({method,params}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(failure('TIMEOUT','唯讀核對逾時；原交易紀錄保留。')),Math.min(VERIFY_RPC_MS,remaining));})]);}
       finally{clearTimeout(timer);}
     }else result=await provider.request({method,params});
     current(g);return result;
@@ -352,17 +352,24 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
     async prepare(request){return action(async g=>{review=null;const state=await base(g);const p=restorePendingView();assert(!p,'PENDING_INTENT','先核對原待確認交易，不重送。');const d=['approve','burn'].includes(request?.kind)?{}:await deployments(g),item=await candidate(copy(request),state,d,g),fees=await quote(item,g);current(g);review={...item,...fees,request:copy(request),reviewId:uniqueId(),generation:g,preparedAt:timestamp(),owner:state.owner,payloadHash};view.phase='REVIEW';view.status='請核對本筆內容與最高 BNB 費用，再由本人錢包確認。';return publish();});},
     async confirm(reviewId,{accepted,maxCostBNB}={}){return action(async g=>withLock(async()=>{
       assert(accepted===true,'EXPLICIT_CONSENT_REQUIRED');const original=review;assert(original&&original.reviewId===reviewId&&original.generation===g,'REVIEW_INVALID');assert(timestamp()-original.preparedAt>=0&&timestamp()-original.preparedAt<=REVIEW_MS,'REVIEW_EXPIRED');const limit=decimal(maxCostBNB,'MAX_COST');assert(limit>0n,'MAX_COST_REQUIRED','請明確填入本人可接受的最高 BNB 費用。');
-      assert(!restorePendingView(),'PENDING_INTENT');const state=await base(g);const d=['approve','burn'].includes(original.kind)?{}:await deployments(g),fresh=await candidate(original.request,state,d,g);
-      assert(sameRecord(fresh,{kind:original.kind,config:original.config,account:original.account,...Object.fromEntries(['contract','organ','organKey','candidate','minimumDelay','amountWei','spender','deploymentAddresses','lifeId'].filter(k=>original[k]!==undefined).map(k=>[k,original[k]])),tx:original.tx}),'FRESH_STATE_CHANGED','送交前狀態已變更，請重新預覽。');
-      const fee=await quote(fresh,g);assert(BigInt(fee.maxCostWei)<=limit,'COST_LIMIT_EXCEEDED','估算費用超過本人輸入上限；未送交易。');assert(BigInt(fee.nativeBalanceWei)>=BigInt(fee.maxCostWei),'BNB_BALANCE_INSUFFICIENT');
-      const item={...fresh,schemaVersion:1,intentId:uniqueId(),payloadHash,chainId:56,owner:state.owner,hash:null,phase:'AWAITING_WALLET',createdAt:timestamp(),submissionAnchor:{number:state.block.number,hash:state.block.hash,timestamp:integer(state.block.timestamp).toString()},fee,maxCostWei:limit.toString()};let requested=false;
-      localPending=item;view.pending=item;writeStorage(KUFO_PENDING_KEY,item);review=null;view.phase='WAITING_WALLET';view.status='等待本人錢包確認此一筆交易；請勿重複送出。';publish();
+      let item,fee,requested=false;
       try{
-        await finalGuard(item,g);assert(timestamp()-original.preparedAt<=REVIEW_MS,'REVIEW_EXPIRED');current(g);const saved=parseStored(readStorage(KUFO_PENDING_KEY),'PENDING_CORRUPT');assert(saved?.intentId===item.intentId&&sameRecord(saved,item),'PENDING_CHANGED');
+        // The existing read budget ends before asking the wallet to send anything.
+        await boundedRead(g,async()=>{
+          assert(!restorePendingView(),'PENDING_INTENT');const state=await base(g);const d=['approve','burn'].includes(original.kind)?{}:await deployments(g),fresh=await candidate(original.request,state,d,g);
+          assert(sameRecord(fresh,{kind:original.kind,config:original.config,account:original.account,...Object.fromEntries(['contract','organ','organKey','candidate','minimumDelay','amountWei','spender','deploymentAddresses','lifeId'].filter(k=>original[k]!==undefined).map(k=>[k,original[k]])),tx:original.tx}),'FRESH_STATE_CHANGED','送交前狀態已變更，請重新預覽。');
+          fee=await quote(fresh,g);assert(BigInt(fee.maxCostWei)<=limit,'COST_LIMIT_EXCEEDED','估算費用超過本人輸入上限；未送交易。');assert(BigInt(fee.nativeBalanceWei)>=BigInt(fee.maxCostWei),'BNB_BALANCE_INSUFFICIENT');
+          item={...fresh,schemaVersion:1,intentId:uniqueId(),payloadHash,chainId:56,owner:state.owner,hash:null,phase:'AWAITING_WALLET',createdAt:timestamp(),submissionAnchor:{number:state.block.number,hash:state.block.hash,timestamp:integer(state.block.timestamp).toString()},fee,maxCostWei:limit.toString()};
+          localPending=item;view.pending=item;writeStorage(KUFO_PENDING_KEY,item);review=null;view.phase='WAITING_WALLET';view.status='等待本人錢包確認此一筆交易；請勿重複送出。';publish();
+          await finalGuard(item,g);assert(timestamp()-original.preparedAt<=REVIEW_MS,'REVIEW_EXPIRED');current(g);const saved=parseStored(readStorage(KUFO_PENDING_KEY),'PENDING_CORRUPT');assert(saved?.intentId===item.intentId&&sameRecord(saved,item),'PENDING_CHANGED');
+        });
+        // Leaving the read scope yields once; recheck synchronously before the wallet request.
+        current(g);const saved=parseStored(readStorage(KUFO_PENDING_KEY),'PENDING_CORRUPT');assert(saved?.intentId===item.intentId&&sameRecord(saved,item),'PENDING_CHANGED');assert(timestamp()-original.preparedAt<=REVIEW_MS,'REVIEW_EXPIRED');current(g);
         requested=true;const returned=await provider.request({method:'eth_sendTransaction',params:[{...item.tx,gas:quantity(fee.gasLimit),gasPrice:quantity(fee.gasPriceWei)}]});
         assert(HASH.test(returned),'SUBMISSION_UNKNOWN');localPending={...item,hash:returned,phase:'SUBMITTED'};
         changePending(item,{hash:returned,phase:'SUBMITTED'});view.phase='SUBMITTED';view.status='已取得原交易雜湊；尚未確認，請只讀核對回執。';return publish();
       }catch(error){
+        if(!item)throw error;
         if(requested&&HASH.test(error.transactionHash)&&!localPending?.hash){localPending={...item,hash:error.transactionHash,phase:'SUBMITTED'};try{changePending(item,{hash:error.transactionHash,phase:'SUBMITTED'});}catch{}}
         if(requested&&Number(error.code)===4001&&!localPending?.hash){clearPending(item);view.phase='REJECTED';view.status='本人已拒絕，沒有取得送出雜湊；可重新預覽下一次手動操作。';return publish();}
         if(!requested){try{clearPending(item);}catch{}}
