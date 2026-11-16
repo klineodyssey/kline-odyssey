@@ -68,6 +68,18 @@ async function touchTarget(page,selector){
   return rect;
 }
 
+async function originalConnectionInView(page,row,label){
+  // The product must restore this status to the viewport after hiding the chooser.
+  // Do not scroll here: that would conceal a failed return-to-status transition.
+  await page.waitForFunction(()=>{
+    const el=document.querySelector('#originalPageConnection'),r=el?.getBoundingClientRect();
+    return r&&r.width>0&&r.height>0&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight&&/此頁已透過 WalletConnect 連線/.test(el.textContent);
+  });
+  const rect=await geometry(page,'#originalPageConnection');
+  assert.ok(rect.visible&&rect.inView&&rect.hit,'the product brings the original-page WalletConnect status fully into the viewport');
+  (row.originalPageConnectionViewport??=[]).push({label,...rect});
+}
+
 async function noOverflow(page){
   const dimensions=await page.evaluate(()=>({viewport:innerWidth,html:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
   assert.ok(dimensions.html<=dimensions.viewport&&dimensions.body<=dimensions.viewport,'18911 has no horizontal overflow '+JSON.stringify(dimensions));
@@ -469,7 +481,7 @@ async function capture(page,row,label){
   if(row.width<600&&await page.locator('#walletBridgePanel').isVisible()){
     const chooser=await page.locator('#walletBridgePanel .button-group').evaluate(group=>{
       const parent=group.getBoundingClientRect();
-      return {width:parent.width,left:parent.left,right:parent.right,controls:['openMetaMask','openTrustWallet','connectMobileWallet','cancelWalletBridge'].map(id=>{
+      return {width:parent.width,left:parent.left,right:parent.right,controls:['connectMobileWallet','openMetaMask','openTrustWallet','cancelWalletBridge'].map(id=>{
         const el=document.getElementById(id),r=el.getBoundingClientRect();
         return {id,text:el.textContent.trim(),left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};
       })};
@@ -696,7 +708,7 @@ async function runProfile(browser,width,height){
     row.urlCopy={scope:'SYNTHETIC_CLIPBOARD_API_NO_OS_CLIPBOARD',...(await page.evaluate(()=>window.__18911ClipboardQA)),denialSelectsFullReadonlyUrl:true,lateRejectionCannotReplaceNewerSuccessOrFocus:true};
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts'||item.method==='eth_sendTransaction').length,0,'copying a URL never authorizes or submits');
     await capture(page,row,'complete-url-copy-fallback');
-    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
+    await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
     assert.ok(await page.locator('#walletBridgePanel').isVisible(),'ordinary mobile browser gets a usable wallet chooser');
     const links=await page.locator('#walletBridgePanel').evaluate(panel=>({
       metamask:panel.querySelector('#openMetaMask').href,trust:panel.querySelector('#openTrustWallet').href,
@@ -957,7 +969,7 @@ async function runBscConnectionScenarios(browser,profile){
   });
   await runScenario(browser,profile,'bsc-mobile-bridge-connect',{guest:true,walletBridge:true,chainId:1},async(page,row)=>{
     const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page);
-    await page.locator('#connectWallet').click();await touchTarget(page,'#connectMobileWallet');await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
     await connectedOnBsc(page,row);await unchangedFinancial(page,row,pending,journal);
     assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),1,'the original WalletConnect action is not re-paired during the switch');
     await page.locator('#walletChain').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));await capture(page,row,'mobile-bridge-bsc56-no-transaction');
@@ -997,8 +1009,8 @@ async function runBscConnectionScenarios(browser,profile){
   });
   await runScenario(browser,profile,'bsc-mobile-switch-timeout-reselect',{guest:true,walletBridge:true,chainId:1,clock:true},async(page,row)=>{
     const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page),gate='bsc-mobile-network-timeout';
-    await page.locator('#connectWallet').click();await page.evaluate(id=>window.__18911WalletQA.gateWalletChain(id),gate);
-    await page.locator('#connectMobileWallet').click();await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,gate);
+    await page.evaluate(id=>window.__18911WalletQA.gateWalletChain(id),gate);
+    await page.locator('#connectWallet').click();await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,gate);
     const originalBridge=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
     assert.equal(originalBridge.initializations.length,1);assert.equal(originalBridge.enableCalls,1);assert.equal(switches(row).length,1);
     await page.clock.fastForward(60_100);await page.waitForFunction(()=>!document.body.classList.contains('loading'));
@@ -1025,10 +1037,10 @@ async function runBscConnectionScenarios(browser,profile){
 async function runWalletBridgeScenarios(browser,profile){
   await runScenario(browser,profile,'bridge-connected',{guest:true,walletBridge:true},async(page,row)=>{
     assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),0,'opening the page does not pair a wallet');
-    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
-    assert.ok(await page.locator('#walletBridgePanel').isVisible());
-    await touchTarget(page,'#connectMobileWallet');await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
     assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+    assert.match(await page.locator('#originalPageConnection').textContent(),/此頁已透過 WalletConnect 連線/);
+    assert.ok(await page.locator('#originalPageConnection').isVisible());
     assert.equal(await page.locator('#walletBridgePanel').isVisible(),false);
     const bridge=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
     assert.equal(bridge.initializations.length,1);assert.equal(bridge.enableCalls,1);
@@ -1039,20 +1051,19 @@ async function runWalletBridgeScenarios(browser,profile){
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,1,'only the explicitly selected bridge connects the real client');
     assert.equal(row.sendRequests.length,0);assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
     row.walletBridge={scope:'SYNTHETIC_WALLETCONNECT_BOUNDARY_NO_SDK_RELAY',...bridge};
-    await page.locator('#walletAccount').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+    await originalConnectionInView(page,row,'connected-no-transaction');
     await capture(page,row,'connected-no-transaction');
   });
   await runScenario(browser,profile,'bridge-rejected-cancel-late',{guest:true,walletBridge:true},async(page,row)=>{
-    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
     await page.evaluate(()=>window.__18911BridgeQA.setMode('reject'));
-    await touchTarget(page,'#connectMobileWallet');await page.locator('#connectMobileWallet').click();
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
     await page.waitForFunction(()=>document.querySelector('#appStatus')?.textContent.includes('取消')&&!document.querySelector('#connectMobileWallet')?.disabled);
     assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);
     assert.equal(row.sendRequests.length,0);await capture(page,row,'pairing-rejected');
 
     await page.evaluate(()=>window.__18911BridgeQA.setMode('deferred'));
-    await touchTarget(page,'#connectMobileWallet');await page.locator('#connectMobileWallet').click();
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
     await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().waiting);
     await touchTarget(page,'#cancelWalletBridge');await page.locator('#cancelWalletBridge').click();
     assert.match(await page.locator('#appStatus').textContent(),/取消/);
@@ -1073,7 +1084,7 @@ async function runWalletBridgeScenarios(browser,profile){
     const authGate='bridge-cancel-connect-authorization';
     await page.evaluate(()=>window.__18911BridgeQA.setMode('success'));
     await page.evaluate(id=>window.__18911WalletQA.gateWalletAuthorization(id),authGate);
-    await touchTarget(page,'#connectMobileWallet');await page.locator('#connectMobileWallet').click();
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
     await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,authGate);
     assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().waiting),false,'raw pairing is complete while the real client connect is still awaiting an account');
     await touchTarget(page,'#cancelWalletBridge');await page.locator('#cancelWalletBridge').click();
@@ -1088,11 +1099,42 @@ async function runWalletBridgeScenarios(browser,profile){
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);assert.equal(row.sendRequests.length,0);
     assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),WALLET_HINT_KEY),null,'late client authorization cannot recreate restoration authority');
     await capture(page,row,'late-connect-ignored');
-    await touchTarget(page,'#connectMobileWallet');await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
     assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
     assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),4,'a fresh explicit click can reconnect only after the original pairing settles');
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,2);assert.equal(row.sendRequests.length,0);
     row.walletBridge={scope:'SYNTHETIC_WALLETCONNECT_BOUNDARY_NO_SDK_RELAY',rejected:true,cancelledLateReplyIgnored:true,cancelledLateClientAuthorizationIgnored:true,explicitRetryConnected:true};
+  });
+  await runScenario(browser,profile,'bridge-primary-pairing-timeout-late',{guest:true,walletBridge:true,clock:true},async(page,row)=>{
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page);
+    await page.evaluate(()=>window.__18911BridgeQA.setMode('deferred'));
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
+    await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().waiting);
+    const started=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
+    assert.equal(started.initializations.length,1);assert.equal(started.enableCalls,1);
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);
+    await page.clock.fastForward(60_100);await page.waitForFunction(()=>!document.body.classList.contains('loading'));
+    assert.match(await page.locator('#appStatus').textContent(),/逾時/);
+    assert.equal(await page.locator('#connectWallet').isEnabled(),false,'the original primary pairing cannot be requested twice before it settles');
+    assert.equal(await page.locator('#connectMobileWallet').isEnabled(),false);
+    assert.equal(await page.locator('#refreshStatus').isEnabled(),true,'initial pairing timeout leaves read-only recovery available');
+    await page.locator('#connectWallet').dispatchEvent('click');
+    assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),1);
+    assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),WALLET_HINT_KEY),null);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending);assert.deepEqual(await journalBytes(page),journal);
+    assert.equal(row.sendRequests.length,0);await capture(page,row,'first-primary-pairing-timeout-original-request-retained');
+    await page.evaluate(()=>window.__18911BridgeQA.release());
+    await page.waitForFunction(()=>!window.__18911BridgeQA.snapshot().waiting&&!document.querySelector('#connectWallet').disabled);
+    await autoSettled(page);await page.clock.fastForward(31_000);await autoSettled(page);
+    assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),1);
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0,'a late approval does not authorize the original page after its primary attempt timed out');
+    assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+    assert.doesNotMatch(await page.locator('#originalPageConnection').textContent(),/此頁已透過 WalletConnect 連線/);
+    assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),WALLET_HINT_KEY),null);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending);assert.deepEqual(await journalBytes(page),journal);
+    assert.equal(row.sendRequests.length,0);
+    row.walletBridge={scope:'SYNTHETIC_PRIMARY_PAIRING_TIMEOUT_NO_REAL_RELAY',primaryClicksToPair:1,original60SecondDeadline:true,enableCalls:1,lateAccountAuthorizations:0,pendingAndJournalPreserved:true,financialRequests:0};
+    await capture(page,row,'late-pairing-not-original-page-authority');
   });
   await runScenario(browser,profile,'bridge-native-return',{nativeReturn:true},async(page,row)=>{
     await phase(page,'CONNECTED');
@@ -1106,7 +1148,7 @@ async function runWalletBridgeScenarios(browser,profile){
     await capture(page,row,'one-connect-no-transaction');
   });
   await runScenario(browser,profile,'bridge-real-sdk-loader',{guest:true,walletBridge:'sdk-loader',sdkLoader:true},async(page,row)=>{
-    await page.locator('#connectWallet').click();await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
     const bridge=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
     assert.equal(bridge.sdkGlobalValidated,true,'the real pinned UMD evaluated before its init boundary was replaced');
     assert.equal(bridge.sdkIntegrity,WALLET_SDK_SRI);assert.equal(row.sdkScriptReads?.length,1);
@@ -1147,21 +1189,43 @@ async function runWalletBridgeScenarios(browser,profile){
     await capture(page,row,'cancel-keeps-disconnected');
   });
   await runScenario(browser,profile,'bridge-background-approval-return',{guest:true,walletBridge:true},async(page,row)=>{
-    await page.locator('#connectWallet').click();await page.evaluate(()=>window.__18911BridgeQA.setMode('deferred'));
-    await page.locator('#connectMobileWallet').click();await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().waiting);
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),journal=await journalBytes(page);
+    await page.evaluate(()=>window.__18911BridgeQA.setMode('deferred'));
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().waiting);
     await page.evaluate(()=>window.__18911WalletQA.setVisibility('hidden'));
+    await page.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true})));
     await page.evaluate(()=>window.__18911BridgeQA.release());await page.waitForFunction(()=>!window.__18911BridgeQA.snapshot().waiting);
     assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase(),'background approval is not adopted before the original page is visible');
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);
-    await page.evaluate(()=>window.__18911WalletQA.setVisibility('visible'));await phase(page,'CONNECTED');
+    await page.evaluate(()=>{window.__18911WalletQA.setVisibility('visible');window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));});await phase(page,'CONNECTED');
     assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
     assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),1);
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,1);assert.equal(row.sendRequests.length,0);
-    row.walletBridge={scope:'SYNTHETIC_VISIBILITY_AND_PAIRING_NO_PHYSICAL_APP',approvedWhileHidden:true,adoptedOnlyOnReturn:true};
+    assert.match(await page.locator('#originalPageConnection').textContent(),/此頁已透過 WalletConnect 連線/);
+    const session=await page.evaluate(()=>window.__18911BridgeQA.storedSession());
+    assert.ok(session?.topic,'the original external page holds its own approved SDK session');
+    await originalConnectionInView(page,row,'original-page-connected-after-return');
     await capture(page,row,'original-page-connected-after-return');
+    const beforeNavigation=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
+    assert.equal(beforeNavigation.initializations.length,1,'pending-enable persisted return keeps the same original pairing instead of initializing another one');
+    await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
+    for(const [id,wallet]of [['openMetaMask','MetaMask'],['openTrustWallet','Trust Wallet']]){
+      assert.match(await page.locator('#'+id).textContent(),new RegExp('只在 '+wallet+' 內開啟'));
+      await touchTarget(page,'#'+id);await page.locator('#'+id).click();
+    }
+    const afterNavigation=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
+    assert.equal(afterNavigation.enableCalls,beforeNavigation.enableCalls);assert.equal(afterNavigation.initializations.length,beforeNavigation.initializations.length,'opening native URLs cannot initialize another SDK session');
+    assert.equal((await page.evaluate(()=>window.__18911BridgeQA.storedSession())).topic,session.topic);
+    assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending);assert.deepEqual(await journalBytes(page),journal);
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,1);assert.equal(row.sendRequests.length,0);
+    assert.equal(await page.evaluate(()=>window.__18911WalletQA.nativeNavigations().length),2);
+    row.walletBridge={scope:'SYNTHETIC_VISIBILITY_PAIRING_AND_PERSISTED_EVENTS_NO_PHYSICAL_APP',primaryClicksToPair:1,approvedWhileHidden:true,adoptedOnlyOnReturn:true,
+      pendingEnableAcrossSyntheticPagehidePageshow:true,nativeNavigationKeepsOriginalTopicAndAccount:true,additionalEnableCalls:0,additionalAccountPermissions:0,financialRequests:0,actualBFCache:'NOT_TESTED'};
+    await capture(page,row,'original-session-preserved-after-native-links');
   });
   await runScenario(browser,profile,'bridge-original-session-reload',{guest:true,walletBridge:true},async(page,row)=>{
-    await page.locator('#connectWallet').click();await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
     assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),WALLET_HINT_KEY),'1');
     const authorizations=row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
     await page.reload({waitUntil:'load'});await phase(page,'CONNECTED');await autoSettled(page);
@@ -1174,7 +1238,7 @@ async function runWalletBridgeScenarios(browser,profile){
     await capture(page,row,'original-session-restored');
   });
   await runScenario(browser,profile,'bridge-invalid-session-not-authority',{guest:true,walletBridge:true},async(page,row)=>{
-    await page.locator('#connectWallet').click();await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
     const valid=await page.evaluate(()=>window.__18911BridgeQA.storedSession());
     const authorizations=row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
     row.invalidSessionCases=[];
@@ -1191,7 +1255,7 @@ async function runWalletBridgeScenarios(browser,profile){
     await capture(page,row,'invalid-session-remains-disconnected');
   });
   await runScenario(browser,profile,'bridge-restore-init-timeout-late',{guest:true,walletBridge:true,clock:true},async(page,row)=>{
-    await page.locator('#connectWallet').click();await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
     const authorizations=row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
     await page.evaluate(()=>window.__18911BridgeQA.setInitMode('deferred'));await page.reload({waitUntil:'load'});
     await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().initWaiting);
@@ -1208,7 +1272,7 @@ async function runWalletBridgeScenarios(browser,profile){
     await capture(page,row,'stalled-init-timeout-recovered');
   });
   await runScenario(browser,profile,'bridge-restore-read-cancel-late',{guest:true,walletBridge:true},async(page,row)=>{
-    await page.locator('#connectWallet').click();await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+    await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
     const authorizations=row.rpc.filter(item=>item.method==='eth_requestAccounts').length,gate='restore-wallet-read';
     await page.evaluate(id=>window.__18911WalletQA.armReloadWalletReadGate(id),gate);await page.reload({waitUntil:'load'});
     await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,gate);
@@ -1263,7 +1327,7 @@ async function runWalletBridgeScenarios(browser,profile){
       const embedded=link.pathname.slice('/dapp/'.length)+link.search+link.hash;
       return new URL(/^https?:\/\//.test(embedded)?embedded:'https://'+embedded);
     };
-    await page.locator('#connectWallet').click();await touchTarget(page,'#walletDestination');
+    await page.locator('#chooseWallet').click();await touchTarget(page,'#walletDestination');
     assert.equal(await page.locator('#walletDestination').inputValue(),'furnace');
     assert.equal(await page.locator('#walletDestinationLink').textContent(),ENTRY);
     await touchTarget(page,'#openMetaMask');await page.locator('#openMetaMask').click();
@@ -1294,8 +1358,9 @@ async function runWalletBridgeScenarios(browser,profile){
       assert.equal((await walletPage.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
       assert.equal(inApp.rpc.filter(item=>item.method==='eth_requestAccounts').length,1,'wallet browser separately obtains its own explicit account permission');
       assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase(),'the native browser permission is not copied into the original browser');
-      await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+      await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
       assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase(),'the original page connects only through its own later explicit WalletConnect action');
+      assert.match(await page.locator('#originalPageConnection').textContent(),/此頁已透過 WalletConnect 連線/);
       assert.equal(await page.evaluate(()=>Boolean(window.ethereum)),false);assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),1);
       assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,1);
       assert.equal((await walletPage.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
@@ -1576,6 +1641,7 @@ try{
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.checks.push('Both viewports retain the original bridge rejection/cancellation/late reply and financial-pending guards. One dedicated case independently reads the exact pinned WalletConnect2.12.2 script, verifies SHA384/SRI and its actual browser global, then replaces only init/pairing before any SDK relay operation; every other pairing/session fixture is synthetic. This is loader acceptance, not real relay or wallet acceptance.');
+  report.checks.push('Without an injected provider, one explicit primary Connect click starts the existing WalletConnect pairing for this original page, with one enable/account authorization and no financial request. Synthetic hidden approval plus pending-enable pagehide/pageshow returns to the original page without a duplicate pairing; its explicit original-page connection label is checked. A sixty-second first-pairing timeout retains the unresolved request and rejects late authority. Native-only navigation remains under Choose wallet and cannot replace or mutate the original page topic, account, pending or journal. These synthetic events do not prove automatic OS return, a ChatGPT browser handoff, real BFCache or a physical wallet.');
   report.checks.push('Native URL targets resolve to the complete original18911 page. Delayed injection, bounded discovery, account cancellation/timeout, unresolved SDK restore init/read, original sixty-second deadlines, late replies and passive SDK-session reload are exercised without automatic financial requests. An untrusted restoration hint alone never provides account authority.');
   report.checks.push('Complete canonical site and18911 URLs remain visible/copyable without a wallet. Synthetic clipboard success, denied-write manual selection and older-rejection versus newer-success ordering are checked; no real OS clipboard is used. Native first-click navigation directly opens the selected site or furnace target without an original-page WalletConnect prerequisite, authorization, false connected state or financial pending/journal mutation.');
   report.checks.push('A separate isolated wallet-browser context opens the exact furnace target and independently authorizes its injected account. The original browser remains disconnected until its own later explicit WalletConnect action; neither URL nor local hint transfers account permission. App navigation is intercepted in CI; actual OS wallet handoff and physical phone connection remain NOT_TESTED. Synthetic background and persisted events do not prove real BFCache.');
