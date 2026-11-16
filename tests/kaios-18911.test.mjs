@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {createKufoClient} from '../K線西遊記/temples/18911/kufo-client.mjs';
-import {walletBridgeLanding,walletNativeLink,waitForWalletProvider,walletConnectSessionPermits} from '../K線西遊記/temples/18911/panel.mjs';
+import {walletBridgeLanding,walletNativeLink,waitForWalletProvider,walletConnectSessionPermits,ensureWalletBsc,walletNetworkRequestPending} from '../K線西遊記/temples/18911/panel.mjs';
 
 // SYNTHETIC_EIP1193_NO_REAL_WALLET: the real public payload, ABI encoder and
 // client run against an in-memory provider. No fetch, RPC, signer or EVM exists.
@@ -819,4 +819,103 @@ test('18911 cancellation removes discovery listeners and prevents a late provide
   const already=new AbortController();already.abort();const before=discoveryTarget();
   await assert.rejects(waitForWalletProvider(()=>null,{target:before.target,signal:already.signal}),error=>error.name==='AbortError'&&error.code==='WALLET_DISCOVERY_CANCELLED');
   assert.equal(before.listeners(),0);
+});
+
+test('18911 an already BSC wallet needs only a chain read without switching or requesting accounts',async()=>{
+  const calls=[],provider={async request(args){calls.push(args);assert.equal(args.method,'eth_chainId');return '0x38';}};
+  await ensureWalletBsc(provider);
+  assert.deepEqual(calls.map(call=>call.method),['eth_chainId']);
+  assert.equal(walletNetworkRequestPending(provider),false);
+});
+
+test('18911 an explicit BSC switch can emit chainChanged before the real client starts its connection',async()=>{
+  const h=harness();h.chainId=1;const original=h.provider.request.bind(h.provider);
+  h.provider.request=async args=>{
+    if(args.method!=='wallet_switchEthereumChain')return original(args);
+    h.requests.push(structuredClone(args));assert.deepEqual(args.params,[{chainId:'0x38'}]);
+    h.chainId=56;h.provider.emit('chainChanged','0x38');return null;
+  };
+  try{
+    await ensureWalletBsc(h.provider);
+    assert.deepEqual(h.requests.map(call=>call.method),['eth_chainId','wallet_switchEthereumChain','eth_chainId']);
+    assert.equal(h.client.snapshot().phase,'STALE','the normal client event guard still invalidates the previous context');
+    await h.client.connect();
+    assert.equal(h.client.snapshot().phase,'CONNECTED');assert.equal(h.client.snapshot().chainId,56);
+    assert.equal(normalize(h.client.snapshot().account),normalize(h.account));assert.equal(h.sends.length,0);
+    assert.equal(walletNetworkRequestPending(h.provider),false);
+  }finally{h.client.dispose();}
+});
+
+test('18911 refused, unknown and unsupported BSC switches preserve the wallet code without adding a chain',async()=>{
+  for(const code of [4001,4902,-32601]){
+    const calls=[],provider={async request(args){calls.push(args);if(args.method==='eth_chainId')return '0x1';throw Object.assign(new Error('Synthetic wallet refusal'),{code});}};
+    await assert.rejects(ensureWalletBsc(provider),error=>error.code===code&&typeof error.message==='string'&&error.message.length>0);
+    assert.deepEqual(calls.map(call=>call.method),['eth_chainId','wallet_switchEthereumChain']);
+    assert.equal(walletNetworkRequestPending(provider),false);
+  }
+});
+
+test('18911 a resolved switch is not BSC authority until the provider confirms chain 56',async()=>{
+  const calls=[],provider={async request(args){calls.push(args);return args.method==='eth_chainId'?'0x1':null;}};
+  await assert.rejects(ensureWalletBsc(provider),error=>error.code==='WRONG_CHAIN');
+  assert.deepEqual(calls.map(call=>call.method),['eth_chainId','wallet_switchEthereumChain','eth_chainId']);
+  assert.equal(walletNetworkRequestPending(provider),false);
+});
+
+test('18911 an expired BSC-switch context cannot open even the first wallet request',async()=>{
+  const calls=[],provider={async request(args){calls.push(args);return '0x38';}};
+  await assert.rejects(ensureWalletBsc(provider,{isCurrent:()=>false}));
+  assert.deepEqual(calls,[]);assert.equal(walletNetworkRequestPending(provider),false);
+});
+
+test('18911 late chain reads and switch replies cannot continue after their connection context is cancelled',async()=>{
+  for(const stoppedAt of [0,1,2]){
+    const gate=deferred(),calls=[];let current=true,waiting=false;
+    const provider={async request(args){
+      const index=calls.length;calls.push(args);
+      if(index===stoppedAt){waiting=true;await gate.promise;}
+      return args.method==='eth_chainId'?(index===0?'0x1':'0x38'):null;
+    }};
+    const checking=ensureWalletBsc(provider,{isCurrent:()=>current}),rejection=assert.rejects(checking);
+    while(!waiting)await tick();
+    current=false;gate.resolve();await rejection;await tick();
+    assert.equal(calls.length,stoppedAt+1,'a late reply cannot trigger the next chain or account request');
+    assert.ok(calls.every(call=>['eth_chainId','wallet_switchEthereumChain'].includes(call.method)));
+    assert.equal(walletNetworkRequestPending(provider),false);
+  }
+});
+
+test('18911 timed-out BSC switching keeps one provider request pending until settlement and ignores its late result',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const gate=deferred(),calls=[];let chain='0x1',settlements=0,waiting=false;
+  const provider={async request(args){
+    calls.push(args);
+    if(args.method==='eth_chainId')return chain;
+    assert.equal(args.method,'wallet_switchEthereumChain');waiting=true;await gate.promise;chain='0x38';return null;
+  }};
+  const checking=ensureWalletBsc(provider,{timeoutMs:20,onSettled:()=>{settlements++;assert.equal(walletNetworkRequestPending(provider),false);}});
+  const timedOut=assert.rejects(checking,error=>error.code==='WALLET_NETWORK_TIMEOUT');
+  while(!waiting)await tick();t.mock.timers.tick(21);await timedOut;
+  assert.equal(walletNetworkRequestPending(provider),true);assert.equal(settlements,0);
+  await assert.rejects(ensureWalletBsc(provider,{timeoutMs:20}));
+  assert.deepEqual(calls.map(call=>call.method),['eth_chainId','wallet_switchEthereumChain'],'timeout does not permit a duplicate wallet prompt');
+  gate.resolve();await tick();
+  assert.equal(walletNetworkRequestPending(provider),false);assert.equal(settlements,1);
+  assert.equal(calls.length,2,'late switch success cannot resume a timed-out connection or perform its final read');
+  await ensureWalletBsc(provider,{timeoutMs:20});
+  assert.deepEqual(calls.map(call=>call.method),['eth_chainId','wallet_switchEthereumChain','eth_chainId'],'a later explicit retry may read the now-settled wallet');
+});
+
+test('18911 an unresolved network request in one provider does not lock an independent wallet',async()=>{
+  const gate=deferred(),blockedCalls=[],otherCalls=[];let current=true,waiting=false;
+  const blocked={async request(args){blockedCalls.push(args);waiting=true;await gate.promise;return '0x1';}};
+  const other={async request(args){otherCalls.push(args);return '0x38';}};
+  const checking=ensureWalletBsc(blocked,{isCurrent:()=>current}),rejection=assert.rejects(checking);
+  while(!waiting)await tick();
+  assert.equal(walletNetworkRequestPending(blocked),true);
+  await ensureWalletBsc(other);
+  assert.deepEqual(otherCalls.map(call=>call.method),['eth_chainId']);assert.equal(walletNetworkRequestPending(other),false);
+  assert.equal(walletNetworkRequestPending(blocked),true);
+  current=false;gate.resolve();await rejection;
+  assert.deepEqual(blockedCalls.map(call=>call.method),['eth_chainId']);assert.equal(walletNetworkRequestPending(blocked),false);
 });

@@ -1517,3 +1517,5 @@ activation still require the lawful Human holder and canonical chain results.
 `K線西遊記/temples/12345/cockpit.html` 沿用 `assets/kaios-audio.mjs`、`assets/kaios-audio-ui.mjs` 與 `assets/kaios-audio.css`，在艙頂呈現單一共享聲音控制及返回 KAIOS。12345「心光」、四通道、靜音、手勢解鎖、背景／pagehide與BFCache生命週期均由原音訊器官管理；不載入舊商業MP3或舊Heart Runtime。CSP僅增加本站模組及樣式來源，沒有 `unsafe-eval`。聲音載入獨立於遊戲啟動，單檔 `file:` 下載不要求外部模組，失敗時保留可見說明與原離線試玩。
 
 原12345 `index.html`、`VERSION`、`MANIFEST.json` 與cockpit同步標記V10.51.0 build3；原入口的雜湊綁定replace／手動fallback不變，manifest歷史檔案hash仍明列為歷史快照。原 `tests/kaios-world-audio-browser.mjs` 依新版入口、只讀錢包、公開餘額、本機模擬、手機控制及共享聲音驗收；已退役的真幣Heart操作不再被宣稱為已通過。音訊PCM、單AudioContext／排程、靜音跨頁及0商業歌曲下載門檻維持原值。新版12345仍未開放真KGEN領取、入金、成交結算或出金；18911錢包授權與煉丹仍由持有人本人確認，UI發布不等於新增鏈上交易。
+
+2026-11-16 Sony 錯網修正：明確按連接本人錢包、原生18911落地連線或原頁配對時，沿既有18911 panel先核錢包網路；非56時請本人在錢包確認 `wallet_switchEthereumChain`（0x38），讀回確實為56才接續帳戶連線。錯網列提供「切換至 BSC 56 並連線」，並將啟用狀態明示為目前網路無法查核。拒絕、未知鏈、不支援、回覆仍錯網與60秒逾時保留原因，未結束的原請求禁止重複；取消、背景、換provider或遲到回覆不續授權。重載恢復、查詢與30秒唯讀查核不會彈切網，也不自動加入網路。原client/共用core/合約/payload/金融pending不變；以原unit及CI合成provider驗收，Sony真機切網仍待本人實測。切網方法依 [EIP-3326](https://eips.ethereum.org/EIPS/eip-3326)，不代表代幣授權、煉丹或部署。
