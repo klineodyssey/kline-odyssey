@@ -1505,7 +1505,7 @@ activation still require the lawful Human holder and canonical chain results.
 
 ## 2026-11-15｜18911 從頁面連接手機錢包
 
-2026-11-16 Sony手機回報後，原入口改為先核准原瀏覽器頁的WalletConnect連線，再由本人點原MetaMask／Trust入口，直接開啟錢包內18911。開啟App內頁不會冒稱原頁已連線；兩個瀏覽器各自核對帳戶，沒有把query或儲存標記當成共享授權。原生入口等待有界的晚到錢包注入及EIP-6963公告，等待完成後才消耗一次性連線意圖；取消、拒絕與逾時不自動重試帳戶授權。
+2026-11-16 Human補正的現行入口：18911版面常駐官網首頁與18911完整網址、直接連結及各自複製按鈕；clipboard不可用時選取原readonly欄位並提示手動複製，沿12345既有模式。按連接本人錢包後，可選官網／18911，再由MetaMask或Trust原生入口直接開啟目標頁，不以原頁WalletConnect配對為前提。原頁仍可另按「連接目前瀏覽器」獨立配對；App內頁與原頁各自核對帳戶，不把導航、query或儲存標記當成共享授權。18911原生落地仍有界等待晚注入及EIP-6963，取消、拒絕與逾時不自動重試帳戶授權。PR666的先配對後跳頁為前輪歷史，現行操作依本段Human補正。原12345固定橋接頁、cockpit與共用wallet core保持原實作。
 
 原頁重載僅可恢復SDK自有且符合本頁metadata／topic／期限／BSC帳戶的session，非秘密hint只用來決定是否嘗試恢復。背景返回只接續原配對或唯讀現況；不接續金融交易。沿用同一pinned2.12.2與SRI，不另裝SDK。真SDK載入驗收與合成provider配對分列，實體Sony、MetaMask／Trust及真relay仍須實測；軟體測試不能冒充這些驗收。參考[官方provider流程](https://docs.reown.com/advanced/providers/ethereum)、[EIP-6963](https://eips.ethereum.org/EIPS/eip-6963)及[Trust原生入口](https://developer.trustwallet.com/developer/develop-for-trust/deeplinking)。
 

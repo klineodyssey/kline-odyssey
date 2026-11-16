@@ -452,7 +452,7 @@ async function capture(page,row,label){
   if(row.width<600&&await page.locator('#walletBridgePanel').isVisible()){
     const chooser=await page.locator('#walletBridgePanel .button-group').evaluate(group=>{
       const parent=group.getBoundingClientRect();
-      return {width:parent.width,left:parent.left,right:parent.right,controls:['connectMobileWallet','openMetaMask','openTrustWallet','cancelWalletBridge'].map(id=>{
+      return {width:parent.width,left:parent.left,right:parent.right,controls:['openMetaMask','openTrustWallet','connectMobileWallet','cancelWalletBridge'].map(id=>{
         const el=document.getElementById(id),r=el.getBoundingClientRect();
         return {id,text:el.textContent.trim(),left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};
       })};
@@ -638,6 +638,47 @@ async function runProfile(browser,width,height){
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts'||item.method==='eth_sendTransaction').length,0,'keyboard focus never authorizes or sends, while public automatic reads remain allowed');
     for(const control of ['#connectWallet','#kaiosAmount','#lifeId','#activationTime','#activationNow'])await touchTarget(page,control);
     await capture(page,row,'overview');
+    assert.ok(await page.locator('#completeWalletUrls').isVisible(),'complete copyable URLs are visible before any wallet chooser or connection');
+    row.completeUrls=[];
+    for(const [input,link,copy,expected]of [
+      ['#officialSiteUrl','#officialSiteLink','#copyOfficialSiteUrl',ROOT.href],
+      ['#furnacePageUrl','#furnacePageLink','#copyFurnaceUrl',ENTRY],
+    ]){
+      assert.equal(await page.locator(input).inputValue(),expected);
+      assert.equal(await page.locator(input).evaluate(el=>el.readOnly),true);
+      assert.equal(await page.locator(link).evaluate(el=>el.href),expected);
+      for(const control of [input,link,copy])await touchTarget(page,control);
+      row.completeUrls.push({input,link,copy,url:expected,visible:true,readonly:true});
+    }
+    await page.evaluate(()=>{
+      window.__18911ClipboardQA={reject:false,deferNext:false,waiting:false,rejectPending:null,attempts:[],writes:[]};
+      Object.defineProperty(navigator,'clipboard',{configurable:true,value:{async writeText(value){
+        const state=window.__18911ClipboardQA;state.attempts.push(value);
+        if(state.deferNext){state.deferNext=false;state.waiting=true;await new Promise((_,reject)=>{state.rejectPending=()=>{state.waiting=false;state.rejectPending=null;reject(new DOMException('Synthetic late clipboard denial','NotAllowedError'));};});}
+        if(state.reject)throw new DOMException('Synthetic clipboard denial','NotAllowedError');state.writes.push(value);
+      }}});
+    });
+    await page.locator('#copyOfficialSiteUrl').click();
+    await page.waitForFunction(()=>document.querySelector('#walletUrlStatus')?.textContent.includes('已複製'));
+    await page.locator('#copyFurnaceUrl').click();
+    await page.waitForFunction(()=>window.__18911ClipboardQA.writes.length===2);
+    assert.deepEqual(await page.evaluate(()=>window.__18911ClipboardQA.writes),[ROOT.href,ENTRY],'copy buttons write their exact complete canonical URL');
+    await page.evaluate(()=>{window.__18911ClipboardQA.deferNext=true;});await page.locator('#copyOfficialSiteUrl').click();
+    await page.waitForFunction(()=>window.__18911ClipboardQA.waiting);await page.locator('#copyFurnaceUrl').click();
+    await page.waitForFunction(()=>window.__18911ClipboardQA.writes.length===3);
+    const latestCopyStatus=await page.locator('#walletUrlStatus').textContent();
+    await page.evaluate(()=>window.__18911ClipboardQA.rejectPending());
+    await page.waitForFunction(()=>!window.__18911ClipboardQA.waiting);await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,0)));
+    assert.equal(await page.locator('#walletUrlStatus').textContent(),latestCopyStatus,'an older rejected copy cannot overwrite the later successful copy status');
+    assert.equal(await page.locator('#copyFurnaceUrl').evaluate(el=>document.activeElement===el),true,'an older copy rejection cannot steal focus to a different URL');
+    await page.evaluate(()=>{window.__18911ClipboardQA.reject=true;});await page.locator('#copyFurnaceUrl').click();
+    await page.waitForFunction(()=>{const el=document.querySelector('#furnacePageUrl');return document.activeElement===el&&el.selectionStart===0&&el.selectionEnd===el.value.length;});
+    assert.match(await page.locator('#walletUrlStatus').textContent(),/手動|長按/);
+    assert.doesNotMatch(await page.locator('#walletUrlStatus').textContent(),/已複製/,'clipboard denial cannot claim success');
+    assert.equal(await page.locator('#furnacePageUrl').inputValue(),ENTRY);
+    row.urlCopy={scope:'SYNTHETIC_CLIPBOARD_API_NO_OS_CLIPBOARD',...(await page.evaluate(()=>window.__18911ClipboardQA)),denialSelectsFullReadonlyUrl:true,lateRejectionCannotReplaceNewerSuccessOrFocus:true};
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts'||item.method==='eth_sendTransaction').length,0,'copying a URL never authorizes or submits');
+    await capture(page,row,'complete-url-copy-fallback');
     await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
     assert.ok(await page.locator('#walletBridgePanel').isVisible(),'ordinary mobile browser gets a usable wallet chooser');
     const links=await page.locator('#walletBridgePanel').evaluate(panel=>({
@@ -710,6 +751,16 @@ async function runProfile(browser,width,height){
     assert.ok(await page.locator('#pendingPanel').isVisible());
     assert.ok(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length>0,'submitted hash is automatically checked without resending');
     await capture(page,row,'submitted');
+    const beforeNativePending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),beforeNativeJournal=await journalBytes(page);
+    const beforeNativeAuthorizations=row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
+    await page.locator('#chooseWallet').click();await page.locator('#openMetaMask').click();
+    assert.equal(await page.evaluate(()=>window.__18911WalletQA.nativeNavigations().length),1,'a pending financial intent does not erase the independent native navigation link');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),beforeNativePending);
+    assert.deepEqual(await journalBytes(page),beforeNativeJournal,'native navigation cannot rewrite the original pending/journal bytes');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,beforeNativeAuthorizations);
+    assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().initializations.length),0);
+    assert.equal(row.sendRequests.length,1,'opening a native URL cannot resend the original financial intent');
+    row.nativeWhilePending={navigationOnly:true,originalPendingAndJournalPreserved:true,additionalAuthorizations:0,additionalTransactions:0};
     const receiptReadsBefore=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
     await touchTarget(page,'#resumePending');await page.locator('#resumePending').click();await phase(page,'PENDING');await autoSettled(page);
     assert.equal(row.sendRequests.length,1,'resume only reads the saved receipt');
@@ -1046,17 +1097,36 @@ async function runWalletBridgeScenarios(browser,profile){
     await capture(page,row,'persisted-native-request-not-replayed');
   });
   await runScenario(browser,profile,'bridge-native-opens-same18911-two-contexts',{guest:true,walletBridge:true},async(page,row)=>{
-    await page.locator('#connectWallet').click();await touchTarget(page,'#openMetaMask');await page.locator('#openMetaMask').click();await phase(page,'CONNECTED');
-    assert.equal(await page.evaluate(()=>window.__18911WalletQA.nativeNavigations().length),0,'the first native click pairs the original page before app navigation');
+    const nativeTarget=navigation=>{
+      const link=new URL(navigation.href);
+      if(navigation.id==='openTrustWallet'){
+        assert.equal(link.origin,'https://link.trustwallet.com');assert.equal(link.searchParams.get('coin_id'),'20000714');return new URL(link.searchParams.get('url'));
+      }
+      assert.equal(link.origin,'https://link.metamask.io');assert.ok(link.pathname.startsWith('/dapp/'));
+      const embedded=link.pathname.slice('/dapp/'.length)+link.search+link.hash;
+      return new URL(/^https?:\/\//.test(embedded)?embedded:'https://'+embedded);
+    };
+    await page.locator('#connectWallet').click();await touchTarget(page,'#walletDestination');
+    assert.equal(await page.locator('#walletDestination').inputValue(),'furnace');
+    assert.equal(await page.locator('#walletDestinationLink').textContent(),ENTRY);
+    await touchTarget(page,'#openMetaMask');await page.locator('#openMetaMask').click();
+    let navigations=await page.evaluate(()=>window.__18911WalletQA.nativeNavigations());assert.equal(navigations.length,1,'the first native click navigates immediately without requiring original-page pairing');
+    assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().initializations.length),0);
+    assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),0);
+    assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase(),'opening a wallet URL does not claim that the original page is connected');
     assert.ok(await page.locator('#walletBridgePanel').isVisible());
-    assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+    await page.locator('#walletDestination').selectOption('site');
+    assert.equal(await page.locator('#walletDestinationLink').textContent(),ROOT.href);assert.equal(await page.locator('#walletDestinationLink').evaluate(el=>el.href),ROOT.href);
     await page.locator('#openMetaMask').click();await page.locator('#openTrustWallet').click();
-    const navigations=await page.evaluate(()=>window.__18911WalletQA.nativeNavigations());assert.equal(navigations.length,2);
-    const metamask=new URL(navigations.find(item=>item.id==='openMetaMask').href),trust=new URL(navigations.find(item=>item.id==='openTrustWallet').href);
-    const embedded=metamask.pathname.slice('/dapp/'.length)+metamask.search+metamask.hash;
-    const metamaskTarget=new URL(/^https?:\/\//.test(embedded)?embedded:'https://'+embedded);
-    const target=new URL(trust.searchParams.get('url'));
-    assert.equal(target.href,metamaskTarget.href);assert.equal(target.origin,ROOT.origin);assert.equal(target.pathname,new URL(ENTRY).pathname);assert.equal(target.searchParams.get('walletBridge'),'1');assert.equal(target.hash,'#playerPanel');
+    navigations=await page.evaluate(()=>window.__18911WalletQA.nativeNavigations());assert.equal(navigations.length,3);
+    for(const navigation of navigations.slice(1)){const target=nativeTarget(navigation);assert.equal(target.href,ROOT.href);assert.equal(target.searchParams.has('walletBridge'),false);assert.equal(target.hash,'');}
+    await capture(page,row,'native-site-target-visible');
+    await page.locator('#walletDestination').selectOption('furnace');await page.locator('#openTrustWallet').click();
+    navigations=await page.evaluate(()=>window.__18911WalletQA.nativeNavigations());assert.equal(navigations.length,4);
+    const target=nativeTarget(navigations[3]);assert.equal(target.href,nativeTarget(navigations[0]).href);
+    assert.equal(target.origin,ROOT.origin);assert.equal(target.pathname,new URL(ENTRY).pathname);assert.equal(target.searchParams.get('walletBridge'),'1');assert.equal(target.hash,'#playerPanel');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);assert.equal(row.sendRequests.length,0);
+    assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().initializations.length),0,'selecting either native destination never starts WalletConnect');
     const inApp={profile:row.profile,name:row.name+'-wallet-in-app',width:row.width,height:row.height,screenshots:[],touchTargets:[],blockedRequests:[],runtimeErrors:[],consoleErrors:[]};
     const {context:walletContext,page:walletPage}=await isolatedContext(browser,inApp);targetRecords.set(walletPage,inApp.touchTargets);
     try{
@@ -1066,13 +1136,17 @@ async function runWalletBridgeScenarios(browser,profile){
       await walletPage.evaluate(()=>window.__18911WalletQA.announceInjectedWallet());await phase(walletPage,'CONNECTED');
       assert.equal((await walletPage.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
       assert.equal(inApp.rpc.filter(item=>item.method==='eth_requestAccounts').length,1,'wallet browser separately obtains its own explicit account permission');
-      assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase(),'original external page keeps its independently validated WalletConnect account');
+      assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase(),'the native browser permission is not copied into the original browser');
+      await page.locator('#connectMobileWallet').click();await phase(page,'CONNECTED');
+      assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase(),'the original page connects only through its own later explicit WalletConnect action');
       assert.equal(await page.evaluate(()=>Boolean(window.ethereum)),false);assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),1);
+      assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,1);
+      assert.equal((await walletPage.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
       assert.equal(row.sendRequests.length,0);assert.equal(inApp.sendRequests.length,0);assert.deepEqual(inApp.blockedRequests,[]);assert.deepEqual(inApp.runtimeErrors,[]);
       await capture(walletPage,inApp,'wallet-in-app-separately-connected');
     }finally{await walletContext.close();}
     row.walletInAppContext=inApp;row.nativeNavigationIntents=navigations;
-    row.walletBridge={scope:'SYNTHETIC_TWO_BROWSER_CONTEXTS_NO_NATIVE_APP_NO_REAL_RELAY',originalPairedBeforeNavigation:true,eachContextHasOwnAccountAuthorization:true};
+    row.walletBridge={scope:'SYNTHETIC_TWO_BROWSER_CONTEXTS_NO_NATIVE_APP_NO_REAL_RELAY',nativeNavigationRequiresPriorPairing:false,nativeTargets:['site','furnace'],eachContextHasOwnAccountAuthorization:true};
     await capture(page,row,'original-page-retains-connection');
   });
 }
@@ -1345,7 +1419,8 @@ try{
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.checks.push('Both viewports retain the original bridge rejection/cancellation/late reply and financial-pending guards. One dedicated case independently reads the exact pinned WalletConnect2.12.2 script, verifies SHA384/SRI and its actual browser global, then replaces only init/pairing before any SDK relay operation; every other pairing/session fixture is synthetic. This is loader acceptance, not real relay or wallet acceptance.');
   report.checks.push('Native URL targets resolve to the complete original18911 page. Delayed injection, bounded discovery, account cancellation/timeout, unresolved SDK restore init/read, original sixty-second deadlines, late replies and passive SDK-session reload are exercised without automatic financial requests. An untrusted restoration hint alone never provides account authority.');
-  report.checks.push('An original-browser native click pairs that page first; a later user gesture exposes the wallet-app navigation target. A separate isolated browser context opens that exact target and independently authorizes its injected account, while the original page retains its own validated session. App navigation is intercepted in CI; actual OS wallet handoff and physical phone connection remain NOT_TESTED. Synthetic background and persisted events do not prove real BFCache.');
+  report.checks.push('Complete canonical site and18911 URLs remain visible/copyable without a wallet. Synthetic clipboard success, denied-write manual selection and older-rejection versus newer-success ordering are checked; no real OS clipboard is used. Native first-click navigation directly opens the selected site or furnace target without an original-page WalletConnect prerequisite, authorization, false connected state or financial pending/journal mutation.');
+  report.checks.push('A separate isolated wallet-browser context opens the exact furnace target and independently authorizes its injected account. The original browser remains disconnected until its own later explicit WalletConnect action; neither URL nor local hint transfers account permission. App navigation is intercepted in CI; actual OS wallet handoff and physical phone connection remain NOT_TESTED. Synthetic background and persisted events do not prove real BFCache.');
   report.functional='PASS';
 }catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));process.exitCode=1;}
 finally{

@@ -749,6 +749,25 @@ test('18911 native links resolve the complete original18911 landing rather than 
   assert.throws(()=>walletNativeLink('unrelated-wallet',original));
 });
 
+test('18911 site-entry landing preserves the original URL without creating a connection intent',()=>{
+  const site='https://klineodyssey.github.io/kline-odyssey/?source=manual#world';
+  assert.equal(walletBridgeLanding(site,{connect:false}).href,site);
+  assert.equal(walletBridgeLanding('https://klineodyssey.github.io/kline-odyssey/',{connect:false}).href,'https://klineodyssey.github.io/kline-odyssey/');
+  const furnace='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18911/index.html?original=1#ownerPanel';
+  assert.equal(walletBridgeLanding(furnace,{connect:false}).href,furnace,'navigation-only mode does not rewrite an existing page/query/fragment');
+  for(const href of ['javascript:alert(1)','data:text/html,test','file:///tmp/index.html','http://untrusted.example/18911/'])assert.throws(()=>walletBridgeLanding(href,{connect:false}),'navigation-only mode keeps the original HTTPS boundary');
+});
+
+test('18911 native site links decode to the selected site without a furnace connection marker',()=>{
+  const site='https://klineodyssey.github.io/kline-odyssey/';
+  const metamask=new URL(walletNativeLink('metamask',site,{connect:false}));
+  const target=new URL('https://'+metamask.pathname.slice('/dapp/'.length)+metamask.search+metamask.hash);
+  assert.equal(target.href,site);assert.equal(target.searchParams.has('walletBridge'),false);assert.equal(target.hash,'');
+  const trust=new URL(walletNativeLink('trust',site,{connect:false}));
+  assert.equal(trust.searchParams.get('url'),site);assert.equal(trust.searchParams.get('coin_id'),'20000714');
+  for(const wallet of ['metamask','trust'])assert.throws(()=>walletNativeLink(wallet,'http://untrusted.example/',{connect:false}));
+});
+
 function discoveryTarget(){
   const target=new EventTarget(),listeners=new Map();
   const add=target.addEventListener.bind(target),remove=target.removeEventListener.bind(target);
