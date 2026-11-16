@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {createKufoClient} from '../K線西遊記/temples/18911/kufo-client.mjs';
-import {walletBridgeLanding,walletConnectSessionPermits} from '../K線西遊記/temples/18911/panel.mjs';
+import {walletBridgeLanding,walletNativeLink,waitForWalletProvider,walletConnectSessionPermits} from '../K線西遊記/temples/18911/panel.mjs';
 
 // SYNTHETIC_EIP1193_NO_REAL_WALLET: the real public payload, ABI encoder and
 // client run against an in-memory provider. No fetch, RPC, signer or EVM exists.
@@ -733,4 +733,71 @@ test('18911 WalletConnect accepts only the current own-metadata topic and an une
     if(fault==='emptyAccounts')provider.session.namespaces.eip155.accounts=[];
     assert.equal(walletConnectSessionPermits(provider,metadata,expectedTopic,account),false,fault+' must not bind this application to an unrelated or stale session');
   }
+});
+
+test('18911 native links resolve the complete original18911 landing rather than a wallet home page',()=>{
+  const original='https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18911/index.html?case=original#ownerPanel';
+  const landing=walletBridgeLanding(original);
+  const metamask=new URL(walletNativeLink('metamask',original));
+  assert.equal(metamask.origin,'https://link.metamask.io');
+  assert.ok(metamask.pathname.startsWith('/dapp/'));
+  const target=new URL('https://'+metamask.pathname.slice('/dapp/'.length)+metamask.search+metamask.hash);
+  assert.equal(target.href,landing.href,'the wallet route decodes to the exact HTTPS18911 page, query and player panel');
+  const trust=new URL(walletNativeLink('trust',original));
+  assert.equal(trust.origin,'https://link.trustwallet.com');assert.equal(trust.pathname,'/open_url');
+  assert.equal(trust.searchParams.get('coin_id'),'20000714');assert.equal(trust.searchParams.get('url'),landing.href);
+  assert.throws(()=>walletNativeLink('unrelated-wallet',original));
+});
+
+function discoveryTarget(){
+  const target=new EventTarget(),listeners=new Map();
+  const add=target.addEventListener.bind(target),remove=target.removeEventListener.bind(target);
+  target.addEventListener=(name,fn,options)=>{if(!listeners.has(name))listeners.set(name,new Set());listeners.get(name).add(fn);add(name,fn,options);};
+  target.removeEventListener=(name,fn,options)=>{listeners.get(name)?.delete(fn);remove(name,fn,options);};
+  return {target,listeners:()=>[...listeners.values()].reduce((sum,items)=>sum+items.size,0)};
+}
+const discoveryPause=()=>new Promise(resolve=>setTimeout(resolve,30));
+
+test('18911 discovery returns an already injected provider and leaves no timer or listener activity',async()=>{
+  const h=discoveryTarget(),provider={request(){}},calls=[];
+  assert.equal(await waitForWalletProvider(value=>{calls.push(value);return provider;},{target:h.target,timeoutMs:100,intervalMs:5}),provider);
+  const settled=calls.length;await discoveryPause();assert.equal(calls.length,settled);assert.equal(h.listeners(),0);
+});
+
+test('18911 native return discovers a late injected provider on its initialization event exactly once',async()=>{
+  const h=discoveryTarget(),provider={request(){}},calls=[];let injected=null;
+  const result=waitForWalletProvider(value=>{calls.push(value);return injected;},{target:h.target,timeoutMs:200,intervalMs:5});
+  injected=provider;h.target.dispatchEvent(new Event('ethereum#initialized'));
+  assert.equal(await result,provider);const settled=calls.length;
+  h.target.dispatchEvent(new Event('ethereum#initialized'));await discoveryPause();
+  assert.equal(calls.length,settled,'settled discovery cannot reconnect after a repeated wallet event');assert.equal(h.listeners(),0);
+});
+
+test('18911 discovery accepts an announced EIP6963 provider without requiring a preexisting window slot',async()=>{
+  const h=discoveryTarget(),provider={request(){}},calls=[];
+  const result=waitForWalletProvider(value=>{calls.push(value);return value||null;},{target:h.target,timeoutMs:200,intervalMs:5});
+  const announcement=new Event('eip6963:announceProvider');Object.defineProperty(announcement,'detail',{value:{provider,info:{uuid:'synthetic-provider'}}});
+  h.target.dispatchEvent(announcement);assert.equal(await result,provider);
+  const settled=calls.length;await discoveryPause();assert.equal(calls.length,settled);assert.equal(h.listeners(),0);
+});
+
+test('18911 discovery polling handles injection without an event and stops after the bounded timeout',async()=>{
+  const h=discoveryTarget(),provider={request(){}},calls=[];let injected=null;
+  const result=waitForWalletProvider(()=>{calls.push(1);return injected;},{target:h.target,timeoutMs:200,intervalMs:5});
+  setTimeout(()=>{injected=provider;},10);assert.equal(await result,provider);
+  let settled=calls.length;await discoveryPause();assert.equal(calls.length,settled);assert.equal(h.listeners(),0);
+  const missing=discoveryTarget();let probes=0;
+  assert.equal(await waitForWalletProvider(()=>{probes++;return null;},{target:missing.target,timeoutMs:15,intervalMs:5}),null);
+  settled=probes;await discoveryPause();assert.equal(probes,settled,'a missing wallet cannot leave a retry loop');assert.equal(missing.listeners(),0);
+});
+
+test('18911 cancellation removes discovery listeners and prevents a late provider from being adopted',async()=>{
+  const h=discoveryTarget(),controller=new AbortController();let probes=0;
+  const result=waitForWalletProvider(()=>{probes++;return null;},{target:h.target,timeoutMs:200,intervalMs:5,signal:controller.signal});
+  controller.abort();await assert.rejects(result,error=>error.name==='AbortError'&&error.code==='WALLET_DISCOVERY_CANCELLED');
+  const settled=probes;h.target.dispatchEvent(new Event('ethereum#initialized'));await discoveryPause();
+  assert.equal(probes,settled);assert.equal(h.listeners(),0);
+  const already=new AbortController();already.abort();const before=discoveryTarget();
+  await assert.rejects(waitForWalletProvider(()=>null,{target:before.target,signal:already.signal}),error=>error.name==='AbortError'&&error.code==='WALLET_DISCOVERY_CANCELLED');
+  assert.equal(before.listeners(),0);
 });
