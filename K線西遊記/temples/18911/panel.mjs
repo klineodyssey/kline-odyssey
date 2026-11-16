@@ -263,7 +263,7 @@ const errors={
  WEB_LOCKS_REQUIRED:'瀏覽器不支援安全跨分頁鎖，無法送交易。請使用支援 Web Locks 的 HTTPS 錢包瀏覽器。',
  REVIEW_EXPIRED:'這份費用預覽已到期，請重新預覽。',
  REVIEW_INVALID:'原預覽已失效，請重新核對。',
- CONTEXT_CHANGED:'帳號、網路或頁面已變更，原預覽已失效。',
+ CONTEXT_CHANGED:'頁面或錢包已變更；請本人重新連接並重新預覽。',
  SUBMISSION_UNKNOWN:'錢包送出狀態未知。保留原紀錄，請先核對，不能重送。',
  PENDING_INTENT:'已有待確認交易，請先查核原交易回執。',
  PENDING_ACCOUNT_MISMATCH:'請使用原交易帳戶核對；原紀錄保留。',
