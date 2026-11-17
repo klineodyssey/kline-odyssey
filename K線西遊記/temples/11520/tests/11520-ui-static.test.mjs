@@ -13,6 +13,22 @@ const mobileShell=read('../runtime/game-mobile-shell.mjs');
 const logistics=read('../runtime/digital-ant-logistics-runtime.mjs');
 const marketLayout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
 const walletRuntime=read('../runtime/evm-wallet-runtime.mjs');
+
+test('visible parameter controls retain the original explicit order path without bypassing financial owners',async()=>{
+  const ui=read('../runtime/mobile-ui-settings.mjs'),layout=read('../runtime/mobile-control-layout.mjs');
+  assert.ok(layout.includes(':not(.k11520TradeOpen):not(.k11520ControlsOpen) :is(#orderFire,#flat)'));
+  assert.ok(ui.includes("el.dataset.k11520ContextSuppressed=marketOpen||controlsOpen?'0':'1'"));
+  const start=ui.indexOf("document.addEventListener('click',e=>{\n    if(!e.target.closest?.('#orderFire,#flat'))return;");
+  assert.ok(start>=0,'one capture owner admits the original explicit action');
+  const handler=ui.slice(start,ui.indexOf('},true);',start)+9),{runInNewContext}=await import('node:vm');
+  for(const [marketOpen,controlsOpen,expected] of [[false,false,'BLOCK'],[false,true,'OPEN'],[true,false,'PASS']]){
+    let callback,opened=0,blocked=0;const context={marketOpen,controlsOpen,document:{addEventListener:(_,fn)=>{callback=fn}},showMarketCards:()=>opened++};
+    runInNewContext(handler,context);callback({target:{closest:()=>true},preventDefault:()=>blocked++,stopImmediatePropagation:()=>blocked++});
+    assert.equal(opened,expected==='OPEN'?1:0);assert.equal(blocked,expected==='BLOCK'?2:0);
+    callback({target:{closest:()=>false},preventDefault:()=>assert.fail('unrelated click blocked'),stopImmediatePropagation:()=>assert.fail()});
+  }
+  assert.ok(main.includes("$('#flat').onclick=closePos;$('#orderFire').onclick=openOrder"),'existing preview and close owners remain in charge');
+});
 test('dodge tries safe alternatives without bypassing midpoint or endpoint collision',()=>{
   const dodge=main.split("$('#dodge').onclick=")[1]?.split('\n')[0]||'';
   assert.ok(dodge.includes('[0,Math.PI/2,-Math.PI/2,Math.PI]'));

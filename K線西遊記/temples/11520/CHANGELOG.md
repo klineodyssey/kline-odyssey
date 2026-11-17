@@ -1,5 +1,16 @@
 # 11520 Changelog
 
+## 2026-11-17 PR672 explicit order visibility follow-up — Codex /root
+
+Human requested continuation after the exact-head browser gate found invisible
+order controls. The existing HUD visibility owner now leaves the original
+order/close buttons available when the original parameter controls are open.
+An explicit click discloses trade information and continues through the original
+action owner; hidden controls still reject clicks. Existing disabled/inert flags,
+preview/confirmation, wallet/eligibility, simulation and settlement logic remain
+unchanged. Focused VM admission regression passed; browser QA pending. This is
+not deployment, signer, payment or real-trading authority and is not a release PASS.
+
 ## 4.1.3 local candidate — 2026-11-17 / Digital Ant /root
 
 - Human corrected accidental 11529 to 11520; no 11529 entry created.

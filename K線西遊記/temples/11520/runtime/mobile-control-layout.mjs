@@ -1,3 +1,5 @@
+// 2026-11-17 / Codex /root / PR672: original action visibility follows retained
+// controls OR explicit trade context; no change to geometry or financial state.
 // LOCAL_CANDIDATE_REVISION: HUD-FLOW2-TAP-J1; latestHumanretainfaintoutlineandremoveoutervisualsquareonly; actualauthorCodex originaltechnicalexecutor01a189ef-ecbc-7699-b87b-a4538d57c029.
 import './market-origin-wallet-layout-runtime.mjs';
 import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
@@ -143,7 +145,7 @@ html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen
 /* Explicit information restores original status/map cards even in the compact
    utility context; individual preferences and foreground Settings still win. */
 html[data-k11520-hud-mode="ON_DEMAND"].k11520InfoOpen:not(.k11520HudCollapsed):not(.k11520SettingsOpen) :is(.tele,.monsterHud,.minimapWrap):not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important}
-html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen) :is(#orderFire,#flat){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen):not(.k11520ControlsOpen) :is(#orderFire,#flat){display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"] #joy{display:block!important;visibility:visible!important;opacity:.28!important;pointer-events:auto!important;background:transparent!important;border:0!important;box-shadow:none!important;transition:opacity .18s linear;touch-action:none}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520MovementActive) #joy>*{opacity:.3!important}
 html[data-k11520-hud-mode="ON_DEMAND"].k11520MovementActive #joy{opacity:.72!important;background:#68e4ff0a!important;border-color:#9eeeff66!important}
