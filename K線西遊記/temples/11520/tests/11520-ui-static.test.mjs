@@ -390,6 +390,18 @@ test('numeric editors preserve ordinary blur but cannot commit after Settings su
   settings=false;input.value='7';listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12','7'],'a fresh Enter after close commits normally');
 });
 
+test('fine C touch release commits its final coordinate but cancelled or obsolete pointers cannot change C',async()=>{
+  const {runInNewContext}=await import('node:vm'),commits=[];let settings=false;
+  const el={getBoundingClientRect:()=>({top:0,height:100}),setPointerCapture(){},hasPointerCapture:()=>true,releasePointerCapture(){}};
+  const context={ROOT:{classList:{contains:()=>settings}},$:()=>el,applySignedValue:v=>commits.push(v),signedFromPointer:y=>y};
+  runInNewContext('let internalNative=false,cPointer=null;'+signedC.slice(signedC.indexOf('function cancelCInput()'),signedC.indexOf('function onDocumentClick('))+'globalThis.input=onCEvent;',context);
+  const event=(type,id,y)=>({type,pointerId:id,clientY:y,target:{closest:()=>el,classList:{contains:()=>false}},preventDefault(){},stopImmediatePropagation(){}});
+  context.input(event('pointerdown',1,50));context.input(event('pointerup',1,44));assert.deepEqual(commits,[50,44],'small drag commits even when no move was delivered');
+  context.input(event('pointerup',1,20));assert.deepEqual(commits,[50,44],'obsolete release cannot edit');
+  context.input(event('pointerdown',2,50));context.input(event('pointercancel',2,10));assert.deepEqual(commits,[50,44,50],'cancel does not commit');
+  context.input(event('pointerdown',3,50));settings=true;context.input(event('pointerup',3,10));assert.deepEqual(commits,[50,44,50,50],'Settings blocks release changes');
+});
+
 test('shared Wallet foreground guard composes with Settings and current hidden preferences',async()=>{
   const {runInNewContext}=await import('node:vm');const layout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
   const flags=new Set(['k11520UtilitiesOpen']),node=id=>({id,textContent:'',title:'',dataset:{},attrs:{},classes:new Set(),classList:{contains(name){return this.owner.classes.has(name)}},style:{values:{},setProperty(k,v){this.values[k]=v},removeProperty(k){delete this.values[k]},getPropertyValue(k){return this.values[k]||''},getPropertyPriority(k){return k in this.values?'important':''}},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]}});
