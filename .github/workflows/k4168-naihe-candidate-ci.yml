@@ -1,0 +1,33 @@
+name: K4168 Naihe Candidate CI
+
+on:
+  pull_request:
+    paths:
+      - "KGEN-KAIOS/civilization/naihe-reservoir-v1/**"
+      - ".github/workflows/k4168-naihe-candidate-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: k4168-naihe-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate candidate module
+        run: node --check KGEN-KAIOS/civilization/naihe-reservoir-v1/naihe-reservoir-simulator.mjs
+      - name: Run Naihe candidate tests
+        run: node --test KGEN-KAIOS/civilization/naihe-reservoir-v1/naihe-reservoir.test.mjs
