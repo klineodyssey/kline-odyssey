@@ -234,6 +234,10 @@ async function verifyWorldFirst(){
       assert.deepEqual(await read(),start,'card gestures must not pan camera');
       assert.doesNotMatch(await page.locator('#k11520MarketRow').textContent(),/BTC|ETH|BNB|LIVE/,'collapsed Market must not preserve a quote ticker');await page.screenshot({path:`${OUT}/market-idle-hidden-${profile.width}x${profile.height}.png`});
       result.checks.marketIdle='15s trade context / held-pointer / resume / explicit information close PASS';result.checks.camera='PAN / PINCH / RESET / XYZ ISOLATION PASS';
+      // The preceding case explicitly closed information. Reopen through the
+      // native disclosure before using its monster guide, just as a player must.
+      await ensureExpandedMarket(page);
+      await page.locator('#k11520MonsterGuide').waitFor({state:'visible'});
       quoteStep=100;
       await page.waitForFunction(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.some(m=>m.intent?.direction==='LONG'),null,{timeout:15000});
       const before=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot());
