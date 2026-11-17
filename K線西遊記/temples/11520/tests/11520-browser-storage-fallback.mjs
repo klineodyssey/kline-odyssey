@@ -27,7 +27,9 @@ async function open11520({ blockIndexedDb = false } = {}) {
       || document.documentElement.dataset.universeStore === "MEMORY_FALLBACK"
   ), null, { timeout: 15000 });
   await page.locator("#content .hero").waitFor({ state: "visible", timeout: 15000 });
-  await page.waitForFunction(() => document.body.textContent.includes("KAIOS INCENSE · 18911"), null, { timeout: 15000 });
+  await page.locator("#lamp-scanner").waitFor({ state: "visible", timeout: 15000 });
+  assert.match(await page.locator("#lamp-scanner").textContent(), /CT\+1～CT\+9/,
+    "the actual default MARKET entry must survive storage fallback, not the former HOME dashboard");
   assert.deepEqual(errors, [], `11520 portal page errors: ${errors.join("\n")}`);
   return page;
 }
