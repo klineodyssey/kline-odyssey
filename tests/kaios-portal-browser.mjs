@@ -1277,7 +1277,7 @@ async function verifyLampScanner(){
       await page.goto(new URL('K線西遊記/temples/11520/index.html',BASE+'/').href,{waitUntil:'domcontentloaded'});
       await page.waitForFunction(()=>document.querySelector('#lamp-readout')?.textContent.includes('501/1001'));
       await page.locator('#lamp-day').selectOption('8');
-      await page.locator('#lamp-point').fill('500');await page.locator('#lamp-point').dispatchEvent('input');
+      await page.locator('#lamp-point').focus();await page.keyboard.press('End');
       assert.match(await page.locator('#lamp-readout').textContent(),/CT\+8 · 1001\/1001/);
       assert.equal(await page.locator('#lamp-chart circle').count(),1);
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
