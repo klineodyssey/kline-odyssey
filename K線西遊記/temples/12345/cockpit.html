@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="k12345-frontend-version" content="12345-TEMPLE-V10.51.0-COCKPIT-ENTRY">
 <meta name="k12345-release-status" content="FRONTEND_RELEASE_NONFINANCIAL">
-<meta name="k12345-build-revision" content="3">
+<meta name="k12345-build-revision" content="4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline'; img-src data: blob: https://*.walletconnect.com https://*.walletconnect.org https://*.reown.com https://imagedelivery.net; connect-src 'self' https://api.web3modal.org https://data-api.binance.vision https://esm.sh https://bsc-dataseed.binance.org https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://*.reown.com wss://*.reown.com; frame-src https://verify.walletconnect.com https://verify.walletconnect.org; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>12345 五指山悟空財神殿｜V10.51.0 駕駛艙試玩</title>
 <style>
@@ -262,7 +262,7 @@ body.cockpit-tabs-ready{height:100vh;height:100dvh;overflow:hidden;display:grid;
 <noscript><p class="boot-note">這個檢視器沒有執行 JavaScript，不能玩。請下載 HTML，改用瀏覽器開啟。</p></noscript>
 <main class="shell" id="gameShell" inert>
 <header class="mast top panel" aria-label="11520 式艙頂儀表">
- <div class="brand"><div class="seal" aria-hidden="true">悟</div><div><p class="eyebrow">K12345 · 五指山航線 · <span id="frontendVersion">V10.51.0</span></p><h1>悟空財神殿・飛碟駕駛艙</h1><p class="sub">五站停靠 × 公開行情模擬下單｜真幣交易未開通</p></div></div>
+ <div class="brand"><div class="seal" aria-hidden="true">悟</div><div><p class="eyebrow">K12345 · 五指山航線 · <span id="frontendVersion">V10.51.0 · build 4</span></p><h1>悟空財神殿・飛碟駕駛艙</h1><p class="sub">五站停靠 × 公開行情模擬下單｜真幣交易未開通</p></div></div>
  <div class="wallet-hud" aria-label="BSC56 錢包鏈上餘額，不是遊戲保證金">
   <div class="pill"><small>錢包 KAIOS</small><b id="hudKaiosBalance" data-state="disconnected">未連接</b></div>
   <div class="pill"><small>錢包 KGEN</small><b id="hudKgenBalance" data-state="disconnected">未連接</b></div>
@@ -348,7 +348,7 @@ body.cockpit-tabs-ready{height:100vh;height:100dvh;overflow:hidden;display:grid;
 </details>
 <section class="telemetry tele panel" id="flightTelemetry" aria-label="即時儀表">
  <div class="metric"><span>目前座標 · X / Y / Z（m）</span><strong class="mono"><i id="xNow">0.0</i> / <i id="yNow">0.0</i> / <i id="zNow">0.0</i></strong></div>
- <div class="metric"><span>實際飛行速度（m/s）</span><strong class="mono" id="speedNow">0.0</strong></div>
+ <div class="metric"><span>實際移動速度（m/s）</span><strong class="mono" id="speedNow">0.0</strong></div>
  <div class="metric"><span>五站完成數</span><strong class="mono"><i id="completedCount">0</i> / 5</strong></div>
  <div class="metric"><span>住宅能力（不擋下單）</span><strong class="mono" id="travelMaxFloor">—</strong></div>
 </section>
@@ -2177,6 +2177,18 @@ const flightMps=c=>spatialCore.gameUnitsToMeters(spatialCore.kToGameUnits(Math.a
 // Like 11520, neutral C keeps ordinary movement; .10 m/frame at 60 Hz
 // is converted to a frame-independent local reference for this trial.
 const localMovementMps=c=>c===0?6:flightMps(c);
+function movementCoupling(book,{axis=TRADE_AXIS,market=TRADE_MARKET,blocked=practiceBlock()}={}){
+  const ordinary=reason=>({c:0,reason});
+  if(blocked)return ordinary("試玩帳本尚未就緒");
+  if(!Array.isArray(book?.positions)||book.positions.some(position=>!position||!["OPEN","CLOSED","LIQUIDATED"].includes(position.status)))return ordinary("持倉狀態無法核對");
+  const open=book.positions.filter(position=>position.status==="OPEN");
+  if(open.length===0)return ordinary("尚未成交，調 C 只改下一單草稿");
+  if(open.length!==1)return ordinary("多筆已成交部位，不能唯一核對移動 C");
+  const position=open[0];
+  if(position.axis!==axis||position.market!==market)return ordinary("已成交部位與目前市場不一致");
+  if(!Number.isFinite(position.c)||position.c===0||Math.abs(position.c)>100)return ordinary("已成交部位的固定 C 無法核對");
+  return {c:position.c,reason:""};
+}
 const WARP_DETENTS=Object.freeze(C_DETENTS.filter(value=>Math.abs(value)<=1));
 const LEVERAGE_DETENTS=Object.freeze(WARP_DETENTS.filter(value=>value>=0));
 const directionName=value=>value>0?"做多":value<0?"做空":"中性";
@@ -2186,7 +2198,7 @@ const leverageText=value=>String(value)+"×";
 function paintWarp(){
   const text=signedInput(warp)+"C", side=sideFromWarp();
   $("warpRail").value=String(WARP_DETENTS.indexOf(warp));
-  $("warpRail").setAttribute("aria-valuetext",text+" · "+directionName(warp)+" · "+localMovementMps(warp).toFixed(3)+" m/s");
+  $("warpRail").setAttribute("aria-valuetext","下一單草稿 "+text+" · "+directionName(warp)+"；實際移動依已成交部位固定 C");
   $("warpNumericInput").value=signedInput(warp);
   $("speedSet").textContent=text;
   $("tradeSide").textContent=directionName(warp);
@@ -2199,7 +2211,7 @@ function applyWarp(value){
     $("controlHint").textContent="曲速範圍是 −1～+1C；保留 "+signedInput(warp)+"C。";
   }else{
     warp=value;
-    $("controlHint").textContent=value===0?"曲速 0C：可普通移動，不送新單；既有委託與持倉照常。":"曲速 "+signedInput(warp)+"C · "+flightMps(warp).toFixed(3)+" m/s；Z 軸 "+directionName(warp)+"，XY 仍可自由移動。";
+    $("controlHint").textContent=value===0?"下一單草稿 0C：不送新單；既有部位固定 C 不變，沒有已成交部位時普通移動。":"下一單草稿 "+signedInput(warp)+"C · "+directionName(warp)+"；點火委託成交後才依該筆固定 C 移動，未成交仍普通移動。";
   }
   paintWarp();
   renderOrderPreview();
@@ -2335,6 +2347,7 @@ function qualifies(){
 function heartAtDock(){return target.id==="heartbeat"&&docked()&&!done.has("heartbeat")&&!heartOrder&&qualifies();}
 function render(){
   paintMapCamera();
+  const applied=movementCoupling(tradeLedger?.simulation);
   const at=plot(p), goal=markers.get(target.id).at, d=distance(), ready=docked(), isDone=done.has(target.id);
   const heartHere=target.id==="heartbeat", pending=heartHere&&!!heartOrder, issue=heartHere&&ready?heartIssue:"";
   $("xNow").textContent=readout(p.x); $("yNow").textContent=readout(p.y); $("zNow").textContent=readout(p.z);
@@ -2343,8 +2356,8 @@ function render(){
   $("kaiosNow").textContent=hasKaios?"有":"無";
   $("distanceNow").textContent=readout(d); $("depthDelta").textContent=readout(target.z-p.z);
   $("player").setAttribute("transform","translate("+at.x.toFixed(2)+" "+at.y.toFixed(2)+") rotate("+heading.toFixed(1)+")");
-  $("player").classList.toggle("ufo-in-flight",speed>=.15);
-  const flightText=ready?"已停靠":speed>=.15?"飛碟巡航":"待飛";
+  $("player").classList.toggle("ufo-in-flight",speed>=.15&&applied.c!==0);
+  const flightText=ready?"已停靠":speed>=.15?applied.c!==0?"飛碟巡航":"普通移動":"待行";
   if($("flightState").textContent!==flightText) $("flightState").textContent=flightText;
   for (const [k,v] of Object.entries({x1:at.x,y1:at.y,x2:goal.x,y2:goal.y})) $("route").setAttribute(k,v);
   const summary=isDone?"已完成":pending?"心跳委託待成交":ready?"已到站":d<=DOCK?"請停穩":"航行中";
@@ -2444,7 +2457,9 @@ function tick(t){
   vector[rail]=controls.z+has("e")-has("q");
   let {x,y,z}=heldNumeric!==null||numericKey!==null?numericThrust:vector;
   if(keys.has(" ")) x=y=z=0;
-  const movement=advanceFlight(p,x,y,z,localMovementMps(warp),elapsed);
+  // Read the applied ledger without cloning financial history on every frame.
+  const applied=movementCoupling(tradeLedger?.simulation);
+  const movement=advanceFlight(p,x,y,z,localMovementMps(applied.c),elapsed);
   speed=movement.actual;
   const oldHeading=heading;
   if(Math.hypot(x,y)>.08) heading=Math.atan2(x,y)*180/Math.PI;
@@ -3123,9 +3138,9 @@ function renderOrderPreview(){
   $("previewMargin").textContent=margin+" 模擬 KGEN";
   $("deckPreview").textContent=lots+" 口 · "+margin+" 模擬 KGEN 本金";
   $("tradeQuote").textContent=quote?tradeNum(quote.price):"—";
-  const coupled=book.positions.some(position=>position.status==="OPEN");
+  const applied=movementCoupling(book),coupled=applied.c!==0;
   $("marketCoupling").dataset.state=coupled?"coupled":"idle";
-  $("marketCoupling").textContent=coupled?marketName()+" 部位已成交，開始多空交戰（本機演練）":marketName()+" 尚未成交；調 C 只改草稿，確認點火後才建立委託。";
+  $("marketCoupling").textContent=coupled?marketName()+" 部位已成交，固定 "+signedInput(applied.c)+"C · 移動 "+Math.min(localMovementMps(applied.c),flightMps(1)).toFixed(3)+" m/s（本機演練）；調草稿不改原部位動力。":applied.reason+"；普通移動 "+localMovementMps(0).toFixed(3)+" m/s，未啟用曲速。";
   $("tradeLotsFree").textContent=lotCredits+" 模擬 KGEN"+(heartOrder?" · 舊版心跳委託待成交":"");
   $("lotSelectionStatus").textContent="本次選 "+lots+" 口 · 可選 0–"+available+" 口。每減 1 口，釋放 1 模擬 KGEN 到穿越能量。";
   $("tradeMarginFree").textContent=tradeNum(energy)+" KGEN";

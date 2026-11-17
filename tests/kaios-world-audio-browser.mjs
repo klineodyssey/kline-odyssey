@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import vm from 'node:vm';
 import {chromium} from 'playwright';
 
 assert.equal(process.env.GITHUB_ACTIONS,'true','world browser QA is CI-only');
@@ -139,6 +140,8 @@ async function openCockpit(page,query=''){
  await page.goto(ENTRY+query,{waitUntil:'domcontentloaded'});await stable(page);
  assert.equal(new URL(page.url()).pathname,new URL(COCKPIT).pathname,'original official entry reaches the current cockpit');
  assert.equal(await page.locator('#frontendVersion').count(),1);await markSynthetic(page);
+ assert.equal(await page.locator('meta[name=k12345-build-revision]').getAttribute('content'),'4');
+ assert.match(await page.locator('#frontendVersion').textContent(),/V10\.51\.0.*build 4/);
 }
 async function selectWallet(page){
  await tab(page,'wallet');await page.locator('#practiceConnect').click();await page.locator('#practiceWalletPicker:not([hidden])').waitFor();
@@ -266,6 +269,97 @@ async function cockpitLayoutQA(){
   }catch(error){reports.push({id:'12345-layout-failure-geometry',width,height,geometry:await failureGeometry(page).catch(()=>null)});await shot(page,'12345-current-layout-'+width+'-FAIL').catch(()=>{});throw error;}finally{await context.close();}
  }
 }
+function movementSelectionQA(){
+ const start=cockpitSource.indexOf('function movementCoupling('),end=cockpitSource.indexOf('const WARP_DETENTS=',start);
+ assert.ok(start>=0&&end>start,'read the existing cockpit movement selector');
+ const select=vm.runInNewContext('('+cockpitSource.slice(start,end).trim()+')',{
+  TRADE_AXIS:'KX',TRADE_MARKET:'BTCUSDT',practiceBlock:()=>''});
+ const open={status:'OPEN',axis:'KX',market:'BTCUSDT',c:.1};
+ const cases=[
+  ['no-position',{positions:[]},{},0,/尚未成交/],
+  ['pending-is-not-filled',{positions:[],orders:[{...open,status:'PENDING'}]},{},0,/尚未成交/],
+  ['one-filled-fixed-c',{positions:[open]},{},.1,/^$/],
+  ['negative-filled-c',{positions:[{...open,c:-.1}]},{},-.1,/^$/],
+  ['closed',{positions:[{...open,status:'CLOSED'}]},{},0,/尚未成交/],
+  ['liquidated',{positions:[{...open,status:'LIQUIDATED'}]},{},0,/尚未成交/],
+  ['conflicting-open',{positions:[open,{...open,c:1}]},{},0,/多筆/],
+  ['foreign-axis',{positions:[{...open,axis:'KY'}]},{},0,/市場不一致/],
+  ['foreign-market',{positions:[{...open,market:'ETHUSDT'}]},{},0,/市場不一致/],
+  ['invalid-c',{positions:[{...open,c:NaN}]},{},0,/固定 C 無法核對/],
+  ['unknown-state',{positions:[{...open,status:'UNKNOWN'}]},{},0,/狀態無法核對/],
+  ['missing-book',null,{},0,/狀態無法核對/],
+  ['practice-block',{positions:[open]},{blocked:'ACCOUNT_CHANGED'},0,/帳本尚未就緒/]
+ ];
+ for(const [name,book,options,c,reason]of cases){
+  const before=JSON.stringify(book),actual=select(book,options);
+  assert.equal(actual.c,c,name);assert.match(actual.reason,reason,name);assert.equal(JSON.stringify(book),before,name+' leaves the ledger unchanged');
+ }
+ reports.push({id:'12345-fixed-flight-selection',mode:'ISOLATED_ACTUAL_SOURCE_PURE_SELECTION',cases:cases.length,
+  multipleOpen:'ORDINARY_MOVEMENT_NO_ARBITRARY_SELECTION',financialMutation:false,crossWorldArrival:'NOT_IMPLEMENTED'});
+}
+async function cockpitFlightCouplingQA(){
+ for(const [width,height]of [[390,844],[844,390]]){
+  const {context,page,row}=await contextFor(width,height);
+  const key='k12345.practice.v1:guest-session',readBook=()=>page.evaluate(key=>JSON.parse(sessionStorage.getItem(key))?.payload?.ledger?.simulation,key);
+  const phases=[];
+  async function edit(selector,value){await page.locator(selector).fill(value);await page.locator(selector).press('Tab');}
+  async function walkingOrFlight(expected,label){
+   await tab(page,'flight');
+   await edit('#joyHorizontalInput','100');await edit('#joyVerticalInput','0');await edit('#axisNumericInput','0');
+   const button=await target(page,'#applyNumericThrust');await page.mouse.move(button.x+button.w/2,button.y+button.h/2);await page.mouse.down();
+   let speed;try{
+    speed=await until(()=>page.locator('#speedNow').textContent(),value=>Math.abs(Number(value)-expected)<.002,label+' actual speed');
+    assert.equal(await page.locator('#flightState').textContent(),expected===6?'普通移動':'飛碟巡航',label+' movement mode matches the applied source');
+   }
+   finally{await page.mouse.up();await page.locator('#brake').click();}
+   await until(()=>page.locator('#speedNow').textContent(),value=>Number(value)===0,label+' stopped');
+   phases.push({label,movingMps:Number(speed),stopped:true});
+  }
+  async function capture(stage){await page.locator('#marketCoupling').scrollIntoViewIfNeeded();await shot(page,'12345-fixed-flight-'+width+'x'+height+'-'+stage+'-SYNTHETIC');}
+  async function submitPending({expectPending=true}={}){
+   await tab(page,'trade');await edit('#tradeLots','1');await page.locator('#tradeTrigger').fill('76000');await page.locator('#tradeSubmit').click();
+   await until(readBook,book=>expectPending?book?.orders.some(order=>order.status==='PENDING'):
+    ['PENDING','FILLED'].includes(book?.orders.at(-1)?.status),'original order accepted'+(expectPending?' pending':''));
+  }
+  try{
+   await openCockpit(page);await tab(page,'trade');await page.locator('#marketMode').selectOption('REPLAY');
+   await tab(page,'stations');await page.locator('#claimDestination').selectOption('MARGIN');await page.locator('#act').click();
+   await tab(page,'flight');await edit('#warpNumericInput','1');
+   await walkingOrFlight(6,'no-order-draft-1c');assert.equal(await page.locator('#marketCoupling').getAttribute('data-state'),'idle');await capture('no-order');
+   await edit('#warpNumericInput','.1');await submitPending();
+   await walkingOrFlight(6,'pending-does-not-propel');await capture('pending');
+   await tab(page,'trade');await page.getByRole('button',{name:'取消',exact:true}).click();
+   await until(readBook,book=>book.orders.some(order=>order.status==='CANCELLED')&&!book.positions.some(position=>position.status==='OPEN'),'cancel stays unfilled');
+   await walkingOrFlight(6,'cancelled-does-not-propel');
+   await submitPending();await page.locator('#replayPriceInput').fill('76000');await page.locator('#applyReplayPrice').click();
+   await until(readBook,book=>book?.positions.filter(position=>position.status==='OPEN').length===1,'original replay price fills the order');
+   const filled=(await readBook()).positions.find(position=>position.status==='OPEN');assert.equal(filled.c,.1);
+   const fixedMps=(384400/16888)*.1;
+   await walkingOrFlight(fixedMps,'filled-fixed-0.1c');assert.match(await page.locator('#marketCoupling').textContent(),/固定 \+0\.1C/);await capture('filled');
+   await edit('#warpNumericInput','-1');await walkingOrFlight(fixedMps,'opposite-draft-does-not-change-filled-c');
+   await edit('#warpNumericInput','0');await walkingOrFlight(fixedMps,'zero-draft-does-not-change-filled-c');
+   assert.equal((await readBook()).positions.find(position=>position.status==='OPEN').c,.1);await capture('draft-change');
+   await page.reload({waitUntil:'domcontentloaded'});await stable(page);await markSynthetic(page);
+   await tab(page,'trade');await page.locator('#marketMode').selectOption('REPLAY');await tab(page,'flight');
+   await until(()=>page.locator('#speedNow').textContent(),value=>Number(value)===0,'reload restores stopped flight');
+   assert.equal((await readBook()).positions.find(position=>position.status==='OPEN').c,.1);
+   await walkingOrFlight(fixedMps,'reloaded-position-needs-new-input');await capture('reloaded');
+   await tab(page,'trade');await page.getByRole('button',{name:'平倉',exact:true}).click();
+   await until(readBook,book=>book.positions.every(position=>position.status!=='OPEN'),'close removes propulsion');
+   await walkingOrFlight(6,'closed-returns-to-ordinary');await capture('closed');
+   await edit('#warpNumericInput','1');await submitPending({expectPending:false});
+   await until(readBook,book=>book.positions.some(position=>position.status==='OPEN'),'second original order fills at current replay price');
+   await page.locator('#replayPriceInput').fill('1');await page.locator('#applyReplayPrice').click();
+   await until(readBook,book=>book.positions.some(position=>position.status==='LIQUIDATED')&&!book.positions.some(position=>position.status==='OPEN'),'original price engine liquidates');
+   await walkingOrFlight(6,'liquidated-returns-to-ordinary');
+   await assertNoWrites(page,row);assert.deepEqual(row.runtimeErrors,[]);assert.deepEqual(row.commercialRequests,[]);
+   reports.push({id:'12345-fixed-flight-coupling',...row,phases,filledPositionC:filled.c,ordinaryMps:6,
+    draftCannotPropel:true,filledCFixed:true,reloadStopped:true,closeAndLiquidationReturnToOrdinary:true,
+    originalLedgerAndReplayEngine:true,crossWorldArrival:'NOT_IMPLEMENTED',realTransactions:0});
+  }catch(error){reports.push({id:'12345-fixed-flight-failure',...row,phases,geometry:await failureGeometry(page).catch(()=>null)});await shot(page,'12345-fixed-flight-'+width+'-FAIL').catch(()=>{});throw error;}
+  finally{await context.close();}
+ }
+}
 async function instrumentAudio(context){
  await context.addInitScript(()=>{
   const Real=window.AudioContext||window.webkitAudioContext;window.__qaAudioContexts=[];window.__qaAnalysers=[];
@@ -334,8 +428,10 @@ async function worldAudioQA(){
  }
 }
 try{
+ movementSelectionQA();
  if(!preservation&&!layoutOnly)await walletRoundTripQA();
  if(!preservation&&!walletOnly)await cockpitLayoutQA();
+ if(!preservation&&!walletOnly&&!layoutOnly)await cockpitFlightCouplingQA();
  if(!walletOnly&&!heartOnly&&!layoutOnly)await worldAudioQA();
 } catch(error){reports.push({id:'FAIL',error:String(error.stack||error)});throw error;}
 finally{await fs.writeFile(OUT+'/world-audio-report.json',JSON.stringify(reports,null,2));await browser.close();console.log(JSON.stringify(reports));}
