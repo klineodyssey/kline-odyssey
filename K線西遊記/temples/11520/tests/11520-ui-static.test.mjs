@@ -478,6 +478,7 @@ test('tiny landscape Market reserves its own lane and browser regression rejects
   assert.match(layout,/html\[data-k11520-hud-profile\] \.top\{right:calc\(max\(6px, env\(safe-area-inset-right\)\) \+ 52px\)!important;height:54px!important\}/);
   assert.ok(layout.includes('.k11520InfoOpen:not(.k11520UtilitiesOpen):not(.k11520HudCollapsed)'), 'information cannot override the original compact utility tray owner');
   assert.ok(layout.includes('.minimapWrap #minimap{height:70px!important}'), 'narrow portrait retains a native world gesture gap without changing camera admission');
+  assert.ok(layout.includes('.tele{font-size:7px!important;line-height:1.1!important;padding:5px!important}'), 'landscape diagnostic text stays clear of original parameter rails');
   assert.ok(layout.includes('height:44px!important;min-height:44px!important;box-sizing:border-box!important;white-space:nowrap!important'), 'shared portrait guide remains compact instead of a centred story overlay');
   assert.match(layout,/#k11520MarketRow\{top:6px;left:auto;right:max\(6px, env\(safe-area-inset-right\)\);width:44px;min-height:44px\}/);
   const source=browserSource.slice(browserSource.indexOf('async function verifyMarketHeaderSeparation('),browserSource.indexOf('async function verifySettingsInterruptedRails('));

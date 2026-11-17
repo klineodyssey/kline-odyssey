@@ -136,6 +136,9 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   html[data-k11520-hud-profile] .axes{height:auto!important;min-height:74px!important}
   html[data-k11520-hud-profile] .axis .marketKValue{white-space:normal!important;overflow-wrap:normal!important;word-break:keep-all!important;line-height:1.25!important}
   html[data-k11520-hud-profile] .tele,html[data-k11520-hud-profile] .monsterHud{top:var(--k11520-landscape-status-top,136px)!important}
+  /* Taller readable header must not push the diagnostic row onto the fixed
+     parameter rails. Use the existing portrait text scale, with auto height. */
+  html[data-k11520-hud-profile] .tele{font-size:7px!important;line-height:1.1!important;padding:5px!important}
   html[data-k11520-hud-profile] #k11520MonsterGuide{top:auto!important;bottom:8px!important;transform:none!important}
   html[data-k11520-hud-profile="MINIMAL"].k11520MarketOpen #k11520MonsterGuide{top:auto!important}
   html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:66px!important;bottom:auto!important;left:6px!important}
