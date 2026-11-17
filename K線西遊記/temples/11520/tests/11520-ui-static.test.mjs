@@ -405,6 +405,16 @@ test('fine C touch release commits its final coordinate but cancelled or obsolet
   context.input(event('pointerdown',3,50));settings=true;context.input(event('pointerup',3,10));assert.deepEqual(commits,[50,44,50,50],'Settings blocks release changes');
 });
 
+test('trade HUD disclosure cannot open a blocking Market modal behind the order preview',async()=>{
+  const {runInNewContext}=await import('node:vm');let listener,opened=0,paused=0,closed=0;
+  const root={dataset:{}},sheet={classList:{remove:()=>closed++}},body={querySelector:()=>({})},title={textContent:'市場'};
+  const context={document:{documentElement:root,addEventListener:(_,fn)=>listener=fn},openOrgan:()=>opened++,kgenPoolReference:{pause:()=>paused++},ORGANS:[['market',null,'市場']],$:s=>s==='#sheetBody'?body:s==='#sheetTitle'?title:sheet};
+  runInNewContext(main.slice(main.indexOf('function installKgenReferenceContext(){'),main.indexOf('installKgenReferenceContext();'))+'installKgenReferenceContext();',context);
+  listener({detail:{tradeOpen:true}});listener({detail:{tradeOpen:true}});assert.equal(opened,0,'HUD context must not create an unsolicited modal');
+  listener({detail:{tradeOpen:false}});assert.equal(paused,1);assert.equal(closed,1,'existing explicit reference sheet still closes safely with context');
+  assert.ok(main.includes("if(id==='assets'||id==='market')"),'explicit reference entry is preserved');
+});
+
 test('shared Wallet foreground guard composes with Settings and current hidden preferences',async()=>{
   const {runInNewContext}=await import('node:vm');const layout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
   const flags=new Set(['k11520UtilitiesOpen']),node=id=>({id,textContent:'',title:'',dataset:{},attrs:{},classes:new Set(),classList:{contains(name){return this.owner.classes.has(name)}},style:{values:{},setProperty(k,v){this.values[k]=v},removeProperty(k){delete this.values[k]},getPropertyValue(k){return this.values[k]||''},getPropertyPriority(k){return k in this.values?'important':''}},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]}});
@@ -801,7 +811,7 @@ test('simulation component revisions expose complete provenance and recorded exe
  // or deployment claim. Executable-byte hashes remain exact, not self-derived.
  const referenceMetadata={revision:'2026-10-31.READONLY-KGEN-WBNB-REFERENCE',sourceCommit:'b7e4a244f5eeb5583d4cf27ae09a0b19a3d09880',lastUpdated:'2026-10-31',updatedBy:'Codex / original thread 01a189ef-ecbc-7699-b87b-a4538d57c029 / HUMAN_AUTHORIZED_LOCAL_CANDIDATE',reviewedBy:'PENDING_ORIGINAL_INDEPENDENT_REVIEW; previous header preserved in exact base snapshot',sourceOfTruth:'LOCAL_CANDIDATE_NOT_CANONICAL'};
  const current={
-  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'026d83d8632dde2b55fb869446dc7bfe88b02c00fe5414be7eab80459ea58346'},
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'f8af28403351811f2891b101a42f7caa6d5a2c81b6bd06d2af10e383f2f28303'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
   'game-5d.html':{nonMetadataSha256:'2c2d9cb8ebf438a0943193f791ec071bad7bed40ebb839d7ac80b446b767c56d'}
  };
