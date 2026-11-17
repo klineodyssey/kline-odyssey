@@ -130,18 +130,19 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.5 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.5 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.5'"));
-  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.5'"),'Portal registry must advertise the same K11520 release');
+test('canonical shared release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes("SHARED_GAME_VERSION+' · 5D K線西遊記"));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes('const PRODUCT_VERSION=SHARED_GAME_VERSION'));
+  const registry=read('../../../../assets/kaios-world-registry.mjs');
+  assert.ok(registry.includes('version:SHARED_GAME_VERSION'),'Portal registry must advertise the same game release');
   // Reuse the canonical release guard established by the Courier QA repair;
   // check literal AND escaped active consumers, never historical documents.
-  const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
+  const release=registry.match(/const SHARED_GAME_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
   for(const path of ['./11520-browser-responsive.mjs','./11520-browser-smoke.mjs']){
-    const source=read(path);assert.ok(source.includes(escaped),`${path} exact regex must match canonical release ${release}`);
+    const source=read(path);assert.ok(source.includes('SHARED_GAME_VERSION'),`${path} must consume the canonical shared release ${release}`);
     for(const version of source.match(/V2(?:\\)?\.9(?:\\)?\.\d+/g)||[])assert.equal(version.replaceAll('\\',''),release,`${path} stale active version ${version}`);
   }
-  assert.ok(read('../../../../tests/kaios-portal.test.mjs').includes(`'${release}'`),'Portal unit consumer must match canonical release');
+  assert.ok(read('../../../../tests/kaios-portal.test.mjs').includes("findWorld('88888').version,SHARED_GAME_VERSION"),'Portal unit consumer must match canonical release');
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
@@ -205,7 +206,7 @@ test('Player Courier exposes explicit local-only Bandit mode, raid action and on
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','attackKSpace'])assert.ok(main.includes(token),token);assert.equal(main.includes('S.kaios+=r.rewardKaios'),false)});
 
 test('public reference quotes use the browser-safe market-data origin without credentials',()=>{
-  assert.ok(main.includes("import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs'"));
+  assert.match(main,/import \{[^}]*\bfetchPublicMarketObservations\b[^}]*\bpublicObservationStatus\b[^}]*\} from '\.\/public-market-quotes\.mjs'/);
   assert.ok(main.includes('observedAt:r.updatedAt'),'execution must use provider time, never fetch time');
   assert.ok(publicMarketQuotes.includes("origin:'https://data-api.binance.vision'"));
   assert.ok(publicMarketQuotes.includes("credentials:'omit'"));
@@ -362,11 +363,11 @@ test('existing rail owners cancel capture on Settings and require a fresh pointe
     let settings=false,commits=[],clears=0;
     const listeners=new Map(),documentListeners=new Map(),captured=new Set();
     const el={dataset:{},classList:{contains:()=>false},closest:()=>el,getBoundingClientRect:()=>({top:0,height:100}),addEventListener(type,fn){const a=listeners.get(type)||[];a.push(fn);listeners.set(type,a)},setPointerCapture:id=>captured.add(id),hasPointerCapture:id=>captured.has(id),releasePointerCapture:id=>captured.delete(id)};
-    const root={classList:{contains:()=>settings}},doc={documentElement:root,addEventListener(type,fn){const a=documentListeners.get(type)||[];a.push(fn);documentListeners.set(type,a)}};
-    const ctx={$:()=>el,ROOT:root,document:doc,el,record:value=>commits.push(value),clear:()=>clears++,signedFromPointer:y=>y,paintSignedC:()=>{},applySignedValue:value=>commits.push(value)};
+    const root={dataset:{},classList:{contains:()=>settings}},doc={documentElement:root,addEventListener(type,fn){const a=documentListeners.get(type)||[];a.push(fn);documentListeners.set(type,a)}};
+    const ctx={$:()=>el,ROOT:root,document:doc,el,setTimeout:()=>1,clearTimeout(){},record:value=>commits.push(value),clear:()=>clears++,signedFromPointer:y=>y,paintSignedC:()=>{},applySignedValue:value=>commits.push(value)};
     if(owner==='lots')runInNewContext(main.slice(main.indexOf('function bindVertical('),main.indexOf("bindVertical('#lotsControl'"))+"bindVertical('#lotsControl',record);",ctx);
     if(owner==='C')runInNewContext('let cPointer=null,internalNative=false;'+signedC.slice(signedC.indexOf('function cancelCInput()'),signedC.indexOf('function onDocumentClick('))+signedC.slice(signedC.indexOf('function bindC()'),signedC.indexOf('function publish()'))+'bindC();',ctx);
-    if(owner==='Y')runInNewContext('let railPid=null,rail={active:false,value:0};function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
+    if(owner==='Y')runInNewContext('let railPid=null,discPid=null,holdTimer=0,centerTap=null,discStart=null,rail={active:false,value:0};function syncMembrane(){}function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
     const emit=(type,pointerId,clientY=25)=>{const e={type,pointerId,clientY,target:el,preventDefault(){},stopImmediatePropagation(){}};for(const fn of listeners.get(type)||[])fn(e)};
     const context=open=>{settings=open;for(const fn of documentListeners.get('k11520:settings-context')||[])fn({detail:{open}})};
     emit('pointerdown',1);assert.equal(commits.length,1,owner+' fresh down');assert.ok(captured.has(1));
@@ -382,7 +383,7 @@ test('existing rail owners cancel capture on Settings and require a fresh pointe
 test('numeric editors preserve ordinary blur but cannot commit after Settings suppresses geometry',async()=>{
   const {runInNewContext}=await import('node:vm');let settings=false,commits=[],syncs=0;const listeners={};
   const input={dataset:{},value:'12',addEventListener:(type,fn)=>listeners[type]=fn,blur:()=>listeners.blur()};
-  const ctx={input,commit:v=>commits.push(v),ROOT:{classList:{contains:()=>settings}},syncNumericEditors:()=>syncs++};
+  const ctx={input,commit:v=>commits.push(v),ROOT:{classList:{contains:()=>settings}},document:{addEventListener(){}},syncNumericEditors:()=>syncs++};
   runInNewContext(signedC.slice(signedC.indexOf('function bindNumericEditor('),signedC.indexOf('function ensureNumericEditors('))+'bindNumericEditor(input,commit);',ctx);
   listeners.blur();assert.deepEqual(commits,['12'],'normal blur-before-open still commits');settings=true;input.value='99';listeners.change();listeners.blur();listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12'],'Settings-active change/blur/Enter cannot dispatch into hidden rails');assert.ok(syncs>=2);
   settings=false;input.value='7';listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12','7'],'a fresh Enter after close commits normally');
