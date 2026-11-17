@@ -42,7 +42,14 @@ async function clickRoute(page,selector,expected,visibleSelector,label){
     await Promise.all([page.waitForURL(expected,{waitUntil:'domcontentloaded'}),page.locator(selector).click()]);
     assertExactRoute(page.url(),expected,`${label}: actual URL`);
     await page.locator(visibleSelector).waitFor({state:'visible'});
-    const visible=await reachable(page,visibleSelector);assert.ok(visible.width>0&&visible.height>0&&visible.inView&&visible.hit,`${label}: visible reachable destination`);
+    let visible=await reachable(page,visibleSelector);
+    if(visibleSelector==='canvas#three'){
+      await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_WORLD_COORDS__);
+      // An actual game canvas legitimately has HUD over its centre. Require
+      // a real interior world hit, not the old iframe-host centre predicate.
+      visible=await page.locator(visibleSelector).evaluate(el=>{const r=el.getBoundingClientRect(),points=[.25,.5,.75].flatMap(x=>[.25,.5,.75].map(y=>({x:r.left+r.width*x,y:r.top+r.height*y}))),worldPoints=points.filter(p=>document.elementFromPoint(p.x,p.y)===el);return{width:r.width,height:r.height,inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,hit:worldPoints.length>0,worldPoints}});
+    }
+    assert.ok(visible.width>0&&visible.height>0&&visible.inView&&visible.hit,`${label}: visible reachable destination`);
     report.navigations.push({label,href,expected,actual:page.url(),visible,failures});
   }catch(error){report.navigations.push({label,href,expected,actual:page.url(),failures,failed:true});throw error;}
   finally{page.off('requestfailed',failed);}

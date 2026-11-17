@@ -352,7 +352,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       // The original assets/market sheet now includes a separate public
       // KGEN/WBNB reference. Fail its first read locally: never forward RPC,
       // never supply a price, and retain every other RPC/write as a failure.
-      if(request.url()===KGEN_POOL_REFERENCE_SOURCE.rpc&&request.method()==='POST'){
+      if(request.url()===new URL(KGEN_POOL_REFERENCE_SOURCE.rpc).href&&request.method()==='POST'){
         let payload;try{payload=request.postDataJSON()}catch{}
         if(payload?.jsonrpc==='2.0'&&Number.isSafeInteger(payload.id)&&payload.method==='eth_chainId'&&Array.isArray(payload.params)&&payload.params.length===0){
           result.blockedReadOnlyReferences.push({url:request.url(),method:payload.method,forwarded:false});
@@ -436,7 +436,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       assert.equal(s.wallet.modeDisabled,true,'Unverified REAL/Testnet selection stays disabled');
       assert.ok(s.providerCalls.every(call=>['eth_accounts','eth_chainId','eth_getBalance','eth_call'].includes(call.method)),'No connect, signer, chain switch or TX request is permitted');
       assert.deepEqual(result.networkAuthorityAttempts,[],'No unmocked RPC, network write or wallet websocket may be attempted');
-      assert.ok(result.blockedReadOnlyReferences.every(row=>row.url===KGEN_POOL_REFERENCE_SOURCE.rpc&&row.method==='eth_chainId'&&row.forwarded===false),'only the exact original public-reference first read is failed locally; no real RPC or synthetic price');
+      assert.ok(result.blockedReadOnlyReferences.every(row=>row.url===new URL(KGEN_POOL_REFERENCE_SOURCE.rpc).href&&row.method==='eth_chainId'&&row.forwarded===false),'only the exact original public-reference first read is failed locally; no real RPC or synthetic price');
       for(const observation of Object.values(s.publicReference))assert.notEqual(observation.source,source,'Simulation must never become public/REAL provenance');
     };
     const verifyRawSource=async phase=>{
