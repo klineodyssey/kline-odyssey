@@ -475,7 +475,10 @@ test('browser control inspection preserves per-control hit checks with one bound
 
 test('tiny landscape Market reserves its own lane and browser regression rejects covered balance text',async()=>{
   const {runInNewContext}=await import('node:vm'),layout=read('../runtime/mobile-control-layout.mjs'),browserSource=read('./11520-browser-responsive.mjs');
-  assert.match(layout,/html\[data-k11520-hud-profile\] \.top\{right:calc\(max\(6px, env\(safe-area-inset-right\)\) \+ 52px\)!important\}/);
+  assert.match(layout,/html\[data-k11520-hud-profile\] \.top\{right:calc\(max\(6px, env\(safe-area-inset-right\)\) \+ 52px\)!important;height:54px!important\}/);
+  assert.ok(layout.includes('.k11520InfoOpen:not(.k11520UtilitiesOpen):not(.k11520HudCollapsed)'), 'information cannot override the original compact utility tray owner');
+  assert.ok(layout.includes('.minimapWrap #minimap{height:70px!important}'), 'narrow portrait retains a native world gesture gap without changing camera admission');
+  assert.ok(layout.includes('height:44px!important;min-height:44px!important;box-sizing:border-box!important;white-space:nowrap!important'), 'shared portrait guide remains compact instead of a centred story overlay');
   assert.match(layout,/#k11520MarketRow\{top:6px;left:auto;right:max\(6px, env\(safe-area-inset-right\)\);width:44px;min-height:44px\}/);
   const source=browserSource.slice(browserSource.indexOf('async function verifyMarketHeaderSeparation('),browserSource.indexOf('async function verifySettingsInterruptedRails('));
   async function inspect({covered=false,clipped=false,blocked=false}={}){

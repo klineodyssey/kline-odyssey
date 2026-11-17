@@ -1,5 +1,6 @@
 // 2026-11-17 / Codex /root / PR672: original action visibility follows retained
-// controls OR explicit trade context; no change to geometry or financial state.
+// controls OR explicit trade context. Compact overlays fit the existing world;
+// no financial state, world coordinate or gesture admission rule is changed.
 // LOCAL_CANDIDATE_REVISION: HUD-FLOW2-TAP-J1; latestHumanretainfaintoutlineandremoveoutervisualsquareonly; actualauthorCodex originaltechnicalexecutor01a189ef-ecbc-7699-b87b-a4538d57c029.
 import './market-origin-wallet-layout-runtime.mjs';
 import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
@@ -97,6 +98,12 @@ function installStyle(){
 @media(max-width:380px){
   html[data-k11520-layout-owner] #k11520PlaneLabel{width:calc(100vw - 252px)!important}
 }
+@media(max-width:380px) and (orientation:portrait){
+  /* Keep a real world gesture gap between the map and movement controls on
+     narrow screens; retain the existing map owner and 44px action buttons. */
+  html[data-k11520-hud-profile] .minimapWrap{height:110px!important}
+  html[data-k11520-hud-profile] .minimapWrap #minimap{height:70px!important}
+}
 /* WORLD_FIRST_HUD_POLICY: disclosure never changes coordinates or control owners. */
 #k11520MarketRow{position:fixed;top:68px;left:auto;right:6px;width:44px;height:44px;min-height:44px;z-index:310;border:1px solid #68e4ff66;border-radius:12px;background:#071018e8;color:#dffaff;font:700 12px system-ui;touch-action:manipulation}
 #k11520HudProfile{min-height:44px;background:#102332;color:#dffaff;border:1px solid #68e4ff66;border-radius:8px}
@@ -121,7 +128,7 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
 @media(orientation:landscape) and (max-height:600px){
   /* The tiny Market edge has its own 44px lane plus an 8px gap. Reserve that
      lane beside the header so FULL balance labels/values stay readable. */
-  html[data-k11520-hud-profile] .top{right:calc(max(6px, env(safe-area-inset-right)) + 52px)!important}
+  html[data-k11520-hud-profile] .top{right:calc(max(6px, env(safe-area-inset-right)) + 52px)!important;height:54px!important}
   #k11520MarketRow{top:6px;left:auto;right:max(6px, env(safe-area-inset-right));width:44px;min-height:44px}
   html[data-k11520-hud-profile] .axes{top:54px!important;left:360px!important;right:58px!important;width:auto!important;max-width:none!important;transform:none!important}
   /* Realistic quotes may wrap k/alpha/theta onto two lines. Size to content,
@@ -148,7 +155,7 @@ html[data-k11520-hud-mode="ON_DEMAND"]:not([data-k11520-hud-profile="FULL"]):not
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) .controls{display:none!important;visibility:hidden!important;pointer-events:none!important}
 /* Explicit information restores original status/map cards even in the compact
    utility context; individual preferences and foreground Settings still win. */
-html[data-k11520-hud-mode="ON_DEMAND"].k11520InfoOpen:not(.k11520HudCollapsed):not(.k11520SettingsOpen) :is(.tele,.monsterHud,.minimapWrap):not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important}
+html[data-k11520-hud-mode="ON_DEMAND"].k11520InfoOpen:not(.k11520UtilitiesOpen):not(.k11520HudCollapsed):not(.k11520SettingsOpen) :is(.tele,.monsterHud,.minimapWrap):not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520TradeOpen):not(.k11520ControlsOpen) :is(#orderFire,#flat){display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"] #joy{display:block!important;visibility:visible!important;opacity:.28!important;pointer-events:auto!important;background:transparent!important;border:0!important;box-shadow:none!important;transition:opacity .18s linear;touch-action:none}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520MovementActive) #joy>*{opacity:.3!important}
@@ -166,6 +173,9 @@ html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!
 @media(orientation:landscape) and (max-height:600px){html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,54px)!important}}
 #k11520BuildStamp::after{content:' · L:FLOW2/TAP-J1'}
 @media(max-width:600px) and (orientation:portrait){
+  /* FULL and compact modes share one compact guide. Full story/details remain
+     on its original explicit activation, not a centred world-blocking card. */
+  html[data-k11520-hud-profile] #k11520MonsterGuide{left:6px!important;right:6px!important;width:auto!important;max-width:none!important;transform:none!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
   html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{top:var(--k11520-guide-top,346px)!important;bottom:auto!important}
   html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520InfoOpen,.k11520TradeOpen) .minimapWrap{top:var(--k11520-map-top,400px)!important;bottom:auto!important}
 }

@@ -287,6 +287,9 @@ async function verifyWorldFirst(){
       }
       await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520HudProfile').selectOption('STANDARD');
       await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.profile==='STANDARD');
+      // Settings boots before the scene. Every profile must await the actual
+      // monster runtime after reload before asserting its no-auto-trade flag.
+      await page.waitForFunction(()=>typeof globalThis.__K11520_MONSTER_FOLLOW__?.snapshot==='function');
       if(completedGrowth){await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().actors.some(a=>a.id===id),followed);assert.deepEqual(await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed),completedGrowth,'reload keeps completed growth without fabricating a new result');result.checks.performanceReload='EXACT GROWTH RETAINED PASS'}
       assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().automatesTrading),false);
       assert.deepEqual(errors,[]);result.checks.reload='PREFERENCE RETAINED / NO AUTO TRADE PASS';
