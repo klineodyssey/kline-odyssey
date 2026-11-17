@@ -264,6 +264,7 @@ function assertOfflineToastCoverage(result,profile){
 }
 
 async function offlineSimulationBrowserQA({baseline=false}={}){
+  const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   const {createHash}=await import('node:crypto');
   const {execFileSync}=await import('node:child_process');
   const base=(process.env.K11520_BASE_URL||'http://127.0.0.1:4173').replace(/\/+$/,'');
@@ -296,7 +297,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
   const browser=await chromium.launch({headless:true});
   try{for(const profile of profiles){
     const name=`${profile.width}x${profile.height}-${profile.quote.toLowerCase()}`;
-    const result={profile,head,baseline,simulatedBrowserClock:true,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],networkAuthorityAttempts:[]};results.push(result);
+    const result={profile,head,baseline,simulatedBrowserClock:true,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};results.push(result);
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage();
     page.setDefaultTimeout(12000);let stage='raw-source-proof',networkSequence=0;
     page.on('pageerror',error=>result.pageErrors.push(String(error)));
@@ -348,6 +349,16 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     await page.route('**/*',async r=>{
       const request=r.request(),url=new URL(request.url()),external=url.origin!==new URL(base).origin;
       const rpc=external&&/dataseed|llamarpc|ankr\.com|infura|alchemy|quicknode|(?:^|[./-])rpc(?:[./-]|$)/i.test(url.hostname+url.pathname);
+      // The original assets/market sheet now includes a separate public
+      // KGEN/WBNB reference. Fail its first read locally: never forward RPC,
+      // never supply a price, and retain every other RPC/write as a failure.
+      if(request.url()===KGEN_POOL_REFERENCE_SOURCE.rpc&&request.method()==='POST'){
+        let payload;try{payload=request.postDataJSON()}catch{}
+        if(payload?.jsonrpc==='2.0'&&Number.isSafeInteger(payload.id)&&payload.method==='eth_chainId'&&Array.isArray(payload.params)&&payload.params.length===0){
+          result.blockedReadOnlyReferences.push({url:request.url(),method:payload.method,forwarded:false});
+          await r.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'OFFLINE_READONLY_REFERENCE_UNAVAILABLE'})});return;
+        }
+      }
       if(!['GET','HEAD','OPTIONS'].includes(request.method())||rpc){result.networkAuthorityAttempts.push({method:request.method(),origin:url.origin,path:url.pathname,rpc});await r.abort('blockedbyclient');return}
       await r.fallback();
     });
@@ -424,7 +435,8 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       assert.equal(s.execution.mode,'SIMULATION_WALLET','Offline simulation must not switch execution authority');
       assert.equal(s.wallet.modeDisabled,true,'Unverified REAL/Testnet selection stays disabled');
       assert.ok(s.providerCalls.every(call=>['eth_accounts','eth_chainId','eth_getBalance','eth_call'].includes(call.method)),'No connect, signer, chain switch or TX request is permitted');
-      assert.deepEqual(result.networkAuthorityAttempts,[],'No public RPC, network write or wallet websocket may be attempted');
+      assert.deepEqual(result.networkAuthorityAttempts,[],'No unmocked RPC, network write or wallet websocket may be attempted');
+      assert.ok(result.blockedReadOnlyReferences.every(row=>row.url===KGEN_POOL_REFERENCE_SOURCE.rpc&&row.method==='eth_chainId'&&row.forwarded===false),'only the exact original public-reference first read is failed locally; no real RPC or synthetic price');
       for(const observation of Object.values(s.publicReference))assert.notEqual(observation.source,source,'Simulation must never become public/REAL provenance');
     };
     const verifyRawSource=async phase=>{
