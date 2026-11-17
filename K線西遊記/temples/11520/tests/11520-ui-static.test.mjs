@@ -698,7 +698,7 @@ test('world-first minimap waits for dismissal and requires native owned pointer 
   const good=await run();assert.equal(good.error,undefined);assert.deepEqual(good.order,['hidden','reset','click']);
   for(const option of ['wrongTarget','untrusted','missingUp','wrongPlane'])assert.ok((await run({[option]:true})).error,option+' must fail closed');
   const blocked=await run({blocked:true,diagnosticsFail:true});assert.equal(blocked.error,blocked.clickError,'diagnostics cannot mask native input failure');
-  assert.match(source,/await clickWorldFirstMinimap\(page,result\);\s*await page.locator\('#waypointAction'\).waitFor\(\{state:'visible'\}\)/);
+  assert.match(source,/await clickWorldFirstMinimap\(page,result\);\s*await page.locator\('#xyzWaypointAction'\).waitFor\(\{state:'visible'\}\)/);
 });
 
 test('FULL HUD readiness diagnostics observe existing queries without extra hit tests or relaxed thresholds',async()=>{
