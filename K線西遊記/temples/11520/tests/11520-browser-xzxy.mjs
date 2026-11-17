@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../runtime/player-life-runtime.mjs';
 
@@ -15,6 +16,17 @@ assert.equal(skillStore.activePlayer().level,3);
 await page.addInitScript(({key,encoded})=>{if(!localStorage.getItem(key))localStorage.setItem(key,encoded)},{key:PLAYER_LIFE_STORAGE_KEY,encoded:skillStorage.get(PLAYER_LIFE_STORAGE_KEY)});
 await page.addInitScript(()=>{try{localStorage.setItem('k11520.joystick.plane','XZ')}catch{}});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+const traceMetadata={head:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||null,profile:{width:390,height:844,isMobile:true,hasTouch:true},sourceHashes:{}};
+for(const file of ['game-5d-main.mjs','joystick-xzxyyz.mjs','spatial-coordinate-runtime.mjs','combat-drive-live-runtime.mjs','xyz-map-navigation-runtime.mjs'])traceMetadata.sourceHashes[file]=createHash('sha256').update(await fs.readFile(new URL('../runtime/'+file,import.meta.url))).digest('hex');
+let motionTraceReady=false;
+const traceReadErrors=[];
+const saveMotionTrace=async(status,error=null)=>{
+  let observed=null;try{observed=await page.evaluate(()=>globalThis.__k11520MotionDiagnostic?.snapshot()||{installed:false,visibility:document.visibilityState,url:location.href})}catch(readError){traceReadErrors.push(String(readError))}
+  const report={capturedAt:new Date().toISOString(),...traceMetadata,actualViewport:page.viewportSize(),status,error:error?String(error.stack||error):null,pageErrors:errors,traceReadErrors,observed};
+  if(error)try{await page.screenshot({path:`${OUT}/11520-xzxy-motion-failure.png`,fullPage:true})}catch(captureError){report.failureScreenshotError=String(captureError)}
+  await fs.writeFile(`${OUT}/11520-xzxy-motion-trace.json`,JSON.stringify(report,null,2));
+};
+try{
 await page.goto((process.env.K11520_BASE_URL||'http://127.0.0.1:4173')+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(1800);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
@@ -32,6 +44,39 @@ try{await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE_TIMER__&&glo
 catch(error){throw new Error(`${error}\n${JSON.stringify({errors,state:await page.evaluate(()=>({drive:!!globalThis.__K11520_COMBAT_DRIVE_TIMER__,control:!!globalThis.__K11520_3D_CONTROL__,character:document.querySelector('#charState')?.textContent}))})}`)}
 await page.evaluate(()=>{clearInterval(globalThis.__K11520_COMBAT_DRIVE_TIMER__);globalThis.__K11520_COMBAT_DRIVE_TIMER__=null});
 await page.waitForTimeout(120);
+
+// Read-only diagnosis on this existing test page. It owns only its observer RAF,
+// never the actor RAF/timers, controls, positions, collision result or visibility.
+await page.evaluate(()=>{
+  const traces=[],limits={traces:48,framesPerTrace:64,pointersPerTrace:16};let active=null,observerRaf=null;
+  const xyz=value=>value?{x:value.x,y:value.y,z:value.z}:null;
+  const read=()=>{
+    const control=globalThis.__K11520_3D_CONTROL__,world=globalThis.__K11520_WORLD_COORDS__,motion=globalThis.__K11520_LOCAL_MOTION__,navigation=globalThis.__K11520_XYZ_MAP_NAVIGATION__;
+    return{at:performance.now(),visibility:document.visibilityState,hidden:document.hidden,settingsOpen:document.documentElement.classList.contains('k11520SettingsOpen'),activeElement:document.activeElement?.id||null,
+      sheetOpen:document.querySelector('#sheet')?.classList.contains('open'),confirmOpen:document.querySelector('#confirm')?.classList.contains('open'),
+      control:control?{mode:control.mode,discAxes:control.discAxes?.slice(),railAxis:control.railAxis,disc:control.disc?{active:control.disc.active,h:control.disc.h,v:control.disc.v}:null,rail:control.rail?{active:control.rail.active,value:control.rail.value}:null,vector:xyz(control.vector)}:null,
+      world:world?{physical:xyz(world.physical),intent:xyz(world.intent),mode:world.mode}:null,
+      motion:motion?{status:motion.status,position:xyz(motion.position),intentDelta:xyz(motion.intentDelta),elapsedSeconds:motion.elapsedSeconds,distanceMoved:motion.distanceMoved,observedSpeedKPerSecond:motion.observedSpeedKPerSecond,speedKPerSecond:motion.speedKPerSecond,speedSource:motion.speedSource,appliedC:motion.appliedC,ownerKey:motion.ownerKey,blocked:motion.blocked,blocker:motion.blocker?{id:motion.blocker.id,name:motion.blocker.name}:null,substeps:motion.substeps,detour:motion.detour}:null,
+      navigation:navigation?{active:navigation.active,mode:navigation.mode,source:navigation.source,target:xyz(navigation.target)}:null,collision:document.querySelector('#collision')?.textContent?.slice(0,240)||null};
+  };
+  const finish=reason=>{if(observerRaf!==null)cancelAnimationFrame(observerRaf);observerRaf=null;if(active){active.finished=read();active.finishReason=reason;active=null}};
+  const observe=frameAt=>{observerRaf=null;if(!active)return;active.frames.push({frameAt,...read()});if(active.frames.length<limits.framesPerTrace)observerRaf=requestAnimationFrame(observe);else active.frameLimitReached=true};
+  const begin=intent=>{
+    finish('NEXT_TRACE');if(traces.length>=limits.traces)return;
+    active={intent,started:read(),frames:[],pointers:[],frameLimitReached:false,pointerLimitReached:false};traces.push(active);observerRaf=requestAnimationFrame(observe);
+  };
+  for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,event=>{
+    if(!active||event.pointerId!==active.intent.pointerId||!event.target?.closest?.('#joy,#yControl'))return;
+    const trace=active,pointer={type,at:performance.now(),pointerId:event.pointerId,isTrusted:event.isTrusted,pointerType:event.pointerType,buttons:event.buttons,clientX:event.clientX,clientY:event.clientY,target:event.target.id||event.target.tagName};
+    // Read after the real input handlers. A capture-phase snapshot alone could
+    // precede the canonical disc update and falsely suggest an ignored gesture.
+    queueMicrotask(()=>{if(trace.pointers.length<limits.pointersPerTrace)trace.pointers.push({...pointer,afterHandlers:read()});else trace.pointerLimitReached=true});
+  },true);
+  globalThis.__k11520MotionDiagnostic={begin,finish,snapshot:()=>({limits,traces,current:read()})};
+});
+motionTraceReady=true;
+const beginMotionTrace=async intent=>{if(motionTraceReady)await page.evaluate(intent=>__k11520MotionDiagnostic.begin(intent),intent)};
+const endMotionTrace=async()=>{if(motionTraceReady)try{await page.evaluate(()=>__k11520MotionDiagnostic.finish('GESTURE_COMPLETE'))}catch(error){traceReadErrors.push(String(error))}};
 
 // Exercise actual HTTP ESM resolution, not just matching import strings.
 const moduleCompatibility=await page.evaluate(async()=>{
@@ -53,9 +98,9 @@ const railBox=async()=>{const b=await page.locator('#yControl').boundingBox();as
 const knobBox=async()=>{const b=await page.locator('#knob').boundingBox();assert.ok(b,'knob missing');return b};
 const center=b=>({x:b.x+b.width/2,y:b.y+b.height/2});
 const point=(b,x,y,buttons=1,id=1)=>({pointerId:id,pointerType:'touch',clientX:b.x+b.width*x,clientY:b.y+b.height*y,buttons});
-const drag=async(toX,toY,id,hold=300)=>{const b=await joyBox();await page.dispatchEvent('#joy','pointerdown',point(b,.5,.5,1,id));await page.dispatchEvent('#joy','pointermove',point(b,toX,toY,1,id));await page.waitForTimeout(hold);await page.dispatchEvent('#joy','pointerup',point(b,toX,toY,0,id));await page.waitForTimeout(120)};
+const drag=async(toX,toY,id,hold=300)=>{const b=await joyBox();await beginMotionTrace({kind:'DISC',pointerId:id,toX,toY,holdMs:hold,box:b});try{await page.dispatchEvent('#joy','pointerdown',point(b,.5,.5,1,id));await page.dispatchEvent('#joy','pointermove',point(b,toX,toY,1,id));await page.waitForTimeout(hold);await page.dispatchEvent('#joy','pointerup',point(b,toX,toY,0,id));await page.waitForTimeout(120)}finally{await endMotionTrace()}};
 const assertThumbFollows=async()=>{const b=await joyBox(),k0=await knobBox(),c0=center(k0),p0=point(b,.5,.5,1,91),p1=point(b,.88,.22,1,91);await page.dispatchEvent('#joy','pointerdown',p0);await page.dispatchEvent('#joy','pointermove',p1);await page.waitForTimeout(100);const k1=await knobBox(),c1=center(k1),travel=Math.hypot(c1.x-c0.x,c1.y-c0.y),limit=Math.min(b.width,b.height)/2*.70;assert.ok(c1.x>c0.x+12,`joystick thumb must follow finger right: ${JSON.stringify({c0,c1})}`);assert.ok(c1.y<c0.y-10,`joystick thumb must follow finger up: ${JSON.stringify({c0,c1})}`);assert.ok(travel<=limit+2,`joystick thumb must remain clamped: ${JSON.stringify({travel,limit,c0,c1})}`);assert.equal(await page.locator('#joy').getAttribute('data-k11520-disc-active'),'1','drag visual state missing');await page.screenshot({path:`${OUT}/11520-mobile-joystick-follow.png`,fullPage:true});await page.dispatchEvent('#joy','pointerup',{...p1,buttons:0});await page.waitForTimeout(180);const c2=center(await knobBox());assert.ok(Math.hypot(c2.x-c0.x,c2.y-c0.y)<3,`joystick thumb must ease back to center: ${JSON.stringify({c0,c2})}`);assert.equal(await page.locator('#joy').getAttribute('data-k11520-disc-active'),'0','thumb follow state must clear after release')};
-const dragRail=async(toY,id,hold=320)=>{const b=await railBox(),p0=point(b,.5,.5,1,id),p1=point(b,.5,toY,1,id);await page.dispatchEvent('#yControl','pointerdown',p0);await page.dispatchEvent('#yControl','pointermove',p1);await page.waitForTimeout(hold);await page.dispatchEvent('#yControl','pointerup',{...p1,buttons:0});await page.waitForTimeout(120)};
+const dragRail=async(toY,id,hold=320)=>{const b=await railBox(),p0=point(b,.5,.5,1,id),p1=point(b,.5,toY,1,id);await beginMotionTrace({kind:'RAIL',pointerId:id,toY,holdMs:hold,box:b});try{await page.dispatchEvent('#yControl','pointerdown',p0);await page.dispatchEvent('#yControl','pointermove',p1);await page.waitForTimeout(hold);await page.dispatchEvent('#yControl','pointerup',{...p1,buttons:0});await page.waitForTimeout(120)}finally{await endMotionTrace()}};
 const tapCenter=async id=>{const b=await joyBox(),p=point(b,.5,.5,1,id);await page.dispatchEvent('#joy','pointerdown',p);await page.waitForTimeout(70);await page.dispatchEvent('#joy','pointerup',{...p,buttons:0});await page.waitForTimeout(180)};
 const visible=async sel=>{const r=await page.locator(sel).evaluate(el=>{const b=el.getBoundingClientRect(),s=getComputedStyle(el);return{x:b.x,y:b.y,w:b.width,h:b.height,right:b.right,bottom:b.bottom,display:s.display,visibility:s.visibility,opacity:s.opacity,pointer:s.pointerEvents}});assert.ok(r.w>0&&r.h>0&&r.display!=='none'&&r.visibility!=='hidden'&&r.opacity!=='0',`${sel} not visible ${JSON.stringify(r)}`);return r};
 const near=(a,b,t=.16)=>Math.abs(a-b)<=t;
@@ -116,5 +161,9 @@ for(const [mode,discAxes,railAxis] of [['XZ',['X','Z'],'Y'],['XY',['X','Y'],'Z']
 assert.equal((await control()).mode,'XZ','native landscape touch must complete XZ→XY→YZ→XZ');
 assert.deepEqual(errors,[],'page errors after module imports/rotation: '+errors.join('\n'));
 await fs.writeFile(`${OUT}/11520-xzxy-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),head:process.env.K11520_SOURCE_SHA||null,organ:'XYZ Plane Joystick',moduleCompatibility,landscapeModes,mode:(await control()).mode,xyz:await xyz(),world:await world(),controller:await control(),normalMarket:await normal(),mobileControlLayout:layout,quickActions:{attack,order}},null,2));
-await browser.close();
+await saveMotionTrace('PASS');
 console.log('11520 XZ+Y / XY+Z / YZ+X controller + touch-follow thumb + normal market + mobile control layout browser QA PASS');
+}catch(error){
+  try{await saveMotionTrace('FAIL',error)}catch(evidenceError){console.error('XZXY_MOTION_TRACE_SAVE_FAILED',String(evidenceError))}
+  throw error;
+}finally{await browser.close()}
