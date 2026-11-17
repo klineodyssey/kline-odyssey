@@ -127,6 +127,9 @@ async function verifyWorldFirst(){
       assert.equal(await page.locator('.brandMetaV250 span:first-child').textContent(),`${SHARED_GAME_VERSION} · 5D K線西遊記`);
       result.checks.visibleVersion=SHARED_GAME_VERSION;
       assert.equal(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__.profile),'MINIMAL');
+      // Current default retains discoverable controls/information. Exercise
+      // world-first only after the real user explicitly closes information.
+      if(await page.locator('#axes').isVisible())await page.locator('#k11520MarketRow').click();
       assert.equal(await page.locator('#axes').isVisible(),false);
       assert.equal(await page.locator('#k11520CameraReset').isVisible(),false,'automatic follow has no persistent Recenter');
       for(const selector of ['#k11520MarketRow']){
@@ -202,7 +205,7 @@ async function verifyWorldFirst(){
       await page.locator('#k11520CameraReset').click();assert.deepEqual(await read(),start);assert.equal(await page.locator('#k11520CameraReset').isVisible(),false,'Recenter returns to contextual hidden state');
       await page.screenshot({path:`${OUT}/camera-${profile.name}-recenter.png`});
       await page.waitForFunction(original=>{const p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return Math.abs(p.x-original.x)<.5&&Math.abs(p.y-original.y)<.5},result.visibility.player,{timeout:3000});
-      await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),true);
+      await ensureExpandedMarket(page);assert.equal(await page.locator('#axes').isVisible(),true);
       const marketReadability=await page.locator('#axes').evaluate(el=>{
         const cards=[...el.querySelectorAll('.axis')];
         return cards.map(card=>{const r=card.getBoundingClientRect(),symbol=card.querySelector('.marketName'),price=card.querySelector('.q'),address=card.querySelector('.marketKValue'),style=address?getComputedStyle(address):null;return{width:r.width,symbol:symbol?.textContent?.trim(),symbolFits:!!symbol&&symbol.scrollWidth<=symbol.clientWidth+1&&symbol.scrollHeight<=parseFloat(getComputedStyle(symbol).lineHeight)+1,price:price?.textContent?.trim(),priceFits:!!price&&price.scrollWidth<=price.clientWidth+1&&price.scrollHeight<=parseFloat(getComputedStyle(price).lineHeight)+1,address:address?.textContent?.trim(),addressFits:!!address&&address.scrollWidth<=address.clientWidth+1&&address.getBoundingClientRect().bottom<=r.bottom-3,overflowWrap:style?.overflowWrap,wordBreak:style?.wordBreak}});
@@ -225,10 +228,12 @@ async function verifyWorldFirst(){
       await page.waitForTimeout(15100);assert.equal(await page.locator('#axes').isVisible(),true);
       await touch('touchMove',[[1,card.x+20,card.y+12]]);await touch('touchEnd',[]);
       if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
-      await page.waitForFunction(()=>getComputedStyle(document.getElementById('axes')).display==='none',null,{timeout:17000});
+      await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__.tradeOpen===false,null,{timeout:17000});
+      assert.equal(await page.locator('#axes').isVisible(),true,'trade timeout retains independently disclosed information');
+      await page.locator('#k11520MarketRow').click();await page.locator('#axes').waitFor({state:'hidden'});
       assert.deepEqual(await read(),start,'card gestures must not pan camera');
       assert.doesNotMatch(await page.locator('#k11520MarketRow').textContent(),/BTC|ETH|BNB|LIVE/,'collapsed Market must not preserve a quote ticker');await page.screenshot({path:`${OUT}/market-idle-hidden-${profile.width}x${profile.height}.png`});
-      result.checks.marketIdle='15s / held-pointer / resume / true-hide PASS';result.checks.camera='PAN / PINCH / RESET / XYZ ISOLATION PASS';
+      result.checks.marketIdle='15s trade context / held-pointer / resume / explicit information close PASS';result.checks.camera='PAN / PINCH / RESET / XYZ ISOLATION PASS';
       quoteStep=100;
       await page.waitForFunction(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.some(m=>m.intent?.direction==='LONG'),null,{timeout:15000});
       const before=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot());
@@ -286,7 +291,11 @@ async function verifyWorldFirst(){
   }
 }
 async function ensureExpandedMarket(page){
-  if(!await page.locator('#axes').isVisible())await page.locator('#k11520MarketRow').click();
+  if(!await page.locator('#axes').isVisible()){
+    await page.locator('#k11520MarketRow').click();
+    await page.locator('#k11520UiSettings').waitFor({state:'visible'});
+    await page.locator('#k11520ShowTrade').click();
+  }
   await page.locator('#axes').waitFor({state:'visible'});
   // Reflow from actual disclosure before geometry assertions, without waiting
   // for a desired margin or weakening any retained clearance threshold.
@@ -392,7 +401,7 @@ async function verifySettingsContext(page,report){
     await verifyScrolledControlCenters(page,'#k11520UiSettings button,#k11520UiSettings select','Settings');
     await page.locator('#k11520UiSettingsClose').scrollIntoViewIfNeeded();
     if(cycle===2)await page.screenshot({path:`${OUT}/${report.profile.name}-settings-owned.png`});
-    if(closeWith==='Escape'){escapeMarketBefore=await page.locator('#k11520MarketRow').getAttribute('aria-expanded');await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#k11520UiSettings').isVisible(),true);await page.keyboard.press('Escape')}else await page.locator('#k11520UiSettingsClose').click();
+    if(closeWith==='Escape'){escapeMarketBefore=await page.locator('#k11520MarketRow').getAttribute('aria-expanded');const edge=await page.locator('#k11520MarketRow').boundingBox();await page.mouse.click(edge.x+edge.width/2,edge.y+edge.height/2);assert.equal(await page.locator('#k11520UiSettings').isVisible(),true);await page.keyboard.press('Escape')}else await page.locator('#k11520UiSettingsClose').click();
     await page.waitForFunction(()=>!document.documentElement.classList.contains('k11520SettingsOpen'));
     assert.equal(await page.evaluate(()=>document.activeElement?.id),'gameModeToggle','Settings close returns keyboard focus to its launcher');
     if(escapeMarketBefore!==null&&await page.locator('#k11520MarketRow').getAttribute('aria-expanded')!==escapeMarketBefore)await page.locator('#k11520MarketRow').click();
@@ -433,6 +442,8 @@ async function verifyContextualHud(){
       if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(async error=>{if(await page.locator('#intro11520').isVisible())throw error});
       await page.locator('#intro11520').waitFor({state:'hidden'});
       await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
+      assert.equal(await page.locator('#axes').isVisible(),true,'fresh current default displays public information');
+      await page.locator('#k11520MarketRow').click();
       assert.equal(await page.locator('#axes').isVisible(),false);assert.equal(await page.locator('#k11520CameraReset').isVisible(),false);
       for(const id of ['cargoInterceptionButton','homeDeliveryButton'])assert.equal(await page.locator('#'+id).isVisible(),false,'idle action is absent from World');
       const edge=await page.locator('#k11520MarketRow').boundingBox();assert.ok(edge.width===44&&edge.height===44,'Market disclosure is one tiny edge control, never a ticker row');assert.doesNotMatch(await page.locator('#k11520MarketRow').textContent(),/BTC|ETH|BNB|LIVE/);
@@ -467,8 +478,8 @@ async function verifyContextualHud(){
       const activeReport={profile:{...profile,name:profile.name+'-active-courier'}};await verifySettingsContext(page,activeReport);
       assert.equal(await page.evaluate(()=>__K11520_PLAYER_COURIER__.active().missionId),missionId,'Settings never cancels or replaces the mission');report.activeCourier=activeReport.settingsContext;
       await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520HudProfile').selectOption('FULL');await page.locator('#k11520UiSettingsClose').click();await page.locator('#k11520UtilityMaster').click();
-      assert.equal(await page.locator('#axes').isVisible(),false,'FULL cannot override an explicit Market collapse');await verifyMarketHeaderSeparation(page,report,'full-explicit-collapse');await ensureExpandedMarket(page);await verifyMarketHeaderSeparation(page,report,'full-expanded');
-      await page.waitForTimeout(15100);await page.locator('#axes').waitFor({state:'hidden',timeout:2000});assert.equal(await page.locator('#k11520MarketRow').getAttribute('aria-expanded'),'false');
+      assert.equal(await page.locator('#axes').isVisible(),true,'explicit FULL selection discloses information');await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),false,'explicit information close wins after FULL selection');await verifyMarketHeaderSeparation(page,report,'full-explicit-collapse');await ensureExpandedMarket(page);await verifyMarketHeaderSeparation(page,report,'full-expanded');
+      await page.waitForTimeout(15100);assert.equal(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__.tradeOpen),false);assert.equal(await page.locator('#axes').isVisible(),true,'idle closes trade context, not explicit information');await page.locator('#k11520MarketRow').click();await page.locator('#axes').waitFor({state:'hidden',timeout:2000});assert.equal(await page.locator('#k11520MarketRow').getAttribute('aria-expanded'),'false');report.informationClosedExplicitlyAfterTradeExpiry=true;
       await verifyMarketHeaderSeparation(page,report,'full-idle-hidden');report.market={cards,idleMs:15000,fullRespectsCollapse:true};report.camera='DEFAULT_HIDDEN / MANUAL_ONLY / RECENTER_HIDES / XYZ_UNCHANGED';assert.deepEqual(errors,[]);
       await page.screenshot({path:`${OUT}/${profile.name}-contextual-full-idle-hidden.png`});
     }catch(error){report.error=String(error);failures.push(profile.name+': '+error);await page.screenshot({path:`${OUT}/${profile.name}-contextual-FAIL.png`}).catch(()=>{})}
