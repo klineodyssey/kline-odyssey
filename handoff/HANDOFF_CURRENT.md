@@ -22,6 +22,8 @@
 - 新 head 原 Universal CI `44184119067` 首跑 593 項／592 PASS／1 FAIL：`tests/11520-order-route.test.mjs` 的抽取訂閱 callback fixture 缺原 module 新增的 `navAutoWalletKey=null`。只補 fixture 初值後，此檔 23/23 PASS（294.5871ms）；原 READING 清除順序斷言保留，產品碼未再修改。其他 runtime／visual CI 尚待結果。
 - 後續 `4e8d2e3ea0f47a0ae7a107bcf53d33f3ccaa6696` 原 Universal CI `44184793604` SUCCESS。Game `44184793508` 首個實測失敗是 `11520-browser-xzxy.mjs` 的 `XZ up must Z+`；原斷言及 hold 不變，僅在原測試加入最多48段×64幀／16 pointer 的唯讀 trace及失敗截圖保存，再作一次原 CI 診斷。來源／離線控制向量核對未顯示 Z 反轉，但不能據此推定實景根因；若相同故障再次失敗，保存證據並停止盲重試。
 - 同 head Trading `44184793520` 的本機 EVM 候選與 canonical job SUCCESS；M1 先前餘額／換帳／重載／斷重連已過，但 RETURN_LEGACY 被既有 `RECOVERY_HISTORY_REQUIRES_INDEXER` 範圍保護拒絕（部署133803774至讀回143331474相差9,527,700，超過原2,000,000上限）。原 artifact `14373423972` SHA256 `fc32c7e6ae9f1141671745446f7495e9f8311967b2799c95ba7d00bd21660f6e` 保留；不提高上限、不以不完整 history 冒充退出驗收。`LEGACY_EXIT_BLOCKED / NOT_VERIFIED` 仍成立，本輪未改此財務恢復程式或測試 gate。
+- `a849f36787d58f9a10973551c8aff7c40ab93502` 第二段有軌跡實測首故障為 XZ right。原 artifact `14374641927` SHA256 `26654f1c7ab01e751b85dabebc9019ace92c978d6662cb17713413695fbfc0b7`，JSON exact head 及五原碼指紋已核。6個 active frame 的 raw.h=1／elapsed>0，但 `ATM-11520-001` 真碰撞讓 physical不變、intent.x仍增，排除本次 Z 符號／clock 抑制的猜測。上輪無軌跡，不追認同因。
+- 已定位的前置污染為 `assertThumbFollows()` 在方向矩陣之前按住斜向移動截圖，截圖期間角色繼續走到 ATM 邊；僅把這個原視覺檢查移到九軸矩陣完成並回 XZ 之後。所有原方向／地面／回彈／截圖斷言、hold及timeout保持，未停 actor、修改碰撞或 force/reset 位置。這是已核根因的 QA 排序修正；之前兩段失敗及停止盲重試紀錄保留，不冒充產品碼已修復。
 - 唯一下一步：沿原 PR673 讀回修正後精確 head 的既有 CI 與兩尺寸實圖，合格後原站交付；#523 已關閉，不再作為普通工程等待條件。
 
 ## Earlier handoff records — preserved as history
