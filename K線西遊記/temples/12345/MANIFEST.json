@@ -5,21 +5,28 @@
     "previous_registration_date": "2026-11-12",
     "version": "12345-TEMPLE-V10.51.0-COCKPIT-ENTRY",
     "status": "LOCAL_CANDIDATE_NOT_MAINNET_READY",
-    "paths": ["index.html", "cockpit.html", "VERSION", "MANIFEST.json", "modules/collateral-account.js", "tests/frontend-v34.test.mjs"],
+    "paths": [
+      "index.html",
+      "cockpit.html",
+      "VERSION",
+      "MANIFEST.json",
+      "modules/collateral-account.js",
+      "tests/frontend-v34.test.mjs"
+    ],
     "backend_inventory": "../../../KAIOS/backend/README.md",
     "checkpoint": "PROGRAM_HISTORY.md",
     "legacy_files_manifest_status": "HISTORICAL_SNAPSHOT_NOT_CURRENT_BUILD_HASHES",
     "live_financial_writes": false
   },
   "version": "12345-TEMPLE-V10.51.0-COCKPIT-ENTRY",
-  "build": "20261115-COCKPIT-ENTRY-R3",
+  "build": "20261117-COCKPIT-ENTRY-R4",
   "base_from": "12345-TEMPLE-V10.50.0-KAIOS-LINEAGE-TEMPLEHEART-V3.3.2-READY",
-  "generated": "2026-11-15",
+  "generated": "2026-11-17",
   "frontend_release": {
     "version": "12345-TEMPLE-V10.51.0-COCKPIT-ENTRY",
     "version_source": "VERSION",
     "status": "FRONTEND_RELEASE_NONFINANCIAL",
-    "build_revision": 3,
+    "build_revision": 4,
     "navigation_strategy": "CSP_HASHED_REPLACE_WITH_MANUAL_FALLBACK",
     "publication_channel": "GITHUB_PAGES",
     "source_branch": "main",
@@ -41,7 +48,10 @@
     "previous_manifest_generated": "2026-05-20",
     "previous_file_certificate_version": "12345-TEMPLE-V10.48.0-LIFE-STANDARD-REGENERATION",
     "previous_file_certificate_build": "20260525-V10.48.0-LIFE-STANDARD-REGENERATION",
-    "files_health_and_runtime_inventory": "HISTORICAL_SNAPSHOT_NOT_CURRENT_BUILD_HASHES"
+    "files_health_and_runtime_inventory": "HISTORICAL_SNAPSHOT_NOT_CURRENT_BUILD_HASHES",
+    "previous_frontend_build": "20261115-COCKPIT-ENTRY-R3",
+    "previous_frontend_generated": "2026-11-15",
+    "previous_frontend_build_revision": 3
   },
   "root": "K線西遊記/temples/12345",
   "health": {
@@ -241,7 +251,7 @@
       "life_layer": "DNA",
       "life_type": "Genome DNA Record",
       "version": "12345-TEMPLE-V10.51.0-COCKPIT-ENTRY",
-      "build": "20261115-COCKPIT-ENTRY-R3",
+      "build": "20261117-COCKPIT-ENTRY-R4",
       "birth": "2026-05-25",
       "death": "ACTIVE",
       "growth_stage": "IMMORTAL_REGENERATION_STANDARDIZATION"
