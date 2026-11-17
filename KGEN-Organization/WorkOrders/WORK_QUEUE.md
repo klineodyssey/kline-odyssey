@@ -12,9 +12,9 @@
 - REPLACEMENT_SOURCE: 本次 PR673 整合提交；精確 SHA 沿 PR head 與原 checkpoint 讀回，不以先前 core-only `ae675442` 代填。
 - CANDIDATE_CHECKS: 新導航16/16 PASS；UI-static首跑68/72後修正舊假設／fixture，第二跑72/72 PASS；drive adapter PASS、product-standard舊名稱 marker修正後 PASS；Full HUD admission相關2/2 PASS。合成兩尺寸瀏覽器流程與原 CI runtime／實景驗收仍待執行，不以本機靜態結果宣稱完成品。
 - STATUS: `INTEGRATION_CANDIDATE / NOT_MERGED_TO_MAIN / FULL_UI_NOT_COMPLETE`。未宣稱本輪部署、完整 UI、實體手機或真交易驗收。
-- DISPOSITION: 替代提交保存後，root 才將 #523 關閉為 `REPLACED_BY673`，附實際替代來源；目前不預造關閉或部署結果，不刪除原分支／提交歷史。
+- DISPOSITION: 替代提交 `b58e850a2fc48491bcc7a3fb9f0728446407aef4` 已保存及 push；#523 已於 `2026-11-17T21:51:57Z`（台灣11/18 05:51:57）closed／merged=false，附 `REPLACED_BY673` 來源。原 body／分支／提交歷史保留；這不宣稱 PR673 已部署。
 - RETAINED_BOUNDARIES: #19 的具體拒絕與禁止重試、其他具體 HOLD、成本／資源／停機限制、停用 Browser 與原停止條件不變。真錢包、主網合約部署、真交易、付款與治理仍由合法持有人本人確認；AI 不簽署、送真交易、取得秘密或繞過限制。
-- NEXT_STEP: root 保存本輪替代來源提交與差異，讀回並記錄 #523 的實際關閉，再完成 PR673 的原有整合與驗收。
+- NEXT_STEP: root 沿 PR673 讀回精確 head 的 CI 與兩尺寸實景證據，修復具體失敗，合格後原站交付。#523 普通工程權限無需再次詢問。
 
 ## Earlier queue records — preserved as history
 

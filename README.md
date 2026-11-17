@@ -22,8 +22,8 @@ supply engine C. Stopping decisions preserves existing orders and positions.
 Human explicitly released #523's ordinary engineering HOLD. Its needed motion
 clock, collision and navigation delta is carried into the current original
 files through [PR673](https://github.com/klineodyssey/kline-odyssey/pull/673).
-The old conflicting draft will be closed with its history retained after the
-replacement source is saved. Earlier #523 HOLD text below is historical for
+The old conflicting draft was closed at 2026-11-17T21:51:57Z after replacement
+source b58e850a2 was pushed; its branch and history are retained. Earlier #523 HOLD text below is historical for
 this scope. Exact-head CI/visual acceptance and Pages delivery are still
 pending; cross-world arrival at 18911 and live automatic trading are not
 implemented by this candidate. Other specific HOLDs and holder-wallet

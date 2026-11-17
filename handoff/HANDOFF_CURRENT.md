@@ -18,8 +18,9 @@
 - UI_CANDIDATE: 三市場獨立選擇、原世界地圖中的 XYZ／距離／ETA／分欄情境 PnL、明確確認的模擬自駕與原委託／持倉入口。單一 motion clock／已成交 C 引擎、換身份／模式與隱藏停止策略；draft/pending 不點火。既有兩尺寸 settlement QA 增加真 DOM flow 與原 artifact 路徑的合成截圖，尚待 CI runtime 驗證。
 - CI_REPAIR: 舊 head 的 provenance mismatch 已保存並更新精確 executable-byte 記錄，未刪除祖先雜湊；兩個既有 Trading browser job 固定與 Game 同 `ubuntu-22.04` 以相容原 Playwright 1.51.1；冷 360 Full HUD 的實際 down 不合格先 cancel/reacquire，沿原 1000ms／max3 邊界，未延長 timeout 或改產品 gate。
 - CURRENT_STATUS: `PR673_INTEGRATION_CANDIDATE / NOT_MERGED_TO_MAIN / FULL_UI_NOT_COMPLETE`。本紀錄不宣稱本輪 main 合併、Pages 部署、手機驗收、真交易或 #523 已關閉。
-- 預定處置：替代來源提交保存後，由 root 將 #523 關閉為 `REPLACED_BY673`，並附替代來源；保留原分支、提交與交接歷史，不刪除歷史。
-- 唯一下一步：root 保存本輪替代來源 commit 與精確差異，讀回後記錄 #523 的實際關閉結果，再沿 PR673 完成既有整合與驗收。
+- 實際處置：替代來源 `b58e850a2fc48491bcc7a3fb9f0728446407aef4` 已 commit/push 原 PR673；#523 於 UTC `2026-11-17T21:51:57Z`／台灣 `2026-11-18T05:51:57+08:00` 關閉為 `REPLACED_BY673`（merged=false）。原 body 前綴、分支 `dot/k11520-navigator-reconstruction-20261007`、head 與交接歷史保留。
+- 新 head 原 Universal CI `44184119067` 首跑 593 項／592 PASS／1 FAIL：`tests/11520-order-route.test.mjs` 的抽取訂閱 callback fixture 缺原 module 新增的 `navAutoWalletKey=null`。只補 fixture 初值後，此檔 23/23 PASS（294.5871ms）；原 READING 清除順序斷言保留，產品碼未再修改。其他 runtime／visual CI 尚待結果。
+- 唯一下一步：沿原 PR673 讀回修正後精確 head 的既有 CI 與兩尺寸實圖，合格後原站交付；#523 已關閉，不再作為普通工程等待條件。
 
 ## Earlier handoff records — preserved as history
 
