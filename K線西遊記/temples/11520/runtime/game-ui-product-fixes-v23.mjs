@@ -47,7 +47,7 @@ let toastContextObserver=null;
 // route/joystick writers still address #toast; context changes do not reset time.
 function place11520Toast(toast){
   const confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),body=document.getElementById('sheetBody');
-  const organ=body?.dataset.simOrgan,title=['orders','positions','history'].includes(organ)?document.querySelector('#rail [data-organ="'+organ+'"]')?.getAttribute('title'):null;
+  const organ=body?.dataset.simOrgan,title=['orders','positions','history','worldmap'].includes(organ)?document.querySelector('#rail [data-organ="'+organ+'"]')?.getAttribute('title'):null;
   const panel=confirm?.classList.contains('open')?confirm:sheet?.classList.contains('open')&&title&&document.getElementById('sheetTitle')?.textContent===title?sheet:null;
   const header=panel?.querySelector('.sheetHead');
   if(header){
@@ -62,7 +62,12 @@ function place11520Toast(toast){
   if(guide?.width>0){
     for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
     const height=toast.getBoundingClientRect().height;
-    if(guide.bottom+6+height>innerHeight-6)toast.style.setProperty('top',Math.max(6,guide.top-6-height)+'px','important');
+    if(guide.bottom+6+height>innerHeight-6){
+      // Prefer a smaller below-guide gap before falling back above the guide.
+      // The old fallback crossed the landscape Life HP panel at 844x390.
+      const top=guide.bottom+2+height<=innerHeight-2?guide.bottom+2:Math.max(6,guide.top-6-height);
+      toast.style.setProperty('top',top+'px','important');
+    }
   }
 }
 function install11520ToastContext(){

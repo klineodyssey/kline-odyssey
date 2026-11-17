@@ -1,5 +1,28 @@
 # HANDOFF_CURRENT
 
+## 2026-11-18 Human 授權更新與 PR523 → PR673 接續（最新有效範圍）
+
+- RECORDED_UTC: `2026-11-17T21:16:49Z`; 台灣時間：`2026-11-18T05:16:49+08:00`。
+- 直接依據：本頁 Human 明確要求處理並解除 #523 的普通工程阻塞，讓原專案繼續；原話末句：「要專案能進行，常識說就是授權改」。
+- 本次授權解除 #523 對原範圍普通工程的 HOLD；以下歷史紀錄中的該項限制於此範圍由本次接續授權取代。不得再將它當成全域工程阻擋，或對相同範圍反覆要求 Human 授權。
+- 這是既有 `HUMAN_DIRECT_ORDINARY_LOCAL_ENGINEERING / MANUAL_DISPATCH_NON_ATOMIC` 的 authority-scope 更新；root 是本輪單一整合 Writer，助手僅按既有檔案範圍分工。沒有建立新 Worker、原子 claim、dispatcher、排程或產品。
+- #19 的具體拒絕／禁止重試、真錢包與主網的持有人確認、其他具體 HOLD、成本／資源／停機上限，以及既有停用 Browser 與停止條件全部保留。此更新不授權 AI 簽署、送真交易、付款、治理、部署主網合約、讀取秘密或繞過工具限制。
+- 來源固定：main `01794eba63b2664db741f9787a16bc9b7dd37b7d`；[PR523](https://github.com/klineodyssey/kline-odyssey/pull/523) 是共同 base `f7f67950418ebbb6f7a5a309a32d529232fcb3b6` 上的五個舊重建提交、28 個變更檔案，head `c8e930c1cf49432f21dd3420ae8fb479e884d814`。提交沿革：`71b39ec25` → `1aecc6a3d` → `300196dcd` → `f3b0dcbda` → `c8e930c1c`。
+- 對照該 main，仍有六個未合入 API，現已按需移至 [PR673](https://github.com/klineodyssey/kline-odyssey/pull/673) 的候選工作樹，沿用原檔：
+  - `K線西遊記/temples/11520/runtime/combat-drive-adapter.mjs`：`readCanonicalDriveState`。
+  - `K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs`：`advanceLocalMotionClock`、`integrateLocalMotion`。
+  - `K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs`：`resolveLocalNavigationStep`、`prepareLocalNavigationFrame`、`commitLocalNavigationFrame`。
+- 保留目前 main 的 conversion/address、既有帳本、交易 owner 與後續 UI 成果；不整檔套回舊重建。舊 UI／版本覆蓋及把普通 `0C LOCAL_WALK` 改成 `PAUSED` 的行為不移入。
+- REPLACEMENT_SOURCE: 本次 PR673 整合提交；精確 SHA 沿該 PR head 與本頁原 checkpoint 讀回，不以先前 core-only head `ae675442` 冒充包含本輪 delta。
+- LOCAL_VALIDATION: 新導航 16/16 PASS（196.5212ms）；UI-static 首跑 68/72，修正舊 frame-step／市場權威假設及 fixture 範圍後 72/72 PASS（1541.04ms）；既有 drive adapter PASS；product-standard 首跑舊器官名稱 marker FAIL，更新名稱／elapsed callback marker 後 PASS；新 Full HUD admission helper相關 2/2 PASS（232.1667ms）。原 core 71/71 沿同指紋前段證據，未重跑。
+- UI_CANDIDATE: 三市場獨立選擇、原世界地圖中的 XYZ／距離／ETA／分欄情境 PnL、明確確認的模擬自駕與原委託／持倉入口。單一 motion clock／已成交 C 引擎、換身份／模式與隱藏停止策略；draft/pending 不點火。既有兩尺寸 settlement QA 增加真 DOM flow 與原 artifact 路徑的合成截圖，尚待 CI runtime 驗證。
+- CI_REPAIR: 舊 head 的 provenance mismatch 已保存並更新精確 executable-byte 記錄，未刪除祖先雜湊；兩個既有 Trading browser job 固定與 Game 同 `ubuntu-22.04` 以相容原 Playwright 1.51.1；冷 360 Full HUD 的實際 down 不合格先 cancel/reacquire，沿原 1000ms／max3 邊界，未延長 timeout 或改產品 gate。
+- CURRENT_STATUS: `PR673_INTEGRATION_CANDIDATE / NOT_MERGED_TO_MAIN / FULL_UI_NOT_COMPLETE`。本紀錄不宣稱本輪 main 合併、Pages 部署、手機驗收、真交易或 #523 已關閉。
+- 預定處置：替代來源提交保存後，由 root 將 #523 關閉為 `REPLACED_BY673`，並附替代來源；保留原分支、提交與交接歷史，不刪除歷史。
+- 唯一下一步：root 保存本輪替代來源 commit 與精確差異，讀回後記錄 #523 的實際關閉結果，再沿 PR673 完成既有整合與驗收。
+
+## Earlier handoff records — preserved as history
+
 STATUS: INITIAL
 
 ## Three-cell cargo / cross-market simulation acceptance

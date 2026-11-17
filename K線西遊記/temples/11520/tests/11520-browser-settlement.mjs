@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
 
 if(process.argv.includes('--simulation-offline')||process.argv.includes('--simulation-offline-baseline')){
   await offlineSimulationBrowserQA({baseline:process.argv.includes('--simulation-offline-baseline')});process.exit(0);
@@ -226,9 +227,137 @@ try {
     const hit=await page.locator('#attack').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(hit,true,'attack pointer path');
     assert.deepEqual(errors,[]);await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'DETERMINISTIC_SIMULATION_FIXTURES',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:s},null,2));
     await page.close();
+    await navigationConsoleBrowserQA({browser,width,height,base,out});
   }
   console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
 } finally {await browser.close()}
+
+// The same two existing CI viewports get a separate guest context and ledger.
+// Only external read-only quote responses are fixtures; every decision uses the
+// real rendered controls, original adapter and original actor/collision clock.
+async function navigationConsoleBrowserQA({browser,width,height,base,out}){
+  const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
+  const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
+  let eth=4000,sequence=0;
+  const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
+  page.on('pageerror',error=>report.pageErrors.push(String(error)));
+  page.on('websocket',socket=>report.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
+  await page.addInitScript(()=>{
+    window.__navigationQA={providerCalls:[],native:[]};
+    window.ethereum={on(){},removeListener(){},request:async({method})=>{
+      __navigationQA.providerCalls.push(method);
+      if(method==='eth_accounts')return [];
+      if(method==='eth_chainId')return '0x38';
+      throw new Error('FORBIDDEN_NAVIGATION_QA_PROVIDER_METHOD:'+method);
+    }};
+    for(const type of ['click','change'])document.addEventListener(type,event=>{
+      const element=event.target?.closest?.('#navigationConsole button,#navigationConsole select,#navigationAutopilotAck,#confirmOrder,[data-sim-close]');
+      if(element)__navigationQA.native.push({type,id:element.id||element.dataset.simClose,isTrusted:event.isTrusted});
+    },true);
+  });
+  await page.route('https://data-api.binance.vision/**',route=>{
+    const url=new URL(route.request().url()),prices={BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600};
+    const payload=url.pathname.endsWith('/aggTrades')?[{p:String(prices[url.searchParams.get('symbol')]),T:Date.now(),a:++sequence}]:Object.entries(prices).map(([symbol,price])=>({symbol,price:String(price)}));
+    return route.fulfill({contentType:'application/json',body:JSON.stringify(payload)});
+  });
+  await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
+  await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{
+    const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile('node_modules/three/'+route.request().url().slice(prefix.length),'utf8');
+    body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);
+    await route.fulfill({contentType:'text/javascript',body});
+  });
+  await page.route('**/*',async route=>{
+    const request=route.request(),url=new URL(request.url()),external=url.origin!==new URL(base).origin;
+    if(request.url()===new URL(KGEN_POOL_REFERENCE_SOURCE.rpc).href&&request.method()==='POST'){
+      let payload;try{payload=request.postDataJSON()}catch{}
+      if(payload?.jsonrpc==='2.0'&&payload.method==='eth_chainId'&&Array.isArray(payload.params)&&payload.params.length===0){
+        report.blockedReadOnlyReferences.push({url:request.url(),method:payload.method,forwarded:false});
+        return route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'OFFLINE_READONLY_REFERENCE_UNAVAILABLE'})});
+      }
+    }
+    const rpc=external&&/dataseed|llamarpc|ankr\.com|infura|alchemy|quicknode|(?:^|[./-])rpc(?:[./-]|$)/i.test(url.hostname+url.pathname);
+    if(!['GET','HEAD','OPTIONS'].includes(request.method())||rpc){report.networkAuthorityAttempts.push({method:request.method(),origin:url.origin,path:url.pathname,rpc});return route.abort('blockedbyclient')}
+    return route.fallback();
+  });
+  const snapshot=()=>page.evaluate(()=>({view:__K11520_NAVIGATION_CONSOLE__.snapshot(),book:__K11520_SIMULATION_EXCHANGE__.snapshot(),motion:globalThis.__K11520_LOCAL_MOTION__,fixture:__navigationQA}));
+  const near=(actual,expected,label)=>assert.ok(Number.isFinite(actual)&&Math.abs(actual-expected)<=1e-8,`${label}: ${actual} != ${expected}`);
+  const game=async()=>{
+    if(await page.locator('#confirm').evaluate(el=>el.classList.contains('open')))await page.locator('#cancelOrder').click();
+    await page.locator('#confirm').waitFor({state:'hidden'});
+    if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
+    await page.locator('#sheet').waitFor({state:'hidden'});
+    if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+  };
+  const organ=async name=>{await game();await page.locator('#k11520UtilityMaster').click();if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();await page.locator(`#dock [data-organ="${name}"]`).click();await page.locator('#sheet.open').waitFor()};
+  const control=async selector=>{
+    const element=page.locator(selector);await element.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest'}));
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    const box=await element.evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,hit:!!hit&&(el===hit||el.contains(hit))}});
+    assert.equal(box.inView,true,selector+' must be in the actual viewport');assert.equal(box.hit,true,selector+' must own its pointer center');assert.ok(box.width>=44&&box.height>=44,selector+' must retain a readable touch target');return element;
+  };
+  const shot=async(name,selector)=>{
+    if(selector)await control(selector);
+    for(const fullPage of [false,true]){const file=`${width}x${height}-navigation-${name}-SYNTHETIC${fullPage?'-fullpage':''}.png`;await page.screenshot({path:`${out}/${file}`,fullPage});report.screenshots.push(file)}
+  };
+  const setC=async value=>{await game();await page.locator('#cNumericInput').fill(String(value));await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(value=>__K11520_SIGNED_C_IMMERSIVE__.signedC===value,value)};
+  const setTarget=async target=>{for(const axis of ['x','y','z'])await page.locator('#navigation'+axis.toUpperCase()).fill(String(target[axis]))};
+  const moveAndStop=async(label,expectedSource='LOCAL_WALK')=>{
+    // At filled 1C the canonical local calibration is about 22.76 m/s. Keep
+    // an observable route after native scrolling/click delivery, not a 0.53s race.
+    const distance=expectedSource==='FILLED_POSITION'?120:12;
+    const before=await snapshot(),target={...before.view.playerXYZ,y:before.view.playerXYZ.y+distance};await setTarget(target);
+    const planned=await snapshot();assert.equal(planned.view.route.status,'ESTIMATE');assert.ok(planned.view.route.etaSeconds>0);near(planned.view.route.distance,distance,'local XYZ distance');
+    await (await control('#navigationGo')).click();
+    const observed=await page.waitForFunction(({position,expectedSource})=>{const view=__K11520_NAVIGATION_CONSOLE__.snapshot(),motion=__K11520_LOCAL_MOTION__;return view.navigation?.active&&motion?.status==='MOVING'&&motion.speedSource===expectedSource&&motion.observedSpeedKPerSecond>0&&Math.hypot(...['x','y','z'].map(axis=>view.playerXYZ[axis]-position[axis]))>=1?{view,motion,book:__K11520_SIMULATION_EXCHANGE__.snapshot()}:false},{position:before.view.playerXYZ,expectedSource});
+    const moved=await observed.jsonValue();await observed.dispose();assert.equal(moved.motion.speedSource,expectedSource);assert.equal(moved.motion.appliedC,expectedSource==='LOCAL_WALK'?0:1);
+    await (await control('#navigationStop')).click();await page.waitForFunction(()=>!__K11520_NAVIGATION_CONSOLE__.snapshot().navigation.active);
+    const stopped=await snapshot();await page.waitForTimeout(400);const still=await snapshot();assert.deepEqual(still.view.playerXYZ,stopped.view.playerXYZ,'stopping navigation leaves no second movement clock');
+    report.checks[label]={planned:planned.view,moved:{view:moved.view,motion:moved.motion},stopped:stopped.view};await shot(label,'#navigationStop');return moved;
+  };
+  try{
+    await page.goto(`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>globalThis.__K11520_NAVIGATION_CONSOLE__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT,null,{timeout:15000});
+    if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();await page.locator('#intro11520').waitFor({state:'hidden'});
+    await organ('worldmap');const initial=await snapshot();report.checks.markets=[];
+    for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']]){
+      await (await control('#navigationMarket')).selectOption(axis);await page.waitForFunction(axis=>__K11520_NAVIGATION_CONSOLE__.snapshot().axis===axis,axis);
+      const current=await snapshot();assert.equal(current.view.market,market);assert.equal(current.view.physicalPlane,initial.view.physicalPlane);assert.deepEqual(current.view.playerXYZ,initial.view.playerXYZ);assert.equal(current.book.orders.length,0);report.checks.markets.push(current.view);
+    }
+    await page.locator('#navigationMarket').selectOption('KY');await shot('three-markets','#navigationMarket');
+    await setC(1);await page.locator('#lotsNumericInput').fill('1');await page.locator('#lotsNumericInput').press('Enter');await organ('worldmap');
+    const draftMotion=await moveAndStop('draft-c-walk');assert.equal(draftMotion.book.positions.length,0);
+    await game();await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('4001');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});await page.locator('#sheet.open').waitFor();
+    let state=await snapshot();assert.equal(state.book.orders.length,1);assert.equal(state.book.orders[0].status,'PENDING');assert.equal(state.book.positions.length,0);
+    await organ('worldmap');const pendingMotion=await moveAndStop('pending-c-walk');near(pendingMotion.motion.speedKPerSecond,draftMotion.motion.speedKPerSecond,'pending order cannot ignite C');
+    eth=4002;await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='OPEN',null,{timeout:15000});
+    await page.waitForFunction(()=>__K11520_LOCAL_MOTION__?.speedSource==='FILLED_POSITION');state=await snapshot();assert.equal(state.motion.appliedC,1);assert.ok(state.motion.speedKPerSecond>pendingMotion.motion.speedKPerSecond);report.checks.filledSpeed={motion:state.motion,position:state.book.positions[0]};
+    await setC(-1);await organ('worldmap');const filledMotion=await moveAndStop('filled-c-move','FILLED_POSITION');assert.ok(filledMotion.motion.observedSpeedKPerSecond>pendingMotion.motion.observedSpeedKPerSecond,'a filled position changes measured physical speed, rather than presentation alone');state=await snapshot();assert.equal(state.motion.appliedC,1,'changing the draft C preserves the filled position engine');
+    const position=state.book.positions[0],receiptIds=state.book.receipts.map(row=>row.receiptId);report.checks.scenarios=[];
+    for(const mark of [position.entry+5,1]){
+      await page.locator('#navigationTargetPrice').fill(String(mark));const current=await snapshot(),expected=positionRisk({...position,mark});
+      assert.equal(current.view.scenario.status,'ESTIMATE');assert.equal(current.view.scenario.source,'OPEN_POSITION');assert.equal(current.view.scenario.c,position.c);assert.equal(current.view.scenario.feeKgen,0);near(current.view.scenario.pnl,expected.pnl,'original scenario PnL');assert.ok(current.view.scenario.pnl>=-expected.principal);
+      assert.deepEqual(current.book.receipts.map(row=>row.receiptId),receiptIds,'scenario preview never settles the real simulation position');assert.equal(current.book.orders.length,1);report.checks.scenarios.push(current.view.scenario);
+      await shot(mark===1?'loss-floor-preview':'profit-preview','#navigationTargetPrice');
+    }
+    await (await control('#navigationManagePositions')).click();await page.locator('[data-sim-close]').click();await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='CLOSED');
+    await organ('worldmap');await page.locator('#navigationAutopilotSettings summary').click();const beforeAutoSnapshot=await snapshot(),beforeAuto=beforeAutoSnapshot.book.orders.length,beforeAutoState=beforeAutoSnapshot.view.autopilot.state;assert.ok(['DISARMED','STOPPED'].includes(beforeAutoState));
+    await (await control('#navigationAutoStart')).click();assert.equal((await snapshot()).view.autopilot.state,beforeAutoState);assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/請先確認/);
+    await page.locator('#navigationAutopilotAck').check();await (await control('#navigationAutoStart')).click();assert.equal((await snapshot()).view.autopilot.state,beforeAutoState);assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/設定未通過/);
+    for(const [id,value] of Object.entries({navigationLongAbove:4001,navigationShortBelow:3990,navigationAutoC:1,navigationAutoLots:1,navigationMaxLoss:2,navigationMaxOrders:2}))await page.locator('#'+id).fill(String(value));
+    // Staying at the current physical position prevents arrival from being a
+    // second reason to stop; this explicit checkbox authorizes continued SIM.
+    await setTarget((await snapshot()).view.playerXYZ);await page.locator('#navigationContinue').check();await (await control('#navigationAutoStart')).click();
+    await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.submittedOrders===1);state=await snapshot();assert.equal(state.view.autopilot.config.market,'ETHUSDT');assert.equal(state.view.autopilot.config.axis,'KY');assert.equal(state.view.autopilot.signerRequested,false);assert.equal(state.view.autopilot.broadcast,false);assert.equal(state.book.orders.length,beforeAuto+1);
+    const autoOrderId=state.view.autopilot.orderIds[0];assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.armed=state;
+    await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId),'stop cannot cancel an already-created order');report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
+    eth=3988;await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().observations.ETHUSDT?.price===3988,null,{timeout:15000});await page.waitForTimeout(2200);state=await snapshot();assert.equal(state.book.orders.length,beforeAuto+1,'stopped decisions cannot reverse on a later opposite signal');assert.equal(state.view.autopilot.state,'STOPPED');assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.afterOppositeSignal=state;
+    for(const id of ['navigationMarket','navigationX','navigationY','navigationZ','navigationGo','navigationStop','navigationTargetPrice','navigationLongAbove','navigationShortBelow','navigationAutoC','navigationAutoLots','navigationMaxLoss','navigationMaxOrders','navigationAutoStart','navigationAutoStop'])await control('#'+id);
+    assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.networkAuthorityAttempts,[]);assert.ok(state.fixture.providerCalls.every(method=>['eth_accounts','eth_chainId'].includes(method)),'no wallet connect, signer, chain switch or transaction requests');
+    assert.ok(state.fixture.native.some(event=>event.id==='navigationGo'&&event.isTrusted));assert.ok(state.fixture.native.some(event=>event.id==='navigationAutoStart'&&event.isTrusted));assert.ok(state.fixture.native.filter(event=>event.type==='click').every(event=>event.isTrusted),'navigation actions use native rendered controls');
+    report.functional='PASS';
+  }catch(error){report.functional='FAIL';report.error=String(error?.stack||error);try{await shot('failure')}catch{}throw error}
+  finally{try{report.final=await snapshot()}catch{}await fs.writeFile(`${out}/${width}x${height}-navigation-result.json`,JSON.stringify(report,null,2));await page.close()}
+}
 
 // Opt-in P0 acceptance at the actual game entry. This lane never calls a model
 // submit/observe API, replaces runtime code, connects a wallet, or signs a TX.

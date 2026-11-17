@@ -1,5 +1,23 @@
 # KGEN Organization V2.0 WorkQueue
 
+## 2026-11-18 既有 PR673 接續：Human 解除 #523 普通工程 HOLD
+
+- RECORDED_UTC: `2026-11-17T21:16:49Z`; 台灣時間：`2026-11-18T05:16:49+08:00`。
+- TASK_SOURCE: 本頁最新 Human 明確授權處理 #523 並讓專案進行；原話末句：「要專案能進行，常識說就是授權改」。
+- AUTHORITY_SCOPE: #523 的原範圍普通工程 HOLD 已解除；歷史限制文字不再作為該範圍的全域阻擋，不對相同範圍反覆索取授權。沿既有 `HUMAN_DIRECT_ORDINARY_LOCAL_ENGINEERING / MANUAL_DISPATCH_NON_ATOMIC` 接續；root 為單一整合 Writer。這是既有工作 authority-scope 更新，不新增 Worker、原子 claim、dispatcher 或排程。
+- SOURCE: main `01794eba63b2664db741f9787a16bc9b7dd37b7d`；[PR523](https://github.com/klineodyssey/kline-odyssey/pull/523) 的五個舊重建提交／28 檔，head `c8e930c1cf49432f21dd3420ae8fb479e884d814`。原分支與歷史保留。
+- TARGET: [PR673](https://github.com/klineodyssey/kline-odyssey/pull/673)，既有分支 `codex/K11520-SIMULATION-AUTOPILOT-20261118-01` 的候選整合。
+- RETAINED_DELTA: main 尚無的六個 API 已按需移至候選工作樹：`readCanonicalDriveState`、`advanceLocalMotionClock`、`integrateLocalMotion`、`resolveLocalNavigationStep`、`prepareLocalNavigationFrame`、`commitLocalNavigationFrame`，分別沿用 11520 既有 `runtime/combat-drive-adapter.mjs`、`runtime/spatial-coordinate-runtime.mjs`、`runtime/xyz-map-navigation-runtime.mjs`。
+- PRESERVATION: 保留目前 conversion/address、帳本、交易 owner、普通 `0C LOCAL_WALK` 與後續 UI 修復；不搬回 #523 舊 UI／版本或其普通 0C 強制 `PAUSED` 行為。
+- REPLACEMENT_SOURCE: 本次 PR673 整合提交；精確 SHA 沿 PR head 與原 checkpoint 讀回，不以先前 core-only `ae675442` 代填。
+- CANDIDATE_CHECKS: 新導航16/16 PASS；UI-static首跑68/72後修正舊假設／fixture，第二跑72/72 PASS；drive adapter PASS、product-standard舊名稱 marker修正後 PASS；Full HUD admission相關2/2 PASS。合成兩尺寸瀏覽器流程與原 CI runtime／實景驗收仍待執行，不以本機靜態結果宣稱完成品。
+- STATUS: `INTEGRATION_CANDIDATE / NOT_MERGED_TO_MAIN / FULL_UI_NOT_COMPLETE`。未宣稱本輪部署、完整 UI、實體手機或真交易驗收。
+- DISPOSITION: 替代提交保存後，root 才將 #523 關閉為 `REPLACED_BY673`，附實際替代來源；目前不預造關閉或部署結果，不刪除原分支／提交歷史。
+- RETAINED_BOUNDARIES: #19 的具體拒絕與禁止重試、其他具體 HOLD、成本／資源／停機限制、停用 Browser 與原停止條件不變。真錢包、主網合約部署、真交易、付款與治理仍由合法持有人本人確認；AI 不簽署、送真交易、取得秘密或繞過限制。
+- NEXT_STEP: root 保存本輪替代來源提交與差異，讀回並記錄 #523 的實際關閉，再完成 PR673 的原有整合與驗收。
+
+## Earlier queue records — preserved as history
+
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei
 
 - WORK_ID: `K11520-THREE-CELL-CARGO-MARKET-QA-20261013-001`.

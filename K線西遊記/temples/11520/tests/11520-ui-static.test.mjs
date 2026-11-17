@@ -184,7 +184,20 @@ const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnec
 test('all formal organs remain present in production source',()=>{for(const id of organs)assert.ok(main.includes(`['${id}'`),id)});
 test('all current fixed control surfaces exist in shell HTML',()=>{for(const id of fixed)assert.ok(html.includes(`id="${id}"`),id)});
 test('core controls have runtime event wiring',()=>{for(const token of ["joy.addEventListener('pointerdown'","$('#lookPad').addEventListener('pointerdown'","$('#attack').onclick","$('#skill').onclick","$('#dodge').onclick","$('#tradeSword').onclick","$('#flat').onclick","$('#orderFire').onclick","$('#dockToggle').onclick","$('#walletConnect').onclick","$('#walletRefresh').onclick","$('#walletToggle').onclick","bindVertical('#lotsControl'","bindVertical('#cControl'"])assert.ok(main.includes(token),token);for(const token of ['function bindDisc()','function bindRail()','__K11520_3D_CONTROL__','railAxis','discAxes'])assert.ok(xyzControl.includes(token),token);assert.equal(main.includes("bindVertical('#yControl'"),false,'remaining-axis rail must not use legacy bounded Y slider wiring')});
-test('0C walking remains independent from C control',()=>{assert.equal(source.includes('D.warp===0?0'),false);assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('const speed=.10'))});
+test('0C and draft C retain walking; only filled position C supplies movement speed',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const {gameUnitsToK}=await import('../runtime/spatial-coordinate-runtime.mjs');
+ const {readCanonicalDriveState}=await import('../runtime/combat-drive-adapter.mjs');
+ const current={c:1000,pos:null},context={S:{axis:'KY'},axis:()=>current,gameUnitsToK,readCanonicalDriveState};
+ const fn=main.slice(main.indexOf('function localNavigationSpeed('),main.indexOf('function moveManual('));
+ runInNewContext(fn+'globalThis.speed=localNavigationSpeed;',context);
+ assert.equal(context.speed({navigating:false}),gameUnitsToK(6),'a draft rail does not ignite the engine');
+ current.pos={status:'PENDING_TRIGGER',c:1};assert.equal(context.speed({navigating:true}),gameUnitsToK(5.1));
+ current.pos={status:'OPEN',c:1};assert.equal(context.speed({navigating:true}),.001);
+ current.pos.c=-.1;assert.equal(context.speed({navigating:true}),.0001,'short sign does not reverse route or speed');
+ current.pos.c=0;assert.equal(context.speed({navigating:false}),gameUnitsToK(6));
+ assert.equal(source.includes('D.warp===0?0'),false);
+});
 test('current dynamic organ actions are wired',()=>{for(const token of ['data-organ','openOrgan(','data-axis','data-market','openOrder()','closePos','setWaypoint','bindMap','PLANE_TRADE_AXIS','syncTradeAxisFromPlane'])assert.ok(main.includes(token),token)});
 
 test('Player Courier exposes explicit local-only Bandit mode, raid action and one-shot loot UI',()=>{
@@ -248,8 +261,8 @@ test('human-approved current control imagery is production-wired',()=>{
 test('XYZ plane control is unbounded intent with collision-constrained body',()=>{
   assert.ok(main.includes('intentXYZ:{x:0,y:0,z:0}'));
   assert.ok(main.includes('unboundedIntent:true'));
-  assert.ok(main.includes("blocker={name:'GROUND'}"));
-  assert.ok(main.includes('S.intentXYZ={x:S.intentXYZ.x+v.x*speed'));
+  assert.ok(main.includes("blocker:{name:'GROUND'}"));
+  assert.ok(main.includes('S.intentXYZ[a]+result.intentDelta[a]'));
   assert.ok(xyzControl.includes('unboundedCoordinateIntent:true'));
 });
 
@@ -320,7 +333,19 @@ test('product help uses signed C and positive lots without obsolete zero-lot hin
   assert.ok(fixes.includes('最小 1 口'));
 });
 
-test('plane switch directly owns trading axis and sword no longer gates orders',()=>{assert.ok(main.includes("const PLANE_TRADE_AXIS=Object.freeze({XZ:'KY',XY:'KZ',YZ:'KX'})"));assert.equal(main.includes('if(!S.tradeArmed)'),false);assert.equal(main.includes('tradeArmed'),false);for(const skill of ['phantomAxe','goldenRain','slash'])assert.ok(main.includes(`performCombat('${skill}')`));assert.ok(main.includes("data-market-card"));assert.ok(main.includes("點市場卡不會改變交易軸"));for(const pair of ["KX:'BTCUSDT'","KY:'ETHUSDT'","KZ:'BNBUSDT'"])assert.ok(main.includes(pair),pair);assert.equal(main.includes('核爆'),false);assert.equal(html.includes('核爆'),false)});
+test('plane supplies the default market; explicit market selection keeps physical controls independent',async()=>{
+ const {runInNewContext}=await import('node:vm');let plane='XZ',stops=0;
+ const S={axis:'KX',xyz:{x:2,y:3,z:4},axes:{KX:{market:'BTCUSDT'},KY:{market:'ETHUSDT'},KZ:{market:'BNBUSDT'}}};
+ const context={S,controlState:()=>({mode:plane}),stopNavigationAutopilot:()=>stops++,renderAxes:()=>{},syncControls:()=>{},executionBusy:false,previewSequence:0,$:()=>({classList:{remove(){}}}),document:{dispatchEvent(){}},CustomEvent:class{}};
+ const fn=main.slice(main.indexOf('function tradeAxisForPlane('),main.indexOf('globalThis.__K11520_TRADE_AXIS_API__'));
+ runInNewContext("const PLANE_TRADE_AXIS={XZ:'KY',XY:'KZ',YZ:'KX'};let selectedTradingAxis=null;"+fn+'globalThis.select=selectTradingMarket;globalThis.sync=syncTradeAxisFromPlane;',context);
+ context.sync();assert.equal(S.axis,'KY');plane='XY';context.sync();assert.equal(S.axis,'KZ');
+ context.select('KX');plane='XZ';context.sync();assert.equal(S.axis,'KX');assert.equal(stops,4);
+ assert.deepEqual(S.xyz,{x:2,y:3,z:4});assert.equal(context.select('INVALID'),false);
+ assert.equal(main.includes('tradeArmed'),false);for(const skill of ['phantomAxe','goldenRain','slash'])assert.ok(main.includes(`performCombat('${skill}')`));
+ for(const pair of ["KX:'BTCUSDT'","KY:'ETHUSDT'","KZ:'BNBUSDT'"])assert.ok(main.includes(pair),pair);
+ assert.equal(main.includes('核爆'),false);assert.equal(html.includes('核爆'),false);
+});
 
 test('combat FX shields translucent HUD surfaces while effects are active',()=>{const fx=readFileSync(new URL('../runtime/combat-fx-runtime.mjs',import.meta.url),'utf8');assert.ok(fx.includes('k11520CombatFxActive'));assert.ok(fx.includes('hudShielded:true'));assert.ok(fx.includes("background:#091119!important"))});
 
@@ -835,9 +860,14 @@ test('simulation component revisions expose complete provenance and recorded exe
  // or deployment claim. Executable-byte hashes remain exact, not self-derived.
  const referenceMetadata={revision:'2026-10-31.READONLY-KGEN-WBNB-REFERENCE',sourceCommit:'b7e4a244f5eeb5583d4cf27ae09a0b19a3d09880',lastUpdated:'2026-10-31',updatedBy:'Codex / original thread 01a189ef-ecbc-7699-b87b-a4538d57c029 / HUMAN_AUTHORIZED_LOCAL_CANDIDATE',reviewedBy:'PENDING_ORIGINAL_INDEPENDENT_REVIEW; previous header preserved in exact base snapshot',sourceOfTruth:'LOCAL_CANDIDATE_NOT_CANONICAL'};
  const current={
-  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'f8af28403351811f2891b101a42f7caa6d5a2c81b6bd06d2af10e383f2f28303'},
+  // Human authorized the #523 replacement/UI integration on 2026-11-18.
+  // Keep the ancestry table and historical headers; pin the reviewed candidate
+  // bytes separately. These fingerprints do not claim browser acceptance.
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'3f1f69019f892c2c381487cda0569c872cbc34df9f9a555f4988e1f795bbfeb5'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
-  'game-5d.html':{nonMetadataSha256:'2c2d9cb8ebf438a0943193f791ec071bad7bed40ebb839d7ac80b446b767c56d'}
+  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'699c2b88b0505f1efbbedd5486b10669cdc22410b3f3ab277e7043fb6a8f9b9f'},
+  'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'3a3ef17b1b2a4ef248e7e2755919b98b32878b71256c36385e7e6564f0dcac7f'},
+  'game-5d.html':{nonMetadataSha256:'ee4283c4a11b2ae5250f20e79c7f4ab80f2f7e84fd7f3eebd4ae82e4bd520cd3'}
  };
  for(const ancestor of assets){
   const asset={...ancestor,...current[ancestor.path]};
@@ -892,11 +922,12 @@ const snapshot=label=>{trace.push({at:now,label,cards:doc.querySelectorAll('[dat
 const ctx=vm.createContext({document:doc,Node:{TEXT_NODE:3},setInterval:(fn,period)=>{const i={id:++sequence,fn,period,next:now+period};intervals.push(i);return i.id},clearInterval:id=>{const i=intervals.find(i=>i.id===id);if(i)i.disabled=true},S:{axis:'KY',quotes:{BTCUSDT:77564.83,ETHUSDT:2511.16,BNBUSDT:724.23},axes:{KX:{market:'BTCUSDT'},KY:{market:'ETHUSDT'},KZ:{market:'BNBUSDT'}}},execution:{mode:'SIMULATION',readOnly:false,tick:()=>({ok:true,events:[]}),snapshot:()=>({observations:{}})},fmt:(x,n)=>x.toFixed(n),openMarketCard:axis=>opened.push(axis),world:{},kMarketSnapshot:()=>({markets:[['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']].map(([axis,symbol])=>({axis,symbol,universe:axis,price:1})),status:'LIVE',receivedAt:0}),formatUniverseAddress:a=>a+' fixture address',resolveCMode:()=>({mode:'MONSTER_MODE'}),combatSelection:()=>({c:0}),publicObservations:{},publicObservationStatus:()=>{},playerLifeSwitching:false,publicQuoteAttempted:true,recordSimulationEvents:()=>{},syncSimulationPositions:()=>{},refreshSimulationSheet:()=>{},pending:false,toast:()=>{},__K11520_3D_CONTROL__:{mode:'XZ'}});
 const render=main.slice(main.indexOf('function renderAxes(){'),main.indexOf('function openMarketCard('));
 const labels=main.slice(main.indexOf('function syncMarketKLabels(){'),main.indexOf('function controlState('));
-const tick=main.slice(main.indexOf('function tickSimulation(){'),main.indexOf('function executionQuote('));
+const tick=main.slice(main.indexOf('function tickSimulation(){'),main.indexOf('\nfunction navigationConsoleHTML('));
 const normal=read('../runtime/normal-market-presentation.mjs');
 // This fixture owns the three canonical market cards, not the separately
 // tested read-only KGEN/WBNB reference panel added by the later mainline organ.
 ctx.paintKgenReference=()=>{};
+ctx.stepNavigationAutopilot=()=>{};
 vm.runInContext("const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];"+render+labels+tick,ctx);
 vm.runInContext(normal.replace(/^import .*;$/m,'').replace(/^const \$=.*$/m,'').replace(/^const \$\$=.*$/m,'').replace('export function install11520NormalMarketPresentation','function install11520NormalMarketPresentation'),ctx);
 vm.runInContext('renderAxes()',ctx);snapshot('initial actual renderAxes + actual syncMarketKLabels');

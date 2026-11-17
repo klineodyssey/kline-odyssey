@@ -1,6 +1,30 @@
 # KGEN_FRONTEND_INDEX
 
-## 11520 simulation autopilot core candidate — 2026-11-18
+## 11520 navigation / simulation autopilot integration candidate — 2026-11-18
+
+Human has explicitly released #523's ordinary engineering HOLD. Earlier HOLD
+references remain history, not a global project blocker. The necessary old
+navigation delta is carried by PR673 in these existing homes:
+
+- `K線西遊記/temples/11520/game-5d.html` and `runtime/game-5d-main.mjs`:
+  existing world-map sheet controls for independent three-market selection,
+  local physical XYZ navigation/distance/ETA, separate target-price scenario
+  PnL and explicit simulation autopilot arm/stop.
+- `runtime/normal-market-presentation.mjs`: selected-market emphasis while
+  preserving physical control-plane labels and the original default mapping.
+- `runtime/combat-drive-adapter.mjs`, `runtime/spatial-coordinate-runtime.mjs`
+  and `runtime/xyz-map-navigation-runtime.mjs`: filled-C speed, one elapsed
+  motion owner, collision-resolved frames and observed ETA. Ordinary 0C walking
+  remains; draft/pending C cannot ignite movement.
+- Existing navigation, UI-static and browser-settlement/responsive QA files
+  retain the original CI evidence route. Browser acceptance is pending for the
+  integrated candidate; local unit evidence is not phone or wallet acceptance.
+
+No new Runtime/bootstrap/version file is introduced. Global 18911 travel,
+price-to-global-coordinate projection and live automatic trading remain outside
+the implemented local candidate. Other specific HOLDs remain unchanged.
+
+### Prior core-only checkpoint — retained for lineage
 
 - `K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs`:
   `createSimulationAutopilot` uses only adapters created by the existing local
@@ -12,10 +36,10 @@
 - `K線西遊記/temples/11520/KGEN_TRADING_SPEC.md` §9: cumulative component API
   documentation. Existing financial math, market bindings and settlement owner
   remain authoritative.
-- This component has no timer, DOM hook, signer, provider or persistent auto-arm.
-  It is not wired into the current game UI; complete XYZ navigation, ETA/PnL,
-  browser visual acceptance and real automatic trading remain unverified.
-  No #523 protected file is changed or bypassed.
+- The core itself has no timer, DOM hook, signer, provider or persistent auto-arm.
+  At the earlier core-only checkpoint it had no game UI wiring and #523 paths
+  were untouched. The current integration scope is recorded above; this prior
+  component checkpoint is not the current authorization state.
 
 ## 11520 market / 12682 presentation candidate — 2026-11-17
 

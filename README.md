@@ -6,16 +6,28 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
-### 11520 simulation autopilot core candidate — 2026-11-18
+### 11520 three-market navigation and simulation autopilot candidate — 2026-11-18
 
 The existing `K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs`
 exports `createSimulationAutopilot` over its existing simulation adapter. It
 requires explicit strategy/risk settings and confirms a closed position's
 settlement receipt before submitting the opposite side. Usage and limitations:
 [11520 trading specification](K線西遊記/temples/11520/KGEN_TRADING_SPEC.md#9-模擬自動操盤核心候選2026-11-18).
-This is an offline component candidate: game UI, route ETA/PnL integration and
-live automatic trading are not delivered by this change. #523 protected paths
-remain unchanged.
+The existing game world-map sheet now hosts explicit BTC/ETH/BNB selection,
+local XYZ destination/distance/ETA, a separate target-price PnL scenario, and
+simulation autopilot controls. Changing the market does not change the physical
+control plane. Draft/pending orders do not ignite movement; filled positions
+supply engine C. Stopping decisions preserves existing orders and positions.
+
+Human explicitly released #523's ordinary engineering HOLD. Its needed motion
+clock, collision and navigation delta is carried into the current original
+files through [PR673](https://github.com/klineodyssey/kline-odyssey/pull/673).
+The old conflicting draft will be closed with its history retained after the
+replacement source is saved. Earlier #523 HOLD text below is historical for
+this scope. Exact-head CI/visual acceptance and Pages delivery are still
+pending; cross-world arrival at 18911 and live automatic trading are not
+implemented by this candidate. Other specific HOLDs and holder-wallet
+confirmation requirements remain in force.
 
 ### K11520 three-plane joystick filename — 2026-10-19
 
