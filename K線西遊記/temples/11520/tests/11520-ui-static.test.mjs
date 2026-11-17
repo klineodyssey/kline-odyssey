@@ -17,6 +17,9 @@ const walletRuntime=read('../runtime/evm-wallet-runtime.mjs');
 test('visible parameter controls retain the original explicit order path without bypassing financial owners',async()=>{
   const ui=read('../runtime/mobile-ui-settings.mjs'),layout=read('../runtime/mobile-control-layout.mjs');
   assert.ok(layout.includes(':not(.k11520TradeOpen):not(.k11520ControlsOpen) :is(#orderFire,#flat)'));
+  const informationGate=layout.split('\n').find(line=>line.startsWith('html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen)'));
+  assert.ok(informationGate,'information still has its original suppression gate');
+  for(const organ of ['#gameModeToggle','#walletPanel','#walletToggle','#k11520UtilityMaster','#k11520CameraReset','.controls'])assert.equal(informationGate.includes(organ),false,organ+' must not disappear merely because information closes');
   assert.ok(ui.includes("el.dataset.k11520ContextSuppressed=marketOpen||controlsOpen?'0':'1'"));
   const start=ui.indexOf("document.addEventListener('click',e=>{\n    if(!e.target.closest?.('#orderFire,#flat'))return;");
   assert.ok(start>=0,'one capture owner admits the original explicit action');

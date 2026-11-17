@@ -141,7 +141,10 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   #k11520UiSettings{top:54px!important;max-height:calc(100dvh - 64px);overflow:auto}
 }
 /* V2.9.6 candidate: visibility changes never resize/reanchor the world. */
-html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :is(.top,.axes,.tele,.monsterHud,.minimapWrap,.controls,#k11520MonsterGuide,#k11520UtilityMaster,#k11520HudCollapseAll,#k11520CameraReset,#k11520FollowMonster,#walletPanel,#walletToggle,#chatHandle,#gameChat,#gameModeToggle,#aiChatButton,#bgmButton,#backpackButton,#dock){display:none!important;visibility:hidden!important;pointer-events:none!important}
+/* Information disclosure must not own Settings, Wallet, camera recovery or
+   explicit controls. Each original organ keeps its own foreground/hidden gate. */
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :is(.top,.axes,.tele,.monsterHud,.minimapWrap,#k11520MonsterGuide){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) .controls{display:none!important;visibility:hidden!important;pointer-events:none!important}
 /* Explicit information restores original status/map cards even in the compact
    utility context; individual preferences and foreground Settings still win. */
 html[data-k11520-hud-mode="ON_DEMAND"].k11520InfoOpen:not(.k11520HudCollapsed):not(.k11520SettingsOpen) :is(.tele,.monsterHud,.minimapWrap):not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important}
