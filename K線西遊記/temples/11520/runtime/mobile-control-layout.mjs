@@ -143,7 +143,8 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
 /* V2.9.6 candidate: visibility changes never resize/reanchor the world. */
 /* Information disclosure must not own Settings, Wallet, camera recovery or
    explicit controls. Each original organ keeps its own foreground/hidden gate. */
-html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :is(.top,.axes,.tele,.monsterHud,.minimapWrap,#k11520MonsterGuide){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :is(.axes,.tele,.monsterHud,.minimapWrap,#k11520MonsterGuide){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not([data-k11520-hud-profile="FULL"]):not(.k11520InfoOpen):not(.k11520TradeOpen) .top{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) .controls{display:none!important;visibility:hidden!important;pointer-events:none!important}
 /* Explicit information restores original status/map cards even in the compact
    utility context; individual preferences and foreground Settings still win. */

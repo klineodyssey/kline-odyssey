@@ -20,6 +20,8 @@ test('visible parameter controls retain the original explicit order path without
   const informationGate=layout.split('\n').find(line=>line.startsWith('html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen)'));
   assert.ok(informationGate,'information still has its original suppression gate');
   for(const organ of ['#gameModeToggle','#walletPanel','#walletToggle','#k11520UtilityMaster','#k11520CameraReset','.controls'])assert.equal(informationGate.includes(organ),false,organ+' must not disappear merely because information closes');
+  assert.equal(informationGate.includes('.top'),false,'FULL balance header must not be owned by card disclosure');
+  assert.ok(layout.includes(':not([data-k11520-hud-profile="FULL"]):not(.k11520InfoOpen):not(.k11520TradeOpen) .top'),'compact modes still hide their information header without overriding FULL or saved preferences');
   assert.ok(ui.includes("el.dataset.k11520ContextSuppressed=marketOpen||controlsOpen?'0':'1'"));
   const start=ui.indexOf("document.addEventListener('click',e=>{\n    if(!e.target.closest?.('#orderFire,#flat'))return;");
   assert.ok(start>=0,'one capture owner admits the original explicit action');
