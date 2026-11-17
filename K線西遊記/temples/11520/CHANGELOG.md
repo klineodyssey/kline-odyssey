@@ -1,5 +1,25 @@
 # 11520 Changelog
 
+## PR672 continuation evidence — 2026-11-17 / Codex /root
+
+- Exact mainline source and original 12345 cockpit entry are now used by the
+  old fixture checks. Local UI-static suite: 72/72 PASS; original 311 focused
+  portal/exchange/public-feed tests PASS. Exact-head Exchange CI became green.
+- Real-browser C failure evidence showed an unsolicited Market sheet blocking
+  touch input (no C pointer events), not a proven detent calculation defect.
+  HUD context no longer auto-opens that sheet. Explicit Market/card access and
+  read-only KGEN reference remain available. Financial/settlement rules unchanged.
+- Information collapse no longer suppresses unrelated original control owners.
+  Fine active-pointer release commits; cancellation/Settings/obsolete inputs do
+  not. These changes still require same-source native browser screenshots.
+- Existing offline QA fails the exact public reference's first eth_chainId read
+  locally with HTTP503; it never forwards RPC or fabricates a price. Every other
+  RPC/write remains a failure. Native scanner keyboard input and HTTP503 clearing
+  passed in desktop/mobile CI. This does not validate forecasting accuracy.
+- Source is committed/pushed under explicit Human approval in PR #672. As of
+  this record, browser release gates are pending/failing; merge and public Pages
+  deployment are NOT claimed. Physical phone and real-money actions NOT_TESTED.
+
 ## 2026-11-17 PR672 explicit order visibility follow-up — Codex /root
 
 Human requested continuation after the exact-head browser gate found invisible

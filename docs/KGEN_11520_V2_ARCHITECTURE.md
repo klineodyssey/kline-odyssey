@@ -1,5 +1,24 @@
 # 11520 Universal Exchange V2 Architecture
 
+## PR672 continuation state — 2026-11-17 / Codex /root
+
+Source is committed and pushed under explicit Human publication approval;
+browser/visual gates, merge, Pages deployment and public readback are separate.
+The older candidate snapshot below is historical, not the latest commit status.
+The playable research panel uses UTC **daily** candles, closed-candle Wilder
+ATR14, +/-500 indices (1001 prices) and an explicitly unvalidated 14-close linear
+trend anchored at the public quote. The generic inquiry still requires the
+supplier to name its market/interval/model/rights/price and acceptance evidence.
+No prediction accuracy, character entitlement or real financial settlement is
+created by the preview.
+
+Original HUD owners now keep explicit order access with retained parameters,
+separate information collapse from Settings/Wallet/camera/controls, and avoid
+automatically opening the Market sheet over cancelled order previews. Existing
+preview/confirm, C caps, source guards, account isolation and settlement owners
+remain authoritative. Local UI-static 72 PASS; Exchange CI green. Full native
+browser acceptance remains required, not inferred from these unit results.
+
 ## Human market/game realignment candidate — 2026-11-17 / Digital Ant /root
 
 Base main 823ef4556e228a6c6b7c2d65dab66e7b8c585a12. Direct Human corrected

@@ -1,3 +1,42 @@
+## PR672 market / 12682 / native-control continuation — 2026-11-17
+
+WORK_ID: K11520-MARKET-12682-20261117-01
+PLAN_OWNER: DIGITAL_ANT_0001 (original Human task, not a new worker claim)
+ACTUAL_AUTHOR: Codex /root; assistants: none.
+SOURCE: direct Human correction and explicit commit/push/merge/Pages approval,
+followed by Human "繼續". No chain, signer, funds or protected deployment approval.
+
+- Original checkout: `C:/Desktop/kline-odyssey-11520-market-12682`;
+  branch `codex/digital-ant-11520-market-12682`; PR #672;
+  base main `823ef4556e228a6c6b7c2d65dab66e7b8c585a12`.
+- Keep 11520 as goods quotation/market entry; reuse the same game source at
+  `game-5d.html?world=12682` as 阿斗起飛. Old K11520 storage remains unchanged.
+- Public daily research scanner: CT+1..9, Chang'e CT+8, closed-candle Wilder
+  ATR14, +/-ATR14 split into 500 intervals per side (1001 points total).
+  Linear trend is an unvalidated baseline, pressure a historical candle proxy;
+  neither is future truth, order-book evidence, entitlement or settlement input.
+- Fixed native UI-owner defects: order entry remains available with parameter
+  controls; information collapse cannot hide unrelated Settings/Wallet/camera
+  recovery; explicit trade disclosure cannot auto-open a blocking Market sheet.
+  Active C release retains the last coordinate; cancellation and Settings still
+  prevent stale pointer commits. Original financial owners are unchanged.
+- Existing test fixtures now follow the canonical shared version and actual
+  12345 cockpit return. Old provenance is not fabricated into review acceptance;
+  executable hashes and byte-exact old changelog history remain asserted.
+- Local focused portal/exchange/public-feed 311 PASS; UI-static 72 PASS.
+  CI Exchange became green; full browser/visual acceptance remains pending at
+  this handoff edit. Earlier screenshots are not a PASS for later source changes.
+- Last program commit before this record: `f106f516aa1c01ddd70a1d08561a72aa150b16ee`.
+  Next: finish exact-head browser gates, inspect resulting runtime screenshots,
+  repair observed defects, merge only on accepted technical gates, then verify
+  the existing Pages deployment and public assets. Do not publish a localhost
+  link as the official site. No merge or public release is asserted here.
+- True goods trading still needs supplier/offer/rights/payment/receipt integration;
+  leveraged mainnet deployment manifest remains blocked. Do not turn simulation
+  into real assets, use #133 as settlement, deploy contracts or sign transactions.
+
+Historical handoff sections below are preserved.
+
 ## White-hole cargo escort M1 candidate — 2026-10-08
 
 - Work/claim: `KAIOS-CARGO-WHITEHOLE-ESCORT-001` /

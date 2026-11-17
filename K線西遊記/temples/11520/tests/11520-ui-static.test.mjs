@@ -217,6 +217,24 @@ test('public reference quotes use the browser-safe market-data origin without cr
   for(const forbidden of ['Authorization','privateKey','sendTransaction','eth_sendTransaction'])assert.equal(publicMarketQuotes.includes(forbidden),false,forbidden);
 });
 
+test('offline browser transport fails only the exact first pool-reference read locally and rejects every other RPC or write',async()=>{
+  const {runInNewContext}=await import('node:vm'),{KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
+  const source=read('./11520-browser-settlement.mjs'),start=source.indexOf("    await page.route('**/*',async r=>{",source.indexOf('async function offlineSimulationBrowserQA'));
+  const handler=source.slice(start,source.indexOf("    page.on('websocket'",start));assert.ok(start>=0);
+  for(const [endpoint,payload,expected] of [
+    [KGEN_POOL_REFERENCE_SOURCE.rpc,{jsonrpc:'2.0',id:1,method:'eth_chainId',params:[]},'MOCK503'],
+    [KGEN_POOL_REFERENCE_SOURCE.rpc,{jsonrpc:'2.0',id:1,method:'eth_sendTransaction',params:[{}]},'BLOCK'],
+    [KGEN_POOL_REFERENCE_SOURCE.rpc,{jsonrpc:'2.0',id:1,method:'eth_call',params:[]},'BLOCK'],
+    [KGEN_POOL_REFERENCE_SOURCE.rpc,{jsonrpc:'2.0',id:1,method:'eth_chainId',params:['unexpected']},'BLOCK'],
+    ['https://unapproved-rpc.invalid/',{jsonrpc:'2.0',id:1,method:'eth_chainId',params:[]},'BLOCK']
+  ]){
+    let callback,outcome;const result={blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};
+    await runInNewContext('(async()=>{'+handler+'})()',{URL,base:'http://127.0.0.1:4173',KGEN_POOL_REFERENCE_SOURCE,result,page:{route:async(_,fn)=>callback=fn}});
+    await callback({request:()=>({url:()=>new URL(endpoint).href,method:()=>'POST',postDataJSON:()=>payload}),fulfill:async row=>{assert.equal(row.status,503);outcome='MOCK503'},abort:async()=>outcome='BLOCK',fallback:async()=>assert.fail('external RPC must not escape to the network')});
+    assert.equal(outcome,expected);assert.equal(result.networkAuthorityAttempts.length,expected==='BLOCK'?1:0);assert.equal(result.blockedReadOnlyReferences.length,expected==='MOCK503'?1:0);
+  }
+});
+
 test('human-approved current control imagery is production-wired',()=>{
   assert.ok(controls.includes("const KGEN_GENESIS_DATA='data:image/webp;base64,"),'KGEN Genesis joystick data asset');
   for(const token of ['goddess-ui.webp','kgen-user-ui.webp','ufo-ui.png'])assert.ok(controls.includes(token),token);
