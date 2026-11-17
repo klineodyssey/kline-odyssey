@@ -12,10 +12,10 @@ const root=new URL('../',import.meta.url);
 const storage=()=>{const data=new Map();return {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)}};
 test('one registry separates verified playable worlds from the shared Taiwan/America beta entries',()=>{
  assert.equal(validateWorldRegistry(),true);assert.deepEqual(WORLD_REGISTRY.filter(isPlayable).map(w=>w.worldId),['12345','16888']);
- assert.deepEqual(WORLD_REGISTRY.filter(w=>w.status==='BETA').map(w=>w.worldId),['11520','88888']);
+ assert.deepEqual(WORLD_REGISTRY.filter(w=>w.status==='BETA').map(w=>w.worldId),['11520','12682','88888']);
  for(const id of ['11520','88888']){assert.equal(isNavigable(findWorld(id)),true);assert.equal(isPlayable(findWorld(id)),false);assert.equal(entryDestination(id),findWorld(id).entryUrl);assert.equal(playableDestination(id),null)}
  assert.deepEqual(WORLD_STATUSES,['PLAYABLE','BETA','UNDER_CONSTRUCTION','RESEARCH','ARCHIVED']);
- assert.equal(findWorld('11520').version,'CURRENT');assert.equal(findWorld('88888').version,SHARED_GAME_VERSION);
+ assert.equal(findWorld('11520').version,'4.1.3');assert.equal(findWorld('88888').version,SHARED_GAME_VERSION);
  assert.equal(Object.isFrozen(WORLD_REGISTRY),true);assert.equal(Object.isFrozen(findWorld('11520').capabilities),true);
 });
 test('all registry destinations exist; construction worlds have no play destination',()=>{
@@ -27,7 +27,7 @@ test('same registry URLs work at repository-root local server and Pages prefix',
   const base=portalBase(moduleUrl);
   for(const id of ['11520','88888']){
    const url=new URL(worldUrl(id,base));assert.equal(url.origin,new URL(moduleUrl).origin);assert.equal(url.href,new URL(`K線西遊記/temples/${id}/index.html`,base).href);assert.equal(url.pathname.startsWith('/kline-odyssey/'),moduleUrl.includes('github.io'));
-   const game=new URL(sharedGameUrl(base,id));assert.equal(game.origin,url.origin);assert.equal(game.pathname,new URL('K線西遊記/temples/11520/game-5d.html',base).pathname);assert.equal(game.search,`?world=${id}`);assert.equal(game.hash,'');
+   const game=new URL(sharedGameUrl(base,id));assert.equal(game.origin,url.origin);assert.equal(game.pathname,new URL('K線西遊記/temples/11520/game-5d.html',base).pathname);assert.equal(game.search,'?world=12682');assert.equal(game.hash,'');
   }
  }
 });
@@ -47,7 +47,7 @@ test('returning player projection reuses validated domain and excludes wallet/pr
 test('shared-game resume changes only the displayed destination and preserves canonical player data',()=>{
  const s=storage(),store=createLocalPlayerStore({storage:s,crypto:webcrypto});store.createPlayer();store.saveProgress({lastWorld:'11520'});
  const before=s.getItem(PLAYER_LIFE_STORAGE_KEY),homeWorld=store.loadPlayer().homeWorld,p=readPortalPlayer(s);
- assert.deepEqual(Object.keys(p).sort(),['destination','displayName','homeWorld','lastWorld','displayLastWorld','level'].sort());assert.equal(p.homeWorld,homeWorld);assert.equal(p.lastWorld,'11520');assert.equal(p.displayLastWorld,'88888');assert.equal(p.destination,findWorld('88888').entryUrl);assert.equal(Object.isFrozen(p),true);assert.equal(s.getItem(PLAYER_LIFE_STORAGE_KEY),before);assert.equal(store.loadPlayer().lastWorld,'11520');
+ assert.deepEqual(Object.keys(p).sort(),['destination','displayName','homeWorld','lastWorld','displayLastWorld','level'].sort());assert.equal(p.homeWorld,homeWorld);assert.equal(p.lastWorld,'11520');assert.equal(p.displayLastWorld,'12682');assert.equal(p.destination,findWorld('12682').entryUrl);assert.equal(Object.isFrozen(p),true);assert.equal(s.getItem(PLAYER_LIFE_STORAGE_KEY),before);assert.equal(store.loadPlayer().lastWorld,'11520');
 });
 test('player switch and reload reads current player without leaking another profile',()=>{
  const s=storage(),store=createLocalPlayerStore({storage:s,crypto:webcrypto}),a=store.createPlayer();store.updateProfile({displayName:'玩家 A'});store.createPlayer();store.updateProfile({displayName:'玩家 B'});
@@ -86,7 +86,7 @@ test('shared game entry moves the same owned link into normal menu flow without 
  assert.equal(doc.getElementById('kaiosSharedGameEntry'),link);assert.equal(body.children.length,0);assert.deepEqual(menu.children,[link]);
  assert.equal(link.style.position,'static');for(const field of ['left','right','top','bottom','zIndex'])assert.equal(link.style[field],'auto');
  assert.equal(link.classList.contains('nav-btn'),true);assert.equal(link.style.minHeight,'44px');assert.equal(link.dataset.kaiosSharedGameLayout,'flow');
- assert.equal(link.href,new URL('K線西遊記/temples/88888/index.html',base).href);assert.equal(link.target,'_top');assert.ok(link.title.includes(SHARED_GAME_VERSION));
+ assert.equal(link.href,new URL(findWorld('12682').entryUrl,base).href);assert.equal(link.target,'_top');assert.ok(link.title.includes(SHARED_GAME_VERSION));
  assert.equal(mountSharedGameEntry({container:body,base}),link);assert.deepEqual(body.children,[link]);assert.equal(menu.children.length,0);assert.equal(link.style.position,'fixed');assert.equal(link.classList.contains('nav-btn'),false);
 });
 test('invalid shared entry placement does not create or move a link',()=>{

@@ -1,5 +1,6 @@
 import { createResilientBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.1.2-storage-fallback";
 import {getKaiosAudio} from '../../../assets/kaios-audio.mjs';
+import { fetchAtrLampReference, lampScanPoint } from './runtime/public-market-quotes.mjs?v=11520-v4.1.3';
 import { createListing } from "../../../core/market/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.1-ai-ant-bank";
@@ -21,8 +22,8 @@ import {
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.1-ai-ant-bank";
 
 const NAVIGATION = Object.freeze([
-  ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
-  ["TOKENS", "TOKENS"], ["JOBS", "JOBS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"],
+  ["MARKET", "商品報價"], ["TOKENS", "BSC56 換幣"], ["HOME", "原工作台"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
+  ["JOBS", "JOBS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"],
   ["FACTORIES", "FACTORIES"], ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"],
   ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"], ["BANK", "AI ANT BANK"]
 ]);
@@ -79,7 +80,81 @@ async function sha256Text(value) {
 
 function currentRoute() {
   const route = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
-  return { page: (route[0] || "HOME").toUpperCase(), id: route[1] || null };
+  return { page: (route[0] || "MARKET").toUpperCase(), id: route[1] || null };
+}
+
+async function goodsMarketView() {
+  return `${hero("K11520 · V4.1.3", "宇宙萬物，先有可核對的報價。", "11520 負責商品與服務市場；遊戲／駕駛艙前往 12682 阿斗起飛。換幣、商品付款、交付與遊戲損益分開記帳。")}
+    <article class="card" id="lamp-scanner"><div class="eyebrow">八眼琉璃燈 · 公開行情研究體驗</div><h2>CT+1～CT+9 · 1001 點掃描</h2>
+      <p>日 K／UTC：七仙女 CT+1～7，嫦娥 CT+8（第 8 天），琉璃燈怪 CT+1～9。掃描範圍為中心 ±ATR(14)，每格 ATR(14)/500。這是未經準確率驗證的趨勢模型，不是已知未來或交易訊號。</p>
+      <div class="grid two"><div class="field"><label for="lamp-market">市場</label><select id="lamp-market"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option></select></div><button class="button" id="lamp-refresh" type="button">讀取免費即時行情</button>
+      <div class="field"><label for="lamp-day">造型／能力</label><select id="lamp-day">${Array.from({length:9},(_,i)=>`<option value="${i+1}">${i<7?`第 ${i+1} 位仙女`:i===7?'嫦娥':'八眼琉璃燈怪'} · CT+${i+1}</option>`).join('')}</select></div>
+      <div class="field"><label for="lamp-point">掃描點位 −500～+500</label><input id="lamp-point" type="range" min="-500" max="500" step="1" value="0"></div></div>
+      <p id="lamp-data-status" role="status">正在讀取公開行情；沒有捏造備援價格。</p><div id="lamp-readout" aria-live="polite"></div>
+      <svg id="lamp-chart" viewBox="0 0 800 240" role="img" aria-label="九天模型中心與 ATR 掃描範圍" style="width:100%;height:auto;max-height:280px"></svg>
+      <p class="muted">造型選擇是免費能力預覽，並非已取得仙女或鏈上資產。多空拔河數值為最近 14 根已收盤日 K 的實體／振幅代理，不是委託簿，也不是未來成交證據。此面板不下單、不付款。</p></article>
+    <div class="grid two">
+      <article class="card"><div class="eyebrow">首案 · Human 本輪修訂 CT+9</div><h2>八眼琉璃燈怪物 · 預見未來車頭燈</h2>
+        <p>Current Time（CT）之後第 9 根 K 線：CT+9。需明列市場、K 線週期、當前 K 線識別與預測目標，不能把 9 根解讀為固定 9 天。</p>
+        <p class="muted">這是待報價的怪物／軟體能力，不是出售實體古物，也不是已驗證能看見未來。舊 #630 的九眼／CT+1 第一顆是歷史需求，本輪改按八眼／CT+9 詢價；預測準確率、交付與交易結算尚未驗收。</p>
+        ${kv("正式供應者", "尚未確認")}${kv("正式售價／幣別", "尚未報價，不是 0 元")}${kv("交付／授權", "需供應者提出並經買方確認")}
+        <a class="button secondary request-link" href="https://github.com/klineodyssey/kline-odyssey/issues/630" target="_blank" rel="noopener">查看原專案與正式回覆</a>
+      </article>
+      <form class="card form-grid" id="lamp-rfq"><h2 class="full">準備詢價內容</h2>
+        <div class="field full"><label for="lamp-scope">需求與驗收條件</label><textarea id="lamp-scope" rows="5" maxlength="2400" required>八眼琉璃燈怪物／預見未來車頭燈：預測 Current Time 之後第9根K線（CT+9）。請報市場、K線週期、CT基準與目標K線識別、預測輸出、資料來源、樣本外驗證、版本、工期、程式碼／使用權與驗收方式；不是固定9天，不保證獲利。</textarea></div>
+        <div class="field"><label for="lamp-budget">預算上限（選填，不是供應者報價）</label><input id="lamp-budget" type="text" inputmode="decimal" maxlength="40" pattern="[0-9]+(\\.[0-9]{1,18})?" placeholder="尚未指定"></div>
+        <div class="field"><label for="lamp-currency">預算幣別</label><select id="lamp-currency"><option>KGEN</option><option>KAIOS</option><option>BNB</option><option>TWD</option><option>USD</option></select></div>
+        <button class="button full" type="submit">產生詢價文字，不付款</button>
+        <textarea class="full" id="lamp-rfq-output" rows="8" readonly hidden aria-label="待提交原工單的詢價文字"></textarea>
+        <button class="button secondary full" id="lamp-copy" type="button" hidden>複製詢價文字</button>
+        <p class="full muted" id="lamp-rfq-status" role="status">只在此頁整理文字；不自動提交、不建立訂單，也不保存私人資料。</p>
+      </form>
+    </div>
+    ${section("真幣交易：三條路徑分開", `<div class="grid">
+      <article class="card"><h3>KGEN ↔ BNB 換幣</h3><p>沿用既有 BSC56 PancakeSwap 路徑。需即時核驗市場，再由玩家錢包確認；本次沒有代簽或真幣驗收。</p><a class="button secondary" href="#/TOKENS">開啟既有換幣介面</a></article>
+      <article class="card"><h3>琉璃燈商品交易</h3><p>還缺正式供應者、有效報價、交付／驗收條款及收款或託管接線。詢價文字不等於訂單或付款。</p></article>
+      <article class="card"><h3>BTC／宇宙指數部位</h3><p>現有下單與結算引擎的主網配接器未整合，部署／角色／資金與可信結算價格仍須逐項核驗；不能以換幣冒充部位成交。</p></article>
+    </div>`)}`;
+}
+
+function bindGoodsMarketEvents() {
+  const scanner=document.querySelector('#lamp-scanner');
+  let reference=null, generation=0;
+  const draw=()=>{
+    if(!reference||!scanner.isConnected)return;
+    const day=Number(scanner.querySelector('#lamp-day').value),index=Number(scanner.querySelector('#lamp-point').value),point=lampScanPoint(reference,day,index);
+    const fresh=Date.now()-reference.observedAt<=15000;
+    const atr=reference.atr14;
+    scanner.querySelector('#lamp-readout').innerHTML=`${kv('公開現價',reference.currentPrice.toFixed(2))}${kv('ATR(14)／每格',`${atr.toFixed(4)} / ${(atr/500).toFixed(6)}`)}${kv('目標／掃描序號',`CT+${day} · ${point.ordinal+1}/1001 (${index})`)}${kv('模型掃描價格（非成交）',point.price.toFixed(4))}${kv('目標 UTC 日',new Date(reference.ctOpenAt+day*86400000).toISOString().slice(0,10))}${kv('歷史多空代理',`${(reference.bullShare*100).toFixed(1)}% / ${(reference.bearShare*100).toFixed(1)}%`)}${kv('報價時間／時效',`${new Date(reference.observedAt).toISOString()} · ${fresh?'15 秒內':'已過期，請刷新；非即時報價'}`)}`;
+    const centers=reference.horizons.map(h=>h.center),lo=Math.min(...centers)-atr,hi=Math.max(...centers)+atr,y=p=>210-(p-lo)/(hi-lo)*180,x=d=>40+(d-1)*90;
+    scanner.querySelector('#lamp-chart').innerHTML=`<rect width="800" height="240" fill="#101e30"/><polygon points="${reference.horizons.map(h=>`${x(h.day)},${y(h.center+atr)}`).join(' ')} ${[...reference.horizons].reverse().map(h=>`${x(h.day)},${y(h.center-atr)}`).join(' ')}" fill="#caa756" opacity=".18"/><polyline points="${reference.horizons.map(h=>`${x(h.day)},${y(h.center)}`).join(' ')}" fill="none" stroke="#e7c879" stroke-width="3"/>${reference.horizons.map(h=>`<text x="${x(h.day)}" y="233" text-anchor="middle" fill="white" font-size="14">+${h.day}</text>`).join('')}<circle cx="${x(day)}" cy="${y(point.price)}" r="6" fill="#71e9d4"/>`;
+  };
+  const refresh=async()=>{
+    const ticket=++generation; reference=null;
+    const status=scanner.querySelector('#lamp-data-status'),button=scanner.querySelector('#lamp-refresh');
+    status.textContent='讀取 Binance 公開日 K 與最新成交…';button.disabled=true;scanner.querySelector('#lamp-readout').textContent='';scanner.querySelector('#lamp-chart').innerHTML='';
+    try{const result=await fetchAtrLampReference({market:scanner.querySelector('#lamp-market').value});if(ticket!==generation||!scanner.isConnected)return;reference=result;status.textContent='行情已取得。可切換能力與拖動 1001 點；未來曲線為研究模型推估。';draw();}
+    catch(error){if(ticket===generation&&scanner.isConnected)status.textContent=`行情不可用：${error.message}。未產生替代假價格；可按重新讀取。`;}
+    finally{if(ticket===generation&&scanner.isConnected)button.disabled=false;}
+  };
+  scanner.querySelector('#lamp-refresh').addEventListener('click',refresh);
+  scanner.querySelector('#lamp-market').addEventListener('change',refresh);
+  scanner.querySelector('#lamp-day').addEventListener('change',draw);
+  scanner.querySelector('#lamp-point').addEventListener('input',draw);
+  const ageTimer=setInterval(()=>{if(!scanner.isConnected){clearInterval(ageTimer);return;}draw();},5000);
+  refresh();
+  document.querySelector("#lamp-rfq")?.addEventListener("submit", event => {
+    event.preventDefault();
+    const scope=document.querySelector("#lamp-scope").value.trim(),budget=document.querySelector("#lamp-budget").value.trim();
+    const status=document.querySelector("#lamp-rfq-status"),out=document.querySelector("#lamp-rfq-output"),copy=document.querySelector("#lamp-copy");
+    if(!scope||scope.length>2400||(budget&&!/^\d+(?:\.\d{1,18})?$/.test(budget))){out.hidden=true;copy.hidden=true;status.textContent="請填需求；預算須為正確十進位數字。";return;}
+    out.value=`【11520 琉璃燈詢價草稿｜非訂單／非付款】\n原案：https://github.com/klineodyssey/kline-odyssey/issues/630\n需求：${scope}\n買方預算上限：${budget?budget+" "+document.querySelector("#lamp-currency").value:"未指定"}\n請供應者回覆：正式價格／幣別、有效期限、工期、交付版本與權利、驗收、修補／取消條款及付款方式。\n狀態：文字已準備，尚未提交／接單／付款。`;
+    out.hidden=false;copy.hidden=false;status.textContent="詢價文字已準備；請複製到原工單 #630，由供應者正式回覆。尚未送出。";
+  });
+  document.querySelector("#lamp-copy")?.addEventListener("click", async () => {
+    const out=document.querySelector("#lamp-rfq-output"),status=document.querySelector("#lamp-rfq-status");
+    try{await navigator.clipboard.writeText(out.value);status.textContent="已複製。仍未提交原工單、建立訂單或付款。";}catch{out.focus();out.select();status.textContent="瀏覽器不允許自動複製；文字已選取，請手動複製。尚未送出。";}
+  });
 }
 
 function renderNav(active) {
@@ -585,6 +660,7 @@ async function render() {
   const route = currentRoute();
   renderNav(route.page === "MY_LIFE" ? "MY_LIFE" : route.page);
   const views = {
+    MARKET: goodsMarketView,
     HOME: homeView,
     REQUEST: publicRequestGatewayView,
     LIFE: () => route.id ? lifeDetailView(route.id) : lifeMarketView(),
@@ -608,6 +684,7 @@ async function render() {
 }
 
 function bindViewEvents(route) {
+  if (route.page === "MARKET") bindGoodsMarketEvents();
   if (route.page === "HOME") bindPlayerFirstEvents();
   if (route.page === "LIFE_FACTORY") bindLifeFactoryEvents();
   if (route.page === "TOKENS") bindTokenEvents();

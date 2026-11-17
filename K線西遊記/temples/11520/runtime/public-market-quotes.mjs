@@ -26,6 +26,67 @@ export const PUBLIC_MARKET_QUOTE_SOURCE=Object.freeze({
 });
 
 export const FREE_ORACLE_MAX_AGE_MS=15000;
+
+// Human lamp specification: UTC daily CT+1..9, +/-ATR(14), 500 subdivisions
+// each side plus the centre. This is a public-data research/game organ, never
+// an Oracle, ownership registry, payment instruction or accuracy promise.
+export const LAMP_DAY_MS=86400000;
+export function buildAtrLampReference({rows,observation,now=Date.now()}={}){
+  if(!Number.isSafeInteger(now)||now<=0)throw new Error('LAMP_CLOCK_INVALID');
+  if(!Array.isArray(rows)||rows.length<16||rows.length>1000)throw new Error('LAMP_CANDLES_INCOMPLETE');
+  const candles=[];let previousOpen=-1;
+  for(const row of rows){
+    if(!Array.isArray(row)||row.length<7)throw new Error('LAMP_CANDLE_INVALID');
+    const [openAt,o,h,l,c,,closeAt]=row,open=Number(o),high=Number(h),low=Number(l),close=Number(c);
+    if(!Number.isSafeInteger(openAt)||openAt<0||openAt%LAMP_DAY_MS!==0||!Number.isSafeInteger(closeAt)||closeAt!==openAt+LAMP_DAY_MS-1||
+      ![o,h,l,c].every(x=>typeof x==='string'||typeof x==='number')||![open,high,low,close].every(x=>Number.isFinite(x)&&x>0)||low>Math.min(open,close)||high<Math.max(open,close)||low>high||
+      (previousOpen!==-1&&openAt!==previousOpen+LAMP_DAY_MS))throw new Error('LAMP_CANDLE_INVALID');
+    previousOpen=openAt;
+    if(closeAt<now)candles.push(Object.freeze({openAt,closeAt,open,high,low,close}));
+  }
+  const ctOpen=Math.floor(now/LAMP_DAY_MS)*LAMP_DAY_MS,last=candles.at(-1);
+  if(candles.length<15||last?.openAt!==ctOpen-LAMP_DAY_MS)throw new Error('LAMP_CANDLES_STALE_OR_INCOMPLETE');
+  const status=publicObservationStatus(observation,now);
+  if(status.stale||!Number.isFinite(observation?.price)||observation.price<=0||!['BTCUSDT','ETHUSDT','BNBUSDT'].includes(observation.market)||observation.source!==PUBLIC_MARKET_QUOTE_SOURCE.id)throw new Error('LAMP_CURRENT_PRICE_STALE');
+  const tr=candles.slice(1).map((b,i)=>Math.max(b.high-b.low,Math.abs(b.high-candles[i].close),Math.abs(b.low-candles[i].close)));
+  let atr=tr.slice(0,14).reduce((a,b)=>a+b,0)/14;
+  for(const value of tr.slice(14))atr=(atr*13+value)/14;
+  if(!Number.isFinite(atr)||atr<=0)throw new Error('LAMP_ATR_UNAVAILABLE');
+  const sample=candles.slice(-14),mean=sample.reduce((sum,b)=>sum+b.close,0)/14;
+  const denominator=sample.reduce((sum,_,i)=>sum+(i-6.5)**2,0);
+  const slope=sample.reduce((sum,b,i)=>sum+(i-6.5)*(b.close-mean),0)/denominator;
+  const span=sample.reduce((sum,b)=>sum+b.high-b.low,0),body=sample.reduce((sum,b)=>sum+b.close-b.open,0);
+  const bullShare=span>0?Math.max(0,Math.min(1,(1+body/span)/2)):0.5;
+  const horizons=Array.from({length:9},(_,i)=>{
+    const day=i+1,center=observation.price+slope*day;
+    if(!Number.isFinite(center)||center-atr<=0)throw new Error('LAMP_MODEL_OUT_OF_RANGE');
+    return Object.freeze({day,center,lower:center-atr,upper:center+atr,step:atr/500,targetOpenAt:ctOpen+day*LAMP_DAY_MS,targetCloseAt:ctOpen+(day+1)*LAMP_DAY_MS-1});
+  });
+  return Object.freeze({market:observation.market,interval:'1d',ctOpenAt:ctOpen,observedAt:observation.updatedAt,receivedAt:now,
+    currentPrice:observation.price,atr14:atr,slope,closedCandles:Object.freeze(candles),bullShare,bearShare:1-bullShare,
+    pressureSource:'LAST_14_CLOSED_CANDLE_BODY_RANGE_PROXY_NOT_ORDER_BOOK',model:'CLOSED_14_LINEAR_TREND_ANCHORED_AT_CURRENT_PRICE',
+    modelStatus:'RESEARCH_BASELINE_NOT_ACCURACY_VALIDATED',source:PUBLIC_MARKET_QUOTE_SOURCE.id,settlementAuthority:false,horizons:Object.freeze(horizons)});
+}
+export function lampScanPoint(reference,day,index){
+  if(!Number.isInteger(day)||day<1||day>9||!Number.isInteger(index)||index<-500||index>500)throw new Error('LAMP_SCAN_OUT_OF_RANGE');
+  const h=reference?.horizons?.[day-1];
+  if(!h||h.day!==day||!Number.isFinite(h.center)||!Number.isFinite(h.step)||h.step<=0)throw new Error('LAMP_REFERENCE_REQUIRED');
+  return Object.freeze({day,index,ordinal:index+500,total:1001,price:h.center+index*h.step,deltaFromCurrent:h.center+index*h.step-reference.currentPrice});
+}
+export async function fetchAtrLampReference({market='BTCUSDT',fetchImpl=globalThis.fetch,now=Date.now,timeoutMs=8000}={}){
+  if(!['BTCUSDT','ETHUSDT','BNBUSDT'].includes(market)||typeof fetchImpl!=='function')throw new Error('LAMP_MARKET_INVALID');
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const url=new URL('/api/v3/klines',PUBLIC_MARKET_QUOTE_SOURCE.origin);
+    url.searchParams.set('symbol',market);url.searchParams.set('interval','1d');url.searchParams.set('limit','100');
+    const [response,observations]=await Promise.all([
+      fetchImpl(url.href,{method:'GET',mode:'cors',cache:'no-store',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal}),
+      fetchPublicMarketObservations({symbols:[market],fetchImpl,now,timeoutMs})
+    ]);
+    if(!response?.ok)throw new Error('LAMP_CANDLE_HTTP_'+(response?.status??'UNKNOWN'));
+    return buildAtrLampReference({rows:await response.json(),observation:observations[market],now:now()});
+  }finally{controller.abort();clearTimeout(timer)}
+}
 // Public REST references are simulation/world inputs, not authenticated USD
 // settlement reports. Never manufacture provider time from receipt time.
 export function publicObservationStatus(observation,now=Date.now()){

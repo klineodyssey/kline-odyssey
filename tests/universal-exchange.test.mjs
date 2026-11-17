@@ -3453,7 +3453,7 @@ test("V4.1 production shell exposes animated concierge and resilient storage cac
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.1\.2-storage-fallback/);
+  assert.match(htmlSource, /v=11520-v4\.1\.3-market-12682/);
   assert.match(htmlSource, /id="storage-status"/);
   assert.match(appSource, /AI ANT BANK/);
   assert.match(appSource, /createResilientBrowserUniverseStore/);
@@ -3465,4 +3465,16 @@ test("V4.1 production shell exposes animated concierge and resilient storage cac
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+test("11520 goods market uses the original lamp request, never inventing a paid order",async()=>{
+  const source=await fs.readFile(new URL('../K線西遊記/temples/11520/app.mjs',import.meta.url),'utf8');
+  const version=(await fs.readFile(new URL('../K線西遊記/temples/11520/VERSION',import.meta.url),'utf8')).trim();
+  const manifest=JSON.parse(await fs.readFile(new URL('../K線西遊記/temples/11520/MANIFEST.json',import.meta.url),'utf8'));
+  assert.equal(version,manifest.version);assert.equal(version,'4.1.3');
+  assert.equal(manifest.public_market_world,'11520');assert.equal(manifest.public_game_world,'12682');
+  assert.match(source,/MARKET: goodsMarketView/);assert.match(source,/issues\/630/);
+  assert.match(source,/尚未報價，不是 0 元/);assert.match(source,/尚未提交／接單／付款/);
+  assert.match(source,/八眼琉璃燈怪物/);assert.match(source,/第 9 根 K 線：CT\+9/);
+  assert.match(source,/KGEN ↔ BNB 換幣/);assert.match(source,/href="#\/TOKENS"/);
 });

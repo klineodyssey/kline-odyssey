@@ -1,5 +1,18 @@
 # 11520 Changelog
 
+## 4.1.3 local candidate — 2026-11-17 / Digital Ant /root
+
+- Human corrected accidental 11529 to 11520; no 11529 entry created.
+- Market homepage/header/cache/VERSION/MANIFEST aligned at 4.1.3.
+- Game public presentation moves to 12682 阿斗起飛, preserving old source and
+  save identity; not a global coordinate/account migration.
+- Human corrected lamp scope to eight-eye monster / CT+9, ninth future candle;
+  old #630 CT+1 preserved as history. Inquiry text is not an Order/payment.
+- Existing BSC56 AMM preserved; no new mainnet route unlocked.
+- Node suites 303/303 PASS; Chrome market desktop/mobile functional and reviewed
+  screenshots PASS. Game visual NOT_COMPLETE (world not rendered in smoke).
+  Physical phone, live trade and goods delivery NOT_TESTED. Not published.
+
 ## Metadata
 
 | Field | Value |
@@ -338,3 +351,18 @@
 
 ## Historical 4.0.0 and earlier
 Earlier entries remain available in Git history. Current behavior is governed by the CURRENT canonical files above; historical code or text that conflicts with them must not be resurrected as active rules.
+# 2026-11-17 local acceptance addendum (unpublished)
+
+The existing public-market quote organ now validates UTC closed daily candles,
+computes Wilder ATR(14), and exposes CT+1..9 research projections with exactly
+1001 scan points across +/-ATR14 (step ATR14/500). The market page provides
+market/day selection, refresh, scan slider, chart, provider timestamps and stale
+labels. Chang'e is CT+8, not day seven. No forecast accuracy, character ownership,
+order execution, payment or settlement is asserted. Linear trend is explicitly
+an unvalidated research baseline; historical candle pressure is not an order book.
+
+Acceptance: 303 existing portal/exchange/security tests plus 8 public-market tests
+passed. Chrome desktop 1440x1000 and mobile emulation 390x844 fetched real public
+BTC data, changed CT+8 and index +500, rendered without horizontal overflow;
+screenshots inspected. Physical mobile and full 3D game remain NOT_TESTED / not
+accepted respectively. No commit, push, deployment or financial transaction.

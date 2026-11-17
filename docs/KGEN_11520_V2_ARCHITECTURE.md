@@ -1,5 +1,47 @@
 # 11520 Universal Exchange V2 Architecture
 
+## Human market/game realignment candidate — 2026-11-17 / Digital Ant /root
+
+Base main 823ef4556e228a6c6b7c2d65dab66e7b8c585a12. Direct Human corrected
+11529 to 11520: marketplace stays 11520, game presentation moves to 12682
+阿斗起飛. Reuses `game-5d.html?world=12682`, not a new runtime or a global
+directory/coordinate migration. Historical K11520 player/storage/asset keys stay.
+VERSION, MANIFEST, market header and cache entry align at 4.1.3; game keeps its
+separate SHARED_GAME_VERSION. Old 88888 bookmarks remain compatible.
+
+Human further corrected the first product to **八眼琉璃燈怪物／預見未來車頭燈**,
+CT+9 = ninth future candle from Current Time, not nine fixed days. Market,
+candle interval, CT baseline, target candle, model outputs and acceptance need
+explicit definition. #630 is the historical nine-eye/CT+1 predecessor; that
+scope is not silently presented as the current CT+9 product.
+
+The form prepares copyable inquiry text only, not a submitted request, formal
+Quote/Order, saved record, payment or prediction. No price, seller or delivery
+rights are fabricated. Existing BSC56 KGEN/WBNB AMM is a distinct existing path,
+not a goods payment or BTC/index settlement adapter.
+
+Actual live-goods blockers: verified supplier/offer, accepted price/currency and
+expiry, deliverable rights/acceptance/refunds, verified payment/escrow endpoint
+and receipt-to-delivery integration. Actual leveraged-position blockers:
+`real-trading-order-intent.mjs` rejects unconfigured non-simulation/non-testnet
+execution; mainnet manifest is BLOCKED_NOT_EXECUTABLE. Contract/role/feed/capital
+evidence and BSC56 execution integration must be verified. Mere removal of HOLD
+or text cannot implement these. Concrete deploy/funding/oracle/signing actions
+need action-specific approval; do not invent a second-reviewer ceremony for
+ordinary repository work.
+
+Prior lamp R1 evidence recovered read-only:
+`C:/Desktop/kline-odyssey/2026-10-26/task-3/review-temp/quote-receipt-repair-r1/review-result.json`,
+fingerprint 43a86f90a2321cd6718a15dfc65b8a6088dcea8c6b2feb004ce01802283a1f01.
+It is a limited source/VM mock preview; payment/fees/totals/reliable commit are
+NOT_CONFIGURED. No predecessor implementation was transplanted.
+
+Market Chrome desktop/mobile inquiry and missing-wallet feedback passed;
+screenshots were reviewed. Game smoke reached 12682 title but had an unrendered
+world; game VISUAL_QA NOT_COMPLETE. Physical phone and live trade NOT_TESTED.
+Candidate remains uncommitted/unpublished; no signer, asset move, deployment,
+oracle activation, real payment or commercial-complete claim.
+
 ## V4.0 Player First, Voice/Character repair and 8888 exploration
 
 The Production entry is now a first-minute player experience rather than a status dashboard. `WUKONG_HAIR_3D_CONCIERGE` is a lightweight CSS 3D character with explicit idle, listening, thinking, speaking, success and error states; unsupported 3D and reduced-motion devices retain a visible 2D avatar. The six first actions are Voice, Text, Explore, Join, Work and My AI.

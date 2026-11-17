@@ -1,4 +1,18 @@
-# 11520 Universal Exchange V3.9
+# 11520 Universal Exchange
+
+## 4.1.3 local market / 12682 presentation candidate — 2026-11-17
+
+11520 is the goods quotation entry. The game opens the existing
+`game-5d.html?world=12682` runtime as **12682 阿斗起飛**, preserving historical
+K11520 storage and player identities. No duplicate engine or directory migration.
+88888 bookmarks remain a compatibility route to that same game.
+
+Default MARKET presents Human's **八眼琉璃燈怪物 / CT+9** inquiry; #630 remains
+the historical nine-eye/CT+1 reference, not the current specification. The form
+only prepares/copies text: no automatic submission, storage, Order or payment.
+Existing TOKENS KGEN/BNB AMM is not goods settlement. See
+`docs/KGEN_11520_V2_ARCHITECTURE.md` for actual blockers and QA limitations.
+This candidate is uncommitted/unpublished, not a completed live trading product.
 
 ## K11520 three-plane joystick filename (2026-10-19)
 
