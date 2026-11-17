@@ -6,6 +6,17 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### 11520 simulation autopilot core candidate — 2026-11-18
+
+The existing `K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs`
+exports `createSimulationAutopilot` over its existing simulation adapter. It
+requires explicit strategy/risk settings and confirms a closed position's
+settlement receipt before submitting the opposite side. Usage and limitations:
+[11520 trading specification](K線西遊記/temples/11520/KGEN_TRADING_SPEC.md#9-模擬自動操盤核心候選2026-11-18).
+This is an offline component candidate: game UI, route ETA/PnL integration and
+live automatic trading are not delivered by this change. #523 protected paths
+remain unchanged.
+
 ### K11520 three-plane joystick filename — 2026-10-19
 
 `K線西遊記/temples/11520/runtime/joystick-xzxyyz.mjs` is the single canonical

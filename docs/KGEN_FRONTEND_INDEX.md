@@ -1,5 +1,22 @@
 # KGEN_FRONTEND_INDEX
 
+## 11520 simulation autopilot core candidate — 2026-11-18
+
+- `K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs`:
+  `createSimulationAutopilot` uses only adapters created by the existing local
+  simulation factory. Explicit Player Life context, strategy thresholds and
+  risk limits are required. Receipt-confirmed closes precede reversal orders;
+  pending orders, context changes, failed actions and risk limits block new orders.
+- `tests/11520-real-trading-order-intent.test.mjs`: existing test home for the
+  adapter and controller lifecycle/guard regressions.
+- `K線西遊記/temples/11520/KGEN_TRADING_SPEC.md` §9: cumulative component API
+  documentation. Existing financial math, market bindings and settlement owner
+  remain authoritative.
+- This component has no timer, DOM hook, signer, provider or persistent auto-arm.
+  It is not wired into the current game UI; complete XYZ navigation, ETA/PnL,
+  browser visual acceptance and real automatic trading remain unverified.
+  No #523 protected file is changed or bypassed.
+
 ## 11520 market / 12682 presentation candidate — 2026-11-17
 
 Existing `K線西遊記/temples/11520/index.html` + `app.mjs` now default to MARKET

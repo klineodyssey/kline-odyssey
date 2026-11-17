@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
+import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 import {createKgenLedger} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 import {createRequire} from 'node:module';
@@ -667,4 +667,231 @@ test('public observe cannot bypass recovery or reset a pinned pending/open sourc
  assert.equal(ledger.simulation.orders[0].priceSource,'BINANCE_PUBLIC_MARKET_DATA_ONLY');assert.equal(ledger.simulation.orders[0].executionPriceSource,'K11520_DETERMINISTIC_SIMULATION');
  ledger.simulation.observations.ETHUSDT.source='BINANCE_PUBLIC_MARKET_DATA_ONLY';const before=structuredClone(ledger);
  assert.equal(adapter.observe({market:'ETHUSDT',price:5000,observedAt:18000,now:18000}).reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before);
+});
+
+// Explicit synthetic test parameters, never product defaults or a trading recommendation.
+const autopilotParameters={axis:'KX',market:'BTCUSDT',cMagnitude:.1,lots:2,
+ longAbove:100,shortBelow:99.8,maxLossKgen:5,maxOrders:4};
+function autopilotFixture({parameters={},balance=1000,hooks={}}={}){
+ const ledger=createKgenLedger(balance),config={...autopilotParameters,...parameters};
+ let playerContext={id:'SYNTHETIC_PLAYER_A',readOnly:false};
+ const adapter=createExecutionAdapter({ledger,productV1:true,...hooks});
+ const observe=(price,now,market=config.market)=>{
+  const result=adapter.observe({market,price,observedAt:now,now});
+  assert.equal(result.ok,true,'the existing simulator accepts the test observation');return result;
+ };
+ observe(100,1000);
+ const pilot=createSimulationAutopilot({adapter,getContext:()=>playerContext});
+ return {ledger,adapter,config,pilot,observe,setContext:value=>{playerContext=value}};
+}
+async function openAutopilotLong(f){
+ assert.equal(f.pilot.arm(f.config).ok,true);
+ assert.equal((await f.pilot.step({now:1001})).ok,true);
+ assert.equal(f.adapter.snapshot().orders[0].status,'PENDING');
+ assert.equal(f.adapter.snapshot().positions.length,0,'an autopilot submit does not fabricate a fill');
+ f.observe(100,1002);
+ const position=f.adapter.snapshot().positions.find(p=>p.status==='OPEN');
+ assert.equal(position.side,'LONG');return position;
+}
+
+test('autopilot requires every strategy and risk parameter without economic defaults',async()=>{
+ for(const key of Object.keys(autopilotParameters)){
+  const f=autopilotFixture(),before=structuredClone(f.ledger),incomplete={...f.config};delete incomplete[key];
+  assert.equal(f.pilot.arm(incomplete).ok,false,'missing '+key);
+  assert.equal(f.pilot.snapshot().state,'STOPPED');assert.equal(f.pilot.snapshot().config,null);
+  assert.equal((await f.pilot.step({now:1001})).ok,false);assert.deepEqual(f.ledger,before);
+ }
+ for(const invalid of [{market:'ETHUSDT'},{cMagnitude:0},{cMagnitude:.3},{cMagnitude:10},
+  {lots:0},{longAbove:99},{shortBelow:100},{maxLossKgen:0},{maxOrders:0},{maxOrders:1.5},
+  {longStopPrice:101},{shortTakeProfitPrice:101}]){
+  const f=autopilotFixture(),before=structuredClone(f.ledger);
+  assert.equal(f.pilot.arm({...f.config,...invalid}).ok,false,JSON.stringify(invalid));assert.deepEqual(f.ledger,before);
+ }
+});
+
+test('autopilot accepts only the actual simulation factory and an explicit writable player context',()=>{
+ const {adapter,ledger}=fixture(),before=structuredClone(ledger),context=()=> 'SYNTHETIC_PLAYER_A';
+ assert.throws(()=>createSimulationAutopilot({adapter:{...adapter},getContext:context}),/SIMULATION_ADAPTER_REQUIRED/);
+ assert.throws(()=>createSimulationAutopilot({adapter:Object.create(adapter),getContext:context}),/SIMULATION_ADAPTER_REQUIRED/);
+ const evm=createExecutionAdapter({ledger,deployment:{mode:'ON_CHAIN'}});
+ assert.throws(()=>createSimulationAutopilot({adapter:evm,getContext:context}),/SIMULATION_ADAPTER_REQUIRED/);
+ const testnet=testnetFixture(),testnetAdapter=testnet.make(),callsBefore=testnet.calls.length;
+ assert.throws(()=>createSimulationAutopilot({adapter:testnetAdapter,getContext:context}),/SIMULATION_ADAPTER_REQUIRED/);
+ assert.equal(testnet.calls.length,callsBefore,'rejected autopilot never requests Testnet identity, signing or transmission');
+ assert.throws(()=>createSimulationAutopilot({adapter}),/PLAYER_CONTEXT_REQUIRED/);
+ for(const getContext of [()=>'',()=>null,()=>({id:'SYNTHETIC_PLAYER_A',readOnly:true})]){
+  const pilot=createSimulationAutopilot({adapter,getContext});assert.equal(pilot.arm(autopilotParameters).ok,false);
+ }
+ assert.deepEqual(ledger,before);
+});
+
+test('autopilots retain all three fixed financial market bindings without cross-market fills',async()=>{
+ const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true});
+ const bindings=[['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']],pilots=[];
+ for(const [axis,market]of bindings){
+  assert.equal(adapter.observe({market,price:100,observedAt:1000,now:1000}).ok,true);
+  const pilot=createSimulationAutopilot({adapter,getContext:()=> 'SYNTHETIC_PLAYER_A'});
+  assert.equal(pilot.arm({...autopilotParameters,axis,market}).ok,true);pilots.push(pilot);
+ }
+ await Promise.all(pilots.map(p=>p.step({now:1001})));
+ assert.deepEqual(adapter.snapshot().orders.map(o=>[o.axis,o.market,o.status]),bindings.map(b=>[...b,'PENDING']));
+ assert.equal(adapter.observe({market:'BTCUSDT',price:100,observedAt:1002,now:1002}).ok,true);
+ const book=adapter.snapshot();assert.deepEqual(book.positions.map(p=>[p.axis,p.market]),[['KX','BTCUSDT']]);
+ assert.equal(book.orders.filter(o=>o.status==='PENDING').length,2);assert.equal(book.wallet.lockedMargin,2);
+ assert.equal(pilots[1].snapshot().submittedOrders,1);assert.equal(pilots[2].snapshot().submittedOrders,1);
+});
+
+test('autopilot reverses only a receipted closed LONG and earns a falling-price SHORT through the original take-profit engine',async()=>{
+ const f=autopilotFixture({parameters:{shortTakeProfitPrice:99.4}}),long=await openAutopilotLong(f);
+ f.observe(99.8,1003);assert.equal((await f.pilot.step({now:1004})).ok,true);
+ let book=f.adapter.snapshot(),closed=book.positions.find(p=>p.positionId===long.positionId);
+ assert.equal(closed.status,'CLOSED');assert.equal(closed.margin,0);
+ const closeReceipt=book.receipts.find(r=>r.positionId===long.positionId&&r.kind==='SETTLEMENT');
+ assert.equal(closeReceipt.status,'CLOSED');assert.equal(closeReceipt.marginAfter,0);
+ assert.equal(book.orders.length,2);assert.equal(book.orders[1].side,'SHORT');assert.equal(book.orders[1].c,-.1);
+ assert.equal(book.orders[1].status,'PENDING');assert.equal(book.positions.length,1);
+ f.observe(99.8,1005);assert.equal(f.adapter.snapshot().positions[1].side,'SHORT');
+ f.observe(99.4,1006);book=f.adapter.snapshot();
+ const shortReceipt=book.receipts.find(r=>r.kind==='SETTLEMENT'&&r.positionId===book.positions[1].positionId);
+ assert.equal(shortReceipt.status,'TAKE_PROFIT');assert.ok(shortReceipt.realizedPnl>0,'the SHORT benefits from the actual lower observation');
+ assert.ok(book.wallet.realizedPnl>0);assert.equal(book.wallet.lockedMargin,0);
+ assert.ok(Math.abs(book.wallet.free-(1000+book.wallet.realizedPnl))<1e-9);
+ await f.pilot.step({now:1007});assert.equal(f.adapter.snapshot().orders.length,2,'the same signal does not issue another order after settlement');
+ assert.ok(Math.abs(f.pilot.snapshot().realizedPnl-book.wallet.realizedPnl)<1e-9);
+ assert.equal(f.pilot.snapshot().signerRequested,false);assert.equal(f.pilot.snapshot().broadcast,false);
+});
+
+test('autopilot single-flight and repeated pending observations never duplicate or cancel an existing order',async()=>{
+ const f=autopilotFixture();assert.equal(f.pilot.arm(f.config).ok,true);
+ const first=f.pilot.step({now:1001});assert.equal(f.pilot.snapshot().busy,true);
+ const overlap=f.pilot.step({now:1001}),rearm=f.pilot.arm(f.config);
+ assert.equal(rearm.reason,'ACTION_IN_PROGRESS');assert.equal((await overlap).reason,'ACTION_IN_PROGRESS');await first;
+ assert.equal(f.pilot.snapshot().busy,false);
+ const before=structuredClone(f.ledger);
+ for(let i=0;i<4;i++)assert.equal((await f.pilot.step({now:1002+i})).state,'PENDING_TRIGGER');
+ assert.deepEqual(f.ledger,before);assert.equal(f.pilot.snapshot().submittedOrders,1);
+ f.pilot.stop();assert.equal((await f.pilot.step({now:1007})).ok,false);
+ assert.deepEqual(f.ledger,before,'stop disarms decisions without cancelling the previously accepted pending order');
+});
+
+test('autopilot stale or corrupt quotes and insufficient margin stop without creating an order',async()=>{
+ for(const kind of ['stale','future','invalid-price','missing-price','margin']){
+  const f=autopilotFixture({balance:kind==='margin'?1:1000});assert.equal(f.pilot.arm(f.config).ok,true);
+  if(kind==='future')f.ledger.simulation.observations.BTCUSDT.at=2000;
+  if(kind==='invalid-price')f.ledger.simulation.observations.BTCUSDT.price=NaN;
+  if(kind==='missing-price')delete f.ledger.simulation.observations.BTCUSDT;
+  const before=structuredClone(f.ledger),result=await f.pilot.step({now:kind==='stale'?16001:1001});
+  assert.equal(result.ok,false,kind);assert.equal(f.pilot.snapshot().state,'STOPPED',kind);
+  assert.deepEqual(f.ledger,before,kind+' leaves the prior ledger intact');
+ }
+});
+
+test('autopilot stop, player switch and read-only transition during preview forbid the later submit',async()=>{
+ for(const interrupt of ['stop','player','readonly']){
+  const f=autopilotFixture();assert.equal(f.pilot.arm(f.config).ok,true);const before=structuredClone(f.ledger);
+  const result=f.pilot.step({now:1001});assert.equal(f.pilot.snapshot().busy,true);
+  if(interrupt==='stop')f.pilot.stop();
+  else f.setContext({id:interrupt==='player'?'SYNTHETIC_PLAYER_B':'SYNTHETIC_PLAYER_A',readOnly:interrupt==='readonly'});
+  assert.equal((await result).ok,false,interrupt);assert.deepEqual(f.ledger,before,interrupt);
+  assert.equal(f.pilot.snapshot().state,'STOPPED');assert.equal(f.pilot.snapshot().submittedOrders,0);
+ }
+ for(const interrupt of ['stop','player','readonly']){
+  let injecting=false,f,mutationHooks=0;
+  f=autopilotFixture({hooks:{beforeMutation(){
+   if(!injecting)return;mutationHooks++;
+   if(interrupt==='stop')f.pilot.stop();
+   else f.setContext({id:interrupt==='player'?'SYNTHETIC_PLAYER_B':'SYNTHETIC_PLAYER_A',readOnly:interrupt==='readonly'});
+  }}});
+  assert.equal(f.pilot.arm(f.config).ok,true);const before=JSON.stringify(f.ledger);injecting=true;
+  assert.equal((await f.pilot.step({now:1001})).ok,false,interrupt+' in the actual submit hook');
+  assert.equal(mutationHooks,1);assert.equal(JSON.stringify(f.ledger),before,'post-hook guard prevents any '+interrupt+' submit mutation');
+  assert.equal(f.pilot.snapshot().submittedOrders,0);assert.equal(f.pilot.snapshot().state,'STOPPED');
+ }
+});
+
+test('autopilot cancellation during a completed-close await keeps that settlement but forbids a reverse order',async()=>{
+ for(const interrupt of ['stop','player','readonly']){
+  const f=autopilotFixture(),long=await openAutopilotLong(f);f.observe(99.8,1003);
+  const operation=f.pilot.step({now:1004});
+  assert.equal(f.adapter.snapshot().positions.find(p=>p.positionId===long.positionId).status,'CLOSED','the real close happened before the async continuation');
+  if(interrupt==='stop')f.pilot.stop();
+  else f.setContext({id:interrupt==='player'?'SYNTHETIC_PLAYER_B':'SYNTHETIC_PLAYER_A',readOnly:interrupt==='readonly'});
+  assert.equal((await operation).ok,false,interrupt);
+  const book=f.adapter.snapshot();assert.equal(book.orders.length,1);assert.equal(book.positions.length,1);
+  assert.equal(book.receipts.filter(r=>r.kind==='SETTLEMENT').length,1);assert.equal(f.pilot.snapshot().submittedOrders,1);
+  assert.equal(f.pilot.snapshot().state,'STOPPED');assert.equal(f.pilot.snapshot().busy,false);
+ }
+ for(const interrupt of ['stop','player','readonly']){
+  let injecting=false,f,mutationHooks=0;
+  f=autopilotFixture({hooks:{beforeMutation(){
+   if(!injecting)return;mutationHooks++;
+   if(interrupt==='stop')f.pilot.stop();
+   else f.setContext({id:interrupt==='player'?'SYNTHETIC_PLAYER_B':'SYNTHETIC_PLAYER_A',readOnly:interrupt==='readonly'});
+  }}});
+  await openAutopilotLong(f);f.observe(99.8,1003);const before=JSON.stringify(f.ledger);injecting=true;
+  assert.equal((await f.pilot.step({now:1004})).ok,false,interrupt+' in the actual close hook');
+  assert.equal(mutationHooks,1);assert.equal(JSON.stringify(f.ledger),before,'post-hook guard prevents '+interrupt+' close or reversal');
+  assert.equal(f.pilot.snapshot().submittedOrders,1);assert.equal(f.pilot.snapshot().state,'STOPPED');
+ }
+});
+
+test('autopilot close rejection or a missing persisted settlement cannot authorize a reverse',async()=>{
+ for(const fault of ['before-close','missing-receipt']){
+  let inject=false,f;
+  const hooks={beforeMutation(){if(inject&&fault==='before-close')throw new Error('SYNTHETIC_CLOSE_FAILURE')},
+   afterMutation(){if(inject&&fault==='missing-receipt')f.ledger.simulation.receipts=f.ledger.simulation.receipts.filter(r=>r.kind!=='SETTLEMENT')}};
+  f=autopilotFixture({hooks});const long=await openAutopilotLong(f);f.observe(99.8,1003);inject=true;
+  assert.equal((await f.pilot.step({now:1004})).ok,false,fault);
+  assert.equal(f.pilot.snapshot().reason,'CLOSE_NOT_CONFIRMED');assert.equal(f.adapter.snapshot().orders.length,1);
+  assert.equal(f.adapter.snapshot().positions.find(p=>p.positionId===long.positionId).status,fault==='before-close'?'OPEN':'CLOSED');
+  const stopped=structuredClone(f.ledger);await f.pilot.step({now:1005});assert.deepEqual(f.ledger,stopped,'failed close is never retried');
+ }
+});
+
+test('autopilot loss budget and order budget stop new decisions on the existing settlement evidence',async()=>{
+ const loss=autopilotFixture({parameters:{maxLossKgen:.05}}),lossPosition=await openAutopilotLong(loss);
+ loss.observe(99.7,1003);assert.equal((await loss.pilot.step({now:1004})).reason,'LOSS_LIMIT_REACHED');
+ assert.equal(loss.adapter.snapshot().positions.find(p=>p.positionId===lossPosition.positionId).status,'CLOSED');
+ assert.equal(loss.adapter.snapshot().orders.length,1);assert.ok(loss.pilot.snapshot().realizedPnl<-.05);
+ const limited=autopilotFixture({parameters:{maxOrders:1}}),limitedPosition=await openAutopilotLong(limited);
+ limited.observe(99.8,1003);assert.equal((await limited.pilot.step({now:1004})).reason,'ORDER_LIMIT_REACHED');
+ assert.equal(limited.adapter.snapshot().positions.find(p=>p.positionId===limitedPosition.positionId).status,'CLOSED');
+ assert.equal(limited.adapter.snapshot().orders.length,1);assert.equal(limited.pilot.snapshot().submittedOrders,1);
+});
+
+test('autopilot never adopts manual positions, ignores neither external close nor liquidation, and preserves their ledger',async()=>{
+ for(const filled of [false,true]){
+  const f=autopilotFixture();const manual=f.adapter.submit({axis:'KX',market:'BTCUSDT',c:.1,lots:1,currentPrice:100,triggerPrice:100},{now:1001});
+  assert.equal(manual.ok,true);if(filled)f.observe(100,1002);
+  const before=structuredClone(f.ledger);assert.equal(f.pilot.arm(f.config).reason,'AXIS_ALREADY_ACTIVE');assert.deepEqual(f.ledger,before);
+ }
+ const collision=autopilotFixture();assert.equal(collision.pilot.arm(collision.config).ok,true);
+ const inFlight=collision.pilot.step({now:1001});
+ const manual=collision.adapter.submit({axis:'KX',market:'BTCUSDT',c:-.1,lots:1,currentPrice:100,triggerPrice:99.8},{now:1001});
+ assert.equal(manual.ok,true);await inFlight;
+ assert.deepEqual(collision.adapter.snapshot().orders.map(o=>o.orderId),[manual.order.orderId]);assert.equal(collision.pilot.snapshot().state,'STOPPED');
+ for(const terminal of ['external-close','liquidated']){
+  const f=autopilotFixture(),position=await openAutopilotLong(f);
+  if(terminal==='external-close')assert.equal(f.adapter.close(position.positionId,{now:1003}).ok,true);else f.observe(89,1003);
+  const before=structuredClone(f.ledger);assert.equal((await f.pilot.step({now:1004})).ok,false);
+  assert.equal(f.pilot.snapshot().reason,terminal==='external-close'?'POSITION_CLOSED_EXTERNALLY':'AUTOPILOT_LIQUIDATED');assert.deepEqual(f.ledger,before);
+ }
+ for(const terminal of ['cancelled','missing','rejected']){
+  const f=autopilotFixture({balance:2});assert.equal(f.pilot.arm(f.config).ok,true);await f.pilot.step({now:1001});
+  const owned=f.adapter.snapshot().orders[0];
+  if(terminal==='cancelled')assert.equal(f.adapter.cancel(owned.orderId).ok,true);
+  else if(terminal==='missing')f.ledger.simulation.orders=[];
+  else{
+   // A separate real simulation fill uses the funds while the original order is pending.
+   f.observe(100,1002,'ETHUSDT');
+   assert.equal(f.adapter.submit({axis:'KY',market:'ETHUSDT',c:.1,lots:1,currentPrice:100,triggerPrice:100},{now:1003}).ok,true);
+   f.observe(100,1004,'ETHUSDT');assert.equal(f.adapter.snapshot().wallet.free,1);
+   f.observe(100,1005);assert.equal(f.adapter.snapshot().orders.find(o=>o.orderId===owned.orderId).status,'REJECTED');
+   assert.equal(f.adapter.snapshot().orders.find(o=>o.orderId===owned.orderId).reason,'INSUFFICIENT_FREE_KGEN');
+  }
+  f.observe(99.8,1006);const before=JSON.stringify(f.ledger);
+  assert.equal((await f.pilot.step({now:1007})).reason,'AUTOPILOT_ORDER_'+terminal.toUpperCase());
+  assert.equal(f.pilot.snapshot().state,'STOPPED');assert.equal(f.pilot.snapshot().submittedOrders,1);
+  assert.equal(JSON.stringify(f.ledger),before,terminal+' never retries or reverses on the opposite signal');
+ }
 });

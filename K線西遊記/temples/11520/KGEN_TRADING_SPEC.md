@@ -91,3 +91,59 @@ KGEN 錢包餘額不等於全部都是保證金。UI/runtime 必須分開：
 
 ## 8. 變更控制
 若要修改以上公式，必須先有新的明確 Human Decision，再同步修改本文件、GAME_UI_SPEC.md、CHANGELOG.md、runtime 與 regression tests。不得為配合現有程式而反向改寫正典。
+
+## 9. 模擬自動操盤核心候選（2026-11-18）
+
+本節記錄 Human「多空 XYZ 導航之上的自動駕駛，能自動切換多空部位」
+要求的一個軟體元件；不改上列金融公式、口數、費用、C 或市場綁定。
+完整導航／自駕產品尚未交付。#523 的遊戲畫面、導航、座標與其測試 HOLD
+保持，本元件未以新 Runtime、DOM 點擊、事件或另一個 bootstrap 繞過。
+
+既有 `runtime/real-trading-order-intent.mjs` 增加
+`createSimulationAutopilot({adapter, getContext})`：
+
+- `adapter` 必須是同模組 `createExecutionAdapter` 建立的 SIMULATION 實例。
+  偽造 `{mode:'SIMULATION'}`、ON_CHAIN、BSC_TESTNET 或 provider callback
+  都不會成為可接受的自駕執行器。
+- `getContext()` 必須回傳目前 Player Life 範圍的非空識別字串，或
+  `{id, readOnly}`。每次決策、每個非同步接續點都重驗身分與唯讀狀態。
+  原保存用的 `beforeMutation` hook 返回後、真正修改帳本前也重驗，避免
+  hook 內切換帳號或停止策略後，舊動作仍寫入帳本。
+  它不以 `snapshot().wallet` 或頁面旗標推定簽署／交易權限。
+- `arm(config)` 明確啟動；`step({now})` 由既有呼叫端提供一輪決策；
+  `snapshot()` 讀狀態；`stop()` 停止後續決策。沒有內建定時器或自動恢復。
+  建立新實例／重新載入必定 DISARMED。
+
+啟動設定不得省略以下欄位，核心不代填交易或風控數字：
+
+| 欄位 | 意義 |
+|---|---|
+| `axis`、`market` | 沿原 KX/BTCUSDT、KY/ETHUSDT、KZ/BNBUSDT 綁定 |
+| `lots`、`cMagnitude` | 沿原口數／正值 V1 C 檔位；多方使用正 C，空方負 C |
+| `longAbove`、`shortBelow` | 價格達上界時多方訊號、達下界時空方訊號；下界必須小於上界 |
+| `maxLossKgen` | 此次啟動所屬部位的已實現加未實現淨虧損停止門檻 |
+| `maxOrders` | 此次啟動允許建立的新委託數量上限 |
+
+可選 `longStopPrice`、`longTakeProfitPrice`、`shortStopPrice`、
+`shortTakeProfitPrice`，皆按原委託模型與該方向驗證絕對價格。
+反手不沿用另一方向的停損／止盈價格。
+
+決策沿原 `quote → preview → submit`；提交成功仍僅為 PENDING_TRIGGER，
+須後續有效 observation 觸及／穿越才可能成交。核心不製造行情、FILL 或回執，
+不改原觸價成交規則。已有 pending 時不重複建立同軸委託。
+
+與現有多空方向相反時，先以原 `close` 平倉，再同時核對成功結果、同部位
+SETTLEMENT 回執、CLOSED 終態、歸零保證金與帳本保存的回執，才可預覽及
+建立反向委託。清算不冒充成功平倉；未知結果、失敗或缺回執即停止，沒有
+自動重試。不得接管啟動前／其他操作者建立的同軸委託或部位。
+延後成交時被原帳本拒絕的委託、外部取消、遺失的策略委託或外部手動平倉
+也會停止策略；不能靠相反訊號重新送單。
+
+`maxLossKgen` 依原 `positionRisk` 和原帳本回執計算；到達門檻時嘗試確認
+平掉本控制器的既有部位並停止。它不是跳空／滑價／過期行情下的保證最大損失。
+停止或出錯不會自動取消既有 pending 或擅自平倉；它們仍保留在原帳本，須沿
+原明確取消／平倉流程處理。`stop()` 不等於帳本已空倉。
+
+本元件僅離線模擬，沒有 UI 接線、XYZ→金融 K 映射、路線 ETA／情境損益整合
+或實景驗收，也沒有真錢包自動多空、簽署或送鏈能力。後續整合須沿原 owner
+及具體 HOLD 範圍另行核實，不得把元件測試通過當成完整產品驗收。
