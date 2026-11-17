@@ -1,3 +1,6 @@
+// 2026-11-17 / Codex /root / Human-authorized PR672 follow-up: expose the
+// original explicit order path with visible controls; retain prior metadata
+// below as ancestry. No preview, settlement, wallet or confirmation changes.
 import './mobile-action-rail-clearance-runtime.mjs';
 import {SHARED_GAME_VERSION} from '../../../../assets/kaios-world-registry.mjs';
 /* KGEN_META
@@ -84,7 +87,7 @@ function syncWorldFirst(){
   // CSS plus the capture guard suppress hidden actions. Do not overwrite
   // financial owners' hidden/inert/disabled flags, including changes made idle.
   for(const el of document.querySelectorAll('#orderFire,#flat')){
-    el.dataset.k11520ContextSuppressed=marketOpen?'0':'1';
+    el.dataset.k11520ContextSuppressed=marketOpen||controlsOpen?'0':'1';
   }
   if(globalThis.__K11520_UI_SETTINGS__)Object.assign(globalThis.__K11520_UI_SETTINGS__,{tradeOpen:marketOpen,controlsOpen,infoOpen});
   document.dispatchEvent(new CustomEvent('k11520:hud-context',{detail:{tradeOpen:marketOpen,controlsOpen,infoOpen}}));
@@ -118,7 +121,13 @@ function installWorldFirst(){
   // An explicit stationary hold in the existing joystick requests information,
   // never a click/order. Plane changes and movement no longer reveal cards.
   document.addEventListener('k11520:trade-context',e=>{if(e.detail?.open===true&&e.detail?.source==='joystick-hold')showMarketCards();else if(e.detail?.open===false)hideMarketCards()});
-  document.addEventListener('click',e=>{if(!marketOpen&&e.target.closest?.('#orderFire,#flat')){e.preventDefault();e.stopImmediatePropagation()}},true);
+  document.addEventListener('click',e=>{
+    if(!e.target.closest?.('#orderFire,#flat'))return;
+    if(!marketOpen&&!controlsOpen){e.preventDefault();e.stopImmediatePropagation();return;}
+    // The player's explicit existing action opens context; the financial owner
+    // still owns preview/confirmation, eligibility, disabled and inert flags.
+    if(!marketOpen)showMarketCards();
+  },true);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeInformation();setControlsOpen(false)}});
   addEventListener('blur',hideMarketCards);document.addEventListener('visibilitychange',()=>{if(document.hidden)hideMarketCards()});syncWorldFirst();
 }

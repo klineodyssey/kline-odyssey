@@ -13,6 +13,27 @@ const mobileShell=read('../runtime/game-mobile-shell.mjs');
 const logistics=read('../runtime/digital-ant-logistics-runtime.mjs');
 const marketLayout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
 const walletRuntime=read('../runtime/evm-wallet-runtime.mjs');
+
+test('visible parameter controls retain the original explicit order path without bypassing financial owners',async()=>{
+  const ui=read('../runtime/mobile-ui-settings.mjs'),layout=read('../runtime/mobile-control-layout.mjs');
+  assert.ok(layout.includes(':not(.k11520TradeOpen):not(.k11520ControlsOpen) :is(#orderFire,#flat)'));
+  const informationGate=layout.split('\n').find(line=>line.startsWith('html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen)'));
+  assert.ok(informationGate,'information still has its original suppression gate');
+  for(const organ of ['#gameModeToggle','#walletPanel','#walletToggle','#k11520UtilityMaster','#k11520CameraReset','.controls'])assert.equal(informationGate.includes(organ),false,organ+' must not disappear merely because information closes');
+  assert.equal(informationGate.includes('.top'),false,'FULL balance header must not be owned by card disclosure');
+  assert.ok(layout.includes(':not([data-k11520-hud-profile="FULL"]):not(.k11520InfoOpen):not(.k11520TradeOpen) .top'),'compact modes still hide their information header without overriding FULL or saved preferences');
+  assert.ok(ui.includes("el.dataset.k11520ContextSuppressed=marketOpen||controlsOpen?'0':'1'"));
+  const start=ui.indexOf("document.addEventListener('click',e=>{\n    if(!e.target.closest?.('#orderFire,#flat'))return;");
+  assert.ok(start>=0,'one capture owner admits the original explicit action');
+  const handler=ui.slice(start,ui.indexOf('},true);',start)+9),{runInNewContext}=await import('node:vm');
+  for(const [marketOpen,controlsOpen,expected] of [[false,false,'BLOCK'],[false,true,'OPEN'],[true,false,'PASS']]){
+    let callback,opened=0,blocked=0;const context={marketOpen,controlsOpen,document:{addEventListener:(_,fn)=>{callback=fn}},showMarketCards:()=>opened++};
+    runInNewContext(handler,context);callback({target:{closest:()=>true},preventDefault:()=>blocked++,stopImmediatePropagation:()=>blocked++});
+    assert.equal(opened,expected==='OPEN'?1:0);assert.equal(blocked,expected==='BLOCK'?2:0);
+    callback({target:{closest:()=>false},preventDefault:()=>assert.fail('unrelated click blocked'),stopImmediatePropagation:()=>assert.fail()});
+  }
+  assert.ok(main.includes("$('#flat').onclick=closePos;$('#orderFire').onclick=openOrder"),'existing preview and close owners remain in charge');
+});
 test('dodge tries safe alternatives without bypassing midpoint or endpoint collision',()=>{
   const dodge=main.split("$('#dodge').onclick=")[1]?.split('\n')[0]||'';
   assert.ok(dodge.includes('[0,Math.PI/2,-Math.PI/2,Math.PI]'));
@@ -114,18 +135,19 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.5 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.5 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.5'"));
-  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.5'"),'Portal registry must advertise the same K11520 release');
+test('canonical shared release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes("SHARED_GAME_VERSION+' · 5D K線西遊記"));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes('const PRODUCT_VERSION=SHARED_GAME_VERSION'));
+  const registry=read('../../../../assets/kaios-world-registry.mjs');
+  assert.ok(registry.includes('version:SHARED_GAME_VERSION'),'Portal registry must advertise the same game release');
   // Reuse the canonical release guard established by the Courier QA repair;
   // check literal AND escaped active consumers, never historical documents.
-  const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
+  const release=registry.match(/const SHARED_GAME_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
   for(const path of ['./11520-browser-responsive.mjs','./11520-browser-smoke.mjs']){
-    const source=read(path);assert.ok(source.includes(escaped),`${path} exact regex must match canonical release ${release}`);
+    const source=read(path);assert.ok(source.includes('SHARED_GAME_VERSION'),`${path} must consume the canonical shared release ${release}`);
     for(const version of source.match(/V2(?:\\)?\.9(?:\\)?\.\d+/g)||[])assert.equal(version.replaceAll('\\',''),release,`${path} stale active version ${version}`);
   }
-  assert.ok(read('../../../../tests/kaios-portal.test.mjs').includes(`'${release}'`),'Portal unit consumer must match canonical release');
+  assert.ok(read('../../../../tests/kaios-portal.test.mjs').includes("findWorld('88888').version,SHARED_GAME_VERSION"),'Portal unit consumer must match canonical release');
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
@@ -189,12 +211,30 @@ test('Player Courier exposes explicit local-only Bandit mode, raid action and on
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','attackKSpace'])assert.ok(main.includes(token),token);assert.equal(main.includes('S.kaios+=r.rewardKaios'),false)});
 
 test('public reference quotes use the browser-safe market-data origin without credentials',()=>{
-  assert.ok(main.includes("import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs'"));
+  assert.match(main,/import \{[^}]*\bfetchPublicMarketObservations\b[^}]*\bpublicObservationStatus\b[^}]*\} from '\.\/public-market-quotes\.mjs'/);
   assert.ok(main.includes('observedAt:r.updatedAt'),'execution must use provider time, never fetch time');
   assert.ok(publicMarketQuotes.includes("origin:'https://data-api.binance.vision'"));
   assert.ok(publicMarketQuotes.includes("credentials:'omit'"));
   assert.equal(main.includes('https://api.binance.com'),false,'CORS-hostile general API origin returned');
   for(const forbidden of ['Authorization','privateKey','sendTransaction','eth_sendTransaction'])assert.equal(publicMarketQuotes.includes(forbidden),false,forbidden);
+});
+
+test('offline browser transport fails only the exact first pool-reference read locally and rejects every other RPC or write',async()=>{
+  const {runInNewContext}=await import('node:vm'),{KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
+  const source=read('./11520-browser-settlement.mjs'),start=source.indexOf("    await page.route('**/*',async r=>{",source.indexOf('async function offlineSimulationBrowserQA'));
+  const handler=source.slice(start,source.indexOf("    page.on('websocket'",start));assert.ok(start>=0);
+  for(const [endpoint,payload,expected] of [
+    [KGEN_POOL_REFERENCE_SOURCE.rpc,{jsonrpc:'2.0',id:1,method:'eth_chainId',params:[]},'MOCK503'],
+    [KGEN_POOL_REFERENCE_SOURCE.rpc,{jsonrpc:'2.0',id:1,method:'eth_sendTransaction',params:[{}]},'BLOCK'],
+    [KGEN_POOL_REFERENCE_SOURCE.rpc,{jsonrpc:'2.0',id:1,method:'eth_call',params:[]},'BLOCK'],
+    [KGEN_POOL_REFERENCE_SOURCE.rpc,{jsonrpc:'2.0',id:1,method:'eth_chainId',params:['unexpected']},'BLOCK'],
+    ['https://unapproved-rpc.invalid/',{jsonrpc:'2.0',id:1,method:'eth_chainId',params:[]},'BLOCK']
+  ]){
+    let callback,outcome;const result={blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};
+    await runInNewContext('(async()=>{'+handler+'})()',{URL,base:'http://127.0.0.1:4173',KGEN_POOL_REFERENCE_SOURCE,result,page:{route:async(_,fn)=>callback=fn}});
+    await callback({request:()=>({url:()=>new URL(endpoint).href,method:()=>'POST',postDataJSON:()=>payload}),fulfill:async row=>{assert.equal(row.status,503);outcome='MOCK503'},abort:async()=>outcome='BLOCK',fallback:async()=>assert.fail('external RPC must not escape to the network')});
+    assert.equal(outcome,expected);assert.equal(result.networkAuthorityAttempts.length,expected==='BLOCK'?1:0);assert.equal(result.blockedReadOnlyReferences.length,expected==='MOCK503'?1:0);
+  }
 });
 
 test('human-approved current control imagery is production-wired',()=>{
@@ -307,12 +347,13 @@ test('Settings context preserves organ states and restores only its temporary in
   assert.ok(ui.includes("e.key==='Escape'"));assert.ok(ui.includes("e.key==='Tab'"));
 });
 
-test('the existing Market owner collapses every HUD profile after a real 15-second idle interval',async()=>{
+test('trade context expires after 15 seconds without erasing independently disclosed information or control preferences',async()=>{
   const {runInNewContext}=await import('node:vm');const ui=read('../runtime/mobile-ui-settings.mjs');let timer=null;
-  const row={hidden:false,attributes:{},setAttribute(k,v){this.attributes[k]=v}},root={dataset:{},classList:{toggle(k,v){this[k]=v}}};
-  const context={document:{documentElement:root},row,setTimeout:(fn,ms)=>{timer={fn,ms};return 1},clearTimeout:()=>{timer=null}};
-  runInNewContext("const $=()=>row;const MARKET_IDLE_MS=15000;let profile='FULL',marketOpen=false,marketTimer=0,marketPointers=new Set(),allOn=true,state={markets:true};"+ui.slice(ui.indexOf('function syncWorldFirst()'),ui.indexOf('function installWorldFirst()'))+"globalThis.openMarket=showMarketCards;globalThis.holdMarket=()=>{marketPointers.add(1);scheduleMarketHide()};globalThis.releaseMarket=()=>{marketPointers.clear();scheduleMarketHide()};",context);
-  context.openMarket();assert.equal(row.attributes['aria-expanded'],'true');assert.equal(timer.ms,15000);assert.equal(row.textContent,'⌃');context.holdMarket();assert.equal(timer,null);context.releaseMarket();assert.equal(timer.ms,15000);timer.fn();assert.equal(root.classList.k11520MarketOpen,false);assert.equal(row.attributes['aria-expanded'],'false');assert.equal(row.textContent,'📈');
+  const row={hidden:false,attributes:{},setAttribute(k,v){this.attributes[k]=v},removeAttribute(k){delete this.attributes[k]}},root={dataset:{},classList:{toggle(k,v){this[k]=v},remove(k){this[k]=false}}};
+  const actions=[{dataset:{}},{dataset:{}}];
+  const context={document:{documentElement:root,querySelectorAll:()=>actions,dispatchEvent(){}},row,CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail}},setTimeout:(fn,ms)=>{timer={fn,ms};return 1},clearTimeout:()=>{timer=null}};
+  runInNewContext("const $=s=>s==='#k11520MarketRow'?row:null;const MARKET_IDLE_MS=15000,INFO_KEYS=['hud','markets','status','map'];let profile='FULL',marketOpen=false,marketTimer=0,marketPointers=new Set(),controlsOpen=false,infoOpen=false,disclosedSurfaces=new Set(),allOn=true,state={markets:true,params:true};function apply(){syncWorldFirst()}"+ui.slice(ui.indexOf('function syncWorldFirst()'),ui.indexOf('function installWorldFirst()'))+"globalThis.openMarket=showMarketCards;globalThis.closeInfo=closeInformation;globalThis.holdMarket=()=>{marketPointers.add(1);scheduleMarketHide()};globalThis.releaseMarket=()=>{marketPointers.clear();scheduleMarketHide()};",context);
+  context.openMarket();assert.equal(row.attributes['aria-expanded'],'true');assert.equal(timer.ms,15000);assert.equal(root.classList.k11520TradeOpen,true);context.holdMarket();assert.equal(timer,null);context.releaseMarket();assert.equal(timer.ms,15000);timer.fn();assert.equal(root.classList.k11520TradeOpen,false);assert.equal(root.classList.k11520InfoOpen,true);assert.equal(root.classList.k11520ControlsOpen,true);context.closeInfo();assert.equal(root.classList.k11520MarketOpen,false);assert.equal(row.attributes['aria-expanded'],'false');assert.equal(row.textContent,'ⓘ');assert.equal(root.classList.k11520ControlsOpen,true,'closing information does not erase parameter disclosure');
   const layout=read('../runtime/mobile-control-layout.mjs');assert.ok(layout.includes('html[data-k11520-hud-profile]:not(.k11520MarketOpen) .axes{display:none!important}'));assert.equal(main.includes('KX BTC · KY ETH · KZ BNB ·'),false,'quotes must not recreate the persistent ticker');
 });
 
@@ -346,11 +387,11 @@ test('existing rail owners cancel capture on Settings and require a fresh pointe
     let settings=false,commits=[],clears=0;
     const listeners=new Map(),documentListeners=new Map(),captured=new Set();
     const el={dataset:{},classList:{contains:()=>false},closest:()=>el,getBoundingClientRect:()=>({top:0,height:100}),addEventListener(type,fn){const a=listeners.get(type)||[];a.push(fn);listeners.set(type,a)},setPointerCapture:id=>captured.add(id),hasPointerCapture:id=>captured.has(id),releasePointerCapture:id=>captured.delete(id)};
-    const root={classList:{contains:()=>settings}},doc={documentElement:root,addEventListener(type,fn){const a=documentListeners.get(type)||[];a.push(fn);documentListeners.set(type,a)}};
-    const ctx={$:()=>el,ROOT:root,document:doc,el,record:value=>commits.push(value),clear:()=>clears++,signedFromPointer:y=>y,paintSignedC:()=>{},applySignedValue:value=>commits.push(value)};
+    const root={dataset:{},classList:{contains:()=>settings}},doc={documentElement:root,addEventListener(type,fn){const a=documentListeners.get(type)||[];a.push(fn);documentListeners.set(type,a)}};
+    const ctx={$:()=>el,ROOT:root,document:doc,el,setTimeout:()=>1,clearTimeout(){},record:value=>commits.push(value),clear:()=>clears++,signedFromPointer:y=>y,paintSignedC:()=>{},applySignedValue:value=>commits.push(value)};
     if(owner==='lots')runInNewContext(main.slice(main.indexOf('function bindVertical('),main.indexOf("bindVertical('#lotsControl'"))+"bindVertical('#lotsControl',record);",ctx);
     if(owner==='C')runInNewContext('let cPointer=null,internalNative=false;'+signedC.slice(signedC.indexOf('function cancelCInput()'),signedC.indexOf('function onDocumentClick('))+signedC.slice(signedC.indexOf('function bindC()'),signedC.indexOf('function publish()'))+'bindC();',ctx);
-    if(owner==='Y')runInNewContext('let railPid=null,rail={active:false,value:0};function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
+    if(owner==='Y')runInNewContext('let railPid=null,discPid=null,holdTimer=0,centerTap=null,discStart=null,rail={active:false,value:0};function syncMembrane(){}function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
     const emit=(type,pointerId,clientY=25)=>{const e={type,pointerId,clientY,target:el,preventDefault(){},stopImmediatePropagation(){}};for(const fn of listeners.get(type)||[])fn(e)};
     const context=open=>{settings=open;for(const fn of documentListeners.get('k11520:settings-context')||[])fn({detail:{open}})};
     emit('pointerdown',1);assert.equal(commits.length,1,owner+' fresh down');assert.ok(captured.has(1));
@@ -366,10 +407,32 @@ test('existing rail owners cancel capture on Settings and require a fresh pointe
 test('numeric editors preserve ordinary blur but cannot commit after Settings suppresses geometry',async()=>{
   const {runInNewContext}=await import('node:vm');let settings=false,commits=[],syncs=0;const listeners={};
   const input={dataset:{},value:'12',addEventListener:(type,fn)=>listeners[type]=fn,blur:()=>listeners.blur()};
-  const ctx={input,commit:v=>commits.push(v),ROOT:{classList:{contains:()=>settings}},syncNumericEditors:()=>syncs++};
+  const ctx={input,commit:v=>commits.push(v),ROOT:{classList:{contains:()=>settings}},document:{addEventListener(){}},syncNumericEditors:()=>syncs++};
   runInNewContext(signedC.slice(signedC.indexOf('function bindNumericEditor('),signedC.indexOf('function ensureNumericEditors('))+'bindNumericEditor(input,commit);',ctx);
   listeners.blur();assert.deepEqual(commits,['12'],'normal blur-before-open still commits');settings=true;input.value='99';listeners.change();listeners.blur();listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12'],'Settings-active change/blur/Enter cannot dispatch into hidden rails');assert.ok(syncs>=2);
   settings=false;input.value='7';listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12','7'],'a fresh Enter after close commits normally');
+});
+
+test('fine C touch release commits its final coordinate but cancelled or obsolete pointers cannot change C',async()=>{
+  const {runInNewContext}=await import('node:vm'),commits=[];let settings=false;
+  const el={getBoundingClientRect:()=>({top:0,height:100}),setPointerCapture(){},hasPointerCapture:()=>true,releasePointerCapture(){}};
+  const context={ROOT:{classList:{contains:()=>settings}},$:()=>el,applySignedValue:v=>commits.push(v),signedFromPointer:y=>y};
+  runInNewContext('let internalNative=false,cPointer=null;'+signedC.slice(signedC.indexOf('function cancelCInput()'),signedC.indexOf('function onDocumentClick('))+'globalThis.input=onCEvent;',context);
+  const event=(type,id,y)=>({type,pointerId:id,clientY:y,target:{closest:()=>el,classList:{contains:()=>false}},preventDefault(){},stopImmediatePropagation(){}});
+  context.input(event('pointerdown',1,50));context.input(event('pointerup',1,44));assert.deepEqual(commits,[50,44],'small drag commits even when no move was delivered');
+  context.input(event('pointerup',1,20));assert.deepEqual(commits,[50,44],'obsolete release cannot edit');
+  context.input(event('pointerdown',2,50));context.input(event('pointercancel',2,10));assert.deepEqual(commits,[50,44,50],'cancel does not commit');
+  context.input(event('pointerdown',3,50));settings=true;context.input(event('pointerup',3,10));assert.deepEqual(commits,[50,44,50,50],'Settings blocks release changes');
+});
+
+test('trade HUD disclosure cannot open a blocking Market modal behind the order preview',async()=>{
+  const {runInNewContext}=await import('node:vm');let listener,opened=0,paused=0,closed=0;
+  const root={dataset:{}},sheet={classList:{remove:()=>closed++}},body={querySelector:()=>({})},title={textContent:'市場'};
+  const context={document:{documentElement:root,addEventListener:(_,fn)=>listener=fn},openOrgan:()=>opened++,kgenPoolReference:{pause:()=>paused++},ORGANS:[['market',null,'市場']],$:s=>s==='#sheetBody'?body:s==='#sheetTitle'?title:sheet};
+  runInNewContext(main.slice(main.indexOf('function installKgenReferenceContext(){'),main.indexOf('installKgenReferenceContext();'))+'installKgenReferenceContext();',context);
+  listener({detail:{tradeOpen:true}});listener({detail:{tradeOpen:true}});assert.equal(opened,0,'HUD context must not create an unsolicited modal');
+  listener({detail:{tradeOpen:false}});assert.equal(paused,1);assert.equal(closed,1,'existing explicit reference sheet still closes safely with context');
+  assert.ok(main.includes("if(id==='assets'||id==='market')"),'explicit reference entry is preserved');
 });
 
 test('shared Wallet foreground guard composes with Settings and current hidden preferences',async()=>{
@@ -412,7 +475,11 @@ test('browser control inspection preserves per-control hit checks with one bound
 
 test('tiny landscape Market reserves its own lane and browser regression rejects covered balance text',async()=>{
   const {runInNewContext}=await import('node:vm'),layout=read('../runtime/mobile-control-layout.mjs'),browserSource=read('./11520-browser-responsive.mjs');
-  assert.match(layout,/html\[data-k11520-hud-profile\] \.top\{right:calc\(max\(6px, env\(safe-area-inset-right\)\) \+ 52px\)!important\}/);
+  assert.match(layout,/html\[data-k11520-hud-profile\] \.top\{right:calc\(max\(6px, env\(safe-area-inset-right\)\) \+ 52px\)!important;height:54px!important\}/);
+  assert.ok(layout.includes('.k11520InfoOpen:not(.k11520UtilitiesOpen):not(.k11520HudCollapsed)'), 'information cannot override the original compact utility tray owner');
+  assert.ok(layout.includes('.minimapWrap #minimap{height:70px!important}'), 'narrow portrait retains a native world gesture gap without changing camera admission');
+  assert.ok(layout.includes('.tele{font-size:7px!important;line-height:1.1!important;padding:5px!important}'), 'landscape diagnostic text stays clear of original parameter rails');
+  assert.ok(layout.includes('height:44px!important;min-height:44px!important;box-sizing:border-box!important;white-space:nowrap!important'), 'shared portrait guide remains compact instead of a centred story overlay');
   assert.match(layout,/#k11520MarketRow\{top:6px;left:auto;right:max\(6px, env\(safe-area-inset-right\)\);width:44px;min-height:44px\}/);
   const source=browserSource.slice(browserSource.indexOf('async function verifyMarketHeaderSeparation('),browserSource.indexOf('async function verifySettingsInterruptedRails('));
   async function inspect({covered=false,clipped=false,blocked=false}={}){
@@ -484,7 +551,8 @@ test('responsive event routing retains standalone mobile-HUD coverage and refere
     const directory=mkdtempSync(resolve(tmpdir(),'k11520-hud-routing-'));try{
       mkdirSync(resolve(directory,'artifacts/11520-responsive-qa'),{recursive:true});const trace=resolve(directory,'trace');
       const mocked='set -euo pipefail\ntimeout(){ printf "%s\\n" "$*" >> "$TRACE"; }\npython3(){ printf "REFERENCE\\n" >> "$TRACE"; cat >/dev/null; }\n';
-      const result=spawnSync('bash',['-c',mocked+script],{cwd:directory,env:{PATH:process.env.PATH,TRACE:trace,GITHUB_EVENT_NAME:event,PUBLIC_QA:production},encoding:'utf8'});
+      const bash=process.platform==='win32'?resolve(process.env.ProgramFiles||'C:/Program Files','Git/bin/bash.exe'):'bash';
+      const result=spawnSync(bash,['-c',mocked+script],{cwd:directory,env:{...process.env,TRACE:trace.replaceAll('\\','/'),GITHUB_EVENT_NAME:event,PUBLIC_QA:production},encoding:'utf8'});
       assert.equal(result.status,0,result.stderr);const observed=existsSync(trace)?readFileSync(trace,'utf8'):'';
       assert.equal(observed.includes('REFERENCE'),reference,event+'/'+production+' ownership reference');assert.equal(observed.includes('11520-browser-mobile-hud.mjs'),mobile,event+'/'+production+' local mobile-HUD execution');assert.equal(observed.includes('11520-browser-character-status.mjs'),production==='false','character coverage remains unchanged');
     }finally{rmSync(directory,{recursive:true,force:true})}
@@ -762,10 +830,20 @@ test('simulation component revisions expose complete provenance and recorded exe
  const revision='2026-10-06.SIMULATION-ORDER-PLAYABILITY',sourceCommit='0ad0cffe33d23d1104baa963fedef25ad149a0ac';
  const assets=[{"path": "runtime/game-5d-main.mjs", "version": "2.9.0", "status": "ACTIVE", "nonMetadataSha256": "4c4b69e6e0c78160b28c28df12c387a7c9d50af62270b5b5a22a71ebf0e8d950", "priorFullSha256": "d38f0a6c21b73553eddfba6fb1742891bef800f4d1ca33e81e2f46123935afda", "revision": "2026-10-06.MARKET-CARD-NODE-RETENTION", "sourceCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4", "ancestorCommit": "cf2ffb47c3e71e444935ef6151adc7f9d6208ca4"}, {"path": "runtime/public-market-quotes.mjs", "version": "1.0.0", "status": "ACTIVE", "nonMetadataSha256": "850908b15e29dfeba665b2d1b28535e7bb7812fa5c8cad271a9154ee0603eeaf", "priorFullSha256": "07d2553b0a918a0d33236202eed35dd93dc6b44f7c4f24b1243b199587f99071"}, {"path": "runtime/real-trading-order-intent.mjs", "version": "1.0.0", "status": "CANDIDATE", "nonMetadataSha256": "59c72325eda86da744153e4f64035f032025a6d5a2529fdf30ad417c373113b0", "priorFullSha256": "f412d5e054e2df611c74efc2ee2a66d7467f28ee8adeef6ed22ed22a20c36ece"}, {"path": "runtime/kgen-margin-runtime.mjs", "version": "CURRENT", "status": "ACTIVE", "nonMetadataSha256": "cbbb60fead493a081252f92b222caa6951b8d0cf7dd6e24669f839dd40bc0341", "priorFullSha256": "03063c4c323826fb3a74275884aac060c9267e7dc7b9db9750298f3ef2787631", "revision": "2026-10-07.BNB-LIQUIDATION-STATUS-CONSISTENCY", "sourceCommit": "35e2a331b05140a33e1b86e6918304e3e36ff039", "ancestorCommit": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6", "lastUpdated": "2026-10-07", "reviewedBy": "dot / independent scoped technical source review / 2026-10-07; no registered Reviewer role or release approval", "taskId": "K11520-BNB-LIQUIDATION-STATUS-20261007"}, {"path": "runtime/game-ui-product-fixes-v23.mjs", "version": "2.4.0", "status": "ACTIVE", "nonMetadataSha256": "ec23460a1632e6ec61eda91a5334c9f08d50173ad6091a4c5cb563f35ba4653b", "priorFullSha256": "a944b9fbe886e0348ad1ef0d39a5af0d64f5acf261be9338cef74d621b13b2f2", "revision": "2026-10-06.TOAST-DISMISSAL-PLACEMENT", "sourceCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9", "ancestorCommit": "de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9"}, {"path": "game-5d.html", "version": "2.9.5", "status": "ACTIVE", "nonMetadataSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f", "priorFullSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f"}];
  const mandatory=['VERSION','REVISION','STATUS','LAST_UPDATED','UPDATED_BY','REVIEWED_BY','SOURCE_COMMIT','TASK_ID','CHANGE_REASON','ANCESTOR','SOURCE_OF_TRUTH'];
- for(const asset of assets){
+ // Preserve the old table above as ancestry. Record the actual later mainline
+ // source explicitly; candidate/pending metadata is NOT promoted to a review
+ // or deployment claim. Executable-byte hashes remain exact, not self-derived.
+ const referenceMetadata={revision:'2026-10-31.READONLY-KGEN-WBNB-REFERENCE',sourceCommit:'b7e4a244f5eeb5583d4cf27ae09a0b19a3d09880',lastUpdated:'2026-10-31',updatedBy:'Codex / original thread 01a189ef-ecbc-7699-b87b-a4538d57c029 / HUMAN_AUTHORIZED_LOCAL_CANDIDATE',reviewedBy:'PENDING_ORIGINAL_INDEPENDENT_REVIEW; previous header preserved in exact base snapshot',sourceOfTruth:'LOCAL_CANDIDATE_NOT_CANONICAL'};
+ const current={
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'f8af28403351811f2891b101a42f7caa6d5a2c81b6bd06d2af10e383f2f28303'},
+  'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
+  'game-5d.html':{nonMetadataSha256:'2c2d9cb8ebf438a0943193f791ec071bad7bed40ebb839d7ac80b446b767c56d'}
+ };
+ for(const ancestor of assets){
+  const asset={...ancestor,...current[ancestor.path]};
   const source=read('../'+asset.path),match=asset.path.endsWith('.mjs')?source.match(/^\/\* KGEN_META\n([\s\S]*?)\*\/\n/):source.match(/^\ufeff<!doctype html>\n<!-- KGEN_META\n([\s\S]*?)-->\n/);
   assert.ok(match,asset.path+' has one leading metadata comment');const fields=Object.fromEntries(match[1].trim().split('\n').map(line=>[line.slice(0,line.indexOf(':')),line.slice(line.indexOf(':')+1).trim()]));
-  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,asset.revision||revision);assert.equal(fields.PRODUCT_CONTEXT,'V2.9.5');assert.equal(fields.SOURCE_COMMIT,asset.sourceCommit||sourceCommit);assert.equal(fields.LAST_UPDATED,asset.lastUpdated||'2026-10-06');assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,'TRUE');assert.equal(fields.REVIEWED_BY,asset.reviewedBy||'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','recorded scoped review required');if(asset.taskId)assert.equal(fields.TASK_ID,asset.taskId);
+  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,asset.revision||revision);assert.equal(fields.PRODUCT_CONTEXT,'V2.9.5');assert.equal(fields.SOURCE_COMMIT,asset.sourceCommit||sourceCommit);assert.equal(fields.LAST_UPDATED,asset.lastUpdated||'2026-10-06');if(asset.updatedBy)assert.equal(fields.UPDATED_BY,asset.updatedBy);else assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,asset.sourceOfTruth||'TRUE');assert.equal(fields.REVIEWED_BY,asset.reviewedBy||'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','preserve recorded review status without inventing acceptance');if(asset.taskId)assert.equal(fields.TASK_ID,asset.taskId);
   assert.equal(fields.ANCESTOR,'K線西遊記/temples/11520/'+asset.path+' @ '+(asset.ancestorCommit||'e26f3a76ef0be7f43058225f46def3fbe123371e'));
   const body=asset.path.endsWith('.mjs')?source.slice(match[0].length):'\ufeff<!doctype html>\n'+source.slice(match[0].length);assert.equal(hash(body),asset.nonMetadataSha256,asset.path+' changed non-metadata bytes');
  }
@@ -775,7 +853,8 @@ test('simulation component revisions expose complete provenance and recorded exe
  for(const path of [".github/workflows/11520-game-product-qa.yml", "K線西遊記/temples/11520/CHANGELOG.md", "K線西遊記/temples/11520/HANDOFF_CURRENT.md", "K線西遊記/temples/11520/game-5d.html", "K線西遊記/temples/11520/runtime/game-5d-main.mjs", "K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs", "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs", "K線西遊記/temples/11520/runtime/public-market-quotes.mjs", "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs", "K線西遊記/temples/11520/tests/11520-browser-responsive.mjs", "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs", "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs", "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs", "tests/11520-order-route.test.mjs", "tests/11520-real-trading-order-intent.test.mjs"])assert.ok(changelog.includes('`'+path+'`'),'CHANGELOG aggregate file '+path);
  assert.ok(changelog.includes('metadata-only commit can be reverted'));assert.ok(changelog.includes('do not load the old runtime against active synthetic-source books'));
  assert.ok(!/PENDING_(?:METADATA|SCOPED)_REVIEW/.test(changelog),'CHANGELOG reviewer must be accepted before handoff');
- const history='# 11520 Changelog\n\n'+changelog.slice(changelog.indexOf('## 2026-10-04 — Canonical signed market address candidate'));assert.equal(hash(history),'214f25ea9de3aff65ee08cfabb871e78a7c39e1a33b055150e3c936ad3149881','prior changelog history remains byte-exact');
+ const historicalEnd=changelog.indexOf('# 2026-11-17 local acceptance addendum');
+ const history='# 11520 Changelog\n\n'+changelog.slice(changelog.indexOf('## 2026-10-04 — Canonical signed market address candidate'),historicalEnd<0?undefined:historicalEnd);assert.equal(hash(history),'214f25ea9de3aff65ee08cfabb871e78a7c39e1a33b055150e3c936ad3149881','prior changelog history remains byte-exact');
 });
 
 
@@ -815,6 +894,9 @@ const render=main.slice(main.indexOf('function renderAxes(){'),main.indexOf('fun
 const labels=main.slice(main.indexOf('function syncMarketKLabels(){'),main.indexOf('function controlState('));
 const tick=main.slice(main.indexOf('function tickSimulation(){'),main.indexOf('function executionQuote('));
 const normal=read('../runtime/normal-market-presentation.mjs');
+// This fixture owns the three canonical market cards, not the separately
+// tested read-only KGEN/WBNB reference panel added by the later mainline organ.
+ctx.paintKgenReference=()=>{};
 vm.runInContext("const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];"+render+labels+tick,ctx);
 vm.runInContext(normal.replace(/^import .*;$/m,'').replace(/^const \$=.*$/m,'').replace(/^const \$\$=.*$/m,'').replace('export function install11520NormalMarketPresentation','function install11520NormalMarketPresentation'),ctx);
 vm.runInContext('renderAxes()',ctx);snapshot('initial actual renderAxes + actual syncMarketKLabels');

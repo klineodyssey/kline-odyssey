@@ -1,5 +1,15 @@
 # KGEN_FRONTEND_INDEX
 
+## 11520 market / 12682 presentation candidate — 2026-11-17
+
+Existing `K線西遊記/temples/11520/index.html` + `app.mjs` now default to MARKET
+with Human's eight-eye lamp CT+9 inquiry. Existing
+`assets/kaios-world-registry.mjs` + `assets/kaios-portal.mjs` route game users to
+`K線西遊記/temples/11520/game-5d.html?world=12682` (阿斗起飛).
+`K線西遊記/temples/88888/index.html` remains a compatibility host. No new file,
+Boot change, engine, ledger or payment organ. Historical storage keys preserved.
+Point/presentation changes do not enable actual goods payment or delivery.
+
 ## K11520 three-plane joystick filename (2026-10-19)
 
 Human selected `joystick-xzxyyz.mjs` (option A) for PR #615. This migrates

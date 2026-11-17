@@ -1,6 +1,10 @@
 {
   "product_id": "KGEN_11520_UNIVERSAL_EXCHANGE",
-  "version": "4.0.0",
+  "version": "4.1.3",
+  "public_market_world": "11520",
+  "public_game_world": "12682",
+  "game_storage_identity": "K11520_PRESERVED_NO_BALANCE_MIGRATION",
+  "goods_settlement": "NOT_CONFIGURED_SELLER_QUOTE_DELIVERY_AND_PAYMENT_REQUIRED",
   "status": "PLAYER_FIRST_VOICE_3D_CONCIERGE_MEMBERSHIP_AND_8888_ENTRY",
   "entrypoint": "index.html",
   "runtime": "app.mjs",

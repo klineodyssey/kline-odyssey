@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {formatUniverseAddress,signedUniverseAddress} from '../runtime/spatial-coordinate-runtime.mjs';
+import {SHARED_GAME_VERSION} from '../../../../assets/kaios-world-registry.mjs';
 import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../runtime/player-life-runtime.mjs';
 function freeQuotePayload(route,rows){
   const url=new URL(route.request().url());
@@ -122,10 +123,13 @@ async function verifyWorldFirst(){
       await page.locator('#intro11520').waitFor({state:'hidden'});
       // MINIMAL deliberately hides diagnostic telemetry; readiness is state, not visibility.
       await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''),null,{timeout:45000});
-      await page.waitForFunction(()=>document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.5');
-      assert.match(await page.locator('.brandMetaV250 span:first-child').textContent(),/^V2\.9\.5 · 5D K線西遊記$/);
-      result.checks.visibleVersion='V2.9.5';
+      await page.waitForFunction(version=>document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion===version,SHARED_GAME_VERSION);
+      assert.equal(await page.locator('.brandMetaV250 span:first-child').textContent(),`${SHARED_GAME_VERSION} · 5D K線西遊記`);
+      result.checks.visibleVersion=SHARED_GAME_VERSION;
       assert.equal(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__.profile),'MINIMAL');
+      // Current default retains discoverable controls/information. Exercise
+      // world-first only after the real user explicitly closes information.
+      if(await page.locator('#axes').isVisible())await page.locator('#k11520MarketRow').click();
       assert.equal(await page.locator('#axes').isVisible(),false);
       assert.equal(await page.locator('#k11520CameraReset').isVisible(),false,'automatic follow has no persistent Recenter');
       for(const selector of ['#k11520MarketRow']){
@@ -201,7 +205,7 @@ async function verifyWorldFirst(){
       await page.locator('#k11520CameraReset').click();assert.deepEqual(await read(),start);assert.equal(await page.locator('#k11520CameraReset').isVisible(),false,'Recenter returns to contextual hidden state');
       await page.screenshot({path:`${OUT}/camera-${profile.name}-recenter.png`});
       await page.waitForFunction(original=>{const p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return Math.abs(p.x-original.x)<.5&&Math.abs(p.y-original.y)<.5},result.visibility.player,{timeout:3000});
-      await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),true);
+      await ensureExpandedMarket(page);assert.equal(await page.locator('#axes').isVisible(),true);
       const marketReadability=await page.locator('#axes').evaluate(el=>{
         const cards=[...el.querySelectorAll('.axis')];
         return cards.map(card=>{const r=card.getBoundingClientRect(),symbol=card.querySelector('.marketName'),price=card.querySelector('.q'),address=card.querySelector('.marketKValue'),style=address?getComputedStyle(address):null;return{width:r.width,symbol:symbol?.textContent?.trim(),symbolFits:!!symbol&&symbol.scrollWidth<=symbol.clientWidth+1&&symbol.scrollHeight<=parseFloat(getComputedStyle(symbol).lineHeight)+1,price:price?.textContent?.trim(),priceFits:!!price&&price.scrollWidth<=price.clientWidth+1&&price.scrollHeight<=parseFloat(getComputedStyle(price).lineHeight)+1,address:address?.textContent?.trim(),addressFits:!!address&&address.scrollWidth<=address.clientWidth+1&&address.getBoundingClientRect().bottom<=r.bottom-3,overflowWrap:style?.overflowWrap,wordBreak:style?.wordBreak}});
@@ -224,10 +228,16 @@ async function verifyWorldFirst(){
       await page.waitForTimeout(15100);assert.equal(await page.locator('#axes').isVisible(),true);
       await touch('touchMove',[[1,card.x+20,card.y+12]]);await touch('touchEnd',[]);
       if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
-      await page.waitForFunction(()=>getComputedStyle(document.getElementById('axes')).display==='none',null,{timeout:17000});
+      await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__.tradeOpen===false,null,{timeout:17000});
+      assert.equal(await page.locator('#axes').isVisible(),true,'trade timeout retains independently disclosed information');
+      await page.locator('#k11520MarketRow').click();await page.locator('#axes').waitFor({state:'hidden'});
       assert.deepEqual(await read(),start,'card gestures must not pan camera');
       assert.doesNotMatch(await page.locator('#k11520MarketRow').textContent(),/BTC|ETH|BNB|LIVE/,'collapsed Market must not preserve a quote ticker');await page.screenshot({path:`${OUT}/market-idle-hidden-${profile.width}x${profile.height}.png`});
-      result.checks.marketIdle='15s / held-pointer / resume / true-hide PASS';result.checks.camera='PAN / PINCH / RESET / XYZ ISOLATION PASS';
+      result.checks.marketIdle='15s trade context / held-pointer / resume / explicit information close PASS';result.checks.camera='PAN / PINCH / RESET / XYZ ISOLATION PASS';
+      // The preceding case explicitly closed information. Reopen through the
+      // native disclosure before using its monster guide, just as a player must.
+      await ensureExpandedMarket(page);
+      await page.locator('#k11520MonsterGuide').waitFor({state:'visible'});
       quoteStep=100;
       await page.waitForFunction(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.some(m=>m.intent?.direction==='LONG'),null,{timeout:15000});
       const before=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot());
@@ -277,6 +287,9 @@ async function verifyWorldFirst(){
       }
       await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520HudProfile').selectOption('STANDARD');
       await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.profile==='STANDARD');
+      // Settings boots before the scene. Every profile must await the actual
+      // monster runtime after reload before asserting its no-auto-trade flag.
+      await page.waitForFunction(()=>typeof globalThis.__K11520_MONSTER_FOLLOW__?.snapshot==='function');
       if(completedGrowth){await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().actors.some(a=>a.id===id),followed);assert.deepEqual(await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed),completedGrowth,'reload keeps completed growth without fabricating a new result');result.checks.performanceReload='EXACT GROWTH RETAINED PASS'}
       assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().automatesTrading),false);
       assert.deepEqual(errors,[]);result.checks.reload='PREFERENCE RETAINED / NO AUTO TRADE PASS';
@@ -285,7 +298,11 @@ async function verifyWorldFirst(){
   }
 }
 async function ensureExpandedMarket(page){
-  if(!await page.locator('#axes').isVisible())await page.locator('#k11520MarketRow').click();
+  if(!await page.locator('#axes').isVisible()){
+    await page.locator('#k11520MarketRow').click();
+    await page.locator('#k11520UiSettings').waitFor({state:'visible'});
+    await page.locator('#k11520ShowTrade').click();
+  }
   await page.locator('#axes').waitFor({state:'visible'});
   // Reflow from actual disclosure before geometry assertions, without waiting
   // for a desired margin or weakening any retained clearance threshold.
@@ -391,7 +408,7 @@ async function verifySettingsContext(page,report){
     await verifyScrolledControlCenters(page,'#k11520UiSettings button,#k11520UiSettings select','Settings');
     await page.locator('#k11520UiSettingsClose').scrollIntoViewIfNeeded();
     if(cycle===2)await page.screenshot({path:`${OUT}/${report.profile.name}-settings-owned.png`});
-    if(closeWith==='Escape'){escapeMarketBefore=await page.locator('#k11520MarketRow').getAttribute('aria-expanded');await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#k11520UiSettings').isVisible(),true);await page.keyboard.press('Escape')}else await page.locator('#k11520UiSettingsClose').click();
+    if(closeWith==='Escape'){escapeMarketBefore=await page.locator('#k11520MarketRow').getAttribute('aria-expanded');const edge=await page.locator('#k11520MarketRow').boundingBox();await page.mouse.click(edge.x+edge.width/2,edge.y+edge.height/2);assert.equal(await page.locator('#k11520UiSettings').isVisible(),true);await page.keyboard.press('Escape')}else await page.locator('#k11520UiSettingsClose').click();
     await page.waitForFunction(()=>!document.documentElement.classList.contains('k11520SettingsOpen'));
     assert.equal(await page.evaluate(()=>document.activeElement?.id),'gameModeToggle','Settings close returns keyboard focus to its launcher');
     if(escapeMarketBefore!==null&&await page.locator('#k11520MarketRow').getAttribute('aria-expanded')!==escapeMarketBefore)await page.locator('#k11520MarketRow').click();
@@ -432,6 +449,8 @@ async function verifyContextualHud(){
       if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(async error=>{if(await page.locator('#intro11520').isVisible())throw error});
       await page.locator('#intro11520').waitFor({state:'hidden'});
       await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
+      assert.equal(await page.locator('#axes').isVisible(),true,'fresh current default displays public information');
+      await page.locator('#k11520MarketRow').click();
       assert.equal(await page.locator('#axes').isVisible(),false);assert.equal(await page.locator('#k11520CameraReset').isVisible(),false);
       for(const id of ['cargoInterceptionButton','homeDeliveryButton'])assert.equal(await page.locator('#'+id).isVisible(),false,'idle action is absent from World');
       const edge=await page.locator('#k11520MarketRow').boundingBox();assert.ok(edge.width===44&&edge.height===44,'Market disclosure is one tiny edge control, never a ticker row');assert.doesNotMatch(await page.locator('#k11520MarketRow').textContent(),/BTC|ETH|BNB|LIVE/);
@@ -466,8 +485,8 @@ async function verifyContextualHud(){
       const activeReport={profile:{...profile,name:profile.name+'-active-courier'}};await verifySettingsContext(page,activeReport);
       assert.equal(await page.evaluate(()=>__K11520_PLAYER_COURIER__.active().missionId),missionId,'Settings never cancels or replaces the mission');report.activeCourier=activeReport.settingsContext;
       await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520HudProfile').selectOption('FULL');await page.locator('#k11520UiSettingsClose').click();await page.locator('#k11520UtilityMaster').click();
-      assert.equal(await page.locator('#axes').isVisible(),false,'FULL cannot override an explicit Market collapse');await verifyMarketHeaderSeparation(page,report,'full-explicit-collapse');await ensureExpandedMarket(page);await verifyMarketHeaderSeparation(page,report,'full-expanded');
-      await page.waitForTimeout(15100);await page.locator('#axes').waitFor({state:'hidden',timeout:2000});assert.equal(await page.locator('#k11520MarketRow').getAttribute('aria-expanded'),'false');
+      assert.equal(await page.locator('#axes').isVisible(),true,'explicit FULL selection discloses information');await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),false,'explicit information close wins after FULL selection');await verifyMarketHeaderSeparation(page,report,'full-explicit-collapse');await ensureExpandedMarket(page);await verifyMarketHeaderSeparation(page,report,'full-expanded');
+      await page.waitForTimeout(15100);assert.equal(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__.tradeOpen),false);assert.equal(await page.locator('#axes').isVisible(),true,'idle closes trade context, not explicit information');await page.locator('#k11520MarketRow').click();await page.locator('#axes').waitFor({state:'hidden',timeout:2000});assert.equal(await page.locator('#k11520MarketRow').getAttribute('aria-expanded'),'false');report.informationClosedExplicitlyAfterTradeExpiry=true;
       await verifyMarketHeaderSeparation(page,report,'full-idle-hidden');report.market={cards,idleMs:15000,fullRespectsCollapse:true};report.camera='DEFAULT_HIDDEN / MANUAL_ONLY / RECENTER_HIDES / XYZ_UNCHANGED';assert.deepEqual(errors,[]);
       await page.screenshot({path:`${OUT}/${profile.name}-contextual-full-idle-hidden.png`});
     }catch(error){report.error=String(error);failures.push(profile.name+': '+error);await page.screenshot({path:`${OUT}/${profile.name}-contextual-FAIL.png`}).catch(()=>{})}
@@ -500,7 +519,7 @@ async function verifyInitialQuoteWait(){
     const returning=await page.evaluate(()=>({combat:globalThis.__K11520_KSPACE_API__.snapshot(),coords:globalThis.__K11520_WORLD_COORDS__}));
     assert.equal(returning.coords.physical.x,210);assert.equal(returning.coords.physical.z,186);
     assert.ok(Math.abs(returning.combat.distance-7)<.1,'restored XYZ must receive the guardian at 7m');
-    await page.waitForFunction(()=>document.querySelector('.brandMetaV250')?.textContent.includes('V2.9.5'));
+    await page.waitForFunction(version=>document.querySelector('.brandMetaV250')?.textContent.includes(version),SHARED_GAME_VERSION);
     await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
     await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2);
     const lifeBefore=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot());
@@ -511,7 +530,7 @@ async function verifyInitialQuoteWait(){
     assert.ok(lifeAfter.every((m,i)=>Math.hypot(m.position.x-lifeBefore[i].position.x,m.position.z-lifeBefore[i].position.z)>.01),'ambient life must actually move');
     await fs.writeFile(`${OUT}/returning-player.json`,JSON.stringify({returning,lifeBefore,lifeAfter},null,2));
     await page.screenshot({path:`${OUT}/returning-390-ambient-moving.png`});
-    assert.match(await page.locator('.brandMetaV250').textContent(),/V2\.9\.5/,'legacy runtime must not overwrite release stamp');
+    assert.ok((await page.locator('.brandMetaV250').textContent()).includes(SHARED_GAME_VERSION),'legacy runtime must not overwrite release stamp');
     assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot().market.status),'WAIT');
     assert.equal(await page.locator('.marketKValue').count(),0);await page.locator('#attack').click();
     await ensureExpandedMarket(page);await page.screenshot({path:`${OUT}/startup-WAIT-no-fake-market.png`});ready=true;
@@ -562,9 +581,9 @@ async function snapshot(page){return page.evaluate(async sels=>{
 async function verifyFullHudControlOwnership(page,report){
   const controls=['#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#gameModeToggle','#k11520UtilityMaster'];
   await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_UI_SETTINGS__?.profile==='FULL'&&['k11520CameraReset','cargoInterceptionButton','homeDeliveryButton','k11520MarketRow'].every(id=>document.getElementById(id)),null,{timeout:45000});
-  await page.waitForFunction(()=>document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.5');
-  assert.match(await page.locator('.brandMetaV250 span:first-child').textContent(),/^V2\.9\.5 · 5D K線西遊記$/);
-  report.visibleVersion='V2.9.5';
+  await page.waitForFunction(version=>document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion===version,SHARED_GAME_VERSION);
+  assert.equal(await page.locator('.brandMetaV250 span:first-child').textContent(),`${SHARED_GAME_VERSION} · 5D K線西遊記`);
+  report.visibleVersion=SHARED_GAME_VERSION;
   const ownership=await page.evaluate(selectors=>Object.fromEntries(selectors.map(selector=>{const el=document.querySelector(selector),r=el?.getBoundingClientRect(),style=el?getComputedStyle(el):null;if(!r||style.display==='none'||style.visibility==='hidden')return[selector,null];const inset=Math.min(10,Math.max(2,Math.min(r.width,r.height)/4)),points=[[r.left+r.width/2,r.top+r.height/2],[r.left+inset,r.top+r.height/2],[r.right-inset,r.top+r.height/2],[r.left+r.width/2,r.top+inset],[r.left+r.width/2,r.bottom-inset]],owners=points.map(([x,y])=>{const hit=document.elementFromPoint(x,y);return{owned:hit===el||el.contains(hit),id:hit?.id||'',classes:String(hit?.className||'')}});return[selector,{rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height},owners,ownedHitFraction:owners.filter(x=>x.owned).length/owners.length}]})),selectors);
   for(const selector of controls){const item=ownership[selector];if(!item)continue;assert.ok(item.rect.width>=44&&item.rect.height>=44,selector+' must remain a 44px touch target in FULL HUD');assert.ok(item.ownedHitFraction>0,selector+' has no owned hit area: '+JSON.stringify(item.owners))}
   assert.equal(ownership['#k11520CameraReset'],null,'automatic follow has no persistent Recenter in FULL HUD');

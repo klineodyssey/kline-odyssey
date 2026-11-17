@@ -100,6 +100,7 @@ const driveC=async ratio=>{
 // Trusted Chromium touch input, not a DOM-dispatched event or runtime setter.
 // Exercise every canonical detent through the rendered control in both layouts.
 const touchSession=await page.context().newCDPSession(page);
+await page.evaluate(()=>{globalThis.__cTouchTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(!e.target.closest?.('#cControl'))return;__cTouchTrace.push({type,id:e.pointerId,y:e.clientY,target:e.target.id||e.target.tagName,trusted:e.isTrusted,c:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC});if(__cTouchTrace.length>60)__cTouchTrace.shift()},true)});
 const detentShots=new Map([[0,'C_0'],[.001,'C_0001'],[.01,'C_001'],[.1,'C_01'],[1,'C_1'],[25,'C_25'],[100,'C_100'],[-100,'C_NEG_100']]);
 for(const viewport of [{width:390,height:844},{width:844,height:390}]){
   await page.setViewportSize(viewport);await page.waitForTimeout(400);
@@ -109,7 +110,12 @@ for(const viewport of [{width:390,height:844},{width:844,height:390}]){
     await touchSession.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y:center}]});
     for(let step=1;step<=4;step++)await touchSession.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:center+(target-center)*step/4}]});
     await touchSession.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-    await page.waitForFunction(v=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===v,value,{timeout:2000}).catch(async error=>{error.message+=` detent=${value} viewport=${viewport.width} observed=${await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC)}`;throw error});
+    await page.waitForFunction(v=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===v,value,{timeout:2000}).catch(async error=>{
+      const actual=await page.evaluate(({x,center,target})=>{const c=document.querySelector('#cControl'),r=c.getBoundingClientRect(),owner=(x,y)=>{const e=document.elementFromPoint(x,y);return{id:e?.id,classes:String(e?.className||'')}};return{state:globalThis.__K11520_SIGNED_C_IMMERSIVE__,rootClasses:document.documentElement.className,box:{x:r.x,y:r.y,width:r.width,height:r.height},start:owner(x,center),end:owner(x,target),trace:globalThis.__cTouchTrace}}, {x,center,target});
+      await page.screenshot({path:`${OUT}/signed-c-detent-FAIL-${viewport.width}.png`});
+      await fs.writeFile(`${OUT}/signed-c-detent-FAIL-${viewport.width}.json`,JSON.stringify({expected:value,viewport,actual},null,2));
+      throw new Error(`C_DETENT_FAILURE expected=${value} observed=${actual.state?.signedC} start=${actual.start.id} end=${actual.end.id} trace=${JSON.stringify(actual.trace)}`,{cause:error});
+    });
     assert.equal((await page.locator('#cRead').textContent()).trim(),formatSignedC(value));
     const thumb=await page.locator('#cThumb').evaluate(el=>parseFloat(el.style.top));
     assert.ok(Math.abs(thumb-(1-signedTravelFromC(value))*50)<.001,`thumb drift ${value}`);

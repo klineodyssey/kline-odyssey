@@ -90,7 +90,12 @@ function onCEvent(e){
   if(e.type==='pointermove'&&e.pointerId!==cPointer)return;
   const ending=['pointerup','pointercancel','lostpointercapture'].includes(e.type);
   if(ending&&e.pointerId!==cPointer)return;
-  e.preventDefault();e.stopImmediatePropagation();if(!ending)applySignedValue(signedFromPointer(e.clientY,el.getBoundingClientRect()));else cancelCInput();
+  e.preventDefault();e.stopImmediatePropagation();
+  // Chromium may coalesce a fine touch drag below its move threshold. Commit
+  // the active pointer's actual release coordinate too; cancellation, Settings
+  // and lost capture must never turn into a late value change.
+  if(!ending||e.type==='pointerup')applySignedValue(signedFromPointer(e.clientY,el.getBoundingClientRect()));
+  if(ending)cancelCInput();
 }
 function onDocumentClick(e){if(e.target?.id==='sideBtn'){e.preventDefault();e.stopImmediatePropagation();renderTradeSideLock();return}if(e.target?.closest?.('[data-organ="trade"]'))setTimeout(renderTradeSideLock,0)}
 function bindC(){const el=$('#cControl');if(!el||el.dataset.k11520SignedCBound)return !!el;el.dataset.k11520SignedCBound='1';for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])el.addEventListener(type,onCEvent,{capture:true,passive:false});document.addEventListener('k11520:settings-context',e=>{if(e.detail?.open)cancelCInput()});document.addEventListener('k11520:controls-cancel-input',cancelCInput);paintSignedC();return true}

@@ -1,6 +1,45 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {fetchPublicMarketObservations,publicObservationStatus} from '../runtime/public-market-quotes.mjs';
+import {fetchPublicMarketObservations,publicObservationStatus,buildAtrLampReference,lampScanPoint,LAMP_DAY_MS,fetchAtrLampReference} from '../runtime/public-market-quotes.mjs';
+
+function lampFixture(){
+  const now=40*LAMP_DAY_MS+1000;
+  const rows=Array.from({length:40},(_,i)=>[i*LAMP_DAY_MS,String(100+i),String(103+i),String(99+i),String(101+i),'1',(i+1)*LAMP_DAY_MS-1]);
+  const observation={market:'BTCUSDT',price:140,updatedAt:now-1,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY',sequence:40};
+  return {rows,observation,now};
+}
+test('lamp Wilder ATR14 and 1001 exact-grid points use only closed daily candles',()=>{
+  const f=lampFixture(),r=buildAtrLampReference(f);
+  assert.equal(r.atr14,4);assert.equal(r.slope,1);assert.equal(r.horizons.length,9);assert.equal(r.settlementAuthority,false);
+  for(let day=1;day<=9;day++){
+    const points=Array.from({length:1001},(_,i)=>lampScanPoint(r,day,i-500));
+    assert.equal(points[0].price,140+day-4);assert.equal(points[500].price,140+day);assert.equal(points[1000].price,140+day+4);
+    assert.equal(new Set(points.map(p=>p.price)).size,1001);assert.equal(points[0].total,1001);
+    assert.equal(r.horizons[day-1].targetOpenAt,(40+day)*LAMP_DAY_MS);
+  }
+  assert.equal(r.horizons[7].day,8);assert.equal(r.horizons[8].day,9);
+  assert.equal(r.bullShare,0.625);assert.equal(r.bearShare,0.375);
+  const live=[40*LAMP_DAY_MS,'140','100000','1','99999','1',41*LAMP_DAY_MS-1];
+  assert.equal(buildAtrLampReference({...f,rows:[...f.rows,live]}).atr14,4);
+  assert.equal(buildAtrLampReference({...f,rows:[...f.rows,live]}).slope,1);
+});
+test('lamp rejects stale/missing/gapped OHLC, invalid grid and unsafe markets',async()=>{
+  const f=lampFixture();
+  assert.throws(()=>buildAtrLampReference({...f,rows:f.rows.slice(0,-1)}),/STALE/);
+  assert.throws(()=>buildAtrLampReference({...f,rows:f.rows.filter((_,i)=>i!==20)}),/CANDLE_INVALID/);
+  assert.throws(()=>buildAtrLampReference({...f,observation:{...f.observation,updatedAt:f.now-16000}}),/PRICE_STALE/);
+  const broken=structuredClone(f.rows);broken[0][2]='0';assert.throws(()=>buildAtrLampReference({...f,rows:broken}),/CANDLE_INVALID/);
+  const r=buildAtrLampReference(f);for(const [d,i] of [[0,0],[10,0],[1,501],[1,-501],[1,0.1]])assert.throws(()=>lampScanPoint(r,d,i),/OUT_OF_RANGE/);
+  await assert.rejects(fetchAtrLampReference({market:'ANYTHING'}),/MARKET_INVALID/);
+});
+test('lamp fetch pins credential-free daily candles and provider timestamps',async()=>{
+  const f=lampFixture(),calls=[];
+  const r=await fetchAtrLampReference({now:()=>f.now,fetchImpl:async(url,options)=>{
+    const u=new URL(url);calls.push(u);assert.equal(u.origin,'https://data-api.binance.vision');assert.equal(options.credentials,'omit');assert.equal(options.method,'GET');
+    return {ok:true,json:async()=>u.pathname.endsWith('/klines')?f.rows:[{p:'140',T:f.now-1,a:40}]};
+  }});
+  assert.equal(r.observedAt,f.now-1);assert.equal(calls.find(u=>u.pathname.endsWith('/klines')).searchParams.get('interval'),'1d');
+});
 
 test('free oracle uses provider event timestamp, not fetch time; stale/future/missing times fail closed',async()=>{
   const fetchImpl=async()=>({ok:true,json:async()=>[{p:'100',T:1000,a:42}]});

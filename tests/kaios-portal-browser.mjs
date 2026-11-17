@@ -27,10 +27,10 @@ function assertExactRoute(actual,expected,label){
 function portalRoutes(base){
   const root=new URL(base+'/');assert.ok(['http:','https:'].includes(root.protocol));
   assert.equal(root.username,'');assert.equal(root.password,'');assert.equal(root.search,'');assert.equal(root.hash,'');
-  const quote=worldUrl('11520',root),host=worldUrl('88888',root),game=sharedGameUrl(root,'88888');
+  const quote=worldUrl('11520',root),host=worldUrl('12682',root),game=sharedGameUrl(root,'12682');
   assertExactRoute(quote,new URL('K線西遊記/temples/11520/index.html',root).href,'Taiwan quote registry');
-  assertExactRoute(host,new URL('K線西遊記/temples/88888/index.html',root).href,'America host registry');
-  assertExactRoute(game,new URL('K線西遊記/temples/11520/game-5d.html?world=88888',root).href,'shared engine registry');
+  assertExactRoute(host,new URL('K線西遊記/temples/11520/game-5d.html?world=12682',root).href,'12682 game entry');
+  assertExactRoute(game,host,'single shared engine registry');
   return {portal:root.href,quote,host,game};
 }
 async function clickRoute(page,selector,expected,visibleSelector,label){
@@ -42,7 +42,14 @@ async function clickRoute(page,selector,expected,visibleSelector,label){
     await Promise.all([page.waitForURL(expected,{waitUntil:'domcontentloaded'}),page.locator(selector).click()]);
     assertExactRoute(page.url(),expected,`${label}: actual URL`);
     await page.locator(visibleSelector).waitFor({state:'visible'});
-    const visible=await reachable(page,visibleSelector);assert.ok(visible.width>0&&visible.height>0&&visible.inView&&visible.hit,`${label}: visible reachable destination`);
+    let visible=await reachable(page,visibleSelector);
+    if(visibleSelector==='canvas#three'){
+      await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_WORLD_COORDS__);
+      // An actual game canvas legitimately has HUD over its centre. Require
+      // a real interior world hit, not the old iframe-host centre predicate.
+      visible=await page.locator(visibleSelector).evaluate(el=>{const r=el.getBoundingClientRect(),points=[.25,.5,.75].flatMap(x=>[.25,.5,.75].map(y=>({x:r.left+r.width*x,y:r.top+r.height*y}))),worldPoints=points.filter(p=>document.elementFromPoint(p.x,p.y)===el);return{width:r.width,height:r.height,inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,hit:worldPoints.length>0,worldPoints}});
+    }
+    assert.ok(visible.width>0&&visible.height>0&&visible.inView&&visible.hit,`${label}: visible reachable destination`);
     report.navigations.push({label,href,expected,actual:page.url(),visible,failures});
   }catch(error){report.navigations.push({label,href,expected,actual:page.url(),failures,failed:true});throw error;}
   finally{page.off('requestfailed',failed);}
@@ -1261,9 +1268,40 @@ async function verifyFundingPanel(){
   report.checks.push('original checkbox recovery helper is visible, reachable and adjacent in fixed/cap/pause; its unconnected link only navigates to the original WalletConnect control, with acknowledgment/send/RPC/network writes unchanged and a visible synthetic notice');
   report.checks.push('same two offline funding contexts: automatic no-provider diagnostics, unsupported speech and explicitly labeled synthetic available local zh-TW recognition; no real audio/microphone, no acknowledgment or financial authority, and stopped-session late commands ignored');
 }
+async function verifyLampScanner(){
+  for(const [width,height] of [[1440,1000],[390,844]]){
+    const context=await browser.newContext({viewport:{width,height},isMobile:width===390,hasTouch:width===390,serviceWorkers:'block'}),page=await context.newPage(),errors=[];
+    page.on('pageerror',error=>errors.push(String(error)));
+    let unavailable=false;
+    await context.route('https://data-api.binance.vision/**',async route=>{
+      if(unavailable){await route.fulfill({status:503,body:'unavailable'});return;}
+      const url=new URL(route.request().url()),day=86400000,ct=Math.floor(Date.now()/day)*day;
+      const rows=Array.from({length:40},(_,i)=>[ct-(40-i)*day,String(100+i),String(103+i),String(99+i),String(101+i),'1',ct-(39-i)*day-1]);
+      const payload=url.pathname.endsWith('/klines')?rows:[{a:1,p:'140',T:Date.now()}];
+      await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
+    });
+    try{
+      await page.goto(new URL('K線西遊記/temples/11520/index.html',BASE+'/').href,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelector('#lamp-readout')?.textContent.includes('501/1001'));
+      await page.locator('#lamp-day').selectOption('8');
+      await page.locator('#lamp-point').focus();await page.keyboard.press('End');
+      assert.match(await page.locator('#lamp-readout').textContent(),/CT\+8 · 1001\/1001/);
+      assert.equal(await page.locator('#lamp-chart circle').count(),1);
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+      await page.locator('#lamp-scanner').scrollIntoViewIfNeeded();await shot(page,`lamp-scanner-${width}x${height}`);
+      await page.locator('#lamp-scanner').screenshot({path:`${OUT}/lamp-scanner-panel-${width}x${height}.png`});
+      unavailable=true;await page.locator('#lamp-refresh').click();
+      await page.waitForFunction(()=>document.querySelector('#lamp-data-status').textContent.includes('行情不可用'));
+      assert.equal(await page.locator('#lamp-readout').textContent(),'');assert.equal(await page.locator('#lamp-chart circle').count(),0);
+      assert.equal(await page.locator('#lamp-refresh').isEnabled(),true);assert.deepEqual(errors,[]);
+      report.checks.push(`lamp ${width}x${height}: isolated public-feed mock; CT+8/+500 reaches 1001/1001, chart renders; HTTP503 clears prices and permits retry; no wallet`);
+    }finally{await context.close();}
+  }
+}
 try{
   if(FUNDING_ONLY){await verifyFundingPanel();await verifyFundingAutoPreview();await verifyFundingGuidedFive();await verifyLegacyCards();await verify16888ManualOrder();}
   else{
+  await verifyLampScanner();
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();
     await page.addInitScript(()=>{globalThis.__audioAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const a=this.context.createAnalyser();connect.call(this,a);__audioAnalysers.push(a);}return result;};});
@@ -1350,12 +1388,11 @@ try{
     assertExactRoute(new URL(await page.locator('.shared-game-button').getAttribute('href'),page.url()).href,routes.host,'explicit game button');
     if(i===0){
       await page.reload({waitUntil:'domcontentloaded'});assertExactRoute(page.url(),routes.quote,'quote reload');await page.locator('.shared-game-button').waitFor({state:'visible'});
-      await clickRoute(page,'.shared-game-button',routes.host,'#sharedGameFrame','quote to shared America game');
+      await clickRoute(page,'.shared-game-button',routes.host,'canvas#three','quote to 12682 game');
       for(let load=0;load<2;load++){
         if(load){await page.reload({waitUntil:'domcontentloaded'});assertExactRoute(page.url(),routes.host,'shared host reload');}
-        const frame=page.locator('#sharedGameFrame');await frame.waitFor({state:'visible'});assert.equal(await frame.count(),1);
-        assertExactRoute(new URL(await frame.getAttribute('src'),page.url()).href,routes.game,'fixed shared engine');
-        const canvas=page.frameLocator('#sharedGameFrame').locator('canvas#three');await canvas.waitFor({state:'visible'});
+        assert.equal(await page.locator('#sharedGameFrame').count(),0,'direct game entry does not duplicate an iframe runtime');
+        const canvas=page.locator('canvas#three');await canvas.waitFor({state:'visible'});
         assertExactRoute(await canvas.evaluate(el=>el.ownerDocument.location.href),routes.game,'actual shared child URL');
         const size=await canvas.evaluate(el=>({width:el.width,height:el.height,rectWidth:el.getBoundingClientRect().width,rectHeight:el.getBoundingClientRect().height}));
         assert.ok(Object.values(size).every(value=>Number.isFinite(value)&&value>0),'shared game canvas has visible nonzero dimensions');

@@ -59,6 +59,13 @@ assert.ok(!walletTrade.includes('<option value="1000">'),'standalone wallet trad
 assert.ok(walletTrade.includes('PnL = ΔIndex × C × 口數'),'standalone wallet trade formula must use index delta');
 assert.ok(walletTrade.includes('每 1 index 損益'),'standalone wallet trade preview must use index semantics');
 for(const [temple,id] of [[temple12345,'12345'],[temple16888,'16888']]){
+  if(id==='12345'){
+    assert.ok(temple.includes('window.location.replace(new URL("./cockpit.html", window.location.href).href)'),'12345 canonical bootstrap stays on the original cockpit');
+    const cockpit=fs.readFileSync(path.join(root,'../12345/cockpit.html'),'utf8');
+    assert.match(cockpit,/<a[^>]+href="\.\.\/\.\.\/\.\.\/"[^>]+data-kaios-return="PORTAL"[^>]+aria-label="回 KAIOS 總世界"/,'actual cockpit retains an accessible canonical Portal return');
+    assert.ok(cockpit.includes('location.assign(home.href)'),'actual return handler uses its declared canonical href');
+    continue;
+  }
   assert.ok(temple.includes('href="../../../" id="return-to-11520" data-kaios-return="PORTAL"'),`${id} must return to the single canonical root Portal`);
   if(id==='12345'){
     assert.match(temple,/data-kaios-return="PORTAL" aria-label="回 KAIOS 總世界" title="回 KAIOS">🌌</,'12345 approved compact Portal icon retains accessible destination');

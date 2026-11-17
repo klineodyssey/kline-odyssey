@@ -117,7 +117,11 @@ function installKgenReferenceContext(){
   root.dataset.kgenReferenceContextBound='1';let disclosed=false;
   document.addEventListener('k11520:hud-context',event=>{
     const open=event.detail?.tradeOpen===true;
-    if(open&&!disclosed){disclosed=true;openOrgan('market');return}
+    // 2026-11-17 / Codex /root / PR672: HUD disclosure is not a request to
+    // open the Market sheet. That automatic modal remained behind cancelled
+    // order previews and intercepted subsequent C/lot gestures. The existing
+    // explicit Market organ/card remains the sole entry to its reference UI.
+    if(open&&!disclosed){disclosed=true;return}
     if(!open){disclosed=false;const body=$('#sheetBody');
       if(body?.querySelector('[data-kgen-pool-reference]')&&$('#sheetTitle').textContent===ORGANS.find(x=>x[0]==='market')?.[2]){kgenPoolReference.pause();$('#sheet').classList.remove('open')}
     }

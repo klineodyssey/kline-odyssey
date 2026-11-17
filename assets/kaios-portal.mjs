@@ -10,7 +10,7 @@ export function readPortalPlayer(storage){
   const store=createLocalPlayerStore({storage}),snapshot=store.snapshot(),player=store.loadPlayer();
   if(snapshot.status!=='READY'||!player)return null;
    const destination=resumeDestination(player.lastWorld);if(!destination)return null;
-  return Object.freeze({displayName:player.displayName,level:player.level,homeWorld:player.homeWorld,lastWorld:player.lastWorld,displayLastWorld:player.lastWorld==='11520'?'88888':player.lastWorld,destination});
+  return Object.freeze({displayName:player.displayName,level:player.level,homeWorld:player.homeWorld,lastWorld:player.lastWorld,displayLastWorld:['11520','88888'].includes(player.lastWorld)?'12682':player.lastWorld,destination});
  }catch{return null}
 }
 function el(document,tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node}
@@ -23,7 +23,7 @@ export function renderPortal(document,{storage,base=portalBase()}={}){
  const bankCopy=el(document,'span','bank-service-copy');bankCopy.append(el(document,'strong','bank-service-name',BANK_SERVICE.name),el(document,'span','bank-service-description',BANK_SERVICE.description));
  bank.append(bankCopy,el(document,'span','bank-service-action',BANK_SERVICE.cta+' →'));bankHost.append(bank);
  const primary=findWorld('11520'),primaryHost=document.querySelector('#primaryWorld');primaryHost.replaceChildren(status(primary));
- const launch=link('前往花果山台灣報價',primary.entryUrl,'primary-cta');launch.dataset.worldId=primary.worldId;launch.id='primaryPlay';launch.append(el(document,'span','','↗'));primaryHost.append(launch);
+ const launch=link('前往11520宇宙萬物交易所',primary.entryUrl,'primary-cta');launch.dataset.worldId=primary.worldId;launch.id='primaryPlay';launch.append(el(document,'span','','↗'));primaryHost.append(launch);
  const cards=document.querySelector('#worldCards');cards.replaceChildren();
  for(const world of WORLD_REGISTRY.filter(isNavigable)){
   const card=el(document,'article',`world-card ${world.tone}`);card.dataset.worldId=world.worldId;
