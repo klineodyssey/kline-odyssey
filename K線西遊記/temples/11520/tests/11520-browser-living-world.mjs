@@ -281,7 +281,14 @@ assert.deepEqual(errors,[],'page errors after selected-Life click: '+errors.join
 if(await page.locator('#sheet').evaluate(sheet=>sheet.classList.contains('open')))await page.locator('#sheetClose').click();
 async function verifyActiveLandscapeContext(kind,{eligible=true}={}){
   await page.setViewportSize({width:844,height:390});await page.waitForTimeout(250);
-  if(await page.locator('#k11520UtilityMaster').getAttribute('aria-expanded')==='true')await page.locator('#k11520UtilityMaster').click();
+  // The clean default intentionally hides financial quick actions. These
+  // retained eight-control hit checks exercise explicit expanded controls.
+  if(!await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__?.controlsOpen===true)){
+    if(!await page.locator('#gameModeToggle').isVisible())await page.locator('#k11520UtilityMaster').click();
+    await page.locator('#gameModeToggle').click();await page.locator('#k11520UiSettings').waitFor({state:'visible'});
+    await page.locator('#k11520ShowControls').click();await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.controlsOpen===true);
+  }
+  if(await page.evaluate(()=>document.documentElement.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
   for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(id).isVisible(),false,'landscape context actions stay in More even when active');
   // Human 12:43: a mission is not by itself an eligible raid. The closed
   // attack window stays out of World; explicit More still opens its explanation.
