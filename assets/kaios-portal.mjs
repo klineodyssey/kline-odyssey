@@ -60,15 +60,20 @@ export function parseLatestVideo(readme){
   return Object.freeze({title,url:url.href,videoId:id});
  }catch{return null}
 }
+function mountVideoPlayer(document,host,{videoId,title,label,className}){
+ if(typeof videoId!=='string'||!/^[A-Za-z0-9_-]{11}$/.test(videoId))throw new TypeError('INVALID_VIDEO_ID');
+ const play=el(document,'button',className);play.type='button';play.dataset.videoId=videoId;
+ play.append(el(document,'span','film-play-icon','▶'),el(document,'strong','',label),el(document,'small','','點擊後在本站載入 YouTube 播放器'));host.append(play);
+ play.addEventListener('click',()=>{
+  const frame=el(document,'iframe');frame.src='https://www.youtube.com/embed/'+videoId+'?autoplay=1&playsinline=1';frame.title=title;frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;host.replaceChildren(frame);
+ },{once:true});
+}
 export function mountVisitorInfo(document,{base=portalBase(),fetcher=globalThis.fetch}={}){
  const section=el(document,'section','section visitor-section');section.id='youtube';section.setAttribute('aria-labelledby','visitorTitle');
  const heading=el(document,'div','section-heading');heading.append(el(document,'p','eyebrow','K-LINE ODYSSEY / STORIES'),el(document,'h2','','走進 K線西遊記'));heading.lastChild.id='visitorTitle';section.append(heading);
- const grid=el(document,'div','visitor-grid'),film=el(document,'div','brand-film'),play=el(document,'button','brand-film-play');
- play.type='button';play.append(el(document,'span','film-play-icon','▶'),el(document,'strong','','播放官方品牌影片'),el(document,'small','','點擊後在本站載入 YouTube 播放器'));film.append(play);
- // Loading external frames requires the visitor's explicit playback gesture.
- play.addEventListener('click',()=>{
-  const frame=el(document,'iframe');frame.src='https://www.youtube.com/embed/akp4K_uzJ28?autoplay=1&playsinline=1';frame.title='K線西遊記官方品牌影片';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;film.replaceChildren(frame);
- });
+ const grid=el(document,'div','visitor-grid'),film=el(document,'div','brand-film');
+ // Both players require an explicit playback gesture before loading a frame.
+ mountVideoPlayer(document,film,{videoId:'akp4K_uzJ28',title:'K線西遊記官方品牌影片',label:'播放官方品牌影片',className:'brand-film-play'});
  const copy=el(document,'div','visitor-copy');copy.append(el(document,'h3','','官方品牌影片'),el(document,'p','visitor-note','從一支影片認識我們的世界。'));
  const original=el(document,'a','visitor-link','在 YouTube 觀看品牌影片 ↗');original.href='https://www.youtube.com/watch?v=akp4K_uzJ28';original.target='_blank';original.rel='noopener noreferrer';copy.append(original);
  const latest=el(document,'div','latest-video');latest.id='latestVideo';latest.setAttribute('aria-live','polite');latest.append(el(document,'h3','','最新影片'),el(document,'p','visitor-note','最近同步的頻道影片；完整最新發布請查看官方頻道。'));
@@ -81,7 +86,9 @@ export function mountVisitorInfo(document,{base=portalBase(),fetcher=globalThis.
  // Reuse the existing official-link renderer and canonical manifest.
  const script=el(document,'script');script.src=new URL('assets/official-links.js',base).href;script.dataset.manifest=new URL('OfficialLinks.json',base).href;document.body.append(script);
  const ready=Promise.resolve().then(()=>fetcher(new URL('README.md',base).href,{cache:'no-store'})).then(response=>{if(!response.ok)throw new Error('VIDEO_SOURCE_UNAVAILABLE');return response.text()}).then(readme=>{
-  const current=parseLatestVideo(readme);if(!current)throw new Error('VIDEO_SOURCE_INVALID');video.href=current.url;video.textContent=current.title+' ↗';latest.dataset.state='synced';
+  const current=parseLatestVideo(readme);if(!current)throw new Error('VIDEO_SOURCE_INVALID');
+  const player=el(document,'div','latest-film');mountVideoPlayer(document,player,{videoId:current.videoId,title:'最近同步影片：'+current.title,label:'播放最近同步影片',className:'latest-film-play'});
+  video.href=current.url;video.textContent=current.title+' ↗';latest.append(player);latest.dataset.state='synced';
  }).catch(()=>{latest.dataset.state='unavailable';latest.querySelector('p').textContent='暫時無法讀取同步影片，請前往官方頻道查看最新發布。'});
  return {ready};
 }
