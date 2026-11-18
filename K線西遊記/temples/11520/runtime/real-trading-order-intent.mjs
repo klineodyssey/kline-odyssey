@@ -12,12 +12,17 @@ CHANGE_REASON: Isolate simulation source and recovery guards across the existing
 ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fixed axis/market bindings.
+CURRENT_ADDITION: 2026-11-18 / Codex Hengyao / K11520-SIMULATION-AUTOPILOT-20261118-01. Explicitly armed simulation controller only; original financial owner and protected UI remain unchanged.
 */
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
 import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
-  observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot} from './kgen-margin-runtime.mjs';
+  observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot,positionRisk} from './kgen-margin-runtime.mjs';
+
+const simulationExecutionAdapters=new WeakSet();
+const simulationAutopilotMutationGuards=new WeakMap();
+const SIMULATION_QUOTE_MAX_AGE_MS=15000;
 
 function finitePositive(value,label){const n=Number(value);if(!Number.isFinite(n)||n<=0)throw new Error(`${label}_MUST_BE_POSITIVE`);return n}
 function integerRange(value,label,min,max){const n=Number(value);if(!Number.isInteger(n)||n<min||n>max)throw new Error(`${label}_OUT_OF_RANGE`);return n}
@@ -85,14 +90,18 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
         orders:[],positions:[],receipts:[],observations:{}})});
   }
   if(!ledger||typeof ledger!=='object')throw new Error('EXISTING_LEDGER_REQUIRED');
-  const run=(fn,mutating=false)=>{try{if(mutating)options.beforeMutation?.();const result=fn();if(result.ok&&mutating)options.afterMutation?.();return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){return executionFailure(error)}};
+  const run=(fn,mutating=false)=>{try{
+    if(mutating){options.beforeMutation?.();simulationAutopilotMutationGuards.get(adapter)?.()}
+    const result=fn();if(result.ok&&mutating)options.afterMutation?.();
+    return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result);
+  }catch(error){return executionFailure(error)}};
   const fallback=options.simulationFallback===true;
   const quote=(market,{now=Date.now(),book=simulationSnapshot(ledger)}={})=>{
     const previous=book.observations[market],pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING'),open=book.positions.filter(p=>p.market===market&&p.status==='OPEN'),active=pending.length>0||open.length>0;
     const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE);
     if((!previous&&active)||(pinned&&previous?.source!==SIMULATION_PRICE_SOURCE))throw new Error('SIMULATION_RECOVERY_REQUIRED');
     if(previous&&(!Number.isFinite(previous.price)||previous.price<=0||!Number.isSafeInteger(previous.at)||previous.at<0))throw new Error(active?'SIMULATION_RECOVERY_REQUIRED':'INVALID_SIMULATION_SOURCE');
-    if(fallback&&(previous?.source===SIMULATION_PRICE_SOURCE||!previous||now-previous.at>15000)){
+    if(fallback&&(previous?.source===SIMULATION_PRICE_SOURCE||!previous||now-previous.at>SIMULATION_QUOTE_MAX_AGE_MS)){
       try{return deterministicSimulationObservation({market,previous,now})}catch(error){if(active)throw new Error('SIMULATION_RECOVERY_REQUIRED');throw error}
     }
     return previous;
@@ -105,7 +114,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   const preview=(input,{now=Date.now()}={})=>run(()=>{
     if(options.productV1)requireV1TradingC(input.c);
     const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
-    if(!selected||now<selected.at||now-selected.at>15000)throw new Error('STALE_PRICE');
+    if(!selected||now<selected.at||now-selected.at>SIMULATION_QUOTE_MAX_AGE_MS)throw new Error('STALE_PRICE');
     if(book.orders.some(o=>o.axis===intent.axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===intent.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
     const margin=requiredMargin(intent),available=book.wallet.free;
     if(!Number.isFinite(available)||available<margin)throw new Error('INSUFFICIENT_FREE_KGEN');
@@ -114,7 +123,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       pnlModel:'INDEX_DELTA_C_LOTS_V1',liquidationModel:'SIMULATION_ISOLATED_ZERO_MAINTENANCE_NO_FEES',
       currentPrice:selected.price,priceObservedAt:selected.at,priceSource:selected.source||'SIMULATION_OBSERVATION',simulationOnly:true,executionMode:'SIMULATION'};
   });
-  return Object.freeze({name:'SIMULATION_ADAPTER',mode:'SIMULATION',enabled:true,preview,quote,
+  const adapter=Object.freeze({name:'SIMULATION_ADAPTER',mode:'SIMULATION',enabled:true,preview,quote,
     submit:(input,{now=Date.now()}={})=>run(()=>{
       const checked=preview(input,{now});if(!checked.ok)return checked;
       const draft=structuredClone(ledger),observation=applyQuote(draft,checked.market,now);if(!observation.ok)return observation;
@@ -146,6 +155,139 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     },true),
     cancel:(orderId)=>run(()=>cancelSimulationOrder(ledger,orderId),true),
     snapshot:()=>simulationSnapshot(ledger)});
+  simulationExecutionAdapters.add(adapter);
+  return adapter;
+}
+
+// A simulation-only controller over the existing order/settlement owner. It has
+// no timer, persistence, DOM, provider, wallet or on-chain adapter fallback.
+// Reload starts disarmed. A caller must supply current Player Life context and
+// explicitly arm every strategy/risk parameter; market signals alone cannot arm.
+export function createSimulationAutopilot({adapter,getContext}={}){
+  if(!simulationExecutionAdapters.has(adapter))throw new Error('SIMULATION_ADAPTER_REQUIRED');
+  if(typeof getContext!=='function')throw new Error('PLAYER_CONTEXT_REQUIRED');
+  let state='DISARMED',reason=null,config=null,contextId=null,generation=0,busy=false;
+  let submittedOrders=0,lastIssuedSide=null,realizedPnl=0;
+  const ownedOrders=new Set(),requestedCloses=new Set();
+  const context=()=>{
+    const value=getContext(),id=typeof value==='string'?value:value?.id;
+    if(typeof id!=='string'||!id.trim())throw new Error('PLAYER_CONTEXT_REQUIRED');
+    if(value?.readOnly===true)throw new Error('READ_ONLY_CONTEXT');
+    return id;
+  };
+  const snapshot=()=>({simulationOnly:true,executionMode:'SIMULATION',state,reason,busy,
+    config:config?{...config}:null,contextId,submittedOrders,lastIssuedSide,realizedPnl,
+    orderIds:[...ownedOrders],signerRequested:false,broadcast:false});
+  const halt=message=>{state='STOPPED';reason=message;generation++;return {ok:false,reason:message,...snapshot()}};
+  const check=token=>{
+    if(token!==generation||state==='STOPPED'||state==='DISARMED')throw new Error('AUTOPILOT_STOPPED');
+    if(adapter.mode!=='SIMULATION'||adapter.enabled!==true)throw new Error('SIMULATION_ADAPTER_REQUIRED');
+    if(context()!==contextId)throw new Error('PLAYER_CONTEXT_CHANGED');
+  };
+  const mutate=(action,token)=>{
+    check(token);
+    if(simulationAutopilotMutationGuards.has(adapter))throw new Error('ACTION_IN_PROGRESS');
+    simulationAutopilotMutationGuards.set(adapter,()=>check(token));
+    try{return action()}finally{simulationAutopilotMutationGuards.delete(adapter)}
+  };
+  const active=book=>({
+    pending:book.orders.filter(o=>o.axis===config.axis&&o.status==='PENDING'),
+    open:book.positions.filter(p=>p.axis===config.axis&&p.status==='OPEN'),
+  });
+  const inspect=book=>{
+    const orders=book.orders.filter(o=>ownedOrders.has(o.orderId));
+    if(orders.length!==ownedOrders.size)throw new Error('AUTOPILOT_ORDER_MISSING');
+    if(orders.some(o=>o.status==='REJECTED'))throw new Error('AUTOPILOT_ORDER_REJECTED');
+    if(orders.some(o=>o.status==='CANCELLED'))throw new Error('AUTOPILOT_ORDER_CANCELLED');
+    const {pending,open}=active(book);
+    if(pending.length+open.length>1||[...pending,...open].some(x=>!ownedOrders.has(x.orderId)))throw new Error('AXIS_OWNER_CHANGED');
+    const settled=book.receipts.filter(r=>r.kind==='SETTLEMENT'&&ownedOrders.has(r.orderId));
+    realizedPnl=settled.reduce((sum,r)=>sum+r.realizedPnl,0);
+    if(!Number.isFinite(realizedPnl))throw new Error('INVALID_SETTLEMENT_RECEIPT');
+    if(settled.some(r=>r.status==='LIQUIDATED'))throw new Error('AUTOPILOT_LIQUIDATED');
+    if(settled.some(r=>r.status==='CLOSED'&&!requestedCloses.has(r.positionId)))throw new Error('POSITION_CLOSED_EXTERNALLY');
+    return {pending,open};
+  };
+  const arm=input=>{
+    if(busy)return {ok:false,reason:'ACTION_IN_PROGRESS'};
+    if(state!=='DISARMED'&&state!=='STOPPED')return {ok:false,reason:'ALREADY_ARMED'};
+    try{
+      const id=context(),binding=assertRealTradingAxisMarket(input||{});
+      const cMagnitude=finitePositive(input?.cMagnitude,'C_MAGNITUDE');requireV1TradingC(cMagnitude);
+      const next={axis:binding.axis,market:binding.market,cMagnitude,
+        lots:integerRange(input?.lots,'LOTS',1,100),longAbove:finitePositive(input?.longAbove,'LONG_ABOVE'),
+        shortBelow:finitePositive(input?.shortBelow,'SHORT_BELOW'),maxLossKgen:finitePositive(input?.maxLossKgen,'MAX_LOSS_KGEN'),
+        maxOrders:integerRange(input?.maxOrders,'MAX_ORDERS',1,Number.MAX_SAFE_INTEGER)};
+      if(next.shortBelow>=next.longAbove)throw new Error('SIGNAL_THRESHOLDS_OVERLAP');
+      for(const key of ['longStopPrice','longTakeProfitPrice','shortStopPrice','shortTakeProfitPrice'])next[key]=input?.[key]==null?null:finitePositive(input[key],key.toUpperCase());
+      for(const [side,c,trigger] of [['long',cMagnitude,next.longAbove],['short',-cMagnitude,next.shortBelow]]){
+        buildExecutionOrderIntent({...next,c,currentPrice:trigger,triggerPrice:trigger,
+          stopPrice:next[side+'StopPrice'],takeProfitPrice:next[side+'TakeProfitPrice']});
+      }
+      const book=adapter.snapshot();
+      if(book.orders.some(o=>o.axis===next.axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===next.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
+      if(context()!==id)throw new Error('PLAYER_CONTEXT_CHANGED');
+      config=Object.freeze(next);contextId=id;submittedOrders=0;lastIssuedSide=null;realizedPnl=0;
+      ownedOrders.clear();requestedCloses.clear();generation++;state='ARMED';reason=null;
+      return {ok:true,...snapshot()};
+    }catch(error){return halt(/^[A-Z_]+$/.test(error?.message)?error.message:'INVALID_AUTOPILOT_CONFIG')}
+  };
+  const closeConfirmed=async(position,now,token)=>{
+    check(token);requestedCloses.add(position.positionId);
+    const result=await mutate(()=>adapter.close(position.positionId,{now}),token);check(token);
+    const book=adapter.snapshot(),receipt=result?.receipt;
+    const closed=book.positions.find(p=>p.positionId===position.positionId);
+    if(!result?.ok||receipt?.kind!=='SETTLEMENT'||receipt.positionId!==position.positionId||receipt.status!=='CLOSED'||
+       receipt.simulationOnly!==true||receipt.marginAfter!==0||closed?.status!=='CLOSED'||
+       !book.receipts.some(r=>r.receiptId===receipt.receiptId&&r.positionId===position.positionId&&r.status==='CLOSED'))throw new Error('CLOSE_NOT_CONFIRMED');
+    inspect(book);return book;
+  };
+  const step=async({now=Date.now()}={})=>{
+    if(busy)return {ok:false,reason:'ACTION_IN_PROGRESS'};
+    if(state==='DISARMED'||state==='STOPPED')return {ok:false,...snapshot(),reason:'AUTOPILOT_NOT_ARMED',stopReason:reason};
+    busy=true;const token=generation;
+    try{
+      check(token);
+      if(!Number.isSafeInteger(now)||now<0)throw new Error('INVALID_TIMESTAMP');
+      let book=adapter.snapshot();const {pending,open}=inspect(book);
+      const quote=adapter.quote(config.market,{now});
+      if(!quote||!Number.isFinite(quote.price)||quote.price<=0||!Number.isSafeInteger(quote.at)||quote.at>now||now-quote.at>SIMULATION_QUOTE_MAX_AGE_MS)throw new Error('STALE_PRICE');
+      const pnl=realizedPnl+open.reduce((sum,p)=>sum+positionRisk({...p,mark:quote.price}).pnl,0);
+      if(pnl<=-config.maxLossKgen){
+        if(open.length){state='CLOSING';await closeConfirmed(open[0],now,token)}
+        return halt('LOSS_LIMIT_REACHED');
+      }
+      if(pending.length){state='PENDING_TRIGGER';return {ok:true,...snapshot()}}
+      const side=quote.price>=config.longAbove?'LONG':quote.price<=config.shortBelow?'SHORT':null;
+      if(!side){state=open.length?'OPEN_POSITION':'WAIT_SIGNAL';return {ok:true,...snapshot()}}
+      if(open[0]?.side===side){state='OPEN_POSITION';return {ok:true,...snapshot()}}
+      if(open.length){state='CLOSING';book=await closeConfirmed(open[0],now,token)}
+      check(token);
+      if(realizedPnl<=-config.maxLossKgen)return halt('LOSS_LIMIT_REACHED');
+      if(submittedOrders>=config.maxOrders)return halt('ORDER_LIMIT_REACHED');
+      if(side===lastIssuedSide){state='WAIT_NEW_SIGNAL';return {ok:true,...snapshot()}}
+      const key=side==='LONG'?'long':'short',input={axis:config.axis,market:config.market,
+        lots:config.lots,c:side==='LONG'?config.cMagnitude:-config.cMagnitude,
+        currentPrice:quote.price,triggerPrice:quote.price,stopPrice:config[key+'StopPrice'],takeProfitPrice:config[key+'TakeProfitPrice']};
+      const preview=await adapter.preview(input,{now});check(token);
+      if(!preview?.ok)throw new Error('AUTOPILOT_PREVIEW_REJECTED');
+      const result=mutate(()=>adapter.submit(input,{now}),token);
+      if(result?.ok&&typeof result.order?.orderId==='string'){
+        ownedOrders.add(result.order.orderId);submittedOrders++;lastIssuedSide=side;
+      }
+      check(token);
+      if(!result?.ok||result.status!=='PENDING_TRIGGER'||result.order?.status!=='PENDING'||!ownedOrders.has(result.order?.orderId))throw new Error('AUTOPILOT_SUBMIT_UNCONFIRMED');
+      state='PENDING_TRIGGER';return {ok:true,...snapshot()};
+    }catch(error){
+      if(token!==generation)return {ok:false,reason:reason||'AUTOPILOT_STOPPED',...snapshot()};
+      return halt(/^[A-Z_]+$/.test(error?.message)?error.message:'AUTOPILOT_ACTION_FAILED');
+    }finally{busy=false}
+  };
+  // Stops decisions only. Existing orders/positions remain in the original
+  // ledger for explicit cancellation/close; a fault never retries mutations.
+  return Object.freeze({arm,step:async options=>{
+    const result=await step(options);return {...result,busy};
+  },stop:()=>halt('USER_STOPPED'),snapshot});
 }
 
 export function assertRealExecutionPriceSource({priceSource,source,simulationOnly,quoteState}={}){
@@ -236,7 +378,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   const blank=()=>({mode:'BSC_TESTNET',label:'TESTNET · NO REAL VALUE',status:'NOT_DEPLOYED_OR_AUTHORIZED',
     chainId:97,account:null,wallet:null,orders:[],positions:[],receipts:[],observations:{},transaction:null,
     readOnly:readOnly===true,...readOnly?{readScope:'BALANCES_ONLY',block:null,blockHash:null,rpcReadCount:null,balanceStatus:'UNKNOWN',historyStatus:'NOT_REQUESTED',positionsStatus:'NOT_REQUESTED',pnlStatus:'NOT_REQUESTED',claimsStatus:'NOT_REQUESTED',oracleStatus:'NOT_REQUESTED'}:{},exitOnly:exitOnly===true,deploymentContext:'97:'+String(deployment?.addresses?.brainProxy||'').toLowerCase()});
-  let rpcRequestCount=0,state=blank(),busy=false,displayActive=true,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null;
+  let rpcRequestCount=0,state=blank(),busy=false,displayActive=true,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null,legacyPrincipalScope=false,legacyWriteSession=null;
   const copy=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
   const snapshot=()=>copy({...state,writeBlocked:readOnly===true||!!ethereum&&TESTNET_PENDING_WALLET_REQUESTS.has(ethereum)});
   const publish=patch=>{state={...state,...patch};try{onState(snapshot())}catch{}return snapshot()};
@@ -291,7 +433,11 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     if(BigInt(await req('eth_chainId'))!==97n)fail('WRONG_CHAIN');
     const accounts=await req('eth_accounts');if(!validAddress(accounts?.[0]))fail('DISCONNECTED');return accounts[0];
   };
-  const sameSession=async(account,ticket)=>{if(ticket!==generation||lower(await identity())!==lower(account))fail('DISCONNECTED')};
+  const sameSession=async(account,ticket)=>{
+    if(ticket!==generation)fail('DISCONNECTED');
+    const current=await identity();
+    if(ticket!==generation||lower(current)!==lower(account))fail('DISCONNECTED');
+  };
   const verify=async(block='latest')=>{
     const account=await identity();
     for(const k of [...keys,'brainImplementation']){const code=await req('eth_getCode',[a[k],block]);if(code==='0x'||lower(ethers.keccak256(code))!==lower(hashes[k]))fail('DEPLOYMENT_CODE_MISMATCH')}
@@ -350,6 +496,40 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     return {txHash:r.transactionHash,block:Number(BigInt(r.blockNumber)),timestamp:Number(BigInt(block.timestamp))*1000,
       contract:log.address,method,status:'RECEIPT_CONFIRMED',transactionStatus:'RECEIPT_CONFIRMED',executionMode:'BSC_TESTNET'};
   };
+  const unknownLegacyPrincipal=()=>({readScope:'LEGACY_PRINCIPAL_ONLY',balanceStatus:'UNKNOWN',historyStatus:'UNKNOWN',historyError:null,
+    ordersStatus:'UNKNOWN',positionsStatus:'UNKNOWN',pnlStatus:'UNKNOWN',claimsStatus:'UNKNOWN',oracleStatus:'UNKNOWN'});
+  const recoverLegacyPrincipal=async(height,revision,ticket)=>{
+    legacyPrincipalScope=true;
+    const tag=hex(height),pinned=await req('eth_getBlockByNumber',[tag,false]);
+    if(!/^0x[0-9a-f]{64}$/i.test(pinned?.hash||'')||Number(BigInt(pinned.number??-1))!==height)fail('RECOVERY_BLOCK_UNVERIFIED');
+    const account=await verify(tag);
+    const [native,balance,principal,locked,available]=await Promise.all([req('eth_getBalance',[account,tag]),call('testToken','balanceOf',[account],tag),
+      call('brainProxy','principalOf',[account],tag),call('brainProxy','lockedPrincipalOf',[account],tag),call('brainProxy','availablePrincipal',[account],tag)]);
+    if(typeof native!=='string'||!/^0x[0-9a-f]{1,64}$/i.test(native))fail('INVALID_NATIVE_BALANCE_RESPONSE');
+    if([balance[0],principal[0],locked[0],available[0]].some(v=>typeof v!=='bigint'||v<0n)||locked[0]>principal[0]||available[0]!==principal[0]-locked[0])fail('PRINCIPAL_BALANCE_MISMATCH');
+    const lease=TESTNET_PENDING_WALLET_REQUESTS.get(ethereum);let reconciledLease=null;
+    if(lease?.hash&&/^0x[0-9a-fA-F]{64}$/.test(lease.hash)){
+      const receipt=await req('eth_getTransactionReceipt',[lease.hash]);
+      if(receipt&&['0x0','0x1'].includes(receipt.status)&&Number(BigInt(receipt.blockNumber))<=height&&lower(receipt.from)===lower(lease.from)&&lower(receipt.to)===lower(lease.to)&&lower(receipt.transactionHash)===lower(lease.hash)){
+        const mined=await req('eth_getBlockByNumber',[receipt.blockNumber,false]);
+        if(/^0x[0-9a-f]{64}$/i.test(receipt.blockHash||'')&&lower(mined?.hash)===lower(receipt.blockHash)&&BigInt(mined?.number??-1)===BigInt(receipt.blockNumber))reconciledLease=lease;
+      }
+    }
+    const canonical=await req('eth_getBlockByNumber',[tag,false]);
+    if(lower(canonical?.hash)!==lower(pinned.hash)||Number(BigInt(canonical?.number??-1))!==height)fail('RECOVERY_BLOCK_CHANGED');
+    await sameSession(account,ticket);
+    if(ticket!==generation)fail('DISCONNECTED');
+    if(revision<appliedRefreshRevision||height<(state.block??0))return {ok:true,superseded:true,...snapshot()};
+    if(reconciledLease&&TESTNET_PENDING_WALLET_REQUESTS.get(ethereum)===reconciledLease)TESTNET_PENDING_WALLET_REQUESTS.delete(ethereum);
+    appliedRefreshRevision=revision;lastReadyRefresh=null;
+    publish({...unknownLegacyPrincipal(),account,chainId:97,error:null,status:'LEGACY_PRINCIPAL_VERIFIED',balanceStatus:'VERIFIED',
+      historyStatus:'INDEXER_REQUIRED',historyError:'RECOVERY_HISTORY_REQUIRES_INDEXER',block:height,blockHash:pinned.hash,
+      wallet:{readScope:'LEGACY_PRINCIPAL_ONLY',testBnbBalance:ethers.formatUnits(BigInt(native),18),testBnbBalanceWei:String(BigInt(native)),testTokenBalance:num(balance[0]),testTokenBalanceWei:String(balance[0]),
+        principal:num(principal[0]),total:num(principal[0]),principalWei:String(principal[0]),locked:num(locked[0]),lockedMargin:num(locked[0]),lockedWei:String(locked[0]),
+        free:num(available[0]),availableWei:String(available[0]),withdrawable:num(available[0]),allowance:null,allowanceWei:null,allowanceUnlimited:null,
+        equity:null,unrealizedPnl:null,realizedPnl:null,claimable:null,claimableStatus:'UNKNOWN'},capital:null,claims:[],orders:[],positions:[],receipts:[],observations:{}});
+    return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
+  };
   const refreshRead=async()=>{
     const revision=++refreshRevision;
     try{
@@ -371,6 +551,13 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
           principal:null,total:null,principalWei:null,free:null,availableWei:null,withdrawable:null,allowanceWei:null,allowance:null,allowanceUnlimited:null,claimable:null,claimableStatus:'NOT_REQUESTED',locked:null,lockedMargin:null,lockedWei:null,equity:null,unrealizedPnl:null,realizedPnl:null},
         capital:null,claims:[],orders:[],positions:[],receipts:[],observations:{},transaction:null});
       return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
+    }
+    if(exitOnly){
+      const ticket=generation,height=Number(BigInt(await req('eth_blockNumber')));
+      if(!Number.isSafeInteger(height)||height<fromBlock)fail('RECOVERY_BLOCK_UNVERIFIED');
+      // An aged legacy deployment may still expose exact available principal.
+      // This branch never substitutes an incomplete book for full history.
+      if(height-fromBlock>2000000)return await recoverLegacyPrincipal(height,revision,ticket);
     }
     const ticket=generation,account=await verify(),height=Number(BigInt(await req('eth_blockNumber'))),tag=hex(height),recoveryLogCache=new Map();
     const pinnedBlock=readOnly?await req('eth_getBlockByNumber',[tag,false]):null;
@@ -495,8 +682,9 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     try{return await flight}finally{if(refreshFlight===flight)refreshFlight=null}
   };
   const run=async fn=>{try{return await fn()}catch(error){lastReadyRefresh=null;const failure=executionFailure(error),lost=['WRONG_CHAIN','DISCONNECTED'].includes(failure.code);
-    publish({...lost||readOnly?blank():{},status:failure.code,error:failure.reason,
-      transaction:state.transaction?{...state.transaction,status:failure.code}:null});return failure}};
+    const transaction=legacyPrincipalScope&&state.transaction?.status==='RECEIPT_CONFIRMED'?state.transaction:state.transaction?{...state.transaction,status:failure.code}:null;
+    publish({...lost||readOnly||legacyPrincipalScope?blank():{},...legacyPrincipalScope?unknownLegacyPrincipal():{},status:failure.code,error:failure.reason,
+      transaction});return failure}};
   const previewInternal=async(input,{forceRefresh=false}={})=>{
     assertRealExecutionPriceSource(input);
     const intent=buildExecutionOrderIntent(input),ticket=generation,account=await identity(),recent=lastReadyRefresh;
@@ -526,7 +714,8 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       estimatedLiquidationPrice:estimate,pnlModel,liquidationModel:'ON_CHAIN_INITIAL_AND_MAINTENANCE_MARGIN_ESTIMATE',executionMode:'BSC_TESTNET'};
   };
   const send=async(k,method,args,expectedEvent)=>{
-    const account=await verify(),ticket=generation,data=abi[k].encodeFunctionData(method,args);
+    const account=await verify(),ticket=legacyWriteSession?.ticket??generation,data=abi[k].encodeFunctionData(method,args);
+    if(legacyWriteSession&&lower(account)!==lower(legacyWriteSession.account))fail('DISCONNECTED');
     publish({transaction:{status:'PREFLIGHT',method}});
     // Settlement estimation executes bounded risk/receipt calculations, often
     // repeatedly. Keep a larger but finite budget than ordinary balance reads.
@@ -548,12 +737,38 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       .find(l=>method==='closePosition'?['PositionClosed','PositionLiquidated'].includes(l?.name)&&String(l.args.positionId)===String(args[0]):l?.name===expectedEvent);
     if(expectedEvent&&!event)fail('RECEIPT_EVENT_MISSING');
     await sameSession(account,ticket);
+    if(legacyPrincipalScope&&method==='withdrawMargin'){
+      const canonical=await req('eth_getBlockByNumber',[receipt.blockNumber,false]);
+      if(!/^0x[0-9a-f]{64}$/i.test(receipt.blockHash||'')||lower(canonical?.hash)!==lower(receipt.blockHash)||BigInt(canonical?.number??-1)!==BigInt(receipt.blockNumber))fail('RECEIPT_NOT_CANONICAL');
+      await sameSession(account,ticket);
+      const lease=TESTNET_PENDING_WALLET_REQUESTS.get(ethereum);
+      if(lease?.hash===hash&&lower(lease.from)===lower(account)&&lower(lease.to)===lower(a[k]))TESTNET_PENDING_WALLET_REQUESTS.delete(ethereum);
+      const confirmed={status:'RECEIPT_CONFIRMED',method,txHash:hash,block:Number(BigInt(receipt.blockNumber)),
+        account,chainId:97,deploymentContext:'97:'+lower(a.brainProxy),to:a[k]};
+      publish({transaction:confirmed});
+      try{await refreshInternal(true)}catch(error){
+        lastReadyRefresh=null;publish({...blank(),...unknownLegacyPrincipal(),status:'LEGACY_PRINCIPAL_RECHECK_REQUIRED',error:executionFailure(error).reason,transaction:confirmed});
+      }
+      publish({transaction:confirmed});
+      return {ok:true,status:'RECEIPT_CONFIRMED',txHash:hash,orderId:null,executionMode:'BSC_TESTNET'};
+    }
     await refreshInternal(true);publish({transaction:{status:'RECEIPT_CONFIRMED',method,txHash:hash,block:Number(BigInt(receipt.blockNumber))}});
     return {ok:true,status:method==='createOrder'?'ON_CHAIN_ORDER_CREATED':'RECEIPT_CONFIRMED',txHash:hash,
       orderId:event?.args?.orderId==null?null:String(event.args.orderId),executionMode:'BSC_TESTNET'};
   };
-  const mutate=(fn,operation)=>run(async()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly&&!['close','cancel','withdraw','claim'].includes(operation))fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{return await fn()}finally{busy=false}});
-  const invalidate=()=>{lastReadyRefresh=null;generation++;appliedRefreshRevision=++refreshRevision;if(displayActive)publish({...blank(),status:'RECONNECT_REQUIRED'})};
+  const mutate=(fn,operation)=>run(async()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly&&!['close','cancel','withdraw','claim'].includes(operation))fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{
+    if(exitOnly){
+      const ticket=generation,account=await identity(),height=Number(BigInt(await req('eth_blockNumber')));
+      if(!Number.isSafeInteger(height)||height<fromBlock)fail('RECOVERY_BLOCK_UNVERIFIED');
+      if(height-fromBlock>2000000){
+        if(operation!=='withdraw')fail('LEGACY_PRINCIPAL_ONLY_WITHDRAW_REQUIRED');
+        await refreshInternal(true);await sameSession(account,ticket);
+        legacyWriteSession={account,ticket};
+      }
+    }
+    return await fn();
+  }finally{legacyWriteSession=null;busy=false}});
+  const invalidate=()=>{lastReadyRefresh=null;generation++;appliedRefreshRevision=++refreshRevision;if(displayActive)publish({...blank(),...legacyPrincipalScope?unknownLegacyPrincipal():{},status:'RECONNECT_REQUIRED'})};
   for(const event of ['accountsChanged','chainChanged','disconnect'])ethereum.on?.(event,invalidate);
   return Object.freeze({name:'EVM_ADAPTER',mode:'BSC_TESTNET',enabled:true,readOnly:readOnly===true,exitOnly:exitOnly===true,snapshot,
     preview:input=>run(()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly)fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');return previewInternal(input)}),refresh:()=>run(refreshInternal),recover:()=>run(refreshInternal),

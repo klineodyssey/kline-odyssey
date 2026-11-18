@@ -40,11 +40,11 @@ const temple12345=fs.readFileSync(path.join(root,'../12345/index.html'),'utf8');
 const temple16888=fs.readFileSync(path.join(root,'../16888/index.html'),'utf8');
 const source=[html,main,fixes,controls].join('\n');
 
-for(const marker of ['Knight.glb','GLTFLoader','AnimationMixer','walletConnect','KGEN verified','KX','KY','KZ','orderFire','confirmOrder','主城世界','K場交易','持倉','委託','歷史','資產','統計','市場','背包','角色','世界地圖','ATM','設定','客服/說明'])assert.ok(source.includes(marker),`missing product marker: ${marker}`);
+for(const marker of ['Knight.glb','GLTFLoader','AnimationMixer','walletConnect','KGEN verified','KX','KY','KZ','orderFire','confirmOrder','主城世界','K場交易','持倉','委託','歷史','資產','統計','市場','背包','角色','導航／自駕地圖','ATM','設定','客服/說明'])assert.ok(source.includes(marker),`missing product marker: ${marker}`);
 assert.ok(controls.includes("const KGEN_GENESIS_DATA='data:image/webp;base64,"),'missing approved mobile-control marker: KGEN Genesis joystick data asset');
 for(const marker of ['goddess-ui.webp','kgen-user-ui.webp','ufo-ui.png','#yJoyV250 .yKnob','#lotsThumb','#cThumb'])assert.ok(controls.includes(marker),`missing approved mobile-control marker: ${marker}`);
 
-assert.ok(main.includes("joy.addEventListener('pointerdown'"));assert.ok(main.includes("$('#attack').onclick"));assert.ok(main.includes("$('#dockToggle').onclick"));assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('setWaypoint'));assert.ok(fixes.includes('restoreWalletOrgan'));assert.ok(fixes.includes('placeOnlyRealBag'));assert.ok(controls.includes("#lookPad{display:none!important;pointer-events:none!important}"));assert.ok(!source.includes('margin = lots / leverage'));assert.ok(!source.includes('margin = lots / C'));
+assert.ok(main.includes("joy.addEventListener('pointerdown'"));assert.ok(main.includes("$('#attack').onclick"));assert.ok(main.includes("$('#dockToggle').onclick"));assert.ok(main.includes('function moveManual(now)'));assert.ok(main.includes('setWaypoint'));assert.ok(fixes.includes('restoreWalletOrgan'));assert.ok(fixes.includes('placeOnlyRealBag'));assert.ok(controls.includes("#lookPad{display:none!important;pointer-events:none!important}"));assert.ok(!source.includes('margin = lots / leverage'));assert.ok(!source.includes('margin = lots / C'));
 for(const runtime of [main,signedC,shell,fixesV23])assert.ok(!runtime.includes('[0,.000001,.00001,.0001,.001,.01,.1,1,10,100,1000]'),'interactive C ladder must stop at 100C');
 for(const runtime of [legacyRuntime,nonlinearControls,backend])assert.ok(!runtime.includes('max:1000')&&!runtime.includes('<=1000'),'all executable 11520 C/leverage surfaces must stop at 100');
 assert.ok(!backend.includes('lots / leverage'),'off-chain backend must not discount principal by leverage');

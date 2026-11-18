@@ -152,6 +152,7 @@ html.k11520SettingsOpen .sliderDock{display:none!important}
 #k11520UiSettings .full{grid-column:1/-1}.k11520HiddenBySettings{display:none!important}
 #k11520ControlsClose{position:fixed;right:max(58px,calc(env(safe-area-inset-right) + 52px));top:68px;bottom:auto;min-width:64px;min-height:44px;z-index:7100;border:1px solid #68e4ff66;border-radius:10px;background:#071018e8;color:#dffaff;touch-action:manipulation}
 #k11520ControlsClose[hidden]{display:none!important}
+html.k11520UtilitiesOpen:not(.k11520HudCollapsed):not(.k11520SettingsOpen) body:has(#walletPanel:not(.collapsed)):not(:has(#dock.open)) #k11520ControlsClose{visibility:hidden!important;pointer-events:none!important}
 #k11520BuildStamp{position:fixed;left:max(6px,env(safe-area-inset-left));top:max(4px,env(safe-area-inset-top));z-index:12001;max-width:calc(100vw - 64px);padding:3px 5px;border-radius:5px;background:#071018f2;color:#dffaff;font:700 10px system-ui,sans-serif;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 #k11520UiSettings{max-height:calc(100dvh - 64px);overflow:auto;top:32px}
 @media(orientation:landscape) and (max-height:600px){#k11520ControlsClose{left:212px;right:auto;top:66px;bottom:auto;width:64px}#k11520UiSettings{top:16px;max-height:calc(100dvh - 32px)}}

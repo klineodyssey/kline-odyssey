@@ -1,5 +1,69 @@
 # KGEN_FRONTEND_INDEX
 
+## 11520 navigation / simulation autopilot integration candidate — 2026-11-18
+
+Human has explicitly released #523's ordinary engineering HOLD. Earlier HOLD
+references remain history, not a global project blocker. The necessary old
+navigation delta is carried by PR673 in these existing homes:
+
+- `K線西遊記/temples/11520/game-5d.html` and `runtime/game-5d-main.mjs`:
+  existing world-map sheet controls for independent three-market selection,
+  local physical XYZ navigation/distance/ETA, separate target-price scenario
+  PnL and explicit simulation autopilot arm/stop.
+- `runtime/normal-market-presentation.mjs`: selected-market emphasis while
+  preserving physical control-plane labels and the original default mapping.
+- `runtime/combat-drive-adapter.mjs`, `runtime/spatial-coordinate-runtime.mjs`
+  and `runtime/xyz-map-navigation-runtime.mjs`: filled-C speed, one elapsed
+  motion owner, collision-resolved frames and observed ETA. Ordinary 0C walking
+  remains; draft/pending C cannot ignite movement.
+- Existing navigation, UI-static and browser-settlement/responsive QA files
+  retain the original CI evidence route. Browser acceptance is pending for the
+  integrated candidate; local unit evidence is not phone or wallet acceptance.
+- `runtime/real-trading-order-intent.mjs` and `runtime/game-5d-main.mjs`:
+  the original legacy BSC97 exit-only path verifies pinned principal/available
+  values without expanding the two-million-block history limit. Missing
+  positions/PnL/history remain unknown. Available withdrawals retain original
+  fee/session/receipt checks; a confirmed withdrawal with failed balance reread
+  retains only its wallet/chain/deployment-attributed receipt and pauses further
+  withdrawal until rechecked. Ordinary full recovery and M1 balance-only views
+  keep their original limits and capabilities.
+- `runtime/mobile-ui-settings.mjs`: the existing ControlsClose button is
+  temporarily hidden while the original Wallet owns the foreground. Wallet
+  Connect/Refresh and the original close toggle remain available; closing Wallet
+  restores the player's existing controls/params preference. The original M1 and
+  responsive browser QA check actual pointer centers and restoration, not a new
+  overlay controller or a changed saved preference.
+- `runtime/game-ui-product-fixes-v23.mjs`: the existing singleton toast also
+  recognizes the actual navigation console and its matching original rail title,
+  reusing the existing sheet header flow. Navigation stays outside financial
+  sheet refresh; notification text, expiry, fade and confirmation priority stay
+  with the original owner. The existing browser QA records the visible message,
+  real header geometry and controls without waiting for the message to disappear.
+  Its original browser QA clips only the portions of other controls actually
+  behind that same opaque sticky header; the current action target still keeps
+  its full viewport, touch size, pointer-center and toast non-overlap checks.
+
+No new Runtime/bootstrap/version file is introduced. Global 18911 travel,
+price-to-global-coordinate projection and live automatic trading remain outside
+the implemented local candidate. Other specific HOLDs remain unchanged.
+
+### Prior core-only checkpoint — retained for lineage
+
+- `K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs`:
+  `createSimulationAutopilot` uses only adapters created by the existing local
+  simulation factory. Explicit Player Life context, strategy thresholds and
+  risk limits are required. Receipt-confirmed closes precede reversal orders;
+  pending orders, context changes, failed actions and risk limits block new orders.
+- `tests/11520-real-trading-order-intent.test.mjs`: existing test home for the
+  adapter and controller lifecycle/guard regressions.
+- `K線西遊記/temples/11520/KGEN_TRADING_SPEC.md` §9: cumulative component API
+  documentation. Existing financial math, market bindings and settlement owner
+  remain authoritative.
+- The core itself has no timer, DOM hook, signer, provider or persistent auto-arm.
+  At the earlier core-only checkpoint it had no game UI wiring and #523 paths
+  were untouched. The current integration scope is recorded above; this prior
+  component checkpoint is not the current authorization state.
+
 ## 11520 market / 12682 presentation candidate — 2026-11-17
 
 Existing `K線西遊記/temples/11520/index.html` + `app.mjs` now default to MARKET

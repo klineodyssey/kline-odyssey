@@ -267,7 +267,7 @@ async function verifyWorldFirst(){
         result.checks.followSwitch='ACTUAL WORLD TAP / SWITCH / CANCEL PASS';
       }
       await clickWorldFirstMinimap(page,result);
-      await page.locator('#waypointAction').waitFor({state:'visible'});await page.locator('#waypointAction').click();
+      await page.locator('#xyzWaypointAction').waitFor({state:'visible'});await page.locator('#xyzWaypointAction').click();
       await page.waitForFunction(old=>Math.hypot(globalThis.__K11520_CAMERA__.snapshot().playerXYZ.x-old.x,globalThis.__K11520_CAMERA__.snapshot().playerXYZ.z-old.z)>.5,start.playerXYZ);
       // Canonical joystick remains the movement owner and cancels waypoint navigation.
       const joy=await page.locator('#joy').boundingBox();await page.mouse.move(joy.x+joy.width*.5,joy.y+joy.height*.5);await page.mouse.down();await page.mouse.move(joy.x+joy.width*.7,joy.y+joy.height*.5);await page.mouse.up();
@@ -429,7 +429,7 @@ async function verifySettingsContext(page,report){
   await page.locator('#walletToggle').click();await page.waitForFunction(()=>!document.querySelector('#walletPanel').classList.contains('collapsed'));
   await page.waitForFunction(()=>document.querySelector('#gameModeToggle').style.display==='none');await page.waitForTimeout(150);
   // Cross at least two normal owner ticks; polling must not resurrect peers.
-  for(const selector of ['#gameModeToggle','#dock','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#kaiosPortalButton','#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),false,selector+' must not cover Wallet');
+  for(const selector of ['#gameModeToggle','#k11520ControlsClose','#dock','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#kaiosPortalButton','#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),false,selector+' must not cover Wallet');
   await verifyScrolledControlCenters(page,'#walletPanel button:visible,#walletPanel select:visible,#walletPanel a:visible','Wallet');
   assert.equal(await page.locator('#walletToggle').evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===el}),true,'Wallet close toggle stays pointer reachable');
   await page.screenshot({path:`${OUT}/${report.profile.name}-wallet-restored.png`});await page.locator('#walletToggle').click();
@@ -636,18 +636,43 @@ async function verifyFullHudControlOwnership(page,report){
         search:for(const y of ys){if(performance.now()-began>=2000)break;diagnostics.rows++;for(let x=r.left+60;x<r.right-60;x+=10)if(clear(x,y,cache,domCache)){point={x,y};since=performance.now();history.push({event:'CANDIDATE',at:since,...point});break search}}
       }
       diagnostics.frames.push({elapsedMs:performance.now()-began,searchMs:performance.now()-frameStarted,centers:diagnostics.centers-centersBefore});if(diagnostics.frames.length>16){diagnostics.frames.shift();diagnostics.droppedFrames++}
-      if(point&&performance.now()-since>=150&&performance.now()-began<2000)return{point:{...point,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()},elapsedMs:performance.now()-began,stableMs:performance.now()-since,radius:30,history,diagnostics};
+      if(point&&performance.now()-since>=150&&performance.now()-began<2000)return{point:{...point,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()},traceStart:fullHudPointerTrace.length,elapsedMs:performance.now()-began,stableMs:performance.now()-since,radius:30,history,diagnostics};
       await new Promise(requestAnimationFrame);
     }
     return{point:null,elapsedMs:performance.now()-began,radius:30,history,diagnostics,actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()};
   });
-  report.fullHudPanPrecondition={readiness,origin:readiness.point,before:start};
-  const point=readiness.point;
-  assert.ok(point,'FULL HUD must leave a stable actual world gesture area within2s for one Recenter QA drag');
-  await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+21,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);
+  report.fullHudPanPrecondition={readiness,origin:readiness.point,before:start,admissionAttempts:[]};
+  assert.ok(readiness.point,'FULL HUD must leave a stable actual world gesture area within2s for one Recenter QA drag');
+  // A moving actor can invalidate even the stable sample before CDP delivers
+  // pointerdown. Reacquire only rejected origins within the existing helper's
+  // 1000ms / three-attempt admission budget; an admitted drag is never retried.
+  let firstCandidate=true,admissionTraceStart=0;
+  const admitted=await acquireAdmittedCameraPan({records:report.fullHudPanPrecondition.admissionAttempts,
+    pick:async()=>{
+      if(firstCandidate){firstCandidate=false;admissionTraceStart=readiness.traceStart;return{origin:readiness.point,before:start,selectedAt:readiness.point.selectedAt,traceStart:admissionTraceStart}}
+      const sampled=await page.evaluate(()=>{
+        const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),offsets=[0,-10,10,-20,20,-30,30],cache=new Map(),domCache=new Map(),ys=[];
+        const canvasAt=(x,y)=>{const key=x+','+y;if(!domCache.has(key))domCache.set(key,document.elementFromPoint(x,y)===canvas);return domCache.get(key)};
+        const allowedAt=(x,y)=>{const key=x+','+y;if(!cache.has(key))cache.set(key,__K11520_CAMERA__.canPanAt(x,y));return cache.get(key)};
+        for(let y=r.top+60;y<r.bottom-60;y+=10)ys.push(y);if(innerWidth<=innerHeight)ys.reverse();
+        for(const y of ys)for(let x=r.left+60;x<r.right-60;x+=10){
+          if(!canvasAt(x+42,y)||!offsets.every(dx=>offsets.every(dy=>canvasAt(x+dx,y+dy))))continue;
+          if(offsets.every(dx=>offsets.every(dy=>allowedAt(x+dx,y+dy))))return{origin:{x,y},before:__K11520_CAMERA__.snapshot(),selectedAt:performance.now(),traceStart:fullHudPointerTrace.length};
+        }
+        return null;
+      });
+      if(sampled)admissionTraceStart=sampled.traceStart;return sampled;
+    },
+    // Keep the timed read small; the original full trace remains below and in
+    // failureFullHudInput. Sampling the cursor with the origin saves one await.
+    begin:origin=>pointer('pointerdown',10,origin.x,origin.y,1),
+    inspect:()=>page.evaluate(start=>{const down=fullHudPointerTrace.slice(start).find(e=>e.type==='pointerdown'&&e.isTrusted);return{down:down?{type:down.type,isTrusted:down.isTrusted,target:down.target,canPan:down.canPan,at:down.at,pointerId:down.pointerId}:null}},admissionTraceStart),
+    cancel:async()=>{fullTouches.clear();await fullCdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]})}});
+  const point=admitted.origin;report.fullHudPanPrecondition.origin=point;report.fullHudPanPrecondition.admission=admitted.admission;
+  assert.equal(admitted.admission.actualDown.down.canPan,true,'native FULL pan origin must still be eligible at pointerdown');
+  await pointer('pointermove',10,point.x+21,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);
   try{await page.waitForFunction(()=>__K11520_CAMERA__.snapshot().panX!==0,null,{timeout:3000})}
   finally{report.fullHudPanPrecondition.after=await readCamera();report.fullHudPanPrecondition.pointerTrace=await page.evaluate(()=>fullHudPointerTrace)}
-  assert.equal(report.fullHudPanPrecondition.pointerTrace.find(e=>e.type==='pointerdown')?.canPan,true,'native FULL pan origin must still be eligible at pointerdown');
   assert.notEqual((await readCamera()).panX,0,'FULL HUD pan precondition must move Camera before Recenter');
   assert.equal(await page.locator('#k11520CameraReset').isVisible(),true,'manual pan reveals the existing Recenter');
   const manualReset=await page.locator('#k11520CameraReset').evaluate(el=>{const r=el.getBoundingClientRect(),inset=8,owned=[[r.x+r.width/2,r.y+r.height/2],[r.x+inset,r.y+r.height/2],[r.right-inset,r.y+r.height/2],[r.x+r.width/2,r.y+inset],[r.x+r.width/2,r.bottom-inset]].every(([x,y])=>{const hit=document.elementFromPoint(x,y);return hit===el||el.contains(hit)});return{width:r.width,height:r.height,owned}});assert.ok(manualReset.width>=44&&manualReset.height>=44);assert.equal(manualReset.owned,true,'context-visible Recenter owns all five real hit points');report.manualResetOwnership=manualReset;

@@ -83,7 +83,7 @@ test('M1 wallet view never pairs another account or wrong network with recovered
  const fn=source.slice(source.indexOf('function walletExecutionView('),source.indexOf('function renderWallet('));
  const account='0x'+'11'.repeat(20),chain={account,status:'READY',wallet:{testBnbBalance:'0.025',testTokenBalance:100},capital:{settlementCapital:1000},claims:[{remaining:10}]};
  for(const value of [{account:'0x'+'22'.repeat(20),chainId:97},{account,chainId:56},{account:null,chainId:97}]){
-  const context=vm.createContext({execution:{snapshot:()=>chain},isTestnet:()=>true,value});const result=vm.runInContext(fn+';walletExecutionView(value)',context);
+  const context=vm.createContext({execution:{snapshot:()=>chain},isTestnet:()=>true,value});vm.runInContext(source.slice(source.indexOf('function isPrincipalExitOnlyView('),source.indexOf('function normalizeTradeSide(')),context);const result=vm.runInContext(fn+';walletExecutionView(value)',context);
   assert.equal(result.wallet,null);assert.equal(result.capital,null);assert.equal(result.claims.length,0);assert.equal(result.orders.length,0);assert.equal(result.positions.length,0);assert.equal(result.receipts.length,0);assert.equal(result.transaction,null);
  }
  const context=vm.createContext({execution:{snapshot:()=>chain},isTestnet:()=>true,value:{account,chainId:97}});
@@ -96,9 +96,40 @@ test('M1 wallet-session READING clears cached financial surfaces before adapter 
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
  const start=source.indexOf('walletSession.subscribe(value=>{'),end=source.indexOf('});renderWallet();',start),fn=source.slice(start,end+3);
  const calls=[];let callback;
- const context=vm.createContext({walletSession:{subscribe:fn=>{callback=fn}},execution:{readOnly:true},readOnlyViewRequested:()=>true,playerStore:{activate:()=>false},renderWallet:()=>calls.push('wallet'),isTestnet:()=>true,syncSimulationPositions:()=>calls.push('positions'),refreshSimulationSheet:()=>calls.push('sheet'),refreshTestnet:()=>calls.push('recover')});
+ const context=vm.createContext({navAutoWalletKey:null,walletSession:{subscribe:fn=>{callback=fn}},execution:{readOnly:true},readOnlyViewRequested:()=>true,playerStore:{activate:()=>false},renderWallet:()=>calls.push('wallet'),isTestnet:()=>true,syncSimulationPositions:()=>calls.push('positions'),refreshSimulationSheet:()=>calls.push('sheet'),refreshTestnet:()=>calls.push('recover')});
  vm.runInContext(fn,context);callback({account:null,status:'READING'});
  assert.deepEqual(calls,['wallet','positions','sheet','recover']);
+});
+
+test('limited legacy principal view never turns unknown positions or PnL into empty or zero reports',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const view={readOnly:false,readScope:'LEGACY_PRINCIPAL_ONLY',status:'LEGACY_PRINCIPAL_VERIFIED',balanceStatus:'VERIFIED',ordersStatus:'UNKNOWN',positionsStatus:'UNKNOWN',pnlStatus:'UNKNOWN',historyStatus:'INDEXER_REQUIRED',orders:[],positions:[],receipts:[],claims:[],observations:{},wallet:{readScope:'LEGACY_PRINCIPAL_ONLY',principal:10,total:10,free:7,lockedMargin:3,withdrawable:7,unrealizedPnl:null,realizedPnl:null,equity:null,claimable:null}};
+ const before=JSON.stringify(view),context=vm.createContext({execution:{readOnly:false,snapshot:()=>view},walletExecutionView:()=>view,isTestnet:()=>true,fmt:(value,d=6)=>Number(value).toFixed(d),playerStore:{snapshot:()=>({playerId:'local',owner:'guest',persistent:true,playedMs:1000,loot:0,kaios:0,claimableKaios:0,kaiosRewardStatus:'LOCAL',events:{}})},playerProgressSnapshot:()=>({level:1,xp:0,engineLevel:1,engineXp:0,nextEngineXp:1}),marketEngineSnapshot:()=>({state:'LOCAL',score:0,engineXp:0,components:[],features:[]})});
+ const scope=source.slice(source.indexOf('function isPrincipalExitOnlyView('),source.indexOf('function normalizeTradeSide('));
+ const cross=source.slice(source.indexOf('function crossMarketSnapshot('),source.indexOf('function syncSimulationPositions('));
+ const organs=source.slice(source.indexOf('const escapeUI='),source.indexOf('function bindSimulationSheet('));
+ vm.runInContext(scope+cross+organs,context);
+ for(const organ of ['assets','positions','orders','history']){
+   const html=context.simulationOrganHTML(organ);assert.match(html,/data-legacy-principal-only/);assert.match(html,/尚待索引/);assert.match(html,/不代表空倉|不能視為空倉/);assert.doesNotMatch(html,/尚無部位|尚無委託|data-sim-close|data-sim-cancel/);
+ }
+ const crossState=context.crossMarketSnapshot();assert.equal(crossState.status,'UNKNOWN');assert.equal(crossState.openPositions,null);assert.equal(crossState.realizedPnl,null);assert.equal(crossState.unrealizedPnl,null);assert.equal(crossState.free,7);assert.equal(crossState.lockedMargin,3);
+ const records=context.simulationOrganHTML('records');assert.match(records,/KGEN 跨市場開倉<\/dt><dd>尚未恢復/);assert.match(records,/KGEN REALIZED PNL<\/dt><dd>尚未恢復/);
+ assert.equal(JSON.stringify(view),before,'rendering verified principal cannot mutate financial recovery state');
+ view.balanceStatus='UNKNOWN';view.status='LEGACY_PRINCIPAL_RECHECK_REQUIRED';view.deploymentContext='97:legacy';view.transaction={status:'RECEIPT_CONFIRMED',method:'withdrawMargin',txHash:'0x'+'ab'.repeat(32),account:'0x'+'11'.repeat(20),chainId:97,deploymentContext:view.deploymentContext};
+ const recheckBefore=JSON.stringify(view),recheck=context.simulationOrganHTML('assets');
+ assert.match(recheck,/等待重新核對/);assert.match(recheck,/提款交易已確認/);assert.match(recheck,/提款暫停/);assert.match(recheck,/請勿重送/);assert.match(recheck,/RECEIPT_CONFIRMED/);assert.match(recheck,new RegExp(view.transaction.txHash));assert.match(recheck,/UNVERIFIED/);
+ assert.doesNotMatch(recheck,/可用額已核對|本金已核對|7\.000000|10\.000000/);assert.equal(JSON.stringify(view),recheckBefore,'recheck UI must retain confirmed receipt and never mutate the adapter');
+ const gate=source.split('\n').find(line=>line.includes("$('#testnetGate').textContent=")),gateNode={};
+ context.$=()=>gateNode;context.chain=view;context.testnetGate='TESTNET';vm.runInContext(gate,context);assert.match(gateNode.textContent,/提款交易已確認/);assert.doesNotMatch(gateNode.textContent,/本金已核對/);
+ view.account=null;view.wallet=null;context.walletSession={snapshot:()=>({account:view.transaction.account,chainId:97})};
+ vm.runInContext(source.slice(source.indexOf('function walletExecutionView('),source.indexOf('function renderWallet(')),context);
+ const attributed=context.walletExecutionView();assert.equal(attributed.wallet,null);assert.equal(attributed.account,null);assert.equal(attributed.transaction.txHash,view.transaction.txHash);assert.equal(attributed.balanceStatus,'UNKNOWN');
+ assert.match(context.simulationOrganHTML('assets'),/提款交易已確認/,'real identity filter must retain only this wallet’s confirmed receipt');
+ for(const identity of [{account:'0x'+'22'.repeat(20),chainId:97},{account:view.transaction.account,chainId:56},{account:null,chainId:97}])assert.equal(context.walletExecutionView(identity).transaction,null,'another wallet or network cannot inherit receipt attribution');
+ const originalContext=view.transaction.deploymentContext;view.transaction.deploymentContext='97:another';assert.equal(context.walletExecutionView().transaction,null,'another deployment cannot inherit receipt attribution');view.transaction.deploymentContext=originalContext;
+ context.walletExecutionView=()=>view;view.wallet={readScope:'BALANCES_ONLY'};
+ view.readScope='BALANCES_ONLY';view.readOnly=true;context.execution.readOnly=true;view.wallet.readScope='BALANCES_ONLY';
+ assert.match(context.simulationOrganHTML('positions'),/M1 BALANCES_ONLY/);assert.match(context.simulationOrganHTML('positions'),/NOT_REQUESTED/);
 });
 
 test('M1 candidate config is additive and legacy principal exit context is preserved',async()=>{
@@ -155,6 +186,7 @@ test('M1 financial displays are explicitly NOT_REQUESTED and never infer zero po
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
  const wallet={readScope:'BALANCES_ONLY',testBnbBalance:'0.1',testTokenBalance:1000,free:null};
  const context=vm.createContext({execution:{readOnly:true},walletExecutionView:()=>({readOnly:true,wallet,positions:[]}),receiptRows:rows=>JSON.stringify(rows)});
+ vm.runInContext(source.slice(source.indexOf('function isPrincipalExitOnlyView('),source.indexOf('function normalizeTradeSide(')),context);
  vm.runInContext(source.slice(source.indexOf('function crossMarketSnapshot(){'),source.indexOf('function syncSimulationPositions(){')),context);
  const cross=vm.runInContext('crossMarketSnapshot()',context);assert.equal(cross.status,'NOT_REQUESTED');for(const key of ['openPositions','free','lockedMargin','realizedPnl','unrealizedPnl'])assert.equal(cross[key],null);
  vm.runInContext(source.slice(source.indexOf('function simulationOrganHTML(id){'),source.indexOf('function bindSimulationSheet(')),context);
@@ -164,7 +196,7 @@ test('M1 financial displays are explicitly NOT_REQUESTED and never infer zero po
 
 test('M1 market cards and close action never interpret unrequested positions as empty',async()=>{
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
- assert.match(source,/execution\.readOnly\?'NOT_REQUESTED':x\.pos/);assert.match(source,/持倉：\$\{execution\.readOnly\?'NOT_REQUESTED':p/);
+ assert.match(source,/execution\.readOnly\?'NOT_REQUESTED':principalOnly\?'部位尚未恢復':x\.pos/);assert.match(source,/持倉：\$\{execution\.readOnly\?'NOT_REQUESTED':principalOnly\?'部位尚未恢復':p/);
  const fn=source.slice(source.indexOf('async function closePos(){'),source.indexOf("$('#closeAll')",source.indexOf('async function closePos(){')));
  const prefix=fn.slice(0,fn.indexOf('const p=axis().pos;'))+'}';let message;
  const context=vm.createContext({execution:{readOnly:true},toast:x=>{message=x}});vm.runInContext(prefix,context);await vm.runInContext('closePos()',context);assert.match(message,/NOT_REQUESTED/);
@@ -225,6 +257,7 @@ test('order presentation distinguishes creation provenance from current pending/
  adapter.submit({axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4001},{now:1001});
  adapter.tick({now:17000});
  const context=vm.createContext({execution:{readOnly:false},walletExecutionView:()=>adapter.snapshot(),isTestnet:()=>false,receiptRows:rows=>JSON.stringify(rows),receiptTime:x=>x,executionLabel:()=>'SIMULATION'});
+ vm.runInContext(source.slice(source.indexOf('function isPrincipalExitOnlyView('),source.indexOf('function normalizeTradeSide(')),context);
  vm.runInContext(source.slice(source.indexOf('function simulationOrganHTML(id){'),source.indexOf('function bindSimulationSheet(')),context);
  for(const time of [17000,33000]){
   if(time===33000)adapter.tick({now:time});
