@@ -3,10 +3,11 @@ import fs from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
-import {BANK_SERVICE,worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
+import {BANK_SERVICE,WORLD_REGISTRY,worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
 const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const OUT='artifacts/kaios-portal-qa';
 const FUNDING_ONLY=process.argv.includes('--funding-only');
+const VISITOR_ONLY=process.argv.includes('--visitor-only');
 if(FUNDING_ONLY){
   assert.equal(process.env.GITHUB_ACTIONS,'true','--funding-only runs only in the isolated GitHub Actions browser job');
   const base=new URL(BASE);
@@ -16,7 +17,7 @@ if(FUNDING_ONLY){
 await fs.mkdir(OUT,{recursive:true});
 const report={head:process.env.KAIOS_SOURCE_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),trackedDirty:!!execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),functional:'RUNNING',visual:'SCREENSHOTS_REQUIRE_DIRECT_REVIEW',checks:[],profiles:[],navigations:[],runtimeErrors:[],errors:[]};
 if(FUNDING_ONLY)Object.assign(report,{mode:'UI_ONLY_NO_REAL_WALLET',realWallet:'NOT_TESTED',chainReads:0,transactionRequests:0});
-const browser=await chromium.launch({headless:true,args:['--autoplay-policy=user-gesture-required']});
+const browser=await chromium.launch({headless:true,executablePath:process.env.KAIOS_CHROMIUM_EXECUTABLE||undefined,args:['--autoplay-policy=user-gesture-required']});
 const shot=(page,name)=>page.screenshot({path:`${OUT}/${name}.png`});
 const audio=page=>page.evaluate(async()=>{const {getKaiosAudio}=await import('./assets/kaios-audio.mjs');return getKaiosAudio().snapshot();});
 async function reachable(page,selector){return page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{width:r.width,height:r.height,inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,hit:!!hit&&(hit===el||el.contains(hit))};});}
@@ -1298,9 +1299,74 @@ async function verifyLampScanner(){
     }finally{await context.close();}
   }
 }
+async function verifyVisitorInfo(){
+  const {parseLatestVideo}=await import('../assets/kaios-portal.mjs');
+  const source=await fs.readFile('README.md','utf8'),cached=parseLatestVideo(source);assert.ok(cached,'existing updater block is readable');
+  for(const bad of [source.replace(cached.url,'https://evil.invalid/watch?v='+cached.videoId),source.replace(cached.url,'javascript:alert(1)'),source.replace(cached.url,cached.url+'&v=abcdefghijk'),source.replace('LATEST_VIDEO_END','MISSING'),source+source])assert.equal(parseLatestVideo(bad),null,'reject untrusted or ambiguous latest-video data');
+  assert.equal(parseLatestVideo(source.replace(cached.title,'<img src=x onerror=alert(1)>')).title,'<img src=x onerror=alert(1)>','title stays inert text');
+  const manifest=JSON.parse(await fs.readFile('OfficialLinks.json','utf8'));
+  for(const [layout,width,height] of [['root',390,844],['root',844,390],['root',360,740],['pages-prefix',390,844]]){
+    const base=new URL(layout==='pages-prefix'?BASE+'/kline-odyssey/':BASE+'/');
+    const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
+    page.on('pageerror',error=>errors.push(String(error)));let videoState='actual';
+    await page.route('**/*',async route=>{
+      const url=new URL(route.request().url());
+      // This task never retries the denied YouTube read or exercises live wallets.
+      if(url.origin!==base.origin){
+        if(url.pathname==='/embed/akp4K_uzJ28')return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><body style="margin:0;background:#101927;color:#b0c0d5;font:14px system-ui;display:grid;place-content:center;height:100vh;text-align:center">YouTube<br>外部影片未載入（隔離測試）</body>'});
+        return route.abort('blockedbyclient');
+      }
+      const upstream=new URL(url);if(layout==='pages-prefix')upstream.pathname=url.pathname.replace(/^\/kline-odyssey\//,'/');
+      if(upstream.pathname==='/README.md'&&videoState==='unavailable')return route.fulfill({status:503,body:'unavailable'});
+      if(upstream.pathname==='/README.md'&&videoState==='invalid')return route.fulfill({status:200,body:source.replace(cached.url,'https://evil.invalid/watch?v='+cached.videoId)});
+      if(upstream.pathname==='/README.md'&&videoState==='title')return route.fulfill({status:200,body:source.replace(cached.title,'<img src=x onerror=alert(1)>')});
+      if(layout==='pages-prefix'){const response=await route.fetch({url:upstream.href});return route.fulfill({response})}
+      return route.continue();
+    });
+    try{
+      await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();
+      assert.equal(await page.locator('#worldCards .world-card').count(),4,'one shared-game card; separate 11520 market');
+      assert.equal(await page.locator('#worldCards [data-world-id="88888"]').count(),0);
+      for(const id of ['11520','12682','12345','16888'])assert.equal(await page.locator(`#worldCards article[data-world-id="${id}"]`).count(),1);
+      assertExactRoute(await page.locator('#primaryPlay').getAttribute('href'),worldUrl('11520',base),'market remains independent');
+      assertExactRoute(await page.locator('#worldCards a[data-world-id="12682"]').getAttribute('href'),sharedGameUrl(base,'12682'),'canonical game');
+      const legacy=WORLD_REGISTRY.find(world=>world.worldId==='88888');assert.equal(legacy.routeOnly,true);assert.equal(legacy.canonicalWorldId,'12682');
+      assert.ok((await context.request.get(new URL(legacy.entryUrl,BASE+'/').href)).ok(),'old bookmark remains reachable');
+      assert.equal(await page.locator('#latestVideo a').getAttribute('href'),cached.url);
+      assert.equal(await page.locator('#youtube iframe').getAttribute('src'),'https://www.youtube.com/embed/akp4K_uzJ28?playsinline=1');
+      await page.waitForFunction(()=>document.querySelectorAll('.visitor-socials a').length===8);
+      for(const key of ['youtube','x','telegram','tiktok','facebook_page','instagram','line_official','github']){
+        assert.equal(manifest.links[key].status,'VERIFIED');assert.equal(await page.locator('.visitor-socials a').filter({hasText:manifest.links[key].label}).getAttribute('href'),manifest.links[key].url);
+      }
+      const primary=await reachable(page,'#primaryPlay');assert.ok(primary.inView&&primary.hit&&primary.height>=44,'first-screen CTA preserved');
+      assert.equal(await page.locator('#community a[href^="mailto:"]').getAttribute('href'),'mailto:klineodyssey.io@gmail.com');assert.equal(await page.locator('#community a[href="https://klineodyssey.github.io/kline-odyssey/"]').textContent(),'https://klineodyssey.github.io/kline-odyssey/');
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal overflow');
+      await shot(page,`visitor-first-${layout}-${width}x${height}`);
+      for(const [id,name] of [['youtube','film'],['latestVideo','links'],['support','contact']]){
+        await page.locator('#'+id).evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-${name}-${layout}-${width}x${height}`);
+      }
+      const targets=await page.locator('#youtube a').evaluateAll(anchors=>anchors.filter(a=>a.getClientRects().length).map(a=>({text:a.textContent,height:a.getBoundingClientRect().height})));assert.ok(targets.every(a=>a.height>=44),JSON.stringify(targets));
+      for(const hash of ['youtube','community','support']){
+        await page.goto(base.href+'#'+hash,{waitUntil:'networkidle'});const box=await page.locator('#'+hash).boundingBox();assert.ok(box&&box.y>=-2&&box.y<height,'restored bookmark '+hash);
+      }
+      videoState='title';await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();assert.equal(await page.locator('#latestVideo img').count(),0,'README title cannot inject markup');
+      for(const state of ['invalid','unavailable']){
+        videoState=state;await page.reload({waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="unavailable"]').waitFor();assert.equal(await page.locator('#latestVideo a').getAttribute('href'),'https://www.youtube.com/@klineodyssey/videos');assert.ok(await page.locator('#primaryPlay').isVisible());
+      }
+      await page.locator('#latestVideo').scrollIntoViewIfNeeded();await shot(page,`visitor-unavailable-${layout}-${width}x${height}`);
+      await page.locator('.portal-footer a[href="official/"]').click();await page.waitForURL(new URL('official/',base).href);await page.locator('a[href="mailto:klineodyssey.io@gmail.com"]').waitFor();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('a[href="mailto:klineodyssey.io@gmail.com"]').evaluate(el=>el.closest('.card').scrollIntoView({block:'center'}));await shot(page,`visitor-official-${layout}-${width}x${height}`);
+      assert.deepEqual(errors,[]);report.profiles.push({layout,width,height,status:'PASS'});
+    }finally{await context.close()}
+  }
+  report.checks.push('visitor-only: actual README updater snapshot, safe title/URL parsing, 503/invalid-source fallbacks, fixed portrait brand frame, eight canonical VERIFIED socials, contact, four cards, legacy88888 HTTP, restored anchors and local/Pages-prefix routes');
+  report.externalVideo='NOT_VERIFIED: denied live YouTube read preserved; embed replaced with an explicitly labeled isolated-test placeholder; no playback claim';
+  report.realPhone='NOT_TESTED';report.latestVideo={source:'existing README updater block',videoId:cached.videoId,currentChannelLatest:'NOT_VERIFIED'};
+}
 try{
-  if(FUNDING_ONLY){await verifyFundingPanel();await verifyFundingAutoPreview();await verifyFundingGuidedFive();await verifyLegacyCards();await verify16888ManualOrder();}
+  if(VISITOR_ONLY){await verifyVisitorInfo();}
+  else if(FUNDING_ONLY){await verifyFundingPanel();await verifyFundingAutoPreview();await verifyFundingGuidedFive();await verifyLegacyCards();await verify16888ManualOrder();}
   else{
+  await verifyVisitorInfo();
   await verifyLampScanner();
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();
@@ -1418,4 +1484,4 @@ try{
   }
   report.functional='PASS';
 }catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));throw error;}
-finally{await fs.writeFile(`${OUT}/${FUNDING_ONLY?'funding-browser-report':'portal-browser-report'}.json`,JSON.stringify(report,null,2));await browser.close();console.log(JSON.stringify(report));}
+finally{await fs.writeFile(`${OUT}/${VISITOR_ONLY?'visitor-browser-report':FUNDING_ONLY?'funding-browser-report':'portal-browser-report'}.json`,JSON.stringify(report,null,2));await browser.close();console.log(JSON.stringify(report));}

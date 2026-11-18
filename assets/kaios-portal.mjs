@@ -25,7 +25,7 @@ export function renderPortal(document,{storage,base=portalBase()}={}){
  const primary=findWorld('11520'),primaryHost=document.querySelector('#primaryWorld');primaryHost.replaceChildren(status(primary));
  const launch=link('前往11520宇宙萬物交易所',primary.entryUrl,'primary-cta');launch.dataset.worldId=primary.worldId;launch.id='primaryPlay';launch.append(el(document,'span','','↗'));primaryHost.append(launch);
  const cards=document.querySelector('#worldCards');cards.replaceChildren();
- for(const world of WORLD_REGISTRY.filter(isNavigable)){
+ for(const world of WORLD_REGISTRY.filter(world=>isNavigable(world)&&!world.routeOnly)){
   const card=el(document,'article',`world-card ${world.tone}`);card.dataset.worldId=world.worldId;
   const visual=el(document,'div','card-art');visual.setAttribute('aria-hidden','true');visual.append(el(document,'span','card-orb'),el(document,'span','card-symbol',world.worldId==='11520'?'山':world.worldId==='12345'?'心':'宙'));
   card.append(visual,status(world),el(document,'h3','',world.name),el(document,'p','card-subtitle',world.subtitle),el(document,'p','card-description',world.description));
@@ -47,8 +47,43 @@ export function renderPortal(document,{storage,base=portalBase()}={}){
  }
  updateWelcome();return {refreshPlayer:updateWelcome,worldUrl:id=>worldUrl(id,base)};
 }
+/** Read only the updater-owned block; never interpret README markup as HTML. */
+export function parseLatestVideo(readme){
+ const start='<!-- LATEST_VIDEO_START -->',end='<!-- LATEST_VIDEO_END -->';
+ if(typeof readme!=='string'||readme.split(start).length!==2||readme.split(end).length!==2)return null;
+ const from=readme.indexOf(start),to=readme.indexOf(end);if(to<from)return null;
+ const block=readme.slice(from+start.length,to),title=block.match(/^▶\s+(.+?)\s*$/m)?.[1]?.trim(),href=block.match(/^👉\s+(https:\/\/\S+)\s*$/m)?.[1];
+ if(!title||!href)return null;
+ try{
+  const url=new URL(href),id=url.searchParams.get('v');
+  if(url.protocol!=='https:'||url.hostname!=='www.youtube.com'||url.port||url.username||url.password||url.pathname!=='/watch'||url.hash||[...url.searchParams.keys()].join()!=='v'||!/^[A-Za-z0-9_-]{11}$/.test(id))return null;
+  return Object.freeze({title,url:url.href,videoId:id});
+ }catch{return null}
+}
+export function mountVisitorInfo(document,{base=portalBase(),fetcher=globalThis.fetch}={}){
+ const section=el(document,'section','section visitor-section');section.id='youtube';section.setAttribute('aria-labelledby','visitorTitle');
+ const heading=el(document,'div','section-heading');heading.append(el(document,'p','eyebrow','K-LINE ODYSSEY / STORIES'),el(document,'h2','','走進 K線西遊記'));heading.lastChild.id='visitorTitle';section.append(heading);
+ const grid=el(document,'div','visitor-grid'),film=el(document,'div','brand-film'),frame=el(document,'iframe');
+ frame.src='https://www.youtube.com/embed/akp4K_uzJ28?playsinline=1';frame.title='K線西遊記官方品牌影片';frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;film.append(frame);
+ const copy=el(document,'div','visitor-copy');copy.append(el(document,'h3','','官方品牌影片'),el(document,'p','visitor-note','從一支影片認識我們的世界。'));
+ const original=el(document,'a','visitor-link','在 YouTube 觀看品牌影片 ↗');original.href='https://www.youtube.com/watch?v=akp4K_uzJ28';original.target='_blank';original.rel='noopener noreferrer';copy.append(original);
+ const latest=el(document,'div','latest-video');latest.id='latestVideo';latest.setAttribute('aria-live','polite');latest.append(el(document,'h3','','最新影片'),el(document,'p','visitor-note','最近同步的頻道影片；完整最新發布請查看官方頻道。'));
+ const video=el(document,'a','visitor-link','前往官方 YouTube 頻道 ↗');video.href='https://www.youtube.com/@klineodyssey/videos';video.target='_blank';video.rel='noopener noreferrer';latest.append(video);copy.append(latest);
+ const community=el(document,'div','visitor-community');community.id='community';community.append(el(document,'h3','','官方社群'));
+ const socials=el(document,'div','visitor-socials');socials.dataset.officialLinks='youtube,x,telegram,tiktok,facebook_page,instagram,line_official,github';socials.dataset.officialLinksCardClass='visitor-social';socials.dataset.officialLinksAnchorClass='visitor-link';socials.dataset.officialLinksShowStatus='false';community.append(socials);
+ const all=el(document,'a','visitor-link','查看所有官方社群 →');all.href=new URL('community/',base).href;community.append(all);copy.append(community);
+ const contact=el(document,'div','visitor-contact');contact.id='support';contact.append(el(document,'h3','','聯絡我們'));const email=el(document,'a','visitor-link','klineodyssey.io@gmail.com');email.href='mailto:klineodyssey.io@gmail.com';const website=el(document,'a','visitor-link','https://klineodyssey.github.io/kline-odyssey/');website.href='https://klineodyssey.github.io/kline-odyssey/';contact.append(email,el(document,'br'),website);community.append(contact);
+ grid.append(film,copy);section.append(grid);document.querySelector('#explore').before(section);
+ // Reuse the existing official-link renderer and canonical manifest.
+ const script=el(document,'script');script.src=new URL('assets/official-links.js',base).href;script.dataset.manifest=new URL('OfficialLinks.json',base).href;document.body.append(script);
+ const ready=Promise.resolve().then(()=>fetcher(new URL('README.md',base).href,{cache:'no-store'})).then(response=>{if(!response.ok)throw new Error('VIDEO_SOURCE_UNAVAILABLE');return response.text()}).then(readme=>{
+  const current=parseLatestVideo(readme);if(!current)throw new Error('VIDEO_SOURCE_INVALID');video.href=current.url;video.textContent=current.title+' ↗';latest.dataset.state='synced';
+ }).catch(()=>{latest.dataset.state='unavailable';latest.querySelector('p').textContent='暫時無法讀取同步影片，請前往官方頻道查看最新發布。'});
+ return {ready};
+}
 if(typeof document!=='undefined'){
  const portal=renderPortal(document);
+ mountVisitorInfo(document);
  window.addEventListener('storage',()=>portal.refreshPlayer());window.addEventListener('pageshow',()=>portal.refreshPlayer());
  // Audio failure must not prevent navigation or Player Life. No autoplay attempt.
  import('./kaios-audio-ui.mjs').then(({mountAudioControl})=>mountAudioControl({container:document.querySelector('#portalAudio'),worldId:'PORTAL'})).catch(()=>{document.querySelector('#portalAudio').textContent='聲音暫不可用 · 可靜音遊玩'});
@@ -63,7 +98,7 @@ if(typeof document!=='undefined'){
   location.assign(target.href);
  });
  // Old homepage bookmarks converge to the one Portal rather than dead sections.
- const aliases={top:'main',temples:'worlds',token:'explore',library:'explore',map:'explore',operating:'explore','official-info':'explore',dna:'explore',youtube:'explore',community:'explore',support:'explore','player-genesis':'explore','causal-world':'explore','ecosystem-runtime':'explore','aquaculture-runtime':'explore','ai-company-runtime':'explore','creator-marketplace':'explore','life-runtime':'explore','kaios-world':'explore','k280-world':'explore'};
+ const aliases={top:'main',temples:'worlds',token:'explore',library:'explore',map:'explore',operating:'explore','official-info':'explore',dna:'explore','player-genesis':'explore','causal-world':'explore','ecosystem-runtime':'explore','aquaculture-runtime':'explore','ai-company-runtime':'explore','creator-marketplace':'explore','life-runtime':'explore','kaios-world':'explore','k280-world':'explore'};
  const restoreBookmark=()=>{const id=aliases[location.hash.slice(1)];if(id)document.getElementById(id).scrollIntoView()};
  restoreBookmark();window.addEventListener('hashchange',restoreBookmark);
 }
