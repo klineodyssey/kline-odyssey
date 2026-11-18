@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
+import {loadNativeYouTubeFixture} from './fixtures/kaios-youtube/fixture-tools.mjs';
 import {BANK_SERVICE,WORLD_REGISTRY,worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
 const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const OUT='artifacts/kaios-portal-qa';
@@ -1299,6 +1300,57 @@ async function verifyLampScanner(){
     }finally{await context.close();}
   }
 }
+async function verifyViewportVideo(cached,fixture){
+  const results=[];report.viewportVideo=results;
+  for(const [layout,width,height] of [['root',390,844],['root',844,390],['root',360,740],['pages-prefix',390,844],['root',1280,900]]){
+    const base=new URL(layout==='pages-prefix'?BASE+'/kline-odyssey/':BASE+'/');
+    const context=await browser.newContext({viewport:{width,height},isMobile:width<1000,hasTouch:width<1000,reducedMotion:'no-preference',serviceWorkers:'block'});
+    const row={layout,width,height,mode:'LOCAL_NATIVE_MEDIA_NOT_YOUTUBE',errors:[],blocked:[]};results.push(row);
+    await context.addInitScript(()=>{if(window!==window.top)return;window.__visitorAudioContexts=0;for(const key of ['AudioContext','webkitAudioContext']){const Original=window[key];if(Original)window[key]=new Proxy(Original,{construct(target,args){window.__visitorAudioContexts++;return Reflect.construct(target,args)}})}});
+    await context.route('**/*',async route=>{
+      const request=route.request(),url=new URL(request.url());
+      if(!['GET','HEAD'].includes(request.method())){row.blocked.push({method:request.method(),url:url.href});return route.abort('blockedbyclient')}
+      if(url.origin!==base.origin){const response=fixture.responseFor(request);if(response)return route.fulfill(response);row.blocked.push({url:url.href});return route.abort('blockedbyclient')}
+      if(layout==='pages-prefix'){const upstream=new URL(url);upstream.pathname=url.pathname.replace(/^\/kline-odyssey\//,'/');const response=await route.fetch({url:upstream.href});return route.fulfill({response})}
+      return route.continue();
+    });
+    const page=await context.newPage();page.on('pageerror',error=>row.errors.push(String(error)));
+    const stages=()=>page.locator('.brand-film .video-stage,.latest-film .video-stage');
+    const playing=host=>page.locator(host+'[data-playback-state="playing"]').waitFor();
+    const media=host=>page.frameLocator(host+' iframe').locator('video');
+    try{
+      await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();
+      assert.equal(await page.locator('#youtube iframe').count(),0,'offscreen load creates no video frame');assert.equal(await page.locator('script[src="https://www.youtube.com/iframe_api"]').count(),0,'offscreen load creates no external API script');
+      row.stageSizes=await stages().evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return{width:r.width,height:r.height}}));for(const size of row.stageSizes)assert.ok(size.width>=200&&size.height>=200,'minimum200x200 player viewport');
+      await page.locator('.brand-film .video-stage').evaluate(node=>{const r=node.getBoundingClientRect();scrollTo({top:scrollY+r.top-innerHeight+r.height*.49,behavior:'instant'})});
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));assert.equal(await page.locator('.brand-film iframe').count(),0,'49% visibility cannot start brand autoplay');
+      await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();
+      await page.locator('.brand-film .video-stage').evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));await playing('.brand-film');
+      assert.equal(await media('.brand-film').evaluate(v=>!v.paused&&v.muted&&v.playsInline),true,'real local muted inline media is playing after scroll without a click');
+      row.activeViewport=await page.locator('.brand-film iframe').evaluate(frame=>{const r=frame.getBoundingClientRect(),toolbar=frame.closest('.brand-film').querySelector('.video-controls').getBoundingClientRect();return{width:r.width,height:r.height,visibleFraction:Math.max(0,Math.min(r.bottom,innerHeight)-Math.max(r.top,0))*Math.max(0,Math.min(r.right,innerWidth)-Math.max(r.left,0))/(r.width*r.height),toolbarOutside:toolbar.bottom<=r.top+.1,referrerPolicy:frame.referrerPolicy,allow:frame.allow}});
+      assert.ok(row.activeViewport.width>=200&&row.activeViewport.height>=200&&row.activeViewport.visibleFraction>.5&&row.activeViewport.toolbarOutside,'legal visible player and unobscured native controls');assert.equal(row.activeViewport.referrerPolicy,'strict-origin-when-cross-origin');assert.ok(row.activeViewport.allow.includes('autoplay'));
+      await media('.brand-film').evaluate(v=>new Promise(resolve=>{if(v.currentTime>.1)return resolve();const tick=()=>{if(v.currentTime>.1){v.removeEventListener('timeupdate',tick);resolve()}};v.addEventListener('timeupdate',tick)}));
+      row.nativeAutoplay=await media('.brand-film').evaluate(v=>({paused:v.paused,muted:v.muted,currentTime:v.currentTime,videoWidth:v.videoWidth,videoHeight:v.videoHeight}));assert.ok(row.nativeAutoplay.currentTime>.1);
+      assert.equal(await page.evaluate(()=>window.__visitorAudioContexts),0,'muted video does not create or unlock first-party AudioContext/BGM');
+      await page.locator('.brand-film').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));await shot(page,`visitor-auto-brand-${layout}-${width}x${height}`);
+      const identity=await page.locator('.brand-film iframe').getAttribute('id');await page.locator('.brand-film .brand-film-play').click();await page.locator('.brand-film[data-playback-state="paused"]').waitFor();
+      row.pausedTime=await media('.brand-film').evaluate(v=>({paused:v.paused,currentTime:v.currentTime}));assert.equal(row.pausedTime.paused,true);assert.equal(await page.locator('.brand-film iframe').getAttribute('id'),identity,'manual pause preserves the same player');
+      await page.locator('.brand-film .brand-film-play').click();await playing('.brand-film');assert.equal(await page.locator('.brand-film iframe').getAttribute('id'),identity,'manual resume does not reset the player');
+      await page.locator('.brand-film .video-sound').click();await page.waitForFunction(()=>document.querySelector('.brand-film').dataset.muted==='false');assert.equal(await media('.brand-film').evaluate(v=>v.muted),false,'native local sound flag changes only after explicit sound control');
+      await page.locator('#latestVideo .latest-film-play').click();await playing('.latest-film');assert.equal(await page.locator('#youtube iframe').count(),1);assert.equal(await page.locator('.brand-film iframe').count(),0);assert.equal(await media('.latest-film').evaluate(v=>v.muted&&!v.paused),true,'new activation returns to muted');
+      row.latestViewport=await page.locator('.latest-film iframe').evaluate(frame=>{const r=frame.getBoundingClientRect(),toolbar=frame.closest('.latest-film').querySelector('.video-controls').getBoundingClientRect();return{width:r.width,height:r.height,toolbarOutside:toolbar.bottom<=r.top+.1,referrerPolicy:frame.referrerPolicy}});assert.ok(row.latestViewport.width>=200&&row.latestViewport.height>=200&&row.latestViewport.toolbarOutside);assert.equal(row.latestViewport.referrerPolicy,'strict-origin-when-cross-origin');
+      await page.locator('.latest-film').evaluate(node=>node.scrollIntoView({block:'start',behavior:'instant'}));await shot(page,`visitor-auto-latest-${layout}-${width}x${height}`);
+      await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.waitForFunction(()=>document.querySelectorAll('#youtube iframe').length===0);row.framesAfterExit=await page.locator('#youtube iframe').count();
+      await page.locator('.brand-film .video-stage').evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));await playing('.brand-film');assert.equal(await media('.brand-film').evaluate(v=>v.muted),true,'reentry never restores audible autoplay');
+      await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pagehide')));await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));assert.equal(await page.locator('#youtube iframe').count(),0,'pagehide suspends pending viewport work');
+      await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow')));await playing('.brand-film');assert.equal(await media('.brand-film').evaluate(v=>v.muted),true);
+      row.fixtureSnapshots=await page.evaluate(()=>window.__KGEN_LOCAL_YT_MEDIA_FIXTURE__.snapshot());assert.equal(await page.locator('script[src="https://www.youtube.com/iframe_api"]').count(),1,'shared official API loader is requested only once');
+      for(const host of ['.brand-film','.latest-film'])for(const button of ['button[class$="film-play"]','.video-sound']){const size=await page.locator(host+' '+button).evaluate(node=>{const r=node.getBoundingClientRect();return{width:r.width,height:r.height}});assert.ok(size.width>=44&&size.height>=44,'persistent touch controls');}
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.deepEqual(row.errors,[]);assert.deepEqual(row.blocked,[]);row.status='PASS';
+    }finally{await context.close()}
+  }
+  report.nativeMedia='LOCAL_CHROMIUM_FIXTURE_ONLY: actual native VP8/Opus play, pause, inline, muted and sound flags; no human listening or real YouTube playback verification';
+}
 async function verifyVisitorInfo(){
   const {parseLatestVideo,marketClocks,MARKET_NEWS_LINKS}=await import('../assets/kaios-portal.mjs');
   const source=await fs.readFile('README.md','utf8'),cached=parseLatestVideo(source);assert.ok(cached,'existing updater block is readable');
@@ -1311,6 +1363,8 @@ async function verifyVisitorInfo(){
   ]){const clocks=marketClocks(new Date(date));assert.ok(clocks.newYork.includes(time)&&clocks.newYork.includes(offset),clocks.newYork);assert.ok(clocks.taipei.includes('GMT+8'));}
   assert.throws(()=>marketClocks(new Date('invalid')),/INVALID_MARKET_CLOCK/);
   const manifest=JSON.parse(await fs.readFile('OfficialLinks.json','utf8'));
+  const videoFixture=await loadNativeYouTubeFixture({videoIds:['akp4K_uzJ28',cached.videoId,'abcdefghijk']});
+  const assertVideoSource=(value,id,origin)=>{const url=new URL(value);assert.equal(url.origin,'https://www.youtube.com');assert.equal(url.pathname,'/embed/'+id);for(const [key,expected]of [['autoplay','0'],['mute','1'],['playsinline','1'],['enablejsapi','1'],['origin',origin]])assert.equal(url.searchParams.get(key),expected,key);};
   for(const [layout,width,height] of [['root',390,844],['root',844,390],['root',360,740],['pages-prefix',390,844]]){
     const base=new URL(layout==='pages-prefix'?BASE+'/kline-odyssey/':BASE+'/');
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
@@ -1320,7 +1374,7 @@ async function verifyVisitorInfo(){
       const url=new URL(route.request().url());
       // This task never retries the denied YouTube read or exercises live wallets.
       if(url.origin!==base.origin){
-        if(url.origin==='https://www.youtube.com'&&['akp4K_uzJ28',cached.videoId,alternateId].some(id=>url.pathname==='/embed/'+id))return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><body style="margin:0;background:#101927;color:#b0c0d5;font:14px system-ui;display:grid;place-content:center;height:100vh;text-align:center">YouTube<br>外部影片未載入（隔離測試）</body>'});
+        const response=videoFixture.responseFor(route.request());if(response)return route.fulfill(response);
         return route.abort('blockedbyclient');
       }
       const upstream=new URL(url);if(layout==='pages-prefix')upstream.pathname=url.pathname.replace(/^\/kline-odyssey\//,'/');
@@ -1340,8 +1394,8 @@ async function verifyVisitorInfo(){
       assertExactRoute(await page.locator('#worldCards a[data-world-id="12682"]').getAttribute('href'),sharedGameUrl(base,'12682'),'canonical game');
       const legacy=WORLD_REGISTRY.find(world=>world.worldId==='88888');assert.equal(legacy.routeOnly,true);assert.equal(legacy.canonicalWorldId,'12682');
       assert.ok((await context.request.get(new URL(legacy.entryUrl,BASE+'/').href)).ok(),'old bookmark remains reachable');
-      assert.equal(await page.locator('#latestVideo a').getAttribute('href'),cached.url);
-      assert.equal(await page.locator('#youtube iframe').count(),0,'homepage never loads an external frame before explicit playback');assert.ok(await page.locator('.brand-film .brand-film-play').isVisible());assert.equal(await page.locator('#latestVideo .latest-film-play').getAttribute('data-video-id'),cached.videoId);
+      assert.equal(await page.locator('#latestVideo > a').getAttribute('href'),cached.url);
+      assert.equal(await page.locator('#youtube iframe').count(),0,'reduced-motion profile never auto-loads an external frame');assert.ok(await page.locator('.brand-film .brand-film-play').isVisible());assert.equal(await page.locator('#latestVideo .latest-film-play').getAttribute('data-video-id'),cached.videoId);
       await page.waitForFunction(()=>document.querySelectorAll('.visitor-socials a').length===8);
       for(const key of ['youtube','x','telegram','tiktok','facebook_page','instagram','line_official','github']){
         assert.equal(manifest.links[key].status,'VERIFIED');assert.equal(await page.locator('.visitor-socials a').filter({hasText:manifest.links[key].label}).getAttribute('href'),manifest.links[key].url);
@@ -1368,27 +1422,28 @@ async function verifyVisitorInfo(){
       for(const [id,name] of [['youtube','film'],['latestVideo','links'],['support','contact']]){
         await page.locator('#'+id).evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-${name}-${layout}-${width}x${height}`);
       }
-      await page.locator('.brand-film .brand-film-play').click();await page.locator('.brand-film iframe').waitFor();assert.equal(await page.locator('.brand-film iframe').getAttribute('src'),'https://www.youtube.com/embed/akp4K_uzJ28?autoplay=1&playsinline=1');
-      await page.frameLocator('.brand-film iframe').getByText('外部影片未載入（隔離測試）',{exact:false}).waitFor();await page.locator('.brand-film').evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-film-loaded-${layout}-${width}x${height}`);
+      await page.locator('.brand-film .brand-film-play').click();await page.locator('.brand-film iframe').waitFor();assertVideoSource(await page.locator('.brand-film iframe').getAttribute('src'),'akp4K_uzJ28',base.origin);await page.locator('.brand-film[data-playback-state="playing"]').waitFor();assert.equal(await page.frameLocator('.brand-film iframe').locator('video').evaluate(v=>v.muted&&!v.paused),true,'native local media plays after muted manual activation');
+      await page.frameLocator('.brand-film iframe').getByText('LOCAL FIXTURE',{exact:false}).waitFor();await page.locator('.brand-film').evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-film-loaded-${layout}-${width}x${height}`);
       await page.locator('#latestVideo .latest-film-play').scrollIntoViewIfNeeded();const latestButton=await reachable(page,'#latestVideo .latest-film-play');assert.ok(latestButton.hit&&latestButton.inView&&latestButton.width>=44&&latestButton.height>=44,'latest playback is a native reachable touch target');
-      await page.locator('#latestVideo .latest-film-play').click();await page.locator('#latestVideo iframe').waitFor();assert.equal(await page.locator('#latestVideo iframe').getAttribute('src'),'https://www.youtube.com/embed/'+cached.videoId+'?autoplay=1&playsinline=1');assert.equal(await page.locator('#latestVideo iframe').count(),1);assert.equal(await page.locator('#latestVideo .latest-film-play').count(),0);assert.equal(await page.locator('.brand-film iframe').count(),1,'latest activation preserves the separate brand player');
-      await page.frameLocator('#latestVideo iframe').getByText('外部影片未載入（隔離測試）',{exact:false}).waitFor();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('#latestVideo').evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-latest-loaded-${layout}-${width}x${height}`);await page.locator('#latestVideo').screenshot({path:`${OUT}/visitor-latest-loaded-panel-${layout}-${width}x${height}.png`});
+      await page.locator('#latestVideo .latest-film-play').click();await page.locator('#latestVideo iframe').waitFor();assertVideoSource(await page.locator('#latestVideo iframe').getAttribute('src'),cached.videoId,base.origin);await page.locator('#latestVideo .latest-film[data-playback-state="playing"]').waitFor();assert.equal(await page.locator('#latestVideo iframe').count(),1);assert.equal(await page.locator('#latestVideo .latest-film-play').count(),1,'manual playback remains available');assert.equal(await page.locator('.brand-film iframe').count(),0,'switching removes the old player before latest plays');assert.equal(await page.locator('#youtube iframe').count(),1,'one connected video player maximum');
+      await page.frameLocator('#latestVideo iframe').getByText('LOCAL FIXTURE',{exact:false}).waitFor();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('#latestVideo').evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-latest-loaded-${layout}-${width}x${height}`);await page.locator('#latestVideo').screenshot({path:`${OUT}/visitor-latest-loaded-panel-${layout}-${width}x${height}.png`});
       const targets=await page.locator('#youtube a').evaluateAll(anchors=>anchors.filter(a=>a.getClientRects().length).map(a=>({text:a.textContent,height:a.getBoundingClientRect().height})));assert.ok(targets.every(a=>a.height>=44),JSON.stringify(targets));
       for(const hash of ['youtube','community','support','market-watch','market-news']){
         await page.goto(base.href+'#'+hash,{waitUntil:'networkidle'});const box=await page.locator('#'+hash).boundingBox();assert.ok(box&&box.y>=-2&&box.y<height,'restored bookmark '+hash);
       }
-      videoState='alternate';await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();assert.equal(await page.locator('#youtube iframe').count(),0);assert.equal(await page.locator('#latestVideo .latest-film-play').getAttribute('data-video-id'),alternateId);await page.locator('#latestVideo .latest-film-play').click();assert.equal(await page.locator('#latestVideo iframe').getAttribute('src'),'https://www.youtube.com/embed/'+alternateId+'?autoplay=1&playsinline=1','latest player follows updated validated README data');assert.equal(await page.locator('.brand-film iframe').count(),0,'updating latest never starts brand playback');
+      videoState='alternate';await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();assert.equal(await page.locator('#youtube iframe').count(),0);assert.equal(await page.locator('#latestVideo .latest-film-play').getAttribute('data-video-id'),alternateId);await page.locator('#latestVideo .latest-film-play').click();await page.locator('#latestVideo iframe').waitFor();assertVideoSource(await page.locator('#latestVideo iframe').getAttribute('src'),alternateId,base.origin);await page.locator('#latestVideo .latest-film[data-playback-state="playing"]').waitFor();assert.equal(await page.locator('.brand-film iframe').count(),0,'updating latest never starts brand playback');
       videoState='title';await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();assert.equal(await page.locator('#latestVideo img').count(),0,'README title cannot inject markup');
       for(const state of ['invalid','unavailable']){
-        videoState=state;await page.reload({waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="unavailable"]').waitFor();assert.equal(await page.locator('#latestVideo a').getAttribute('href'),'https://www.youtube.com/@klineodyssey/videos');assert.ok(await page.locator('#primaryPlay').isVisible());assert.equal(await page.locator('#latestVideo .latest-film-play').count(),0);assert.equal(await page.locator('#latestVideo iframe').count(),0);assert.ok(await page.locator('.brand-film .brand-film-play').isVisible());
+        videoState=state;await page.reload({waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="unavailable"]').waitFor();assert.equal(await page.locator('#latestVideo > a').getAttribute('href'),'https://www.youtube.com/@klineodyssey/videos');assert.ok(await page.locator('#primaryPlay').isVisible());assert.equal(await page.locator('#latestVideo .latest-film-play').count(),0);assert.equal(await page.locator('#latestVideo iframe').count(),0);assert.ok(await page.locator('.brand-film .brand-film-play').isVisible());
       }
       await page.locator('#latestVideo').scrollIntoViewIfNeeded();await shot(page,`visitor-unavailable-${layout}-${width}x${height}`);
       await page.locator('.portal-footer a[href="official/"]').click();await page.waitForURL(new URL('official/',base).href);await page.locator('a[href="mailto:klineodyssey.io@gmail.com"]').waitFor();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('a[href="mailto:klineodyssey.io@gmail.com"]').evaluate(el=>el.closest('.card').scrollIntoView({block:'center'}));await shot(page,`visitor-official-${layout}-${width}x${height}`);
       assert.deepEqual(errors,[]);report.profiles.push({layout,width,height,status:'PASS'});
     }finally{await context.close()}
   }
-  report.checks.push('visitor-only: actual README updater snapshot, safe title/URL parsing, 503/invalid-source fallbacks, gesture-loaded brand and validated latest-video players, dynamic latest-ID refresh and unavailable-source exclusion, exchange-timezone clocks/DST boundaries, corrected regular sessions, six historic news/market providers, existing quote routes, eight canonical VERIFIED socials, contact, four cards, legacy88888 HTTP, restored anchors and local/Pages-prefix routes');
-  report.externalVideo='NOT_VERIFIED: denied live YouTube read preserved; embed replaced with an explicitly labeled isolated-test placeholder; no playback claim';
+  await verifyViewportVideo(cached,videoFixture);
+  report.checks.push('visitor-only: actual README updater snapshot, safe title/URL parsing, 503/invalid-source fallbacks, muted viewport and manual brand/latest players with one connected player, dynamic latest-ID refresh and unavailable-source exclusion, exchange-timezone clocks/DST boundaries, corrected regular sessions, six historic news/market providers, existing quote routes, eight canonical VERIFIED socials, contact, four cards, legacy88888 HTTP, restored anchors and local/Pages-prefix routes');
+  report.externalVideo='NOT_VERIFIED: original YouTube read HOLD preserved; official API/frame requests fulfilled with an explicitly labeled local native-media fixture, never upstream. Controller behavior and local Chromium media playback do not verify real YouTube playback.';
   report.realPhone='NOT_TESTED';report.latestVideo={source:'existing README updater block',videoId:cached.videoId,currentChannelLatest:'NOT_VERIFIED'};
 }
 try{
