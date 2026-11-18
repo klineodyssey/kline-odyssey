@@ -14,6 +14,44 @@ const logistics=read('../runtime/digital-ant-logistics-runtime.mjs');
 const marketLayout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
 const walletRuntime=read('../runtime/evm-wallet-runtime.mjs');
 
+test('fresh minimal HUD collapses transient cards while saved full/off organ preferences remain authoritative',async()=>{
+  const {runInNewContext}=await import('node:vm'),ui=read('../runtime/mobile-ui-settings.mjs');
+  const load=ui.slice(ui.indexOf('function load(){'),ui.indexOf('function save(){'));
+  for(const [saved,expected] of [
+    [null,{profile:'MINIMAL',controlsOpen:false,infoOpen:false,allOn:true,params:true}],
+    [{profile:'FULL'},{profile:'FULL',controlsOpen:true,infoOpen:true,allOn:true,params:true}],
+    [{profile:'FULL',allOn:false},{profile:'FULL',controlsOpen:false,infoOpen:false,allOn:false,params:true}],
+    [{profile:'FULL',params:false},{profile:'FULL',controlsOpen:false,infoOpen:true,allOn:true,params:false}],
+    [{profile:'MINIMAL',markets:false},{profile:'MINIMAL',controlsOpen:false,infoOpen:false,allOn:true,params:true}],
+    ['CORRUPT',{profile:'MINIMAL',controlsOpen:false,infoOpen:false,allOn:true,params:true}],
+    ['UNAVAILABLE',{profile:'MINIMAL',controlsOpen:false,infoOpen:false,allOn:true,params:true}],
+  ]){
+    const context={localStorage:{getItem(){if(saved==='UNAVAILABLE')throw new Error('storage unavailable');return saved==='CORRUPT'?'{broken':saved?JSON.stringify(saved):null},setItem(){assert.fail('loading a disclosure must not rewrite saved preferences')}}};
+    runInNewContext("const STORE='k11520.ui.settings',LEGACY_STORE='k11520.ui.settings.v267',HUD_PROFILES=['MINIMAL','STANDARD','FULL'];let state={hud:true,markets:true,status:true,map:true,params:true},allOn=true,profile='MINIMAL',marketOpen=false,controlsOpen=false,infoOpen=false,disclosedSurfaces=new Set();"+load+"load();globalThis.result={profile,controlsOpen,infoOpen,allOn,params:state.params};",context);
+    assert.deepEqual(JSON.parse(JSON.stringify(context.result)),expected);
+  }
+  assert.equal(ui.includes("if(e.detail?.active)setControlsOpen(true)"),false,'moving must not reopen parameter cards');
+});
+
+test('world movement excludes actual foreground panels while hidden retained panels and the trade status badge do not block fixed controls',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('../runtime/joystick-xzxyyz.mjs');
+  const functions=source.slice(source.indexOf('function foregroundVisible('),source.indexOf('export function floating11520JoystickEnabled(')).replaceAll('export function ','function ');
+  const classes=new Set(),nodes=new Map();
+  const context={$:selector=>nodes.get(selector)||null,document:{hidden:false,documentElement:{classList:{contains:name=>classes.has(name)}}},getComputedStyle:element=>element.style};
+  runInNewContext(functions+'globalThis.blocked=()=>({fixed:joystickInputBlocked(),world:world11520InputBlocked()});',context);
+  const check=expected=>assert.deepEqual(JSON.parse(JSON.stringify(context.blocked())),expected);
+  const panel=()=>({hidden:false,inert:false,style:{display:'block',visibility:'visible'},getClientRects:()=>[{}]});
+  nodes.set('#k11520RealTradePreflight',panel());check({fixed:false,world:false});
+  for(const selector of ['#walletPanel:not(.collapsed)','#walletLaunchSheet.open','#sheet.open','#confirm.open','#backpackPanel.open','#aiChatPanel.open','#gameChat.open']){
+    const element=panel();nodes.set(selector,element);check({fixed:true,world:true});
+    element.style.display='none';check({fixed:false,world:false});element.style.display='block';element.style.visibility='hidden';check({fixed:false,world:false});
+    element.style.visibility='visible';element.hidden=true;check({fixed:false,world:false});nodes.delete(selector);
+  }
+  classes.add('k11520UtilitiesOpen');check({fixed:false,world:true});classes.clear();
+  for(const name of ['k11520SettingsOpen','k11520HudCollapsed']){classes.add(name);check({fixed:true,world:true});classes.clear()}
+  context.document.hidden=true;check({fixed:true,world:true});
+});
+
 test('visible parameter controls retain the original explicit order path without bypassing financial owners',async()=>{
   const ui=read('../runtime/mobile-ui-settings.mjs'),layout=read('../runtime/mobile-control-layout.mjs');
   assert.ok(layout.includes(':not(.k11520TradeOpen):not(.k11520ControlsOpen) :is(#orderFire,#flat)'));
@@ -91,7 +129,7 @@ test('market and ATM organs surface cross-market engine and wallet-bound KAIOS c
 
 test('journey monster has an always-visible find-and-attack guide',()=>{
   assert.ok(main.includes('k11520MonsterGuide'));
-  assert.ok(main.includes('用左下搖桿靠近'));
+  assert.ok(main.includes('用空白拖曳靠近'));
   assert.ok(main.includes('靠近再攻擊'));
   assert.ok(main.includes('⚔ 可攻擊'));
   assert.ok(main.includes('KAIOS 戰利品已記帳'));
@@ -416,7 +454,11 @@ test('existing rail owners cancel capture on Settings and require a fresh pointe
     const ctx={$:()=>el,ROOT:root,document:doc,el,setTimeout:()=>1,clearTimeout(){},record:value=>commits.push(value),clear:()=>clears++,signedFromPointer:y=>y,paintSignedC:()=>{},applySignedValue:value=>commits.push(value)};
     if(owner==='lots')runInNewContext(main.slice(main.indexOf('function bindVertical('),main.indexOf("bindVertical('#lotsControl'"))+"bindVertical('#lotsControl',record);",ctx);
     if(owner==='C')runInNewContext('let cPointer=null,internalNative=false;'+signedC.slice(signedC.indexOf('function cancelCInput()'),signedC.indexOf('function onDocumentClick('))+signedC.slice(signedC.indexOf('function bindC()'),signedC.indexOf('function publish()'))+'bindC();',ctx);
-    if(owner==='Y')runInNewContext('let railPid=null,discPid=null,holdTimer=0,centerTap=null,discStart=null,rail={active:false,value:0};function syncMembrane(){}function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
+    if(owner==='Y'){
+      ctx.$=selector=>selector==='#yControl'?el:null;
+      const blockers=xyzControl.slice(xyzControl.indexOf('function foregroundVisible('),xyzControl.indexOf('export function world11520InputBlocked('));
+      runInNewContext('let railPid=null,discPid=null,holdTimer=0,centerTap=null,discStart=null,rail={active:false,value:0};function syncMembrane(){}function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+blockers+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
+    }
     const emit=(type,pointerId,clientY=25)=>{const e={type,pointerId,clientY,target:el,preventDefault(){},stopImmediatePropagation(){}};for(const fn of listeners.get(type)||[])fn(e)};
     const context=open=>{settings=open;for(const fn of documentListeners.get('k11520:settings-context')||[])fn({detail:{open}})};
     emit('pointerdown',1);assert.equal(commits.length,1,owner+' fresh down');assert.ok(captured.has(1));
@@ -658,7 +700,9 @@ test('one open-PR push stays within four heavy runners including bounded diagnos
 test('contextual entry tolerates only a completed intro transition and still requires character readiness',async()=>{
   const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
   const contextual=browserSource.slice(browserSource.indexOf('async function verifyContextualHud(){'));
-  const entry=contextual.slice(contextual.indexOf("if(await page.locator('#enter11520')"),contextual.indexOf("      assert.equal(await page.locator('#axes')"));
+  const entryEnd=contextual.indexOf('      await assertInformationClosed(');
+  assert.ok(entryEnd>0,'entry fixture ends before the separate HUD disclosure assertions');
+  const entry=contextual.slice(contextual.indexOf("if(await page.locator('#enter11520')"),entryEnd);
   assert.ok(entry.includes("await page.waitForFunction(()=>/READY|FALLBACK/.test"),'runtime readiness remains mandatory after intro dismissal');
   for(const scenario of [
     {name:'native click',button:true,dismiss:true},
@@ -875,7 +919,10 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Human authorized the #523 replacement/UI integration on 2026-11-18.
   // Keep the ancestry table and historical headers; pin the reviewed candidate
   // bytes separately. These fingerprints do not claim browser acceptance.
-  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'a8c9d8d4dbd8a259b37ac7fb0f1e4b99623b6b1ba9f42d8b46b71d1e73579c00'},
+  // Previous integrated navigation body: a8c9d8d4dbd8a259b37ac7fb0f1e4b99623b6b1ba9f42d8b46b71d1e73579c00.
+  // Human's floating-control request changes the original canvas arbitration
+  // and help text. This pin records those executable bytes, not visual PASS.
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'105221614e4f33cecf4ffb9302cbfb6319bdab0552e290989564555767bcc34c'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
   'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078'},
   'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'d36f9eeacb703b9540db56e212c9c1c5af428c0386a3b5a56508b9a96f173d03'},

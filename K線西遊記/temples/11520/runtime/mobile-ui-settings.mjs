@@ -1,3 +1,5 @@
+// 2026-11-18 / Codex / Human clean-combat HUD: MINIMAL starts undisclosed;
+// preserve saved organ switches/master state and explicit FULL/control access.
 // 2026-11-17 / Codex /root / Human-authorized PR672 follow-up: expose the
 // original explicit order path with visible controls; retain prior metadata
 // below as ancestry. No preview, settlement, wallet or confirmation changes.
@@ -21,7 +23,7 @@ const LEGACY_CLEAN='11520.play.cleanMode';
 const SURFACES=[
   ['hud','上方 HUD','.top'],
   ['markets','三軸行情','.axes'],
-  ['status','世界/生命狀態','.tele,.monsterHud'],
+  ['status','世界/生命狀態','.tele,.monsterHud,#k11520MonsterGuide'],
   ['map','小地圖','.minimapWrap'],
   ['combat','戰鬥按鈕','.controls'],
   ['params','C / 口數','.sliderDock'],
@@ -43,7 +45,7 @@ let settingsInstalled=false,worldFirstBound=false;
 // Human 2026-10-05 12:43: hide/inert the background right HUD while
 // Settings owns the foreground, including partly covered C/lots/Y rails.
 // Preserve each organ's values/preferences; this owns only interaction.
-const SETTINGS_BACKGROUND='#k11520UtilityMaster,#cargoInterceptionButton,#homeDeliveryButton,#whiteholeEscortButton,#dock,#gameModeToggle,#walletToggle,#walletPanel,#chatHandle,#gameChat,#bgmButton,#aiChatButton,#aiChatPanel,#backpackButton,#backpackPanel,#k11520HudCollapseAll,#kaiosPortalButton,#playerCourierDetails,#playerBanditPanel,#k11520RealTradePreflight,#k11520MarketRow,#k11520ControlsClose,#cControl,#lotsControl,#yControl,.sliderDock,.controls';
+const SETTINGS_BACKGROUND='#k11520UtilityMaster,#cargoInterceptionButton,#homeDeliveryButton,#whiteholeEscortButton,#dock,#gameModeToggle,#walletToggle,#walletPanel,#chatHandle,#gameChat,#bgmButton,#aiChatButton,#aiChatPanel,#backpackButton,#backpackPanel,#k11520HudCollapseAll,#kaiosPortalButton,#playerCourierDetails,#playerBanditPanel,#k11520RealTradePreflight,#k11520MarketRow,#k11520MovePlane,#k11520ControlsClose,#cControl,#lotsControl,#yControl,.sliderDock,.controls';
 const settingsInertBefore=new Map();
 let settingsWasOpen=false,settingsEscapeBound=false;
 function syncSettingsContext(){
@@ -75,7 +77,7 @@ export const WORLD_FIRST_HUD_POLICY=Object.freeze({
   MANUAL:['wallet','backpack','settings','chat','audio'],
 });
 
-function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}marketOpen=false;disclosedSurfaces.clear();controlsOpen=allOn&&state.params;infoOpen=allOn}
+function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}marketOpen=false;disclosedSurfaces.clear();controlsOpen=profile==='FULL'&&allOn&&state.params;infoOpen=profile!=='MINIMAL'&&allOn}
 function save(){try{localStorage.setItem(STORE,JSON.stringify({...state,allOn,profile}))}catch{}}
 function syncWorldFirst(){
   const root=document.documentElement;root.dataset.k11520HudProfile=profile;root.dataset.k11520HudMode='ON_DEMAND';
@@ -108,11 +110,12 @@ function installWorldFirst(){
   if(worldFirstBound)return;worldFirstBound=true;
   const panel=$('#k11520UiSettings'),picker=document.createElement('select');picker.id='k11520HudProfile';picker.className='full';picker.setAttribute('aria-label','HUD 顯示模式');
   for(const value of HUD_PROFILES){const opt=document.createElement('option');opt.value=value;opt.textContent={MINIMAL:'MINIMAL · 世界優先',STANDARD:'STANDARD · 狀態資訊',FULL:'FULL HUD · 完整資訊'}[value];picker.appendChild(opt)}
-  picker.value=profile;picker.onchange=()=>{profile=picker.value;infoOpen=profile!=='MINIMAL';for(const key of INFO_KEYS)infoOpen?disclosedSurfaces.add(key):disclosedSurfaces.delete(key);save();apply()};panel?.appendChild(picker);
+  picker.value=profile;picker.onchange=()=>{profile=picker.value;hideMarketCards();controlsOpen=profile==='FULL'&&allOn&&state.params;if(!controlsOpen)cancelControlInput();disclosedSurfaces.delete('params');infoOpen=profile!=='MINIMAL'&&allOn;for(const key of INFO_KEYS)infoOpen?disclosedSurfaces.add(key):disclosedSurfaces.delete(key);save();apply()};panel?.appendChild(picker);
   for(const [id,label,act] of [['k11520ShowControls','顯示操作：移動／口數／C',showControls],['k11520ShowInformation','顯示資訊：行情／座標／小地圖',showInformation],['k11520ShowTrade','交易／點火資訊（仍須下單確認）',showMarketCards],['k11520HideTrade','收合資訊卡；保留操作',closeInformation]]){if($('#'+id))continue;const button=document.createElement('button');button.id=id;button.type='button';button.className='btn full';button.textContent=label;button.onclick=act;panel?.appendChild(button)}
   let close=$('#k11520ControlsClose');if(!close){close=document.createElement('button');close.id='k11520ControlsClose';close.type='button';close.textContent='收操作 ×';close.setAttribute('aria-label','收合操作控制；保留口數與 C');document.body.appendChild(close);close.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();cancelControlInput();try{close.setPointerCapture(e.pointerId)}catch{}},{passive:false});close.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();setControlsOpen(false);try{close.releasePointerCapture(e.pointerId)}catch{}},{passive:false});close.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setControlsOpen(false)})}
   let row=$('#k11520MarketRow');if(!row){row=document.createElement('button');row.id='k11520MarketRow';row.type='button';document.body.appendChild(row)}
-  document.addEventListener('k11520:movement-context',e=>{if(e.detail?.active)setControlsOpen(true)});
+  // Movement owns only its existing active feedback and remaining-axis rail.
+  // It must not reopen saved parameter/information cards during a floating drag.
   const axes=$('#axes');
   document.addEventListener('pointerdown',e=>{if(marketOpen&&e.target.closest?.('#axes,#cControl,#lotsControl,#yControl,.controls')){marketPointers.add(e.pointerId);clearTimeout(marketTimer)}},true);
   for(const type of ['pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(marketPointers.delete(e.pointerId))scheduleMarketHide()},true);

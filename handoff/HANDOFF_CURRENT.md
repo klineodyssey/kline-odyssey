@@ -984,3 +984,16 @@ WORK_ID KUFO-637-CONTINUOUS-ALCHEMY-20261114-01；原PR637，source main33967045
 最終36合約0warnings編譯PASS（248620.5081ms），KUFO source SHA7226aac7ec0f48405a33f3ab17f64eb57bf1cc5d8c390d1d89dd9cd7f220d415，standardinput1bd0e40d4ec2bacb6c00abc08322e0b4625604c54b1ad3874ea0053130a43df0。最終31/31 EVM PASS625773.2286ms；pure20/20 PASS7471.6809ms；首次ABI4/mainlineage10保留且34未變artifact模板/ABI及KUFOABI逐項等同，不重跑。65項矩陣不是單次65全過。首輪45項44PASS/1FAIL（dust原300kgas門檻）原log與62檔red zip95317f85…保留；修復只省六處冗餘索引寫入，不放寬門檻。最終dust transfer264105/settle340037，maxappend proposal428852/execute7555818<8M；最大constructor18216737gas/40242initbytes<30M/49152。內部獨立reviewNO_BLOCKER，非外部audit。
 
 本機對10000年度/120000分組與高groupID已做純資料檢查，EVM做萬年延遲、年12027時間戳及全tier索引；不是已有精準一萬年農曆/天文表，也沒有建立65536真EVMcohorts。正式初始曆表/時區/生效/財年界/星座窗口/實際地址角色code與原費用仍待核，只有合法持有人用本人錢包確認部署/啟用/後續曆表治理。0真鏈讀寫/簽署/部署；UI、手機及真錢包NOT_VERIFIED。唯一下一步：Human核定具體初始資料與當時合法綁定/成本後，由合法持有人依原流程確認；未定值或無新證據時不重造工程或重跑未變套件。詳細逐項證據沿KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md及原kaios checkpoint/current_continuity讀回。
+
+## Human 2026-11-18：浮動搖桿與精簡遊戲畫面（候選，實景待驗）
+
+WORK_ID K11520-FLOATING-JOYSTICK-CLEAN-HUD-20261118-01；來源 main f42f6cdf5d7175075ce6430205c4e5189c9959ba。Human 最新圖片要求沿既有遊戲收合左下常駐圓盤，以空白場景拖曳叫出同一控制器，放開收起；中央留給角色及世界，原資訊卡按需展開。沿 HUMAN_DIRECT_ORDINARY_LOCAL_ENGINEERING / MANUAL_DISPATCH_NON_ATOMIC，各原檔單一 Writer，不接管舊 Draft、不新增 Runtime/bootstrap/Worker/排程。
+
+- 原 joystick-xzxyyz／game-5d-main 協調唯一 canvas 手勢：空白短點仍導航、物件／玩家仍辨識，拖曳才產生同一 XYZ 向量。原盤以視窗內底座顯示，輸入保留原按下點的位移；放開、第二指、設定／錢包／背景／resize 都取消輸入。原生雙指縮放及明確顯示操作後的固定盤／鏡頭控制保留。
+- 原 mobile-ui-settings／mobile-control-layout：MINIMAL 預設只留原 HP、所選市場、XYZ 摘要與原戰鬥鍵，行情大卡／小地圖／C 口數按需展開；移動不再自動展開。原儲存 allOn／器官偏好、FULL、獨立交易確認及錢包 foreground 邊界保留。
+- root 介面檢查最終 73/73 PASS（1522.7386 ms），產品規則 PASS，14 個變更 MJS syntax 與 whitespace PASS。首次整合暴露兩個原 VM fixture／來源 pin 待遷移，第二輪另暴露舊 entry 截取邊界，原 log 私有保存，均已依實際新來源修正；不改寫為首輪全過。
+- 新原生觸控／直橫向 PNG 沿原 responsive CI 輸出；目前 FUNCTIONAL_QA／VISUAL_QA 尚待實跑與直接讀圖，候選不等於已發布。本機 Browser／Python STOPPED 未操作；沒有簽署、送單、查鏈、修改費用／資源／用量或解除具體 HOLD。
+
+原 PR673／675 已發布交付與歷史證據保留。KUFO BscScan、原100 KAIOS實際煉丹、正式18911航程等未完帳繼續沿原 checkpoint，不由本 UI 候選宣稱完成。唯一下一步：原 CI exact-head Chromium 功能及截圖驗收；合格後按持續授權 merge／原 Pages 發布，再核對公開來源與實景。
+
+追加核對 UTC 2026-11-18T06:13:37.488Z／台灣 2026-11-18T14:13:37.488+08:00：交叉原碼審查找到並修正『隱藏但open的錢包/聊天不可讓搖桿隱形』與『交易狀態badge不是modal』，沿實際可見前景與既有owner補綁觀察；新增原VM回歸後最終74/74 PASS（1453.0006 ms）。前述73項為前一指紋，原紀錄保留；實景仍待原CI。

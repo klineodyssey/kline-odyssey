@@ -1,3 +1,6 @@
+// 2026-11-18 / Codex / Human clean-combat HUD: existing live edge summaries,
+// original explicit detail surfaces, and one canvas-owned floating-disc visual.
+// Earlier presentation notes remain below as source ancestry.
 // 2026-11-17 / Codex /root / PR672: original action visibility follows retained
 // controls OR explicit trade context. Compact overlays fit the existing world;
 // no financial state, world coordinate or gesture admission rule is changed.
@@ -22,10 +25,12 @@ const thumbObservers=new WeakMap();
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 const paramsHidden=()=>!!$('.sliderDock')?.classList.contains('k11520HiddenBySettings');
 const onDemand=()=>document.documentElement.dataset.k11520HudMode==='ON_DEMAND';
+const compactHud=()=>{const root=document.documentElement;return onDemand()&&root.dataset.k11520HudProfile==='MINIMAL'&&!['k11520InfoOpen','k11520TradeOpen','k11520SettingsOpen','k11520UtilitiesOpen','k11520HudCollapsed'].some(name=>root.classList.contains(name))};
 const railDisclosed=sel=>!onDemand()||document.documentElement.classList.contains('k11520ControlsOpen')||document.documentElement.classList.contains('k11520TradeOpen')||(sel==='#yControl'&&document.documentElement.classList.contains('k11520MovementActive'));
 function installStyle(){
   let s=$('#k11520MobileControlLayout');
   if(!s){s=document.createElement('style');s.id='k11520MobileControlLayout';document.head.appendChild(s)}
+  const compact='html[data-k11520-hud-mode="ON_DEMAND"][data-k11520-hud-profile="MINIMAL"]:not(.k11520InfoOpen):not(.k11520TradeOpen):not(.k11520SettingsOpen):not(.k11520UtilitiesOpen):not(.k11520HudCollapsed)';
   const css=`
 @media(max-width:${MOBILE_MAX}px){
   .hud-drawer-toggle,#yJoyV250{display:none!important;visibility:hidden!important;pointer-events:none!important}
@@ -185,6 +190,41 @@ html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!
 @media(orientation:landscape) and (max-height:600px){
   html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{top:var(--k11520-landscape-guide-top,252px)!important;bottom:auto!important}
 }
+/* Compact combat reuses the live HP/XYZ/selected-market organs. Full cards
+   remain in their original explicit information and trading contexts. */
+${compact} #k11520BuildStamp{display:none!important}
+${compact} .monsterHud:not(.k11520HiddenBySettings){display:flex!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;bottom:auto!important;width:110px!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;padding:4px 6px!important;gap:3px;flex-direction:column;justify-content:center;background:#071018b8!important;border:1px solid #68e4ff44!important;border-radius:9px!important;z-index:610!important;font-size:12px!important;line-height:1.2!important}
+${compact} .monsterHud .bar{height:5px!important;margin:0!important}
+${compact} .monsterHud details{display:none!important}
+${compact} .axes:not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;left:max(124px,calc(env(safe-area-inset-left) + 118px))!important;right:auto!important;top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;bottom:auto!important;width:min(244px,calc(100vw - max(124px,calc(env(safe-area-inset-left) + 118px)) - max(58px,calc(env(safe-area-inset-right) + 52px))))!important;height:44px!important;min-height:44px!important;max-width:none!important;transform:none!important;z-index:610!important}
+${compact} .axes .axis:not(.active){display:none!important}
+${compact} .axes .axis.active{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;align-items:center;column-gap:6px;position:static!important;width:100%!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;margin:0!important;padding:3px 6px!important;outline:none!important;box-shadow:none!important;border:1px solid #68e4ff44!important;border-radius:9px!important;background:#071018b8!important;font-size:11px!important;line-height:1.2!important;overflow:hidden}
+${compact} .axis .axisHead{display:contents!important}
+${compact} .axis .axisHead>span,${compact} .axis .pos,${compact} .axis .marketKValue,${compact} .axis .universeFloorBadge{display:none!important}
+${compact} .axis .axisHead>b{grid-column:2;grid-row:1;font-size:9px!important}
+${compact} .axis .marketName{grid-column:1;grid-row:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px!important}
+${compact} .axis .q{grid-column:1/-1;grid-row:2;white-space:nowrap;font-size:12px!important;line-height:1.2!important}
+${compact} .tele:not(.k11520HiddenBySettings){display:flex!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:max(58px,calc(env(safe-area-inset-right) + 52px))!important;top:max(74px,calc(env(safe-area-inset-top) + 70px))!important;bottom:auto!important;width:auto!important;height:32px!important;min-height:32px!important;box-sizing:border-box!important;padding:4px 6px!important;align-items:center;background:#07101899!important;border:0!important;border-radius:7px!important;z-index:609!important;font-size:11px!important;line-height:1.25!important;overflow:hidden}
+${compact} .tele>b{display:block;width:100%;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+${compact} .tele>div{display:none!important}
+${compact} #k11520MonsterGuide[style*="display: block"]:not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:max(112px,calc(env(safe-area-inset-top) + 108px))!important;bottom:auto!important;width:min(320px,calc(100vw - max(6px,env(safe-area-inset-left)) - max(58px,calc(env(safe-area-inset-right) + 52px))))!important;max-width:none!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;margin:0!important;padding:6px 8px!important;transform:none!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;background:#07101899!important;border:1px solid #68e4ff33!important;border-radius:9px!important;z-index:609!important;font-size:11px!important;line-height:30px!important}
+${compact}:not(.k11520ControlsOpen) .controls:not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:auto!important;right:max(58px,calc(env(safe-area-inset-right) + 52px))!important;top:auto!important;bottom:max(72px,calc(env(safe-area-inset-bottom) + 64px))!important;width:154px!important;height:156px!important;transform:none!important;z-index:470!important}
+${compact} .controls>button{min-width:44px!important;min-height:44px!important}
+${compact}:not(.k11520ControlsOpen) .controls :is(#attack,#skill,#dodge,#tradeSword){position:absolute!important;left:auto!important;top:auto!important;pointer-events:auto!important;border-radius:50%!important}
+${compact}:not(.k11520ControlsOpen) .controls #attack{right:0!important;bottom:0!important;width:56px!important;height:56px!important;font-size:13px!important}
+${compact}:not(.k11520ControlsOpen) .controls #skill{right:66px!important;bottom:0!important;width:44px!important;height:44px!important;font-size:13px!important}
+${compact}:not(.k11520ControlsOpen) .controls #tradeSword{right:0!important;bottom:66px!important;width:44px!important;height:44px!important;font-size:15px!important}
+${compact}:not(.k11520ControlsOpen) .controls #dodge{right:66px!important;bottom:56px!important;width:44px!important;height:44px!important;font-size:15px!important}
+/* The same canvas-owned joystick is only a visual while floating. Neither it
+   nor its children can steal the second contact from the existing pinch owner. */
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) #joy:not([data-k11520-floating-active="1"]){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"]{position:fixed!important;left:var(--k11520-floating-x,50vw)!important;right:auto!important;top:var(--k11520-floating-y,50vh)!important;bottom:auto!important;transform:translate(-50%,-50%)!important;opacity:.88!important;visibility:visible!important;pointer-events:none!important;background:#07101844!important;border:1px solid #9eeeff88!important;border-radius:50%!important;box-shadow:none!important;z-index:450!important}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] *{pointer-events:none!important;opacity:1!important}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] #k11520PlaneLabel{display:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) #joy:not([data-k11520-floating-active="1"]){visibility:visible!important;pointer-events:auto!important}
+#k11520MovePlane{position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;width:70px!important;height:44px!important;min-width:70px!important;min-height:44px!important;box-sizing:border-box!important;display:grid!important;place-items:center!important;padding:4px!important;border:1px solid #68e4ff66!important;border-radius:10px!important;background:#071018d9!important;color:#dffaff!important;font:700 12px system-ui!important;z-index:590!important;touch-action:manipulation!important}
+#k11520MovePlane[hidden],html:is(.k11520ControlsOpen,.k11520TradeOpen,.k11520SettingsOpen,.k11520UtilitiesOpen,.k11520HudCollapsed) #k11520MovePlane,html.k11520WorldInputBlocked #k11520MovePlane{display:none!important;visibility:hidden!important;pointer-events:none!important}
+html:is(.k11520SettingsOpen,.k11520UtilitiesOpen,.k11520HudCollapsed) #joy[data-k11520-floating-active="1"],html.k11520WorldInputBlocked #joy[data-k11520-floating-active="1"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 `;
   if(s.textContent!==css)s.textContent=css;
 }
@@ -252,7 +292,7 @@ function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwn
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
-  const isVisible=sel=>{const el=$(sel);if(!el)return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0};
+  const isVisible=sel=>{const el=$(sel);if(!el)return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&r.width>0&&r.height>0};
   const statusVisible=isVisible('.tele')||isVisible('.monsterHud'),marketVisible=isVisible('.axes');
   const report={version:'1.3.14',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),axisTrack:rect('#yControl .track'),axisThumb:rect('#yThumb'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.axisRailCentered=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&Math.abs((report.axisRail.left+report.axisRail.width/2)-innerWidth/2)<2);
@@ -264,7 +304,16 @@ function measure(){
   report.mapBelowStatus=innerWidth>MOBILE_MAX||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
   report.overlaps={joyRail:overlap(report.joy,report.axisRail),warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketHud,report.worldHud),marketLife:overlap(report.marketHud,report.lifeHud),worldMap:overlap(report.worldHud,report.minimap),lifeMap:overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();report.paramsHidden=paramsHidden();report.settingsOpen=document.documentElement.classList.contains('k11520SettingsOpen');
-  report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.settingsOpen||(report.paramsHidden||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned)&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v));
+  report.compact=compactHud();report.floatingActive=$('#joy')?.dataset.k11520FloatingActive==='1';
+  // A compact summary is intentionally not the equal-width diagnostic cards.
+  // Measure its actual visible edge organs; hidden rails retain their values.
+  const compactSelectors=['.axes','.tele','.monsterHud','#k11520MonsterGuide','#k11520MovePlane','#k11520MarketRow','#k11520UtilityMaster','#attack','#skill','#dodge','#tradeSword','#orderFire','#flat','#yControl','#cControl','#lotsControl'];
+  const compactBoxes=compactSelectors.filter(isVisible).map(selector=>({selector,rect:rect(selector)}));
+  report.compactContained=compactBoxes.every(({rect:r})=>r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight);
+  report.compactOverlaps=[];for(let i=0;i<compactBoxes.length;i++)for(let j=i+1;j<compactBoxes.length;j++)if(overlap(compactBoxes[i].rect,compactBoxes[j].rect))report.compactOverlaps.push([compactBoxes[i].selector,compactBoxes[j].selector]);
+  report.compactTouchTargets=compactBoxes.filter(({selector})=>!['.axes','.tele','.monsterHud','#k11520MonsterGuide','#yControl','#cControl','#lotsControl'].includes(selector)).every(({rect:r})=>r.width>=44&&r.height>=44);
+  const fullGeometry=innerWidth>MOBILE_MAX||(report.paramsHidden||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned)&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v);
+  report.ok=report.collapsed||report.settingsOpen||(report.compact?report.compactContained&&report.compactTouchTargets&&report.compactOverlaps.length===0:fullGeometry);
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
   return report;
 }

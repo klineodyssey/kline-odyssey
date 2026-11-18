@@ -16,7 +16,7 @@ try{
   const page=await context.newPage(),row={width,height,errors:[]};report.rows.push(row);page.on('pageerror',e=>row.errors.push(String(e)));page.setDefaultTimeout(20000);
   await page.goto(base+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html');await ready(page);
   // Real controller gesture, not a programmatic unlock or synthetic award.
-  await page.locator('#joy').click({position:{x:22,y:35}});await page.waitForFunction(()=>__K11520_BGM__.playing);
+  await page.locator('#k11520MovePlane').click();await page.waitForFunction(()=>__K11520_BGM__.playing);
   assert.equal((await audio(page)).activeMusicLayers,1);
   row.signal=await page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<30;i++){for(const a of __audioAnalysers){const v=new Float32Array(a.fftSize);a.getFloatTimeDomainData(v);let sum=0;for(const x of v){peak=Math.max(peak,Math.abs(x));sum+=x*x;}rms=Math.max(rms,Math.sqrt(sum/v.length));}await new Promise(r=>setTimeout(r,100));}return{peak,rms};});
   assert.ok(row.signal.rms>.008&&row.signal.peak>.02&&row.signal.peak<.95,'11520 destination signal above near-silence and below clipping');

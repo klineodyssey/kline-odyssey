@@ -3,6 +3,16 @@ import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
 
+// Trading regressions explicitly disclose the retained control panel. Default
+// gameplay no longer opens C/lots or a fixed disc merely because it was touched.
+async function showRetainedControls(page){
+  if(await page.locator('html').evaluate(el=>el.classList.contains('k11520ControlsOpen')))return;
+  if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+  if(!await page.locator('#k11520UiSettings').evaluate(el=>el.classList.contains('open')))await page.locator('#gameModeToggle').click();
+  await page.locator('#k11520ShowControls').click();
+  if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+}
+
 if(process.argv.includes('--simulation-offline')||process.argv.includes('--simulation-offline-baseline')){
   await offlineSimulationBrowserQA({baseline:process.argv.includes('--simulation-offline-baseline')});process.exit(0);
 }
@@ -74,7 +84,7 @@ try {
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
     // Character readiness is independent of the MINIMAL telemetry visibility.
     await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
-    await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
     await page.locator('#lotsNumericInput').fill('10');await page.locator('#lotsNumericInput').press('Enter');
     const organ=async name=>{
       if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();
@@ -170,17 +180,17 @@ try {
     assert.equal((await snap()).positions[1].status,'CLOSED','reload recovers exact account ledger');
     await shot('reload-recovery');
     await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
-    await page.locator('#cNumericInput').fill('5');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('5');await page.locator('#cNumericInput').press('Enter');
     await page.locator('#orderFire').click();
     await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('V1_HIGH_SPEED_PRODUCTION_LOCKED'));
     assert.equal(await page.locator('#confirmOrder').isDisabled(),true);await shot('high-c-locked');
     await page.locator('#cancelOrder').click();
-    await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
     if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     await page.locator('#gameModeToggle').click();await page.locator('#journeyReplay').click();
     assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'MOVE');
     await shot('journey-story');await page.locator('#journeyContinue').click();
-    const joy=await page.locator('#joy').boundingBox(),jx=joy.x+joy.width/2,jy=joy.y+joy.height/2;
+    await showRetainedControls(page);const joy=await page.locator('#joy').boundingBox(),jx=joy.x+joy.width/2,jy=joy.y+joy.height/2;
     const knobBefore=await page.locator('#knob').boundingBox();
     await page.mouse.move(jx,jy);await page.mouse.down();await page.mouse.move(jx,jy-40,{steps:5});
     const knobMoved=await page.locator('#knob').boundingBox();assert.ok(knobMoved.y<knobBefore.y,'joystick thumb follows finger');
@@ -209,9 +219,9 @@ try {
     assert.equal(await page.evaluate(()=>__K11520_PRODUCT__.snapshot().kaios),5);
     await shot('journey-loot');
     assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'PHASE');
-    await page.locator('#cNumericInput').fill('.001');await page.locator('#cNumericInput').press('Enter');
-    await page.locator('#joy').tap();
-    await page.locator('#cNumericInput').fill('-.001');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('.001');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#joy').tap();
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('-.001');await page.locator('#cNumericInput').press('Enter');
     await page.waitForFunction(()=>__K11520_JOURNEY__.snapshot().stage==='PREVIEW');await shot('journey-sixphase');
     const ordersBefore=(await snap()).orders.length;await page.locator('#orderFire').click();await shot('journey-preview');
     assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().complete),true);
@@ -348,7 +358,7 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
     if(selector)await control(selector);
     for(const fullPage of [false,true]){const file=`${width}x${height}-navigation-${name}-SYNTHETIC${fullPage?'-fullpage':''}.png`;await page.screenshot({path:`${out}/${file}`,fullPage});report.screenshots.push(file)}
   };
-  const setC=async value=>{await game();await page.locator('#cNumericInput').fill(String(value));await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(value=>__K11520_SIGNED_C_IMMERSIVE__.signedC===value,value)};
+  const setC=async value=>{await game();await showRetainedControls(page);await page.locator('#cNumericInput').fill(String(value));await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(value=>__K11520_SIGNED_C_IMMERSIVE__.signedC===value,value)};
   const setTarget=async target=>{for(const axis of ['x','y','z'])await page.locator('#navigation'+axis.toUpperCase()).fill(String(target[axis]))};
   const moveAndStop=async(label,expectedSource='LOCAL_WALK')=>{
     // At filled 1C the canonical local calibration is about 22.76 m/s. Keep
@@ -604,11 +614,11 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     };
     const select=async ({plane,axis,c})=>{
       await game();for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
-        const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await page.locator('#joy').tap();
+        const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await showRetainedControls(page);await page.locator('#joy').tap();
         await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
       }
       await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
-      await page.locator('#cNumericInput').fill(String(c));await page.locator('#cNumericInput').press('Enter');
+      await showRetainedControls(page);await page.locator('#cNumericInput').fill(String(c));await page.locator('#cNumericInput').press('Enter');
       await page.locator('#lotsNumericInput').fill('1');await page.locator('#lotsNumericInput').press('Enter');
       await page.waitForFunction(({axis,c})=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis&&__K11520_SIGNED_C_IMMERSIVE__.signedC===c&&__K11520_SIGNED_C_IMMERSIVE__.lots===1,{axis,c});
     };
@@ -838,7 +848,7 @@ async function localCandidateBrowserQA(){
         const oid=await trigger.nextOrderId();await send(trigger.connect(signers[player]),'createOrder',[1,parseEther('1'),2,parseEther('100')]);await send(trigger,'observeOrder',[oid]);
         const pid=(await trigger.order(oid)).positionId;await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.lockedMargin===2);
         assert.equal(await page.locator('#testnetApprove').isDisabled(),true);assert.equal(await page.locator('#testnetDeposit').isDisabled(),true);await shot('legacy-exit-only');
-        await game();await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click();
+        await game();await showRetainedControls(page);await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click();
         await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('LEGACY_EXIT_ONLY_NO_NEW_RISK'));assert.equal(await page.locator('#confirmOrder').isDisabled(),true);await page.locator('#cancelOrder').click();
         await price(100.5);await organ('positions');await page.locator(`[data-sim-close="${pid}"]`).click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.every(p=>p.status!=='OPEN'));
         assert.equal((await snap()).wallet.free,1001);await shot('legacy-close-preserved');
@@ -858,7 +868,7 @@ async function localCandidateBrowserQA(){
       await page.locator('[data-deposit-preset="1000"]').click();await page.locator('#testnetApprove').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.allowanceUnlimited===true);
       await page.locator('#testnetDeposit').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===1000);assert.equal(await page.locator('#testnetApprove').isDisabled(),true);
       await shot('deposit-controls');await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('brain-account');
-      stage='order';await game();await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
+      stage='order';await game();await showRetainedControls(page);await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
 await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100.001');await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('INDEX_DELTA_C_LOTS_V1')&&!document.querySelector('#confirmOrder').disabled,null,{timeout:120000});await page.locator('#confirm').evaluate(el=>el.scrollTop=0);await page.locator('#confirmBody').evaluate(el=>el.scrollTop=0);await shot('100c100lots-preview');await page.locator('#confirmOrder').click();await wait(()=>__K11520_EXECUTION__.snapshot().orders.some(o=>o.status==='PENDING'));
       let book=await snap(),order=book.orders.at(-1);await shot('pending');await price(100.002);await send(trigger,'observeOrder',[BigInt(order.orderId)]);await wallet();await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.some(p=>p.status==='OPEN'));
       book=await snap();const pid=book.positions.at(-1).positionId;assert.equal(book.wallet.lockedMargin,100);await price(100.007);await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet.unrealizedPnl>0);
@@ -1031,8 +1041,8 @@ async function publicTestnetBrowserQA(){
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});await shot('deposit');
       }
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await page.locator('#walletToggle').click();await page.locator('#k11520UtilityMaster').click();
-      for(let i=0;i<3&&(await page.evaluate(()=>__K11520_TRADE_AXIS_API__.current()))!=='KX';i++){await page.locator('#joy').tap();await page.waitForTimeout(200)}
-      await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
+      for(let i=0;i<3&&(await page.evaluate(()=>__K11520_TRADE_AXIS_API__.current()))!=='KX';i++){await showRetainedControls(page);await page.locator('#joy').tap();await page.waitForTimeout(200)}
+      await showRetainedControls(page);await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
       stage='CREATE_ORDER';const before=new Set((await snapshot()).orders.map(o=>o.orderId));
       const accountBeforeOrder=(await snapshot()).wallet,capitalBeforeOrder=(await snapshot()).capital;
       let order;

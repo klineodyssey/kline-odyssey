@@ -12,6 +12,8 @@ const OUT='artifacts/11520-visual-qa';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+// Rail geometry belongs to the explicitly expanded control layout.
+await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[
   {symbol:'BTCUSDT',price:'65000.25'},
