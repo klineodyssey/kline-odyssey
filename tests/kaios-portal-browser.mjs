@@ -1357,6 +1357,7 @@ async function verifyVisitorInfo(){
       const clocks=await page.locator('[data-market-clock]').evaluateAll(nodes=>nodes.map(node=>({key:node.dataset.marketClock,text:node.textContent,iso:node.dateTime})));for(const clock of clocks)assert.equal(clock.text.replace(/\s+/gu,' '),marketClocks(new Date(clock.iso))[clock.key].replace(/\s+/gu,' '),'browser and Node clocks agree apart from locale whitespace');
       const marketLinks=await page.locator('#market-watch a').evaluateAll(anchors=>anchors.map(a=>({href:a.href,target:a.target,rel:a.rel,height:a.getBoundingClientRect().height})));for(const a of marketLinks){assert.ok(a.height>=44);if(new URL(a.href).origin!==base.origin){assert.equal(new URL(a.href).protocol,'https:');assert.equal(a.target,'_blank');assert.ok(a.rel.includes('noopener'));}}
       for(const id of ['market-watch','market-times','market-sources']){await page.locator('#'+id).evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-${id}-${layout}-${width}x${height}`);}
+      for(const id of ['market-times','market-sources'])await page.locator('#'+id).screenshot({path:`${OUT}/visitor-${id}-panel-${layout}-${width}x${height}.png`});
       await page.evaluate(()=>scrollTo(0,0));await shot(page,`visitor-first-${layout}-${width}x${height}`);
       for(const [id,name] of [['youtube','film'],['latestVideo','links'],['support','contact']]){
         await page.locator('#'+id).evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-${name}-${layout}-${width}x${height}`);
