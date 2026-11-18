@@ -1,5 +1,6 @@
 import { requireArray, requireFields, requireId, requireEnum } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
+import { sha256 } from "../shared/utils.mjs";
 
 export const COMPANY_FIELDS = Object.freeze([
   "company_id", "founder_life_id", "name", "wallet_address", "treasury_address", "employees", "equity",
@@ -509,6 +510,339 @@ export function validateAutoLpProduct(product) {
   invariant(product.chain_write === false && product.liquidity_authority === false && product.status === "PRODUCT_CANDIDATE_ARCHITECTURE_ONLY", "AUTO_LP_AUTHORITY_NOT_GRANTED", "Auto LP remains a non-executable product candidate");
   invariant(product.accounting_profile !== "COMPANY_INVESTMENT", "AUTO_LP_INVESTMENT_SEPARATION", "Liquidity service and Company investment require separate accounting and risk profiles");
   return product;
+}
+
+export const K18921_AUTO_LP_PAIRS = Object.freeze(["KAIOS/USDT", "KAIOS/WBNB", "KAIOS/KGEN", "KGEN/WBNB"]);
+
+function positiveFinite(value, code, message) {
+  const number = Number(value);
+  invariant(Number.isFinite(number) && number > 0, code, message);
+  return number;
+}
+
+function approximatelyEqual(left, right, tolerance = 1e-9) {
+  const leftNumber = Number(left);
+  const rightNumber = Number(right);
+  return Number.isFinite(leftNumber) && Number.isFinite(rightNumber)
+    && Math.abs(leftNumber - rightNumber) <= tolerance * Math.max(1, Math.abs(leftNumber), Math.abs(rightNumber));
+}
+
+function strictIsoTimestamp(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) return false;
+  const timestamp = Date.parse(value);
+  const normalized = value.includes(".") ? value : value.replace("Z", ".000Z");
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString() === normalized;
+}
+
+export function validateAutoLpMarketQuote(quote, { observedAt, maxAgeMs = 120_000 } = {}) {
+  requireFields(quote, ["source", "symbol", "price", "source_timestamp", "received_timestamp", "freshness", "status"], "AutoLpMarketQuote");
+  invariant(typeof quote.source === "string" && quote.source.trim(), "AUTO_LP_QUOTE_SOURCE_REQUIRED", "Auto LP quote requires a named source");
+  invariant(["KGEN/WBNB", "BNB/USDT"].includes(quote.symbol), "AUTO_LP_QUOTE_SYMBOL_INVALID", "Auto LP quote symbol is not supported");
+  positiveFinite(quote.price, "AUTO_LP_QUOTE_PRICE_INVALID", "Auto LP quote price must be positive and finite");
+  invariant(quote.status === "AVAILABLE" && quote.freshness === "FRESH", "AUTO_LP_QUOTE_NOT_FRESH", "STALE, WAIT, INVALID or unavailable quotes cannot increase liquidity risk");
+  const sourceMs = Date.parse(quote.source_timestamp);
+  const receivedMs = Date.parse(quote.received_timestamp);
+  const observedMs = Date.parse(observedAt);
+  invariant(strictIsoTimestamp(quote.source_timestamp) && strictIsoTimestamp(quote.received_timestamp) && strictIsoTimestamp(observedAt), "AUTO_LP_QUOTE_TIME_INVALID", "Auto LP quote timestamps must be strict UTC ISO timestamps");
+  invariant(sourceMs <= receivedMs && receivedMs <= observedMs, "AUTO_LP_QUOTE_SEQUENCE_INVALID", "Auto LP quote timestamps must follow source, received, observed sequence");
+  invariant(Number.isInteger(maxAgeMs) && maxAgeMs > 0 && observedMs - sourceMs <= maxAgeMs, "AUTO_LP_QUOTE_STALE", "Auto LP quote exceeds the declared freshness window");
+  return quote;
+}
+
+export function calculateK18921CrossRates({ kgenWbnbQuote, bnbUsdtQuote, kaiosUsdtReference, observedAt, maxAgeMs = 120_000, maxSourceSkewMs = 30_000 }) {
+  validateAutoLpMarketQuote(kgenWbnbQuote, { observedAt, maxAgeMs });
+  validateAutoLpMarketQuote(bnbUsdtQuote, { observedAt, maxAgeMs });
+  invariant(kgenWbnbQuote.symbol === "KGEN/WBNB" && bnbUsdtQuote.symbol === "BNB/USDT", "AUTO_LP_QUOTE_ROLE_MISMATCH", "Cross-rate inputs must preserve their exact pair roles");
+  invariant(Number.isInteger(maxSourceSkewMs) && maxSourceSkewMs >= 0 && Math.abs(Date.parse(kgenWbnbQuote.source_timestamp) - Date.parse(bnbUsdtQuote.source_timestamp)) <= maxSourceSkewMs, "AUTO_LP_QUOTE_TIME_SKEW", "Cross-rate observations exceed the allowed source-time skew");
+  requireFields(kaiosUsdtReference, ["price", "source", "classification"], "KaiosUsdtReference");
+  invariant(typeof kaiosUsdtReference.source === "string" && kaiosUsdtReference.source.trim(), "KAIOS_REFERENCE_SOURCE_REQUIRED", "KAIOS reference target requires a named policy source");
+  const kaiosUsdt = positiveFinite(kaiosUsdtReference.price, "KAIOS_REFERENCE_PRICE_INVALID", "KAIOS reference price must be positive and finite");
+  invariant(kaiosUsdtReference.classification === "REFERENCE_TARGET_NOT_PEG", "KAIOS_REFERENCE_NOT_GUARANTEE", "KAIOS pricing input must be labelled as a reference target, never a guaranteed peg");
+  const kgenWbnb = Number(kgenWbnbQuote.price);
+  const bnbUsdt = Number(bnbUsdtQuote.price);
+  const kgenUsdt = positiveFinite(kgenWbnb * bnbUsdt, "AUTO_LP_CROSS_RATE_INVALID", "Derived KGEN/USDT rate must be positive and finite");
+  return Object.freeze({
+    status: "SIMULATION_INPUTS_STRUCTURALLY_VALIDATED",
+    mode: "READ_CALCULATE_ONLY_NO_CHAIN_WRITE",
+    observed_at: observedAt,
+    rates: Object.freeze({
+      "KGEN/WBNB": kgenWbnb,
+      "BNB/USDT": bnbUsdt,
+      "KGEN/USDT": kgenUsdt,
+      "KAIOS/USDT": kaiosUsdt,
+      "KAIOS/WBNB": kaiosUsdt / bnbUsdt,
+      "KAIOS/KGEN": kaiosUsdt / kgenUsdt
+    }),
+    sources: Object.freeze({
+      "KGEN/WBNB": kgenWbnbQuote.source,
+      "BNB/USDT": bnbUsdtQuote.source,
+      "KAIOS/USDT": kaiosUsdtReference.source
+    }),
+    kaios_reference_classification: kaiosUsdtReference.classification,
+    chain_write: false,
+    liquidity_authority: false
+  });
+}
+
+function usdPrices(rates) {
+  requireFields(rates, ["KGEN/USDT", "BNB/USDT", "KAIOS/USDT"], "AutoLpCrossRates");
+  return Object.freeze({
+    KGEN: positiveFinite(rates["KGEN/USDT"], "AUTO_LP_RATE_INVALID", "KGEN/USDT rate must be positive"),
+    KAIOS: positiveFinite(rates["KAIOS/USDT"], "AUTO_LP_RATE_INVALID", "KAIOS/USDT reference must be positive"),
+    WBNB: positiveFinite(rates["BNB/USDT"], "AUTO_LP_RATE_INVALID", "BNB/USDT rate must be positive"),
+    USDT: 1
+  });
+}
+
+export function calculateK18921InitialLiquidity({ pair, totalValueUsd, rates }) {
+  invariant(K18921_AUTO_LP_PAIRS.includes(pair), "AUTO_LP_PAIR_INVALID", "Pair is not registered for K18921 simulation");
+  const totalUsd = positiveFinite(totalValueUsd, "AUTO_LP_CAPITAL_INVALID", "Simulated LP capital must be positive and finite");
+  const [tokenA, tokenB] = pair.split("/");
+  const prices = usdPrices(rates);
+  const sideUsd = totalUsd / 2;
+  const tokenAAmount = sideUsd / prices[tokenA];
+  const tokenBAmount = sideUsd / prices[tokenB];
+  return Object.freeze({
+    pair,
+    mode: "SIMULATION_ONLY",
+    token_a: tokenA,
+    token_b: tokenB,
+    token_a_amount: tokenAAmount,
+    token_b_amount: tokenBAmount,
+    usd_value_a: tokenAAmount * prices[tokenA],
+    usd_value_b: tokenBAmount * prices[tokenB],
+    initial_price_token_b_per_token_a: prices[tokenA] / prices[tokenB],
+    expected_tvl_usd: totalUsd,
+    expected_lp_token_estimate: Math.sqrt(tokenAAmount * tokenBAmount),
+    lp_token_estimate_classification: "UNSCALED_CONSTANT_PRODUCT_SIMULATION_NOT_MINT_QUOTE",
+    accounting_class: "LP_CAPITAL_SIMULATION",
+    chain_write: false
+  });
+}
+
+export function simulateK18921ConstantProductSwap({ reserveIn, reserveOut, amountIn, feeBps, transferTaxInBps, transferTaxOutBps }) {
+  const x = positiveFinite(reserveIn, "AUTO_LP_RESERVE_INVALID", "Input reserve must be positive and finite");
+  const y = positiveFinite(reserveOut, "AUTO_LP_RESERVE_INVALID", "Output reserve must be positive and finite");
+  const input = positiveFinite(amountIn, "AUTO_LP_SWAP_SIZE_INVALID", "Simulated swap size must be positive and finite");
+  invariant(Number.isInteger(feeBps) && feeBps >= 0 && feeBps < 10_000, "AUTO_LP_FEE_INVALID", "Simulation fee must be explicit integer basis points below 10000");
+  invariant(Number.isInteger(transferTaxInBps) && transferTaxInBps >= 0 && transferTaxInBps < 10_000, "AUTO_LP_TRANSFER_TAX_INVALID", "Input transfer tax must be an explicit integer basis-point observation");
+  invariant(Number.isInteger(transferTaxOutBps) && transferTaxOutBps >= 0 && transferTaxOutBps < 10_000, "AUTO_LP_TRANSFER_TAX_INVALID", "Output transfer tax must be an explicit integer basis-point observation");
+  const receivedInput = input * (1 - transferTaxInBps / 10_000);
+  const effectiveInput = receivedInput * (1 - feeBps / 10_000);
+  const curveOnlyOut = y * receivedInput / (x + receivedInput);
+  const amountOutBeforeTax = y * effectiveInput / (x + effectiveInput);
+  const amountOut = amountOutBeforeTax * (1 - transferTaxOutBps / 10_000);
+  const spotPriceBefore = y / x;
+  const executionPrice = amountOut / input;
+  const nextReserveIn = x + receivedInput;
+  const nextReserveOut = y - amountOutBeforeTax;
+  const spotPriceAfter = nextReserveOut / nextReserveIn;
+  return Object.freeze({
+    mode: "SIMULATION_ONLY",
+    amount_in: input,
+    amount_received_by_pool: receivedInput,
+    amount_in_after_fee: effectiveInput,
+    amount_out_before_transfer_tax: amountOutBeforeTax,
+    amount_out: amountOut,
+    spot_price_before: spotPriceBefore,
+    execution_price: executionPrice,
+    spot_price_after: spotPriceAfter,
+    price_impact_bps: Math.max(0, (spotPriceBefore - curveOnlyOut / receivedInput) / spotPriceBefore * 10_000),
+    amm_fee_impact_bps: Math.max(0, (curveOnlyOut - amountOutBeforeTax) / curveOnlyOut * 10_000),
+    total_execution_deviation_bps: Math.max(0, (spotPriceBefore - executionPrice) / spotPriceBefore * 10_000),
+    slippage_at_size_bps: Math.max(0, (spotPriceBefore - executionPrice) / spotPriceBefore * 10_000),
+    reserve_price_change_bps: Math.abs(spotPriceAfter - spotPriceBefore) / spotPriceBefore * 10_000,
+    next_reserve_in: nextReserveIn,
+    next_reserve_out: nextReserveOut,
+    constant_product_before: x * y,
+    constant_product_after: nextReserveIn * nextReserveOut,
+    fee_bps: feeBps,
+    transfer_tax_in_bps: transferTaxInBps,
+    transfer_tax_out_bps: transferTaxOutBps,
+    chain_write: false
+  });
+}
+
+export function calculateK18921ImpermanentLossScenarios(priceMultipliers) {
+  requireArray(priceMultipliers, "auto_lp.price_multipliers");
+  invariant(priceMultipliers.length > 0, "AUTO_LP_IL_SCENARIO_REQUIRED", "At least one price multiplier is required");
+  return Object.freeze(priceMultipliers.map((value) => {
+    const multiplier = positiveFinite(value, "AUTO_LP_IL_MULTIPLIER_INVALID", "IL price multiplier must be positive and finite");
+    const relativeValue = 2 * Math.sqrt(multiplier) / (1 + multiplier);
+    const loss = 1 - relativeValue;
+    return Object.freeze({ price_multiplier: multiplier, lp_value_relative_to_hold: relativeValue, impermanent_loss_ratio: loss, impermanent_loss_percent: loss * 100 });
+  }));
+}
+
+export function simulateK18921AutoLp({ pair, totalValueUsd, rates, feeBps, transferTaxBps, transferTaxContext, swapSizesUsd, priceMultipliers }) {
+  requireArray(swapSizesUsd, "auto_lp.swap_sizes_usd");
+  requireFields(transferTaxBps, ["KAIOS", "USDT", "WBNB", "KGEN"], "AutoLpTransferTaxObservations");
+  requireFields(transferTaxContext, ["source", "classification", "direction", "sender_context", "recipient_context", "exemption_state"], "AutoLpTransferTaxContext");
+  invariant(transferTaxContext.classification === "SIMULATION_ASSUMPTION_NOT_LIVE_TAX_QUOTE", "AUTO_LP_TAX_CONTEXT_INVALID", "Auto LP transfer-tax inputs must remain explicit simulation assumptions until pair, direction and exemption state are verified");
+  for (const field of ["source", "direction", "sender_context", "recipient_context", "exemption_state"]) invariant(typeof transferTaxContext[field] === "string" && transferTaxContext[field].trim(), "AUTO_LP_TAX_CONTEXT_INVALID", `Auto LP transfer-tax context requires ${field}`);
+  invariant(swapSizesUsd.length > 0, "AUTO_LP_SWAP_SCENARIO_REQUIRED", "At least one swap-size scenario is required");
+  const plan = calculateK18921InitialLiquidity({ pair, totalValueUsd, rates });
+  const prices = usdPrices(rates);
+  const impacts = swapSizesUsd.map((sizeUsd) => {
+    const usd = positiveFinite(sizeUsd, "AUTO_LP_SWAP_SIZE_INVALID", "Swap-size scenario must be positive and finite");
+    const result = simulateK18921ConstantProductSwap({ reserveIn: plan.token_a_amount, reserveOut: plan.token_b_amount, amountIn: usd / prices[plan.token_a], feeBps, transferTaxInBps: transferTaxBps[plan.token_a], transferTaxOutBps: transferTaxBps[plan.token_b] });
+    return Object.freeze({ size_usd: usd, ...result });
+  });
+  return Object.freeze({
+    node_id: "K18921",
+    product_id: "AI_ANT_AUTO_LP",
+    status: "SIMULATION_COMPLETE_NO_EXECUTION_AUTHORITY",
+    plan,
+    impacts: Object.freeze(impacts),
+    impermanent_loss_scenarios: calculateK18921ImpermanentLossScenarios(priceMultipliers),
+    transfer_tax_context: Object.freeze({ ...transferTaxContext }),
+    rebalance_requirement: "RECALCULATE_EQUAL_VALUE_SIDES_WHEN_VALIDATED_MARKET_INPUTS_CHANGE",
+    accounting_boundaries: Object.freeze(["LP_CAPITAL", "OPERATING_EXPENSE", "GAME_REVENUE", "FREIGHT_COST", "CREATOR_ROYALTY", "LIQUIDITY_GAIN_LOSS"]),
+    chain_write: false,
+    add_liquidity_authority: false,
+    transfer_authority: false
+  });
+}
+
+export function createK18921LiquidityStatusProjection({ crossRates, simulations, observedAt }) {
+  requireArray(simulations, "auto_lp.simulations");
+  invariant(crossRates?.status === "SIMULATION_INPUTS_STRUCTURALLY_VALIDATED" && crossRates.mode === "READ_CALCULATE_ONLY_NO_CHAIN_WRITE" && crossRates.chain_write === false && crossRates.liquidity_authority === false, "AUTO_LP_PROJECTION_EVIDENCE_REQUIRED", "11520 liquidity projection requires structurally validated no-authority rates");
+  invariant(observedAt === crossRates.observed_at && strictIsoTimestamp(observedAt), "AUTO_LP_PROJECTION_TIME_MISMATCH", "11520 liquidity projection must preserve the strict UTC cross-rate observation time");
+  const rates = crossRates.rates;
+  const prices = usdPrices(rates);
+  for (const pair of ["KGEN/WBNB", "KAIOS/WBNB", "KAIOS/KGEN"]) positiveFinite(rates?.[pair], "AUTO_LP_PROJECTION_RATE_INVALID", "11520 liquidity projection requires every positive registered cross-rate");
+  invariant(approximatelyEqual(rates["KGEN/WBNB"], rates["KGEN/USDT"] / rates["BNB/USDT"])
+    && approximatelyEqual(rates["KAIOS/WBNB"], rates["KAIOS/USDT"] / rates["BNB/USDT"])
+    && approximatelyEqual(rates["KAIOS/KGEN"], rates["KAIOS/USDT"] / rates["KGEN/USDT"]), "AUTO_LP_PROJECTION_RATE_MISMATCH", "11520 liquidity projection cross-rates must remain internally consistent");
+  invariant(crossRates.kaios_reference_classification === "REFERENCE_TARGET_NOT_PEG", "AUTO_LP_PROJECTION_REFERENCE_INVALID", "11520 liquidity projection cannot present the KAIOS reference target as a peg");
+  const projectedPairs = simulations.map((simulation) => simulation?.plan?.pair);
+  invariant(simulations.length === K18921_AUTO_LP_PAIRS.length && new Set(projectedPairs).size === K18921_AUTO_LP_PAIRS.length && K18921_AUTO_LP_PAIRS.every((pair) => projectedPairs.includes(pair)), "AUTO_LP_PROJECTION_PAIR_INVALID", "11520 liquidity projection requires every registered pair exactly once");
+  for (const simulation of simulations) {
+    invariant(simulation.status === "SIMULATION_COMPLETE_NO_EXECUTION_AUTHORITY" && simulation.chain_write === false && simulation.add_liquidity_authority === false && simulation.transfer_authority === false, "AUTO_LP_PROJECTION_AUTHORITY_INVALID", "11520 liquidity projection accepts simulation-only no-authority results");
+    const plan = simulation.plan;
+    const [tokenA, tokenB] = plan.pair.split("/");
+    const tvl = positiveFinite(plan.expected_tvl_usd, "AUTO_LP_PROJECTION_VALUE_INVALID", "Simulated TVL must be positive");
+    const amountA = positiveFinite(plan.token_a_amount, "AUTO_LP_PROJECTION_VALUE_INVALID", "Simulated reserve A must be positive");
+    const amountB = positiveFinite(plan.token_b_amount, "AUTO_LP_PROJECTION_VALUE_INVALID", "Simulated reserve B must be positive");
+    invariant(plan.mode === "SIMULATION_ONLY" && plan.chain_write === false && plan.token_a === tokenA && plan.token_b === tokenB, "AUTO_LP_PROJECTION_PLAN_INVALID", "Projected plan must preserve pair identity and simulation-only authority");
+    invariant(approximatelyEqual(plan.usd_value_a, tvl / 2) && approximatelyEqual(plan.usd_value_b, tvl / 2)
+      && approximatelyEqual(amountA * prices[tokenA], tvl / 2) && approximatelyEqual(amountB * prices[tokenB], tvl / 2)
+      && approximatelyEqual(plan.initial_price_token_b_per_token_a, prices[tokenA] / prices[tokenB]), "AUTO_LP_PROJECTION_PLAN_MISMATCH", "Projected reserves must be recomputable from the validated cross-rates");
+    requireArray(simulation.impacts, "auto_lp.projection.impacts");
+    requireArray(simulation.impermanent_loss_scenarios, "auto_lp.projection.il_scenarios");
+    const taxContext = simulation.transfer_tax_context;
+    requireFields(taxContext, ["source", "classification", "direction", "sender_context", "recipient_context", "exemption_state"], "AutoLpProjectionTaxContext");
+    invariant(taxContext.classification === "SIMULATION_ASSUMPTION_NOT_LIVE_TAX_QUOTE" && ["source", "direction", "sender_context", "recipient_context", "exemption_state"].every((field) => typeof taxContext[field] === "string" && taxContext[field].trim()), "AUTO_LP_PROJECTION_TAX_CONTEXT_INVALID", "Projected transfer tax requires complete simulation-only context");
+    invariant(simulation.impacts.length > 0, "AUTO_LP_PROJECTION_IMPACT_INVALID", "Projected impact scenarios are required");
+    for (const item of simulation.impacts) {
+      const expected = simulateK18921ConstantProductSwap({ reserveIn: amountA, reserveOut: amountB, amountIn: item?.amount_in, feeBps: item?.fee_bps, transferTaxInBps: item?.transfer_tax_in_bps, transferTaxOutBps: item?.transfer_tax_out_bps });
+      const recomputedFields = ["amount_received_by_pool", "amount_in_after_fee", "amount_out_before_transfer_tax", "amount_out", "spot_price_before", "execution_price", "spot_price_after", "price_impact_bps", "amm_fee_impact_bps", "total_execution_deviation_bps", "slippage_at_size_bps", "reserve_price_change_bps", "next_reserve_in", "next_reserve_out", "constant_product_before", "constant_product_after"];
+      invariant(Number.isFinite(item?.size_usd) && item.size_usd > 0 && approximatelyEqual(item.size_usd, item.amount_in * prices[tokenA]) && recomputedFields.every((field) => approximatelyEqual(item[field], expected[field])), "AUTO_LP_PROJECTION_IMPACT_INVALID", "Projected impact scenarios must be recomputable from reserves, fee and explicit tax assumptions");
+    }
+    invariant(simulation.impermanent_loss_scenarios.length > 0, "AUTO_LP_PROJECTION_IL_INVALID", "Projected IL scenarios are required");
+    for (const item of simulation.impermanent_loss_scenarios) {
+      const expected = calculateK18921ImpermanentLossScenarios([item?.price_multiplier])[0];
+      invariant(approximatelyEqual(item?.lp_value_relative_to_hold, expected.lp_value_relative_to_hold) && approximatelyEqual(item?.impermanent_loss_ratio, expected.impermanent_loss_ratio) && approximatelyEqual(item?.impermanent_loss_percent, expected.impermanent_loss_percent), "AUTO_LP_PROJECTION_IL_INVALID", "Projected IL must be recomputable from its price multiplier");
+    }
+  }
+  return Object.freeze({
+    projection_id: "K18921_LIQUIDITY_STATUS",
+    producer: "K18921_AI_ANT_AUTO_LP",
+    consumer: "K11520_READ_ONLY",
+    observed_at: observedAt,
+    market_rates: rates,
+    pairs: Object.freeze(simulations.map((simulation) => Object.freeze({
+      pair: simulation.plan.pair,
+      reserves: Object.freeze({ token_a: simulation.plan.token_a_amount, token_b: simulation.plan.token_b_amount }),
+      tvl_usd: simulation.plan.expected_tvl_usd,
+      slippage_scenarios: simulation.impacts.map((item) => Object.freeze({ size_usd: item.size_usd, slippage_bps: item.slippage_at_size_bps })),
+      liquidity_health: "SIMULATED_NOT_DEPLOYED"
+    }))),
+    kaios_reference_price: crossRates.rates["KAIOS/USDT"],
+    kgen_reference_price: crossRates.rates["KGEN/USDT"],
+    truth_classification: "SIMULATION",
+    live_reserves: false,
+    deployed_pairs_verified: false,
+    chain_write: false
+  });
+}
+
+const UNIVERSE_POINT_PRODUCT_STATUSES = Object.freeze(["ACTIVE_BRANCH", "HISTORICAL_DESIGN", "NOT_IMPLEMENTED", "UNKNOWN"]);
+const UNIVERSE_POINT_RND_STATUSES = Object.freeze(["ACTIVE_RND", "RESEARCH_REQUIRED", "BLOCKED", "UNKNOWN"]);
+const UNIVERSE_POINT_DEPLOYMENT_STATUSES = Object.freeze(["NOT_DEPLOYED", "UNKNOWN"]);
+const UNIVERSE_123_CANONICAL_IDENTITY_SHA256 = "d4b085c5c55e18a0dff584862f3f3499565cbb0b22de913c8a833a000a8b78c7";
+
+export async function buildUniverse123PointRndMap({ canonicalMap, evidenceByPoint = {}, generatedAt }) {
+  invariant(canonicalMap?.version === "KLINE_UNIVERSE_MAP_V10_2_DISTANCE_COMPLETE_ALL_POINTS", "UNIVERSE_123_CANONICAL_VERSION_INVALID", "R&D overlay requires the formal V10.2 canonical map");
+  const canonicalPoints = canonicalMap?.layers?.main_universe?.points;
+  const sortedIndex = canonicalMap?.point_index_sorted;
+  requireArray(canonicalPoints, "universe_123.canonical_points");
+  requireArray(sortedIndex, "universe_123.point_index_sorted");
+  invariant(canonicalPoints.length === 123, "UNIVERSE_123_POINT_COUNT_INVALID", "The canonical Universe map must contain exactly 123 points");
+  invariant(sortedIndex.length === 123 && canonicalMap?.meta?.total_points === 123, "UNIVERSE_123_POINT_COUNT_INVALID", "The canonical map and its derived index must agree on 123 points");
+  invariant(evidenceByPoint && typeof evidenceByPoint === "object" && !Array.isArray(evidenceByPoint), "UNIVERSE_123_EVIDENCE_INVALID", "Point R&D evidence must be keyed by canonical point ID");
+  invariant(strictIsoTimestamp(generatedAt), "UNIVERSE_123_GENERATED_AT_INVALID", "Point R&D map requires a strict UTC ISO generation timestamp");
+  const ids = canonicalPoints.map((point) => point?.id);
+  invariant(ids.every((id) => typeof id === "string" && id.trim()), "UNIVERSE_123_POINT_ID_REQUIRED", "Every Universe point requires its canonical ID");
+  invariant(new Set(ids).size === canonicalPoints.length, "UNIVERSE_123_POINT_ID_DUPLICATE", "Universe point identity must be unique even when coordinates are shared");
+  invariant(canonicalPoints.every((point) => Number.isFinite(Number(point.coord))), "UNIVERSE_123_COORD_INVALID", "Every canonical point requires a finite coordinate");
+  const pointById = new Map(canonicalPoints.map((point) => [point.id, point]));
+  invariant(sortedIndex.every((indexPoint) => {
+    const source = pointById.get(indexPoint?.id);
+    return source && String(source.coord) === String(indexPoint.coord) && source.name === indexPoint.name && source.type === indexPoint.type;
+  }), "UNIVERSE_123_INDEX_MISMATCH", "The derived point index must match every canonical point identity and coordinate");
+  invariant(new Set(sortedIndex.map((point) => point.id)).size === canonicalPoints.length, "UNIVERSE_123_INDEX_MISMATCH", "The derived point index must be a bijection over canonical point IDs");
+  const identityFingerprint = await sha256(canonicalPoints.map(({ id, coord, name, type }) => ({ id, coord, name, type })));
+  invariant(identityFingerprint === UNIVERSE_123_CANONICAL_IDENTITY_SHA256, "UNIVERSE_123_CANONICAL_FINGERPRINT_MISMATCH", "R&D overlay input does not match the repository's formal 123-point identity manifest");
+  invariant(Object.keys(evidenceByPoint).every((id) => ids.includes(id)), "UNIVERSE_123_EVIDENCE_POINT_UNKNOWN", "R&D evidence cannot create a second point identity");
+
+  const entries = canonicalPoints.map((point) => {
+    const evidence = evidenceByPoint[point.id] ?? {};
+    const productStatus = evidence.product_status ?? "NOT_IMPLEMENTED";
+    const rndStatus = evidence.rnd_status ?? "RESEARCH_REQUIRED";
+    const deploymentStatus = evidence.deployment_status ?? "UNKNOWN";
+    invariant(UNIVERSE_POINT_PRODUCT_STATUSES.includes(productStatus), "UNIVERSE_123_PRODUCT_STATUS_INVALID", "Point product status is not canonical");
+    invariant(UNIVERSE_POINT_RND_STATUSES.includes(rndStatus), "UNIVERSE_123_RND_STATUS_INVALID", "Point R&D status is not canonical");
+    invariant(UNIVERSE_POINT_DEPLOYMENT_STATUSES.includes(deploymentStatus), "UNIVERSE_123_DEPLOYMENT_STATUS_INVALID", "Point deployment status is not canonical");
+    const dependencies = evidence.dependencies ?? [];
+    requireArray(dependencies, `universe_123.${point.id}.dependencies`);
+    const hasNonDefaultClaim = productStatus !== "NOT_IMPLEMENTED" || rndStatus !== "RESEARCH_REQUIRED" || deploymentStatus !== "UNKNOWN" || evidence.current_product || evidence.next_feature;
+    invariant(!hasNonDefaultClaim || (typeof evidence.evidence === "string" && evidence.evidence.trim()), "UNIVERSE_123_EVIDENCE_REFERENCE_REQUIRED", "Non-default R&D overlay claims require an evidence reference and remain caller-referenced, not authoritative");
+    return Object.freeze({
+      point_id: point.id,
+      current_product: evidence.current_product ?? null,
+      product_status: productStatus,
+      next_feature: evidence.next_feature ?? null,
+      next_rnd: evidence.next_rnd ?? "CLASSIFY_POINT_ROLE_AND_EVIDENCE",
+      rnd_status: rndStatus,
+      blocker: evidence.blocker ?? "DOMAIN_EVIDENCE_NOT_RECONCILED",
+      dependencies: Object.freeze([...dependencies]),
+      deployment_status: deploymentStatus,
+      evidence: evidence.evidence ?? null
+    });
+  });
+
+  const coordinateCounts = new Map();
+  for (const point of canonicalPoints) {
+    const key = String(point.coord);
+    coordinateCounts.set(key, (coordinateCounts.get(key) ?? 0) + 1);
+  }
+  invariant(coordinateCounts.size === 108 && [...coordinateCounts.values()].filter((count) => count > 1).length === 13, "UNIVERSE_123_GEOMETRY_INVARIANT_INVALID", "The formal map must preserve 108 coordinates and 13 duplicate-coordinate groups");
+  return Object.freeze({
+    map_id: "UNIVERSE_123_POINT_RND_MAP",
+    source_of_identity: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#layers.main_universe.points.id",
+    source_identity_sha256: identityFingerprint,
+    generated_at: generatedAt,
+    point_count: entries.length,
+    unique_coordinate_count: coordinateCounts.size,
+    duplicate_coordinate_group_count: [...coordinateCounts.values()].filter((count) => count > 1).length,
+    geometry_authority: "EXTERNAL_CANONICAL_MAP_NOT_DUPLICATED",
+    physics_authority: "KGEN_UNIVERSE_PHYSICS_RUNTIME_CURRENT_NOT_OVERRIDDEN",
+    evidence_classification: "CALLER_REFERENCES_RECORDED_NOT_EXTERNAL_AUTHORITY",
+    entries: Object.freeze(entries),
+    chain_write: false,
+    deployment_authority: false
+  });
 }
 
 export function validateTreasuryOsProduct(product) {
