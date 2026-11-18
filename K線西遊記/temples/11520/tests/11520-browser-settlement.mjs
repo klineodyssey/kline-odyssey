@@ -6,6 +6,9 @@ import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
 // Trading regressions explicitly disclose the retained control panel. Default
 // gameplay no longer opens C/lots or a fixed disc merely because it was touched.
 async function showRetainedControls(page){
+  // Only the immutable pre-disclosure baseline uses its original visible
+  // controls. Keep its native Submit reproduction, not the new UI setup.
+  if(process.argv.includes('--simulation-offline-baseline'))return;
   if(await page.locator('html').evaluate(el=>el.classList.contains('k11520ControlsOpen')))return;
   if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
   if(!await page.locator('#k11520UiSettings').evaluate(el=>el.classList.contains('open')))await page.locator('#gameModeToggle').click();

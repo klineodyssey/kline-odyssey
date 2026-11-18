@@ -427,6 +427,24 @@ test('Camera Recenter is context-only and never gains movement or settlement aut
   assert.ok(main.includes('cameraView.manual=true;cameraGesture=true;syncCameraResetContext();return;'),'existing pinch owner must reveal Recenter');assert.ok(main.includes('showCameraStatus();syncCameraResetContext()};'),'existing Recenter handler must hide its own control again');
 });
 
+test('floating movement follows the player while idle and explicit camera modes keep their original focus rules',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  class Camera{constructor(){this.position={x:0,y:4.2,z:-8.5};this.userData={}}lookAt(x,y,z){this.lastTarget={x,y,z};return this.lastTarget}}
+  const context={THREE:{PerspectiveCamera:Camera},is11520Game:true};
+  runInNewContext(mobileShell.slice(mobileShell.indexOf('function installDeadZoneCamera(){'),mobileShell.indexOf('function installGameChat(){'))+'installDeadZoneCamera();',context);
+  const camera=new Camera();camera.lookAt(0,.8,1.8);camera.position={x:10,y:4.2,z:-8.5};camera.lookAt(10,.8,1.8);
+  assert.ok(camera.position.x>0&&camera.position.x<10,'ordinary non-floating movement retains the original dead zone');
+  for(const focus of ['PLAYER_CONTROL','PLAYER_HOME','MANUAL_CAMERA']){
+    camera.userData.k11520NavigationFocus=focus;camera.position={x:20,y:8,z:12};camera.lookAt(20,4,22);
+    assert.deepEqual(camera.position,{x:20,y:8,z:12},focus+' leaves the canonical camera position intact');assert.deepEqual(camera.lastTarget,{x:20,y:4,z:22});
+  }
+  delete camera.userData.k11520NavigationFocus;camera.position={x:20,y:8,z:12};camera.lookAt(20,4,22);assert.deepEqual(camera.position,{x:20,y:8,z:12},'release resumes the dead zone from the last actual focus without a jump');
+  const assignment=main.split('\n').find(line=>line.includes('camera.userData.k11520NavigationFocus='));assert.ok(assignment);
+  for(const [manual,recenter,floating,home,expected] of [[false,false,true,false,'PLAYER_CONTROL'],[false,false,false,false,null],[true,false,true,false,'MANUAL_CAMERA'],[false,true,true,false,'MANUAL_CAMERA'],[false,false,false,true,'PLAYER_HOME']]){
+    const ctx={camera:{userData:{}},cameraView:{manual},cameraRecenterPending:recenter,controlState:()=>({floating:{active:floating}}),playerHomeFraming:home,__K11520_XYZ_MAP_NAVIGATION__:{source:'PLAYER_HOME'}};runInNewContext(assignment,ctx);assert.equal(ctx.camera.userData.k11520NavigationFocus,expected);
+  }
+});
+
 test('World context uses existing mission eligibility, not idle or settled history',async()=>{
   const {runInNewContext}=await import('node:vm');const context={};runInNewContext(mobileShell.slice(mobileShell.indexOf('function contextActionWorldVisibility('),mobileShell.indexOf('function style(){'))+'globalThis.visibility=contextActionWorldVisibility;',context);
   const input={target:null,courier:null,digital:null,playerLifeId:'PLAYER-A',playerPosition:{x:0,y:0,z:0},raidDistance:5,now:2000};const visible=patch=>context.visibility({...input,...patch});
@@ -922,7 +940,8 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Previous integrated navigation body: a8c9d8d4dbd8a259b37ac7fb0f1e4b99623b6b1ba9f42d8b46b71d1e73579c00.
   // Human's floating-control request changes the original canvas arbitration
   // and help text. This pin records those executable bytes, not visual PASS.
-  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'105221614e4f33cecf4ffb9302cbfb6319bdab0552e290989564555767bcc34c'},
+  // Prior floating-input body: 105221614e4f33cecf4ffb9302cbfb6319bdab0552e290989564555767bcc34c.
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'bf5c2cbaacedeba8015c9447753111437afe9f11e4758e2e20ab418a36db0539'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
   'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078'},
   'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'d36f9eeacb703b9540db56e212c9c1c5af428c0386a3b5a56508b9a96f173d03'},

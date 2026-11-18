@@ -1038,7 +1038,7 @@ function applyWorldCamera(){
   camera.position.set(x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2/cameraView.zoom,z-Math.cos(S.camYaw)*dist);
   // Recenter must also reset the existing dead-zone's remembered focus. A zero
   // pan alone leaves the old manual-camera focus inside its hysteresis region.
-  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
+  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':controlState()?.floating?.active?'PLAYER_CONTROL':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
   camera.lookAt(x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,z+Math.cos(S.camYaw)*1.8);
   cameraRecenterPending=false;
   revealPlayerBehindOccluders();
