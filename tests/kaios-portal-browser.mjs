@@ -1333,7 +1333,7 @@ async function verifyVisitorInfo(){
       const legacy=WORLD_REGISTRY.find(world=>world.worldId==='88888');assert.equal(legacy.routeOnly,true);assert.equal(legacy.canonicalWorldId,'12682');
       assert.ok((await context.request.get(new URL(legacy.entryUrl,BASE+'/').href)).ok(),'old bookmark remains reachable');
       assert.equal(await page.locator('#latestVideo a').getAttribute('href'),cached.url);
-      assert.equal(await page.locator('#youtube iframe').getAttribute('src'),'https://www.youtube.com/embed/akp4K_uzJ28?playsinline=1');
+      assert.equal(await page.locator('#youtube iframe').count(),0,'homepage never loads an external frame before explicit playback');assert.ok(await page.locator('.brand-film-play').isVisible());
       await page.waitForFunction(()=>document.querySelectorAll('.visitor-socials a').length===8);
       for(const key of ['youtube','x','telegram','tiktok','facebook_page','instagram','line_official','github']){
         assert.equal(manifest.links[key].status,'VERIFIED');assert.equal(await page.locator('.visitor-socials a').filter({hasText:manifest.links[key].label}).getAttribute('href'),manifest.links[key].url);
@@ -1345,6 +1345,8 @@ async function verifyVisitorInfo(){
       for(const [id,name] of [['youtube','film'],['latestVideo','links'],['support','contact']]){
         await page.locator('#'+id).evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-${name}-${layout}-${width}x${height}`);
       }
+      await page.locator('.brand-film-play').click();await page.locator('#youtube iframe').waitFor();assert.equal(await page.locator('#youtube iframe').getAttribute('src'),'https://www.youtube.com/embed/akp4K_uzJ28?autoplay=1&playsinline=1');
+      await page.frameLocator('#youtube iframe').getByText('外部影片未載入（隔離測試）',{exact:false}).waitFor();await page.locator('.brand-film').evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-film-loaded-${layout}-${width}x${height}`);
       const targets=await page.locator('#youtube a').evaluateAll(anchors=>anchors.filter(a=>a.getClientRects().length).map(a=>({text:a.textContent,height:a.getBoundingClientRect().height})));assert.ok(targets.every(a=>a.height>=44),JSON.stringify(targets));
       for(const hash of ['youtube','community','support']){
         await page.goto(base.href+'#'+hash,{waitUntil:'networkidle'});const box=await page.locator('#'+hash).boundingBox();assert.ok(box&&box.y>=-2&&box.y<height,'restored bookmark '+hash);
@@ -1358,7 +1360,7 @@ async function verifyVisitorInfo(){
       assert.deepEqual(errors,[]);report.profiles.push({layout,width,height,status:'PASS'});
     }finally{await context.close()}
   }
-  report.checks.push('visitor-only: actual README updater snapshot, safe title/URL parsing, 503/invalid-source fallbacks, fixed portrait brand frame, eight canonical VERIFIED socials, contact, four cards, legacy88888 HTTP, restored anchors and local/Pages-prefix routes');
+  report.checks.push('visitor-only: actual README updater snapshot, safe title/URL parsing, 503/invalid-source fallbacks, gesture-loaded portrait brand frame, eight canonical VERIFIED socials, contact, four cards, legacy88888 HTTP, restored anchors and local/Pages-prefix routes');
   report.externalVideo='NOT_VERIFIED: denied live YouTube read preserved; embed replaced with an explicitly labeled isolated-test placeholder; no playback claim';
   report.realPhone='NOT_TESTED';report.latestVideo={source:'existing README updater block',videoId:cached.videoId,currentChannelLatest:'NOT_VERIFIED'};
 }

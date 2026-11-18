@@ -63,8 +63,12 @@ export function parseLatestVideo(readme){
 export function mountVisitorInfo(document,{base=portalBase(),fetcher=globalThis.fetch}={}){
  const section=el(document,'section','section visitor-section');section.id='youtube';section.setAttribute('aria-labelledby','visitorTitle');
  const heading=el(document,'div','section-heading');heading.append(el(document,'p','eyebrow','K-LINE ODYSSEY / STORIES'),el(document,'h2','','走進 K線西遊記'));heading.lastChild.id='visitorTitle';section.append(heading);
- const grid=el(document,'div','visitor-grid'),film=el(document,'div','brand-film'),frame=el(document,'iframe');
- frame.src='https://www.youtube.com/embed/akp4K_uzJ28?playsinline=1';frame.title='K線西遊記官方品牌影片';frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;film.append(frame);
+ const grid=el(document,'div','visitor-grid'),film=el(document,'div','brand-film'),play=el(document,'button','brand-film-play');
+ play.type='button';play.append(el(document,'span','film-play-icon','▶'),el(document,'strong','','播放官方品牌影片'),el(document,'small','','點擊後在本站載入 YouTube 播放器'));film.append(play);
+ // Loading external frames requires the visitor's explicit playback gesture.
+ play.addEventListener('click',()=>{
+  const frame=el(document,'iframe');frame.src='https://www.youtube.com/embed/akp4K_uzJ28?autoplay=1&playsinline=1';frame.title='K線西遊記官方品牌影片';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;film.replaceChildren(frame);
+ });
  const copy=el(document,'div','visitor-copy');copy.append(el(document,'h3','','官方品牌影片'),el(document,'p','visitor-note','從一支影片認識我們的世界。'));
  const original=el(document,'a','visitor-link','在 YouTube 觀看品牌影片 ↗');original.href='https://www.youtube.com/watch?v=akp4K_uzJ28';original.target='_blank';original.rel='noopener noreferrer';copy.append(original);
  const latest=el(document,'div','latest-video');latest.id='latestVideo';latest.setAttribute('aria-live','polite');latest.append(el(document,'h3','','最新影片'),el(document,'p','visitor-note','最近同步的頻道影片；完整最新發布請查看官方頻道。'));
