@@ -1,5 +1,14 @@
 # HANDOFF_CURRENT
 
+## 2026-11-18 原站交付與公開活報價驗收追續（現行）
+
+- PR673 已於 UTC `2026-11-18T03:16:11Z` 合併，正式 main `250759c4868b3326d627dd9a44006c0ad34e366a`；其 tree 與五項 CI／本機實景驗收過的 b754 精確一致。原 Pages44229217198 SUCCESS，公開 build-info 與32項部署程式／HUD／M1來源 raw bytes 全相符。#523 已關閉保留歷史，其普通工程 HOLD 解除；其他具體邊界不變。
+- 公開驗收44229319648的 contextual 六尺寸、25來源核對及六張新圖通過；FullHUD在 pages390 的 `verifyMarketSync` 第二個 map-vs-market 精確斷言失敗（原777:59）。map為 `-35.57054000000001`，market為 `-35.567589999999996`；同輪Combat斷言先過。原報表在失敗後才寫first，axis／完整first／內層時間缺失，不追認一frame lag為已證根因。原ZIP14394982719與failure圖保留；證據 `production-first-failure-summary.json` SHA256 `8e2df7b1bf2c32d904bfff7b832efb7959932d76c858e99cc31601617f045356`。public M1因原needs而SKIPPED，未執行／未驗證。
+- 同 WORK_ID `K11520-SIMULATION-AUTOPILOT-20261118-01` 由 root 單一Writer沿乾淨來源開 `codex/K11520-PUBLIC-QUOTE-SYNC-20261118-01`；只改既有 `tests/11520-browser-responsive.mjs` 與三份累積工程文件。quote callback／main HUD和plane-map原有獨立rAF發布，原僅等LIVE不能證明四個呈現owner同世代。現在沿同一次原LIVE wait、相同預設deadline與poll，取同步market／cards／Combat／map；三市場數值精確一致才回資料深副本，直接驗該副本，保留所有原公式／地址／單位／卡牌／owner斷言。永久不同步仍原期限timeout，永久公式錯仍由原斷言拒絕。
+- assert之前保存initial，timeout也保存first／last及最多16筆只讀失配觀測並清除暫時observer；沒有凍結報價、容差、第二個wait、重試、改actor／產品／Runtime／工作流或放寬時限。原1000ms／max3及所有native／兩尺寸／公開來源檢查保留。語法／diff PASS，尚待本追續提交的原CI與第二次公開完整驗收，不把已部署或raw32核對寫成全驗收完成。
+- 原 main push Responsive44229217067另有不同失敗：cold390 Axe 單次攻擊數為0，原17次決策回讀全未落入 .45–.65m／面向 readiness；原observer另3筆距離入帶但沒有facing/input，不能追認完整ready。243–562ms回讀間出現反覆越帶與方向反轉；原12px最小輸入約1.45m/s，可跨 .35–.82m，大於 .20m帶。只將既有Axe standoff QA比例增益70→18、最小12→2px；2px仍高於原 .02 input死區，原band內5px／其他pursuit70及12保持。新增只讀command證據；保留原5秒、native、一次strike、距離／band／Y／面向全部斷言，不改產品、怪物或碰撞，不重試攻擊。兩位獨立Reviewer靜態NO_BLOCKER，未把未執行候選寫成PASS。原ZIP14395870441／cold390 failure及trace保留。
+- 唯一下一步：原普通追續PR完成既有CI，合格後原main／Pages，再沿自動production workflow_run取得FullHUD與原public M1的before／browser／after證據。KUFO BscScan、原100KAIOS、全球18911及原財務／停止／費用／用量界線沿既有五筆ledger保存。
+
 ## 2026-11-18 Human 授權更新與 PR523 → PR673 接續（最新有效範圍）
 
 - RECORDED_UTC: `2026-11-17T21:16:49Z`; 台灣時間：`2026-11-18T05:16:49+08:00`。

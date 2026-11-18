@@ -767,16 +767,34 @@ async function verifyKSpaceMap(page,report){
   report.kspaceMap={rows,status:'FUNCTIONAL_PASS_SCREENSHOTS_REQUIRE_DIRECT_REVIEW'};
 }
 async function verifyMarketSync(page,report){
-  const read=()=>page.evaluate(()=>({market:globalThis.__K11520_MARKET_K__,combat:globalThis.__K11520_KSPACE_API__.snapshot(),map:globalThis.__K11520_KSPACE_MAP__,cards:[...document.querySelectorAll('[data-market-card]')].map(e=>({axis:e.dataset.marketCard,price:e.querySelector('.q').textContent,k:e.querySelector('.marketKValue')?.textContent}))}));
-  await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE');
-  const first=await read();assert.equal(first.market.markets.length,3);
+  const readMarketState=({requireCoherence=false}={})=>{
+    const sample={market:globalThis.__K11520_MARKET_K__,combat:globalThis.__K11520_KSPACE_API__.snapshot(),map:globalThis.__K11520_KSPACE_MAP__,cards:[...document.querySelectorAll('[data-market-card]')].map(e=>({axis:e.dataset.marketCard,price:e.querySelector('.q').textContent,k:e.querySelector('.marketKValue')?.textContent}))};
+    if(!requireCoherence)return sample;
+    const markets=sample.market?.markets||[],rows=markets.map(m=>({axis:m.axis,price:m.price,marketK:m.k,combatK:sample.combat?.playerK?.[m.axis],mapK:sample.map?.player?.[m.axis],cardPrice:sample.cards.find(c=>c.axis===m.axis)?.price}));
+    const coherent=sample.market?.status==='LIVE'&&markets.length===3&&['KX','KY','KZ'].every(axis=>rows.some(r=>r.axis===axis))&&rows.every(r=>r.combatK===r.marketK&&r.mapK===r.marketK&&Number(String(r.cardPrice).replace(/[^0-9.]/g,''))===r.price);
+    // This observer only records reads. Keep the original LIVE wait's default
+    // deadline/polling, and retain bounded failed samples if coherence never arrives.
+    const evidence=globalThis.marketSyncReadEvidence??={polls:0,first:null,last:null,mismatches:[]},entry={readUTC:new Date().toISOString(),status:sample.market?.status,receivedAt:sample.market?.receivedAt,coherent,rows};
+    evidence.polls++;evidence.first??=entry;evidence.last=entry;
+    if(!coherent){evidence.mismatches.push(entry);if(evidence.mismatches.length>16)evidence.mismatches.shift()}
+    // Do not reread after the wait or expose references that a later publisher
+    // can change before JSHandle.jsonValue serializes the successful sample.
+    return coherent?structuredClone(sample):false;
+  };
+  const read=()=>page.evaluate(readMarketState);let first;
+  try{
+    const sample=await page.waitForFunction(readMarketState,{requireCoherence:true});
+    try{first=await sample.jsonValue()}finally{await sample.dispose()}
+  }finally{
+    report.marketReference={initial:first??null,mode:PRODUCTION?'PUBLIC_READ_ONLY':'CONTROLLED_REFERENCE_FAILURE_RECOVERY',renderSync:await page.evaluate(()=>{const evidence=globalThis.marketSyncReadEvidence;delete globalThis.marketSyncReadEvidence;return evidence??null}).catch(error=>({readbackError:String(error)}))};
+  }
+  assert.equal(first.market.markets.length,3);
   for(const m of first.market.markets){
     assert.ok(Math.abs(m.k-100*(m.price/m.anchor-1))<1e-9);
     const card=first.cards.find(c=>c.axis===m.axis);assert.equal(Number(card.price.replace(/[^0-9.]/g,'')),m.price);assert.equal(card.k,formatUniverseAddress(signedUniverseAddress(m.price)));
     assert.deepEqual(m.universe,signedUniverseAddress(m.price));assert.equal(m.quoteUnit,'USDT');assert.equal(m.relativePercent,m.k);
     assert.equal(first.combat.playerK[m.axis],m.k);assert.equal(first.map.player[m.axis],m.k);
   }
-  report.marketReference={initial:first,mode:PRODUCTION?'PUBLIC_READ_ONLY':'CONTROLLED_REFERENCE_FAILURE_RECOVERY'};
   if(PRODUCTION)return;
   const pattern='https://data-api.binance.vision/api/v3/aggTrades*';
   const setBatch=async rows=>{await page.unroute(pattern);await page.route(pattern,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,rows))}))};
@@ -832,9 +850,14 @@ async function verifyKSpaceGameplay(page,report){
           reached=true;break;
         }
         const error=standoff?planar-.55:planar;
-        let travel=Math.abs(error)<(standoff?.08:.15)?0:Math.sign(error)*Math.min(magnitude,Math.max(12,Math.abs(error)*70));
+        // The original Axe trace crossed the entire .2m readiness band between
+        // 243-562ms native feedback samples. Damp only that standoff controller;
+        // 2px still clears the existing .02 input dead zone. Other pursuits keep
+        // their original gain/minimum and every readiness/deadline assertion.
+        let travel=Math.abs(error)<(standoff?.08:.15)?0:Math.sign(error)*Math.min(magnitude,Math.max(standoff?2:12,Math.abs(error)*(standoff?18:70)));
         if(standoff&&planar>=.45&&planar<=.65)travel=contacts.has(31)?5:12;
         const vertical=Math.abs(relative.y)<.15?0:Math.max(-1,Math.min(1,relative.y*1.5));
+        current.command={error,travel,vertical,standoff};
         if(travel!==0&&!contacts.has(31))await send('touchStart',31,x,y);
         if(vertical!==0&&!contacts.has(32))await send('touchStart',32,rx,ry);
         if(contacts.has(31))contacts.set(31,{id:31,x:x+(planar?relative.x/planar*travel:travel),y:y-(planar?relative.z/planar*travel:0),radiusX:3,radiusY:3,force:1});

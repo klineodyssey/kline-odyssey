@@ -1,5 +1,21 @@
 # KGEN_FRONTEND_INDEX
 
+## Published 11520 candidate / public quote acceptance follow-up — 2026-11-18
+
+PR673 was merged as `250759c4868b3326d627dd9a44006c0ad34e366a` and
+published by the original Pages workflow. Exact public source bytes passed;
+public contextual HUD passed. Full HUD's live map/market equality check failed,
+so public M1 was conditionally skipped and full public acceptance remains open.
+The existing `tests/11520-browser-responsive.mjs` now uses its same original LIVE
+wait to capture one exact, coherent market/card/Combat/map generation and a deep
+copy for the original assertions. It retains the original deadline and polling,
+strict formulas/addresses/units, and bounded read-only failed-sample evidence.
+The same original QA also damps only its Axe standoff input controller after a
+separate main-run trace missed the narrow distance band between native reads.
+The original five-second, single-strike, distance/facing and trusted-input checks
+remain; other pursuits and the product motion/actor/collision owners are unchanged.
+No runtime, quote, economic rule, browser control or workflow limit changes.
+
 ## 11520 navigation / simulation autopilot integration candidate — 2026-11-18
 
 Human has explicitly released #523's ordinary engineering HOLD. Earlier HOLD
