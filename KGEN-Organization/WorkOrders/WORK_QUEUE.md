@@ -31,6 +31,10 @@ Game 原單一 owner 契約與 plane-map 舊 readiness/vector 斷言不一致，
 
 Universal／Portal／Trading／Responsive已PASS，Game的導航300秒總驗收仍未完整：390 PASS，844行為和14圖已完成，末尾控件掃描被時限停止。只合併原scroll／2RAF／真geometry為同次evaluate，原300、native和全部28圖／斷言保持。另原M1橫圖證實真正ControlsClose壓重連，沿mobile-ui-settings前景CSS與原M1／Responsive測試修正；保存偏好及原錢包close錨點。仍同WORK_ID／PR673／單一整合Writer，未完成實景前不發布；沒有新Runtime／排程或資源上限放寬。
 
+### a453 空白世界取點前置
+
+原Game在狹窄矩形首null就退出，後續settlement未執行；原8次／750ms／4000ms與全部導航判定不改，只讓原QA掃實際canvas空白並在原8次內重取、失敗座標去重，保存有界真路由／physical診斷。a453錢包前景六尺寸功能及修後實圖已過，仍與未完成整體驗收分列；不誤記a453曾跑第二次300秒。相同WORK_ID／PR673，下一步原新head CI，不改Runtime或資源上限。
+
 ## Earlier queue records — preserved as history
 
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei

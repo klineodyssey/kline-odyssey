@@ -55,6 +55,14 @@
 - 同head的M1橫圖另有實際視覺不合格：真正 `#k11520ControlsClose`（mobile-ui-settings原owner、left212/top66）壓住重連區，與UtilityMaster不同。只在原Wallet前景暫隱該控制；不改controlsOpen／params／allOn／hidden偏好、master、walletToggle或錨點。原M1六尺寸增加偏好／hidden未改、不可受點、Connect/Refresh真中心hit、close後恢復，並保留原金融核對與圖；原Responsive隔離斷言補此控制。
 - 本段原source1檔／test2檔與既有文件接續；語法／diff PASS，本機套件與Browser執行0。唯一下一步同PR的新精確head原CI300秒與錢包修後實圖驗收；通過後原main／Pages交付。不得把舊757失敗或新未執行項改成全過。
 
+## 2026-11-18 a453 原空白世界取點前置修正
+
+- UTC `2026-11-18T01:44:26Z`／台灣09:44:26。a453 原 Trading 全部 SUCCESS，六尺寸30次錢包前景及60次Connect/Refresh中心命中全過；root另直接看390／844新圖，真正ControlsClose已不壓重連。原contextual Wallet六尺寸隔離及修後圖亦過。這些既有結果保存，不由後續不同QA故障撤銷，也不冒充整體交付。
+- 原 Game `44215933840` 首故障在 plane-map:65 `an actual empty world target must exist`，單次候選為null；原 artifact14388847276 SHA256 `9d758385c849044020fb127317df10aacebfc1b6663f9f34be336b5ce782ba99`，到期UTC `2026-12-02T01:33:49Z`。後續settlement被跳過，a453沒有再次實測300秒，不能誤記成第二次300秒失敗。
+- 原picker只掃寬35–80%、高40–65%的固定小矩形並排中線，首null立即assert，令原8次重取未生效。這不證明整個canvas無空白，亦不推定actor／遮罩的具體根因。僅沿原QA使用實際canvas全可用rect、原20px密度、原radius10 canonical九點判定，cheap DOM先拒、portrait下向上，失敗點去重；null在原8次內續取，不增加等待或timeout。
+- 原native click之後仍須750ms內驗WORLD_GROUND/source/mode/active、target.y=0／distinct與4000ms真物理移動；所有原後續斷言保留。沒有改actor、camera、HUD、hit-test、Runtime或金融規則。最多8列原點選路由／DOM統計／前後physical寫入原artifact；僅失敗時附有界截圖，不重跑原失敗head。
+- sole QA Writer已返還，root只讀複核；語法／diff PASS，沒有新unit／本機browser／真RPC。原讀回 `plane-map-picker-check-20261118T014426475Z.json` SHA256 `451e7dad063796fb819d0f99873d10a6a44f553fd405d45278c4b62436c91944`。唯一下一步新同PR head原CI，同時完成尚未再次執行的300秒整輪；全功能／新head實景合格才原main／Pages交付。
+
 ## Earlier handoff records — preserved as history
 
 STATUS: INITIAL

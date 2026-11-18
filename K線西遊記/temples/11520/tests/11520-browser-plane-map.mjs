@@ -60,17 +60,50 @@ await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD tar
 // Select actual empty world through the existing read-only hit-test, then send
 // a real browser click. Keep the canonical WORLD_GROUND and XYZ assertions.
 const tap0=await coords();let groundNavigationActive=false;
-for(let attempt=0;attempt<8&&!groundNavigationActive;attempt++){
-  const ground=await page.evaluate(()=>{for(let y=innerHeight*.4;y<innerHeight*.65;y+=20)for(let x=innerWidth*.35;x<innerWidth*.8;x+=20)if(Math.abs(x-innerWidth/2)>40&&globalThis.__K11520_CAMERA__?.isWorldGestureArea(x,y,10))return{x,y};return null});
-  assert.ok(ground,'an actual empty world target must exist');await page.mouse.click(ground.x,ground.y);
-  groundNavigationActive=await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_GROUND'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='WORLD',null,{timeout:750}).then(()=>true,()=>false);
-  if(!groundNavigationActive&&await page.locator('#sheet.open').isVisible())await page.locator('#sheetClose').click();
+const groundPickerTrace=[],triedGroundPoints=new Set();let groundPickerError=null;
+await page.evaluate(()=>{
+  const fixture={sequence:0,lastRoute:null},canvas=document.querySelector('#three');
+  fixture.read=point=>{const nav=globalThis.__K11520_XYZ_MAP_NAVIGATION__,owner=point?document.elementFromPoint(point.x,point.y):null;return {at:performance.now(),physical:{...globalThis.__K11520_WORLD_COORDS__?.physical},navigation:nav?{active:nav.active,source:nav.source,mode:nav.mode,target:nav.target?{...nav.target}:null}:null,routeSequence:fixture.sequence,lastRoute:fixture.lastRoute,pointOwner:point?{id:owner?.id||null,tag:owner?.tagName||null}:null}};
+  fixture.onRoute=event=>{const d=event.detail||{};fixture.sequence++;fixture.lastRoute={at:performance.now(),route:d.route,entityType:d.entityType,entityId:d.entityId,x:d.x,y:d.y,z:d.z}};
+  canvas.addEventListener('k11520:world-tap',fixture.onRoute);globalThis.__K11520_QA_GROUND_PICKER__=fixture;
+});
+try{
+  for(let attempt=0;attempt<8&&!groundNavigationActive;attempt++){
+    const pick=await page.evaluate(tried=>{
+      const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),began=performance.now(),radius=10,step=20,visited=new Set(tried),domCache=new Map();
+      const before=__K11520_QA_GROUND_PICKER__.read(),stats={candidates:0,triedRejected:0,domReads:0,domRejected:0,canonicalReads:0,canonicalRejected:0,firstDomBlock:null,lastDomBlock:null};
+      const canvasAt=(x,y)=>{const key=x+','+y;if(!domCache.has(key)){const owner=document.elementFromPoint(x,y);stats.domReads++;domCache.set(key,owner===canvas);if(owner!==canvas){const blocked={x,y,id:owner?.id||null,tag:owner?.tagName||null};stats.firstDomBlock??=blocked;stats.lastDomBlock=blocked}}return domCache.get(key)};
+      const ys=[];for(let y=Math.max(0,r.top)+radius;y<=Math.min(innerHeight,r.bottom)-radius;y+=step)ys.push(y);if(innerWidth<=innerHeight)ys.reverse();
+      const finish=point=>({point,before,stats:{...stats,elapsedMs:performance.now()-began},canvasRect:{x:r.x,y:r.y,width:r.width,height:r.height},radius,step});
+      for(const y of ys)for(let x=Math.max(0,r.left)+radius;x<=Math.min(innerWidth,r.right)-radius;x+=step){
+        stats.candidates++;if(visited.has(x+','+y)){stats.triedRejected++;continue}
+        if(![-radius,0,radius].every(dx=>[-radius,0,radius].every(dy=>canvasAt(x+dx,y+dy)))){stats.domRejected++;continue}
+        stats.canonicalReads++;if(!__K11520_CAMERA__.isWorldGestureArea(x,y,radius)){stats.canonicalRejected++;continue}
+        return finish({x,y});
+      }
+      return finish(null);
+    },[...triedGroundPoints]);
+    const row={attempt:attempt+1,...pick};groundPickerTrace.push(row);
+    if(!pick.point){row.after=await page.evaluate(()=>__K11520_QA_GROUND_PICKER__.read());continue}
+    const ground=pick.point;triedGroundPoints.add(ground.x+','+ground.y);
+    await page.mouse.click(ground.x,ground.y);
+    groundNavigationActive=await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_GROUND'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='WORLD',null,{timeout:750}).then(()=>true,()=>false);
+    row.navigationStarted=groundNavigationActive;row.after=await page.evaluate(point=>__K11520_QA_GROUND_PICKER__.read(point),ground);
+    if(!groundNavigationActive&&await page.locator('#sheet.open').isVisible()){await page.locator('#sheetClose').click();row.entitySheetClosed=true}
+  }
+  assert.equal(groundNavigationActive,true,'a fresh empty-world click must start canonical WORLD_GROUND navigation');
+  const groundTarget=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(groundTarget.y.toFixed(3)),0);assert.ok(Math.abs(groundTarget.x-tap0.x)>.1||Math.abs(groundTarget.z-tap0.z)>.1,'world tap did not create a distinct XYZ target');
+  await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.12},[tap0.x,tap0.y,tap0.z],{timeout:4000});
+  await page.screenshot({path:`${OUT}/11520-world-tap-xyz.png`,fullPage:true});
+  await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD canvas tap QA stop'));
+}catch(error){groundPickerError=String(error?.stack||error).slice(0,4000);throw error}
+finally{
+  const final=await page.evaluate(()=>__K11520_QA_GROUND_PICKER__.read()).catch(()=>null);
+  if(groundPickerTrace.length&&!groundPickerTrace.at(-1).after)groundPickerTrace.at(-1).after=final;
+  await fs.writeFile(`${OUT}/11520-plane-map-ground-picker.json`,JSON.stringify({head:process.env.K11520_SOURCE_SHA||null,profile:page.viewportSize(),status:groundPickerError?'FAIL':'WORLD_GROUND_VERIFIED',error:groundPickerError,beforePhysical:tap0,attemptLimit:8,attempts:groundPickerTrace,final},null,2));
+  if(groundPickerError)await page.screenshot({path:`${OUT}/11520-plane-map-ground-picker-failure.png`,fullPage:true,timeout:1500}).catch(()=>{});
+  await page.evaluate(()=>{const fixture=globalThis.__K11520_QA_GROUND_PICKER__;document.querySelector('#three')?.removeEventListener('k11520:world-tap',fixture?.onRoute);delete globalThis.__K11520_QA_GROUND_PICKER__}).catch(()=>{});
 }
-assert.equal(groundNavigationActive,true,'a fresh empty-world click must start canonical WORLD_GROUND navigation');
-const groundTarget=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(groundTarget.y.toFixed(3)),0);assert.ok(Math.abs(groundTarget.x-tap0.x)>.1||Math.abs(groundTarget.z-tap0.z)>.1,'world tap did not create a distinct XYZ target');
-await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.12},[tap0.x,tap0.y,tap0.z],{timeout:4000});
-await page.screenshot({path:`${OUT}/11520-world-tap-xyz.png`,fullPage:true});
-await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD canvas tap QA stop'));
 
 const authority=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_INPUT_AUTHORITY__));
 assert.equal(authority.authoritative,true);assert.equal(authority.legacyXZBubbleSuppressed,true);
