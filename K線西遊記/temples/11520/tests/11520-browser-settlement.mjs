@@ -1227,7 +1227,16 @@ async function m1ReadOnlyBrowserQA(){
         const legacy=await snap(),legacyTag='0x'+legacy.block.toString(16),brainAbi=new Interface(['function principalOf(address) view returns(uint256)','function availablePrincipal(address) view returns(uint256)']);
         const readLegacy=async name=>brainAbi.decodeFunctionResult(name,await provider.send('eth_call',[{to:manifest.addresses.brainProxy,data:brainAbi.encodeFunctionData(name,[state.account])},legacyTag]))[0].toString();
         assert.equal(legacy.deploymentContext,'97:'+manifest.addresses.brainProxy.toLowerCase());assert.equal(legacy.wallet.principalWei,await readLegacy('principalOf'));assert.equal(legacy.wallet.availableWei,await readLegacy('availablePrincipal'));
-        const legacyExitEvidence={account:state.account,block:legacy.block,context:legacy.deploymentContext,principalWei:legacy.wallet.principalWei,availableWei:legacy.wallet.availableWei};
+        const historyRequiresIndexer=legacy.block-manifest.deploymentBlock>2000000;
+        if(historyRequiresIndexer){
+          assert.equal(legacy.status,'LEGACY_PRINCIPAL_VERIFIED');assert.equal(legacy.readScope,'LEGACY_PRINCIPAL_ONLY');
+          assert.equal(legacy.balanceStatus,'VERIFIED');assert.equal(legacy.historyStatus,'INDEXER_REQUIRED');
+          for(const field of ['ordersStatus','positionsStatus','pnlStatus','claimsStatus','oracleStatus'])assert.equal(legacy[field],'UNKNOWN',field+' must not claim full recovery');
+          for(const field of ['unrealizedPnl','realizedPnl','equity','claimable'])assert.equal(legacy.wallet[field],null,field+' cannot be fabricated as0');
+          assert.match(await page.locator('#testnetGate').textContent(),/部位與歷史尚未恢復/);
+          assert.ok(await page.locator('[data-legacy-principal-only]').count()>0,'verified principal must retain an explicit limited-history notice');
+        }
+        const legacyExitEvidence={account:state.account,block:legacy.block,context:legacy.deploymentContext,principalWei:legacy.wallet.principalWei,availableWei:legacy.wallet.availableWei,readScope:legacy.readScope??null,historyStatus:legacy.historyStatus??null,fullHistoryVerified:legacy.historyStatus==='VERIFIED'};
         assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),'BSC_TESTNET');await shot('legacy-exit-preserved');
         const closeHit=await page.locator('#walletToggle').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(closeHit,true,'wallet close is reachable');
         await page.locator('#walletToggle').click();await page.waitForFunction(()=>document.querySelector('#walletPanel').classList.contains('collapsed')&&getComputedStyle(document.querySelector('#dock')).display!=='none');

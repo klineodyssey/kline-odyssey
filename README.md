@@ -29,6 +29,15 @@ pending; cross-world arrival at 18911 and live automatic trading are not
 implemented by this candidate. Other specific HOLDs and holder-wallet
 confirmation requirements remain in force.
 
+The original BSC97 exit-only wallet can recover pinned, verified principal and
+available funds without scanning more than the existing two-million-block
+history limit. Orders, positions, PnL, claims and complete history remain
+explicitly unknown when an indexer is required. Only available-principal
+withdrawal remains available, with the original wallet confirmation and fee
+checks. A confirmed withdrawal remains confirmed if its balance reread fails;
+the UI retains its attributed receipt and pauses withdrawals until rechecked.
+This is a testnet recovery path, not evidence of mainnet trading or funding.
+
 ### K11520 three-plane joystick filename — 2026-10-19
 
 `K線西遊記/temples/11520/runtime/joystick-xzxyyz.mjs` is the single canonical

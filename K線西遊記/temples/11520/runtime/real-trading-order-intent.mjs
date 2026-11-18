@@ -378,7 +378,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   const blank=()=>({mode:'BSC_TESTNET',label:'TESTNET · NO REAL VALUE',status:'NOT_DEPLOYED_OR_AUTHORIZED',
     chainId:97,account:null,wallet:null,orders:[],positions:[],receipts:[],observations:{},transaction:null,
     readOnly:readOnly===true,...readOnly?{readScope:'BALANCES_ONLY',block:null,blockHash:null,rpcReadCount:null,balanceStatus:'UNKNOWN',historyStatus:'NOT_REQUESTED',positionsStatus:'NOT_REQUESTED',pnlStatus:'NOT_REQUESTED',claimsStatus:'NOT_REQUESTED',oracleStatus:'NOT_REQUESTED'}:{},exitOnly:exitOnly===true,deploymentContext:'97:'+String(deployment?.addresses?.brainProxy||'').toLowerCase()});
-  let rpcRequestCount=0,state=blank(),busy=false,displayActive=true,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null;
+  let rpcRequestCount=0,state=blank(),busy=false,displayActive=true,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null,legacyPrincipalScope=false,legacyWriteSession=null;
   const copy=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
   const snapshot=()=>copy({...state,writeBlocked:readOnly===true||!!ethereum&&TESTNET_PENDING_WALLET_REQUESTS.has(ethereum)});
   const publish=patch=>{state={...state,...patch};try{onState(snapshot())}catch{}return snapshot()};
@@ -433,7 +433,11 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     if(BigInt(await req('eth_chainId'))!==97n)fail('WRONG_CHAIN');
     const accounts=await req('eth_accounts');if(!validAddress(accounts?.[0]))fail('DISCONNECTED');return accounts[0];
   };
-  const sameSession=async(account,ticket)=>{if(ticket!==generation||lower(await identity())!==lower(account))fail('DISCONNECTED')};
+  const sameSession=async(account,ticket)=>{
+    if(ticket!==generation)fail('DISCONNECTED');
+    const current=await identity();
+    if(ticket!==generation||lower(current)!==lower(account))fail('DISCONNECTED');
+  };
   const verify=async(block='latest')=>{
     const account=await identity();
     for(const k of [...keys,'brainImplementation']){const code=await req('eth_getCode',[a[k],block]);if(code==='0x'||lower(ethers.keccak256(code))!==lower(hashes[k]))fail('DEPLOYMENT_CODE_MISMATCH')}
@@ -492,6 +496,40 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     return {txHash:r.transactionHash,block:Number(BigInt(r.blockNumber)),timestamp:Number(BigInt(block.timestamp))*1000,
       contract:log.address,method,status:'RECEIPT_CONFIRMED',transactionStatus:'RECEIPT_CONFIRMED',executionMode:'BSC_TESTNET'};
   };
+  const unknownLegacyPrincipal=()=>({readScope:'LEGACY_PRINCIPAL_ONLY',balanceStatus:'UNKNOWN',historyStatus:'UNKNOWN',historyError:null,
+    ordersStatus:'UNKNOWN',positionsStatus:'UNKNOWN',pnlStatus:'UNKNOWN',claimsStatus:'UNKNOWN',oracleStatus:'UNKNOWN'});
+  const recoverLegacyPrincipal=async(height,revision,ticket)=>{
+    legacyPrincipalScope=true;
+    const tag=hex(height),pinned=await req('eth_getBlockByNumber',[tag,false]);
+    if(!/^0x[0-9a-f]{64}$/i.test(pinned?.hash||'')||Number(BigInt(pinned.number??-1))!==height)fail('RECOVERY_BLOCK_UNVERIFIED');
+    const account=await verify(tag);
+    const [native,balance,principal,locked,available]=await Promise.all([req('eth_getBalance',[account,tag]),call('testToken','balanceOf',[account],tag),
+      call('brainProxy','principalOf',[account],tag),call('brainProxy','lockedPrincipalOf',[account],tag),call('brainProxy','availablePrincipal',[account],tag)]);
+    if(typeof native!=='string'||!/^0x[0-9a-f]{1,64}$/i.test(native))fail('INVALID_NATIVE_BALANCE_RESPONSE');
+    if([balance[0],principal[0],locked[0],available[0]].some(v=>typeof v!=='bigint'||v<0n)||locked[0]>principal[0]||available[0]!==principal[0]-locked[0])fail('PRINCIPAL_BALANCE_MISMATCH');
+    const lease=TESTNET_PENDING_WALLET_REQUESTS.get(ethereum);let reconciledLease=null;
+    if(lease?.hash&&/^0x[0-9a-fA-F]{64}$/.test(lease.hash)){
+      const receipt=await req('eth_getTransactionReceipt',[lease.hash]);
+      if(receipt&&['0x0','0x1'].includes(receipt.status)&&Number(BigInt(receipt.blockNumber))<=height&&lower(receipt.from)===lower(lease.from)&&lower(receipt.to)===lower(lease.to)&&lower(receipt.transactionHash)===lower(lease.hash)){
+        const mined=await req('eth_getBlockByNumber',[receipt.blockNumber,false]);
+        if(/^0x[0-9a-f]{64}$/i.test(receipt.blockHash||'')&&lower(mined?.hash)===lower(receipt.blockHash)&&BigInt(mined?.number??-1)===BigInt(receipt.blockNumber))reconciledLease=lease;
+      }
+    }
+    const canonical=await req('eth_getBlockByNumber',[tag,false]);
+    if(lower(canonical?.hash)!==lower(pinned.hash)||Number(BigInt(canonical?.number??-1))!==height)fail('RECOVERY_BLOCK_CHANGED');
+    await sameSession(account,ticket);
+    if(ticket!==generation)fail('DISCONNECTED');
+    if(revision<appliedRefreshRevision||height<(state.block??0))return {ok:true,superseded:true,...snapshot()};
+    if(reconciledLease&&TESTNET_PENDING_WALLET_REQUESTS.get(ethereum)===reconciledLease)TESTNET_PENDING_WALLET_REQUESTS.delete(ethereum);
+    appliedRefreshRevision=revision;lastReadyRefresh=null;
+    publish({...unknownLegacyPrincipal(),account,chainId:97,error:null,status:'LEGACY_PRINCIPAL_VERIFIED',balanceStatus:'VERIFIED',
+      historyStatus:'INDEXER_REQUIRED',historyError:'RECOVERY_HISTORY_REQUIRES_INDEXER',block:height,blockHash:pinned.hash,
+      wallet:{readScope:'LEGACY_PRINCIPAL_ONLY',testBnbBalance:ethers.formatUnits(BigInt(native),18),testBnbBalanceWei:String(BigInt(native)),testTokenBalance:num(balance[0]),testTokenBalanceWei:String(balance[0]),
+        principal:num(principal[0]),total:num(principal[0]),principalWei:String(principal[0]),locked:num(locked[0]),lockedMargin:num(locked[0]),lockedWei:String(locked[0]),
+        free:num(available[0]),availableWei:String(available[0]),withdrawable:num(available[0]),allowance:null,allowanceWei:null,allowanceUnlimited:null,
+        equity:null,unrealizedPnl:null,realizedPnl:null,claimable:null,claimableStatus:'UNKNOWN'},capital:null,claims:[],orders:[],positions:[],receipts:[],observations:{}});
+    return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
+  };
   const refreshRead=async()=>{
     const revision=++refreshRevision;
     try{
@@ -513,6 +551,13 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
           principal:null,total:null,principalWei:null,free:null,availableWei:null,withdrawable:null,allowanceWei:null,allowance:null,allowanceUnlimited:null,claimable:null,claimableStatus:'NOT_REQUESTED',locked:null,lockedMargin:null,lockedWei:null,equity:null,unrealizedPnl:null,realizedPnl:null},
         capital:null,claims:[],orders:[],positions:[],receipts:[],observations:{},transaction:null});
       return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
+    }
+    if(exitOnly&&!capitalEnabled){
+      const ticket=generation,height=Number(BigInt(await req('eth_blockNumber')));
+      if(!Number.isSafeInteger(height)||height<fromBlock)fail('RECOVERY_BLOCK_UNVERIFIED');
+      // An aged legacy deployment may still expose exact available principal.
+      // This branch never substitutes an incomplete book for full history.
+      if(height-fromBlock>2000000)return await recoverLegacyPrincipal(height,revision,ticket);
     }
     const ticket=generation,account=await verify(),height=Number(BigInt(await req('eth_blockNumber'))),tag=hex(height),recoveryLogCache=new Map();
     const pinnedBlock=readOnly?await req('eth_getBlockByNumber',[tag,false]):null;
@@ -637,8 +682,9 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     try{return await flight}finally{if(refreshFlight===flight)refreshFlight=null}
   };
   const run=async fn=>{try{return await fn()}catch(error){lastReadyRefresh=null;const failure=executionFailure(error),lost=['WRONG_CHAIN','DISCONNECTED'].includes(failure.code);
-    publish({...lost||readOnly?blank():{},status:failure.code,error:failure.reason,
-      transaction:state.transaction?{...state.transaction,status:failure.code}:null});return failure}};
+    const transaction=legacyPrincipalScope&&state.transaction?.status==='RECEIPT_CONFIRMED'?state.transaction:state.transaction?{...state.transaction,status:failure.code}:null;
+    publish({...lost||readOnly||legacyPrincipalScope?blank():{},...legacyPrincipalScope?unknownLegacyPrincipal():{},status:failure.code,error:failure.reason,
+      transaction});return failure}};
   const previewInternal=async(input,{forceRefresh=false}={})=>{
     assertRealExecutionPriceSource(input);
     const intent=buildExecutionOrderIntent(input),ticket=generation,account=await identity(),recent=lastReadyRefresh;
@@ -668,7 +714,8 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       estimatedLiquidationPrice:estimate,pnlModel,liquidationModel:'ON_CHAIN_INITIAL_AND_MAINTENANCE_MARGIN_ESTIMATE',executionMode:'BSC_TESTNET'};
   };
   const send=async(k,method,args,expectedEvent)=>{
-    const account=await verify(),ticket=generation,data=abi[k].encodeFunctionData(method,args);
+    const account=await verify(),ticket=legacyWriteSession?.ticket??generation,data=abi[k].encodeFunctionData(method,args);
+    if(legacyWriteSession&&lower(account)!==lower(legacyWriteSession.account))fail('DISCONNECTED');
     publish({transaction:{status:'PREFLIGHT',method}});
     // Settlement estimation executes bounded risk/receipt calculations, often
     // repeatedly. Keep a larger but finite budget than ordinary balance reads.
@@ -690,12 +737,38 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       .find(l=>method==='closePosition'?['PositionClosed','PositionLiquidated'].includes(l?.name)&&String(l.args.positionId)===String(args[0]):l?.name===expectedEvent);
     if(expectedEvent&&!event)fail('RECEIPT_EVENT_MISSING');
     await sameSession(account,ticket);
+    if(legacyPrincipalScope&&method==='withdrawMargin'){
+      const canonical=await req('eth_getBlockByNumber',[receipt.blockNumber,false]);
+      if(!/^0x[0-9a-f]{64}$/i.test(receipt.blockHash||'')||lower(canonical?.hash)!==lower(receipt.blockHash)||BigInt(canonical?.number??-1)!==BigInt(receipt.blockNumber))fail('RECEIPT_NOT_CANONICAL');
+      await sameSession(account,ticket);
+      const lease=TESTNET_PENDING_WALLET_REQUESTS.get(ethereum);
+      if(lease?.hash===hash&&lower(lease.from)===lower(account)&&lower(lease.to)===lower(a[k]))TESTNET_PENDING_WALLET_REQUESTS.delete(ethereum);
+      const confirmed={status:'RECEIPT_CONFIRMED',method,txHash:hash,block:Number(BigInt(receipt.blockNumber)),
+        account,chainId:97,deploymentContext:'97:'+lower(a.brainProxy),to:a[k]};
+      publish({transaction:confirmed});
+      try{await refreshInternal(true)}catch(error){
+        lastReadyRefresh=null;publish({...blank(),...unknownLegacyPrincipal(),status:'LEGACY_PRINCIPAL_RECHECK_REQUIRED',error:executionFailure(error).reason,transaction:confirmed});
+      }
+      publish({transaction:confirmed});
+      return {ok:true,status:'RECEIPT_CONFIRMED',txHash:hash,orderId:null,executionMode:'BSC_TESTNET'};
+    }
     await refreshInternal(true);publish({transaction:{status:'RECEIPT_CONFIRMED',method,txHash:hash,block:Number(BigInt(receipt.blockNumber))}});
     return {ok:true,status:method==='createOrder'?'ON_CHAIN_ORDER_CREATED':'RECEIPT_CONFIRMED',txHash:hash,
       orderId:event?.args?.orderId==null?null:String(event.args.orderId),executionMode:'BSC_TESTNET'};
   };
-  const mutate=(fn,operation)=>run(async()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly&&!['close','cancel','withdraw','claim'].includes(operation))fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{return await fn()}finally{busy=false}});
-  const invalidate=()=>{lastReadyRefresh=null;generation++;appliedRefreshRevision=++refreshRevision;if(displayActive)publish({...blank(),status:'RECONNECT_REQUIRED'})};
+  const mutate=(fn,operation)=>run(async()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly&&!['close','cancel','withdraw','claim'].includes(operation))fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{
+    if(exitOnly&&!capitalEnabled){
+      const ticket=generation,account=await identity(),height=Number(BigInt(await req('eth_blockNumber')));
+      if(!Number.isSafeInteger(height)||height<fromBlock)fail('RECOVERY_BLOCK_UNVERIFIED');
+      if(height-fromBlock>2000000){
+        if(operation!=='withdraw')fail('LEGACY_PRINCIPAL_ONLY_WITHDRAW_REQUIRED');
+        await refreshInternal(true);await sameSession(account,ticket);
+        legacyWriteSession={account,ticket};
+      }
+    }
+    return await fn();
+  }finally{legacyWriteSession=null;busy=false}});
+  const invalidate=()=>{lastReadyRefresh=null;generation++;appliedRefreshRevision=++refreshRevision;if(displayActive)publish({...blank(),...legacyPrincipalScope?unknownLegacyPrincipal():{},status:'RECONNECT_REQUIRED'})};
   for(const event of ['accountsChanged','chainChanged','disconnect'])ethereum.on?.(event,invalidate);
   return Object.freeze({name:'EVM_ADAPTER',mode:'BSC_TESTNET',enabled:true,readOnly:readOnly===true,exitOnly:exitOnly===true,snapshot,
     preview:input=>run(()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly)fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');return previewInternal(input)}),refresh:()=>run(refreshInternal),recover:()=>run(refreshInternal),

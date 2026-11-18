@@ -26,6 +26,17 @@
 - 已定位的前置污染為 `assertThumbFollows()` 在方向矩陣之前按住斜向移動截圖，截圖期間角色繼續走到 ATM 邊；僅把這個原視覺檢查移到九軸矩陣完成並回 XZ 之後。所有原方向／地面／回彈／截圖斷言、hold及timeout保持，未停 actor、修改碰撞或 force/reset 位置。這是已核根因的 QA 排序修正；之前兩段失敗及停止盲重試紀錄保留，不冒充產品碼已修復。
 - 唯一下一步：沿原 PR673 讀回修正後精確 head 的既有 CI 與兩尺寸實圖，合格後原站交付；#523 已關閉，不再作為普通工程等待條件。
 
+## 2026-11-18 Human「完成品給我」：原 PR673 有界驗收修復
+
+- UTC：`2026-11-18T00:07:05.957Z`；台灣：`2026-11-18T08:07:05.957+08:00`（本輪 envelope 保存時間）。RUN_ID `KAIOS-ENGINEERING-20261118T000705957Z`；原 WORK_ID `K11520-SIMULATION-AUTOPILOT-20261118-01`。main 仍核為 `01794eba63b2664db741f9787a16bc9b7dd37b7d`；本輪起點 local `7b1c7d89b6a47cdcb56ba3ab8d44a2ad925f4ada`、remote PR head `91629e0cc78d0f4a571be3985e78577171217c4e`，未聲稱兩者相同。
+- 單一整合 Writer 為 root；助手按原檔隔離：legacy adapter／原 unit、mobile HUD QA、responsive QA；已返還或唯讀複核，不建立原子 claim 或 Worker。兩個實質 review finding（await identity 後 generation、postreceipt UI 身分過濾丟回執）均沿原檔修正；原限制不放寬。
+- `91629` 原 Game CI 的 xzxy／三操控面／thumb／normal／layout 已 PASS；後續 mobile HUD 在 ATM 旁要求 X CONFLICT，但實際位移為0、狀態 GUARD。保留碰撞與所有斷言／520ms hold；把原按住截圖的 thumb block 移到 conflict 後，並在動作前只讀核對真實走廊。沒有重設位置或停 actor。
+- 原 Responsive 冷390證據中第一次 down 不合格，第二次 down 已 canPan=true，但回傳檢查花費超過原1000ms。只把 trace cursor 與取點同次讀回、減少 timed diagnostic payload；原1000ms／max3、原生 admission、pan／XYZ／reset／pinch 斷言皆保留。`7b1c7d89` 的 canonical waypoint selector 修正也保留。
+- 原 BSC97 超長歷史的有界本金恢復與未知 UI 規格見原 `KGEN_TRADING_SPEC.md`。仍保留2,000,000及10001 guards、原 signer／費用／收據；不把本金讀回冒充完整歷史或資金入帳。
+- 本輪原 legacy unit 在首77/78後修新 ABA fixture expectation，前段78/78；這兩次沒有另存原log，不補造。review 後增加最後提款 gate ABA，targeted8/8、完整79/79 PASS；原log保存於原 kaios evidence。新增收據歸屬修正的最終結果沿同PR／checkpoint續存。UI route 首21/24是舊VM fixture缺helper／舊ternary假設，修fixture後24/24；新增 recheck UI 後24/24 PASS（412.0086ms）。後續精確指紋與 CI 結果不得由此推定。
+- 最終 legacy adapter unit 79/79 PASS（2375.9151ms、UTC `2026-11-18T00:32:31Z`），含最後提款 ABA 及 postreceipt 重查失敗的原帳號／鏈／部署回執歸屬。UI route 經 actual `walletExecutionView` 的 account=null 失敗路徑、別帳號／錯鏈／錯部署隔離後24/24 PASS（267.729ms）。UI-static首71/72因 readiness VM 未提供既有 trace，補fixture並驗cursor後72/72 PASS（1437.5828ms）；舊失敗log保留，產品gate未放寬。8個變更 mjs 語法及 diff whitespace PASS；source與QA各獨立唯讀 review finding已閉合／NO_BLOCKER，非外部審計。
+- 狀態仍 `NOT_MERGED / PAGES_NOT_PUBLISHED / VISUAL_QA_NOT_VERIFIED`。唯一下一步：push 原 PR673，讀回精確 head 的既有 CI 與390×844、844×390實圖，合格後沿原 main／Pages交付。#523權限不再重問；KUFO／100KAIOS／全球18911未完帳與所有真資產限制保留。
+
 ## Earlier handoff records — preserved as history
 
 STATUS: INITIAL

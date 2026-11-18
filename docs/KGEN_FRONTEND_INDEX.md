@@ -19,6 +19,14 @@ navigation delta is carried by PR673 in these existing homes:
 - Existing navigation, UI-static and browser-settlement/responsive QA files
   retain the original CI evidence route. Browser acceptance is pending for the
   integrated candidate; local unit evidence is not phone or wallet acceptance.
+- `runtime/real-trading-order-intent.mjs` and `runtime/game-5d-main.mjs`:
+  the original legacy BSC97 exit-only path verifies pinned principal/available
+  values without expanding the two-million-block history limit. Missing
+  positions/PnL/history remain unknown. Available withdrawals retain original
+  fee/session/receipt checks; a confirmed withdrawal with failed balance reread
+  retains only its wallet/chain/deployment-attributed receipt and pauses further
+  withdrawal until rechecked. Ordinary full recovery and M1 balance-only views
+  keep their original limits and capabilities.
 
 No new Runtime/bootstrap/version file is introduced. Global 18911 travel,
 price-to-global-coordinate projection and live automatic trading remain outside

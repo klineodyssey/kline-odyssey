@@ -153,7 +153,7 @@ test('stable wallet/transaction failure states are bounded and do not leak provi
 // Explicit local EIP-1193 fixtures: these addresses/receipts are NOT public deployments.
 const vendored=createRequire(import.meta.url)('../K線西遊記/assets/ethers-5.7.2.umd.min.js');
 const codec=vendored.ethers.utils;
-function testnetFixture({capital=false}={}){
+function testnetFixture({capital=false,height=2}={}){
  const addresses={testToken:'0x'+'11'.repeat(20),brainProxy:'0x'+'22'.repeat(20),positionEngine:'0x'+'33'.repeat(20),orderTriggerEngine:'0x'+'44'.repeat(20),brainImplementation:'0x'+'55'.repeat(20)};
  const code='0x60006000',codeHashes=Object.fromEntries(Object.keys(addresses).map(k=>[k,codec.keccak256(code)]));
  const deployment={mode:'BSC_TESTNET',status:'DEPLOYED_CONFIG_VERIFIED',chainId:97,testOnly:true,publicNetwork:true,verified:true,deploymentBlock:1,addresses,codeHashes};
@@ -173,8 +173,8 @@ function testnetFixture({capital=false}={}){
   if(method==='eth_getBalance')return '0x58d15e17628000';
   if(method==='eth_estimateGas')return '0x20000';
   if(method==='eth_getStorageAt')return '0x'+addresses.brainImplementation.slice(2).padStart(64,'0');
-  if(method==='eth_blockNumber')return '0x2';
-  if(method==='eth_getBlockByNumber')return {timestamp:'0x64',hash:blockHash};
+   if(method==='eth_blockNumber')return '0x'+BigInt(height).toString(16);
+   if(method==='eth_getBlockByNumber')return {number:params[0],timestamp:'0x64',hash:blockHash};
   if(method==='eth_getTransactionReceipt'){if(pendingReceipts-->0)return null;return receipts.get(params[0])??null}
   if(method==='eth_getLogs')return suppressLogs?[]:logs.filter(l=>l.address===params[0].address&&params[0].topics.every((t,i)=>t===null||t===l.topics[i]));
   if(method==='eth_sendTransaction'){
@@ -478,6 +478,113 @@ test('legacy EXIT-ONLY preserves owner principal and claim exits but cannot enab
   const result=await(action==='withdraw'?adapter.withdraw(1):action==='claim'?adapter.claim('0x'+'dd'.repeat(32)):adapter.close('1'));
   assert.equal(result.ok,true,action+': '+result.reason);
  }
+});
+test('aged non-capital EXIT-ONLY verifies pinned principal without claiming an empty financial history',async()=>{
+ const f=testnetFixture({height:2000002}),request=f.provider.request,tag='0x'+(2000002).toString(16);
+ const faces=Object.fromEntries(Object.entries(TESTNET_EXECUTION_ABI).map(([k,v])=>[f.deployment.addresses[k].toLowerCase(),new codec.Interface(v)]));
+ const principal=9007199254740993000000000000000001n,locked=1n,allowed=new Set(['kgen','brainSettlement','executor','engine','brain','decimals','SETTLEMENT_ROLE','hasRole','balanceOf','principalOf','lockedPrincipalOf','availablePrincipal']);let observedReads=0;
+ f.provider.request=async args=>{
+  observedReads++;
+  assert.ok(!['eth_getLogs','eth_getTransactionReceipt','eth_sendTransaction','eth_estimateGas'].includes(args.method),'principal reads neither history nor a financial request');
+  if(args.method==='eth_getCode')assert.equal(args.params[1],tag);
+  if(args.method==='eth_getStorageAt')assert.equal(args.params[2],tag);
+  if(args.method==='eth_getBalance')assert.equal(args.params[1],tag);
+  if(args.method==='eth_call'){
+   const face=faces[args.params[0].to.toLowerCase()],parsed=face.parseTransaction(args.params[0]);assert.ok(allowed.has(parsed.name));assert.equal(args.params[1],tag);
+   if(['principalOf','lockedPrincipalOf','availablePrincipal'].includes(parsed.name)){
+    assert.equal(parsed.args[0].toLowerCase(),WALLET.toLowerCase());
+    return face.encodeFunctionResult(parsed.name,[parsed.name==='principalOf'?principal:parsed.name==='lockedPrincipalOf'?locked:principal-locked]);
+   }
+  }
+  return request(args);
+ };
+ const adapter=f.make({exitOnly:true}),result=await adapter.recover();assert.equal(result.ok,true,result.reason);assert.equal(observedReads,26,'fixed26 requests include all principal reads');assert.equal(f.calls.length,23);
+ const s=adapter.snapshot();assert.equal(s.status,'LEGACY_PRINCIPAL_VERIFIED');assert.equal(s.readScope,'LEGACY_PRINCIPAL_ONLY');assert.equal(s.wallet.readScope,s.readScope);assert.equal(s.balanceStatus,'VERIFIED');
+ assert.equal(s.wallet.principalWei,String(principal));assert.equal(s.wallet.lockedWei,'1');assert.equal(s.wallet.availableWei,String(principal-locked));assert.equal(s.block,2000002);assert.equal(s.blockHash,'0x'+'bb'.repeat(32));
+ assert.equal(s.historyStatus,'INDEXER_REQUIRED');assert.equal(s.historyError,'RECOVERY_HISTORY_REQUIRES_INDEXER');
+ for(const key of ['ordersStatus','positionsStatus','pnlStatus','claimsStatus','oracleStatus'])assert.equal(s[key],'UNKNOWN',key);
+ for(const key of ['equity','unrealizedPnl','realizedPnl','claimable','allowance','allowanceWei','allowanceUnlimited'])assert.equal(s.wallet[key],null,key);
+ for(const key of ['orders','positions','receipts','claims'])assert.deepEqual(s[key],[]);assert.deepEqual(s.observations,{});assert.equal(s.capital,null);
+});
+test('principal recovery is confined to aged non-capital EXIT-ONLY and preserves both full-history bounds',async()=>{
+ for(const capital of [false,true]){
+  const f=testnetFixture({capital,height:2000002}),adapter=f.make(capital?{exitOnly:true}:{});
+  assert.equal((await adapter.recover()).reason,'RECOVERY_HISTORY_REQUIRES_INDEXER');assert.equal(adapter.snapshot().wallet,null);assert.notEqual(adapter.snapshot().readScope,'LEGACY_PRINCIPAL_ONLY');
+ }
+ const boundary=testnetFixture({height:2000001}),within=boundary.make({exitOnly:true});assert.equal((await within.recover()).ok,true);assert.ok(boundary.calls.some(c=>c.method==='eth_getLogs'),'exact2m still uses the original full path');
+ const upper=testnetFixture(),request=upper.provider.request,trigger=new codec.Interface(TESTNET_EXECUTION_ABI.orderTriggerEngine);let enumerated=0;
+ upper.provider.request=async args=>{if(args.method==='eth_call'&&args.params[0].to===upper.deployment.addresses.orderTriggerEngine){const parsed=trigger.parseTransaction(args.params[0]);if(parsed.name==='nextOrderId')return trigger.encodeFunctionResult(parsed.name,[10002]);if(parsed.name==='order')enumerated++}return request(args)};
+ const limited=upper.make({exitOnly:true});assert.equal((await limited.recover()).reason,'RECOVERY_HISTORY_REQUIRES_INDEXER');assert.equal(enumerated,0);assert.equal(limited.snapshot().wallet,null);
+ const m1=testnetFixture({height:2000002}).make({readOnly:true});assert.equal((await m1.recover()).ok,true);assert.equal(m1.snapshot().readScope,'BALANCES_ONLY');assert.equal(m1.snapshot().wallet.principalWei,null);
+});
+test('aged principal recovery rejects inconsistent balances, deployment mismatches and noncanonical pins',async()=>{
+ const faults={available:'PRINCIPAL_BALANCE_MISMATCH',locked:'PRINCIPAL_BALANCE_MISMATCH',native:'INVALID_NATIVE_BALANCE_RESPONSE',code:'DEPLOYMENT_CODE_MISMATCH',proxy:'PROXY_IMPLEMENTATION_MISMATCH',link:'DEPLOYMENT_LINK_MISMATCH',pin:'RECOVERY_BLOCK_UNVERIFIED',reorg:'RECOVERY_BLOCK_CHANGED'};
+ for(const [fault,expected]of Object.entries(faults)){
+  const f=testnetFixture({height:2000002}),request=f.provider.request,brain=new codec.Interface(TESTNET_EXECUTION_ABI.brainProxy);let headers=0;
+  f.provider.request=async args=>{
+   if(fault==='native'&&args.method==='eth_getBalance')return 'unknown';
+   if(fault==='code'&&args.method==='eth_getCode')return '0x6001';
+   if(fault==='proxy'&&args.method==='eth_getStorageAt')return '0x'+'00'.repeat(32);
+   if(args.method==='eth_call'&&args.params[0].to===f.deployment.addresses.brainProxy){const parsed=brain.parseTransaction(args.params[0]);
+    if(fault==='available'&&parsed.name==='availablePrincipal')return brain.encodeFunctionResult(parsed.name,[1]);
+    if(fault==='locked'&&parsed.name==='lockedPrincipalOf')return brain.encodeFunctionResult(parsed.name,[codec.parseEther('1001')]);
+    if(fault==='link'&&parsed.name==='kgen')return brain.encodeFunctionResult(parsed.name,['0x'+'77'.repeat(20)]);
+   }
+   const value=await request(args);
+   if(args.method==='eth_getBlockByNumber'){headers++;if(fault==='pin')return {...value,number:'0x1'};if(fault==='reorg'&&headers===2)return {...value,hash:'0x'+'99'.repeat(32)}}
+   return value;
+  };
+  const adapter=f.make({exitOnly:true});assert.equal((await adapter.recover()).reason,expected,fault);assert.equal(adapter.snapshot().wallet,null,fault);assert.equal(adapter.snapshot().balanceStatus,'UNKNOWN',fault);assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
+ }
+});
+test('aged principal reads fence wrong identity, A B A changes and failed rereads without retaining stale balances',async()=>{
+ for(const missing of ['account','chain']){const f=testnetFixture({height:2000002});if(missing==='account')f.setAccount(null);else f.setChain('0x38');const adapter=f.make({exitOnly:true});assert.equal((await adapter.recover()).code,missing==='account'?'DISCONNECTED':'WRONG_CHAIN');assert.equal(adapter.snapshot().wallet,null)}
+ const f=testnetFixture({height:2000002}),request=f.provider.request,release=f.delayRead();let entered;const started=new Promise(resolve=>{entered=resolve});
+ const brain=new codec.Interface(TESTNET_EXECUTION_ABI.brainProxy);f.provider.request=args=>{if(args.method==='eth_call'&&args.params[0].to===f.deployment.addresses.brainProxy&&brain.parseTransaction(args.params[0]).name==='principalOf')entered();return request(args)};
+ const adapter=f.make({exitOnly:true}),old=adapter.recover();await started;f.setAccount('0x'+'77'.repeat(20));f.setAccount(WALLET);release();assert.equal((await old).superseded,true,'the existing revision fence discards the old account read');assert.equal(adapter.snapshot().wallet,null);
+ assert.equal((await adapter.recover()).ok,true);f.provider.request=args=>{if(args.method==='eth_getBalance')throw Error('RPC_UNAVAILABLE');return request(args)};
+ assert.equal((await adapter.recover()).ok,false);assert.equal(adapter.snapshot().wallet,null);assert.equal(adapter.snapshot().balanceStatus,'UNKNOWN');
+ const zero=testnetFixture({height:2000002});zero.setAmount(0);const empty=zero.make({exitOnly:true});assert.equal((await empty.recover()).ok,true);assert.equal(empty.snapshot().wallet.availableWei,'0');assert.equal(empty.snapshot().balanceStatus,'VERIFIED');
+});
+test('aged principal scope permits only available withdrawal and preserves its canonical receipt and lease boundary',async()=>{
+ const f=testnetFixture({height:2000002});f.fill();const adapter=f.make({exitOnly:true});assert.equal((await adapter.recover()).ok,true);assert.equal(adapter.snapshot().wallet.availableWei,codec.parseEther('998').toString());f.calls.length=0;
+ for(const action of [()=>adapter.submit(onchainInput),()=>adapter.approve(1),()=>adapter.deposit(1),()=>adapter.faucet()])assert.equal((await action()).reason,'LEGACY_EXIT_ONLY_NO_NEW_RISK');assert.equal(f.calls.length,0);
+ for(const action of [()=>adapter.close('1'),()=>adapter.cancel('1'),()=>adapter.claim('0x'+'dd'.repeat(32))])assert.equal((await action()).reason,'LEGACY_PRINCIPAL_ONLY_WITHDRAW_REQUIRED');
+ assert.equal((await adapter.withdraw(999)).code,'INSUFFICIENT_MARGIN');assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
+ const result=await adapter.withdraw(100);assert.equal(result.ok,true,result.reason);const s=adapter.snapshot();assert.equal(s.wallet.principalWei,codec.parseEther('900').toString());assert.equal(s.wallet.availableWei,codec.parseEther('898').toString());assert.equal(s.wallet.lockedWei,codec.parseEther('2').toString());
+ assert.equal(s.status,'LEGACY_PRINCIPAL_VERIFIED');assert.equal(s.historyStatus,'INDEXER_REQUIRED');assert.equal(s.transaction.status,'RECEIPT_CONFIRMED');assert.equal(s.transaction.method,'withdrawMargin');assert.equal(s.writeBlocked,false);
+ const sends=f.calls.filter(c=>c.method==='eth_sendTransaction');assert.equal(sends.length,1);assert.equal(new codec.Interface(TESTNET_EXECUTION_ABI.brainProxy).parseTransaction(sends[0].params[0]).name,'withdrawMargin');assert.ok(f.calls.some(c=>c.method==='eth_estimateGas'));assert.equal(f.calls.some(c=>c.method==='eth_getLogs'),false);
+ const fresh=testnetFixture({height:2000002}),withoutRecovery=fresh.make({exitOnly:true});assert.equal((await withoutRecovery.close('1')).reason,'LEGACY_PRINCIPAL_ONLY_WITHDRAW_REQUIRED');assert.equal(fresh.calls.some(c=>c.method==='eth_sendTransaction'),false);
+});
+test('a confirmed legacy withdrawal remains confirmed when its later principal reread fails',async()=>{
+ const f=testnetFixture({height:2000002}),request=f.provider.request,brain=new codec.Interface(TESTNET_EXECUTION_ABI.brainProxy);let mined=false;
+ f.provider.request=async args=>{if(mined&&args.method==='eth_call'&&args.params[0].to===f.deployment.addresses.brainProxy&&brain.parseTransaction(args.params[0]).name==='principalOf')throw Error('RPC_UNAVAILABLE');const value=await request(args);if(args.method==='eth_getTransactionReceipt'&&value)mined=true;return value};
+ const adapter=f.make({exitOnly:true});assert.equal((await adapter.recover()).ok,true);assert.equal((await adapter.withdraw(1)).ok,true);
+ let s=adapter.snapshot();assert.equal(s.status,'LEGACY_PRINCIPAL_RECHECK_REQUIRED');assert.equal(s.wallet,null);assert.equal(s.account,null);assert.equal(s.balanceStatus,'UNKNOWN');assert.equal(s.transaction.status,'RECEIPT_CONFIRMED');assert.equal(s.writeBlocked,false);
+ assert.equal(s.transaction.account,WALLET);assert.equal(s.transaction.chainId,97);assert.equal(s.transaction.deploymentContext,'97:'+f.deployment.addresses.brainProxy.toLowerCase());assert.equal(s.transaction.to,f.deployment.addresses.brainProxy);
+ assert.equal((await adapter.recover()).ok,false);s=adapter.snapshot();assert.equal(s.transaction.status,'RECEIPT_CONFIRMED');assert.equal(s.wallet,null);
+ assert.equal((await adapter.withdraw(1)).ok,false);assert.equal(f.calls.filter(c=>c.method==='eth_sendTransaction').length,1,'failed rereads never resend the confirmed withdrawal');
+ f.setAccount('0x'+'77'.repeat(20));s=adapter.snapshot();assert.equal(s.account,null);assert.equal(s.wallet,null);assert.equal(s.balanceStatus,'UNKNOWN');assert.equal(s.transaction,null,'a different wallet cannot inherit the earlier receipt attribution');
+});
+test('final legacy withdrawal session gate rejects A B A during awaited identity before any wallet request',async()=>{
+ const f=testnetFixture({height:2000002}),request=f.provider.request;let finalGate=false,injected=false;
+ f.provider.request=async args=>{
+  if(args.method==='eth_estimateGas'){const result=await request(args);finalGate=true;return result}
+  if(args.method==='eth_accounts'&&finalGate&&!injected){injected=true;f.setAccount('0x'+'77'.repeat(20));f.setAccount(WALLET)}
+  return request(args);
+ };
+ const adapter=f.make({exitOnly:true});assert.equal((await adapter.recover()).ok,true);f.calls.length=0;
+ assert.equal((await adapter.withdraw(1)).code,'DISCONNECTED');assert.equal(injected,true,'the account events occur during the final awaited identity after gas estimation');
+ assert.equal(f.calls.filter(c=>c.method==='eth_estimateGas').length,1);assert.equal(f.calls.some(c=>/eth_send|personal_sign|eth_sign|signTypedData/.test(c.method)),false);
+ const s=adapter.snapshot();assert.equal(s.wallet,null);assert.equal(s.account,null);assert.equal(s.balanceStatus,'UNKNOWN');assert.equal(s.transaction,null);
+});
+test('aged principal recovery cannot clear an unresolved or noncanonical withdrawal lease',async()=>{
+ const f=testnetFixture({height:2000002}),request=f.provider.request,release=f.delaySend();let corrupt=true;
+ f.provider.request=async args=>{const value=await request(args);return args.method==='eth_getTransactionReceipt'&&value&&corrupt?{...value,blockHash:'0x'+'99'.repeat(32)}:value};
+ const adapter=f.make({exitOnly:true,walletRequestTimeoutMs:10});assert.equal((await adapter.recover()).ok,true);assert.equal((await adapter.withdraw(1)).code,'RECEIPT_TIMEOUT');assert.equal(adapter.snapshot().writeBlocked,true);
+ release();await new Promise(resolve=>setTimeout(resolve,10));assert.equal((await adapter.recover()).ok,true);assert.equal(adapter.snapshot().writeBlocked,true,'a noncanonical mined receipt cannot clear the lease');
+ assert.equal((await adapter.withdraw(1)).reason,'WALLET_REQUEST_UNRESOLVED');assert.equal(f.calls.filter(c=>c.method==='eth_sendTransaction').length,1);
+ corrupt=false;assert.equal((await adapter.recover()).ok,true);assert.equal(adapter.snapshot().writeBlocked,false);assert.equal(adapter.snapshot().wallet.principalWei,codec.parseEther('999').toString());assert.equal(f.calls.filter(c=>c.method==='eth_sendTransaction').length,1);
 });
 test('read-only recovery cannot consume a legacy unresolved lease or mutate its recovered cache',async()=>{
  const f=testnetFixture(),release=f.delaySend(),legacy=f.make({walletRequestTimeoutMs:10});

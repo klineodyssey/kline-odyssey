@@ -707,10 +707,10 @@ test('FULL HUD readiness diagnostics observe existing queries without extra hit 
  assert.ok(begin>0&&end>begin);const body=source.slice(begin,end);
  async function inspect(kind){
   let now=0,domReads=0,canPanReads=0,afterDeadlineReads=0;const canvas={getBoundingClientRect:()=>({left:0,top:0,right:140,bottom:240})},hud={id:'fixture-HUD'};
-  const context={performance:{now:()=>now},innerWidth:140,innerHeight:240,requestAnimationFrame:fn=>{now+=50;fn(now)},document:{querySelector:()=>canvas,elementFromPoint:()=>{domReads++;if(now>=2000)afterDeadlineReads++;return kind==='DOM'?hud:canvas}},__K11520_CAMERA__:{canPanAt:()=>{canPanReads++;if(now>=2000)afterDeadlineReads++;return kind!=='SCENE'}},__K11520_WORLD_SELECTION_PROJECTION__:{journeyLifeSnapshot:()=>[],playerHomeSnapshot:()=>({})}};
+  const context={fullHudPointerTrace:[{type:'pointerup'},{type:'pointercancel'}],performance:{now:()=>now},innerWidth:140,innerHeight:240,requestAnimationFrame:fn=>{now+=50;fn(now)},document:{querySelector:()=>canvas,elementFromPoint:()=>{domReads++;if(now>=2000)afterDeadlineReads++;return kind==='DOM'?hud:canvas}},__K11520_CAMERA__:{canPanAt:()=>{canPanReads++;if(now>=2000)afterDeadlineReads++;return kind!=='SCENE'}},__K11520_WORLD_SELECTION_PROJECTION__:{journeyLifeSnapshot:()=>[],playerHomeSnapshot:()=>({})}};
   const result=await runInNewContext('(async()=>{'+body+'})()',context);return {result,domReads,canPanReads,afterDeadlineReads};
  }
- const pass=await inspect('CLEAR');assert.ok(pass.result.point);assert.equal(pass.result.radius,30);assert.equal(pass.result.stableMs,150);assert.equal(pass.canPanReads,49*4,'all49 scene predicates remain checked each stability sample');
+ const pass=await inspect('CLEAR');assert.ok(pass.result.point);assert.equal(pass.result.traceStart,2,'readiness samples the existing trace cursor with its origin');assert.equal(pass.result.radius,30);assert.equal(pass.result.stableMs,150);assert.equal(pass.canPanReads,49*4,'all49 scene predicates remain checked each stability sample');
  for(const kind of ['DOM','SCENE']){
   const x=await inspect(kind),d=x.result.diagnostics;assert.equal(x.result.point,null);assert.equal(x.result.elapsedMs,2000);assert.equal(x.afterDeadlineReads,0,'diagnostics never probe after deadline');
   assert.equal(d.domReads,x.domReads);assert.equal(d.canPanReads,x.canPanReads);assert.equal(d.frames.length,16);assert.ok(d.droppedFrames>0);assert.ok(d.centers>0&&d.rows>0);
@@ -863,9 +863,9 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Human authorized the #523 replacement/UI integration on 2026-11-18.
   // Keep the ancestry table and historical headers; pin the reviewed candidate
   // bytes separately. These fingerprints do not claim browser acceptance.
-  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'3f1f69019f892c2c381487cda0569c872cbc34df9f9a555f4988e1f795bbfeb5'},
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'a8c9d8d4dbd8a259b37ac7fb0f1e4b99623b6b1ba9f42d8b46b71d1e73579c00'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
-  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'699c2b88b0505f1efbbedd5486b10669cdc22410b3f3ab277e7043fb6a8f9b9f'},
+  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'f6a01e97a50f50a9bb469eb503a7188e0e09ac2a2b5d5516c7e18a40453656a6'},
   'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'3a3ef17b1b2a4ef248e7e2755919b98b32878b71256c36385e7e6564f0dcac7f'},
   'game-5d.html':{nonMetadataSha256:'ee4283c4a11b2ae5250f20e79c7f4ab80f2f7e84fd7f3eebd4ae82e4bd520cd3'}
  };

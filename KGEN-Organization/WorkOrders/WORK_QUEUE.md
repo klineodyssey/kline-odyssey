@@ -16,6 +16,13 @@
 - RETAINED_BOUNDARIES: #19 的具體拒絕與禁止重試、其他具體 HOLD、成本／資源／停機限制、停用 Browser 與原停止條件不變。真錢包、主網合約部署、真交易、付款與治理仍由合法持有人本人確認；AI 不簽署、送真交易、取得秘密或繞過限制。
 - NEXT_STEP: root 沿 PR673 讀回精確 head 的 CI 與兩尺寸實景證據，修復具體失敗，合格後原站交付。#523 普通工程權限無需再次詢問。
 
+## 2026-11-18 PR673 完成品接續（同 WORK_ID）
+
+- Human 本頁「完成品給我」沿原 `K11520-SIMULATION-AUTOPILOT-20261118-01`，RUN_ID `KAIOS-ENGINEERING-20261118T000705957Z`；envelope UTC `2026-11-18T00:07:05.957Z`／台灣08:07:05.957。原 main `01794eba63b2664db741f9787a16bc9b7dd37b7d`；root 統一整合，按既有檔案分配唯一 Writer／獨立唯讀 review，非原子 claim。
+- 實際範圍：mobile HUD 真走廊前置與 thumb 截圖順序；responsive timed read 同次取 cursor／減少輸出；原 BSC97 exit-only 有界本金恢復與不冒充空倉的 UI／原測試；文件與既有 executable 指紋記錄。維持原所有掃描、費用、時限、簽署與特定 HOLD；不另建 Runtime／bootstrap／排程／工作流。
+- review 發現 await 身分核對後漏 generation 重核及已確認回執被 UI identity filter 清除，均納入原程式窄修。完整原歷史、首失敗與未驗項保留。
+- `STATUS: LOCAL_FINAL_REVIEW / CI_AND_VISUAL_PENDING / NOT_DEPLOYED`。結果保存於同一 `handoff/HANDOFF_CURRENT.md` 與原 checkpoint；唯一下一步為精確 head 既有 CI／兩尺寸實景驗收，通過後原站發布，無需再問 #523 普通工程許可。
+
 ## Earlier queue records — preserved as history
 
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei

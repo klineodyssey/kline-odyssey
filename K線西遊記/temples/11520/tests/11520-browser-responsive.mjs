@@ -636,7 +636,7 @@ async function verifyFullHudControlOwnership(page,report){
         search:for(const y of ys){if(performance.now()-began>=2000)break;diagnostics.rows++;for(let x=r.left+60;x<r.right-60;x+=10)if(clear(x,y,cache,domCache)){point={x,y};since=performance.now();history.push({event:'CANDIDATE',at:since,...point});break search}}
       }
       diagnostics.frames.push({elapsedMs:performance.now()-began,searchMs:performance.now()-frameStarted,centers:diagnostics.centers-centersBefore});if(diagnostics.frames.length>16){diagnostics.frames.shift();diagnostics.droppedFrames++}
-      if(point&&performance.now()-since>=150&&performance.now()-began<2000)return{point:{...point,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()},elapsedMs:performance.now()-began,stableMs:performance.now()-since,radius:30,history,diagnostics};
+      if(point&&performance.now()-since>=150&&performance.now()-began<2000)return{point:{...point,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()},traceStart:fullHudPointerTrace.length,elapsedMs:performance.now()-began,stableMs:performance.now()-since,radius:30,history,diagnostics};
       await new Promise(requestAnimationFrame);
     }
     return{point:null,elapsedMs:performance.now()-began,radius:30,history,diagnostics,actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()};
@@ -649,21 +649,24 @@ async function verifyFullHudControlOwnership(page,report){
   let firstCandidate=true,admissionTraceStart=0;
   const admitted=await acquireAdmittedCameraPan({records:report.fullHudPanPrecondition.admissionAttempts,
     pick:async()=>{
-      if(firstCandidate){firstCandidate=false;return{origin:readiness.point,before:start,selectedAt:readiness.point.selectedAt}}
-      return page.evaluate(()=>{
+      if(firstCandidate){firstCandidate=false;admissionTraceStart=readiness.traceStart;return{origin:readiness.point,before:start,selectedAt:readiness.point.selectedAt,traceStart:admissionTraceStart}}
+      const sampled=await page.evaluate(()=>{
         const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),offsets=[0,-10,10,-20,20,-30,30],cache=new Map(),domCache=new Map(),ys=[];
         const canvasAt=(x,y)=>{const key=x+','+y;if(!domCache.has(key))domCache.set(key,document.elementFromPoint(x,y)===canvas);return domCache.get(key)};
         const allowedAt=(x,y)=>{const key=x+','+y;if(!cache.has(key))cache.set(key,__K11520_CAMERA__.canPanAt(x,y));return cache.get(key)};
         for(let y=r.top+60;y<r.bottom-60;y+=10)ys.push(y);if(innerWidth<=innerHeight)ys.reverse();
         for(const y of ys)for(let x=r.left+60;x<r.right-60;x+=10){
           if(!canvasAt(x+42,y)||!offsets.every(dx=>offsets.every(dy=>canvasAt(x+dx,y+dy))))continue;
-          if(offsets.every(dx=>offsets.every(dy=>allowedAt(x+dx,y+dy))))return{origin:{x,y},before:__K11520_CAMERA__.snapshot(),selectedAt:performance.now()};
+          if(offsets.every(dx=>offsets.every(dy=>allowedAt(x+dx,y+dy))))return{origin:{x,y},before:__K11520_CAMERA__.snapshot(),selectedAt:performance.now(),traceStart:fullHudPointerTrace.length};
         }
         return null;
       });
+      if(sampled)admissionTraceStart=sampled.traceStart;return sampled;
     },
-    begin:async origin=>{admissionTraceStart=await page.evaluate(()=>fullHudPointerTrace.length);await pointer('pointerdown',10,origin.x,origin.y,1)},
-    inspect:()=>page.evaluate(start=>({down:fullHudPointerTrace.slice(start).find(e=>e.type==='pointerdown'&&e.isTrusted)||null,camera:__K11520_CAMERA__.snapshot()}),admissionTraceStart),
+    // Keep the timed read small; the original full trace remains below and in
+    // failureFullHudInput. Sampling the cursor with the origin saves one await.
+    begin:origin=>pointer('pointerdown',10,origin.x,origin.y,1),
+    inspect:()=>page.evaluate(start=>{const down=fullHudPointerTrace.slice(start).find(e=>e.type==='pointerdown'&&e.isTrusted);return{down:down?{type:down.type,isTrusted:down.isTrusted,target:down.target,canPan:down.canPan,at:down.at,pointerId:down.pointerId}:null}},admissionTraceStart),
     cancel:async()=>{fullTouches.clear();await fullCdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]})}});
   const point=admitted.origin;report.fullHudPanPrecondition.origin=point;report.fullHudPanPrecondition.admission=admitted.admission;
   assert.equal(admitted.admission.actualDown.down.canPan,true,'native FULL pan origin must still be eligible at pointerdown');
