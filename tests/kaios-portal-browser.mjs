@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import {writeSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
@@ -18,7 +19,17 @@ if(FUNDING_ONLY){
 await fs.mkdir(OUT,{recursive:true});
 const report={head:process.env.KAIOS_SOURCE_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),trackedDirty:!!execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),functional:'RUNNING',visual:'SCREENSHOTS_REQUIRE_DIRECT_REVIEW',checks:[],profiles:[],navigations:[],runtimeErrors:[],errors:[]};
 if(FUNDING_ONLY)Object.assign(report,{mode:'UI_ONLY_NO_REAL_WALLET',realWallet:'NOT_TESTED',chainReads:0,transactionRequests:0});
+let activeCheck='browser-launch';
+function checkpoint(phase,status,error){
+  const entry={head:report.head,mode:VISITOR_ONLY?'visitor-only':FUNDING_ONLY?'funding-only':'portal',phase,status};
+  if(error)entry.error=String(error.stack||error).slice(0,4096);
+  // Keep short failure evidence before cleanup; diagnostics never change the result.
+  try{writeSync(2,`[kaios-portal-qa] ${JSON.stringify(entry)}\n`);}catch{}
+}
+async function runCheck(name,check){activeCheck=name;checkpoint(name,'START');await check();checkpoint(name,'PASS');}
+checkpoint(activeCheck,'START');
 const browser=await chromium.launch({headless:true,executablePath:process.env.KAIOS_CHROMIUM_EXECUTABLE||undefined,args:['--autoplay-policy=user-gesture-required']});
+checkpoint(activeCheck,'PASS');
 const shot=(page,name)=>page.screenshot({path:`${OUT}/${name}.png`});
 const audio=page=>page.evaluate(async()=>{const {getKaiosAudio}=await import('./assets/kaios-audio.mjs');return getKaiosAudio().snapshot();});
 async function reachable(page,selector){return page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{width:r.width,height:r.height,inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,hit:!!hit&&(hit===el||el.contains(hit))};});}
@@ -1447,11 +1458,12 @@ async function verifyVisitorInfo(){
   report.realPhone='NOT_TESTED';report.latestVideo={source:'existing README updater block',videoId:cached.videoId,currentChannelLatest:'NOT_VERIFIED'};
 }
 try{
-  if(VISITOR_ONLY){await verifyVisitorInfo();}
-  else if(FUNDING_ONLY){await verifyFundingPanel();await verifyFundingAutoPreview();await verifyFundingGuidedFive();await verifyLegacyCards();await verify16888ManualOrder();}
+  if(VISITOR_ONLY){await runCheck('visitor-info',verifyVisitorInfo);}
+  else if(FUNDING_ONLY){await runCheck('funding-panel',verifyFundingPanel);await runCheck('funding-auto-preview',verifyFundingAutoPreview);await runCheck('funding-guided-five',verifyFundingGuidedFive);await runCheck('legacy-card-documents',verifyLegacyCards);await runCheck('16888-manual-order',verify16888ManualOrder);}
   else{
-  await verifyVisitorInfo();
-  await verifyLampScanner();
+  await runCheck('visitor-info',verifyVisitorInfo);
+  await runCheck('lamp-scanner',verifyLampScanner);
+  activeCheck='portal-runtime-navigation';checkpoint(activeCheck,'START');
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();
     await page.addInitScript(()=>{globalThis.__audioAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const a=this.context.createAnalyser();connect.call(this,a);__audioAnalysers.push(a);}return result;};});
@@ -1565,7 +1577,15 @@ try{
   await page.reload({waitUntil:'networkidle'});assert.ok(await page.locator('#primaryPlay').isVisible());assert.equal(await page.evaluate(()=>localStorage.getItem('KAIOS_PLAYER_LIFE_V1')),'{corrupt');
   report.checks.push('legacy compatibility redirect, corrupt profile remains intact and play available');
   await context.close();
+  checkpoint(activeCheck,'PASS');
   }
   report.functional='PASS';
-}catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));throw error;}
-finally{await fs.writeFile(`${OUT}/${VISITOR_ONLY?'visitor-browser-report':FUNDING_ONLY?'funding-browser-report':'portal-browser-report'}.json`,JSON.stringify(report,null,2));await browser.close();console.log(JSON.stringify(report));}
+}catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));checkpoint(activeCheck,'FAIL',error);throw error;}
+finally{
+  checkpoint('report-write','START');
+  try{await fs.writeFile(`${OUT}/${VISITOR_ONLY?'visitor-browser-report':FUNDING_ONLY?'funding-browser-report':'portal-browser-report'}.json`,JSON.stringify(report,null,2));}
+  catch(error){checkpoint('report-write','FAIL',error);throw error;}
+  checkpoint('report-write','PASS');checkpoint('browser-close','START');
+  try{await browser.close();}catch(error){checkpoint('browser-close','FAIL',error);throw error;}
+  checkpoint('browser-close','PASS');console.log(JSON.stringify(report));
+}
