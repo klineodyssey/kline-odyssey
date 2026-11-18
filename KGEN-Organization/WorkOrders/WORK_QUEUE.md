@@ -27,6 +27,10 @@
 
 Game 原單一 owner 契約與 plane-map 舊 readiness/vector 斷言不一致，僅遷移原 QA 至當前 authority 與同幀真位移；原超時／碰撞／後續斷言保留。M1 實際退出部署具資本能力，僅修退出本金分支的錯誤能力排除，不改 manifest 或非退出完整歷史上限。新配置80/80 unit、新 API契約1/1與provenance1/1 PASS；舊 CI 失敗／未抵達實景仍保留。root 在同 PR673整合，下一步為新精確 head 原 CI／實圖驗收，非繞過失敗 gate。
 
+### 757 實景驗收後接續
+
+Universal／Portal／Trading／Responsive已PASS，Game的導航300秒總驗收仍未完整：390 PASS，844行為和14圖已完成，末尾控件掃描被時限停止。只合併原scroll／2RAF／真geometry為同次evaluate，原300、native和全部28圖／斷言保持。另原M1橫圖證實真正ControlsClose壓重連，沿mobile-ui-settings前景CSS與原M1／Responsive測試修正；保存偏好及原錢包close錨點。仍同WORK_ID／PR673／單一整合Writer，未完成實景前不發布；沒有新Runtime／排程或資源上限放寬。
+
 ## Earlier queue records — preserved as history
 
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei

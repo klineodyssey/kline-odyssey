@@ -27,6 +27,12 @@ navigation delta is carried by PR673 in these existing homes:
   retains only its wallet/chain/deployment-attributed receipt and pauses further
   withdrawal until rechecked. Ordinary full recovery and M1 balance-only views
   keep their original limits and capabilities.
+- `runtime/mobile-ui-settings.mjs`: the existing ControlsClose button is
+  temporarily hidden while the original Wallet owns the foreground. Wallet
+  Connect/Refresh and the original close toggle remain available; closing Wallet
+  restores the player's existing controls/params preference. The original M1 and
+  responsive browser QA check actual pointer centers and restoration, not a new
+  overlay controller or a changed saved preference.
 
 No new Runtime/bootstrap/version file is introduced. Global 18911 travel,
 price-to-global-coordinate projection and live automatic trading remain outside

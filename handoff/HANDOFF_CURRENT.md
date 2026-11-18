@@ -46,6 +46,15 @@
 - Game artifact `14386360040` SHA256 `6e3034ad995038932c7774edfafce2c890f36a5f5df882ab1871ec60078e6321`，到期UTC `2026-12-02T00:41:57Z`。舊 M1 `14385521095` SHA256 `96277a0f3bdcbc973ea9fd0da6f466b2714122b89504fbe9b0183479be340c85`；兩個原失敗與所有小log／ZIP保留，不改寫成一輪全過。navigation console 尚未抵達實景，仍 NOT_VERIFIED。
 - 唯一下一步：同 PR 保存修正後 head，取得原 CI 的完整功能與兩尺寸實圖，合格後才合併／原 Pages交付。沒有本機 Browser／CUA／Python、沒有重跑原失敗 head、沒有簽送或成本／時限放寬。
 
+## 2026-11-18 757 實景後的最小前景／QA 成本修正
+
+- UTC `2026-11-18T01:18:59.428Z`／台灣09:18:59.428（helper 語法與指紋核對）。原757 head的 Universal、Portal、Trading、Responsive 已全部 SUCCESS；Responsive contextual/world-first/full 三job已過，cold390原生首試324ms、844首試251ms，原1000ms／三次界線保留。production-only M1 lane按原條件SKIPPED，不冒充該lanePASS。
+- 原 Game settlement 在UTC00:58:30.187至01:03:30.223達300秒、exit124。原 artifact `14387031305` SHA256 `89b2dd9b78cc2dc1211e9a28ea8c4ff34cfd8c7262aca9c584b1f1b6f612a5c8` 已核：兩尺寸原settlement均PASS；390導航report也PASS；844具相同9項行為檢查及14張原PNG、無pageError／authority attempt，但最後全控件幾何loop的第3項被外部時限中斷，不能列整體PASS。ZIP DOS時計僅用相對差，不冒充時區證據。
+- 僅將原 navigation `control()` 的 scroll＋兩個真RAF＋當時geometry/hit 合併成一次 element.evaluate，減少每次兩個多餘protocol往返。原 inView／actual center／44px 斷言、所有native操作、28張圖及300秒保持；新增每次控件實際box與elapsedMs證據。獨立只讀review NO_BLOCKER，節省時間須新CI量測，不預保證PASS。
+- Root已直接看757的390／844 profit-preview及autopilot-stopped四張原圖；情境標示、停止保留委託與控制可讀，未見該四圖新blocker。這不是未完成的最後幾何掃描或真交易／全球18911驗收。
+- 同head的M1橫圖另有實際視覺不合格：真正 `#k11520ControlsClose`（mobile-ui-settings原owner、left212/top66）壓住重連區，與UtilityMaster不同。只在原Wallet前景暫隱該控制；不改controlsOpen／params／allOn／hidden偏好、master、walletToggle或錨點。原M1六尺寸增加偏好／hidden未改、不可受點、Connect/Refresh真中心hit、close後恢復，並保留原金融核對與圖；原Responsive隔離斷言補此控制。
+- 本段原source1檔／test2檔與既有文件接續；語法／diff PASS，本機套件與Browser執行0。唯一下一步同PR的新精確head原CI300秒與錢包修後實圖驗收；通過後原main／Pages交付。不得把舊757失敗或新未執行項改成全過。
+
 ## Earlier handoff records — preserved as history
 
 STATUS: INITIAL

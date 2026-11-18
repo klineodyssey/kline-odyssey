@@ -429,7 +429,7 @@ async function verifySettingsContext(page,report){
   await page.locator('#walletToggle').click();await page.waitForFunction(()=>!document.querySelector('#walletPanel').classList.contains('collapsed'));
   await page.waitForFunction(()=>document.querySelector('#gameModeToggle').style.display==='none');await page.waitForTimeout(150);
   // Cross at least two normal owner ticks; polling must not resurrect peers.
-  for(const selector of ['#gameModeToggle','#dock','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#kaiosPortalButton','#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),false,selector+' must not cover Wallet');
+  for(const selector of ['#gameModeToggle','#k11520ControlsClose','#dock','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#kaiosPortalButton','#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),false,selector+' must not cover Wallet');
   await verifyScrolledControlCenters(page,'#walletPanel button:visible,#walletPanel select:visible,#walletPanel a:visible','Wallet');
   assert.equal(await page.locator('#walletToggle').evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===el}),true,'Wallet close toggle stays pointer reachable');
   await page.screenshot({path:`${OUT}/${report.profile.name}-wallet-restored.png`});await page.locator('#walletToggle').click();

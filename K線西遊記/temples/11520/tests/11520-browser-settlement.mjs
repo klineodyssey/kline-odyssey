@@ -237,7 +237,7 @@ try {
 // real rendered controls, original adapter and original actor/collision clock.
 async function navigationConsoleBrowserQA({browser,width,height,base,out}){
   const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
-  const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
+  const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],controlChecks:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
   let eth=4000,sequence=0;
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   page.on('pageerror',error=>report.pageErrors.push(String(error)));
@@ -290,9 +290,11 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
   };
   const organ=async name=>{await game();await page.locator('#k11520UtilityMaster').click();if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();await page.locator(`#dock [data-organ="${name}"]`).click();await page.locator('#sheet.open').waitFor()};
   const control=async selector=>{
-    const element=page.locator(selector);await element.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest'}));
-    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-    const box=await element.evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,hit:!!hit&&(el===hit||el.contains(hit))}});
+    const element=page.locator(selector),began=Date.now();
+    // Keep the original scroll, two rendered frames and real pointer-center
+    // checks together; avoid two extra browser protocol round trips per target.
+    const box=await element.evaluate(async el=>{el.scrollIntoView({block:'center',inline:'nearest'});await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,hit:!!hit&&(el===hit||el.contains(hit))}});
+    report.controlChecks.push({selector,elapsedMs:Date.now()-began,...box});
     assert.equal(box.inView,true,selector+' must be in the actual viewport');assert.equal(box.hit,true,selector+' must own its pointer center');assert.ok(box.width>=44&&box.height>=44,selector+' must retain a readable touch target');return element;
   };
   const shot=async(name,selector)=>{
@@ -1182,6 +1184,21 @@ async function m1ReadOnlyBrowserQA(){
       await page.addInitScript(()=>{const listeners=new Map();window.__m1WalletEvents={emit:(name,value)=>{for(const fn of listeners.get(name)||[])fn(value)}};window.ethereum={request:async args=>{const result=await window.__m1ReadBroker(args);if(args.method==='wallet_switchEthereumChain')window.__m1WalletEvents.emit('chainChanged','0x61');return result},on:(n,f)=>{if(!listeners.has(n))listeners.set(n,new Set());listeners.get(n).add(f)},removeListener:(n,f)=>listeners.get(n)?.delete(f)};if(!sessionStorage.getItem('k11520.execution-mode'))sessionStorage.setItem('k11520.execution-mode','SIMULATION')});
       const snap=()=>page.evaluate(()=>globalThis.__K11520_EXECUTION__?.snapshot()??null),shot=name=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`});
       const wallet=async()=>{if(!await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();if(await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click()};
+      let walletUiBaseline;const walletForegroundEvidence=[];
+      const walletUiPreferences=()=>page.evaluate(()=>{const ui=globalThis.__K11520_UI_SETTINGS__;return {controlsOpen:ui.controlsOpen,params:ui.state.params,allOn:ui.allOn}});
+      const controlCenter=selector=>page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect(),target=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {rect:{x:r.x,y:r.y,width:r.width,height:r.height},hit:!!target&&el.contains(target),targetId:target?.id||'',hidden:el.hidden}});
+      const verifyWalletForeground=async label=>{
+        assert.deepEqual(await walletUiPreferences(),walletUiBaseline.preferences,'Wallet foreground must preserve controls/params preferences');
+        assert.equal(await page.locator('#k11520ControlsClose').isVisible(),false,'background ControlsClose must not cover the foreground Wallet');
+        const close=await controlCenter('#k11520ControlsClose');assert.equal(close.hit,false,'background ControlsClose must not receive a pointer');
+        assert.equal(close.hidden,!walletUiBaseline.preferences.controlsOpen,'Wallet suppression must not change ControlsClose hidden preference');
+        const controls={};
+        for(const selector of ['#walletConnect','#walletRefresh']){
+          await page.locator(selector).scrollIntoViewIfNeeded();const center=await controlCenter(selector);
+          assert.equal(center.hit,true,selector+' center must receive the actual pointer in the foreground Wallet');controls[selector]=center;
+        }
+        walletForegroundEvidence.push({label,preferences:await walletUiPreferences(),controlsClose:close,controls});
+      };
       const verify=async expected=>{
         await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.readOnly&&s.account?.toLowerCase()===a.toLowerCase()&&s.wallet},expected,{timeout:150000});
         const s=await snap(),tag='0x'+s.block.toString(16),native=await provider.send('eth_getBalance',[expected,tag]);
@@ -1207,10 +1224,12 @@ async function m1ReadOnlyBrowserQA(){
           await page.waitForFunction(()=>{const next=globalThis.__K11520_MARKET_ORIGIN_RUNTIME__;if(!next||next===globalThis.__m1ObservedLayout)return false;globalThis.__m1ObservedLayout=next;return true});
           for(const selector of ['#dock','#aiChatButton','#chatHandle','#bgmButton','#backpackButton','#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),false,'wallet view owns peer utility surface after owner tick '+tick+' '+selector);
         }
+        await verifyWalletForeground('M1_'+stage);
         return {account:expected,block:s.block,blockHash:s.blockHash,status:s.status,nativeWei:s.wallet.testBnbBalanceWei,testTokenWei:s.wallet.testTokenBalanceWei,historyStatus:s.historyStatus,positionsStatus:s.positionsStatus,rpcReadCount:s.rpcReadCount,context:s.deploymentContext};
       };
       try{
-        await boot(page);await wallet();await page.locator('#walletConnect').click();await page.waitForFunction(()=>!document.querySelector('#walletM1ReadOnly').disabled);
+        await boot(page);await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.state);walletUiBaseline={preferences:await walletUiPreferences(),controlsCloseVisible:await page.locator('#k11520ControlsClose').isVisible()};
+        await wallet();await page.locator('#walletConnect').click();await page.waitForFunction(()=>!document.querySelector('#walletM1ReadOnly').disabled);
         const legacyPreference=await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode'));
         phase='M1';await page.locator('#walletM1ReadOnly').click();await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().status==='WRONG_CHAIN');assert.equal((await snap()).wallet,null);await shot('wrong-chain');
         await page.locator('#testnetSwitch').click();evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('connected');stage='ACCOUNT_SWITCH';
@@ -1237,12 +1256,14 @@ async function m1ReadOnlyBrowserQA(){
           assert.ok(await page.locator('[data-legacy-principal-only]').count()>0,'verified principal must retain an explicit limited-history notice');
         }
         const legacyExitEvidence={account:state.account,block:legacy.block,context:legacy.deploymentContext,principalWei:legacy.wallet.principalWei,availableWei:legacy.wallet.availableWei,readScope:legacy.readScope??null,historyStatus:legacy.historyStatus??null,fullHistoryVerified:legacy.historyStatus==='VERIFIED'};
-        assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),'BSC_TESTNET');await shot('legacy-exit-preserved');
+        assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),'BSC_TESTNET');await verifyWalletForeground('RETURN_LEGACY');await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('legacy-exit-preserved');
         const closeHit=await page.locator('#walletToggle').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(closeHit,true,'wallet close is reachable');
         await page.locator('#walletToggle').click();await page.waitForFunction(()=>document.querySelector('#walletPanel').classList.contains('collapsed')&&getComputedStyle(document.querySelector('#dock')).display!=='none');
+        assert.deepEqual(await walletUiPreferences(),walletUiBaseline.preferences,'Wallet close must preserve controls/params preferences');
+        assert.equal(await page.locator('#k11520ControlsClose').isVisible(),walletUiBaseline.controlsCloseVisible,'Wallet close must restore the original ControlsClose visibility');
         for(const selector of ['#dock','#aiChatButton','#chatHandle','#bgmButton','#backpackButton'])assert.equal(await page.locator(selector).isVisible(),true,'wallet close restores peer '+selector);await shot('wallet-close-restores-tray');
         const publicBrowserSource=finishPublicSource?await finishPublicSource():null;
-        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({rpcDiagnostics:rpcDiagnostics.snapshot(),publicBrowserSource,viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
+        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({rpcDiagnostics:rpcDiagnostics.snapshot(),publicBrowserSource,viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,walletUiBaseline,walletForegroundEvidence,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
         await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify(results.at(-1),null,2));
       }catch(e){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,message:safeText(e.message),stack:safeText(e.stack||e),snapshot,publicBrowserSource:finishPublicSource?.snapshot()??null,forbidden,errors,consoleErrors,requestFailures,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,rpcDiagnostics:rpcDiagnostics.snapshot(),evidence,methods:[...new Set(methods)]},null,2));throw e}finally{await page.close()}
     }
