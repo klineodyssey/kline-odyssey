@@ -172,10 +172,14 @@ PR673 驗收，仍沒有價格至全球 XYZ 映射、真錢包自動多空、簽
 ### 原 BSC97 舊本金退出恢復（2026-11-18 接續）
 
 原退出檢視的部署至今區塊跨度已超過既有 2,000,000 上限，完整委託／
-部位歷史無法在原界線內恢復。只對 `exitOnly && !capitalEnabled` 且跨度
-超限的原部署，沿既有 ABI 以同一區塊及 canonical hash 核對 code、proxy、
+部位歷史無法在原界線內恢復。只對明確 `exitOnly`、非唯讀且跨度超限的
+原部署，沿既有 ABI 以同一區塊及 canonical hash 核對 code、proxy、
 連結、錢包、principal／locked／available；不擴大掃描、不枚舉已知 ID，
 不新增 indexer、合約、地址或經濟規則。
+
+初次候選 `e92ae1504` 以 `!capitalEnabled` 額外限縮，原 CI 已證明它未涵蓋
+實際舊退出部署的 `ISOLATED_V1` 設定，故當時仍被原 history guard 擋下；
+該失敗保留。修正適用條件不更動該能力、manifest 或非退出候選的完整恢復。
 
 `LEGACY_PRINCIPAL_ONLY` 只證明本金與可用額；完整歷史標記
 `INDEXER_REQUIRED`，委託、部位、PnL、Claim 與 oracle 狀態為 `UNKNOWN`。

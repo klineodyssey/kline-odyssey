@@ -37,6 +37,15 @@
 - 最終 legacy adapter unit 79/79 PASS（2375.9151ms、UTC `2026-11-18T00:32:31Z`），含最後提款 ABA 及 postreceipt 重查失敗的原帳號／鏈／部署回執歸屬。UI route 經 actual `walletExecutionView` 的 account=null 失敗路徑、別帳號／錯鏈／錯部署隔離後24/24 PASS（267.729ms）。UI-static首71/72因 readiness VM 未提供既有 trace，補fixture並驗cursor後72/72 PASS（1437.5828ms）；舊失敗log保留，產品gate未放寬。8個變更 mjs 語法及 diff whitespace PASS；source與QA各獨立唯讀 review finding已閉合／NO_BLOCKER，非外部審計。
 - 狀態仍 `NOT_MERGED / PAGES_NOT_PUBLISHED / VISUAL_QA_NOT_VERIFIED`。唯一下一步：push 原 PR673，讀回精確 head 的既有 CI 與390×844、844×390實圖，合格後沿原 main／Pages交付。#523權限不再重問；KUFO／100KAIOS／全球18911未完帳與所有真資產限制保留。
 
+## 2026-11-18 e92 原 CI 失敗的具體接續修正
+
+- UTC `2026-11-18T00:47:17.343Z`／台灣08:47:17.343。原 PR673 head `e92ae1504b8e1c1755c34c1f17552d88c1d12140` 的 Universal、Portal、Trading candidate-wallet-browser 與 canonical EVM 已 SUCCESS；Game mobileHUD（含真 corridor／CONFLICT）及 contextual HUD 也 PASS。contextual lane 不等於後續 Full HUD 原生 acquisition；後者仍待執行，不能混報。
+- Game `44209049253` 首故障為原 plane-map QA 的 `legacyXZPreserved===true`，但當前單一導航 owner 固定發布 false。後段也仍從不再由導航寫入的舊 joystick vector 驗 Y/Z；這兩個過時契約沿原 QA 換為當前 authority／start-stop API 及同幀 intentDelta／真 physical YZ 進展與 X 固定。所有原 timeout／hold／後續 WORLD 與 ground-tap 斷言保留，不修改 runtime 或復活第二 clock。原 unit 新增 published API lifecycle 1/1 PASS（159.8707ms），其餘已過16項未重跑。
+- Trading `44209049146` 的 M1 仍在 RETURN_LEGACY FAIL。原 artifact 證明 `RECOVERY_HISTORY_REQUIRES_INDEXER`、RPC失敗0；實際頂層部署具有 `ISOLATED_V1`，本候選 `!capitalEnabled` 將原退出路徑錯誤排除。只移除 refresh／首次 mutation 識別的這兩處能力排除；明確 exitOnly、非唯讀及原2m超限界線仍在，普通非 exitOnly 的完整恢復仍拒絕超限，不改 manifest／ABI／資本能力或經濟規則。
+- 新配置 targeted3/3、原 execution unit80/80 PASS（2411.1398ms、UTC00:44:12Z）；更新原 executable-byte 記錄後僅選原provenance項1/1 PASS（175.5991ms）。不是 e92 舊 M1 的 PASS，也未宣稱新本金 scope 實景通過。source及QA唯讀審查不擴大任何財務權限。
+- Game artifact `14386360040` SHA256 `6e3034ad995038932c7774edfafce2c890f36a5f5df882ab1871ec60078e6321`，到期UTC `2026-12-02T00:41:57Z`。舊 M1 `14385521095` SHA256 `96277a0f3bdcbc973ea9fd0da6f466b2714122b89504fbe9b0183479be340c85`；兩個原失敗與所有小log／ZIP保留，不改寫成一輪全過。navigation console 尚未抵達實景，仍 NOT_VERIFIED。
+- 唯一下一步：同 PR 保存修正後 head，取得原 CI 的完整功能與兩尺寸實圖，合格後才合併／原 Pages交付。沒有本機 Browser／CUA／Python、沒有重跑原失敗 head、沒有簽送或成本／時限放寬。
+
 ## Earlier handoff records — preserved as history
 
 STATUS: INITIAL

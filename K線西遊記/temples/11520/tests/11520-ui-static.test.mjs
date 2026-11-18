@@ -865,7 +865,7 @@ test('simulation component revisions expose complete provenance and recorded exe
   // bytes separately. These fingerprints do not claim browser acceptance.
   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'a8c9d8d4dbd8a259b37ac7fb0f1e4b99623b6b1ba9f42d8b46b71d1e73579c00'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
-  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'f6a01e97a50f50a9bb469eb503a7188e0e09ac2a2b5d5516c7e18a40453656a6'},
+  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078'},
   'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'3a3ef17b1b2a4ef248e7e2755919b98b32878b71256c36385e7e6564f0dcac7f'},
   'game-5d.html':{nonMetadataSha256:'ee4283c4a11b2ae5250f20e79c7f4ab80f2f7e84fd7f3eebd4ae82e4bd520cd3'}
  };

@@ -23,6 +23,10 @@
 - review 發現 await 身分核對後漏 generation 重核及已確認回執被 UI identity filter 清除，均納入原程式窄修。完整原歷史、首失敗與未驗項保留。
 - `STATUS: LOCAL_FINAL_REVIEW / CI_AND_VISUAL_PENDING / NOT_DEPLOYED`。結果保存於同一 `handoff/HANDOFF_CURRENT.md` 與原 checkpoint；唯一下一步為精確 head 既有 CI／兩尺寸實景驗收，通過後原站發布，無需再問 #523 普通工程許可。
 
+### e92 已證 CI 接續修正
+
+Game 原單一 owner 契約與 plane-map 舊 readiness/vector 斷言不一致，僅遷移原 QA 至當前 authority 與同幀真位移；原超時／碰撞／後續斷言保留。M1 實際退出部署具資本能力，僅修退出本金分支的錯誤能力排除，不改 manifest 或非退出完整歷史上限。新配置80/80 unit、新 API契約1/1與provenance1/1 PASS；舊 CI 失敗／未抵達實景仍保留。root 在同 PR673整合，下一步為新精確 head 原 CI／實圖驗收，非繞過失敗 gate。
+
 ## Earlier queue records — preserved as history
 
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei

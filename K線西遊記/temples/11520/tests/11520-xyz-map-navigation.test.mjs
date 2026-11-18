@@ -145,3 +145,12 @@ test('installed navigation has no private animation clock and hidden/pagehide in
   document.visibilityState='visible';emit('visibilitychange');assert.equal(startWorldNavigation3D(),false);
   frame=startTarget();emitWindow('pagehide');assert.equal(snapshot().active,false);assert.equal(snapshot().target,null);assert.equal(commitLocalNavigationFrame({position:{x:1,y:0,z:0},status:'MOVING'},{frame,speedKPerSecond:1}),false);assert.equal(rafCalls(),0);
 }));
+
+test('published waypoint API uses one collision owner and its actual start-stop lifecycle',()=>withNavigation(({rafCalls,snapshot})=>{
+  const api=install11520XyzMapNavigation();
+  assert.equal(globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__,true);assert.equal(api.legacyXZPreserved,false);assert.equal(api.worldTargetAuthority,true);assert.equal(api.collisionAuthority,'game-5d-main.moveManual');
+  for(const method of ['setWorldTarget','start','stop'])assert.equal(typeof api[method],'function');
+  assert.deepEqual(api.setWorldTarget({x:3,y:4,z:5},{mode:'XZ',source:'PLANE_MAP'}),{x:3,y:4,z:5});
+  assert.equal(api.start(),true);assert.equal(snapshot().active,true);assert.equal(snapshot().source,'PLANE_MAP');assert.deepEqual(prepareLocalNavigationFrame().target,{x:3,y:4,z:5});
+  assert.equal(api.stop(null,{clearTarget:true}),true);assert.equal(snapshot().active,false);assert.equal(snapshot().target,null);assert.equal(prepareLocalNavigationFrame(),null);assert.equal(rafCalls(),0);
+}));

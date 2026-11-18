@@ -552,7 +552,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
         capital:null,claims:[],orders:[],positions:[],receipts:[],observations:{},transaction:null});
       return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
     }
-    if(exitOnly&&!capitalEnabled){
+    if(exitOnly){
       const ticket=generation,height=Number(BigInt(await req('eth_blockNumber')));
       if(!Number.isSafeInteger(height)||height<fromBlock)fail('RECOVERY_BLOCK_UNVERIFIED');
       // An aged legacy deployment may still expose exact available principal.
@@ -757,7 +757,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       orderId:event?.args?.orderId==null?null:String(event.args.orderId),executionMode:'BSC_TESTNET'};
   };
   const mutate=(fn,operation)=>run(async()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly&&!['close','cancel','withdraw','claim'].includes(operation))fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{
-    if(exitOnly&&!capitalEnabled){
+    if(exitOnly){
       const ticket=generation,account=await identity(),height=Number(BigInt(await req('eth_blockNumber')));
       if(!Number.isSafeInteger(height)||height<fromBlock)fail('RECOVERY_BLOCK_UNVERIFIED');
       if(height-fromBlock>2000000){
