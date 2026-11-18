@@ -1,5 +1,11 @@
 # KGEN Organization V2.0 WorkQueue
 
+## 2026-11-18 PR673原站交付後的公開活報價核對
+
+原PR673已merge main250759、Pages成功且32公開來源raw bytes一致；production contextual通過，FullHUD在pages390 map-vs-market精確核對失敗，public M1依原needs跳過。保留原失敗與缺失first證據，不以raw來源核對冒稱公開實景全過。同WORK_ID／root單一Writer只沿原responsive QA的同一次LIVE wait等四owner同世代，深副本直接驗、原全部exact斷言與deadline/poll不變；assert前保存initial及有界失配觀測。原Runtime／工作流／費用／原native1000ms/max3及5筆ledger不變。普通追續PR原CI合格後原main／Pages並取得第二次公開驗收，不建立新Worker／dispatcher／排程。
+
+另原main push的cold390 Axe追隨在原5秒內未取得完整ready，原17次決策越過窄band、方向震盪，0次attack不是重試被拒；僅原QA standoff gain/min降低至18/2px，保原band內5px及nonstandoff70/12、所有單次native攻擊／5秒／距離面向斷言，既有feedback保存command。獨立source/trace review通過，尚待新原CI；不改actor/產品或資源上限。
+
 ## 2026-11-18 既有 PR673 接續：Human 解除 #523 普通工程 HOLD
 
 - RECORDED_UTC: `2026-11-17T21:16:49Z`; 台灣時間：`2026-11-18T05:16:49+08:00`。
