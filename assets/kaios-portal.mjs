@@ -85,9 +85,64 @@ export function mountVisitorInfo(document,{base=portalBase(),fetcher=globalThis.
  }).catch(()=>{latest.dataset.state='unavailable';latest.querySelector('p').textContent='暫時無法讀取同步影片，請前往官方頻道查看最新發布。'});
  return {ready};
 }
+/** Visitor clocks use exchange-local IANA zones, including New York DST. */
+export function marketClocks(now=new Date()){
+ if(!(now instanceof Date)||!Number.isFinite(now.getTime()))throw new TypeError('INVALID_MARKET_CLOCK');
+ const format=timeZone=>new Intl.DateTimeFormat('zh-TW',{timeZone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZoneName:'shortOffset'}).format(now);
+ return {taipei:format('Asia/Taipei'),newYork:format('America/New_York'),iso:now.toISOString()};
+}
+export const MARKET_NEWS_LINKS=Object.freeze([
+ ['聯合新聞網 · 綜合新聞','https://udn.com/news/index'],
+ ['經濟日報 · 期貨新聞','https://money.udn.com/money/cate/11111'],
+ ['兆豐 · 國際財經新聞查詢','https://fund.megabank.com.tw/ETFWeb/HTML/ETNEWS.DJHTM#TYPE=1&DATE=&PAGE=1'],
+ ['非凡新聞台','https://news.ustv.com.tw/'],
+ ['東森財經新聞','https://fnc.ebc.net.tw/'],
+].map(Object.freeze));
+export function mountMarketWatch(document,{base=portalBase()}={}){
+ const section=el(document,'section','section market-watch');section.id='market-watch';section.setAttribute('aria-labelledby','marketTitle');
+ const heading=el(document,'div','section-heading');heading.append(el(document,'p','eyebrow','MARKET WATCH'),el(document,'h2','','股期資訊'),el(document,'p','','看市場時間、前往行情工具，追蹤公開新聞。'));heading.children[1].id='marketTitle';section.append(heading);
+ const clocks=el(document,'div','market-clocks'),clockNodes={};
+ for(const [key,label] of [['taipei','台北 · Asia/Taipei'],['newYork','紐約 · America/New_York']]){
+  const box=el(document,'div','market-clock');clockNodes[key]=el(document,'time');clockNodes[key].dataset.marketClock=key;box.append(el(document,'span','',label),clockNodes[key]);clocks.append(box);
+ }
+ section.append(clocks);
+ const refreshClock=()=>{const current=marketClocks();for(const key of Object.keys(clockNodes)){clockNodes[key].textContent=current[key];clockNodes[key].dateTime=current.iso;}};refreshClock();
+ const link=(label,path)=>{const a=el(document,'a','visitor-link',label);a.href=new URL(path,base).href;if(new URL(a.href).origin!==new URL(base).origin){a.target='_blank';a.rel='noopener noreferrer'}return a;};
+ const grid=el(document,'div','market-watch-grid'),hours=el(document,'article','market-panel');hours.id='market-times';hours.append(el(document,'h3','','一般交易時段'),el(document,'p','visitor-note','時段參考；假日、提早收盤與到期契約以交易所公告為準。'));
+ const sessions=[
+  ['台股現貨','09:00–13:30 · 台北時間','證交所一般交易時段','https://www.twse.com.tw/en/products/system/trading.html'],
+  ['台指期貨 TX','日盤 08:45–13:45 · 台北時間','夜盤 15:00–次日 05:00；到期契約最後交易日日盤至13:30，無夜盤。','https://www.taifex.com.tw/cht/2/tX'],
+  ['美股 Nasdaq 現貨','09:30–16:00 · 紐約時間','紐約時鐘自動反映夏令時間；此列為現貨一般時段。','https://www.nasdaq.com/market-activity'],
+ ];
+ for(const [name,period,note,url] of sessions){const row=el(document,'div','market-session');row.append(el(document,'h4','',name),el(document,'p','market-period',period),el(document,'p','visitor-note',note),link('交易所時段與公告 ↗',url));hours.append(row)}
+ const international=el(document,'div','market-session');international.append(el(document,'h3','','國際期貨時段'),el(document,'p','visitor-note','各商品的日夜盤、休息與假日安排，請查看對應交易所規格。'));
+ const internationalLinks=el(document,'div','market-source-list');
+ for(const [label,url] of [
+  ['CME · Nasdaq-100 期貨（NQ） ↗','https://www.cmegroup.com/markets/equities/nasdaq/e-mini-nasdaq-100.html'],
+  ['JPX · 日經225期貨 ↗','https://www.jpx.co.jp/english/derivatives/products/domestic/225futures/01.html'],
+  ['HKEX · 恒生指數期貨 ↗','https://www.hkex.com.hk/products/listed-derivatives/equity-index/hang-seng-index-(hsi)/hang-seng-index-futures?sc_lang=en'],
+  ['Eurex · DAX期貨 ↗','https://www.eurex.com/ex-en/markets/idx/dax'],
+ ])internationalLinks.append(link(label,url));international.append(internationalLinks);hours.append(international);
+ const sources=el(document,'article','market-panel');sources.id='market-sources';sources.append(el(document,'h3','','行情入口'),el(document,'p','visitor-note','外部行情工具；更新時間與延遲狀態以來源頁面標示為準。'));
+ const quotes=el(document,'div','market-source-list');
+ for(const [label,path] of [
+  ['11520 市場看盤 · BTC / ETH / BNB','K線西遊記/temples/11520/index.html'],
+  ['WantGoo · 台指與期權行情 ↗','https://www.wantgoo.com/futures'],
+  ['WantGoo · 美股行情（含 Nasdaq） ↗','https://www.wantgoo.com/global/us-stocks'],
+  ['WantGoo · 台股與國際市場總覽 ↗','https://www.wantgoo.com/'],
+ ])quotes.append(link(label,path));sources.append(quotes);
+ const news=el(document,'div','market-news');news.id='market-news';news.append(el(document,'h3','','公開新聞'),el(document,'p','visitor-note','外部新聞網站；兆豐連結提供國際財經新聞查詢。'));
+ const newsLinks=el(document,'div','market-source-list');for(const [label,url] of MARKET_NEWS_LINKS)newsLinks.append(link(label+' ↗',url));news.append(newsLinks);sources.append(news);
+ grid.append(hours,sources);section.append(grid);document.querySelector('#youtube').before(section);
+ return {refreshClock};
+}
 if(typeof document!=='undefined'){
  const portal=renderPortal(document);
  mountVisitorInfo(document);
+ const market=mountMarketWatch(document);
+ window.setInterval(()=>{if(!document.hidden)market.refreshClock()},60000);
+ window.addEventListener('pageshow',market.refreshClock);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)market.refreshClock()});
  window.addEventListener('storage',()=>portal.refreshPlayer());window.addEventListener('pageshow',()=>portal.refreshPlayer());
  // Audio failure must not prevent navigation or Player Life. No autoplay attempt.
  import('./kaios-audio-ui.mjs').then(({mountAudioControl})=>mountAudioControl({container:document.querySelector('#portalAudio'),worldId:'PORTAL'})).catch(()=>{document.querySelector('#portalAudio').textContent='聲音暫不可用 · 可靜音遊玩'});

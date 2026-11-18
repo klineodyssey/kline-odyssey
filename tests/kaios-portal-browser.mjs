@@ -1300,10 +1300,16 @@ async function verifyLampScanner(){
   }
 }
 async function verifyVisitorInfo(){
-  const {parseLatestVideo}=await import('../assets/kaios-portal.mjs');
+  const {parseLatestVideo,marketClocks,MARKET_NEWS_LINKS}=await import('../assets/kaios-portal.mjs');
   const source=await fs.readFile('README.md','utf8'),cached=parseLatestVideo(source);assert.ok(cached,'existing updater block is readable');
   for(const bad of [source.replace(cached.url,'https://evil.invalid/watch?v='+cached.videoId),source.replace(cached.url,'javascript:alert(1)'),source.replace(cached.url,cached.url+'&v=abcdefghijk'),source.replace('LATEST_VIDEO_END','MISSING'),source+source])assert.equal(parseLatestVideo(bad),null,'reject untrusted or ambiguous latest-video data');
   assert.equal(parseLatestVideo(source.replace(cached.title,'<img src=x onerror=alert(1)>')).title,'<img src=x onerror=alert(1)>','title stays inert text');
+  for(const [date,time,offset] of [
+    ['2026-01-15T14:30:00Z','09:30','GMT-5'],['2026-07-15T13:30:00Z','09:30','GMT-4'],
+    ['2026-03-08T06:59:00Z','01:59','GMT-5'],['2026-03-08T07:00:00Z','03:00','GMT-4'],
+    ['2026-11-01T05:59:00Z','01:59','GMT-4'],['2026-11-01T06:00:00Z','01:00','GMT-5'],
+  ]){const clocks=marketClocks(new Date(date));assert.ok(clocks.newYork.includes(time)&&clocks.newYork.includes(offset),clocks.newYork);assert.ok(clocks.taipei.includes('GMT+8'));}
+  assert.throws(()=>marketClocks(new Date('invalid')),/INVALID_MARKET_CLOCK/);
   const manifest=JSON.parse(await fs.readFile('OfficialLinks.json','utf8'));
   for(const [layout,width,height] of [['root',390,844],['root',844,390],['root',360,740],['pages-prefix',390,844]]){
     const base=new URL(layout==='pages-prefix'?BASE+'/kline-odyssey/':BASE+'/');
@@ -1341,14 +1347,24 @@ async function verifyVisitorInfo(){
       const primary=await reachable(page,'#primaryPlay');assert.ok(primary.inView&&primary.hit&&primary.height>=44,'first-screen CTA preserved');
       assert.equal(await page.locator('#community a[href^="mailto:"]').getAttribute('href'),'mailto:klineodyssey.io@gmail.com');assert.equal(await page.locator('#community a[href="https://klineodyssey.github.io/kline-odyssey/"]').textContent(),'https://klineodyssey.github.io/kline-odyssey/');
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal overflow');
-      await shot(page,`visitor-first-${layout}-${width}x${height}`);
+      assert.equal(await page.locator('#market-watch').count(),1,'visible homepage market watch');
+      assert.equal(await page.locator('#market-watch details').count(),0,'core market information does not require opening an archive');
+      assert.match(await page.locator('#market-times').textContent(),/08:45–13:45/);assert.match(await page.locator('#market-times').textContent(),/15:00–次日 05:00/);assert.match(await page.locator('#market-times').textContent(),/09:30–16:00 · 紐約時間/);
+      assert.match(await page.locator('#market-sources').textContent(),/更新時間與延遲狀態以來源頁面標示為準/);
+      for(const [label,url] of MARKET_NEWS_LINKS)assert.equal(await page.locator('#market-news a').filter({hasText:label}).getAttribute('href'),url);
+      assert.equal(await page.locator('#market-sources a[href="https://www.wantgoo.com/futures"]').count(),1);assert.equal(await page.locator('#market-sources a[href="https://www.wantgoo.com/global/us-stocks"]').count(),1);
+      assertExactRoute(await page.locator('#market-sources a[href*="11520"]').getAttribute('href'),worldUrl('11520',base),'market tool preserves original11520');
+      const clocks=await page.locator('[data-market-clock]').evaluateAll(nodes=>nodes.map(node=>({key:node.dataset.marketClock,text:node.textContent,iso:node.dateTime})));for(const clock of clocks)assert.equal(clock.text.replace(/\s+/gu,' '),marketClocks(new Date(clock.iso))[clock.key].replace(/\s+/gu,' '),'browser and Node clocks agree apart from locale whitespace');
+      const marketLinks=await page.locator('#market-watch a').evaluateAll(anchors=>anchors.map(a=>({href:a.href,target:a.target,rel:a.rel,height:a.getBoundingClientRect().height})));for(const a of marketLinks){assert.ok(a.height>=44);if(new URL(a.href).origin!==base.origin){assert.equal(new URL(a.href).protocol,'https:');assert.equal(a.target,'_blank');assert.ok(a.rel.includes('noopener'));}}
+      for(const id of ['market-watch','market-times','market-sources']){await page.locator('#'+id).evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-${id}-${layout}-${width}x${height}`);}
+      await page.evaluate(()=>scrollTo(0,0));await shot(page,`visitor-first-${layout}-${width}x${height}`);
       for(const [id,name] of [['youtube','film'],['latestVideo','links'],['support','contact']]){
         await page.locator('#'+id).evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-${name}-${layout}-${width}x${height}`);
       }
       await page.locator('.brand-film-play').click();await page.locator('#youtube iframe').waitFor();assert.equal(await page.locator('#youtube iframe').getAttribute('src'),'https://www.youtube.com/embed/akp4K_uzJ28?autoplay=1&playsinline=1');
       await page.frameLocator('#youtube iframe').getByText('外部影片未載入（隔離測試）',{exact:false}).waitFor();await page.locator('.brand-film').evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-film-loaded-${layout}-${width}x${height}`);
       const targets=await page.locator('#youtube a').evaluateAll(anchors=>anchors.filter(a=>a.getClientRects().length).map(a=>({text:a.textContent,height:a.getBoundingClientRect().height})));assert.ok(targets.every(a=>a.height>=44),JSON.stringify(targets));
-      for(const hash of ['youtube','community','support']){
+      for(const hash of ['youtube','community','support','market-watch','market-news']){
         await page.goto(base.href+'#'+hash,{waitUntil:'networkidle'});const box=await page.locator('#'+hash).boundingBox();assert.ok(box&&box.y>=-2&&box.y<height,'restored bookmark '+hash);
       }
       videoState='title';await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();assert.equal(await page.locator('#latestVideo img').count(),0,'README title cannot inject markup');
@@ -1360,7 +1376,7 @@ async function verifyVisitorInfo(){
       assert.deepEqual(errors,[]);report.profiles.push({layout,width,height,status:'PASS'});
     }finally{await context.close()}
   }
-  report.checks.push('visitor-only: actual README updater snapshot, safe title/URL parsing, 503/invalid-source fallbacks, gesture-loaded portrait brand frame, eight canonical VERIFIED socials, contact, four cards, legacy88888 HTTP, restored anchors and local/Pages-prefix routes');
+  report.checks.push('visitor-only: actual README updater snapshot, safe title/URL parsing, 503/invalid-source fallbacks, gesture-loaded portrait brand frame, exchange-timezone clocks/DST boundaries, corrected regular sessions, six historic news/market providers, existing quote routes, eight canonical VERIFIED socials, contact, four cards, legacy88888 HTTP, restored anchors and local/Pages-prefix routes');
   report.externalVideo='NOT_VERIFIED: denied live YouTube read preserved; embed replaced with an explicitly labeled isolated-test placeholder; no playback claim';
   report.realPhone='NOT_TESTED';report.latestVideo={source:'existing README updater block',videoId:cached.videoId,currentChannelLatest:'NOT_VERIFIED'};
 }
