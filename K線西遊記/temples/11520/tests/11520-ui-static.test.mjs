@@ -986,6 +986,48 @@ test('camera origin endpoint prefilter preserves the exact ordered result while 
 });
 
 
+test('pinch picker uses fresh two-dimensional clear areas and fails closed in the source DOM model',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs');
+ const start=source.indexOf('function selectWorldFirstPanOrigin('),helper=source.slice(start,source.indexOf('// Qualify the actual trusted down',start));
+ const pickStart=source.indexOf('const pickPinch='),picker=source.slice(pickStart,source.indexOf('const inspectPinchDowns=',pickStart));
+ // Execute the actual helper and its actual caller. This is a synthetic DOM
+ // model of the source contract, not native touch targeting or recovery proof.
+ for(const kind of ['top-band','thin-rows']){
+  const width=480,height=900,r={top:0,left:0,right:width,bottom:height},canvas={id:'three',getBoundingClientRect:()=>r},hud={id:'k11520MonsterGuide'},areas=[];
+  const clear=(x,y)=>x>=0&&x<width&&y>=0&&y<height&&(kind==='top-band'?y>156:y%12===8);
+  let clock=0;
+  const context={innerWidth:width,innerHeight:height,worldFirstPointerTrace:[],document:{querySelector:()=>canvas,elementFromPoint:(x,y)=>clear(x,y)?canvas:hud},performance:{now:()=>++clock},__K11520_WORLD_SELECTION_PROJECTION__:{playerHomeSnapshot:()=>({playerScreen:{x:240,y:450}})},__K11520_CAMERA__:{snapshot:()=>({zoom:1,panX:0,panZ:0,manual:false}),isWorldGestureArea:(x,y,radius)=>{assert.equal(radius,10);areas.push({x,y});return[-radius,0,radius].every(dx=>[-radius,0,radius].every(dy=>clear(x+dx,y+dy)))}},page:{evaluate:async(fn,arg)=>fn(arg)}};
+  const actual=await runInNewContext(helper+'(async()=>{const y=164;'+picker+'return await pickPinch();})()',context);
+  if(kind==='thin-rows'){assert.equal(actual,null,'center-only gaps cannot admit a pinch without its clear neighborhoods');continue}
+  assert.ok(actual&&actual.y>164,'a new two-dimensional origin must replace the inherited row164');
+  assert.equal(actual.x,100,'the original pinch horizontal footprint stays inside the canvas');
+  assert.deepEqual(areas.filter(p=>p.y===actual.y).map(p=>p.x),[10,70,130,190],'both finger origins and endpoints use the canonical area predicate');
+  assert.equal(actual.traceStart,0,'the fresh selection retains its own native-event cursor');
+  assert.equal(actual.pickDiagnostics.gesture,'PINCH');
+ }
+});
+
+test('settlement timing retains pending phases, original values and rejections without business payloads',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs'),start=source.indexOf('function createSettlementTiming(');
+ const context={};runInNewContext(source.slice(start,source.indexOf('// Trading regressions',start))+'globalThis.create=createSettlementTiming;',context);
+ let clock=100;const timing=context.create(()=>clock,100),outer=timing.begin('generic');
+ let release,calls=0;const value={business:'must not enter timing report'},blocked=new Promise(resolve=>{release=resolve});clock=105;
+ const pending=timing.measure('snapshot',()=>{calls++;return blocked});clock=110;
+ const before=timing.snapshot();assert.equal(before.events[1].status,'RUNNING');assert.equal(before.events[1].startMs,5);
+ before.events[1].label='mutated-copy';assert.equal(timing.snapshot().events[1].label,'snapshot');
+ clock=140;release(value);assert.equal(await pending,value);assert.equal(calls,1);timing.finish(outer,'COMPLETE');
+ assert.equal(before.events[1].status,'RUNNING','an exported partial report stays independent of later completion');
+ let thrown;const originalError={privatePayload:'must not enter timing report'};clock=150;
+ try{await timing.measure('control',()=>{throw originalError})}catch(error){thrown=error}assert.equal(thrown,originalError);
+ let rejected=false;try{await timing.measure('screenshot',()=>Promise.reject(null))}catch(error){rejected=true;assert.equal(error,null)}assert.equal(rejected,true,'even a falsy rejection is preserved');
+ const report=JSON.parse(JSON.stringify(timing.snapshot()));
+ assert.equal(report.clock,'NODE_MONOTONIC_RELATIVE_MS');assert.equal(report.events[0].durationMs,40);assert.equal(report.events[1].durationMs,35);
+ assert.deepEqual(report.events.map(row=>row.status),['COMPLETE','COMPLETE','FAILED','FAILED']);
+ assert.ok(report.events.every(row=>Object.keys(row).every(key=>['label','startMs','endMs','durationMs','status'].includes(key))));
+ assert.ok(!JSON.stringify(report).includes('must not enter'));
+ clock=200;const nextProfile=context.create(()=>clock,100);assert.equal(nextProfile.begin('navigation').startMs,100,'separate reports share one host-clock origin');
+});
+
 test('simulation ticks retain canonical market cards and normal-owner decorations while updating leaves',async()=>{
 const vm=await import('node:vm');
 // Execute the real owners in a DOM-tree fixture; no browser/CSS/heights are modeled.

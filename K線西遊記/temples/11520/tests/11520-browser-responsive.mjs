@@ -14,18 +14,21 @@ import {chromium} from 'playwright';
 
 // Same ordered candidate grid and predicates; reject a covered endpoint before
 // paying for the unchanged nine-point scene-origin check. No budget is extended.
-function selectWorldFirstPanOrigin({dx,dy}){
+function selectWorldFirstPanOrigin({dx=0,dy=0,pinch=false}){
   globalThis.worldFirstPointerTrace=[];
   const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),startedAt=performance.now();
-  const stats={startedAt,candidates:0,endpointDomChecks:0,endpointRejects:0,originPredicateCalls:0,originRejects:0};globalThis.worldFirstPanPickDiagnostics=stats;
+  const offsets=pinch?[-90,-30,30,90]:[0],insetX=pinch?100:80;
+  const stats={startedAt,gesture:pinch?'PINCH':'PAN',candidates:0,endpointDomChecks:0,endpointRejects:0,originPredicateCalls:0,originRejects:0,contactDomChecks:0,contactAreaChecks:0};globalThis.worldFirstPanPickDiagnostics=stats;
   const finish=()=>{stats.finishedAt=performance.now();stats.elapsedMs=stats.finishedAt-startedAt};
-  for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12){
+  for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+insetX;x<r.right-insetX;x+=12){
     stats.candidates++;stats.endpointDomChecks++;
-    if(document.elementFromPoint(x+dx,y+dy)!==canvas){stats.endpointRejects++;continue}
+    const clearEndpoints=pinch?offsets.every(offset=>{stats.contactDomChecks++;return document.elementFromPoint(x+offset,y)===canvas}):document.elementFromPoint(x+dx,y+dy)===canvas;
+    if(!clearEndpoints){stats.endpointRejects++;continue}
     stats.originPredicateCalls++;
-    if(!__K11520_CAMERA__.isWorldGestureArea(x,y,10)){stats.originRejects++;continue}
+    const clearOrigin=pinch?offsets.every(offset=>{stats.contactAreaChecks++;return __K11520_CAMERA__.isWorldGestureArea(x+offset,y,10)}):__K11520_CAMERA__.isWorldGestureArea(x,y,10);
+    if(!clearOrigin){stats.originRejects++;continue}
     const before={camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen};finish();
-    return{origin:{x,y},before,selectedAt:stats.finishedAt,pickDiagnostics:{...stats}};
+    return{origin:{x,y},before,selectedAt:stats.finishedAt,traceStart:worldFirstPointerTrace.length,pickDiagnostics:{...stats}};
   }
   finish();return null;
 }
@@ -204,11 +207,17 @@ async function verifyWorldFirst(){
       // Recenter first: picking before its rendered frame left a stale origin
       // on the guide in the original cold-480 native failure trace.
       const settlePinchCamera=()=>page.waitForFunction(origin=>{const c=__K11520_CAMERA__.snapshot(),p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return c.zoom===1&&c.panX===0&&c.panZ===0&&c.manual===false&&Math.abs(p.x-origin.x)<.5&&Math.abs(p.y-origin.y)<.5},result.cameraReferencePlayer,{timeout:3000});
-      const pickPinch=()=>page.evaluate(y=>{for(let x=100;x<innerWidth-100;x+=12)if([-90,-30,30,90].every(dx=>document.elementFromPoint(x+dx,y)?.id==='three'))return{x,y,traceStart:worldFirstPointerTrace.length};return null},y);
+      // Reuse the original bounded two-dimensional sampler and its canonical
+      // area predicate for every contact origin/endpoint. This remains only a
+      // prefilter: the actual trusted native target gate below is authoritative.
+      const pickPinch=async()=>{
+        const selected=await page.evaluate(selectWorldFirstPanOrigin,{pinch:true});
+        return selected?{...selected.origin,traceStart:selected.traceStart,pickDiagnostics:selected.pickDiagnostics}:null;
+      };
       const inspectPinchDowns=async(name,origin)=>{
         const evidence=await page.evaluate(cursor=>({trace:worldFirstPointerTrace.slice(cursor,cursor+12),camera:__K11520_CAMERA__.snapshot()}),origin.traceStart);
         const downs=evidence.trace.filter(event=>event.type==='pointerdown'&&event.isTrusted===true);
-        (result.pinchInput??=[]).push({name,origin:{x:origin.x,y:origin.y},...evidence});
+        (result.pinchInput??=[]).push({name,origin:{x:origin.x,y:origin.y},pickDiagnostics:origin.pickDiagnostics,...evidence});
         assert.equal(downs.length,2,'pinch needs two actual trusted native downs');
         assert.equal(new Set(downs.map(event=>event.id)).size,2,'pinch contacts must have distinct native pointer IDs');
         assert.ok(downs.every(event=>event.target==='three'),'both actual pinch downs must belong to canvas');
@@ -216,15 +225,15 @@ async function verifyWorldFirst(){
       await page.locator('#k11520CameraReset').click();await settlePinchCamera();
       const pinchPoint=await pickPinch();
       assert.ok(pinchPoint,'both pinch fingers must originate on world canvas');result.pinchOrigin={x:pinchPoint.x,y:pinchPoint.y};
-      await touch('touchStart',[[1,pinchPoint.x-30,y],[2,pinchPoint.x+30,y]]);
-      try{await inspectPinchDowns('maximum',pinchPoint);await touch('touchMove',[[1,pinchPoint.x-90,y],[2,pinchPoint.x+90,y]])}finally{await touch('touchEnd',[])}
+      await touch('touchStart',[[1,pinchPoint.x-30,pinchPoint.y],[2,pinchPoint.x+30,pinchPoint.y]]);
+      try{await inspectPinchDowns('maximum',pinchPoint);await touch('touchMove',[[1,pinchPoint.x-90,pinchPoint.y],[2,pinchPoint.x+90,pinchPoint.y]])}finally{await touch('touchEnd',[])}
       await page.waitForTimeout(80);
       const zoomMax=await read();assert.equal(zoomMax.zoom,zoomMax.bounds.maxZoom);assert.deepEqual(zoomMax.playerXYZ,start.playerXYZ);assert.match(await page.locator('#k11520CameraZoomStatus').textContent(),/2\.50×/);await page.screenshot({path:`${OUT}/camera-${profile.name}-zoom-max.png`});
       await page.locator('#k11520CameraReset').click();await settlePinchCamera();
       const pinchMinPoint=await pickPinch();
       assert.ok(pinchMinPoint,'both minimum-zoom pinch fingers must originate on world canvas');
-      await touch('touchStart',[[1,pinchMinPoint.x-90,y],[2,pinchMinPoint.x+90,y]]);
-      try{await inspectPinchDowns('minimum',pinchMinPoint);await touch('touchMove',[[1,pinchMinPoint.x-30,y],[2,pinchMinPoint.x+30,y]])}finally{await touch('touchEnd',[])}
+      await touch('touchStart',[[1,pinchMinPoint.x-90,pinchMinPoint.y],[2,pinchMinPoint.x+90,pinchMinPoint.y]]);
+      try{await inspectPinchDowns('minimum',pinchMinPoint);await touch('touchMove',[[1,pinchMinPoint.x-30,pinchMinPoint.y],[2,pinchMinPoint.x+30,pinchMinPoint.y]])}finally{await touch('touchEnd',[])}
       await page.waitForTimeout(80);
       const zoomMin=await read();assert.equal(zoomMin.zoom,zoomMin.bounds.minZoom);assert.deepEqual(zoomMin.playerXYZ,start.playerXYZ);assert.match(await page.locator('#k11520CameraZoomStatus').textContent(),/0\.40×/);await page.screenshot({path:`${OUT}/camera-${profile.name}-zoom-min.png`});
       await page.locator('#k11520CameraReset').click();assert.deepEqual(await read(),start);assert.equal(await page.locator('#k11520CameraReset').isVisible(),false,'Recenter returns to contextual hidden state');
