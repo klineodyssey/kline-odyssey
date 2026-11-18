@@ -72,6 +72,13 @@
 - source／單例與原browser QA Writer已返還root；語法／diff PASS，無本機browser／真RPC／簽送。原300秒與所有hold不變，批量節省及新圖須新head原CI證實。原讀回：`navigation-toast-batch-qa-handback-20261118T022403623Z.json` SHA256 `ac7f2ee3b64ec74e76fff57765be54258dc8fc840eeba1d82c1826a599fffaaf`；root後續只補actual-clickable filter及同步clip cache，實際新指紋沿本提交核對。
 - 唯一下一步同PR新head原CI／真toast圖／完整300秒驗收；合格後原main／Pages及既有production public-source鏈讀回。mergeSHA目前未定，原30項資產清單必須依最後head重新導出，不能用66舊hash冒充新原站。五未完ledger與所有金融／費用／用量／停止界線保留。
 
+## 2026-11-18 b758 真標頭圖後的可見裁切核對
+
+- UTC `2026-11-18T02:45:22Z`／台灣10:45:22。b758 的 Universal、Portal、Trading 已 SUCCESS；Game 新 job134531996928 在02:40:40Z因其他欄位的可見範圍斷言停止，不是300秒逾時。原artifact14392477240 SHA256 `29f03b208c1d3744de2b9aeb96d620a0f685a2123ceb0316397367f20e1ca32b`；失敗小證據 `pr673-b75805ed-toast-failure-20261118T024346445Z.json` SHA256 `9b02ae1c4e10071fb33e9e039842f95bc4bc8412ab2bb1e833b64d7c1a4e287a`，兩張原圖已由root與獨立Reviewer實看。
+- 真toast已在header獨立列：y129至158；header底158。AutoC y139.5至183.5、中心161.5仍可點，但頂18.5px已捲到不透明sticky header背後；QA比較完整DOM矩形造成誤報。當前AutoStart y397.5至441.5，完整可見且中心命中，不被toast覆蓋。未到專用header圖、末15批量、landscape及PlayerLife，不追認PASS。
+- 僅修原browser QA其他控件的有效可見區：限toast確在原sticky／既有不透明色header內、header完整橫向覆蓋欄位時，裁掉真正藏在header後的頂端；所有current target仍用完整rect，新增完整target與toast不可重疊斷言。原viewport／44px／center、36check／兩幀／native／原28圖加2header圖／300秒均保留；不改產品、timer、流程、碰撞或工作流。
+- 下一步同PR的新精確head原CI，完整功能與實景通過才原main／Pages交付。b758已過的M1六尺寸、30前景／60命中與新六圖仍保存，未完成導航不由錢包圖冒充。
+
 ## Earlier handoff records — preserved as history
 
 STATUS: INITIAL

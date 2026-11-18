@@ -39,6 +39,9 @@ navigation delta is carried by PR673 in these existing homes:
   sheet refresh; notification text, expiry, fade and confirmation priority stay
   with the original owner. The existing browser QA records the visible message,
   real header geometry and controls without waiting for the message to disappear.
+  Its original browser QA clips only the portions of other controls actually
+  behind that same opaque sticky header; the current action target still keeps
+  its full viewport, touch size, pointer-center and toast non-overlap checks.
 
 No new Runtime/bootstrap/version file is introduced. Global 18911 travel,
 price-to-global-coordinate projection and live automatic trading remain outside

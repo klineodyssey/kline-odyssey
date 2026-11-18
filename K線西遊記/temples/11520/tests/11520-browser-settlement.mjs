@@ -293,7 +293,7 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
   // final read-only batch use exactly the same rendered DOM measurements.
   const inspectNavigationControls=async(root,{selector,selectors}={})=>{
     const rect=element=>{const r=element.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
-    const visibleRect=(element,clips)=>{
+    const visibleRect=(element,clips,stickyHeader)=>{
       const style=getComputedStyle(element),r=rect(element);if(element.disabled||style.display==='none'||style.visibility==='hidden'||!r.width||!r.height)return null;
       let left=Math.max(0,r.x),top=Math.max(0,r.y),right=Math.min(innerWidth,r.right),bottom=Math.min(innerHeight,r.bottom);
       for(let parent=element.parentElement;parent;parent=parent.parentElement){
@@ -305,6 +305,10 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
       // Scrolled controls behind the sticky header are not currently clickable.
       // A pointer-transparent toast over an owned control still counts below.
       if(!owner||!(element===owner||element.contains(owner)))return null;
+      // A partly scrolled field can own its center below the opaque sticky
+      // header while its top is behind that header. Only that hidden strip is
+      // excluded; the current action target retains its full rectangle below.
+      if(stickyHeader&&stickyHeader.x<=left&&stickyHeader.right>=right&&stickyHeader.y<=top)top=Math.max(top,stickyHeader.bottom);
       return right>left&&bottom>top?{x:left,y:top,width:right-left,height:bottom-top,right,bottom}:null;
     };
     const rows=[];
@@ -317,7 +321,8 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
         const sheet=document.getElementById('sheet'),header=sheet?.querySelector('.sheetHead'),t=rect(toast);
         // Share only this synchronous snapshot's ancestor clips; each target's
         // scroll and two-frame settle gets fresh measurements above.
-        const clips=new Map(),controls=[...document.querySelectorAll('#navigationConsole button,#navigationConsole input,#navigationConsole select,#navigationConsole summary')].map(control=>({id:control.id||control.tagName,rect:visibleRect(control,clips)})).filter(control=>control.rect);
+        const headerBox=header?rect(header):null,stickyHeader=toast.parentElement===header&&getComputedStyle(header).position==='sticky'&&getComputedStyle(header).backgroundColor==='rgb(16, 25, 35)'?headerBox:null;
+        const clips=new Map(),controls=[...document.querySelectorAll('#navigationConsole button,#navigationConsole input,#navigationConsole select,#navigationConsole summary')].map(control=>({id:control.id||control.tagName,rect:visibleRect(control,clips,stickyHeader)})).filter(control=>control.rect);
         feedback={show:true,text:toast.textContent,context:toast.dataset.panelContext,inHeader:toast.parentElement===header,role:toast.getAttribute('role'),live:toast.getAttribute('aria-live'),position:getComputedStyle(toast).position,opacity:Number(getComputedStyle(toast).opacity),toast:t,header:header?rect(header):null,title:header?.querySelector('h2')?rect(header.querySelector('h2')):null,close:header?.querySelector('.close')?rect(header.querySelector('.close')):null,controls,overlaps:controls.filter(control=>Math.min(t.right,control.rect.right)>Math.max(t.x,control.rect.x)&&Math.min(t.bottom,control.rect.bottom)>Math.max(t.y,control.rect.y)).map(control=>control.id)};
       }
       rows.push({selector:currentSelector,elapsedMs:Date.now()-began,...r,inView:r.x>=0&&r.right<=innerWidth&&r.y>=0&&r.bottom<=innerHeight,hit:!!hit&&(el===hit||el.contains(hit)),feedback});
@@ -330,6 +335,7 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
     if(expectedToast){assert.equal(feedback?.show,true,'The native missing-ack feedback must still be truly shown');assert.equal(feedback.text,expectedToast)}
     if(feedback){
       assert.equal(feedback.context,'sheet');assert.equal(feedback.inHeader,true);assert.equal(feedback.position,'static');assert.equal(feedback.role,'status');assert.equal(feedback.live,'polite');assert.ok(feedback.opacity>0&&feedback.header&&feedback.title&&feedback.close,'Navigation feedback must be visible in the existing complete header');assert.deepEqual(feedback.overlaps,[],'Visible navigation feedback must not overlap currently clickable controls');
+      assert.ok(Math.min(feedback.toast.right,box.right)<=Math.max(feedback.toast.x,box.x)||Math.min(feedback.toast.bottom,box.bottom)<=Math.max(feedback.toast.y,box.y),'Visible navigation feedback must not overlap the complete current action target');
       assert.ok(feedback.toast.width>0&&feedback.toast.height>0&&feedback.toast.x>=0&&feedback.toast.right<=width+1&&feedback.toast.y>=0&&feedback.toast.bottom<=height+1,'Visible navigation feedback must remain inside the viewport');
       assert.ok(feedback.toast.y>=Math.max(feedback.title?.bottom||0,feedback.close?.bottom||0)-1&&feedback.toast.bottom<=feedback.header.bottom+1,'Navigation feedback must have its own header row');
     }

@@ -39,6 +39,10 @@ Universal／Portal／Trading／Responsive已PASS，Game的導航300秒總驗收�
 
 原五CI綠但390真FILLED toast蓋啟動文字，故維持未交付。只將真navigationConsole＋title接既有singleton/header通知，保留期限／原文／priority；原case1/1及provenance1/1 PASS。原QA末15只讀批量減往返，每控件2RAF/36check/原28圖/300秒保留，加當時真可見toast與header圖，不等消失。下一步同PR新head完整功能與實景，再原main／Pages／原production來源驗證；不另建Runtime／bootstrap／排程或金融規則。
 
+### b758 固定標頭可見區核對
+
+真toast已在原header獨立列，原圖可讀；AutoC頂18.5px已捲到不透明sticky header背後，但中心仍在header下，完整rect交疊誤作可見遮擋。只修原QA其他欄位的有效可見區，限原opaque sticky header；當前target完整rect額外不得與toast交疊，原44px／center／36checks／兩幀／300秒及所有圖保持。原失敗與未抵達項保存，不改產品／流程／資源上限，沿同WORK_ID／PR673由root單一整合；精確新head CI及實圖合格後原站交付。
+
 ## Earlier queue records — preserved as history
 
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei
