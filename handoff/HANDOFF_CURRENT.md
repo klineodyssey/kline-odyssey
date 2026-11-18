@@ -997,3 +997,5 @@ WORK_ID K11520-FLOATING-JOYSTICK-CLEAN-HUD-20261118-01；來源 main f42f6cdf5d7
 原 PR673／675 已發布交付與歷史證據保留。KUFO BscScan、原100 KAIOS實際煉丹、正式18911航程等未完帳繼續沿原 checkpoint，不由本 UI 候選宣稱完成。唯一下一步：原 CI exact-head Chromium 功能及截圖驗收；合格後按持續授權 merge／原 Pages 發布，再核對公開來源與實景。
 
 追加核對 UTC 2026-11-18T06:13:37.488Z／台灣 2026-11-18T14:13:37.488+08:00：交叉原碼審查找到並修正『隱藏但open的錢包/聊天不可讓搖桿隱形』與『交易狀態badge不是modal』，沿實際可見前景與既有owner補綁觀察；新增原VM回歸後最終74/74 PASS（1453.0006 ms）。前述73項為前一指紋，原紀錄保留；實景仍待原CI。
+
+CI 首輪 exact30acde57 未通過，保留原回執：Responsive44249883282 的contextual/world-first指出active行情摘要0個（要求1個），原ZIP14402754725/14403118038已核SHA並讀390失敗圖；舊:is混有ID#guide，已僅改為:where修正特異度。Game44249883193的character-status因More仍開使GROUND route缺失，已將More保留為非modal世界tap/camera、只抑制浮動移動；原PLAYER/GROUND/ENTITY斷言未放寬。Portal44249883177 audio-world的MovePlane trusted手勢未涵蓋原音訊入口，已擴既有game-5d-bootstrap listener的兩個新遊戲手勢與更新提示，不另建bootstrap/audioowner或自動播放。原trade badge與44px HP內詳細交戰文字只在精簡狀態收合，詳細模式保留。追加來源scope是這個既有bootstrap單檔，由root唯一Writer；沒有BootV1.4或workflow修改。修後81/81 UI+PWA音訊單元PASS（1618.8028ms），交叉來源審查NO_BLOCKER；新native／實圖仍待同PR下一個exact head，舊失敗不改寫成PASS。記錄UTC 2026-11-18T06:28:02.372Z／台灣 2026-11-18T14:28:02.372+08:00。

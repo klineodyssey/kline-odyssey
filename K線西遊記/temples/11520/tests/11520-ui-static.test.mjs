@@ -47,7 +47,7 @@ test('world movement excludes actual foreground panels while hidden retained pan
     element.style.display='none';check({fixed:false,world:false});element.style.display='block';element.style.visibility='hidden';check({fixed:false,world:false});
     element.style.visibility='visible';element.hidden=true;check({fixed:false,world:false});nodes.delete(selector);
   }
-  classes.add('k11520UtilitiesOpen');check({fixed:false,world:true});classes.clear();
+  classes.add('k11520UtilitiesOpen');check({fixed:false,world:false});classes.clear();
   for(const name of ['k11520SettingsOpen','k11520HudCollapsed']){classes.add(name);check({fixed:true,world:true});classes.clear()}
   context.document.hidden=true;check({fixed:true,world:true});
 });

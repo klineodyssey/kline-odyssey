@@ -158,7 +158,7 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
 /* V2.9.6 candidate: visibility changes never resize/reanchor the world. */
 /* Information disclosure must not own Settings, Wallet, camera recovery or
    explicit controls. Each original organ keeps its own foreground/hidden gate. */
-html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :is(.axes,.tele,.monsterHud,.minimapWrap,#k11520MonsterGuide){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :where(.axes,.tele,.monsterHud,.minimapWrap,#k11520MonsterGuide){display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:not([data-k11520-hud-profile="FULL"]):not(.k11520InfoOpen):not(.k11520TradeOpen) .top{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) .controls{display:none!important;visibility:hidden!important;pointer-events:none!important}
 /* Explicit information restores original status/map cards even in the compact
@@ -192,10 +192,12 @@ html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!
 }
 /* Compact combat reuses the live HP/XYZ/selected-market organs. Full cards
    remain in their original explicit information and trading contexts. */
+${compact}:not(.k11520ControlsOpen) #k11520RealTradePreflight{display:none!important;pointer-events:none!important}
 ${compact} #k11520BuildStamp{display:none!important}
 ${compact} .monsterHud:not(.k11520HiddenBySettings){display:flex!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;bottom:auto!important;width:110px!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;padding:4px 6px!important;gap:3px;flex-direction:column;justify-content:center;background:#071018b8!important;border:1px solid #68e4ff44!important;border-radius:9px!important;z-index:610!important;font-size:12px!important;line-height:1.2!important}
 ${compact} .monsterHud .bar{height:5px!important;margin:0!important}
 ${compact} .monsterHud details{display:none!important}
+${compact} .monsterHud #k11520MotionCombat{display:none!important}
 ${compact} .axes:not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;left:max(124px,calc(env(safe-area-inset-left) + 118px))!important;right:auto!important;top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;bottom:auto!important;width:min(244px,calc(100vw - max(124px,calc(env(safe-area-inset-left) + 118px)) - max(58px,calc(env(safe-area-inset-right) + 52px))))!important;height:44px!important;min-height:44px!important;max-width:none!important;transform:none!important;z-index:610!important}
 ${compact} .axes .axis:not(.active){display:none!important}
 ${compact} .axes .axis.active{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;align-items:center;column-gap:6px;position:static!important;width:100%!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;margin:0!important;padding:3px 6px!important;outline:none!important;box-shadow:none!important;border:1px solid #68e4ff44!important;border-radius:9px!important;background:#071018b8!important;font-size:11px!important;line-height:1.2!important;overflow:hidden}
