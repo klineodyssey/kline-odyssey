@@ -1440,7 +1440,16 @@ async function verifyVisitorInfo(){
       await page.frameLocator('#latestVideo iframe').getByText('LOCAL FIXTURE',{exact:false}).waitFor();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('#latestVideo').evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-latest-loaded-${layout}-${width}x${height}`);await page.locator('#latestVideo').screenshot({path:`${OUT}/visitor-latest-loaded-panel-${layout}-${width}x${height}.png`});
       const targets=await page.locator('#youtube a').evaluateAll(anchors=>anchors.filter(a=>a.getClientRects().length).map(a=>({text:a.textContent,height:a.getBoundingClientRect().height})));assert.ok(targets.every(a=>a.height>=44),JSON.stringify(targets));
       for(const hash of ['youtube','community','support','market-watch','market-news']){
-        await page.goto(base.href+'#'+hash,{waitUntil:'networkidle'});const box=await page.locator('#'+hash).boundingBox();assert.ok(box&&box.y>=-2&&box.y<height,'restored bookmark '+hash);
+        const target=base.href+'#'+hash,deadline=performance.now()+30000;
+        await page.goto(target,{waitUntil:'domcontentloaded',timeout:30000});
+        const remaining=Math.floor(deadline-performance.now());
+        assert.ok(remaining>0,'restored bookmark deadline '+hash);
+        await page.waitForFunction(({hash,height})=>{
+          const node=document.getElementById(hash),box=node?.getBoundingClientRect();
+          return location.hash==='#'+hash&&box&&box.width>0&&box.height>0&&box.y>=-2&&box.y<height;
+        },{hash,height},{timeout:remaining});
+        assertExactRoute(page.url(),target,'restored bookmark route '+hash);
+        const box=await page.locator('#'+hash).boundingBox();assert.ok(box&&box.y>=-2&&box.y<height,'restored bookmark '+hash);
       }
       videoState='alternate';await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();assert.equal(await page.locator('#youtube iframe').count(),0);assert.equal(await page.locator('#latestVideo .latest-film-play').getAttribute('data-video-id'),alternateId);await page.locator('#latestVideo .latest-film-play').click();await page.locator('#latestVideo iframe').waitFor();assertVideoSource(await page.locator('#latestVideo iframe').getAttribute('src'),alternateId,base.origin);await page.locator('#latestVideo .latest-film[data-playback-state="playing"]').waitFor();assert.equal(await page.locator('.brand-film iframe').count(),0,'updating latest never starts brand playback');
       videoState='title';await page.goto(base.href,{waitUntil:'networkidle'});await page.locator('#latestVideo[data-state="synced"]').waitFor();assert.equal(await page.locator('#latestVideo img').count(),0,'README title cannot inject markup');
