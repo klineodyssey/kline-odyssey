@@ -63,6 +63,15 @@
 - 原native click之後仍須750ms內驗WORLD_GROUND/source/mode/active、target.y=0／distinct與4000ms真物理移動；所有原後續斷言保留。沒有改actor、camera、HUD、hit-test、Runtime或金融規則。最多8列原點選路由／DOM統計／前後physical寫入原artifact；僅失敗時附有界截圖，不重跑原失敗head。
 - sole QA Writer已返還，root只讀複核；語法／diff PASS，沒有新unit／本機browser／真RPC。原讀回 `plane-map-picker-check-20261118T014426475Z.json` SHA256 `451e7dad063796fb819d0f99873d10a6a44f553fd405d45278c4b62436c91944`。唯一下一步新同PR head原CI，同時完成尚未再次執行的300秒整輪；全功能／新head實景合格才原main／Pages交付。
 
+## 2026-11-18 66bf全CI後的真通知遮字修正
+
+- UTC `2026-11-18T02:29:19.778Z`／台灣10:29:19.778。66bf原五CI全部SUCCESS；Game兩job均過，原300秒雙尺寸結算／導航通過、實耗299.8334秒。原ground trace第1/8次、13ms、真GROUND事件／y0／位移已核；兩尺寸各36（末尾15）控件、共72幾何全過，原28圖全實看。先前「末16」為計數誤寫，以原15-ID清單／實測36為準，未刪除控件。
+- Root與獨立viewport審查均在390 auto-stop原圖看到FILLED toast蓋AutoStart字樣，故全CI綠不等於視覺合格，不合併該head。唯一owner `game-ui-product-fixes-v23.mjs` 原本依financial simOrgan才把toast放header；worldmap的simOrgan刻意空（不能交給financial refresher），新導航因此留body。僅加「真navigationConsole＋原rail worldmap title匹配」辨識，仍同#toast、confirm優先、原header CSS／文案／期限／淡出／ARIA；不改main／simOrgan／HTML、不建立另一訊息Runtime。
+- 原singleton完整case補導航／stale marker／錯title／confirm優先／不重置定時與文字／關閉還body，選1次1/1 PASS（160.3793ms）。更新既有executable hash後只選原provenance1/1 PASS（176.4479ms）；原log保留，其他未變suite不重跑。
+- 原navigation QA以同一DOM inspector供single locator與末15批量讀，批內仍逐控件scroll／兩個真RAF／viewport／44px／center，保持36原順序與28原圖。真缺ACK後原下一個AutoStart檢查.show／原文／header/static/ARIA及不覆蓋目前可點控制，每尺寸另存1張當時真header小圖；不等toast消失、不合成訊息。只於同一同步量測快取共同ancestor clips，每個控件scroll/2RAF後重建；被sticky header裁在後面而本就不可點的欄位，不誤作toast遮擋，當前控件原hit仍嚴格保留。
+- source／單例與原browser QA Writer已返還root；語法／diff PASS，無本機browser／真RPC／簽送。原300秒與所有hold不變，批量節省及新圖須新head原CI證實。原讀回：`navigation-toast-batch-qa-handback-20261118T022403623Z.json` SHA256 `ac7f2ee3b64ec74e76fff57765be54258dc8fc840eeba1d82c1826a599fffaaf`；root後續只補actual-clickable filter及同步clip cache，實際新指紋沿本提交核對。
+- 唯一下一步同PR新head原CI／真toast圖／完整300秒驗收；合格後原main／Pages及既有production public-source鏈讀回。mergeSHA目前未定，原30項資產清單必須依最後head重新導出，不能用66舊hash冒充新原站。五未完ledger與所有金融／費用／用量／停止界線保留。
+
 ## Earlier handoff records — preserved as history
 
 STATUS: INITIAL

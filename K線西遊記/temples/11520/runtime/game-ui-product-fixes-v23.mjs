@@ -43,12 +43,14 @@ export function createWorldFeedbackObserver(emit){
 }
 const feedbackHistory=[];
 let toastContextObserver=null;
-// Reuse the one toast inside the active trading panel's existing header. Direct
+// Reuse the one toast inside the active trading/navigation panel's existing header. Direct
 // route/joystick writers still address #toast; context changes do not reset time.
 function place11520Toast(toast){
   const confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),body=document.getElementById('sheetBody');
   const organ=body?.dataset.simOrgan,title=['orders','positions','history','worldmap'].includes(organ)?document.querySelector('#rail [data-organ="'+organ+'"]')?.getAttribute('title'):null;
-  const panel=confirm?.classList.contains('open')?confirm:sheet?.classList.contains('open')&&title&&document.getElementById('sheetTitle')?.textContent===title?sheet:null;
+  const navigationTitle=body?.querySelector('#navigationConsole')?document.querySelector('#rail [data-organ="worldmap"]')?.getAttribute('title'):null;
+  const sheetTitle=document.getElementById('sheetTitle')?.textContent,matchingTitle=(title&&sheetTitle===title)||(navigationTitle&&sheetTitle===navigationTitle);
+  const panel=confirm?.classList.contains('open')?confirm:sheet?.classList.contains('open')&&matchingTitle?sheet:null;
   const header=panel?.querySelector('.sheetHead');
   if(header){
     if(toast.parentElement!==header)header.appendChild(toast);

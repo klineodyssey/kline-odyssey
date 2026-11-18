@@ -289,13 +289,54 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
     if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
   };
   const organ=async name=>{await game();await page.locator('#k11520UtilityMaster').click();if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();await page.locator(`#dock [data-organ="${name}"]`).click();await page.locator('#sheet.open').waitFor()};
-  const control=async selector=>{
-    const element=page.locator(selector),began=Date.now();
-    // Keep the original scroll, two rendered frames and real pointer-center
-    // checks together; avoid two extra browser protocol round trips per target.
-    const box=await element.evaluate(async el=>{el.scrollIntoView({block:'center',inline:'nearest'});await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,inView:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,hit:!!hit&&(el===hit||el.contains(hit))}});
-    report.controlChecks.push({selector,elapsedMs:Date.now()-began,...box});
-    assert.equal(box.inView,true,selector+' must be in the actual viewport');assert.equal(box.hit,true,selector+' must own its pointer center');assert.ok(box.width>=44&&box.height>=44,selector+' must retain a readable touch target');return element;
+  // This callback is self-contained so single native-action targets and the
+  // final read-only batch use exactly the same rendered DOM measurements.
+  const inspectNavigationControls=async(root,{selector,selectors}={})=>{
+    const rect=element=>{const r=element.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
+    const visibleRect=(element,clips)=>{
+      const style=getComputedStyle(element),r=rect(element);if(element.disabled||style.display==='none'||style.visibility==='hidden'||!r.width||!r.height)return null;
+      let left=Math.max(0,r.x),top=Math.max(0,r.y),right=Math.min(innerWidth,r.right),bottom=Math.min(innerHeight,r.bottom);
+      for(let parent=element.parentElement;parent;parent=parent.parentElement){
+        let clip=clips.get(parent);if(!clip){const css=getComputedStyle(parent),p=parent.getBoundingClientRect();clip={x:/auto|scroll|hidden|clip/.test(css.overflowX),y:/auto|scroll|hidden|clip/.test(css.overflowY),left:p.left+parent.clientLeft,right:p.left+parent.clientLeft+parent.clientWidth,top:p.top+parent.clientTop,bottom:p.top+parent.clientTop+parent.clientHeight};clips.set(parent,clip)}
+        if(clip.x){left=Math.max(left,clip.left);right=Math.min(right,clip.right)}
+        if(clip.y){top=Math.max(top,clip.top);bottom=Math.min(bottom,clip.bottom)}
+      }
+      const owner=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+      // Scrolled controls behind the sticky header are not currently clickable.
+      // A pointer-transparent toast over an owned control still counts below.
+      if(!owner||!(element===owner||element.contains(owner)))return null;
+      return right>left&&bottom>top?{x:left,y:top,width:right-left,height:bottom-top,right,bottom}:null;
+    };
+    const rows=[];
+    for(const currentSelector of selectors||[selector]){
+      const began=Date.now(),el=selectors?root.querySelector(currentSelector):root;if(!el)throw new Error('Missing navigation control: '+currentSelector);
+      el.scrollIntoView({block:'center',inline:'nearest'});await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const r=rect(el),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2),toast=document.getElementById('toast');
+      let feedback=null;
+      if(toast?.classList.contains('show')){
+        const sheet=document.getElementById('sheet'),header=sheet?.querySelector('.sheetHead'),t=rect(toast);
+        // Share only this synchronous snapshot's ancestor clips; each target's
+        // scroll and two-frame settle gets fresh measurements above.
+        const clips=new Map(),controls=[...document.querySelectorAll('#navigationConsole button,#navigationConsole input,#navigationConsole select,#navigationConsole summary')].map(control=>({id:control.id||control.tagName,rect:visibleRect(control,clips)})).filter(control=>control.rect);
+        feedback={show:true,text:toast.textContent,context:toast.dataset.panelContext,inHeader:toast.parentElement===header,role:toast.getAttribute('role'),live:toast.getAttribute('aria-live'),position:getComputedStyle(toast).position,opacity:Number(getComputedStyle(toast).opacity),toast:t,header:header?rect(header):null,title:header?.querySelector('h2')?rect(header.querySelector('h2')):null,close:header?.querySelector('.close')?rect(header.querySelector('.close')):null,controls,overlaps:controls.filter(control=>Math.min(t.right,control.rect.right)>Math.max(t.x,control.rect.x)&&Math.min(t.bottom,control.rect.bottom)>Math.max(t.y,control.rect.y)).map(control=>control.id)};
+      }
+      rows.push({selector:currentSelector,elapsedMs:Date.now()-began,...r,inView:r.x>=0&&r.right<=innerWidth&&r.y>=0&&r.bottom<=innerHeight,hit:!!hit&&(el===hit||el.contains(hit)),feedback});
+    }
+    return rows;
+  };
+  const recordControl=(box,{expectedToast}={})=>{
+    report.controlChecks.push(box);const {selector,feedback}=box;
+    assert.equal(box.inView,true,selector+' must be in the actual viewport');assert.equal(box.hit,true,selector+' must own its pointer center');assert.ok(box.width>=44&&box.height>=44,selector+' must retain a readable touch target');
+    if(expectedToast){assert.equal(feedback?.show,true,'The native missing-ack feedback must still be truly shown');assert.equal(feedback.text,expectedToast)}
+    if(feedback){
+      assert.equal(feedback.context,'sheet');assert.equal(feedback.inHeader,true);assert.equal(feedback.position,'static');assert.equal(feedback.role,'status');assert.equal(feedback.live,'polite');assert.ok(feedback.opacity>0&&feedback.header&&feedback.title&&feedback.close,'Navigation feedback must be visible in the existing complete header');assert.deepEqual(feedback.overlaps,[],'Visible navigation feedback must not overlap currently clickable controls');
+      assert.ok(feedback.toast.width>0&&feedback.toast.height>0&&feedback.toast.x>=0&&feedback.toast.right<=width+1&&feedback.toast.y>=0&&feedback.toast.bottom<=height+1,'Visible navigation feedback must remain inside the viewport');
+      assert.ok(feedback.toast.y>=Math.max(feedback.title?.bottom||0,feedback.close?.bottom||0)-1&&feedback.toast.bottom<=feedback.header.bottom+1,'Navigation feedback must have its own header row');
+    }
+  };
+  const control=async(selector,options)=>{
+    const element=page.locator(selector),began=Date.now(),[box]=await element.evaluate(inspectNavigationControls,{selector});
+    box.elapsedMs=Date.now()-began;recordControl(box,options);return element;
   };
   const shot=async(name,selector)=>{
     if(selector)await control(selector);
@@ -343,8 +384,10 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
     }
     await (await control('#navigationManagePositions')).click();await page.locator('[data-sim-close]').click();await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='CLOSED');
     await organ('worldmap');await page.locator('#navigationAutopilotSettings summary').click();const beforeAutoSnapshot=await snapshot(),beforeAuto=beforeAutoSnapshot.book.orders.length,beforeAutoState=beforeAutoSnapshot.view.autopilot.state;assert.ok(['DISARMED','STOPPED'].includes(beforeAutoState));
-    await (await control('#navigationAutoStart')).click();assert.equal((await snapshot()).view.autopilot.state,beforeAutoState);assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/請先確認/);
-    await page.locator('#navigationAutopilotAck').check();await (await control('#navigationAutoStart')).click();assert.equal((await snapshot()).view.autopilot.state,beforeAutoState);assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/設定未通過/);
+    await (await control('#navigationAutoStart')).click();const missingAck=await snapshot();assert.equal(missingAck.view.autopilot.state,beforeAutoState);assert.equal(missingAck.book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/請先確認/);
+    await page.locator('#navigationAutopilotAck').check();const invalidStart=await control('#navigationAutoStart',{expectedToast:'請先確認模擬自駕設定'});
+    const feedbackFile=`${width}x${height}-navigation-autopilot-ack-feedback-SYNTHETIC-header.png`,feedbackBegan=Date.now();await page.locator('#sheet .sheetHead').screenshot({path:`${out}/${feedbackFile}`});report.toastEvidence=[{file:feedbackFile,controlIndex:report.controlChecks.length-1,captureElapsedMs:Date.now()-feedbackBegan}];
+    await invalidStart.click();assert.equal((await snapshot()).view.autopilot.state,beforeAutoState);assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/設定未通過/);
     for(const [id,value] of Object.entries({navigationLongAbove:4001,navigationShortBelow:3990,navigationAutoC:1,navigationAutoLots:1,navigationMaxLoss:2,navigationMaxOrders:2}))await page.locator('#'+id).fill(String(value));
     // Staying at the current physical position prevents arrival from being a
     // second reason to stop; this explicit checkbox authorizes continued SIM.
@@ -353,7 +396,8 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
     const autoOrderId=state.view.autopilot.orderIds[0];assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.armed=state;
     await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId),'stop cannot cancel an already-created order');report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
     eth=3988;await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().observations.ETHUSDT?.price===3988,null,{timeout:15000});await page.waitForTimeout(2200);state=await snapshot();assert.equal(state.book.orders.length,beforeAuto+1,'stopped decisions cannot reverse on a later opposite signal');assert.equal(state.view.autopilot.state,'STOPPED');assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.afterOppositeSignal=state;
-    for(const id of ['navigationMarket','navigationX','navigationY','navigationZ','navigationGo','navigationStop','navigationTargetPrice','navigationLongAbove','navigationShortBelow','navigationAutoC','navigationAutoLots','navigationMaxLoss','navigationMaxOrders','navigationAutoStart','navigationAutoStop'])await control('#'+id);
+    const selectors=['navigationMarket','navigationX','navigationY','navigationZ','navigationGo','navigationStop','navigationTargetPrice','navigationLongAbove','navigationShortBelow','navigationAutoC','navigationAutoLots','navigationMaxLoss','navigationMaxOrders','navigationAutoStart','navigationAutoStop'].map(id=>'#'+id),batchBegan=Date.now();
+    const boxes=await page.locator('body').evaluate(inspectNavigationControls,{selectors});report.controlBatch={selectors,elapsedMs:Date.now()-batchBegan,count:boxes.length};assert.equal(boxes.length,selectors.length);for(const box of boxes)recordControl(box);assert.equal(report.controlChecks.length,36,'All original navigation control checks must complete');
     assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.networkAuthorityAttempts,[]);assert.ok(state.fixture.providerCalls.every(method=>['eth_accounts','eth_chainId'].includes(method)),'no wallet connect, signer, chain switch or transaction requests');
     assert.ok(state.fixture.native.some(event=>event.id==='navigationGo'&&event.isTrusted));assert.ok(state.fixture.native.some(event=>event.id==='navigationAutoStart'&&event.isTrusted));assert.ok(state.fixture.native.filter(event=>event.type==='click').every(event=>event.isTrusted),'navigation actions use native rendered controls');
     report.functional='PASS';

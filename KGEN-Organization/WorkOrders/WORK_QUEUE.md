@@ -35,6 +35,10 @@ Universal／Portal／Trading／Responsive已PASS，Game的導航300秒總驗收�
 
 原Game在狹窄矩形首null就退出，後續settlement未執行；原8次／750ms／4000ms與全部導航判定不改，只讓原QA掃實際canvas空白並在原8次內重取、失敗座標去重，保存有界真路由／physical診斷。a453錢包前景六尺寸功能及修後實圖已過，仍與未完成整體驗收分列；不誤記a453曾跑第二次300秒。相同WORK_ID／PR673，下一步原新head CI，不改Runtime或資源上限。
 
+### 66bf 全CI後的通知視覺窄修
+
+原五CI綠但390真FILLED toast蓋啟動文字，故維持未交付。只將真navigationConsole＋title接既有singleton/header通知，保留期限／原文／priority；原case1/1及provenance1/1 PASS。原QA末15只讀批量減往返，每控件2RAF/36check/原28圖/300秒保留，加當時真可見toast與header圖，不等消失。下一步同PR新head完整功能與實景，再原main／Pages／原production來源驗證；不另建Runtime／bootstrap／排程或金融規則。
+
 ## Earlier queue records — preserved as history
 
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei

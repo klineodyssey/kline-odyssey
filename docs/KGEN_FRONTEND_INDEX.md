@@ -33,6 +33,12 @@ navigation delta is carried by PR673 in these existing homes:
   restores the player's existing controls/params preference. The original M1 and
   responsive browser QA check actual pointer centers and restoration, not a new
   overlay controller or a changed saved preference.
+- `runtime/game-ui-product-fixes-v23.mjs`: the existing singleton toast also
+  recognizes the actual navigation console and its matching original rail title,
+  reusing the existing sheet header flow. Navigation stays outside financial
+  sheet refresh; notification text, expiry, fade and confirmation priority stay
+  with the original owner. The existing browser QA records the visible message,
+  real header geometry and controls without waiting for the message to disappear.
 
 No new Runtime/bootstrap/version file is introduced. Global 18911 travel,
 price-to-global-coordinate projection and live automatic trading remain outside
