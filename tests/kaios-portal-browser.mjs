@@ -1587,5 +1587,11 @@ finally{
   catch(error){checkpoint('report-write','FAIL',error);throw error;}
   checkpoint('report-write','PASS');checkpoint('browser-close','START');
   try{await browser.close();}catch(error){checkpoint('browser-close','FAIL',error);throw error;}
-  checkpoint('browser-close','PASS');console.log(JSON.stringify(report));
+  checkpoint('browser-close','PASS');
+  console.log(JSON.stringify({
+    head:report.head,mode:VISITOR_ONLY?'visitor-only':FUNDING_ONLY?'funding-only':'portal',
+    functional:report.functional,visual:report.visual,profiles:report.profiles.length,
+    checks:report.checks.length,runtimeErrors:report.runtimeErrors.length,errors:report.errors.length,
+    report:`${OUT}/${VISITOR_ONLY?'visitor-browser-report':FUNDING_ONLY?'funding-browser-report':'portal-browser-report'}.json`
+  }));
 }
