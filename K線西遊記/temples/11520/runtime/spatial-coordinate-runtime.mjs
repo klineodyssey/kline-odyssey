@@ -120,3 +120,48 @@ export function parseHudXYZ(text=''){
   const m=String(text).match(/X\s*(-?\d+(?:\.\d+)?)\s*[·|,]?\s*Y\s*(-?\d+(?:\.\d+)?)\s*[·|,]?\s*Z\s*(-?\d+(?:\.\d+)?)/i);
   return m?{x:Number(m[1]),y:Number(m[2]),z:Number(m[3])}:null;
 }
+
+// 2026-11-18: integrate PR523 c8e930c1's elapsed motion delta while preserving
+// every existing conversion/address function and the current spatial calibration.
+// Hidden, resumed, owner-switched and long-suspended frames do not catch up.
+export function advanceLocalMotionClock(previous,now,{visible=true,ownerKey=null}={}){
+  const valid=Number.isFinite(now),delta=valid&&Number.isFinite(previous?.now)?(now-previous.now)/1000:0;
+  const active=valid&&visible&&previous?.visible&&previous.ownerKey===ownerKey&&delta>=0&&delta<=.25;
+  return Object.freeze({now:valid?now:null,visible:!!visible,ownerKey,elapsedSeconds:active?delta:0,status:!visible?'HIDDEN':active?'ACTIVE':'RESET'});
+}
+
+// LOCAL_METERS remains the existing render/collision space. The caller provides
+// the approved physical speed, including an explicit ordinary-walking fallback;
+// neither a market value nor the sign of C becomes an XYZ direction here.
+export function integrateLocalMotion({position,vector={x:0,y:0,z:0},target=null,elapsedSeconds=0,speedKPerSecond=null,resolveMove}={}){
+  const axes=['x','y','z'],valid=p=>p&&axes.every(a=>typeof p[a]==='number'&&Number.isFinite(p[a]));
+  if(!valid(position))throw new RangeError('INVALID_LOCAL_POSITION');
+  let current={...position},distanceMoved=0,blocked=false,blocker=null,substeps=0,detour=false;
+  const base={position:current,intentDelta:{x:0,y:0,z:0},distanceMoved:0,distanceMovedK:0,observedSpeedKPerSecond:0,inputThrottle:0,blocked:false,blocker:null,substeps:0};
+  if(typeof speedKPerSecond!=='number'||!Number.isFinite(speedKPerSecond)||speedKPerSecond<0||speedKPerSecond>.1)return{...base,status:'SPEED_UNAVAILABLE'};
+  if(speedKPerSecond===0)return{...base,status:'PAUSED'};
+  if(!Number.isFinite(elapsedSeconds)||elapsedSeconds<0||elapsedSeconds>.25||typeof resolveMove!=='function')return{...base,status:'FRAME_UNAVAILABLE'};
+  if((target!==null&&!valid(target))||!valid(vector))return{...base,status:'INPUT_UNAVAILABLE'};
+  const raw=target?Object.fromEntries(axes.map(a=>[a,target[a]-position[a]])):vector,length=Math.hypot(raw.x,raw.y,raw.z);
+  if(!Number.isFinite(length))return{...base,status:'INPUT_UNAVAILABLE'};
+  if(length===0||(!target&&length<.02))return{...base,status:target?'ARRIVED':'IDLE'};
+  const throttle=target?1:Math.min(1,length),budget=kToGameUnits(speedKPerSecond)*elapsedSeconds*throttle;
+  const travel=target?Math.min(length,budget):budget,direction=Object.fromEntries(axes.map(a=>[a,raw[a]/length]));
+  const intentDelta=Object.fromEntries(axes.map(a=>[a,direction[a]*travel]));
+  // The cap follows the existing .1 K/s limit, .25-second frame limit and
+  // <=.25-meter sweeps, rather than introducing a new speed or unit policy.
+  const steps=Math.ceil(travel/.25),maxSteps=Math.ceil(kToGameUnits(.1)*.25/.25);
+  if(!Number.isSafeInteger(steps)||steps>maxSteps)return{...base,status:'FRAME_UNAVAILABLE'};
+  for(let i=0;i<steps;i++){
+    const amount=Math.min(.25,travel-i*.25),next=Object.fromEntries(axes.map(a=>[a,current[a]+direction[a]*amount]));
+    const result=resolveMove(current,next);substeps++;
+    if(!valid(result)){blocked=true;blocker={name:'INVALID_COLLISION_RESULT'};break}
+    if(result.blocked){blocked=true;blocker=result.blocker||{name:'WORLD'};break}
+    const moved=Math.hypot(...axes.map(a=>result[a]-current[a]));
+    if(moved>amount+1e-8){blocked=true;blocker={name:'INVALID_COLLISION_DISPLACEMENT'};break}
+    current=Object.fromEntries(axes.map(a=>[a,result[a]]));distanceMoved+=moved;detour=detour||result.detour===true;
+    if(!result.detour&&axes.some(a=>Math.abs(current[a]-next[a])>1e-8)){blocked=true;blocker={name:'WORLD_BOUNDARY'};break}
+  }
+  const distanceMovedK=gameUnitsToK(distanceMoved),arrived=target&&Math.hypot(...axes.map(a=>target[a]-current[a]))<1e-8;
+  return{position:current,intentDelta,distanceMoved,distanceMovedK,inputThrottle:throttle,observedSpeedKPerSecond:elapsedSeconds>0?distanceMovedK/elapsedSeconds:0,blocked,blocker,substeps,detour,status:blocked?'BLOCKED':arrived?'ARRIVED':detour?'DETOUR':distanceMoved>0?'MOVING':'IDLE'};
+}

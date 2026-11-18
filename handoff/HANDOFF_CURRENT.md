@@ -1,5 +1,86 @@
 # HANDOFF_CURRENT
 
+## 2026-11-18 Human 授權更新與 PR523 → PR673 接續（最新有效範圍）
+
+- RECORDED_UTC: `2026-11-17T21:16:49Z`; 台灣時間：`2026-11-18T05:16:49+08:00`。
+- 直接依據：本頁 Human 明確要求處理並解除 #523 的普通工程阻塞，讓原專案繼續；原話末句：「要專案能進行，常識說就是授權改」。
+- 本次授權解除 #523 對原範圍普通工程的 HOLD；以下歷史紀錄中的該項限制於此範圍由本次接續授權取代。不得再將它當成全域工程阻擋，或對相同範圍反覆要求 Human 授權。
+- 這是既有 `HUMAN_DIRECT_ORDINARY_LOCAL_ENGINEERING / MANUAL_DISPATCH_NON_ATOMIC` 的 authority-scope 更新；root 是本輪單一整合 Writer，助手僅按既有檔案範圍分工。沒有建立新 Worker、原子 claim、dispatcher、排程或產品。
+- #19 的具體拒絕／禁止重試、真錢包與主網的持有人確認、其他具體 HOLD、成本／資源／停機上限，以及既有停用 Browser 與停止條件全部保留。此更新不授權 AI 簽署、送真交易、付款、治理、部署主網合約、讀取秘密或繞過工具限制。
+- 來源固定：main `01794eba63b2664db741f9787a16bc9b7dd37b7d`；[PR523](https://github.com/klineodyssey/kline-odyssey/pull/523) 是共同 base `f7f67950418ebbb6f7a5a309a32d529232fcb3b6` 上的五個舊重建提交、28 個變更檔案，head `c8e930c1cf49432f21dd3420ae8fb479e884d814`。提交沿革：`71b39ec25` → `1aecc6a3d` → `300196dcd` → `f3b0dcbda` → `c8e930c1c`。
+- 對照該 main，仍有六個未合入 API，現已按需移至 [PR673](https://github.com/klineodyssey/kline-odyssey/pull/673) 的候選工作樹，沿用原檔：
+  - `K線西遊記/temples/11520/runtime/combat-drive-adapter.mjs`：`readCanonicalDriveState`。
+  - `K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs`：`advanceLocalMotionClock`、`integrateLocalMotion`。
+  - `K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs`：`resolveLocalNavigationStep`、`prepareLocalNavigationFrame`、`commitLocalNavigationFrame`。
+- 保留目前 main 的 conversion/address、既有帳本、交易 owner 與後續 UI 成果；不整檔套回舊重建。舊 UI／版本覆蓋及把普通 `0C LOCAL_WALK` 改成 `PAUSED` 的行為不移入。
+- REPLACEMENT_SOURCE: 本次 PR673 整合提交；精確 SHA 沿該 PR head 與本頁原 checkpoint 讀回，不以先前 core-only head `ae675442` 冒充包含本輪 delta。
+- LOCAL_VALIDATION: 新導航 16/16 PASS（196.5212ms）；UI-static 首跑 68/72，修正舊 frame-step／市場權威假設及 fixture 範圍後 72/72 PASS（1541.04ms）；既有 drive adapter PASS；product-standard 首跑舊器官名稱 marker FAIL，更新名稱／elapsed callback marker 後 PASS；新 Full HUD admission helper相關 2/2 PASS（232.1667ms）。原 core 71/71 沿同指紋前段證據，未重跑。
+- UI_CANDIDATE: 三市場獨立選擇、原世界地圖中的 XYZ／距離／ETA／分欄情境 PnL、明確確認的模擬自駕與原委託／持倉入口。單一 motion clock／已成交 C 引擎、換身份／模式與隱藏停止策略；draft/pending 不點火。既有兩尺寸 settlement QA 增加真 DOM flow 與原 artifact 路徑的合成截圖，尚待 CI runtime 驗證。
+- CI_REPAIR: 舊 head 的 provenance mismatch 已保存並更新精確 executable-byte 記錄，未刪除祖先雜湊；兩個既有 Trading browser job 固定與 Game 同 `ubuntu-22.04` 以相容原 Playwright 1.51.1；冷 360 Full HUD 的實際 down 不合格先 cancel/reacquire，沿原 1000ms／max3 邊界，未延長 timeout 或改產品 gate。
+- CURRENT_STATUS: `PR673_INTEGRATION_CANDIDATE / NOT_MERGED_TO_MAIN / FULL_UI_NOT_COMPLETE`。本紀錄不宣稱本輪 main 合併、Pages 部署、手機驗收、真交易或 #523 已關閉。
+- 實際處置：替代來源 `b58e850a2fc48491bcc7a3fb9f0728446407aef4` 已 commit/push 原 PR673；#523 於 UTC `2026-11-17T21:51:57Z`／台灣 `2026-11-18T05:51:57+08:00` 關閉為 `REPLACED_BY673`（merged=false）。原 body 前綴、分支 `dot/k11520-navigator-reconstruction-20261007`、head 與交接歷史保留。
+- 新 head 原 Universal CI `44184119067` 首跑 593 項／592 PASS／1 FAIL：`tests/11520-order-route.test.mjs` 的抽取訂閱 callback fixture 缺原 module 新增的 `navAutoWalletKey=null`。只補 fixture 初值後，此檔 23/23 PASS（294.5871ms）；原 READING 清除順序斷言保留，產品碼未再修改。其他 runtime／visual CI 尚待結果。
+- 後續 `4e8d2e3ea0f47a0ae7a107bcf53d33f3ccaa6696` 原 Universal CI `44184793604` SUCCESS。Game `44184793508` 首個實測失敗是 `11520-browser-xzxy.mjs` 的 `XZ up must Z+`；原斷言及 hold 不變，僅在原測試加入最多48段×64幀／16 pointer 的唯讀 trace及失敗截圖保存，再作一次原 CI 診斷。來源／離線控制向量核對未顯示 Z 反轉，但不能據此推定實景根因；若相同故障再次失敗，保存證據並停止盲重試。
+- 同 head Trading `44184793520` 的本機 EVM 候選與 canonical job SUCCESS；M1 先前餘額／換帳／重載／斷重連已過，但 RETURN_LEGACY 被既有 `RECOVERY_HISTORY_REQUIRES_INDEXER` 範圍保護拒絕（部署133803774至讀回143331474相差9,527,700，超過原2,000,000上限）。原 artifact `14373423972` SHA256 `fc32c7e6ae9f1141671745446f7495e9f8311967b2799c95ba7d00bd21660f6e` 保留；不提高上限、不以不完整 history 冒充退出驗收。`LEGACY_EXIT_BLOCKED / NOT_VERIFIED` 仍成立，本輪未改此財務恢復程式或測試 gate。
+- `a849f36787d58f9a10973551c8aff7c40ab93502` 第二段有軌跡實測首故障為 XZ right。原 artifact `14374641927` SHA256 `26654f1c7ab01e751b85dabebc9019ace92c978d6662cb17713413695fbfc0b7`，JSON exact head 及五原碼指紋已核。6個 active frame 的 raw.h=1／elapsed>0，但 `ATM-11520-001` 真碰撞讓 physical不變、intent.x仍增，排除本次 Z 符號／clock 抑制的猜測。上輪無軌跡，不追認同因。
+- 已定位的前置污染為 `assertThumbFollows()` 在方向矩陣之前按住斜向移動截圖，截圖期間角色繼續走到 ATM 邊；僅把這個原視覺檢查移到九軸矩陣完成並回 XZ 之後。所有原方向／地面／回彈／截圖斷言、hold及timeout保持，未停 actor、修改碰撞或 force/reset 位置。這是已核根因的 QA 排序修正；之前兩段失敗及停止盲重試紀錄保留，不冒充產品碼已修復。
+- 唯一下一步：沿原 PR673 讀回修正後精確 head 的既有 CI 與兩尺寸實圖，合格後原站交付；#523 已關閉，不再作為普通工程等待條件。
+
+## 2026-11-18 Human「完成品給我」：原 PR673 有界驗收修復
+
+- UTC：`2026-11-18T00:07:05.957Z`；台灣：`2026-11-18T08:07:05.957+08:00`（本輪 envelope 保存時間）。RUN_ID `KAIOS-ENGINEERING-20261118T000705957Z`；原 WORK_ID `K11520-SIMULATION-AUTOPILOT-20261118-01`。main 仍核為 `01794eba63b2664db741f9787a16bc9b7dd37b7d`；本輪起點 local `7b1c7d89b6a47cdcb56ba3ab8d44a2ad925f4ada`、remote PR head `91629e0cc78d0f4a571be3985e78577171217c4e`，未聲稱兩者相同。
+- 單一整合 Writer 為 root；助手按原檔隔離：legacy adapter／原 unit、mobile HUD QA、responsive QA；已返還或唯讀複核，不建立原子 claim 或 Worker。兩個實質 review finding（await identity 後 generation、postreceipt UI 身分過濾丟回執）均沿原檔修正；原限制不放寬。
+- `91629` 原 Game CI 的 xzxy／三操控面／thumb／normal／layout 已 PASS；後續 mobile HUD 在 ATM 旁要求 X CONFLICT，但實際位移為0、狀態 GUARD。保留碰撞與所有斷言／520ms hold；把原按住截圖的 thumb block 移到 conflict 後，並在動作前只讀核對真實走廊。沒有重設位置或停 actor。
+- 原 Responsive 冷390證據中第一次 down 不合格，第二次 down 已 canPan=true，但回傳檢查花費超過原1000ms。只把 trace cursor 與取點同次讀回、減少 timed diagnostic payload；原1000ms／max3、原生 admission、pan／XYZ／reset／pinch 斷言皆保留。`7b1c7d89` 的 canonical waypoint selector 修正也保留。
+- 原 BSC97 超長歷史的有界本金恢復與未知 UI 規格見原 `KGEN_TRADING_SPEC.md`。仍保留2,000,000及10001 guards、原 signer／費用／收據；不把本金讀回冒充完整歷史或資金入帳。
+- 本輪原 legacy unit 在首77/78後修新 ABA fixture expectation，前段78/78；這兩次沒有另存原log，不補造。review 後增加最後提款 gate ABA，targeted8/8、完整79/79 PASS；原log保存於原 kaios evidence。新增收據歸屬修正的最終結果沿同PR／checkpoint續存。UI route 首21/24是舊VM fixture缺helper／舊ternary假設，修fixture後24/24；新增 recheck UI 後24/24 PASS（412.0086ms）。後續精確指紋與 CI 結果不得由此推定。
+- 最終 legacy adapter unit 79/79 PASS（2375.9151ms、UTC `2026-11-18T00:32:31Z`），含最後提款 ABA 及 postreceipt 重查失敗的原帳號／鏈／部署回執歸屬。UI route 經 actual `walletExecutionView` 的 account=null 失敗路徑、別帳號／錯鏈／錯部署隔離後24/24 PASS（267.729ms）。UI-static首71/72因 readiness VM 未提供既有 trace，補fixture並驗cursor後72/72 PASS（1437.5828ms）；舊失敗log保留，產品gate未放寬。8個變更 mjs 語法及 diff whitespace PASS；source與QA各獨立唯讀 review finding已閉合／NO_BLOCKER，非外部審計。
+- 狀態仍 `NOT_MERGED / PAGES_NOT_PUBLISHED / VISUAL_QA_NOT_VERIFIED`。唯一下一步：push 原 PR673，讀回精確 head 的既有 CI 與390×844、844×390實圖，合格後沿原 main／Pages交付。#523權限不再重問；KUFO／100KAIOS／全球18911未完帳與所有真資產限制保留。
+
+## 2026-11-18 e92 原 CI 失敗的具體接續修正
+
+- UTC `2026-11-18T00:47:17.343Z`／台灣08:47:17.343。原 PR673 head `e92ae1504b8e1c1755c34c1f17552d88c1d12140` 的 Universal、Portal、Trading candidate-wallet-browser 與 canonical EVM 已 SUCCESS；Game mobileHUD（含真 corridor／CONFLICT）及 contextual HUD 也 PASS。contextual lane 不等於後續 Full HUD 原生 acquisition；後者仍待執行，不能混報。
+- Game `44209049253` 首故障為原 plane-map QA 的 `legacyXZPreserved===true`，但當前單一導航 owner 固定發布 false。後段也仍從不再由導航寫入的舊 joystick vector 驗 Y/Z；這兩個過時契約沿原 QA 換為當前 authority／start-stop API 及同幀 intentDelta／真 physical YZ 進展與 X 固定。所有原 timeout／hold／後續 WORLD 與 ground-tap 斷言保留，不修改 runtime 或復活第二 clock。原 unit 新增 published API lifecycle 1/1 PASS（159.8707ms），其餘已過16項未重跑。
+- Trading `44209049146` 的 M1 仍在 RETURN_LEGACY FAIL。原 artifact 證明 `RECOVERY_HISTORY_REQUIRES_INDEXER`、RPC失敗0；實際頂層部署具有 `ISOLATED_V1`，本候選 `!capitalEnabled` 將原退出路徑錯誤排除。只移除 refresh／首次 mutation 識別的這兩處能力排除；明確 exitOnly、非唯讀及原2m超限界線仍在，普通非 exitOnly 的完整恢復仍拒絕超限，不改 manifest／ABI／資本能力或經濟規則。
+- 新配置 targeted3/3、原 execution unit80/80 PASS（2411.1398ms、UTC00:44:12Z）；更新原 executable-byte 記錄後僅選原provenance項1/1 PASS（175.5991ms）。不是 e92 舊 M1 的 PASS，也未宣稱新本金 scope 實景通過。source及QA唯讀審查不擴大任何財務權限。
+- Game artifact `14386360040` SHA256 `6e3034ad995038932c7774edfafce2c890f36a5f5df882ab1871ec60078e6321`，到期UTC `2026-12-02T00:41:57Z`。舊 M1 `14385521095` SHA256 `96277a0f3bdcbc973ea9fd0da6f466b2714122b89504fbe9b0183479be340c85`；兩個原失敗與所有小log／ZIP保留，不改寫成一輪全過。navigation console 尚未抵達實景，仍 NOT_VERIFIED。
+- 唯一下一步：同 PR 保存修正後 head，取得原 CI 的完整功能與兩尺寸實圖，合格後才合併／原 Pages交付。沒有本機 Browser／CUA／Python、沒有重跑原失敗 head、沒有簽送或成本／時限放寬。
+
+## 2026-11-18 757 實景後的最小前景／QA 成本修正
+
+- UTC `2026-11-18T01:18:59.428Z`／台灣09:18:59.428（helper 語法與指紋核對）。原757 head的 Universal、Portal、Trading、Responsive 已全部 SUCCESS；Responsive contextual/world-first/full 三job已過，cold390原生首試324ms、844首試251ms，原1000ms／三次界線保留。production-only M1 lane按原條件SKIPPED，不冒充該lanePASS。
+- 原 Game settlement 在UTC00:58:30.187至01:03:30.223達300秒、exit124。原 artifact `14387031305` SHA256 `89b2dd9b78cc2dc1211e9a28ea8c4ff34cfd8c7262aca9c584b1f1b6f612a5c8` 已核：兩尺寸原settlement均PASS；390導航report也PASS；844具相同9項行為檢查及14張原PNG、無pageError／authority attempt，但最後全控件幾何loop的第3項被外部時限中斷，不能列整體PASS。ZIP DOS時計僅用相對差，不冒充時區證據。
+- 僅將原 navigation `control()` 的 scroll＋兩個真RAF＋當時geometry/hit 合併成一次 element.evaluate，減少每次兩個多餘protocol往返。原 inView／actual center／44px 斷言、所有native操作、28張圖及300秒保持；新增每次控件實際box與elapsedMs證據。獨立只讀review NO_BLOCKER，節省時間須新CI量測，不預保證PASS。
+- Root已直接看757的390／844 profit-preview及autopilot-stopped四張原圖；情境標示、停止保留委託與控制可讀，未見該四圖新blocker。這不是未完成的最後幾何掃描或真交易／全球18911驗收。
+- 同head的M1橫圖另有實際視覺不合格：真正 `#k11520ControlsClose`（mobile-ui-settings原owner、left212/top66）壓住重連區，與UtilityMaster不同。只在原Wallet前景暫隱該控制；不改controlsOpen／params／allOn／hidden偏好、master、walletToggle或錨點。原M1六尺寸增加偏好／hidden未改、不可受點、Connect/Refresh真中心hit、close後恢復，並保留原金融核對與圖；原Responsive隔離斷言補此控制。
+- 本段原source1檔／test2檔與既有文件接續；語法／diff PASS，本機套件與Browser執行0。唯一下一步同PR的新精確head原CI300秒與錢包修後實圖驗收；通過後原main／Pages交付。不得把舊757失敗或新未執行項改成全過。
+
+## 2026-11-18 a453 原空白世界取點前置修正
+
+- UTC `2026-11-18T01:44:26Z`／台灣09:44:26。a453 原 Trading 全部 SUCCESS，六尺寸30次錢包前景及60次Connect/Refresh中心命中全過；root另直接看390／844新圖，真正ControlsClose已不壓重連。原contextual Wallet六尺寸隔離及修後圖亦過。這些既有結果保存，不由後續不同QA故障撤銷，也不冒充整體交付。
+- 原 Game `44215933840` 首故障在 plane-map:65 `an actual empty world target must exist`，單次候選為null；原 artifact14388847276 SHA256 `9d758385c849044020fb127317df10aacebfc1b6663f9f34be336b5ce782ba99`，到期UTC `2026-12-02T01:33:49Z`。後續settlement被跳過，a453沒有再次實測300秒，不能誤記成第二次300秒失敗。
+- 原picker只掃寬35–80%、高40–65%的固定小矩形並排中線，首null立即assert，令原8次重取未生效。這不證明整個canvas無空白，亦不推定actor／遮罩的具體根因。僅沿原QA使用實際canvas全可用rect、原20px密度、原radius10 canonical九點判定，cheap DOM先拒、portrait下向上，失敗點去重；null在原8次內續取，不增加等待或timeout。
+- 原native click之後仍須750ms內驗WORLD_GROUND/source/mode/active、target.y=0／distinct與4000ms真物理移動；所有原後續斷言保留。沒有改actor、camera、HUD、hit-test、Runtime或金融規則。最多8列原點選路由／DOM統計／前後physical寫入原artifact；僅失敗時附有界截圖，不重跑原失敗head。
+- sole QA Writer已返還，root只讀複核；語法／diff PASS，沒有新unit／本機browser／真RPC。原讀回 `plane-map-picker-check-20261118T014426475Z.json` SHA256 `451e7dad063796fb819d0f99873d10a6a44f553fd405d45278c4b62436c91944`。唯一下一步新同PR head原CI，同時完成尚未再次執行的300秒整輪；全功能／新head實景合格才原main／Pages交付。
+
+## 2026-11-18 66bf全CI後的真通知遮字修正
+
+- UTC `2026-11-18T02:29:19.778Z`／台灣10:29:19.778。66bf原五CI全部SUCCESS；Game兩job均過，原300秒雙尺寸結算／導航通過、實耗299.8334秒。原ground trace第1/8次、13ms、真GROUND事件／y0／位移已核；兩尺寸各36（末尾15）控件、共72幾何全過，原28圖全實看。先前「末16」為計數誤寫，以原15-ID清單／實測36為準，未刪除控件。
+- Root與獨立viewport審查均在390 auto-stop原圖看到FILLED toast蓋AutoStart字樣，故全CI綠不等於視覺合格，不合併該head。唯一owner `game-ui-product-fixes-v23.mjs` 原本依financial simOrgan才把toast放header；worldmap的simOrgan刻意空（不能交給financial refresher），新導航因此留body。僅加「真navigationConsole＋原rail worldmap title匹配」辨識，仍同#toast、confirm優先、原header CSS／文案／期限／淡出／ARIA；不改main／simOrgan／HTML、不建立另一訊息Runtime。
+- 原singleton完整case補導航／stale marker／錯title／confirm優先／不重置定時與文字／關閉還body，選1次1/1 PASS（160.3793ms）。更新既有executable hash後只選原provenance1/1 PASS（176.4479ms）；原log保留，其他未變suite不重跑。
+- 原navigation QA以同一DOM inspector供single locator與末15批量讀，批內仍逐控件scroll／兩個真RAF／viewport／44px／center，保持36原順序與28原圖。真缺ACK後原下一個AutoStart檢查.show／原文／header/static/ARIA及不覆蓋目前可點控制，每尺寸另存1張當時真header小圖；不等toast消失、不合成訊息。只於同一同步量測快取共同ancestor clips，每個控件scroll/2RAF後重建；被sticky header裁在後面而本就不可點的欄位，不誤作toast遮擋，當前控件原hit仍嚴格保留。
+- source／單例與原browser QA Writer已返還root；語法／diff PASS，無本機browser／真RPC／簽送。原300秒與所有hold不變，批量節省及新圖須新head原CI證實。原讀回：`navigation-toast-batch-qa-handback-20261118T022403623Z.json` SHA256 `ac7f2ee3b64ec74e76fff57765be54258dc8fc840eeba1d82c1826a599fffaaf`；root後續只補actual-clickable filter及同步clip cache，實際新指紋沿本提交核對。
+- 唯一下一步同PR新head原CI／真toast圖／完整300秒驗收；合格後原main／Pages及既有production public-source鏈讀回。mergeSHA目前未定，原30項資產清單必須依最後head重新導出，不能用66舊hash冒充新原站。五未完ledger與所有金融／費用／用量／停止界線保留。
+
+## 2026-11-18 b758 真標頭圖後的可見裁切核對
+
+- UTC `2026-11-18T02:45:22Z`／台灣10:45:22。b758 的 Universal、Portal、Trading 已 SUCCESS；Game 新 job134531996928 在02:40:40Z因其他欄位的可見範圍斷言停止，不是300秒逾時。原artifact14392477240 SHA256 `29f03b208c1d3744de2b9aeb96d620a0f685a2123ceb0316397367f20e1ca32b`；失敗小證據 `pr673-b75805ed-toast-failure-20261118T024346445Z.json` SHA256 `9b02ae1c4e10071fb33e9e039842f95bc4bc8412ab2bb1e833b64d7c1a4e287a`，兩張原圖已由root與獨立Reviewer實看。
+- 真toast已在header獨立列：y129至158；header底158。AutoC y139.5至183.5、中心161.5仍可點，但頂18.5px已捲到不透明sticky header背後；QA比較完整DOM矩形造成誤報。當前AutoStart y397.5至441.5，完整可見且中心命中，不被toast覆蓋。未到專用header圖、末15批量、landscape及PlayerLife，不追認PASS。
+- 僅修原browser QA其他控件的有效可見區：限toast確在原sticky／既有不透明色header內、header完整橫向覆蓋欄位時，裁掉真正藏在header後的頂端；所有current target仍用完整rect，新增完整target與toast不可重疊斷言。原viewport／44px／center、36check／兩幀／native／原28圖加2header圖／300秒均保留；不改產品、timer、流程、碰撞或工作流。
+- 下一步同PR的新精確head原CI，完整功能與實景通過才原main／Pages交付。b758已過的M1六尺寸、30前景／60命中與新六圖仍保存，未完成導航不由錢包圖冒充。
+
+## Earlier handoff records — preserved as history
+
 STATUS: INITIAL
 
 ## Three-cell cargo / cross-market simulation acceptance

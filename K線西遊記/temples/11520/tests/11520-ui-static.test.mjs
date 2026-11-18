@@ -184,7 +184,20 @@ const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnec
 test('all formal organs remain present in production source',()=>{for(const id of organs)assert.ok(main.includes(`['${id}'`),id)});
 test('all current fixed control surfaces exist in shell HTML',()=>{for(const id of fixed)assert.ok(html.includes(`id="${id}"`),id)});
 test('core controls have runtime event wiring',()=>{for(const token of ["joy.addEventListener('pointerdown'","$('#lookPad').addEventListener('pointerdown'","$('#attack').onclick","$('#skill').onclick","$('#dodge').onclick","$('#tradeSword').onclick","$('#flat').onclick","$('#orderFire').onclick","$('#dockToggle').onclick","$('#walletConnect').onclick","$('#walletRefresh').onclick","$('#walletToggle').onclick","bindVertical('#lotsControl'","bindVertical('#cControl'"])assert.ok(main.includes(token),token);for(const token of ['function bindDisc()','function bindRail()','__K11520_3D_CONTROL__','railAxis','discAxes'])assert.ok(xyzControl.includes(token),token);assert.equal(main.includes("bindVertical('#yControl'"),false,'remaining-axis rail must not use legacy bounded Y slider wiring')});
-test('0C walking remains independent from C control',()=>{assert.equal(source.includes('D.warp===0?0'),false);assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('const speed=.10'))});
+test('0C and draft C retain walking; only filled position C supplies movement speed',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const {gameUnitsToK}=await import('../runtime/spatial-coordinate-runtime.mjs');
+ const {readCanonicalDriveState}=await import('../runtime/combat-drive-adapter.mjs');
+ const current={c:1000,pos:null},context={S:{axis:'KY'},axis:()=>current,gameUnitsToK,readCanonicalDriveState};
+ const fn=main.slice(main.indexOf('function localNavigationSpeed('),main.indexOf('function moveManual('));
+ runInNewContext(fn+'globalThis.speed=localNavigationSpeed;',context);
+ assert.equal(context.speed({navigating:false}),gameUnitsToK(6),'a draft rail does not ignite the engine');
+ current.pos={status:'PENDING_TRIGGER',c:1};assert.equal(context.speed({navigating:true}),gameUnitsToK(5.1));
+ current.pos={status:'OPEN',c:1};assert.equal(context.speed({navigating:true}),.001);
+ current.pos.c=-.1;assert.equal(context.speed({navigating:true}),.0001,'short sign does not reverse route or speed');
+ current.pos.c=0;assert.equal(context.speed({navigating:false}),gameUnitsToK(6));
+ assert.equal(source.includes('D.warp===0?0'),false);
+});
 test('current dynamic organ actions are wired',()=>{for(const token of ['data-organ','openOrgan(','data-axis','data-market','openOrder()','closePos','setWaypoint','bindMap','PLANE_TRADE_AXIS','syncTradeAxisFromPlane'])assert.ok(main.includes(token),token)});
 
 test('Player Courier exposes explicit local-only Bandit mode, raid action and one-shot loot UI',()=>{
@@ -248,8 +261,8 @@ test('human-approved current control imagery is production-wired',()=>{
 test('XYZ plane control is unbounded intent with collision-constrained body',()=>{
   assert.ok(main.includes('intentXYZ:{x:0,y:0,z:0}'));
   assert.ok(main.includes('unboundedIntent:true'));
-  assert.ok(main.includes("blocker={name:'GROUND'}"));
-  assert.ok(main.includes('S.intentXYZ={x:S.intentXYZ.x+v.x*speed'));
+  assert.ok(main.includes("blocker:{name:'GROUND'}"));
+  assert.ok(main.includes('S.intentXYZ[a]+result.intentDelta[a]'));
   assert.ok(xyzControl.includes('unboundedCoordinateIntent:true'));
 });
 
@@ -320,7 +333,19 @@ test('product help uses signed C and positive lots without obsolete zero-lot hin
   assert.ok(fixes.includes('最小 1 口'));
 });
 
-test('plane switch directly owns trading axis and sword no longer gates orders',()=>{assert.ok(main.includes("const PLANE_TRADE_AXIS=Object.freeze({XZ:'KY',XY:'KZ',YZ:'KX'})"));assert.equal(main.includes('if(!S.tradeArmed)'),false);assert.equal(main.includes('tradeArmed'),false);for(const skill of ['phantomAxe','goldenRain','slash'])assert.ok(main.includes(`performCombat('${skill}')`));assert.ok(main.includes("data-market-card"));assert.ok(main.includes("點市場卡不會改變交易軸"));for(const pair of ["KX:'BTCUSDT'","KY:'ETHUSDT'","KZ:'BNBUSDT'"])assert.ok(main.includes(pair),pair);assert.equal(main.includes('核爆'),false);assert.equal(html.includes('核爆'),false)});
+test('plane supplies the default market; explicit market selection keeps physical controls independent',async()=>{
+ const {runInNewContext}=await import('node:vm');let plane='XZ',stops=0;
+ const S={axis:'KX',xyz:{x:2,y:3,z:4},axes:{KX:{market:'BTCUSDT'},KY:{market:'ETHUSDT'},KZ:{market:'BNBUSDT'}}};
+ const context={S,controlState:()=>({mode:plane}),stopNavigationAutopilot:()=>stops++,renderAxes:()=>{},syncControls:()=>{},executionBusy:false,previewSequence:0,$:()=>({classList:{remove(){}}}),document:{dispatchEvent(){}},CustomEvent:class{}};
+ const fn=main.slice(main.indexOf('function tradeAxisForPlane('),main.indexOf('globalThis.__K11520_TRADE_AXIS_API__'));
+ runInNewContext("const PLANE_TRADE_AXIS={XZ:'KY',XY:'KZ',YZ:'KX'};let selectedTradingAxis=null;"+fn+'globalThis.select=selectTradingMarket;globalThis.sync=syncTradeAxisFromPlane;',context);
+ context.sync();assert.equal(S.axis,'KY');plane='XY';context.sync();assert.equal(S.axis,'KZ');
+ context.select('KX');plane='XZ';context.sync();assert.equal(S.axis,'KX');assert.equal(stops,4);
+ assert.deepEqual(S.xyz,{x:2,y:3,z:4});assert.equal(context.select('INVALID'),false);
+ assert.equal(main.includes('tradeArmed'),false);for(const skill of ['phantomAxe','goldenRain','slash'])assert.ok(main.includes(`performCombat('${skill}')`));
+ for(const pair of ["KX:'BTCUSDT'","KY:'ETHUSDT'","KZ:'BNBUSDT'"])assert.ok(main.includes(pair),pair);
+ assert.equal(main.includes('核爆'),false);assert.equal(html.includes('核爆'),false);
+});
 
 test('combat FX shields translucent HUD surfaces while effects are active',()=>{const fx=readFileSync(new URL('../runtime/combat-fx-runtime.mjs',import.meta.url),'utf8');assert.ok(fx.includes('k11520CombatFxActive'));assert.ok(fx.includes('hudShielded:true'));assert.ok(fx.includes("background:#091119!important"))});
 
@@ -673,7 +698,7 @@ test('world-first minimap waits for dismissal and requires native owned pointer 
   const good=await run();assert.equal(good.error,undefined);assert.deepEqual(good.order,['hidden','reset','click']);
   for(const option of ['wrongTarget','untrusted','missingUp','wrongPlane'])assert.ok((await run({[option]:true})).error,option+' must fail closed');
   const blocked=await run({blocked:true,diagnosticsFail:true});assert.equal(blocked.error,blocked.clickError,'diagnostics cannot mask native input failure');
-  assert.match(source,/await clickWorldFirstMinimap\(page,result\);\s*await page.locator\('#waypointAction'\).waitFor\(\{state:'visible'\}\)/);
+  assert.match(source,/await clickWorldFirstMinimap\(page,result\);\s*await page.locator\('#xyzWaypointAction'\).waitFor\(\{state:'visible'\}\)/);
 });
 
 test('FULL HUD readiness diagnostics observe existing queries without extra hit tests or relaxed thresholds',async()=>{
@@ -682,10 +707,10 @@ test('FULL HUD readiness diagnostics observe existing queries without extra hit 
  assert.ok(begin>0&&end>begin);const body=source.slice(begin,end);
  async function inspect(kind){
   let now=0,domReads=0,canPanReads=0,afterDeadlineReads=0;const canvas={getBoundingClientRect:()=>({left:0,top:0,right:140,bottom:240})},hud={id:'fixture-HUD'};
-  const context={performance:{now:()=>now},innerWidth:140,innerHeight:240,requestAnimationFrame:fn=>{now+=50;fn(now)},document:{querySelector:()=>canvas,elementFromPoint:()=>{domReads++;if(now>=2000)afterDeadlineReads++;return kind==='DOM'?hud:canvas}},__K11520_CAMERA__:{canPanAt:()=>{canPanReads++;if(now>=2000)afterDeadlineReads++;return kind!=='SCENE'}},__K11520_WORLD_SELECTION_PROJECTION__:{journeyLifeSnapshot:()=>[],playerHomeSnapshot:()=>({})}};
+  const context={fullHudPointerTrace:[{type:'pointerup'},{type:'pointercancel'}],performance:{now:()=>now},innerWidth:140,innerHeight:240,requestAnimationFrame:fn=>{now+=50;fn(now)},document:{querySelector:()=>canvas,elementFromPoint:()=>{domReads++;if(now>=2000)afterDeadlineReads++;return kind==='DOM'?hud:canvas}},__K11520_CAMERA__:{canPanAt:()=>{canPanReads++;if(now>=2000)afterDeadlineReads++;return kind!=='SCENE'}},__K11520_WORLD_SELECTION_PROJECTION__:{journeyLifeSnapshot:()=>[],playerHomeSnapshot:()=>({})}};
   const result=await runInNewContext('(async()=>{'+body+'})()',context);return {result,domReads,canPanReads,afterDeadlineReads};
  }
- const pass=await inspect('CLEAR');assert.ok(pass.result.point);assert.equal(pass.result.radius,30);assert.equal(pass.result.stableMs,150);assert.equal(pass.canPanReads,49*4,'all49 scene predicates remain checked each stability sample');
+ const pass=await inspect('CLEAR');assert.ok(pass.result.point);assert.equal(pass.result.traceStart,2,'readiness samples the existing trace cursor with its origin');assert.equal(pass.result.radius,30);assert.equal(pass.result.stableMs,150);assert.equal(pass.canPanReads,49*4,'all49 scene predicates remain checked each stability sample');
  for(const kind of ['DOM','SCENE']){
   const x=await inspect(kind),d=x.result.diagnostics;assert.equal(x.result.point,null);assert.equal(x.result.elapsedMs,2000);assert.equal(x.afterDeadlineReads,0,'diagnostics never probe after deadline');
   assert.equal(d.domReads,x.domReads);assert.equal(d.canPanReads,x.canPanReads);assert.equal(d.frames.length,16);assert.ok(d.droppedFrames>0);assert.ok(d.centers>0&&d.rows>0);
@@ -776,7 +801,8 @@ test('one existing toast follows trading-panel context without replacing text, t
  const nodes={},timers=[],cleared=[],observers=[],listeners={};let moves=0;
  const element=id=>{const classes=new Set(),styleValues={};return nodes[id]={id,dataset:{},attrs:{},parentElement:null,children:[],style:{setProperty:(k,v)=>styleValues[k]=v,removeProperty:k=>delete styleValues[k]},styleValues,classList:{contains:k=>classes.has(k),add:k=>classes.add(k),remove:k=>classes.delete(k)},setAttribute(k,v){this.attrs[k]=v},appendChild(node){if(node.parentElement)node.parentElement.children=node.parentElement.children.filter(x=>x!==node);this.children.push(node);node.parentElement=this;moves++},querySelector:()=>null,getBoundingClientRect:()=>({left:6,top:160,bottom:200,width:360,height:24})}};
  const body=element('body'),toast=element('toast'),confirm=element('confirm'),sheet=element('sheet'),sheetBody=element('sheetBody'),sheetTitle=element('sheetTitle'),confirmHeader=element('confirmHeader'),sheetHeader=element('sheetHeader');element('k11520MonsterGuide');body.appendChild(toast);confirm.querySelector=()=>confirmHeader;sheet.querySelector=()=>sheetHeader;
- const context={isGame:true,innerHeight:844,document:{body,getElementById:id=>nodes[id],querySelector:selector=>({getAttribute:()=>({orders:'委託',positions:'持倉',history:'歷史'})[selector.match(/data-organ="(.*?)"/)[1]]})},MutationObserver:class{constructor(callback){this.callback=callback;this.observed=[];observers.push(this)}observe(node,options){this.observed.push({node,options})}disconnect(){this.disconnected=true}},setTimeout:(callback,ms)=>{timers.push({callback,ms});return timers.length},clearTimeout:id=>cleared.push(id),addEventListener:(name,callback)=>listeners[name]=callback};
+ let navigationVisible=false;const navigation=element('navigationConsole');sheetBody.querySelector=selector=>selector==='#navigationConsole'&&navigationVisible?navigation:null;
+ const context={isGame:true,innerHeight:844,document:{body,getElementById:id=>nodes[id],querySelector:selector=>({getAttribute:()=>({orders:'委託',positions:'持倉',history:'歷史',worldmap:'導航／自駕地圖'})[selector.match(/data-organ="(.*?)"/)[1]]})},MutationObserver:class{constructor(callback){this.callback=callback;this.observed=[];observers.push(this)}observe(node,options){this.observed.push({node,options})}disconnect(){this.disconnected=true}},setTimeout:(callback,ms)=>{timers.push({callback,ms});return timers.length},clearTimeout:id=>cleared.push(id),addEventListener:(name,callback)=>listeners[name]=callback};
  runInNewContext(fn+'globalThis.api={install:install11520ToastContext,show:show11520Toast,dispose:dispose11520ToastContext};',context);
  context.api.install();assert.equal(observers.length,1);assert.equal(toast.parentElement,body);assert.equal(toast.attrs.role,'status');assert.equal(toast.attrs['aria-live'],'polite');
  assert.deepEqual(observers[0].observed.map(x=>x.node.id),['confirm','sheet','toast','sheetBody','sheetTitle']);for(const {node,options} of observers[0].observed){if(node===sheetTitle){assert.equal(options.childList,true);assert.equal(options.characterData,true);assert.equal(options.subtree,true)}else{assert.equal(options.attributes,true);assert.equal(options.childList,undefined);assert.equal(options.subtree,undefined)}}
@@ -789,6 +815,17 @@ test('one existing toast follows trading-panel context without replacing text, t
  context.api.show('SIM-R-4 · CLOSED',{event:'GA600_LEVEL_UP',duration:2000});assert.equal(observers.length,1);assert.equal(timers.at(-1).ms,2000);assert.equal(toast.textContent,'SIM-R-4 · CLOSED');assert.equal(toast.dataset.worldEvent,'GA600_LEVEL_UP');
  timers.at(-1).callback();assert.equal(toast.classList.contains('show'),false);assert.equal(toast.dataset.worldEvent,undefined);
  sheetTitle.textContent='市場卡';observers[0].callback([{target:sheetTitle,type:'childList'}]);assert.equal(toast.parentElement,body,'a stale history marker cannot claim an unrelated sheet');sheetTitle.textContent='歷史';observers[0].callback([{target:sheetTitle,type:'childList'}]);assert.equal(toast.parentElement,sheetHeader);sheetBody.dataset.simOrgan='help';observers[0].callback([{target:sheetBody,attributeName:'data-sim-organ'}]);assert.equal(toast.parentElement,body,'unrelated sheets keep existing world behavior');assert.equal(toast.dataset.panelContext,undefined);assert.equal(toast.styleValues.top,'206px');
+  sheetBody.dataset.simOrgan='';navigationVisible=true;sheetTitle.textContent='導航／自駕地圖';
+  context.api.show('SIMULATION FILLED｜KY1C',{duration:1700});const navigationTimers=timers.length,navigationClears=cleared.length;
+  assert.equal(toast.parentElement,sheetHeader,'the actual navigation console owns feedback without a financial marker');assert.equal(sheetBody.dataset.simOrgan,'');assert.equal(toast.dataset.panelContext,'sheet');assert.equal(toast.styleValues.top,undefined);
+  confirm.classList.add('open');observers[0].callback([{target:confirm,attributeName:'class'}]);assert.equal(toast.parentElement,confirmHeader,'confirmation still takes priority over actual navigation');
+  confirm.classList.remove('open');observers[0].callback([{target:confirm,attributeName:'class'}]);assert.equal(toast.parentElement,sheetHeader);
+  sheetTitle.textContent='市場卡';observers[0].callback([{target:sheetTitle,type:'childList'}]);assert.equal(toast.parentElement,body,'a stale navigation subtree cannot claim a different sheet title');
+  navigationVisible=false;sheetTitle.textContent='導航／自駕地圖';observers[0].callback([{target:sheetTitle,type:'childList'}]);assert.equal(toast.parentElement,body,'a navigation title alone is not proof of an actual console');
+  sheetBody.dataset.simOrgan='history';observers[0].callback([{target:sheetBody,attributeName:'data-sim-organ'}]);assert.equal(toast.parentElement,body,'a stale financial marker cannot claim the navigation title');
+  sheetBody.dataset.simOrgan='';navigationVisible=true;observers[0].callback([{target:sheetBody,attributeName:'data-sim-organ'}]);assert.equal(toast.parentElement,sheetHeader);
+  sheet.classList.remove('open');observers[0].callback([{target:sheet,attributeName:'class'}]);assert.equal(toast.parentElement,body,'closing navigation restores the same world toast');
+  assert.equal(toast.textContent,'SIMULATION FILLED｜KY1C');assert.equal(toast.classList.contains('show'),true);assert.equal(toast.attrs.role,'status');assert.equal(toast.attrs['aria-live'],'polite');assert.equal(nodes.toast,toast);assert.equal(body.children.filter(node=>node.id==='toast').length,1);assert.equal(observers.length,1);assert.equal(timers.length,navigationTimers);assert.equal(timers.at(-1).ms,1700);assert.equal(cleared.length,navigationClears,'navigation context must not restart or clear feedback timers');
  const guideRect={left:132,top:355,bottom:434.75,width:220,height:79.75};nodes.k11520MonsterGuide.getBoundingClientRect=()=>guideRect;
  context.api.show('DISMISS_IN_PLACE',{combat:true,duration:450});assert.equal(toast.styleValues.top,'440.75px');const fadePlacement={...toast.styleValues},timerCount=timers.length;
  guideRect.top-=8;guideRect.bottom-=8;timers.at(-1).callback();observers[0].callback([{target:toast,attributeName:'class'}]);
@@ -835,9 +872,14 @@ test('simulation component revisions expose complete provenance and recorded exe
  // or deployment claim. Executable-byte hashes remain exact, not self-derived.
  const referenceMetadata={revision:'2026-10-31.READONLY-KGEN-WBNB-REFERENCE',sourceCommit:'b7e4a244f5eeb5583d4cf27ae09a0b19a3d09880',lastUpdated:'2026-10-31',updatedBy:'Codex / original thread 01a189ef-ecbc-7699-b87b-a4538d57c029 / HUMAN_AUTHORIZED_LOCAL_CANDIDATE',reviewedBy:'PENDING_ORIGINAL_INDEPENDENT_REVIEW; previous header preserved in exact base snapshot',sourceOfTruth:'LOCAL_CANDIDATE_NOT_CANONICAL'};
  const current={
-  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'f8af28403351811f2891b101a42f7caa6d5a2c81b6bd06d2af10e383f2f28303'},
+  // Human authorized the #523 replacement/UI integration on 2026-11-18.
+  // Keep the ancestry table and historical headers; pin the reviewed candidate
+  // bytes separately. These fingerprints do not claim browser acceptance.
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'a8c9d8d4dbd8a259b37ac7fb0f1e4b99623b6b1ba9f42d8b46b71d1e73579c00'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
-  'game-5d.html':{nonMetadataSha256:'2c2d9cb8ebf438a0943193f791ec071bad7bed40ebb839d7ac80b446b767c56d'}
+  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078'},
+  'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'d36f9eeacb703b9540db56e212c9c1c5af428c0386a3b5a56508b9a96f173d03'},
+  'game-5d.html':{nonMetadataSha256:'ee4283c4a11b2ae5250f20e79c7f4ab80f2f7e84fd7f3eebd4ae82e4bd520cd3'}
  };
  for(const ancestor of assets){
   const asset={...ancestor,...current[ancestor.path]};
@@ -892,11 +934,12 @@ const snapshot=label=>{trace.push({at:now,label,cards:doc.querySelectorAll('[dat
 const ctx=vm.createContext({document:doc,Node:{TEXT_NODE:3},setInterval:(fn,period)=>{const i={id:++sequence,fn,period,next:now+period};intervals.push(i);return i.id},clearInterval:id=>{const i=intervals.find(i=>i.id===id);if(i)i.disabled=true},S:{axis:'KY',quotes:{BTCUSDT:77564.83,ETHUSDT:2511.16,BNBUSDT:724.23},axes:{KX:{market:'BTCUSDT'},KY:{market:'ETHUSDT'},KZ:{market:'BNBUSDT'}}},execution:{mode:'SIMULATION',readOnly:false,tick:()=>({ok:true,events:[]}),snapshot:()=>({observations:{}})},fmt:(x,n)=>x.toFixed(n),openMarketCard:axis=>opened.push(axis),world:{},kMarketSnapshot:()=>({markets:[['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']].map(([axis,symbol])=>({axis,symbol,universe:axis,price:1})),status:'LIVE',receivedAt:0}),formatUniverseAddress:a=>a+' fixture address',resolveCMode:()=>({mode:'MONSTER_MODE'}),combatSelection:()=>({c:0}),publicObservations:{},publicObservationStatus:()=>{},playerLifeSwitching:false,publicQuoteAttempted:true,recordSimulationEvents:()=>{},syncSimulationPositions:()=>{},refreshSimulationSheet:()=>{},pending:false,toast:()=>{},__K11520_3D_CONTROL__:{mode:'XZ'}});
 const render=main.slice(main.indexOf('function renderAxes(){'),main.indexOf('function openMarketCard('));
 const labels=main.slice(main.indexOf('function syncMarketKLabels(){'),main.indexOf('function controlState('));
-const tick=main.slice(main.indexOf('function tickSimulation(){'),main.indexOf('function executionQuote('));
+const tick=main.slice(main.indexOf('function tickSimulation(){'),main.indexOf('\nfunction navigationConsoleHTML('));
 const normal=read('../runtime/normal-market-presentation.mjs');
 // This fixture owns the three canonical market cards, not the separately
 // tested read-only KGEN/WBNB reference panel added by the later mainline organ.
 ctx.paintKgenReference=()=>{};
+ctx.stepNavigationAutopilot=()=>{};
 vm.runInContext("const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];"+render+labels+tick,ctx);
 vm.runInContext(normal.replace(/^import .*;$/m,'').replace(/^const \$=.*$/m,'').replace(/^const \$\$=.*$/m,'').replace('export function install11520NormalMarketPresentation','function install11520NormalMarketPresentation'),ctx);
 vm.runInContext('renderAxes()',ctx);snapshot('initial actual renderAxes + actual syncMarketKLabels');

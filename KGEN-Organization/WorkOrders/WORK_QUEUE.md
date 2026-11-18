@@ -1,5 +1,50 @@
 # KGEN Organization V2.0 WorkQueue
 
+## 2026-11-18 既有 PR673 接續：Human 解除 #523 普通工程 HOLD
+
+- RECORDED_UTC: `2026-11-17T21:16:49Z`; 台灣時間：`2026-11-18T05:16:49+08:00`。
+- TASK_SOURCE: 本頁最新 Human 明確授權處理 #523 並讓專案進行；原話末句：「要專案能進行，常識說就是授權改」。
+- AUTHORITY_SCOPE: #523 的原範圍普通工程 HOLD 已解除；歷史限制文字不再作為該範圍的全域阻擋，不對相同範圍反覆索取授權。沿既有 `HUMAN_DIRECT_ORDINARY_LOCAL_ENGINEERING / MANUAL_DISPATCH_NON_ATOMIC` 接續；root 為單一整合 Writer。這是既有工作 authority-scope 更新，不新增 Worker、原子 claim、dispatcher 或排程。
+- SOURCE: main `01794eba63b2664db741f9787a16bc9b7dd37b7d`；[PR523](https://github.com/klineodyssey/kline-odyssey/pull/523) 的五個舊重建提交／28 檔，head `c8e930c1cf49432f21dd3420ae8fb479e884d814`。原分支與歷史保留。
+- TARGET: [PR673](https://github.com/klineodyssey/kline-odyssey/pull/673)，既有分支 `codex/K11520-SIMULATION-AUTOPILOT-20261118-01` 的候選整合。
+- RETAINED_DELTA: main 尚無的六個 API 已按需移至候選工作樹：`readCanonicalDriveState`、`advanceLocalMotionClock`、`integrateLocalMotion`、`resolveLocalNavigationStep`、`prepareLocalNavigationFrame`、`commitLocalNavigationFrame`，分別沿用 11520 既有 `runtime/combat-drive-adapter.mjs`、`runtime/spatial-coordinate-runtime.mjs`、`runtime/xyz-map-navigation-runtime.mjs`。
+- PRESERVATION: 保留目前 conversion/address、帳本、交易 owner、普通 `0C LOCAL_WALK` 與後續 UI 修復；不搬回 #523 舊 UI／版本或其普通 0C 強制 `PAUSED` 行為。
+- REPLACEMENT_SOURCE: 本次 PR673 整合提交；精確 SHA 沿 PR head 與原 checkpoint 讀回，不以先前 core-only `ae675442` 代填。
+- CANDIDATE_CHECKS: 新導航16/16 PASS；UI-static首跑68/72後修正舊假設／fixture，第二跑72/72 PASS；drive adapter PASS、product-standard舊名稱 marker修正後 PASS；Full HUD admission相關2/2 PASS。合成兩尺寸瀏覽器流程與原 CI runtime／實景驗收仍待執行，不以本機靜態結果宣稱完成品。
+- STATUS: `INTEGRATION_CANDIDATE / NOT_MERGED_TO_MAIN / FULL_UI_NOT_COMPLETE`。未宣稱本輪部署、完整 UI、實體手機或真交易驗收。
+- DISPOSITION: 替代提交 `b58e850a2fc48491bcc7a3fb9f0728446407aef4` 已保存及 push；#523 已於 `2026-11-17T21:51:57Z`（台灣11/18 05:51:57）closed／merged=false，附 `REPLACED_BY673` 來源。原 body／分支／提交歷史保留；這不宣稱 PR673 已部署。
+- RETAINED_BOUNDARIES: #19 的具體拒絕與禁止重試、其他具體 HOLD、成本／資源／停機限制、停用 Browser 與原停止條件不變。真錢包、主網合約部署、真交易、付款與治理仍由合法持有人本人確認；AI 不簽署、送真交易、取得秘密或繞過限制。
+- NEXT_STEP: root 沿 PR673 讀回精確 head 的 CI 與兩尺寸實景證據，修復具體失敗，合格後原站交付。#523 普通工程權限無需再次詢問。
+
+## 2026-11-18 PR673 完成品接續（同 WORK_ID）
+
+- Human 本頁「完成品給我」沿原 `K11520-SIMULATION-AUTOPILOT-20261118-01`，RUN_ID `KAIOS-ENGINEERING-20261118T000705957Z`；envelope UTC `2026-11-18T00:07:05.957Z`／台灣08:07:05.957。原 main `01794eba63b2664db741f9787a16bc9b7dd37b7d`；root 統一整合，按既有檔案分配唯一 Writer／獨立唯讀 review，非原子 claim。
+- 實際範圍：mobile HUD 真走廊前置與 thumb 截圖順序；responsive timed read 同次取 cursor／減少輸出；原 BSC97 exit-only 有界本金恢復與不冒充空倉的 UI／原測試；文件與既有 executable 指紋記錄。維持原所有掃描、費用、時限、簽署與特定 HOLD；不另建 Runtime／bootstrap／排程／工作流。
+- review 發現 await 身分核對後漏 generation 重核及已確認回執被 UI identity filter 清除，均納入原程式窄修。完整原歷史、首失敗與未驗項保留。
+- `STATUS: LOCAL_FINAL_REVIEW / CI_AND_VISUAL_PENDING / NOT_DEPLOYED`。結果保存於同一 `handoff/HANDOFF_CURRENT.md` 與原 checkpoint；唯一下一步為精確 head 既有 CI／兩尺寸實景驗收，通過後原站發布，無需再問 #523 普通工程許可。
+
+### e92 已證 CI 接續修正
+
+Game 原單一 owner 契約與 plane-map 舊 readiness/vector 斷言不一致，僅遷移原 QA 至當前 authority 與同幀真位移；原超時／碰撞／後續斷言保留。M1 實際退出部署具資本能力，僅修退出本金分支的錯誤能力排除，不改 manifest 或非退出完整歷史上限。新配置80/80 unit、新 API契約1/1與provenance1/1 PASS；舊 CI 失敗／未抵達實景仍保留。root 在同 PR673整合，下一步為新精確 head 原 CI／實圖驗收，非繞過失敗 gate。
+
+### 757 實景驗收後接續
+
+Universal／Portal／Trading／Responsive已PASS，Game的導航300秒總驗收仍未完整：390 PASS，844行為和14圖已完成，末尾控件掃描被時限停止。只合併原scroll／2RAF／真geometry為同次evaluate，原300、native和全部28圖／斷言保持。另原M1橫圖證實真正ControlsClose壓重連，沿mobile-ui-settings前景CSS與原M1／Responsive測試修正；保存偏好及原錢包close錨點。仍同WORK_ID／PR673／單一整合Writer，未完成實景前不發布；沒有新Runtime／排程或資源上限放寬。
+
+### a453 空白世界取點前置
+
+原Game在狹窄矩形首null就退出，後續settlement未執行；原8次／750ms／4000ms與全部導航判定不改，只讓原QA掃實際canvas空白並在原8次內重取、失敗座標去重，保存有界真路由／physical診斷。a453錢包前景六尺寸功能及修後實圖已過，仍與未完成整體驗收分列；不誤記a453曾跑第二次300秒。相同WORK_ID／PR673，下一步原新head CI，不改Runtime或資源上限。
+
+### 66bf 全CI後的通知視覺窄修
+
+原五CI綠但390真FILLED toast蓋啟動文字，故維持未交付。只將真navigationConsole＋title接既有singleton/header通知，保留期限／原文／priority；原case1/1及provenance1/1 PASS。原QA末15只讀批量減往返，每控件2RAF/36check/原28圖/300秒保留，加當時真可見toast與header圖，不等消失。下一步同PR新head完整功能與實景，再原main／Pages／原production來源驗證；不另建Runtime／bootstrap／排程或金融規則。
+
+### b758 固定標頭可見區核對
+
+真toast已在原header獨立列，原圖可讀；AutoC頂18.5px已捲到不透明sticky header背後，但中心仍在header下，完整rect交疊誤作可見遮擋。只修原QA其他欄位的有效可見區，限原opaque sticky header；當前target完整rect額外不得與toast交疊，原44px／center／36checks／兩幀／300秒及所有圖保持。原失敗與未抵達項保存，不改產品／流程／資源上限，沿同WORK_ID／PR673由root單一整合；精確新head CI及實圖合格後原站交付。
+
+## Earlier queue records — preserved as history
+
 ## Three-cell cargo / cross-market simulation acceptance — 2026-10-13 Taipei
 
 - WORK_ID: `K11520-THREE-CELL-CARGO-MARKET-QA-20261013-001`.

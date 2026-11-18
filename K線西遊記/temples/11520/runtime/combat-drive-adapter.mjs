@@ -48,3 +48,15 @@ export function readDriveStateFromDom(root=globalThis.document){
   const lotsText=root?.querySelector?.('#lotsRead')?.textContent||'1口';
   return buildDriveState({c:parseCRead(cText),lots:parseLotsRead(lotsText)});
 }
+
+// 2026-11-18: integrate the bounded motion reader from PR523 c8e930c1.
+// The existing signed-C owner remains authoritative. Physical movement uses
+// magnitude only; this reader never reverses an input vector or selects a market.
+// At 0C, the actor owner may explicitly provide its existing LOCAL_WALK speed.
+export function readCanonicalDriveState({source=globalThis.__K11520_SIGNED_C_IMMERSIVE__,activeAxis=source?.activeAxis}={}){
+  const unavailable=()=>Object.freeze({available:false,c:null,activeAxis:activeAxis??null,speedKPerSecond:null,status:'SPEED_UNAVAILABLE',source:'EXISTING_SIGNED_C_OWNER'});
+  if(source?.ready!==true||!['KX','KY','KZ'].includes(activeAxis)||source.activeAxis!==activeAxis||!Object.hasOwn(source.signedByAxis||{},activeAxis))return unavailable();
+  const value=source.signedByAxis[activeAxis];if(typeof value!=='number')return unavailable();
+  let c;try{c=normalizeC(value)}catch{return unavailable()}
+  return Object.freeze({available:true,c,activeAxis,speedKPerSecond:.001*Math.abs(c),status:c===0?'LOCAL_WALK':'READY',source:'EXISTING_SIGNED_C_OWNER'});
+}

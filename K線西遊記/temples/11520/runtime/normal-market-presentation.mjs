@@ -2,7 +2,7 @@
 VERSION: 1.0.2
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Normal Market Presentation
-PURPOSE: Present the K-sphere normal-axis market implied by the active 3D control plane and make that normal axis the direct trading selection without changing world coordinates. XZ -> KY, XY -> KZ, YZ -> KX. All three K-axis markets remain visible; only the current normal axis is visually emphasized. Also loads the bounded mobile capture/equal-rail presentation repair from the live 11520 boot path.
+PURPOSE: Present all three K-sphere markets and emphasize the explicit trading selection without changing world coordinates. Until a market is selected, the control-plane normal supplies the default: XZ -> KY, XY -> KZ, YZ -> KX. Also loads the bounded mobile capture/equal-rail presentation repair from the live 11520 boot path.
 */
 import './mobile-capture-equal-rail-polish-runtime.mjs';
 const $=s=>document.querySelector(s);
@@ -29,19 +29,19 @@ function ensureStyle(){
 
 function state(){return globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__||null}
 function normalAxis(mode){return NORMAL_BY_PLANE[mode]||'KY'}
-function decorateAxes(normal){
+function decorateAxes(normal,selected=normal){
   for(const el of $$('[data-axis]')){
-    const active=el.dataset.axis===normal;
+    const active=el.dataset.axis===selected;
     el.classList.toggle('k11520NormalActive',active);
     const head=el.querySelector('.axisHead span');
     if(!head)continue;
     let badge=head.querySelector('.k11520NormalBadge');
     if(!badge){badge=document.createElement('em');badge.className='k11520NormalBadge';head.appendChild(badge)}
-    badge.textContent='⊥ 法向作功';
-    badge.setAttribute('aria-label',`${el.dataset.axis} 法向作功`);
+    badge.textContent=selected===normal?'⊥ 法向作功':'交易市場';
+    badge.setAttribute('aria-label',`${el.dataset.axis} ${selected===normal?'法向作功':'選中交易市場'}`);
   }
 }
-function decorateJoystick(mode,normal){
+function decorateJoystick(mode,normal,selected=normal){
   const label=$('#k11520PlaneLabel');
   if(!label)return;
   let planeName=label.querySelector('.k11520PlaneName');
@@ -52,18 +52,19 @@ function decorateJoystick(mode,normal){
   }
   let hint=$('#k11520NormalMarketHint');
   if(!hint){hint=document.createElement('span');hint.id='k11520NormalMarketHint';label.appendChild(hint)}
-  hint.textContent=`⊥ ${normal} 多空 · 法向作功`;
-  label.setAttribute('aria-label',`${mode} 操控面，法向 ${normal} 多空市場`);
+  hint.textContent=selected===normal?`⊥ ${normal} 多空 · 法向作功`:`⊥ ${normal} · 交易 ${selected}`;
+  label.setAttribute('aria-label',`${mode} 操控面，法向 ${normal}，交易市場 ${selected}`);
 }
+function selectedMarket(normal){return globalThis.__K11520_TRADE_AXIS_API__?.snapshot?.()?.axis||normal}
 function paint(){
-  const mode=state()?.mode||'XZ',normal=normalAxis(mode),key=`${mode}|${normal}|${$$('[data-axis]').length}`;
-  ensureStyle();decorateAxes(normal);decorateJoystick(mode,normal);
-  globalThis.__K11520_NORMAL_MARKET__={mode,normalAxis:normal,semantics:'NORMAL_ONLY_WORK',marketsRemainConcurrent:true,tradingAxisFollowsNormal:true,tradingAxisUntouched:false};
+  const mode=state()?.mode||'XZ',normal=normalAxis(mode),selected=selectedMarket(normal),key=`${mode}|${normal}|${selected}|${$$('[data-axis]').length}`;
+  ensureStyle();decorateAxes(normal,selected);decorateJoystick(mode,normal,selected);
+  globalThis.__K11520_NORMAL_MARKET__={mode,normalAxis:normal,tradingAxis:selected,semantics:'EXPLICIT_MARKET_OR_PLANE_DEFAULT',marketsRemainConcurrent:true,tradingAxisFollowsNormal:selected===normal,tradingAxisUntouched:false};
   lastKey=key;
 }
 export function install11520NormalMarketPresentation(){
   ensureStyle();paint();
   if(timer)clearInterval(timer);
-  timer=setInterval(()=>{const mode=state()?.mode||'XZ',normal=normalAxis(mode),key=`${mode}|${normal}|${$$('[data-axis]').length}`;if(key!==lastKey||!$('#k11520NormalMarketHint')||!$('[data-axis].k11520NormalActive'))paint()},120);
+  timer=setInterval(()=>{const mode=state()?.mode||'XZ',normal=normalAxis(mode),selected=selectedMarket(normal),key=`${mode}|${normal}|${selected}|${$$('[data-axis]').length}`;if(key!==lastKey||!$('#k11520NormalMarketHint')||!$('[data-axis].k11520NormalActive'))paint()},120);
   return true;
 }

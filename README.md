@@ -6,6 +6,38 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### 11520 three-market navigation and simulation autopilot candidate — 2026-11-18
+
+The existing `K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs`
+exports `createSimulationAutopilot` over its existing simulation adapter. It
+requires explicit strategy/risk settings and confirms a closed position's
+settlement receipt before submitting the opposite side. Usage and limitations:
+[11520 trading specification](K線西遊記/temples/11520/KGEN_TRADING_SPEC.md#9-模擬自動操盤核心候選2026-11-18).
+The existing game world-map sheet now hosts explicit BTC/ETH/BNB selection,
+local XYZ destination/distance/ETA, a separate target-price PnL scenario, and
+simulation autopilot controls. Changing the market does not change the physical
+control plane. Draft/pending orders do not ignite movement; filled positions
+supply engine C. Stopping decisions preserves existing orders and positions.
+
+Human explicitly released #523's ordinary engineering HOLD. Its needed motion
+clock, collision and navigation delta is carried into the current original
+files through [PR673](https://github.com/klineodyssey/kline-odyssey/pull/673).
+The old conflicting draft was closed at 2026-11-17T21:51:57Z after replacement
+source b58e850a2 was pushed; its branch and history are retained. Earlier #523 HOLD text below is historical for
+this scope. Exact-head CI/visual acceptance and Pages delivery are still
+pending; cross-world arrival at 18911 and live automatic trading are not
+implemented by this candidate. Other specific HOLDs and holder-wallet
+confirmation requirements remain in force.
+
+The original BSC97 exit-only wallet can recover pinned, verified principal and
+available funds without scanning more than the existing two-million-block
+history limit. Orders, positions, PnL, claims and complete history remain
+explicitly unknown when an indexer is required. Only available-principal
+withdrawal remains available, with the original wallet confirmation and fee
+checks. A confirmed withdrawal remains confirmed if its balance reread fails;
+the UI retains its attributed receipt and pauses withdrawals until rechecked.
+This is a testnet recovery path, not evidence of mainnet trading or funding.
+
 ### K11520 three-plane joystick filename — 2026-10-19
 
 `K線西遊記/temples/11520/runtime/joystick-xzxyyz.mjs` is the single canonical
