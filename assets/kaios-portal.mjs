@@ -82,7 +82,7 @@ function loadYouTubeApi(document){
 /** One viewport-owned player. Removing its frame also stops late/background audio. */
 function createViewportVideoController(document){
  const view=document.defaultView,entries=[],motion=view.matchMedia?.('(prefers-reduced-motion: reduce)');
- let active=null,manualHold=null,scheduled=false,sequence=0,suspended=false;
+ let active=null,manualHold=null,scheduled=false,scheduledHandle=null,schedulerUsesRaf=false,sequence=0,suspended=false;
  const autoAllowed=()=>!motion?.matches&&!view.navigator?.connection?.saveData;
  const visible=entry=>{
   if(suspended||document.hidden||!entry.stage.isConnected)return false;
@@ -163,18 +163,26 @@ function createViewportVideoController(document){
   }catch{if(active===entry&&entry.epoch===epoch){removePlayer(entry);state(entry,'error','播放器未能載入，請使用 YouTube 連結。')}}
  }
  function update(){
-  scheduled=false;
+  scheduled=false;scheduledHandle=null;
   for(const entry of entries){entry.visible=visible(entry);if(!entry.visible){entry.attempted=false;if(manualHold===entry)manualHold=null}}
   if(active&&!active.visible)stop(active);
   if(active||suspended||document.hidden||!autoAllowed()||manualHold?.visible)return;
   const next=entries.find(entry=>entry.visible&&!entry.attempted);if(next)start(next);
  }
- function schedule(){if(scheduled)return;scheduled=true;(view.requestAnimationFrame||view.setTimeout).call(view,update)}
+ function cancelSchedule(){
+  if(scheduledHandle!==null){if(schedulerUsesRaf)view.cancelAnimationFrame?.(scheduledHandle);else view.clearTimeout(scheduledHandle)}
+  scheduledHandle=null;scheduled=false;
+ }
+ function schedule(){
+  if(scheduled||suspended||document.hidden)return;scheduled=true;schedulerUsesRaf=typeof view.requestAnimationFrame==='function';
+  scheduledHandle=schedulerUsesRaf?view.requestAnimationFrame(update):view.setTimeout(update,16);
+ }
  function stopAll(){for(const entry of entries){if(entry===active)stop(entry,'影片已停止；回到畫面後再播放。');entry.attempted=false}manualHold=null}
  view.addEventListener('scroll',schedule,{passive:true});view.addEventListener('resize',schedule,{passive:true});
- view.addEventListener('pagehide',()=>{suspended=true;stopAll()});view.addEventListener('pageshow',()=>{suspended=false;schedule()});
- document.addEventListener('visibilitychange',()=>{document.hidden?stopAll():schedule()});
- motion?.addEventListener?.('change',()=>{if(!autoAllowed())stopAll();schedule()});
+ view.addEventListener('pagehide',()=>{suspended=true;cancelSchedule();stopAll()});view.addEventListener('pageshow',()=>{suspended=false;cancelSchedule();schedule()});
+ document.addEventListener('visibilitychange',()=>{cancelSchedule();document.hidden?stopAll():schedule()});
+ const preferenceChanged=()=>{cancelSchedule();if(!autoAllowed())stopAll();schedule()};
+ motion?.addEventListener?.('change',preferenceChanged);view.navigator?.connection?.addEventListener?.('change',preferenceChanged);
  return {mount(host,{videoId,title,label,className}){
   if(typeof videoId!=='string'||!/^[A-Za-z0-9_-]{11}$/.test(videoId))throw new TypeError('INVALID_VIDEO_ID');
   const controls=el(document,'div','video-controls'),play=el(document,'button',className),sound=el(document,'button','video-sound','開啟聲音');
