@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activateMargin,closeMargin,snapshot,pnlForMove,maxAdversePoints,positionRisk,MAX_C_LEVERAGE,normalizeSignedC,signedCFromLegacyMagnitude} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
+import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activateMargin,closeMargin,snapshot,pnlForMove,maxAdversePoints,positionRisk,MAX_C_LEVERAGE,normalizeSignedC,signedCFromLegacyMagnitude,C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY,bindTempleReturnWalletContinuity} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot,touchedOrCrossed} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
@@ -9,14 +9,16 @@ import {createDigitalAnt,createDeliveryMission,assignDelivery,loadCargo,planCarg
 assert.equal(MAX_C_LEVERAGE,100);
 assert.equal(requiredMargin({lots:8}),8);
 assert.equal(requiredMargin({lots:100}),100);
-assert.equal(pnlForMove({entry:100,mark:101,side:'多',lots:100,c:100}),10000);
-assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-10000);
-assert.equal(pnlForMove({entry:100,mark:101,side:'空',lots:100,c:-100}),-10000);
+assert.equal(C_PNL_MODEL,'UNIVERSE_ENTRY_FLOOR_DELTA_C_LOTS_V1');
+assert.equal(LEGACY_SIMULATION_PNL_MODEL,'INDEX_DELTA_C_LOTS_V1');
+assert.equal(pnlForMove({entry:100,mark:101,side:'多',lots:100,c:100}),100);
+assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-100);
+assert.equal(pnlForMove({entry:100,mark:101,side:'空',lots:100,c:-100}),-100);
 assert.equal(signedCFromLegacyMagnitude(100,'空'),-100);
 assert.equal(normalizeSignedC(-0,{allowNeutral:true}),0);
 for(const c of C_DETENTS){
   assert.equal(normalizeSignedC(c,{allowNeutral:true}),c);
-  if(c!==0)assert.ok(Math.abs(pnlForMove({entry:100,mark:101,lots:1,c})-c)<1e-12);
+  if(c!==0)assert.ok(Math.abs(pnlForMove({entry:100,mark:101,lots:1,c})-.01*c)<1e-12);
 }
 for(const c of [.0001,-.0001,.3,-.3,3.742,-3.742,17.382,-17.382,99.6,-99.6]){
   assert.throws(()=>normalizeSignedC(c),/INVALID_C_DETENT/);
@@ -30,37 +32,39 @@ for(const lots of [0,-1,.5,100.1,101,NaN,Infinity])assert.throws(()=>requiredMar
 for(const [c,side] of [[100,'SHORT'],[-100,'LONG'],[1,'invalid']])assert.throws(()=>pnlForMove({entry:100,mark:101,lots:1,c,side}),/C_SIDE_MISMATCH|SIDE_NOT_SUPPORTED/);
 for(const c of [-100,100])for(const lots of [1,100])for(const change of [-.02,-.01,-.005,-.001,.001,.005,.01,.02]){
   const r=positionRisk({entry:10000,mark:10000*(1+change),c,lots});
-  assert.ok(Math.abs(r.rawPnl-10000*change*c*lots)<1e-5);
+  assert.ok(Math.abs(r.rawPnl-change*c*lots)<1e-9);
   assert.equal(r.remaining,Math.max(0,lots+r.pnl));
   assert.ok(r.pnl>=-lots,'isolated loss cannot consume other principal');
 }
-assert.equal(maxAdversePoints(100,100),.01);
-assert.equal(maxAdversePoints(50,100),.02);
+assert.equal(maxAdversePoints(100,100),1);
+assert.equal(maxAdversePoints(50,100),2);
 assert.throws(()=>pnlForMove({entry:100,mark:101,side:'多',lots:1,c:1000}),/C_LEVERAGE_OUT_OF_RANGE/);
 assert.throws(()=>pnlForMove({entry:100,mark:101,side:'多',lots:1,c:'not-a-number'}),/C_LEVERAGE_OUT_OF_RANGE/);
 assert.throws(()=>pnlForMove({entry:100,mark:Infinity,side:'多',lots:1,c:1}),/MARK_PRICE_MUST_BE_POSITIVE/);
 assert.throws(()=>pnlForMove({entry:100,mark:101,side:'多',lots:Infinity,c:1}),/LOTS_OUT_OF_RANGE/);
 assert.throws(()=>positionRisk({entry:100,mark:NaN,side:'多',lots:1,c:1}),/MARK_PRICE_MUST_BE_POSITIVE/);
 const blown=positionRisk({entry:100,mark:99,side:'多',lots:100,c:100});
-assert.equal(blown.principal,100);assert.equal(blown.pnl,-100);assert.equal(blown.remaining,0);assert.equal(blown.liquidated,true);assert.equal(blown.liquidationMark,99.99);
-const safe=positionRisk({entry:100,mark:99.99,side:'多',lots:100,c:50});
-assert.ok(Math.abs(safe.pnl+50)<1e-8);assert.ok(Math.abs(safe.remaining-50)<1e-8);assert.equal(safe.liquidated,false);assert.equal(safe.liquidationMark,99.98);
+assert.equal(blown.principal,100);assert.equal(blown.pnl,-100);assert.equal(blown.remaining,0);assert.equal(blown.liquidated,true);assert.equal(blown.liquidationMark,99);
+const safe=positionRisk({entry:100,mark:99,side:'多',lots:100,c:50});
+assert.ok(Math.abs(safe.pnl+50)<1e-8);assert.ok(Math.abs(safe.remaining-50)<1e-8);assert.equal(safe.liquidated,false);assert.equal(safe.liquidationMark,98);
 
 // K11520-BNB-LIQUIDATION-STATUS-20261007: the risk flag follows the same
 // exact price boundary as the existing lifecycle, without rounding PnL.
-const marketRiskFixtures=[['KX','BTCUSDT',60000.0004],['KY','ETHUSDT',3000.0004],['KZ','BNBUSDT',600.0004]];
+const marketRiskFixtures=[['KX','BTCUSDT',60000.0004,10000],['KY','ETHUSDT',3000.0004,1000],['KZ','BNBUSDT',600.0004,100]];
 function adjacentPositivePrice(value,up){
   const bytes=new ArrayBuffer(8),price=new Float64Array(bytes),bits=new BigUint64Array(bytes);
   price[0]=value;bits[0]+=up?1n:-1n;return price[0];
 }
-for(const [axis,market,entry] of marketRiskFixtures)for(const c of C_DETENTS.filter(c=>c!==0))for(const lots of [1,100]){
-  const boundary=positionRisk({entry,mark:entry,c,lots}).liquidationMark;
+for(const [axis,market,entry,unit] of marketRiskFixtures)for(const c of C_DETENTS.filter(c=>c!==0))for(const lots of [1,100]){
+  const boundary=entry-unit/c;
+  assert.equal(positionRisk({entry,mark:entry,c,lots}).liquidationMark,boundary);
   if(boundary<=0){
     assert.equal(positionRisk({entry,mark:Number.MIN_VALUE,c,lots}).liquidated,false,'positive prices cannot reach a nonpositive LONG boundary');
     continue;
   }
   for(const mark of [adjacentPositivePrice(boundary,false),boundary,adjacentPositivePrice(boundary,true)]){
     const risk=positionRisk({entry,mark,c,lots}),liquidated=c>0?mark<=boundary:mark>=boundary;
+    assert.equal(risk.entryFloorUnit,unit);assert.equal(risk.pnlModel,C_PNL_MODEL);
     assert.equal(risk.liquidated,liquidated,`${market} ${c}C ${lots} lots at ${mark}`);
     assert.equal(risk.liquidationMark,boundary);
     assert.equal(risk.rawPnl,pnlForMove({entry,mark,c,lots}),'risk status must not round raw PnL');
@@ -140,11 +144,11 @@ for(const c of C_DETENTS.filter(c=>c!==0)){
   assert.equal(filled.orders[0].c,c);assert.equal(filled.positions[0].c,c);assert.equal(filled.receipts[0].c,c);
   assert.equal(l.free,999);assert.equal(l.lockedMargin,1);
   tick(l,100.001,1003);
-  assert.ok(Math.abs(l.unrealizedPnl-.001*c)<1e-10);
+  assert.ok(Math.abs(l.unrealizedPnl-.00001*c)<1e-10);
   assert.equal(closeSimulationPosition(l,filled.positions[0].positionId,{now:1004}).ok,true);
   const closed=simulationSnapshot(l);
   assert.equal(closed.receipts[1].c,c);assert.equal(closed.receipts[1].status,'CLOSED');
-  assert.equal(l.lockedMargin,0);assert.ok(Math.abs(l.free-(1000+.001*c))<1e-10);
+  assert.equal(l.lockedMargin,0);assert.ok(Math.abs(l.free-(1000+.00001*c))<1e-10);
 }
 for(const c of [.3,-.3,3.742,17.382,99.6,100.001,-100.001,1000,-1000]){
   const l=createKgenLedger(1000);tick(l,99,1000);const before=structuredClone(l);
@@ -171,8 +175,9 @@ for(const c of [100,-100])for(const lots of [1,100]){
   const gap=c>0?98:102;assert.equal(tick(l,gap,1004).events[0].status,'LIQUIDATED');
   const dead=simulationSnapshot(l),receipt=dead.receipts[1];
   assert.equal(dead.positions[0].margin,0);assert.equal(dead.positions[0].status,'LIQUIDATED');
-  assert.equal(receipt.marginBefore,lots);assert.equal(receipt.marginAfter,0);assert.ok(Math.abs(receipt.badDebt-199*lots)<1e-9);
-  assert.equal(receipt.liquidationTrigger,c>0?99.99:100.01,'receipt boundary remains based on entry and C after margin is zeroed');
+  assert.equal(receipt.marginBefore,lots);assert.equal(receipt.marginAfter,0);assert.equal(receipt.badDebt,lots);
+  assert.equal(receipt.liquidationTrigger,c>0?99:101,'receipt boundary remains based on the fixed entry floor and C after margin is zeroed');
+  assert.equal(receipt.pnlModel,C_PNL_MODEL);assert.equal(receipt.entryFloorUnit,100);
   assert.equal(l.free,1000-lots);assert.equal(l.lockedMargin,0);assert.equal(l.realizedPnl,-lots);assert.equal(l.unrealizedPnl,0);
   assert.equal(tick(l,100,1005).events.length,0);assert.equal(simulationSnapshot(l).receipts.length,2);
   assert.equal(closeSimulationPosition(l,position.positionId,{now:1006}).reason,'POSITION_NOT_OPEN');
@@ -187,11 +192,11 @@ for(const c of [100,-100])for(const lots of [1,100]){
   assert.equal(cancelSimulationOrder(l,o.order.orderId).ok,true);tick(l,102,1002);assert.equal(simulationSnapshot(l).receipts.length,0);assert.equal(l.free,1000);
 }
 {
-  const l=createKgenLedger(1000);tick(l,100,1000);order(l,{stopPrice:99.995,takeProfitPrice:101});tick(l,100,1002);tick(l,99.995,1003);
+  const l=createKgenLedger(1000);tick(l,100,1000);order(l,{stopPrice:99.5,takeProfitPrice:101});tick(l,100,1002);tick(l,99.5,1003);
   assert.equal(simulationSnapshot(l).positions[0].status,'STOPPED');assert.ok(Math.abs(l.free-950)<1e-8);
 }
 {
-  const l=createKgenLedger(1000);tick(l,100,1000);order(l,{c:-100,takeProfitPrice:99.995});tick(l,100,1002);tick(l,99.995,1003);
+  const l=createKgenLedger(1000);tick(l,100,1000);order(l,{c:-100,takeProfitPrice:99.5});tick(l,100,1002);tick(l,99.5,1003);
   assert.equal(simulationSnapshot(l).positions[0].status,'TAKE_PROFIT');assert.ok(Math.abs(l.free-1050)<1e-8);
 }
 {
@@ -204,6 +209,64 @@ for(const c of [100,-100])for(const lots of [1,100]){
   tick(l,100,1002);assert.equal(simulationSnapshot(l).orders[0].status,'REJECTED');assert.equal(l.lockedMargin,0);assert.equal(simulationSnapshot(l).receipts.length,0);
 }
 console.log('11520 existing-ledger simulation pending/cross/one-shot/isolated receipts PASS');
+
+test('gap fills retain the actual-fill floor through a mark in the previous decade and JSON restart',()=>{
+  for(const [axis,market,whole,unit] of [['KX','BTCUSDT',10000,10000],['KY','ETHUSDT',1000,1000],['KZ','BNBUSDT',100,100]])for(const c of [-1,1]){
+    let book=createKgenLedger(10);
+    const observe=(price,at)=>observeSimulationPrice(book,{market,price,observedAt:at,now:at,productV1:true});
+    assert.equal(observe(whole-1,1000).ok,true);
+    assert.equal(placeSimulationOrder(book,{axis,market,c,lots:2,triggerPrice:whole-.5,now:1001}).ok,true);
+    const fill=observe(whole+.25,1002).events[0];
+    assert.equal(fill.status,'FILLED');assert.equal(fill.fillPrice,whole+.25);
+    assert.equal(fill.pnlModel,C_PNL_MODEL);assert.equal(fill.entryFloorUnit,unit,'trigger is in the lower decade, but actual fill owns the floor');
+    assert.equal(book.free,8);assert.equal(book.lockedMargin,2);
+    book=JSON.parse(JSON.stringify(book));
+    const fillReceipt=structuredClone(simulationSnapshot(book).receipts[0]);
+    assert.equal(observe(whole-.25,1003).events.length,0);
+    const position=simulationSnapshot(book).positions[0],risk=positionRisk(position);
+    assert.equal(position.pnlModel,C_PNL_MODEL);assert.equal(risk.entryFloorUnit,unit);
+    assert.equal(risk.rawPnl,-c/unit,'mark crossing a decade cannot change the fixed financial distance');
+    assert.equal(book.unrealizedPnl,-c/unit);
+    const closed=closeSimulationPosition(book,position.positionId,{now:1004});
+    assert.equal(closed.ok,true);assert.equal(closed.receipt.status,'CLOSED');
+    assert.equal(closed.receipt.pnlModel,C_PNL_MODEL);assert.equal(closed.receipt.entryFloorUnit,unit);
+    assert.equal(closed.receipt.rawPnl,-c/unit);assert.equal(closed.receipt.realizedPnl,-c/unit);
+    assert.equal(book.free,10-c/unit);assert.equal(book.lockedMargin,0);assert.equal(book.unrealizedPnl,0);
+    assert.deepEqual(simulationSnapshot(book).receipts[0],fillReceipt,'closing cannot rewrite the original fill receipt');
+  }
+});
+
+test('untagged legacy OPEN positions keep raw-index settlement after restart without retagging saved state',()=>{
+  for(const c of [-1,1])for(const liquidate of [false,true]){
+    let book=createKgenLedger(10);
+    const observe=(price,at)=>observeSimulationPrice(book,{market:'BTCUSDT',price,observedAt:at,now:at,productV1:true});
+    observe(149,1000);
+    assert.equal(placeSimulationOrder(book,{axis:'KX',market:'BTCUSDT',c,lots:2,triggerPrice:150,now:1001}).ok,true);
+    assert.equal(observe(150,1002).events[0].status,'FILLED');
+    // Restore the pre-model saved shape, not a new fill incorrectly labeled legacy.
+    book=JSON.parse(JSON.stringify(book));
+    delete book.simulation.positions[0].pnlModel;
+    delete book.simulation.receipts[0].pnlModel;delete book.simulation.receipts[0].entryFloorUnit;
+    const beforeSnapshot=structuredClone(book),legacyView=simulationSnapshot(book);
+    assert.equal(legacyView.positions[0].pnlModel,LEGACY_SIMULATION_PNL_MODEL);
+    assert.deepEqual(book,beforeSnapshot,'read-only compatibility labels cannot mutate saved history');
+    const fillReceipt=structuredClone(legacyView.receipts[0]);
+    const outcome=observe(150-c*(liquidate?2:.25),1003);
+    assert.equal(outcome.ok,true);
+    const position=simulationSnapshot(book).positions[0];
+    const closed=liquidate?outcome.events[0]:closeSimulationPosition(book,position.positionId,{now:1004}).receipt;
+    assert.equal(closed.status,liquidate?'LIQUIDATED':'CLOSED');
+    assert.equal(closed.pnlModel,LEGACY_SIMULATION_PNL_MODEL);assert.equal(closed.entryFloorUnit,1);
+    assert.equal(closed.liquidationTrigger,150-c);
+    assert.equal(closed.rawPnl,liquidate?-4:-.5);assert.equal(closed.realizedPnl,liquidate?-2:-.5);
+    assert.equal(closed.badDebt,liquidate?2:0);
+    assert.equal(book.free,liquidate?8:9.5);assert.equal(book.lockedMargin,0);assert.equal(book.unrealizedPnl,0);
+    assert.equal(Object.hasOwn(book.simulation.positions[0],'pnlModel'),false,'settlement preserves the historical position shape');
+    assert.deepEqual(simulationSnapshot(book).receipts[0],fillReceipt);
+    const settled=structuredClone(book);
+    assert.equal(closeSimulationPosition(book,position.positionId,{now:1005}).reason,'POSITION_NOT_OPEN');assert.deepEqual(book,settled);
+  }
+});
 
 // EIP-1193 wallet connection is public-address/read-only balance state, not a ledger.
 const accountA='0x0000000000000000000000000000000000000001';
@@ -323,10 +386,11 @@ for(let directions=0;directions<8;directions++){
       assert.equal(plan.cargoPrincipalAsMargin,false);
       assert.equal(plan.realOrderCreated,false);
       assert.deepEqual(exposure,originalExposure,'planning cannot consume the cost exposure');
-      assert.equal(observeSimulationPrice(book,{market,price:99,observedAt:1000,now:1000,productV1:true}).ok,true);
-      const order=placeSimulationOrder(book,{axis,market,c,side:plan.hedge.side,lots:2,triggerPrice:100,now:1001});
+      assert.equal(observeSimulationPrice(book,{market,price:149,observedAt:1000,now:1000,productV1:true}).ok,true);
+      const order=placeSimulationOrder(book,{axis,market,c,side:plan.hedge.side,lots:2,triggerPrice:150,now:1001});
       assert.equal(order.ok,true);
-      assert.equal(observeSimulationPrice(book,{market,price:100,observedAt:1002,now:1002,productV1:true}).events[0].status,'FILLED');
+      const fill=observeSimulationPrice(book,{market,price:150,observedAt:1002,now:1002,productV1:true}).events[0];
+      assert.equal(fill.status,'FILLED');assert.equal(fill.pnlModel,C_PNL_MODEL);assert.equal(fill.entryFloorUnit,100);
     }
     assert.equal(book.free,0);
     assert.equal(book.lockedMargin,6);
@@ -336,10 +400,11 @@ for(let directions=0;directions<8;directions++){
     assert.deepEqual(recovered,custody);
     for(const [i,[axis,market]] of cargoMarkets.entries()){
       const before=structuredClone(book);
-      assert.equal(observeSimulationPrice(book,{market,price:100,observedAt:1002,now:1002,productV1:true}).reason,'OUT_OF_ORDER_PRICE');
+      assert.equal(observeSimulationPrice(book,{market,price:150,observedAt:1002,now:1002,productV1:true}).reason,'OUT_OF_ORDER_PRICE');
       assert.deepEqual(book,before,'restart must not replay a fill');
       const peers=simulationSnapshot(book).positions.filter(p=>p.market!==market);
-      const outcome=observeSimulationPrice(book,{market,price:signs[i]>0?98:102,observedAt:1003,now:1003,productV1:true});
+      // Positive raw USDT gaps beyond the fixed floor's 50/250 liquidation marks.
+      const outcome=observeSimulationPrice(book,{market,price:signs[i]>0?40:260,observedAt:1003,now:1003,productV1:true});
       assert.equal(outcome.ok,true);
       assert.equal(outcome.events.length,1);
       assert.equal(outcome.events[0].status,'LIQUIDATED');

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
-import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
+import {C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL,createKgenLedger,positionRisk} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
 import {createJourneyTutorial,JOURNEY_ENCOUNTER_PROFILES,GAME_LOOT_TABLE,GA600_GAME_TRAINING,selectJourneyLoot,selectJourneyEncounter,drainJourneyEvents,serializeWorld} from '../runtime/world-runtime.mjs';
 import {GAMEPLAY_UNLOCKS} from '../runtime/player-life-runtime.mjs';
@@ -147,6 +147,128 @@ test('V1 address profiles recover existing ledger without cross-account receipts
   assert.equal(reloaded.snapshot().wallet.lockedMargin,0);
   assert.equal(reloaded.snapshot().receipts[1].trader,a);
 });
+
+function openBtcAtFill({c=1,lots=1,triggerPrice=75000,fillPrice=75000}={}){
+  const ledger=createKgenLedger(100);
+  const adapter=createExecutionAdapter({ledger,productV1:true});
+  const observe=(price,now)=>adapter.observe({market:'BTCUSDT',price,observedAt:now,now});
+  const currentPrice=triggerPrice-100;
+  assert.equal(observe(currentPrice,1000).ok,true);
+  const pending=adapter.submit({axis:'KX',market:'BTCUSDT',c,lots,currentPrice,triggerPrice},{now:1001});
+  assert.equal(pending.ok,true);
+  const fill=observe(fillPrice,1002).events[0];
+  assert.equal(fill.kind,'FILL');
+  assert.equal(fill.fillPrice,fillPrice);
+  assert.equal(fill.triggerPrice,triggerPrice);
+  return {ledger,adapter,observe,fill};
+}
+
+test('BTC 75k long remains open at 74999 and settles +2 KGEN at 85k',()=>{
+  const {adapter,observe,fill}=openBtcAtFill({lots:2});
+  assert.equal(fill.entryFloorUnit,10000);
+  assert.equal(fill.pnlModel,C_PNL_MODEL);
+  assert.deepEqual(observe(74999,1003).events,[]);
+  const {positions,wallet}=adapter.snapshot();
+  const risk=positionRisk(positions[0]);
+  assert.equal(wallet.unrealizedPnl,-0.0002);
+  assert.equal(risk.liquidated,false);
+  assert.equal(risk.liquidationMark,65000);
+  assert.equal(risk.maxAdversePoints,10000);
+  assert.equal(risk.maxAdverseFraction,10000/75000);
+  assert.equal(risk.remaining,1.9998);
+  assert.equal(observe(85000,1004).ok,true);
+  const {ok,receipt}=adapter.close(fill.positionId,{now:1005});
+  assert.equal(ok,true);
+  assert.equal(receipt.kind,'SETTLEMENT');
+  assert.equal(receipt.entryPrice,75000);
+  assert.equal(receipt.settlementPrice,85000);
+  assert.equal(receipt.liquidationTrigger,65000);
+  assert.equal(receipt.entryFloorUnit,10000);
+  assert.equal(receipt.rawPnl,2);
+  assert.equal(receipt.realizedPnl,2);
+  assert.equal(adapter.snapshot().wallet.free,102);
+  assert.equal(adapter.snapshot().wallet.realizedPnl,2);
+  assert.equal(adapter.snapshot().wallet.lockedMargin,0);
+  assert.deepEqual(adapter.snapshot().receipts,[fill,receipt]);
+  assert.equal(adapter.close(fill.positionId,{now:1006}).ok,false);
+});
+
+test('normalized lifecycle preserves fill scale across both a mark crossover and a trigger gap',()=>{
+  for(const [triggerPrice,fillPrice,mark,unit,expected] of [
+    [75000,75000,175000,10000,10],
+    [99000,101000,111000,100000,0.1],
+  ]){
+    const {adapter,observe,fill}=openBtcAtFill({triggerPrice,fillPrice});
+    assert.equal(fill.entryFloorUnit,unit);
+    assert.equal(observe(mark,1003).ok,true);
+    const {receipt}=adapter.close(fill.positionId,{now:1004});
+    assert.equal(receipt.entryPrice,fillPrice);
+    assert.equal(receipt.entryFloorUnit,unit);
+    assert.equal(receipt.settlementPrice,mark);
+    assert.equal(receipt.realizedPnl,expected);
+    assert.equal(adapter.snapshot().wallet.realizedPnl,expected);
+  }
+});
+
+test('signed short profit and adverse gap liquidation use the same frozen K unit',()=>{
+  const falling=openBtcAtFill({c:-1,lots:2});
+  falling.observe(65000,1003);
+  const {receipt}=falling.adapter.close(falling.fill.positionId,{now:1004});
+  assert.equal(receipt.side,'SHORT');
+  assert.equal(receipt.liquidationTrigger,85000);
+  assert.equal(receipt.realizedPnl,2);
+  for(const [c,mark,trigger] of [[1,55000,65000],[-1,95000,85000]]){
+    const {adapter,observe,fill}=openBtcAtFill({c,lots:2});
+    const settled=observe(mark,1003).events[0];
+    assert.equal(settled.status,'LIQUIDATED');
+    assert.equal(settled.liquidationTrigger,trigger);
+    assert.equal(settled.settlementPrice,mark);
+    assert.equal(settled.rawPnl,-4);
+    assert.equal(settled.realizedPnl,-2);
+    assert.equal(settled.badDebt,2);
+    assert.equal(adapter.snapshot().wallet.free,98);
+    assert.equal(adapter.snapshot().wallet.lockedMargin,0);
+    assert.deepEqual(observe(mark,1004).events,[]);
+    assert.deepEqual(adapter.snapshot().receipts,[fill,settled]);
+  }
+});
+
+test('restoring a saved original-model open position preserves balances and old receipts',()=>{
+  const account='0x'+'2'.repeat(40),storageKey='k11520.local-product.v1:'+account;
+  const priorReceipts=[
+    {receiptId:'SIM-R-3',kind:'FILL',positionId:'SIM-P-2',orderId:'SIM-O-1',fillPrice:75000,status:'FILLED'},
+    {receiptId:'SIM-R-4',kind:'SETTLEMENT',positionId:'SIM-P-2',orderId:'SIM-O-1',entryPrice:75000,settlementPrice:85000,rawPnl:20000,realizedPnl:20000,status:'CLOSED'},
+    {receiptId:'SIM-R-7',kind:'FILL',positionId:'SIM-P-6',orderId:'SIM-O-5',fillPrice:75000,status:'FILLED'},
+  ];
+  const legacyPosition={trader:account,positionId:'SIM-P-6',orderId:'SIM-O-5',axis:'KX',market:'BTCUSDT',side:'LONG',
+    c:1,signedC:1,lots:2,entry:75000,mark:75000,margin:2,principal:2,stopPrice:null,takeProfitPrice:null,status:'OPEN'};
+  const fixture={schema:'K11520_LOCAL_SIMULATION_V1',owner:account,revision:4,
+    ledger:{...createKgenLedger(20100),free:20098,lockedMargin:2,realizedPnl:20000,
+      simulation:{sequence:7,orders:[],positions:[legacyPosition],receipts:priorReceipts,
+        observations:{BTCUSDT:{price:75000,at:1000}}}},progress:{}};
+  const saved=new Map([[storageKey,JSON.stringify(fixture)]]);
+  const storage={getItem:key=>saved.get(key)??null,setItem:(key,value)=>saved.set(key,value)};
+  const ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage});
+  store.activate(account);
+  const adapter=createExecutionAdapter({ledger,productV1:true,beforeMutation:store.check,afterMutation:store.save});
+  const loaded=adapter.snapshot();
+  assert.equal(loaded.wallet.realizedPnl,20000);
+  assert.equal(loaded.wallet.free,20098);
+  assert.equal(loaded.wallet.lockedMargin,2);
+  assert.deepEqual(loaded.receipts,priorReceipts);
+  assert.equal(loaded.positions[0].pnlModel,LEGACY_SIMULATION_PNL_MODEL);
+  assert.equal(positionRisk(loaded.positions[0]).liquidationMark,74999);
+  assert.deepEqual(JSON.parse(saved.get(storageKey)).ledger,{...fixture.ledger,owner:account});
+  const quote=adapter.observe({market:'BTCUSDT',price:75002,observedAt:1001,now:1001});
+  assert.equal(quote.ok,true);
+  assert.equal(adapter.snapshot().wallet.unrealizedPnl,4);
+  const {receipt}=adapter.close(legacyPosition.positionId,{now:1002});
+  assert.equal(receipt.pnlModel,LEGACY_SIMULATION_PNL_MODEL);
+  assert.equal(receipt.realizedPnl,4);
+  assert.equal(adapter.snapshot().wallet.realizedPnl,20004);
+  assert.deepEqual(adapter.snapshot().receipts.slice(0,3),priorReceipts);
+});
+
 test('offline 0C journey attacks, drops local-only loot once, respawns without settlement',()=>{
   const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);
   const player={x:0,y:0,z:6};let time=1000,drops=0;

@@ -33,6 +33,28 @@ function portalRoutes(base){
   assertExactRoute(game,host,'single shared engine registry');
   return {portal:root.href,quote,host,game};
 }
+async function qualifySharedSimulationSources(page,routes,gameDocument=page){
+  // The native order lifecycle belongs to the existing settlement browser QA.
+  // This entry test binds its actual HTTP modules to this checkout, without
+  // adding a wallet/feed fixture or modifying the player's simulation ledger.
+  const runtime='K線西遊記/temples/11520/runtime/',sources=[];
+  for(const path of [runtime+'game-5d-main.mjs',runtime+'real-trading-order-intent.mjs',runtime+'kgen-margin-runtime.mjs',runtime+'evm-wallet-runtime.mjs','K線西遊記/temples/88888/index.html']){
+    const url=new URL(path,routes.portal).href,response=await page.request.get(url);
+    assert.ok(response.ok(),'shared simulation source must load: '+path);
+    const actual=await response.body(),expected=await fs.readFile(new URL('../'+path,import.meta.url));
+    assert.deepEqual(actual,expected,'shared entry source must match the tested checkout: '+path);
+    sources.push({path,url,sha256:createHash('sha256').update(actual).digest('hex')});
+  }
+  assertExactRoute(sharedGameUrl(new URL(routes.portal),'88888'),routes.game,'88888 keeps the same simulation owner');
+  const model=await gameDocument.evaluate(async root=>{
+    const runtime=new URL('K線西遊記/temples/11520/runtime/',root),{C_PNL_MODEL,pnlForMove}=await import(new URL('kgen-margin-runtime.mjs',runtime).href);
+    const book=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot();
+    return {pnlModel:C_PNL_MODEL,long:pnlForMove({entry:75000,mark:85000,side:'LONG',lots:1,c:1}),short:pnlForMove({entry:85000,mark:75000,side:'SHORT',lots:1,c:-1}),receiptModelPresent:!!book&&['orders','positions','receipts'].every(key=>Array.isArray(book[key]))};
+  },routes.portal);
+  assert.equal(model.pnlModel,'UNIVERSE_ENTRY_FLOOR_DELTA_C_LOTS_V1');
+  assert.equal(model.long,1);assert.equal(model.short,1);assert.equal(model.receiptModelPresent,true,'live shared game exposes the existing simulation receipt model');
+  return {scope:'HTTP_SOURCE_AND_PURE_MODEL_QUALIFICATION_ONLY',nativeOrderLifecycle:'NOT_EXECUTED_BY_PORTAL_TEST',sources,model};
+}
 async function clickRoute(page,selector,expected,visibleSelector,label){
   const href=await page.locator(selector).getAttribute('href'),failures=[];
   const failed=request=>{if(request.isNavigationRequest()&&request.frame()===page.mainFrame())failures.push({url:request.url(),error:request.failure()?.errorText||'UNKNOWN'});};
@@ -1398,6 +1420,9 @@ try{
         assert.ok(Object.values(size).every(value=>Number.isFinite(value)&&value>0),'shared game canvas has visible nonzero dimensions');
         const identity=await page.evaluate(async root=>{const {createLocalPlayerStore}=await import(new URL('K線西遊記/temples/11520/runtime/player-life-runtime.mjs',root).href);const store=createLocalPlayerStore(),p=store.loadPlayer(),envelope=JSON.parse(localStorage.getItem('KAIOS_PLAYER_LIFE_V1'));return {status:store.snapshot().status,activePlayerId:envelope.activePlayerId,players:Object.keys(envelope.players).sort(),playerId:p?.playerId,createdAt:p?.createdAt,homeWorld:p?.homeWorld,homePlotId:p?.homePlotId,homePlot:p?.homePlot};},routes.portal);
         assert.deepEqual(identity,seeded.identity,'shared entry/reload preserves player identity, collection and home');
+        const qualification=await qualifySharedSimulationSources(page,routes);
+        if(load)assert.deepEqual(qualification,report.sharedGameSimulationSources[0],'shared reload retains the same physical modules and receipt model');
+        (report.sharedGameSimulationSources??=[]).push(qualification);
         await shot(page,`shared-game-${load?'reload':'entry'}-390x844`);
       }
       await page.goBack({waitUntil:'domcontentloaded'});assertExactRoute(page.url(),routes.quote,'shared game back to quote');await page.locator('.shared-game-button').waitFor({state:'visible'});
@@ -1410,6 +1435,19 @@ try{
     await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
   }
   report.checks.push('two strict quote-entry/back cycles, explicit shared game entry/reload/back, canonical identity preservation and entry availability after persisted pageshow; visible canvas screenshots require direct visual review');
+  // The old bookmark has its own shell, but its actual child loads the fixed game.
+  const legacyEntry=worldUrl('88888',new URL(routes.portal));
+  await page.goto(legacyEntry,{waitUntil:'domcontentloaded'});
+  assertExactRoute(page.url(),legacyEntry,'original 88888 compatibility entry');
+  const legacyCanvas=page.frameLocator('#sharedGameFrame').locator('canvas#three');
+  await legacyCanvas.waitFor({state:'visible'});
+  assertExactRoute(await legacyCanvas.evaluate(canvas=>canvas.ownerDocument.location.href),routes.game,'88888 renders the same canonical 12682 child');
+  const legacyGame=page.frames().find(frame=>frame.parentFrame()===page.mainFrame()&&frame.url()===routes.game);
+  assert.ok(legacyGame,'same-origin game child is available');
+  await legacyGame.waitForFunction(()=>!!globalThis.__K11520_SIMULATION_EXCHANGE__);
+  assert.equal(await legacyGame.evaluate(()=>JSON.parse(localStorage.getItem('KAIOS_PLAYER_LIFE_V1')).activePlayerId),seeded.id,'same player through 88888');
+  report.legacy88888SimulationSource=await qualifySharedSimulationSources(page,routes,legacyGame);
+  assert.deepEqual(report.legacy88888SimulationSource,report.sharedGameSimulationSources[0],'both entry documents load the same modules and model');
   await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html',{waitUntil:'networkidle'});assert.equal(new URL(page.url()).pathname,new URL(BASE+'/').pathname,'legacy Portal converges to root');
   await page.evaluate(()=>localStorage.setItem('KAIOS_PLAYER_LIFE_V1','{corrupt'));
   await page.reload({waitUntil:'networkidle'});assert.ok(await page.locator('#primaryPlay').isVisible());assert.equal(await page.evaluate(()=>localStorage.getItem('KAIOS_PLAYER_LIFE_V1')),'{corrupt');

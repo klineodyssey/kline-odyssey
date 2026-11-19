@@ -17,7 +17,7 @@ CURRENT_ADDITION: 2026-11-18 / Codex Hengyao / K11520-SIMULATION-AUTOPILOT-20261
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
 import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
-import {normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
+import {C_PNL_MODEL,normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
   observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot,positionRisk} from './kgen-margin-runtime.mjs';
 
 const simulationExecutionAdapters=new WeakSet();
@@ -120,7 +120,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     if(!Number.isFinite(available)||available<margin)throw new Error('INSUFFICIENT_FREE_KGEN');
     return {ok:true,...intent,intent,requiredMargin:margin,available,
       estimatedLiquidationPrice:Math.max(0,liquidationMark({entry:intent.triggerPrice,c:intent.c,side:intent.side})),
-      pnlModel:'INDEX_DELTA_C_LOTS_V1',liquidationModel:'SIMULATION_ISOLATED_ZERO_MAINTENANCE_NO_FEES',
+      pnlModel:C_PNL_MODEL,liquidationModel:'SIMULATION_ISOLATED_ZERO_MAINTENANCE_NO_FEES',
       currentPrice:selected.price,priceObservedAt:selected.at,priceSource:selected.source||'SIMULATION_OBSERVATION',simulationOnly:true,executionMode:'SIMULATION'};
   });
   const adapter=Object.freeze({name:'SIMULATION_ADAPTER',mode:'SIMULATION',enabled:true,preview,quote,
