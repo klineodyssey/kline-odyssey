@@ -267,13 +267,16 @@ try {
     assert.equal(liquidationQuote?.price,gapQuote,'the stale-price fixture must have recovered before liquidation');
     assert.ok(liquidationQuote.source&&Number.isSafeInteger(liquidationQuote.at)&&Number.isSafeInteger(liquidationQuote.sequence),'liquidation must carry a provider source, time and sequence');
     const receiptsBeforeRecovery=s.receipts.map(receipt=>receipt.receiptId);
+    // The Assets panel is already verified. Close it before refreshing the
+    // synthetic quote so the reserve-reference read guard remains intact.
+    await page.locator('#sheetClose').click();
+    await page.locator('#sheet').waitFor({state:'hidden'});
     // Observe the next accepted fixture quote and its committed ledger together.
     s=await driveQuote('generic.recovery-quote',4002);
     assert.equal(s.positions[0].positionId,openId);
     assert.equal(s.positions[0].status,'LIQUIDATED');
     assert.equal(s.receipts.length,2);
     assert.deepEqual(s.receipts.map(receipt=>receipt.receiptId),receiptsBeforeRecovery);
-    await page.locator('#sheetClose').click();
     if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('4003');await page.locator('#confirmOrder').click();
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().orders[1]?.status==='PENDING',null,{timeout:15000});
