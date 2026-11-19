@@ -172,9 +172,31 @@ try {
     assert.equal(s.receipts.filter(r=>r.kind==='SETTLEMENT').length,1);assert.ok(s.receipts.at(-1).badDebt>0);
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('liquidation-receipt');
     await organ('assets');await shot('wallet');
-    assert.match(await page.locator('#sheetBody').innerText(),/SIMULATION WALLET/);
-    for(const label of ['AVAILABLE','LOCKED MARGIN','EQUITY','UNREALIZED PNL','REALIZED PNL'])assert.match(await page.locator('#sheetBody').innerText(),new RegExp(label));
-    eth=4002;await page.waitForTimeout(5500);s=await snap();assert.equal(s.positions[0].status,'LIQUIDATED');assert.equal(s.receipts.length,2);
+    const walletText=await page.locator('#sheetBody').innerText();
+    assert.match(walletText,/SIMULATION WALLET/);
+    for(const label of ['AVAILABLE','LOCKED MARGIN','EQUITY','UNREALIZED PNL','REALIZED PNL'])assert.match(walletText,new RegExp(label));
+
+    const liquidationQuote=s.observations.ETHUSDT;
+    assert.equal(liquidationQuote?.price,3920,'the stale-price fixture must have recovered before liquidation');
+    assert.ok(liquidationQuote.source&&Number.isSafeInteger(liquidationQuote.at)&&Number.isSafeInteger(liquidationQuote.sequence),'liquidation must carry a provider source, time and sequence');
+    const receiptsBeforeRecovery=s.receipts.map(receipt=>receipt.receiptId);
+    eth=4002;
+    // Observe the next accepted fixture quote and its committed ledger together.
+    s=await phaseTiming.measure('generic.recovery-quote',async()=>{
+      const observation=await page.waitForFunction(({price,previous})=>{
+        const book=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot();
+        const quote=book?.observations.ETHUSDT;
+        if(quote?.price!==price||quote.source!==previous.source||!Number.isSafeInteger(quote.at)||quote.at<=previous.at||
+          !Number.isSafeInteger(quote.sequence)||quote.sequence<=previous.sequence)return false;
+        return book;
+      },{price:eth,previous:liquidationQuote},{timeout:15000,polling:100});
+      try{return await observation.jsonValue()}
+      finally{await observation.dispose()}
+    });
+    assert.equal(s.positions[0].positionId,openId);
+    assert.equal(s.positions[0].status,'LIQUIDATED');
+    assert.equal(s.receipts.length,2);
+    assert.deepEqual(s.receipts.map(receipt=>receipt.receiptId),receiptsBeforeRecovery);
     await page.locator('#sheetClose').click();
     if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('4003');await page.locator('#confirmOrder').click();
