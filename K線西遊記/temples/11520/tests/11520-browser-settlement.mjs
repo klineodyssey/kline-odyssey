@@ -17,6 +17,56 @@ function createSettlementTiming(now=()=>performance.now(),origin=now()){
   return{begin,finish,measure,snapshot:()=>({clock:'NODE_MONOTONIC_RELATIVE_MS',elapsedMs:now()-origin,events:events.map(event=>({...event}))})};
 }
 
+// Keep the application's normal quote poll. For fixture transitions whose
+// assertions concern the accepted price rather than wall-clock latency, ask
+// that same callback to consume one new routed response immediately.
+function captureSettlementQuoteRefresh(){
+  const nativeSetInterval=globalThis.setInterval;
+  globalThis.setInterval=function register(callback,delay,...args){
+    const interval=Reflect.apply(nativeSetInterval,globalThis,[callback,delay,...args]);
+    if(typeof callback==='function'&&callback.name==='quotes'&&delay===5000){
+      globalThis.setInterval=nativeSetInterval;
+      globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__=()=>{
+        if(document.querySelector('#sheet.open [data-kgen-pool-reference]')){
+          throw new Error('Fixture quote refresh cannot request a reserve reference');
+        }
+        return callback(...args);
+      };
+    }
+    return interval;
+  };
+}
+
+async function waitForAcceptedFixtureQuote(page,price,previous){
+  const observation=await page.waitForFunction(({price,previous})=>{
+    const book=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot();
+    const quote=book?.observations.ETHUSDT;
+    if(quote?.price!==price||quote.source!==previous.source||!Number.isSafeInteger(quote.at)||quote.at<=previous.at||
+      !Number.isSafeInteger(quote.sequence)||quote.sequence<=previous.sequence)return false;
+    return book;
+  },{price,previous},{timeout:15000,polling:100});
+  try{return await observation.jsonValue()}
+  finally{await observation.dispose()}
+}
+
+async function driveSettlementFixtureQuote(page,phaseTiming,label,price,setPrice){
+  return phaseTiming.measure(label,async()=>{
+    const previous=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().observations.ETHUSDT);
+    assert.ok(previous?.source&&Number.isSafeInteger(previous.at)&&Number.isSafeInteger(previous.sequence),
+      'Fixture transition requires an existing provider observation');
+    setPrice(price);
+    const [book]=await Promise.all([
+      waitForAcceptedFixtureQuote(page,price,previous),
+      page.evaluate(()=>{
+        const refresh=globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__;
+        if(typeof refresh!=='function')throw new Error('Expected the original game quote interval');
+        return refresh();
+      }),
+    ]);
+    return book;
+  });
+}
+
 // Trading regressions explicitly disclose the retained control panel. Default
 // gameplay no longer opens C/lots or a fixed disc merely because it was touched.
 async function showRetainedControls(page){
@@ -59,6 +109,8 @@ try {
     let eth=4000;
     const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
     page.setDefaultTimeout(20000);
+    await page.addInitScript(captureSettlementQuoteRefresh);
+    const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,value=>{eth=value});
     const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE_ERROR',String(e))});
     // Ordinary simulation QA must remain independent of a public rehearsal.
     // An unverified manifest may not silently activate wallet transactions.
@@ -146,8 +198,8 @@ try {
     const snap=()=>phaseTiming.measure('generic.snapshot',()=>page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot()));
     let s=await snap();assert.equal(s.orders[0].status,'PENDING');assert.equal(s.wallet.lockedMargin,0);
     await organ('orders');await shot('pending');
-    eth=4002;
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().orders[0]?.status==='FILLED',null,{timeout:15000});
+    const filledQuote=await driveQuote('generic.pending-fill-quote',4002);
+    assert.equal(filledQuote.orders[0]?.status,'FILLED');
     s=await snap();assert.equal(s.positions.length,1);assert.equal(s.wallet.lockedMargin,10);assert.equal(s.wallet.free,90);
     assert.equal(s.receipts.filter(r=>r.kind==='FILL').length,1);
     await organ('positions');await shot('filled');
@@ -182,17 +234,7 @@ try {
     const receiptsBeforeRecovery=s.receipts.map(receipt=>receipt.receiptId);
     eth=4002;
     // Observe the next accepted fixture quote and its committed ledger together.
-    s=await phaseTiming.measure('generic.recovery-quote',async()=>{
-      const observation=await page.waitForFunction(({price,previous})=>{
-        const book=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot();
-        const quote=book?.observations.ETHUSDT;
-        if(quote?.price!==price||quote.source!==previous.source||!Number.isSafeInteger(quote.at)||quote.at<=previous.at||
-          !Number.isSafeInteger(quote.sequence)||quote.sequence<=previous.sequence)return false;
-        return book;
-      },{price:eth,previous:liquidationQuote},{timeout:15000,polling:100});
-      try{return await observation.jsonValue()}
-      finally{await observation.dispose()}
-    });
+    s=await phaseTiming.measure('generic.recovery-quote',()=>waitForAcceptedFixtureQuote(page,eth,liquidationQuote));
     assert.equal(s.positions[0].positionId,openId);
     assert.equal(s.positions[0].status,'LIQUIDATED');
     assert.equal(s.receipts.length,2);
@@ -200,10 +242,11 @@ try {
     await page.locator('#sheetClose').click();
     if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('4003');await page.locator('#confirmOrder').click();
-    eth=4004;
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions[1]?.status==='OPEN',null,{timeout:15000});
-    eth=4008;
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet.unrealizedPnl>0,null,{timeout:15000});
+    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().orders[1]?.status==='PENDING',null,{timeout:15000});
+    const secondFillQuote=await driveQuote('generic.second-fill-quote',4004);
+    assert.equal(secondFillQuote.positions[1]?.status,'OPEN');
+    const markQuote=await driveQuote('generic.profitable-mark-quote',4008);
+    assert.ok(markQuote.wallet.unrealizedPnl>0);
     await organ('positions');await shot('pnl');
     await page.locator('[data-sim-close]').click();
     s=await snap();assert.equal(s.positions[1].status,'CLOSED');assert.equal(s.wallet.lockedMargin,0);assert.ok(s.wallet.free>90);
@@ -291,6 +334,8 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
   const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
   const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],controlChecks:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
   let eth=4000,sequence=0;
+  await page.addInitScript(captureSettlementQuoteRefresh);
+  const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,value=>{eth=value});
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   page.on('pageerror',error=>report.pageErrors.push(String(error)));
   page.on('websocket',socket=>report.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
@@ -430,7 +475,8 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     await game();await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('4001');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});await page.locator('#sheet.open').waitFor();
     let state=await snapshot();assert.equal(state.book.orders.length,1);assert.equal(state.book.orders[0].status,'PENDING');assert.equal(state.book.positions.length,0);
     await organ('worldmap');const pendingMotion=await moveAndStop('pending-c-walk');near(pendingMotion.motion.speedKPerSecond,draftMotion.motion.speedKPerSecond,'pending order cannot ignite C');
-    eth=4002;await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='OPEN',null,{timeout:15000});
+    const filledQuote=await driveQuote('navigation.filled-speed-quote',4002);
+    assert.equal(filledQuote.positions[0]?.status,'OPEN');
     await page.waitForFunction(()=>__K11520_LOCAL_MOTION__?.speedSource==='FILLED_POSITION');state=await snapshot();assert.equal(state.motion.appliedC,1);assert.ok(state.motion.speedKPerSecond>pendingMotion.motion.speedKPerSecond);report.checks.filledSpeed={motion:state.motion,position:state.book.positions[0]};
     await setC(-1);await organ('worldmap');const filledMotion=await moveAndStop('filled-c-move','FILLED_POSITION');assert.ok(filledMotion.motion.observedSpeedKPerSecond>pendingMotion.motion.observedSpeedKPerSecond,'a filled position changes measured physical speed, rather than presentation alone');state=await snapshot();assert.equal(state.motion.appliedC,1,'changing the draft C preserves the filled position engine');
     const position=state.book.positions[0],receiptIds=state.book.receipts.map(row=>row.receiptId);report.checks.scenarios=[];
@@ -453,7 +499,9 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.submittedOrders===1);state=await snapshot();assert.equal(state.view.autopilot.config.market,'ETHUSDT');assert.equal(state.view.autopilot.config.axis,'KY');assert.equal(state.view.autopilot.signerRequested,false);assert.equal(state.view.autopilot.broadcast,false);assert.equal(state.book.orders.length,beforeAuto+1);
     const autoOrderId=state.view.autopilot.orderIds[0];assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.armed=state;
     await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId),'stop cannot cancel an already-created order');report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
-    eth=3988;await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().observations.ETHUSDT?.price===3988,null,{timeout:15000});await page.waitForTimeout(2200);state=await snapshot();assert.equal(state.book.orders.length,beforeAuto+1,'stopped decisions cannot reverse on a later opposite signal');assert.equal(state.view.autopilot.state,'STOPPED');assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.afterOppositeSignal=state;
+    const oppositeQuote=await driveQuote('navigation.stopped-opposite-quote',3988);
+    assert.equal(oppositeQuote.observations.ETHUSDT?.price,3988);
+    await page.waitForTimeout(2200);state=await snapshot();assert.equal(state.book.orders.length,beforeAuto+1,'stopped decisions cannot reverse on a later opposite signal');assert.equal(state.view.autopilot.state,'STOPPED');assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.afterOppositeSignal=state;
     const selectors=['navigationMarket','navigationX','navigationY','navigationZ','navigationGo','navigationStop','navigationTargetPrice','navigationLongAbove','navigationShortBelow','navigationAutoC','navigationAutoLots','navigationMaxLoss','navigationMaxOrders','navigationAutoStart','navigationAutoStop'].map(id=>'#'+id),batchBegan=Date.now();
     const boxes=await phaseTiming.measure('navigation.control-batch',()=>page.locator('body').evaluate(inspectNavigationControls,{selectors}));report.controlBatch={selectors,elapsedMs:Date.now()-batchBegan,count:boxes.length};assert.equal(boxes.length,selectors.length);for(const box of boxes)recordControl(box);assert.equal(report.controlChecks.length,36,'All original navigation control checks must complete');
     assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.networkAuthorityAttempts,[]);assert.ok(state.fixture.providerCalls.every(method=>['eth_accounts','eth_chainId'].includes(method)),'no wallet connect, signer, chain switch or transaction requests');
