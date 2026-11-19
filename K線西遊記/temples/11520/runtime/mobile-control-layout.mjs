@@ -22,6 +22,7 @@ const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
 let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const thumbObservers=new WeakMap();
+const flowObserved=new WeakSet();
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 const paramsHidden=()=>!!$('.sliderDock')?.classList.contains('k11520HiddenBySettings');
 const onDemand=()=>document.documentElement.dataset.k11520HudMode==='ON_DEMAND';
@@ -218,6 +219,9 @@ ${compact}:not(.k11520ControlsOpen) .controls #attack{right:0!important;bottom:0
 ${compact}:not(.k11520ControlsOpen) .controls #skill{right:66px!important;bottom:0!important;width:44px!important;height:44px!important;font-size:13px!important}
 ${compact}:not(.k11520ControlsOpen) .controls #tradeSword{right:0!important;bottom:66px!important;width:44px!important;height:44px!important;font-size:15px!important}
 ${compact}:not(.k11520ControlsOpen) .controls #dodge{right:66px!important;bottom:56px!important;width:44px!important;height:44px!important;font-size:15px!important}
+@media(orientation:landscape) and (max-height:600px){
+  ${compact} #k11520CameraZoomStatus{left:var(--k11520-compact-zoom-left,160px);top:var(--k11520-compact-zoom-top,114px)}
+}
 /* The same canvas-owned joystick is only a visual while floating. Neither it
    nor its children can steal the second contact from the existing pinch owner. */
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) #joy:not([data-k11520-floating-active="1"]){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
@@ -336,8 +340,25 @@ function syncHeaderFlow(){
   const contentBottom=Math.max(box($('.top'))?.bottom||0,box(brand)?.bottom||0,box(title)?.bottom||0);
   put('--k11520-market-top',Math.max(landscape?54:116,Math.ceil(contentBottom+8)));
 }
+// Only the compact landscape presentation follows the actual guide bounds.
+// Keep the camera owner, Recenter control, zoom text and 1500ms timer intact.
+function syncCompactCameraStatus(){
+  const root=document.documentElement,leftKey='--k11520-compact-zoom-left',topKey='--k11520-compact-zoom-top';
+  const reset=()=>{root.style.removeProperty(leftKey);root.style.removeProperty(topKey)};
+  if(!compactHud()||!globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches){reset();return}
+  const guide=$('#k11520MonsterGuide'),status=$('#k11520CameraZoomStatus');
+  if(!guide||!status||!guide.getClientRects().length){reset();return}
+  const style=getComputedStyle(guide),g=guide.getBoundingClientRect(),s=status.getBoundingClientRect();
+  if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0||!(g.width>0&&g.height>0&&s.width>0&&s.height>0)){reset();return}
+  const gap=8,inset=6,right={x:g.right+gap,y:g.top+Math.max(0,(g.height-s.height)/2)},below={x:Math.max(inset,Math.min(innerWidth-inset-s.width,g.left)),y:g.bottom+gap};
+  const fits=p=>p.x>=inset&&p.y>=inset&&p.x+s.width<=innerWidth-inset&&p.y+s.height<=innerHeight-inset;
+  const position=fits(right)?right:fits(below)?below:null;
+  if(!position){reset();return}
+  for(const [key,n] of [[leftKey,position.x],[topKey,position.y]]){const value=n+'px';if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value)}
+}
 function syncStatusFlow(){
   syncHeaderFlow();
+  syncCompactCameraStatus();
   const root=document.documentElement;
   if(hudCollapsed()||root.classList.contains('k11520SettingsOpen'))return;
   if(onDemand()&&!root.classList.contains('k11520InfoOpen')&&!root.classList.contains('k11520TradeOpen'))return;
@@ -359,13 +380,20 @@ function syncStatusFlow(){
   const guide=visibleRect($('#k11520MonsterGuide')),guideHeight=Math.max(44,guide?.height||0);
   if(!landscape)put('--k11520-map-top',Math.ceil(guideTop+guideHeight+10));
 }
+function observeFlowRoots(){
+  if(!flowObserver)return;
+  for(const el of [$('.axes'),$('.tele'),$('.monsterHud'),$('#k11520MonsterGuide'),$('#k11520BuildStamp'),$('.top'),$('.brand')].filter(Boolean)){
+    if(flowObserved.has(el))continue;
+    flowObserver.observe(el);flowObserved.add(el);
+  }
+}
 export function install11520MobileControlLayout(){
   apply();
-  if(booted)return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__;
+  if(booted){observeFlowRoots();return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__}
   booted=true;installGuard();addEventListener('resize',apply,{passive:true});
   if(typeof ResizeObserver==='function'){
     flowObserver=new ResizeObserver(()=>{syncStatusFlow();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
-    for(const el of [$('.axes'),$('.tele'),$('.monsterHud'),$('#k11520MonsterGuide'),$('#k11520BuildStamp'),$('.top'),$('.brand')].filter(Boolean))flowObserver.observe(el);
+    observeFlowRoots();
   }
   return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__;
 }

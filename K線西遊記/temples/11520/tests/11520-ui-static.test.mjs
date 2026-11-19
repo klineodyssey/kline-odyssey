@@ -1086,3 +1086,104 @@ test('XZ XY YZ joystick loads the canonical module and preserves old imports',as
   assert.equal(typeof current.install11520JoystickXZXY,'function');
   assert.equal(previous.install11520JoystickXZXY,current.install11520JoystickXZXY,'legacy import must resolve to the same implementation');
 });
+
+async function floatingHudFixture(width,height,{hud=true}={}){
+  const {runInNewContext}=await import('node:vm'),nodes=new Map(),values=new Map(),classes=new Set();
+  const rect=(x,y,w,h)=>({x,y,left:x,top:y,width:w,height:h,right:x+w,bottom:y+h});
+  const joy={dataset:{},clientWidth:160,clientHeight:160,hasPointerCapture:()=>false,style:{setProperty:(k,v)=>values.set(k,v),removeProperty:k=>values.delete(k)},getBoundingClientRect:()=>rect(parseFloat(values.get('--k11520-floating-x')||80)-80,parseFloat(values.get('--k11520-floating-y')||80)-80,160,160)};
+  const knob={offsetWidth:44,offsetHeight:44,style:{},getBoundingClientRect:()=>{const r=joy.getBoundingClientRect();return rect(r.x+58,r.y+58,44,44)}};
+  nodes.set('#joy',joy);nodes.set('#knob',knob);
+  if(hud)for(const [selector,bounds] of [['.monsterHud',[6,24,110,44]],['.axes',[124,24,Math.min(244,width-182),44]],['.tele',[6,74,width-64,32]],['#k11520MonsterGuide',[6,112,Math.min(320,width-64),44]],['#k11520MovePlane',[6,height-50,70,44]]])nodes.set(selector,{hidden:false,inert:false,computed:{display:'block',visibility:'visible',opacity:'1'},getClientRects:()=>[{}],getBoundingClientRect:()=>rect(...bounds)});
+  const document={hidden:false,documentElement:{dataset:{k11520HudMode:'ON_DEMAND'},classList:{contains:n=>classes.has(n),toggle:(n,on)=>on?classes.add(n):classes.delete(n)}},querySelector:s=>nodes.get(s)||null,querySelectorAll:s=>s.split(',').map(k=>nodes.get(k)).filter(Boolean),dispatchEvent:()=>{}};
+  const context={document,innerWidth:width,innerHeight:height,getComputedStyle:el=>el.computed,clearTimeout:()=>{},CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail}}};
+  runInNewContext(read('../runtime/joystick-xzxyyz.mjs').replaceAll('export function ','function ')+"\ninstallStarted=true;globalThis.begin=begin11520FloatingJoystick;globalThis.move=move11520FloatingJoystick;globalThis.end=end11520FloatingJoystick;globalThis.setPlane=value=>{mode=value;exposeMotion()};",context);
+  return{context,nodes,joy,knob,rect,snapshot:()=>JSON.parse(JSON.stringify(context.__K11520_3D_CONTROL__))};
+}
+
+test('floating visual base avoids visible HUD while preserving clear origins and failing closed without space',async()=>{
+  for(const [width,height] of [[390,844],[844,390],[480,900]])for(const x of [80,12,width-12]){
+    const f=await floatingHudFixture(width,height);assert.equal(f.context.begin({pointerId:7,x,y:80,isTrusted:true}),true);
+    const state=f.snapshot(),b=f.joy.getBoundingClientRect();assert.deepEqual(state.floating.pressOrigin,{x,y:80});assert.deepEqual(state.vector,{x:0,y:0,z:0});
+    assert.ok(b.left>=0&&b.top>=0&&b.right<=width&&b.bottom<=height,'the whole visual base remains in the viewport');
+    for(const [selector,node] of f.nodes)if(selector!=='#joy'&&selector!=='#knob'){
+      const r=node.getBoundingClientRect();assert.ok(b.right+4<=r.left||b.left-4>=r.right||b.bottom+4<=r.top||b.top-4>=r.bottom,width+'x'+height+' visual base must avoid '+selector);
+    }
+  }
+  const clear=await floatingHudFixture(390,844);assert.equal(clear.context.begin({pointerId:1,x:190,y:400}),true);assert.deepEqual(clear.snapshot().floating.origin,{x:190,y:400},'a clear origin must not move');
+  for(const key of ['hidden','display','visibility','opacity','offscreen','empty']){
+    const f=await floatingHudFixture(390,844,{hud:false}),node={hidden:false,inert:false,computed:{display:'block',visibility:'visible',opacity:'1'},getClientRects:()=>[{}],getBoundingClientRect:()=>f.rect(0,0,390,844)};
+    if(key==='hidden'){node.hidden=true;node.computed.display='none'}else if(key==='display')node.computed.display='none';else if(key==='visibility')node.computed.visibility='hidden';else if(key==='opacity')node.computed.opacity='0';else if(key==='offscreen')node.getBoundingClientRect=()=>f.rect(-500,0,100,100);else node.getClientRects=()=>[];
+    f.nodes.set('.monsterHud',node);assert.equal(f.context.begin({pointerId:1,x:190,y:400}),true,key);assert.deepEqual(f.snapshot().floating.origin,{x:190,y:400},key+' HUD must not displace the base');
+  }
+  for(const attributes of [{},{inert:true},{hidden:true}]){
+    const full=await floatingHudFixture(390,844,{hud:false});full.nodes.set('.monsterHud',{...attributes,computed:{display:'block',visibility:'visible',opacity:'1'},getClientRects:()=>[{}],getBoundingClientRect:()=>full.rect(0,0,390,844)});
+    assert.equal(full.context.begin({pointerId:1,x:80,y:80}),false,'visible HUD remains protected when inert or when CSS overrides hidden');assert.equal(full.snapshot().floating.active,false);assert.deepEqual(full.snapshot().vector,{x:0,y:0,z:0});
+  }
+});
+
+test('floating HUD relocation retains raw deltas, every plane, a fixed base, thumb clamp and release',async()=>{
+  for(const mode of ['XZ','XY','YZ']){
+    const shifted=await floatingHudFixture(390,844),clear=await floatingHudFixture(390,844,{hud:false});
+    for(const f of [shifted,clear]){f.context.setPlane(mode);assert.equal(f.context.begin({pointerId:7,x:80,y:80,isTrusted:true}),true)}
+    const origin=shifted.snapshot().floating.origin;assert.notDeepEqual(origin,{x:80,y:80});
+    for(const [dx,dy] of [[0,0],[20,-20],[-20,20],[300,-300]]){
+      for(const f of [shifted,clear])assert.equal(f.context.move({pointerId:7,x:80+dx,y:80+dy}),true);
+      const a=shifted.snapshot(),b=clear.snapshot();assert.deepEqual(a.vector,b.vector,'same raw delta has identical '+mode+' intent');assert.deepEqual(a.floating.pressOrigin,{x:80,y:80});assert.deepEqual(a.floating.origin,origin,'base does not chase the moving finger');
+      const offsets=shifted.knob.style.transform.match(/-?\d+(?:\.\d+)?/g).map(Number);assert.ok(Math.hypot(...offsets)<=54.01,'original thumb travel remains clamped');
+    }
+    const before=shifted.snapshot();assert.equal(shifted.context.move({pointerId:99,x:100,y:60}),false);assert.deepEqual(shifted.snapshot(),before,'foreign pointer cannot take over');
+    assert.equal(shifted.context.end(7),true);assert.equal(shifted.snapshot().floating.active,false);assert.deepEqual(shifted.snapshot().vector,{x:0,y:0,z:0});assert.equal(shifted.knob.style.transform,'translate(0px, 0px)');assert.equal(shifted.joy.dataset.k11520FloatingActive,'0');
+  }
+});
+
+test('compact landscape camera status follows measured guide bounds without changing camera or other HUD modes',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('../runtime/mobile-control-layout.mjs');
+  const fn=source.slice(source.indexOf('function syncCompactCameraStatus('),source.indexOf('function syncStatusFlow('));assert.ok(fn.startsWith('function syncCompactCameraStatus('));
+  const values=new Map(),writes=[],rect=(x,y,width,height)=>({left:x,top:y,width,height,right:x+width,bottom:y+height});let compact=true,landscape=true;
+  const status={textContent:'🔍 2.50×',getBoundingClientRect:()=>rect(160,114,126,26)},guide={textContent:'取經守關猴 · 120HP',computed:{display:'block',visibility:'visible',opacity:'1'},getClientRects:()=>[{}],getBoundingClientRect:()=>rect(6,112,320,44)},nodes=new Map([['#k11520CameraZoomStatus',status],['#k11520MonsterGuide',guide]]);
+  const context={$:s=>nodes.get(s),compactHud:()=>compact,matchMedia:()=>({matches:landscape}),innerWidth:844,innerHeight:390,getComputedStyle:el=>el.computed,document:{documentElement:{style:{getPropertyValue:k=>values.get(k)||'',setProperty:(k,v)=>{values.set(k,v);writes.push([k,v])},removeProperty:k=>values.delete(k)}}}};
+  runInNewContext(fn+'globalThis.sync=syncCompactCameraStatus;',context);
+  for(const width of [844,640,480,432,390,320]){
+    context.innerWidth=width;guide.getBoundingClientRect=()=>rect(6,112,Math.min(320,width-64),44);context.sync();
+    const g=guide.getBoundingClientRect(),x=parseFloat(values.get('--k11520-compact-zoom-left')),y=parseFloat(values.get('--k11520-compact-zoom-top'));
+    assert.ok(x>=6&&y>=6&&x+126<=width-6&&y+26<=384);assert.ok(x>=g.right+8||y>=g.bottom+8,'the real measured guide keeps an 8px gap');
+    if(width>=480){assert.equal(x,g.right+8);assert.equal(y,121)}else{assert.equal(x,6);assert.equal(y,164)}
+    const count=writes.length;context.sync();assert.equal(writes.length,count,'unchanged layout must not rewrite its variables');
+  }
+  context.innerWidth=844;guide.getBoundingClientRect=()=>rect(24,136,320,44);guide.inert=true;guide.hidden=true;context.sync();assert.equal(values.get('--k11520-compact-zoom-left'),'352px');assert.equal(values.get('--k11520-compact-zoom-top'),'145px','visible inert/CSS-overridden-hidden guide remains protected');
+  for(const mode of ['FULL','portrait','display-none','visibility-hidden','transparent','missing-guide','missing-status']){
+    compact=mode!=='FULL';landscape=mode!=='portrait';guide.computed={display:mode==='display-none'?'none':'block',visibility:mode==='visibility-hidden'?'hidden':'visible',opacity:mode==='transparent'?'0':'1'};
+    if(mode==='missing-guide')nodes.delete('#k11520MonsterGuide');if(mode==='missing-status')nodes.delete('#k11520CameraZoomStatus');
+    context.sync();assert.equal(values.size,0,mode+' returns to the original CSS placement');nodes.set('#k11520MonsterGuide',guide);nodes.set('#k11520CameraZoomStatus',status);
+  }
+  assert.equal(status.textContent,'🔍 2.50×');assert.equal(guide.textContent,'取經守關猴 · 120HP');
+  assert.match(source,/syncHeaderFlow\(\);\r?\n\s+syncCompactCameraStatus\(\);/,'the existing layout flow invokes the same owner before its compact early return');
+  assert.ok(source.includes('left:var(--k11520-compact-zoom-left,160px);top:var(--k11520-compact-zoom-top,114px)'),'the original compact landscape CSS consumes the measured position');
+});
+
+test('shared camera status observation exposes the original guide collision and retains native FULL evidence',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs'),fn=source.slice(source.indexOf('function inspectCameraZoomStatus('),source.indexOf('// Same ordered candidate grid'));
+  const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height}),nodes=new Map();let statusRect=rect(160,114,126,26);
+  const node=b=>({computed:{display:'block',visibility:'visible',opacity:'1'},getBoundingClientRect:()=>b});
+  const status={...node(null),textContent:'🔍 2.50×',classList:{contains:c=>c==='show'},getBoundingClientRect:()=>statusRect,computed:{opacity:'.7',pointerEvents:'none'}},reset={...node(rect(160,66,44,44)),contains:()=>false};
+  nodes.set('#k11520CameraZoomStatus',status);nodes.set('#k11520CameraReset',reset);nodes.set('#k11520MonsterGuide',node(rect(6,112,320,44)));nodes.set('.tele',node(rect(6,74,774,32)));nodes.set('.monsterHud',node(rect(6,24,110,44)));
+  const camera={zoom:2.5,playerXYZ:{x:0,y:0,z:0}},native=[{isTrusted:true,type:'pointerdown',id:6},{isTrusted:true,type:'pointerdown',id:7}];
+  const context={document:{querySelector:s=>nodes.get(s)||null,elementFromPoint:()=>reset},getComputedStyle:el=>el.computed,innerWidth:844,innerHeight:390,performance:{now:()=>80},__K11520_CAMERA__:{snapshot:()=>camera},__K11520_WORLD_SELECTION_PROJECTION__:{playerHomeSnapshot:()=>({playerScreen:{x:430,y:300}}),journeyLifeSnapshot:()=>[{visible:true,inView:true,screen:{x:230,y:200}}]},worldFirstPointerTrace:native};
+  runInNewContext(fn+'globalThis.inspect=inspectCameraZoomStatus;',context);
+  const prior=context.inspect();assert.equal(prior.controls.find(c=>c.selector==='#k11520MonsterGuide').overlap,true,'the actual old114px position cannot escape the observation');assert.equal(prior.shown,true);assert.equal(prior.opacity,.7);assert.equal(prior.pointerEvents,'none');assert.equal(prior.text,'🔍 2.50×');assert.equal(prior.capturedAt,80);assert.equal(prior.reset.owned,true);assert.equal(prior.pointerTrace,native);assert.equal(prior.camera,camera);
+  statusRect=rect(334,121,126,26);const clear=context.inspect();assert.deepEqual(Array.from(clear.controls.filter(c=>c.overlap)),[]);assert.deepEqual(Array.from(clear.summaries.filter(c=>c.overlap)),[]);assert.equal(clear.playerOverlap,false);assert.equal(clear.monsterOverlaps,0);assert.equal(clear.rect.right,460);
+  statusRect=rect(100,80,126,26);assert.equal(context.inspect().summaries.find(c=>c.selector==='.tele').overlap,true,'HP/XYZ observation stays separate from the retained FULL control list');
+  const full=[{isTrusted:true,id:11},{isTrusted:true,id:12}];context.fullHudPointerTrace=full;assert.equal(context.inspect().pointerTrace,full,'FULL still reports its original native trace');assert.ok(source.includes('const zoomSafety=await page.evaluate(inspectCameraZoomStatus)'));
+});
+
+test('layout reentry observes late guide nodes through its original single ResizeObserver',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('../runtime/mobile-control-layout.mjs');
+  const fn=source.slice(source.indexOf('function observeFlowRoots('),source.indexOf('// Restore current values')).replace('export function install11520MobileControlLayout','function install11520MobileControlLayout');
+  const market={},telemetry={},guide={},brand={},nodes=new Map([['.axes',market],['.tele',telemetry]]),instances=[],subscriptions=[];let applied=0,guards=0,flows=0,measured=0;
+  const context={$:s=>nodes.get(s)||null,apply:()=>applied++,installGuard:()=>guards++,addEventListener:type=>subscriptions.push(type),syncStatusFlow:()=>flows++,measure:()=>({generation:++measured}),ResizeObserver:class{constructor(callback){this.callback=callback;this.nodes=[];instances.push(this)}observe(el){this.nodes.push(el)}}};
+  runInNewContext('let booted=false,flowObserver=null;const flowObserved=new WeakSet();'+fn+'globalThis.install=install11520MobileControlLayout;',context);
+  context.install();assert.equal(instances.length,1);assert.deepEqual(instances[0].nodes,[market,telemetry]);
+  nodes.set('#k11520MonsterGuide',guide);context.install();assert.equal(instances.length,1,'late main-owned guide cannot create another observer');assert.deepEqual(instances[0].nodes,[market,telemetry,guide]);
+  nodes.set('.brand',brand);context.install();context.install();assert.deepEqual(instances[0].nodes,[market,telemetry,guide,brand],'each real node is observed once even after repeated install');assert.equal(guards,1);assert.deepEqual(subscriptions,['resize']);assert.equal(applied,4,'every original install still applies the current layout');
+  instances[0].callback();assert.equal(flows,1);assert.equal(context.__K11520_MOBILE_CONTROL_LAYOUT__.generation,1,'a late guide resize runs the existing flow and measured report');
+});

@@ -69,7 +69,29 @@ function resetKnobVisual(){const joy=$('#joy'),knob=$('#knob');if(!joy||!knob)re
 function inKnob(x,y){const k=$('#knob');if(!k)return false;const r=k.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom}
 function toggle(){clearDisc();clearRail();resetKnobVisual();mode=MODES[(MODES.indexOf(mode)+1)%MODES.length];saveMode();render();installImageGuard();requestAnimationFrame(()=>{if(discPid===null){resetKnobVisual();render()}});const a=planeAxes();flash(`${mode} 模式：圓盤 ${a.discH}${a.discV}／縱桿 ${a.rail}`)}
 function cancelDisc(){const previous=discPid;discPid=null;floating=null;const joy=$('#joy');if(joy){joy.dataset.k11520FloatingActive='0';joy.style.removeProperty('--k11520-floating-x');joy.style.removeProperty('--k11520-floating-y')}clearTimeout(holdTimer);holdTimer=0;discStart=null;centerTap=null;holdConsumed=false;clearDisc();resetKnobVisual();if(previous!==null)try{if(joy?.hasPointerCapture?.(previous))joy.releasePointerCapture(previous)}catch{}syncMembrane()}
-export function begin11520FloatingJoystick({pointerId,x,y,isTrusted=false}={}){if(!floating11520JoystickEnabled()||discPid!==null||railPid!==null||!Number.isFinite(pointerId)||!Number.isFinite(x)||!Number.isFinite(y))return false;const joy=$('#joy');if(!joy)return false;clearTimeout(holdTimer);holdTimer=0;discStart=null;centerTap=null;holdConsumed=false;floating={pointerId,origin:{x,y},pressOrigin:{x,y},trusted:isTrusted===true};discPid=pointerId;joy.dataset.k11520FloatingActive='1';joy.style.setProperty('--k11520-floating-x',`${x}px`);joy.style.setProperty('--k11520-floating-y',`${y}px`);const r=joy.getBoundingClientRect();if(!(r.width>0&&r.height>0)){cancelDisc();return false}const cx=Math.max(r.width/2,Math.min(innerWidth-r.width/2,x)),cy=Math.max(r.height/2,Math.min(innerHeight-r.height/2,y));floating.origin={x:cx,y:cy};joy.style.setProperty('--k11520-floating-x',`${cx}px`);joy.style.setProperty('--k11520-floating-y',`${cy}px`);clearDisc();resetKnobVisual();syncMembrane();return true}
+// Resolve only the visual base once at admission. Raw pressOrigin and pointer
+// deltas keep their existing movement owner even when the base avoids a HUD.
+function floatingDiscOrigin(x,y,width,height){
+  if(width>innerWidth||height>innerHeight)return null;
+  const hw=width/2,hh=height/2,gap=4,clampX=v=>Math.max(hw,Math.min(innerWidth-hw,v)),clampY=v=>Math.max(hh,Math.min(innerHeight-hh,v));
+  const start={x:clampX(x),y:clampY(y)},blocked=[];
+  for(const el of document.querySelectorAll('.monsterHud,.tele,.axes,#k11520MonsterGuide,#k11520MovePlane,#k11520UtilityMaster,#attack,#skill,#dodge,#tradeSword')){
+    if(!el.getClientRects().length)continue;
+    const style=getComputedStyle(el);if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0)continue;
+    const r=el.getBoundingClientRect(),box={left:Math.max(0,r.left),top:Math.max(0,r.top),right:Math.min(innerWidth,r.right),bottom:Math.min(innerHeight,r.bottom)};
+    if(box.right>box.left&&box.bottom>box.top)blocked.push(box);
+  }
+  const clear=(cx,cy)=>blocked.every(r=>cx+hw+gap<=r.left||cx-hw-gap>=r.right||cy+hh+gap<=r.top||cy-hh-gap>=r.bottom);
+  if(clear(start.x,start.y))return start;
+  // Rectangle-edge candidates include the nearest point of each free region;
+  // no per-frame search, hidden HUD changes, or alternate input path is needed.
+  const xs=new Set([start.x]),ys=new Set([start.y]);
+  for(const r of blocked){xs.add(clampX(r.left-hw-gap));xs.add(clampX(r.right+hw+gap));ys.add(clampY(r.top-hh-gap));ys.add(clampY(r.bottom+hh+gap))}
+  let best=null,distance=Infinity;
+  for(const cy of ys)for(const cx of xs){const d=(cx-start.x)**2+(cy-start.y)**2;if(d<distance&&clear(cx,cy)){best={x:cx,y:cy};distance=d}}
+  return best;
+}
+export function begin11520FloatingJoystick({pointerId,x,y,isTrusted=false}={}){if(!floating11520JoystickEnabled()||discPid!==null||railPid!==null||!Number.isFinite(pointerId)||!Number.isFinite(x)||!Number.isFinite(y))return false;const joy=$('#joy');if(!joy)return false;clearTimeout(holdTimer);holdTimer=0;discStart=null;centerTap=null;holdConsumed=false;floating={pointerId,origin:{x,y},pressOrigin:{x,y},trusted:isTrusted===true};discPid=pointerId;joy.dataset.k11520FloatingActive='1';joy.style.setProperty('--k11520-floating-x',`${x}px`);joy.style.setProperty('--k11520-floating-y',`${y}px`);const r=joy.getBoundingClientRect();if(!(r.width>0&&r.height>0)){cancelDisc();return false}const origin=floatingDiscOrigin(x,y,r.width,r.height);if(!origin){cancelDisc();return false}floating.origin=origin;joy.style.setProperty('--k11520-floating-x',`${origin.x}px`);joy.style.setProperty('--k11520-floating-y',`${origin.y}px`);clearDisc();resetKnobVisual();syncMembrane();return true}
 export function move11520FloatingJoystick({pointerId,x,y}={}){if(!floating||floating.pointerId!==pointerId)return false;if(!floating11520JoystickEnabled()){cancelDisc();return false}if(!Number.isFinite(x)||!Number.isFinite(y))return false;discFrom({clientX:floating.origin.x+x-floating.pressOrigin.x,clientY:floating.origin.y+y-floating.pressOrigin.y},true);syncMembrane();return true}
 export function end11520FloatingJoystick(pointerId){if(!floating||(pointerId!==undefined&&floating.pointerId!==pointerId))return false;cancelDisc();return true}
 export function cancel11520JoystickInput(){cancelDisc();const previous=railPid;railPid=null;clearRail();if(previous!==null)try{const host=$('#yControl');if(host?.hasPointerCapture?.(previous))host.releasePointerCapture(previous)}catch{}syncMembrane()}
