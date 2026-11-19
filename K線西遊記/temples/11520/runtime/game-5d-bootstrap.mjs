@@ -3,7 +3,7 @@ import {install11520MobileUiSettings} from './mobile-ui-settings.mjs';
 /* KGEN_META
 VERSION: 2.6.17
 STATUS: ACTIVE
-PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, optional capabilities, legacy observers, or mobile tap delivery fail. Installs the persistent XZ / XY / YZ 3D plane controller, keeps its remaining-axis vertical rail authoritative over legacy hidden-Y skin CSS, presents the active K-sphere normal-axis market as the direct trading-axis selection, installs canonical world-item identity/drop bridging across custody states, and installs a simulation-only Movement Combat V1 prototype where XYZ motion determines per-axis conflict, KX/KY/KZ public market ticks judge conflict direction, and KAIOS game HP absorbs damage without mutating KGEN positions, wallet balances, or chain state.
+PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, optional capabilities, legacy observers, or mobile tap delivery fail. Installs the persistent XZ / XY / YZ 3D plane controller, keeps its remaining-axis vertical rail authoritative over legacy hidden-Y skin CSS, presents the active K-sphere normal-axis market as the direct trading-axis selection, installs canonical world-item identity/drop bridging across custody states, and presents the simulation combat motion relation and the existing Game 5D owner's KAIOS vitality. Moving and reading a quote do not write battle HP, KGEN settlement, or wallet balances.
 */
 import {install11520MobileControlLayout} from './mobile-control-layout.mjs';
 const $=s=>document.querySelector(s);
@@ -24,17 +24,57 @@ const mobileLayoutOwnsAxisRail=()=>document.documentElement.dataset.k11520Layout
 function restoreAxisRail(){if(mobileLayoutOwnsAxisRail())return true;const el=$('#yControl');if(!el)return false;const put=(k,v)=>el.style.setProperty(k,v,'important');for(const [k,v] of [['display','block'],['position','relative'],['left','auto'],['right','auto'],['top','auto'],['bottom','auto'],['width','42px'],['height','112px'],['opacity','1'],['visibility','visible'],['pointer-events','auto'],['z-index','1'],['transform','none'],['margin','0']])put(k,v);el.dataset.k11520RemainingAxisRail='true';return true}
 function guardAxisRail(){if(mobileLayoutOwnsAxisRail()){globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();return}for(const delay of [0,80,220,500,1000,1800])setTimeout(restoreAxisRail,delay);const root=$('#yControl');if(!root)return;try{globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect()}catch{}let busy=false;const mo=new MutationObserver(()=>{if(busy)return;busy=true;restoreAxisRail();queueMicrotask(()=>{busy=false})});mo.observe(root,{attributes:true,attributeFilter:['style','class']});globalThis.__K11520_AXIS_RAIL_GUARD__=mo}
 
-const COMBAT_AXIS={x:'KX',y:'KY',z:'KZ'};
-const combat={version:'MOTION_COMBAT_V1',simulationOnly:true,armed:true,playerKaiosHp:1000,playerKaiosHpMax:1000,monsterKaiosHp:1000,monsterKaiosHpMax:1000,playerDelta:{x:0,y:0,z:0},monsterDelta:{x:.08,y:0,z:.06},relations:{x:'GUARD',y:'GUARD',z:'GUARD'},marketJudge:{KX:0,KY:0,KZ:0},lastPhysical:null,lastQuotes:{},lastHitAt:{x:0,y:0,z:0},lastOutcome:null,guard:true};
+const combat={
+  version:'MOTION_COMBAT_V1',simulationOnly:true,armed:true,
+  playerKaiosHp:null,playerKaiosHpMax:null,monsterKaiosHp:null,monsterKaiosHpMax:null,activityRatio:null,
+  playerDelta:{x:0,y:0,z:0},monsterDelta:{x:.08,y:0,z:.06},relations:{x:'GUARD',y:'GUARD',z:'GUARD'},
+  marketJudge:{KX:0,KY:0,KZ:0},lastPhysical:null,lastQuotes:{},lastOutcome:null,guard:true
+};
 const motionSign=(v,eps=.015)=>Number(v)>eps?1:Number(v)<-eps?-1:0;
 function classifyMotion(p,m){const ps=motionSign(p),ms=motionSign(m);if(ps===0)return'GUARD';if(ps===ms)return'SYNC';return'CONFLICT'}
-function readAxisQuote(axis){const card=document.querySelector(`[data-axis="${axis}"]`);if(!card)return null;const text=card.querySelector('.q')?.textContent||'';const q=Number(text.replace(/[$,]/g,''));return Number.isFinite(q)&&q>0?q:null}
+function readAxisQuote(axis){const card=document.querySelector('[data-axis="'+axis+'"]');if(!card)return null;const text=card.querySelector('.q')?.textContent||'';const q=Number(text.replace(/[$,]/g,''));return Number.isFinite(q)&&q>0?q:null}
 function updateMarketJudges(){for(const a of ['KX','KY','KZ']){const q=readAxisQuote(a),prev=combat.lastQuotes[a];if(q!=null&&prev!=null&&q!==prev)combat.marketJudge[a]=q>prev?1:-1;if(q!=null)combat.lastQuotes[a]=q}}
-function ensureCombatHud(){let box=$('#k11520MotionCombat');if(box)return box;const host=document.querySelector('.monsterHud');if(!host)return null;box=document.createElement('div');box.id='k11520MotionCombat';box.style.cssText='margin-top:3px;padding-top:3px;border-top:1px solid #68e4ff22;font-size:6.5px;line-height:1.15;color:#d8f7ff';box.innerHTML='<div id="k11520CombatState">戰鬥 OFF · 金剛護體</div><div id="k11520CombatAxes">X 守 · Y 守 · Z 守</div><div id="k11520CombatHp">KAIOS HP 1000 / 怪 1000</div>';const details=host.querySelector('details');host.insertBefore(box,details||null);return box}
-function axisWord(r){return r==='SYNC'?'同行':r==='CONFLICT'?'交戰':'護體'}
-function renderCombat(){ensureCombatHud();const state=$('#k11520CombatState'),axes=$('#k11520CombatAxes'),hp=$('#k11520CombatHp'),attack=$('#attack');if(state)state.textContent=combat.guard?'戰鬥 READY · 金剛護體':'戰鬥 READY · 移動交戰';if(axes)axes.textContent=['x','y','z'].map(k=>`${k.toUpperCase()} ${axisWord(combat.relations[k])}`).join(' · ');if(hp)hp.textContent=`KAIOS HP ${Math.max(0,Math.round(combat.playerKaiosHp))} / 怪 ${Math.max(0,Math.round(combat.monsterKaiosHp))}`;if(attack){attack.dataset.k11520CombatArmed='1';attack.setAttribute('aria-pressed','true')}document.documentElement.dataset.k11520Combat=combat.armed?'armed':'safe';globalThis.__K11520_MOTION_COMBAT__=structuredClone(combat)}
-function applyCombatTick(now){updateMarketJudges();const coords=globalThis.__K11520_WORLD_COORDS__?.physical;if(!coords)return;const p={x:Number(coords.x)||0,y:Number(coords.y)||0,z:Number(coords.z)||0};if(combat.lastPhysical){combat.playerDelta={x:p.x-combat.lastPhysical.x,y:p.y-combat.lastPhysical.y,z:p.z-combat.lastPhysical.z}}combat.lastPhysical=p;for(const k of ['x','y','z'])combat.relations[k]=classifyMotion(combat.playerDelta[k],combat.monsterDelta[k]);combat.guard=Object.values(combat.playerDelta).every(v=>motionSign(v)===0);if(combat.armed&&!combat.guard){for(const k of ['x','y','z']){if(combat.relations[k]!=='CONFLICT'||now-(combat.lastHitAt[k]||0)<700)continue;const judge=combat.marketJudge[COMBAT_AXIS[k]]||0;if(!judge)continue;combat.lastHitAt[k]=now;const ps=motionSign(combat.playerDelta[k]),playerWins=ps===judge,damage=8;if(playerWins)combat.monsterKaiosHp=Math.max(0,combat.monsterKaiosHp-damage);else combat.playerKaiosHp=Math.max(0,combat.playerKaiosHp-damage);combat.lastOutcome={axis:k.toUpperCase(),market:COMBAT_AXIS[k],judge,playerWins,damage,at:now}}}renderCombat()}
-function installMotionCombatPrototype(){ensureCombatHud();globalThis.__K11520_MOTION_COMBAT_API__={classifyMotion,setMonsterDelta(v={}){for(const k of ['x','y','z'])if(Number.isFinite(Number(v[k])))combat.monsterDelta[k]=Number(v[k]);renderCombat();return structuredClone(combat)},setMarketJudge(axis,value){if(['KX','KY','KZ'].includes(axis))combat.marketJudge[axis]=motionSign(value,0);renderCombat();return structuredClone(combat)},reset(){combat.armed=true;combat.playerKaiosHp=combat.playerKaiosHpMax;combat.monsterKaiosHp=combat.monsterKaiosHpMax;combat.playerDelta={x:0,y:0,z:0};combat.relations={x:'GUARD',y:'GUARD',z:'GUARD'};combat.lastOutcome=null;renderCombat();return structuredClone(combat)}};renderCombat();clearInterval(globalThis.__K11520_MOTION_COMBAT_TIMER__);globalThis.__K11520_MOTION_COMBAT_TIMER__=setInterval(()=>applyCombatTick(performance.now()),180);return globalThis.__K11520_MOTION_COMBAT__}
+function ensureCombatHud(){let box=$('#k11520MotionCombat');if(box)return box;const host=document.querySelector('.monsterHud');if(!host)return null;box=document.createElement('div');box.id='k11520MotionCombat';box.style.cssText='margin-top:3px;padding-top:3px;border-top:1px solid #68e4ff22;font-size:6.5px;line-height:1.15;color:#d8f7ff';box.innerHTML='<div id="k11520CombatState">戰鬥 READY</div><div id="k11520CombatAxes">X 守 · Y 守 · Z 守</div><div id="k11520CombatHp">KAIOS HP —</div>';const details=host.querySelector('details');host.insertBefore(box,details||null);return box}
+function axisWord(r){return r==='SYNC'?'同行':r==='CONFLICT'?'反向':'護體'}
+function renderCombat(){
+  ensureCombatHud();
+  Object.assign(combat,globalThis.__K11520_KSPACE_API__?.vitality?.());
+  const state=$('#k11520CombatState'),axes=$('#k11520CombatAxes'),hp=$('#k11520CombatHp'),attack=$('#attack');
+  if(state)state.textContent=combat.guard?'戰鬥 READY · 金剛護體':'戰鬥 READY · 移動中';
+  if(axes)axes.textContent=['x','y','z'].map(k=>k.toUpperCase()+' '+axisWord(combat.relations[k])).join(' · ');
+  if(hp){
+    const number=value=>value==null?'—':value.toLocaleString('zh-TW');
+    const ratio=combat.activityRatio==null?'—':(combat.activityRatio*100).toLocaleString('zh-TW',{maximumFractionDigits:1})+'%';
+    hp.textContent='KAIOS HP '+number(combat.playerKaiosHp)+' / '+number(combat.playerKaiosHpMax)+' · 活力 '+ratio;
+    hp.title='妖怪 KAIOS HP '+number(combat.monsterKaiosHp)+' / '+number(combat.monsterKaiosHpMax);
+  }
+  if(attack){attack.dataset.k11520CombatArmed='1';attack.setAttribute('aria-pressed','true')}
+  document.documentElement.dataset.k11520Combat=combat.armed?'armed':'safe';
+  globalThis.__K11520_MOTION_COMBAT__=structuredClone(combat);
+}
+function applyCombatTick(){
+  updateMarketJudges();
+  const coords=globalThis.__K11520_WORLD_COORDS__?.physical;
+  if(!coords)return;
+  const p={x:Number(coords.x)||0,y:Number(coords.y)||0,z:Number(coords.z)||0};
+  if(combat.lastPhysical){combat.playerDelta={x:p.x-combat.lastPhysical.x,y:p.y-combat.lastPhysical.y,z:p.z-combat.lastPhysical.z}}
+  combat.lastPhysical=p;
+  for(const k of ['x','y','z'])combat.relations[k]=classifyMotion(combat.playerDelta[k],combat.monsterDelta[k]);
+  combat.guard=Object.values(combat.playerDelta).every(v=>motionSign(v)===0);
+  renderCombat();
+}
+function installMotionCombatPrototype(){
+  ensureCombatHud();
+  globalThis.__K11520_MOTION_COMBAT_API__={
+    classifyMotion,
+    setMonsterDelta(v={}){for(const k of ['x','y','z'])if(Number.isFinite(Number(v[k])))combat.monsterDelta[k]=Number(v[k]);renderCombat();return structuredClone(combat)},
+    setMarketJudge(axis,value){if(['KX','KY','KZ'].includes(axis))combat.marketJudge[axis]=motionSign(value,0);renderCombat();return structuredClone(combat)},
+    reset(){combat.armed=true;combat.playerDelta={x:0,y:0,z:0};combat.lastPhysical=null;combat.relations={x:'GUARD',y:'GUARD',z:'GUARD'};combat.guard=true;renderCombat();return structuredClone(combat)}
+  };
+  renderCombat();clearInterval(globalThis.__K11520_MOTION_COMBAT_TIMER__);
+  globalThis.__K11520_MOTION_COMBAT_TIMER__=setInterval(applyCombatTick,180);
+  return globalThis.__K11520_MOTION_COMBAT__;
+}
 
 if(btn){btn.onclick=enterWorld;for(const type of ['pointerdown','pointerup','touchstart','touchend','click'])btn.addEventListener(type,enterWorld,{passive:false})}
 const captureEnter=e=>{const t=e.target;if(t&&((t.id==='enter11520')||t.closest?.('#enter11520')))enterWorld(e)};

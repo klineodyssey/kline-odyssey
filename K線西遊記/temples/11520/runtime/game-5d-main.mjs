@@ -15,7 +15,7 @@ PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collisio
 */
 import * as THREE from 'three';
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
-import {createWorldState,createKSpaceEncounter,selectJourneyEncounter,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES,KSPACE_SKILLS} from './world-runtime.mjs';
+import {createWorldState,createKSpaceEncounter,selectJourneyEncounter,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES,KSPACE_SKILLS,GAME_KAIOS_PER_HP} from './world-runtime.mjs';
 import {getKaiosAudio} from '../../../../assets/kaios-audio.mjs';
 import {C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL,createKgenLedger,positionRisk,snapshot} from './kgen-margin-runtime.mjs';
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
@@ -45,7 +45,15 @@ const MARKETS=Object.freeze(Object.values(AXIS_MARKETS));
 const PLANE_TRADE_AXIS=Object.freeze({XZ:'KY',XY:'KZ',YZ:'KX'});
 const ORGANS=[['world','🌍','主城世界'],['trade','⚔','K場交易'],['positions','📌','持倉'],['orders','🧾','委託'],['history','🕘','歷史'],['assets','💰','資產'],['records','📊','統計'],['market','📈','市場'],['character','🧍','角色'],['worldmap','🗺','導航／自駕地圖'],['atm','🛸','ATM'],['bag','🎒','背包'],['settings','⚙','設定'],['help','✨','客服/說明']];
 const RAIL_ORGANS=ORGANS.filter(([id])=>id!=='bag');
-const S={axis:'KX',axes:{KX:{market:'BTCUSDT',side:'多',lots:1,c:0,pos:null},KY:{market:'ETHUSDT',side:'多',lots:1,c:0,pos:null},KZ:{market:'BNBUSDT',side:'多',lots:1,c:0,pos:null}},quotes:{},kaios:1000,hp:100,xyz:{x:0,y:0,z:0},intentXYZ:{x:0,y:0,z:0},heading:0,camYaw:0,joy:{sx:0,sy:0,x:0,z:0},history:[],walletKgen:null,mapZoom:1.3,navTarget:null,navActive:false};
+const PLAYER_KAIOS_HEALTH=Object.freeze({fullHp:100,kaiosPerHp:GAME_KAIOS_PER_HP,regenKaiosPerSecond:1000});
+const S={axis:'KX',axes:{KX:{market:'BTCUSDT',side:'多',lots:1,c:0,pos:null},KY:{market:'ETHUSDT',side:'多',lots:1,c:0,pos:null},KZ:{market:'BNBUSDT',side:'多',lots:1,c:0,pos:null}},quotes:{},kaios:1000,hp:PLAYER_KAIOS_HEALTH.fullHp,xyz:{x:0,y:0,z:0},intentXYZ:{x:0,y:0,z:0},heading:0,camYaw:0,joy:{sx:0,sy:0,x:0,z:0},history:[],walletKgen:null,mapZoom:1.3,navTarget:null,navActive:false};
+function playerActivityRatio(){
+  return Math.max(0,Math.min(1,S.hp/PLAYER_KAIOS_HEALTH.fullHp));
+}
+function recoverPlayerVitality(visibleSeconds){
+  const {fullHp,kaiosPerHp,regenKaiosPerSecond}=PLAYER_KAIOS_HEALTH;
+  S.hp=Math.min(fullHp,S.hp+visibleSeconds*regenKaiosPerSecond/kaiosPerHp);
+}
 let selectedTradingAxis=null,navigationAutopilot=null,localMotionClock=null,lastLocalMotion=null;
 let navAutoBusy=false,navConsoleLastPaint=0,navAutoMessage='',navContinueAfterArrival=false,navAutoWalletKey=null,navConsoleLastTargetKey=null;
 const recordedSimulationReceiptIds=new Set();
@@ -150,8 +158,8 @@ let progressCache=playerLife.gameplayProfile(),progressKey='',musicHoldUntil=0,l
 function showJourneyRecovery(){
   kgenPoolReference.pause();
   if($('#journeyRecover')){$('#sheet').classList.add('open');return}
-  $('#sheetTitle').textContent='休整後再出發';$('#sheetBody').innerHTML='<div class="card"><h3>旅人暫時倒下</h3><p>遊戲 HP 已耗盡。休整會退回怪物外圍，不扣 KGEN、KAIOS、XP 或背包，不產生任何交易。</p><button id="journeyRecover" class="btn" style="min-height:44px">休整並退回安全距離</button></div>';
-  $('#sheet').classList.add('open');$('#journeyRecover').onclick=()=>{const target=combatSnapshot()?.monsterLocal;if(target){S.xyz={x:target.x,y:Math.max(0,target.y),z:target.z-7};S.intentXYZ={...S.xyz}}S.hp=100;lastExplorationPosition={...S.xyz};explorationMeters=0;cancelNavigation('休整');$('#sheet').classList.remove('open');$('#sheetBody').innerHTML='';toast('已休整 · 用走位與閃避接近怪物')};
+  $('#sheetTitle').textContent='休整後再出發';$('#sheetBody').innerHTML='<div class="card"><h3>旅人暫時倒下</h3><p>休整會退回怪物外圍。遊戲血量每秒恢復 1,000 KAIOS，持倉與資產照原帳本管理。</p><button id="journeyRecover" class="btn" style="min-height:44px">休整並退回安全距離</button></div>';
+  $('#sheet').classList.add('open');$('#journeyRecover').onclick=()=>{const target=combatSnapshot()?.monsterLocal;if(target){S.xyz={x:target.x,y:Math.max(0,target.y),z:target.z-7};S.intentXYZ={...S.xyz}}lastExplorationPosition={...S.xyz};explorationMeters=0;cancelNavigation('休整');$('#sheet').classList.remove('open');$('#sheetBody').innerHTML='';toast('正在回血 · 活動力隨血量恢復')};
 }
 function holdMusic(state,milliseconds=2400){getKaiosAudio().setMusicState(state);musicHoldUntil=Date.now()+milliseconds}
 function syncWorldFeedback(){const p=playerLife.activePlayer(),key=p.playerId+':'+p.events.length;world.playerLevel=p.level;world.engineLevel=p.engineLevel;
@@ -315,7 +323,8 @@ function localNavigationSpeed({navigating=globalThis.__K11520_XYZ_MAP_NAVIGATION
   // Preserve ordinary 0C walking. The old manual/navigation rates were .10/.085
   // metres per frame at 60fps. Only a filled position supplies engine C;
   // changing a draft rail or submitting a still-pending order cannot ignite it.
-  return drive.available&&drive.c!==0?drive.speedKPerSecond:gameUnitsToK(navigating?5.1:6);
+  const baseSpeed=drive.available&&drive.c!==0?drive.speedKPerSecond:gameUnitsToK(navigating?5.1:6);
+  return baseSpeed*playerActivityRatio();
 }
 function moveManual(now){
   localMotionClock=advanceLocalMotionClock(localMotionClock,now,{visible:document.visibilityState!=='hidden'&&!playerLifeSwitching,
@@ -335,7 +344,7 @@ function moveManual(now){
   else S.intentXYZ=Object.fromEntries(['x','y','z'].map(a=>[a,S.intentXYZ[a]+result.intentDelta[a]]));
   const delta={x:S.xyz.x-previous.x,z:S.xyz.z-previous.z};if(Math.hypot(delta.x,delta.z)>.000001)S.heading=worldHeading(delta);
   lastLocalMotion={...result,speedKPerSecond,elapsedSeconds:localMotionClock.elapsedSeconds,ownerKey:localMotionClock.ownerKey,
-    appliedC:axis().pos?.status==='OPEN'?axis().pos.c:0,speedSource:axis().pos?.status==='OPEN'?'FILLED_POSITION':'LOCAL_WALK'};
+    appliedC:axis().pos?.status==='OPEN'?axis().pos.c:0,speedSource:axis().pos?.status==='OPEN'?'FILLED_POSITION':'LOCAL_WALK',activityRatio:playerActivityRatio()};
   globalThis.__K11520_LOCAL_MOTION__=lastLocalMotion;
   $('#collision').textContent=result.blocked?`BLOCKED · ${result.blocker?.name||'WORLD'} · BODY X ${formatGameDistanceK(S.xyz.x)} Y ${formatGameDistanceK(S.xyz.y)} Z ${formatGameDistanceK(S.xyz.z)}`:result.detour?'NAV DETOUR':'CLEAR';
   if(frame){
@@ -358,16 +367,24 @@ const mini=$('#minimap');bindMap(mini);let fullMapCanvas=null;function drawAllMa
 
 function combatSelection(){syncTradeAxisFromPlane();return {plane:controlState()?.mode||'XZ',c:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[S.axis]??0}}
 function combatSnapshot(){return kCombatSnapshot(world,S.xyz,combatSelection())}
+function combatVitalityContext(){
+  const local=execution.mode==='SIMULATION'&&!execution.readOnly&&!playerLifeSwitching&&document.visibilityState!=='hidden';
+  return {
+    playerHp:S.hp,playerMaxHp:PLAYER_KAIOS_HEALTH.fullHp,
+    positions:local?Object.values(S.axes).map(axis=>axis.pos).filter(Boolean):[]
+  };
+}
 function attackFeedback(r){
   const reasons={NEUTRAL_PHASE:'0C 中性：調整 C 正負選部位',COOLDOWN:'技能冷卻中',OUT_OF_RANGE:'MISS · 超出範圍',OUTSIDE_SWEEP:'MISS · 目標在身後',NO_TARGET:'守衛已擊倒 · 點目標開始新練習',BODY_DISABLED:'部位已破壞 · 換軸或相位',INVALID_INPUT:'控制尚未就緒'};
-  return r.hit?`${r.reason==='WEAK_POINT'?'WEAK POINT 弱點':r.reason==='BLOCKED_RESIST'?'BLOCKED 抵抗':'HIT 命中'} · ${r.hits.map(h=>`${h.body} −${h.damage}`).join(' / ')}${r.defeated?' · 擊倒 · KAIOS 戰利品記帳':''}`:reasons[r.reason]||'MISS';
+  return r.hit?`${r.reason==='WEAK_POINT'?'WEAK POINT 弱點':r.reason==='BLOCKED_RESIST'?'BLOCKED 抵抗':'HIT 命中'} · ${r.hits.map(h=>`${h.body} −${h.damage}`).join(' / ')}${r.siphon?' · 吸血 +'+fmt(r.siphon.kaios,2)+' KAIOS':''}${r.defeated?' · 擊倒 · KAIOS 戰利品記帳':''}`:reasons[r.reason]||'MISS';
 }
 function performCombat(skill){
   if(playerLifeSwitching||playerLife.activePlayer().playerId!==playerId)return {hit:false,reason:'PLAYER_SWITCH_IN_PROGRESS'};
   if(S.hp<=0){showJourneyRecovery();return {hit:false,reason:'PLAYER_KNOCKED_OUT'}}
   const unlock={slash:'SLASH',goldenRain:'GOLDEN_RAIN',phantomAxe:'PHANTOM_AXE'}[skill];
   if(!progressCache.unlocks[unlock]){toast(`${skill==='goldenRain'?'天罡金陣 · Lv.2':'盤古幻斧 · Lv.3'} 解鎖；先用普通攻擊取經升級`);return {hit:false,reason:'GAMEPLAY_LEVEL_LOCKED'}}
-  const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now(),powerLevel:playerLife.activePlayer().level}),audioFx=globalThis.__K11520_AUDIO_FX__;
+  const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now(),powerLevel:playerLife.activePlayer().level,vitality:combatVitalityContext()}),audioFx=globalThis.__K11520_AUDIO_FX__;
+  if(r.playerHealHp>0)S.hp=Math.min(PLAYER_KAIOS_HEALTH.fullHp,S.hp+r.playerHealHp);
   toast(attackFeedback(r),true);
   if(r.hit)journey.event('HIT');if(r.loot)journey.event('LOOT');
   if(r.reason!=='COOLDOWN'){audioFx?.play?.(skill==='slash'?'SLASH':'ATTACK');lastCombatAt=Date.now()}
@@ -460,7 +477,16 @@ function showCombatTarget(){
   appendMarketLifeDetails(t.id);$('#sheet').classList.add('open');$('#kspacePracticeReset').onclick=()=>{const m=world.monsters.find(m=>m.id===t.id);for(const b of Object.values(m.bodies))b.hp=b.maxHp;m.hp=Object.values(m.bodies).reduce((n,b)=>n+b.hp,0);m.rewardSuppressed=true;m.state='GUARD';world.kSpace.lastResult=null;renderCombatTarget();showCombatTarget()};
 }
 targetHud.onclick=showCombatTarget;
-globalThis.__K11520_KSPACE_API__=Object.freeze({snapshot:combatSnapshot,simulationOnly:true});
+function battleVitality(){
+  const {fullHp,kaiosPerHp}=PLAYER_KAIOS_HEALTH,target=world.monsters.find(monster=>monster.id===world.kSpace?.targetId);
+  return {
+    playerKaiosHp:Math.floor(S.hp*kaiosPerHp),playerKaiosHpMax:fullHp*kaiosPerHp,
+    monsterKaiosHp:target?Math.floor(target.hp*kaiosPerHp):null,
+    monsterKaiosHpMax:target?Math.floor(target.maxHp*kaiosPerHp):null,
+    activityRatio:playerActivityRatio()
+  };
+}
+globalThis.__K11520_KSPACE_API__=Object.freeze({snapshot:combatSnapshot,vitality:battleVitality,simulationOnly:true});
 setInterval(syncMarketKLabels,1000);
 function marketEngineSnapshot(){
   const p=playerProgressSnapshot(),market=kMarketSnapshot(world),rows=market.markets||[];
@@ -1124,7 +1150,28 @@ function revealPlayerBehindOccluders(){
 }
 globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:{...CAMERA_BOUNDS,currentPan:cameraPanLimit()},playerXYZ:{...S.xyz},authority:'CAMERA_ONLY',worldGesture:worldGestureSnapshot()}),canPanAt,isWorldGestureArea});
 
-function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);moveManual(now);persistPlayerSession();ground.position.set(S.xyz.x,0,S.xyz.z);avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);appearanceRing.position.set(S.xyz.x,S.xyz.y+.06,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play(lastLocalMotion?.distanceMoved>0?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();applyWorldCamera();combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
+function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();
+let last=performance.now();
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);
+  moveManual(now);
+  recoverPlayerVitality(localMotionClock.elapsedSeconds);
+  persistPlayerSession();
+  ground.position.set(S.xyz.x,0,S.xyz.z);
+  avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);
+  appearanceRing.position.set(S.xyz.x,S.xyz.y+.06,S.xyz.z);
+  avatar.rotation.y=-S.heading;
+  play(lastLocalMotion?.distanceMoved>0?'walk':'idle');
+  const tr=tickWorld(world,S.xyz,Date.now(),combatVitalityContext());
+  for(const e of tr.events){
+    if(e.type!=='PLAYER_HIT')continue;
+    S.hp=Math.max(0,S.hp-e.damage);
+    if(e.siphon)toast('被吸血 −'+fmt(e.siphon.kaios,2)+' KAIOS',true);
+  }
+  syncLifeVisuals();applyWorldCamera();combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);
+  hud();drawAllMaps();renderer.render(scene,camera)
+}
 
 // Movement and encounter presentation observe the existing world loop; neither
 // can submit a trade or mint an economic reward. Bounded observer, cleared on exit.
