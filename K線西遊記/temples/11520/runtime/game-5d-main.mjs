@@ -25,6 +25,7 @@ import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimul
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK,formatUniverseAddress,gameUnitsToK,advanceLocalMotionClock,integrateLocalMotion} from './spatial-coordinate-runtime.mjs';
 import {readCanonicalDriveState} from './combat-drive-adapter.mjs';
 import {rawVectorFromControl} from './combat-drive-live-runtime.mjs';
+import {world11520InputBlocked,floating11520JoystickEnabled,begin11520FloatingJoystick,move11520FloatingJoystick,end11520FloatingJoystick,cancel11520JoystickInput} from './joystick-xzxyyz.mjs';
 import {collectInspectableEntities,inspectMapPoint,waypointSummary} from './map-object-navigation-runtime.mjs';
 import {createLifeVisual,syncLifeVisual} from './life-visual-runtime.mjs';
 import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
@@ -160,7 +161,7 @@ function syncWorldFeedback(){const p=playerLife.activePlayer(),key=p.playerId+':
   if(Date.now()>=musicHoldUntil){const target=combatSnapshot()?.target,distance=combatSnapshot()?.distance??Infinity;getKaiosAudio().setMusicState(target?.state==='DEAD'?'EXPLORE':target?.boss&&distance<20?(target.lowHp?'BOSS_LOW_HP':'BOSS'):Date.now()-lastCombatAt<4500?'COMBAT':playerHomeFraming?'HOME':distance<10?'ENCOUNTER':'EXPLORE')}
 }
 function trackJourneyMovement(){if(playerLifeSwitching)return;const d=Math.hypot(S.xyz.x-lastExplorationPosition.x,S.xyz.y-lastExplorationPosition.y,S.xyz.z-lastExplorationPosition.z);lastExplorationPosition={...S.xyz};if(d>0&&d<=2)explorationMeters+=d;if(explorationMeters>=5){explorationMeters-=5;try{playerLife.recordExplorationStep()}catch(error){toast('探索保存：'+error.message)}}}
-function startJourneyEncounter(profileId){const p=playerLife.activePlayer(),result=selectJourneyEncounter(world,S.xyz,{profileId,playerLevel:p.level,engineLevel:p.engineLevel,now:Date.now()});if(!result.ok)throw new Error(result.reason||'ENCOUNTER_LOCKED');toast('新遭遇在附近 · 搖桿靠近後攻擊')}
+function startJourneyEncounter(profileId){const p=playerLife.activePlayer(),result=selectJourneyEncounter(world,S.xyz,{profileId,playerLevel:p.level,engineLevel:p.engineLevel,now:Date.now()});if(!result.ok)throw new Error(result.reason||'ENCOUNTER_LOCKED');toast('新遭遇在附近 · 拖曳空白處靠近後攻擊')}
 function claimDailyJourney(){
   const already=playerLife.gameplayProfile().daily.claimed;
   if(!already)playerLife.claimDailyJourney();
@@ -384,7 +385,7 @@ function performCombat(skill){
 }
 $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performCombat('goldenRain');
 $('#tradeSword').onclick=()=>performCombat('phantomAxe');
-$('#dodge').onclick=()=>{cancelNavigation('閃避');if(S.hp<=0){showJourneyRecovery();return}for(const turn of [0,Math.PI/2,-Math.PI/2,Math.PI]){const heading=S.heading+turn,next={x:S.xyz.x+Math.sin(heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(heading)*1.4},mid={x:(S.xyz.x+next.x)/2,y:S.xyz.y,z:(S.xyz.z+next.z)/2};if(!resolvePlayerMove(S.xyz,mid).blocked&&!resolvePlayerMove(S.xyz,next).blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast(turn?'側向閃避 · 避開障礙':'閃避');return}}toast('閃避受阻 · 先用搖桿離開障礙')};
+$('#dodge').onclick=()=>{cancelNavigation('閃避');if(S.hp<=0){showJourneyRecovery();return}for(const turn of [0,Math.PI/2,-Math.PI/2,Math.PI]){const heading=S.heading+turn,next={x:S.xyz.x+Math.sin(heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(heading)*1.4},mid={x:(S.xyz.x+next.x)/2,y:S.xyz.y,z:(S.xyz.z+next.z)/2};if(!resolvePlayerMove(S.xyz,mid).blocked&&!resolvePlayerMove(S.xyz,next).blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast(turn?'側向閃避 · 避開障礙':'閃避');return}}toast('閃避受阻 · 拖曳空白處或顯示操作移開')};
 $('#flat').onclick=closePos;$('#orderFire').onclick=openOrder;
 const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 取經目標：點擊展開座標與六相部位';targetHud.hidden=true;document.body.appendChild(targetHud);
 const monsterHud=document.querySelector('.monsterHud');if(monsterHud){monsterHud.style.cursor='pointer';monsterHud.title='點擊查看 K-space 六相戰鬥詳情';monsterHud.addEventListener('click',e=>{if(e.target.closest('details'))return;showCombatTarget()})}
@@ -420,7 +421,7 @@ function monsterScreenGuide(snapshot){
   if(onScreen){const phase=snapshot.selection?.body?` · 攻 ${snapshot.selection.body}`:' · 0C 自動取經';monsterGuide.textContent=`🎯 ${snapshot.target.name} · ${Math.round(snapshot.target.hp)}/${snapshot.target.maxHp}HP · ${snapshot.distance.toFixed(1)}m${phase}${snapshot.distance<=KSPACE_SKILLS.slash.radius?' · ⚔ 可攻擊':' · 靠近再攻擊'}`;monsterGuide.style.left=`${Math.max(18,Math.min(innerWidth-18,(p.x*.5+.5)*innerWidth))}px`;monsterGuide.style.top=`${Math.max(310,Math.min(innerHeight-245,(-p.y*.5+.5)*innerHeight-36))}px`;monsterGuide.style.transform='translate(-50%,-100%)';monsterGuide.style.display='block';return}
   const rel=snapshot.relative,angle=Math.atan2(rel.x,rel.z)-S.camYaw,side=Math.sin(angle),forward=Math.cos(angle);
   const arrow=forward<-.15?(side>=0?'↙':'↘'):(side>.22?'←':side<-.22?'→':'↑');
-  monsterGuide.textContent=`${arrow} 怪物：${snapshot.target.name} · ${snapshot.distance.toFixed(1)}m · 用左下搖桿靠近`;
+  monsterGuide.textContent=`${arrow} 怪物：${snapshot.target.name} · ${snapshot.distance.toFixed(1)}m · 用空白拖曳靠近`;
   monsterGuide.style.left='50%';monsterGuide.style.top='62%';monsterGuide.style.transform='translate(-50%,-50%)';monsterGuide.style.display='block';
 }
 function renderCombatTarget(){
@@ -691,7 +692,7 @@ $('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confi
 async function closePos(){if(execution.readOnly){toast('M1_READ_ONLY · 部位 NOT_REQUESTED；退出請返回原錢包檢視');return}if(execution.mode==='BSC_TESTNET'&&isPrincipalExitOnlyView()){toast('舊部位資料尚未恢復，暫不提供平倉；可用本金可至錢包提款。');return}const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=await executionAction(()=>execution.close(p.positionId));if(!r.ok){toast(r.reason);return}if(r.receipt)recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
 
 const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open');$('#rail').innerHTML=RAIL_ORGANS.map(([id,ic,n])=>`<button data-organ="${id}" title="${n}">${ic}</button>`).join('');$$('[data-organ]').forEach(b=>b.onclick=()=>openOrgan(b.dataset.organ));$('#sheetClose').onclick=()=>{kgenPoolReference.pause();$('#sheet').classList.remove('open');fullMapCanvas=null};
-function openOrgan(id){if(id!=='assets'&&id!=='market')kgenPoolReference.pause();if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h=navigationConsoleHTML();else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點左下圓盤中央圖循環 XZ／XY／YZ。圓盤控制所選兩軸；右下縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas);bindNavigationConsole()}mountKgenReference(id)}
+function openOrgan(id){if(id!=='assets'&&id!=='market')kgenPoolReference.pause();if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h=navigationConsoleHTML();else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點「XZ 移動」切換 XZ／XY／YZ。預設拖曳遊戲空白處叫出移動盤，放開即收起；輕點空白處導航，點生命或物件查看。雙指縮放。由資訊設定選「顯示操作」叫回固定圓盤及縱桿，並恢復單指拖曳鏡頭。圓盤控制所選兩軸；縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas);bindNavigationConsole()}mountKgenReference(id)}
 
 const walletSession=getWalletSession11520();
 let deploymentManifest=null,readOnlyDeployment=null,legacyExecution=null,readOnlyExecution=null,returnExecution=null,testnetGate='CHECKING_DEPLOYMENT',chainRefreshBusy=false;
@@ -942,7 +943,9 @@ function routeMonsterTap(m){if(!m||m.state==='DEAD')return null;if(m.simulationC
 function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){const routed=routeMonsterTap(latchedMonster);if(routed)return routed}const rect=renderer.domElement.getBoundingClientRect();tapPointer.x=((clientX-rect.left)/rect.width)*2-1;tapPointer.y=-((clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);const hits=raycaster.intersectObjects(scene.children,true);for(const hit of hits){if(ancestorData(hit.object,'playerHome')){playerLifeUI.open();return emitWorldTapRoute('ENTITY',{entityType:'PLAYER_HOME'})}if(ancestorData(hit.object,'isPlayer')){renderer.domElement.dispatchEvent(new CustomEvent('k11520:player-tap',{detail:{source:'WORLD_RAYCAST'}}));return emitWorldTapRoute('PLAYER')}const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null){const m=[...world.monsters,...(world.ambientLife||[])].find(x=>String(x.id)===String(mid));const routed=routeMonsterTap(m);if(routed)return routed}const oid=ancestorData(hit.object,'worldObjectId');if(oid!=null){const o=WORLD_OBJECTS.find(x=>String(x.id)===String(oid));if(o){showEntityInfo(objectEntity(o));toast(`發現 ${o.name||o.label||o.kind||'物件'}`);return emitWorldTapRoute('ENTITY',{entityType:'WORLD_OBJECT',entityId:String(oid)})}}}
   let pointHit=hits.find(h=>ancestorData(h.object,'isGround'));let p=pointHit?.point;if(!p){const q=new THREE.Vector3();if(raycaster.ray.intersectPlane(groundPlane,q))p=q}if(p){cancelNavigation('切換世界目標');S.navTarget=null;document.getElementById('waypointAction')?.remove();setWorldTarget3D({x:p.x,y:p.y,z:p.z},{mode:'WORLD',source:'WORLD_GROUND'});startWorldNavigation3D();toast(`XYZ 前往 X ${fmt(p.x,1)} · Y ${fmt(p.y,1)} · Z ${fmt(p.z,1)}`);return emitWorldTapRoute('GROUND',{x:p.x,y:p.y,z:p.z})}toast('這裡沒有可到達目標');return emitWorldTapRoute('NONE')
 }
-const cameraPointers=new Map();let pinchDistance=null,pinchZoom=1,cameraGesture=false,cameraStatusTimer=0;
+const cameraPointers=new Map();let nativeWorldDown=null,pinchDistance=null,pinchZoom=1,cameraGesture=false,cameraStatusTimer=0,suppressSingleWorldPointer=false;
+function cancelWorldInput(){const held=[...cameraPointers.keys()];cameraPointers.clear();nativeWorldDown=null;worldTapStart=null;pinchDistance=null;cameraGesture=false;suppressSingleWorldPointer=false;cancel11520JoystickInput();resetJoy();for(const id of held)try{if(renderer.domElement.hasPointerCapture?.(id))renderer.domElement.releasePointerCapture(id)}catch{}}
+function worldGestureSnapshot(){return{phase:cameraPointers.size>=2?'PINCH':suppressSingleWorldPointer?'SUPPRESSED':worldTapStart?.floatingActive?'FLOATING_MOVE':worldTapStart?.floating?'PENDING_MOVE':cameraGesture?'CAMERA':worldTapStart?'ENTITY':'IDLE',pointerCount:cameraPointers.size,suppressedSingle:suppressSingleWorldPointer}}
 function canPanAt(x,y){
   if(document.elementFromPoint(x,y)!==renderer.domElement)return false;
   const r=renderer.domElement.getBoundingClientRect(),rayX=renderer.domElement.dataset.xVisualMirror==='1'?r.left+r.width-(x-r.left):x;
@@ -961,7 +964,7 @@ const cameraReset=document.createElement('button');cameraReset.id='k11520CameraR
 function syncCameraResetContext(){const contextual=cameraView.manual;cameraReset.hidden=!contextual;cameraReset.inert=!contextual;cameraReset.dataset.contextState=contextual?'manual':'following'}
 const cameraStatus=document.createElement('output');cameraStatus.id='k11520CameraZoomStatus';cameraStatus.setAttribute('aria-live','polite');cameraStatus.setAttribute('aria-atomic','true');document.body.appendChild(cameraStatus);
 function showCameraStatus(){cameraStatus.textContent=`🔍 ${cameraView.zoom.toFixed(2)}×`;cameraStatus.classList.add('show');clearTimeout(cameraStatusTimer);cameraStatusTimer=setTimeout(()=>cameraStatus.classList.remove('show'),1500)}
-cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false;showCameraStatus();syncCameraResetContext()};
+cameraReset.onclick=()=>{cancelWorldInput();Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;showCameraStatus();syncCameraResetContext()};
 // Retire the transparent half-screen yaw interceptor. HUD controls above the
 // canvas keep their own pointer owners; only world-origin pointers enter here.
 $('#lookPad').style.setProperty('pointer-events','none','important');
@@ -971,10 +974,11 @@ function pointerDistance(){const [a,b]=[...cameraPointers.values()];return a&&b?
 // throughout; worldTapAt still receives the canonical raycast coordinates.
 function cameraScreenX(e){const r=renderer.domElement.getBoundingClientRect();return renderer.domElement.dataset.xVisualMirror==='1'&&e.type!=='pointermove'?r.left+r.width-(e.clientX-r.left):e.clientX}
 renderer.domElement.addEventListener('pointerdown',e=>{
-  if(e.button!==0)return;
+  const nativeDown=nativeWorldDown?.id===e.pointerId?nativeWorldDown:null;nativeWorldDown=null;
+  if(e.button!==0||world11520InputBlocked())return;
   const x=cameraScreenX(e);e.preventDefault();cameraPointers.set(e.pointerId,{x,y:e.clientY});try{renderer.domElement.setPointerCapture?.(e.pointerId)}catch{}
-  if(cameraPointers.size===1){cameraGesture=false;worldTapStart={id:e.pointerId,x,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY),panAllowed:canPanAt(x,e.clientY)}}
-  else{pinchDistance=pointerDistance();pinchZoom=cameraView.zoom;worldTapStart=null;cameraGesture=true}
+  if(cameraPointers.size===1){cameraGesture=false;const panAllowed=canPanAt(x,e.clientY);worldTapStart={id:e.pointerId,x,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY),panAllowed,floating:panAllowed&&floating11520JoystickEnabled(),floatingActive:false,isTrusted:e.isTrusted===true||!!nativeDown&&Math.abs(nativeDown.x-x)<.5&&Math.abs(nativeDown.y-e.clientY)<.5}}
+  else{cancel11520JoystickInput();suppressSingleWorldPointer=true;pinchDistance=pointerDistance();pinchZoom=cameraView.zoom;worldTapStart=null;cameraGesture=true}
 },{passive:false});
 renderer.domElement.addEventListener('pointermove',e=>{
   const old=cameraPointers.get(e.pointerId);if(!old)return;
@@ -982,6 +986,18 @@ renderer.domElement.addEventListener('pointermove',e=>{
   if(cameraPointers.size>=2){
     if(pinchDistance>0){cameraView.zoom=clampCamera(pinchZoom*pointerDistance()/pinchDistance,CAMERA_BOUNDS.minZoom,CAMERA_BOUNDS.maxZoom);const panLimit=cameraPanLimit();cameraView.panX=clampCamera(cameraView.panX,-panLimit,panLimit);cameraView.panZ=clampCamera(cameraView.panZ,-panLimit,panLimit);showCameraStatus()}
     cameraView.manual=true;cameraGesture=true;syncCameraResetContext();return;
+  }
+  // After a pinch, its surviving pointer cannot become a new movement/camera
+  // gesture. A fresh down is required after every contact has ended.
+  if(suppressSingleWorldPointer)return;
+  if(worldTapStart?.floating){
+    if(!floating11520JoystickEnabled()){cancelWorldInput();return}
+    if(!worldTapStart.floatingActive){
+      if(Math.hypot(e.clientX-worldTapStart.x,e.clientY-worldTapStart.y)<=10)return;
+      if(!begin11520FloatingJoystick({pointerId:e.pointerId,x:worldTapStart.x,y:worldTapStart.y,isTrusted:worldTapStart.isTrusted})){cancelWorldInput();return}
+      worldTapStart.floatingActive=true;cameraGesture=true;cancelNavigation('手動移動');
+    }
+    move11520FloatingJoystick({pointerId:e.pointerId,x:e.clientX,y:e.clientY});return;
   }
   // A gesture started on an actionable monster remains a monster interaction.
   if(!worldTapStart?.panAllowed||pinchDistance!==null)return;
@@ -996,20 +1012,33 @@ renderer.domElement.addEventListener('pointermove',e=>{
 },{passive:true});
 function finishCameraPointer(e){
   if(!cameraPointers.has(e.pointerId))return;
-  const start=worldTapStart;cameraPointers.delete(e.pointerId);worldTapStart=null;
-  if(e.type==='pointerup'&&!cameraGesture&&start?.id===e.pointerId&&Math.hypot(cameraScreenX(e)-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420)worldTapAt(e.clientX,e.clientY,start.monster);
-  if(!cameraPointers.size){pinchDistance=null;cameraGesture=false}
+  const start=worldTapStart;end11520FloatingJoystick(e.pointerId);cameraPointers.delete(e.pointerId);worldTapStart=null;
+  if(e.type==='pointerup'&&!cameraGesture&&!suppressSingleWorldPointer&&start?.id===e.pointerId&&Math.hypot(cameraScreenX(e)-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420)worldTapAt(e.clientX,e.clientY,start.monster);
+  if(!cameraPointers.size){pinchDistance=null;cameraGesture=false;suppressSingleWorldPointer=false}
 }
 for(const type of ['pointerup','pointercancel','lostpointercapture'])renderer.domElement.addEventListener(type,finishCameraPointer,{passive:true});
 // Character priority consumes pointerup before the world listener. Clear its
 // completed gesture too, so a later world tap cannot become a phantom pinch.
-renderer.domElement.addEventListener('k11520:player-tap',()=>{cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false});
+renderer.domElement.addEventListener('k11520:player-tap',cancelWorldInput);
+addEventListener('blur',cancelWorldInput);addEventListener('resize',cancelWorldInput);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelWorldInput()});
+document.addEventListener('k11520:controls-cancel-input',cancelWorldInput);
+document.addEventListener('k11520:settings-context',e=>{if(e.detail?.open)cancelWorldInput()});
+// The pre-existing visual-mirror owner clones down/up for raycasting. Keep
+// one original trusted-down record for this exact pointer/physical origin;
+// never label a standalone synthetic event as native and never redispatch it.
+document.addEventListener('pointerdown',e=>{if(e.target===renderer.domElement&&e.isTrusted&&e.button===0)nativeWorldDown={id:e.pointerId,x:e.clientX,y:e.clientY};else if(cameraPointers.size&&e.target!==renderer.domElement)cancelWorldInput()},{capture:true});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(nativeWorldDown?.id===e.pointerId)nativeWorldDown=null},{capture:true});
+// Observe only existing context owners, not the changing world/card subtree.
+// Closing a foreground never resurrects an old pointer or its vector.
+let worldInputContext='';
+function observeWorldInputContext(){const root=document.documentElement,key=[root.dataset.k11520HudProfile,root.dataset.k11520HudMode,...['k11520ControlsOpen','k11520TradeOpen','k11520InfoOpen','k11520SettingsOpen','k11520UtilitiesOpen','k11520HudCollapsed','k11520WorldInputBlocked'].map(c=>root.classList.contains(c)),...['#walletPanel','#walletLaunchSheet','#sheet','#confirm','#backpackPanel','#aiChatPanel','#gameChat'].map(selector=>{const el=$(selector);return el?`${el.className}|${el.hidden}|${el.inert}`:''})].join(';');if(worldInputContext&&key!==worldInputContext)cancelWorldInput();worldInputContext=key}
+const worldInputContextObserver=new MutationObserver(observeWorldInputContext);worldInputContextObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-k11520-hud-profile','data-k11520-hud-mode']});function bindWorldInputContextPanels(){for(const selector of ['#walletPanel','#walletLaunchSheet','#sheet','#confirm','#backpackPanel','#aiChatPanel','#gameChat']){const el=$(selector);if(el)worldInputContextObserver.observe(el,{attributes:true,attributeFilter:['class','hidden','inert']})}observeWorldInputContext()}bindWorldInputContextPanels();
 function applyWorldCamera(){
   const dist=8.5/cameraView.zoom,x=S.xyz.x+cameraView.panX,z=S.xyz.z+cameraView.panZ;
   camera.position.set(x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2/cameraView.zoom,z-Math.cos(S.camYaw)*dist);
   // Recenter must also reset the existing dead-zone's remembered focus. A zero
   // pan alone leaves the old manual-camera focus inside its hysteresis region.
-  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
+  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':controlState()?.floating?.active?'PLAYER_CONTROL':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
   camera.lookAt(x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,z+Math.cos(S.camYaw)*1.8);
   cameraRecenterPending=false;
   revealPlayerBehindOccluders();
@@ -1035,7 +1064,7 @@ function revealPlayerBehindOccluders(){
     for(const material of occlusionMaterials.get(mesh)){if(fadedMaterials.has(material))continue;fadedMaterials.set(material,{opacity:material.opacity,transparent:material.transparent,depthWrite:material.depthWrite});material.opacity=Math.min(material.opacity,.18);material.transparent=true;material.depthWrite=false}
   });
 }
-globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:{...CAMERA_BOUNDS,currentPan:cameraPanLimit()},playerXYZ:{...S.xyz},authority:'CAMERA_ONLY'}),canPanAt,isWorldGestureArea});
+globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:{...CAMERA_BOUNDS,currentPan:cameraPanLimit()},playerXYZ:{...S.xyz},authority:'CAMERA_ONLY',worldGesture:worldGestureSnapshot()}),canPanAt,isWorldGestureArea});
 
 function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);moveManual(now);persistPlayerSession();ground.position.set(S.xyz.x,0,S.xyz.z);avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);appearanceRing.position.set(S.xyz.x,S.xyz.y+.06,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play(lastLocalMotion?.distanceMoved>0?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();applyWorldCamera();combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
 
@@ -1047,4 +1076,4 @@ let gameplayObserver=setInterval(observeGameplay,100);
 addEventListener('pagehide',()=>{clearInterval(gameplayObserver);gameplayObserver=null});
 addEventListener('pageshow',()=>{if(gameplayObserver===null){lastExplorationPosition={...S.xyz};gameplayObserver=setInterval(observeGameplay,100)}});
 globalThis.__K11520_GAMEPLAY__=Object.freeze({snapshot:()=>({progress:playerLife.gameplayProfile(),target:combatSnapshot()?.target,music:getKaiosAudio().snapshot().musicState,ga600FullEngine:'NOT_INTEGRATED',realTradingCapUnchanged:true})});
-renderAxes();syncControls();quotes();setInterval(quotes,5000);install11520ProductFixes();requestAnimationFrame(frame);$('#charState').textContent='3D LOADING';toast('11520 canonical runtime 已啟動');
+renderAxes();syncControls();quotes();setInterval(quotes,5000);install11520ProductFixes();bindWorldInputContextPanels();requestAnimationFrame(frame);$('#charState').textContent='3D LOADING';toast('11520 canonical runtime 已啟動');

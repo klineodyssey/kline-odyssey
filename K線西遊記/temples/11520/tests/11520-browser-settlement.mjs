@@ -3,6 +3,83 @@ import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
 
+// Host-only relative timings in the existing reports. No timer, browser read,
+// retry or budget change; each original operation still runs exactly once.
+function createSettlementTiming(now=()=>performance.now(),origin=now()){
+  const events=[];
+  const begin=label=>{const event={label,startMs:now()-origin,status:'RUNNING'};events.push(event);return event};
+  const finish=(event,status)=>{if(event.status!=='RUNNING')return;event.endMs=now()-origin;event.durationMs=event.endMs-event.startMs;event.status=status};
+  const measure=async(label,operation)=>{
+    const event=begin(label);
+    try{const value=await operation();finish(event,'COMPLETE');return value}
+    catch(error){finish(event,'FAILED');throw error}
+  };
+  return{begin,finish,measure,snapshot:()=>({clock:'NODE_MONOTONIC_RELATIVE_MS',elapsedMs:now()-origin,events:events.map(event=>({...event}))})};
+}
+
+// Keep the application's normal quote poll. For fixture transitions whose
+// assertions concern the accepted price rather than wall-clock latency, ask
+// that same callback to consume one new routed response immediately.
+function captureSettlementQuoteRefresh(){
+  const nativeSetInterval=globalThis.setInterval;
+  globalThis.setInterval=function register(callback,delay,...args){
+    const interval=Reflect.apply(nativeSetInterval,globalThis,[callback,delay,...args]);
+    if(typeof callback==='function'&&callback.name==='quotes'&&delay===5000){
+      globalThis.setInterval=nativeSetInterval;
+      globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__=()=>{
+        if(document.querySelector('#sheet.open [data-kgen-pool-reference]')){
+          throw new Error('Fixture quote refresh cannot request a reserve reference');
+        }
+        return callback(...args);
+      };
+    }
+    return interval;
+  };
+}
+
+async function waitForAcceptedFixtureQuote(page,price,previous){
+  const observation=await page.waitForFunction(({price,previous})=>{
+    const book=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot();
+    const quote=book?.observations.ETHUSDT;
+    if(quote?.price!==price||quote.source!==previous.source||!Number.isSafeInteger(quote.at)||quote.at<=previous.at||
+      !Number.isSafeInteger(quote.sequence)||quote.sequence<=previous.sequence)return false;
+    return book;
+  },{price,previous},{timeout:15000,polling:100});
+  try{return await observation.jsonValue()}
+  finally{await observation.dispose()}
+}
+
+async function driveSettlementFixtureQuote(page,phaseTiming,label,price,setPrice){
+  return phaseTiming.measure(label,async()=>{
+    const previous=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().observations.ETHUSDT);
+    assert.ok(previous?.source&&Number.isSafeInteger(previous.at)&&Number.isSafeInteger(previous.sequence),
+      'Fixture transition requires an existing provider observation');
+    setPrice(price);
+    const [book]=await Promise.all([
+      waitForAcceptedFixtureQuote(page,price,previous),
+      page.evaluate(()=>{
+        const refresh=globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__;
+        if(typeof refresh!=='function')throw new Error('Expected the original game quote interval');
+        return refresh();
+      }),
+    ]);
+    return book;
+  });
+}
+
+// Trading regressions explicitly disclose the retained control panel. Default
+// gameplay no longer opens C/lots or a fixed disc merely because it was touched.
+async function showRetainedControls(page){
+  // Only the immutable pre-disclosure baseline uses its original visible
+  // controls. Keep its native Submit reproduction, not the new UI setup.
+  if(process.argv.includes('--simulation-offline-baseline'))return;
+  if(await page.locator('html').evaluate(el=>el.classList.contains('k11520ControlsOpen')))return;
+  if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+  if(!await page.locator('#k11520UiSettings').evaluate(el=>el.classList.contains('open')))await page.locator('#gameModeToggle').click();
+  await page.locator('#k11520ShowControls').click();
+  if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+}
+
 if(process.argv.includes('--simulation-offline')||process.argv.includes('--simulation-offline-baseline')){
   await offlineSimulationBrowserQA({baseline:process.argv.includes('--simulation-offline-baseline')});process.exit(0);
 }
@@ -24,12 +101,16 @@ if(process.argv.includes('--testnet97')){
 const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 const out='artifacts/11520-settlement-qa';
 await fs.mkdir(out,{recursive:true});
+const settlementStarted=performance.now();
 const browser=await chromium.launch({headless:true});
 try {
   for(const [width,height] of [[390,844],[844,390]]) {
+    const phaseTiming=createSettlementTiming(()=>performance.now(),settlementStarted),generalPhase=phaseTiming.begin('generic');
     let eth=4000;
     const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
     page.setDefaultTimeout(20000);
+    await page.addInitScript(captureSettlementQuoteRefresh);
+    const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,value=>{eth=value});
     const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE_ERROR',String(e))});
     // Ordinary simulation QA must remain independent of a public rehearsal.
     // An unverified manifest may not silently activate wallet transactions.
@@ -74,7 +155,7 @@ try {
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
     // Character readiness is independent of the MINIMAL telemetry visibility.
     await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
-    await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
     await page.locator('#lotsNumericInput').fill('10');await page.locator('#lotsNumericInput').press('Enter');
     const organ=async name=>{
       if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();
@@ -82,7 +163,7 @@ try {
       if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();
       await page.locator(`#dock [data-organ="${name}"]`).click();
     };
-    const shot=async name=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`});
+    const shot=async name=>phaseTiming.measure('generic.screenshot:'+name,()=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`}));
     await shot('game');
     assert.equal(await page.evaluate(()=>__walletFixture.calls.filter(m=>m==='eth_requestAccounts').length),0,'no automatic account request');
     await page.locator('#k11520UtilityMaster').click();await page.locator('#walletToggle').click();
@@ -114,11 +195,11 @@ try {
     // the orders sheet. Wait for that real UI transition before navigating it.
     await page.locator('#confirm').waitFor({state:'hidden'});
     await page.locator('#sheet.open').waitFor({state:'visible'});
-    const snap=()=>page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot());
+    const snap=()=>phaseTiming.measure('generic.snapshot',()=>page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot()));
     let s=await snap();assert.equal(s.orders[0].status,'PENDING');assert.equal(s.wallet.lockedMargin,0);
     await organ('orders');await shot('pending');
-    eth=4002;
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().orders[0]?.status==='FILLED',null,{timeout:15000});
+    const filledQuote=await driveQuote('generic.pending-fill-quote',4002);
+    assert.equal(filledQuote.orders[0]?.status,'FILLED');
     s=await snap();assert.equal(s.positions.length,1);assert.equal(s.wallet.lockedMargin,10);assert.equal(s.wallet.free,90);
     assert.equal(s.receipts.filter(r=>r.kind==='FILL').length,1);
     await organ('positions');await shot('filled');
@@ -143,16 +224,29 @@ try {
     assert.equal(s.receipts.filter(r=>r.kind==='SETTLEMENT').length,1);assert.ok(s.receipts.at(-1).badDebt>0);
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('liquidation-receipt');
     await organ('assets');await shot('wallet');
-    assert.match(await page.locator('#sheetBody').innerText(),/SIMULATION WALLET/);
-    for(const label of ['AVAILABLE','LOCKED MARGIN','EQUITY','UNREALIZED PNL','REALIZED PNL'])assert.match(await page.locator('#sheetBody').innerText(),new RegExp(label));
-    eth=4002;await page.waitForTimeout(5500);s=await snap();assert.equal(s.positions[0].status,'LIQUIDATED');assert.equal(s.receipts.length,2);
+    const walletText=await page.locator('#sheetBody').innerText();
+    assert.match(walletText,/SIMULATION WALLET/);
+    for(const label of ['AVAILABLE','LOCKED MARGIN','EQUITY','UNREALIZED PNL','REALIZED PNL'])assert.match(walletText,new RegExp(label));
+
+    const liquidationQuote=s.observations.ETHUSDT;
+    assert.equal(liquidationQuote?.price,3920,'the stale-price fixture must have recovered before liquidation');
+    assert.ok(liquidationQuote.source&&Number.isSafeInteger(liquidationQuote.at)&&Number.isSafeInteger(liquidationQuote.sequence),'liquidation must carry a provider source, time and sequence');
+    const receiptsBeforeRecovery=s.receipts.map(receipt=>receipt.receiptId);
+    eth=4002;
+    // Observe the next accepted fixture quote and its committed ledger together.
+    s=await phaseTiming.measure('generic.recovery-quote',()=>waitForAcceptedFixtureQuote(page,eth,liquidationQuote));
+    assert.equal(s.positions[0].positionId,openId);
+    assert.equal(s.positions[0].status,'LIQUIDATED');
+    assert.equal(s.receipts.length,2);
+    assert.deepEqual(s.receipts.map(receipt=>receipt.receiptId),receiptsBeforeRecovery);
     await page.locator('#sheetClose').click();
     if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('4003');await page.locator('#confirmOrder').click();
-    eth=4004;
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions[1]?.status==='OPEN',null,{timeout:15000});
-    eth=4008;
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet.unrealizedPnl>0,null,{timeout:15000});
+    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().orders[1]?.status==='PENDING',null,{timeout:15000});
+    const secondFillQuote=await driveQuote('generic.second-fill-quote',4004);
+    assert.equal(secondFillQuote.positions[1]?.status,'OPEN');
+    const markQuote=await driveQuote('generic.profitable-mark-quote',4008);
+    assert.ok(markQuote.wallet.unrealizedPnl>0);
     await organ('positions');await shot('pnl');
     await page.locator('[data-sim-close]').click();
     s=await snap();assert.equal(s.positions[1].status,'CLOSED');assert.equal(s.wallet.lockedMargin,0);assert.ok(s.wallet.free>90);
@@ -170,17 +264,17 @@ try {
     assert.equal((await snap()).positions[1].status,'CLOSED','reload recovers exact account ledger');
     await shot('reload-recovery');
     await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
-    await page.locator('#cNumericInput').fill('5');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('5');await page.locator('#cNumericInput').press('Enter');
     await page.locator('#orderFire').click();
     await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('V1_HIGH_SPEED_PRODUCTION_LOCKED'));
     assert.equal(await page.locator('#confirmOrder').isDisabled(),true);await shot('high-c-locked');
     await page.locator('#cancelOrder').click();
-    await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
     if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     await page.locator('#gameModeToggle').click();await page.locator('#journeyReplay').click();
     assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'MOVE');
     await shot('journey-story');await page.locator('#journeyContinue').click();
-    const joy=await page.locator('#joy').boundingBox(),jx=joy.x+joy.width/2,jy=joy.y+joy.height/2;
+    await showRetainedControls(page);const joy=await page.locator('#joy').boundingBox(),jx=joy.x+joy.width/2,jy=joy.y+joy.height/2;
     const knobBefore=await page.locator('#knob').boundingBox();
     await page.mouse.move(jx,jy);await page.mouse.down();await page.mouse.move(jx,jy-40,{steps:5});
     const knobMoved=await page.locator('#knob').boundingBox();assert.ok(knobMoved.y<knobBefore.y,'joystick thumb follows finger');
@@ -209,9 +303,9 @@ try {
     assert.equal(await page.evaluate(()=>__K11520_PRODUCT__.snapshot().kaios),5);
     await shot('journey-loot');
     assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'PHASE');
-    await page.locator('#cNumericInput').fill('.001');await page.locator('#cNumericInput').press('Enter');
-    await page.locator('#joy').tap();
-    await page.locator('#cNumericInput').fill('-.001');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('.001');await page.locator('#cNumericInput').press('Enter');
+    await showRetainedControls(page);await page.locator('#joy').tap();
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('-.001');await page.locator('#cNumericInput').press('Enter');
     await page.waitForFunction(()=>__K11520_JOURNEY__.snapshot().stage==='PREVIEW');await shot('journey-sixphase');
     const ordersBefore=(await snap()).orders.length;await page.locator('#orderFire').click();await shot('journey-preview');
     assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().complete),true);
@@ -225,9 +319,9 @@ try {
     await page.setViewportSize({width,height});await page.waitForTimeout(200);await shot('rotation');
     const canvas=await page.locator('#three').boundingBox();assert.ok(Math.abs(canvas.height-height)<=2);
     const hit=await page.locator('#attack').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(hit,true,'attack pointer path');
-    assert.deepEqual(errors,[]);await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'DETERMINISTIC_SIMULATION_FIXTURES',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:s},null,2));
+    assert.deepEqual(errors,[]);phaseTiming.finish(generalPhase,'COMPLETE');await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'DETERMINISTIC_SIMULATION_FIXTURES',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:s,timing:phaseTiming.snapshot()},null,2));
     await page.close();
-    await navigationConsoleBrowserQA({browser,width,height,base,out});
+    await navigationConsoleBrowserQA({browser,width,height,base,out,timingOrigin:settlementStarted});
   }
   console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
 } finally {await browser.close()}
@@ -235,10 +329,13 @@ try {
 // The same two existing CI viewports get a separate guest context and ledger.
 // Only external read-only quote responses are fixtures; every decision uses the
 // real rendered controls, original adapter and original actor/collision clock.
-async function navigationConsoleBrowserQA({browser,width,height,base,out}){
+async function navigationConsoleBrowserQA({browser,width,height,base,out,timingOrigin}){
+  const phaseTiming=createSettlementTiming(()=>performance.now(),timingOrigin),navigationPhase=phaseTiming.begin('navigation');
   const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
   const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],controlChecks:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
   let eth=4000,sequence=0;
+  await page.addInitScript(captureSettlementQuoteRefresh);
+  const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,value=>{eth=value});
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   page.on('pageerror',error=>report.pageErrors.push(String(error)));
   page.on('websocket',socket=>report.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
@@ -279,7 +376,7 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
     if(!['GET','HEAD','OPTIONS'].includes(request.method())||rpc){report.networkAuthorityAttempts.push({method:request.method(),origin:url.origin,path:url.pathname,rpc});return route.abort('blockedbyclient')}
     return route.fallback();
   });
-  const snapshot=()=>page.evaluate(()=>({view:__K11520_NAVIGATION_CONSOLE__.snapshot(),book:__K11520_SIMULATION_EXCHANGE__.snapshot(),motion:globalThis.__K11520_LOCAL_MOTION__,fixture:__navigationQA}));
+  const snapshot=()=>phaseTiming.measure('navigation.snapshot',()=>page.evaluate(()=>({view:__K11520_NAVIGATION_CONSOLE__.snapshot(),book:__K11520_SIMULATION_EXCHANGE__.snapshot(),motion:globalThis.__K11520_LOCAL_MOTION__,fixture:__navigationQA})));
   const near=(actual,expected,label)=>assert.ok(Number.isFinite(actual)&&Math.abs(actual-expected)<=1e-8,`${label}: ${actual} != ${expected}`);
   const game=async()=>{
     if(await page.locator('#confirm').evaluate(el=>el.classList.contains('open')))await page.locator('#cancelOrder').click();
@@ -340,15 +437,15 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
       assert.ok(feedback.toast.y>=Math.max(feedback.title?.bottom||0,feedback.close?.bottom||0)-1&&feedback.toast.bottom<=feedback.header.bottom+1,'Navigation feedback must have its own header row');
     }
   };
-  const control=async(selector,options)=>{
+  const control=(selector,options)=>phaseTiming.measure('navigation.control:'+selector,async()=>{
     const element=page.locator(selector),began=Date.now(),[box]=await element.evaluate(inspectNavigationControls,{selector});
     box.elapsedMs=Date.now()-began;recordControl(box,options);return element;
-  };
+  });
   const shot=async(name,selector)=>{
     if(selector)await control(selector);
-    for(const fullPage of [false,true]){const file=`${width}x${height}-navigation-${name}-SYNTHETIC${fullPage?'-fullpage':''}.png`;await page.screenshot({path:`${out}/${file}`,fullPage});report.screenshots.push(file)}
+    for(const fullPage of [false,true]){const file=`${width}x${height}-navigation-${name}-SYNTHETIC${fullPage?'-fullpage':''}.png`;await phaseTiming.measure('navigation.screenshot:'+name+(fullPage?':fullpage':''),()=>page.screenshot({path:`${out}/${file}`,fullPage}));report.screenshots.push(file)}
   };
-  const setC=async value=>{await game();await page.locator('#cNumericInput').fill(String(value));await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(value=>__K11520_SIGNED_C_IMMERSIVE__.signedC===value,value)};
+  const setC=async value=>{await game();await showRetainedControls(page);await page.locator('#cNumericInput').fill(String(value));await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(value=>__K11520_SIGNED_C_IMMERSIVE__.signedC===value,value)};
   const setTarget=async target=>{for(const axis of ['x','y','z'])await page.locator('#navigation'+axis.toUpperCase()).fill(String(target[axis]))};
   const moveAndStop=async(label,expectedSource='LOCAL_WALK')=>{
     // At filled 1C the canonical local calibration is about 22.76 m/s. Keep
@@ -378,7 +475,8 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
     await game();await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('4001');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});await page.locator('#sheet.open').waitFor();
     let state=await snapshot();assert.equal(state.book.orders.length,1);assert.equal(state.book.orders[0].status,'PENDING');assert.equal(state.book.positions.length,0);
     await organ('worldmap');const pendingMotion=await moveAndStop('pending-c-walk');near(pendingMotion.motion.speedKPerSecond,draftMotion.motion.speedKPerSecond,'pending order cannot ignite C');
-    eth=4002;await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='OPEN',null,{timeout:15000});
+    const filledQuote=await driveQuote('navigation.filled-speed-quote',4002);
+    assert.equal(filledQuote.positions[0]?.status,'OPEN');
     await page.waitForFunction(()=>__K11520_LOCAL_MOTION__?.speedSource==='FILLED_POSITION');state=await snapshot();assert.equal(state.motion.appliedC,1);assert.ok(state.motion.speedKPerSecond>pendingMotion.motion.speedKPerSecond);report.checks.filledSpeed={motion:state.motion,position:state.book.positions[0]};
     await setC(-1);await organ('worldmap');const filledMotion=await moveAndStop('filled-c-move','FILLED_POSITION');assert.ok(filledMotion.motion.observedSpeedKPerSecond>pendingMotion.motion.observedSpeedKPerSecond,'a filled position changes measured physical speed, rather than presentation alone');state=await snapshot();assert.equal(state.motion.appliedC,1,'changing the draft C preserves the filled position engine');
     const position=state.book.positions[0],receiptIds=state.book.receipts.map(row=>row.receiptId);report.checks.scenarios=[];
@@ -401,14 +499,16 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out}){
     await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.submittedOrders===1);state=await snapshot();assert.equal(state.view.autopilot.config.market,'ETHUSDT');assert.equal(state.view.autopilot.config.axis,'KY');assert.equal(state.view.autopilot.signerRequested,false);assert.equal(state.view.autopilot.broadcast,false);assert.equal(state.book.orders.length,beforeAuto+1);
     const autoOrderId=state.view.autopilot.orderIds[0];assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.armed=state;
     await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId),'stop cannot cancel an already-created order');report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
-    eth=3988;await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().observations.ETHUSDT?.price===3988,null,{timeout:15000});await page.waitForTimeout(2200);state=await snapshot();assert.equal(state.book.orders.length,beforeAuto+1,'stopped decisions cannot reverse on a later opposite signal');assert.equal(state.view.autopilot.state,'STOPPED');assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.afterOppositeSignal=state;
+    const oppositeQuote=await driveQuote('navigation.stopped-opposite-quote',3988);
+    assert.equal(oppositeQuote.observations.ETHUSDT?.price,3988);
+    await page.waitForTimeout(2200);state=await snapshot();assert.equal(state.book.orders.length,beforeAuto+1,'stopped decisions cannot reverse on a later opposite signal');assert.equal(state.view.autopilot.state,'STOPPED');assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.afterOppositeSignal=state;
     const selectors=['navigationMarket','navigationX','navigationY','navigationZ','navigationGo','navigationStop','navigationTargetPrice','navigationLongAbove','navigationShortBelow','navigationAutoC','navigationAutoLots','navigationMaxLoss','navigationMaxOrders','navigationAutoStart','navigationAutoStop'].map(id=>'#'+id),batchBegan=Date.now();
-    const boxes=await page.locator('body').evaluate(inspectNavigationControls,{selectors});report.controlBatch={selectors,elapsedMs:Date.now()-batchBegan,count:boxes.length};assert.equal(boxes.length,selectors.length);for(const box of boxes)recordControl(box);assert.equal(report.controlChecks.length,36,'All original navigation control checks must complete');
+    const boxes=await phaseTiming.measure('navigation.control-batch',()=>page.locator('body').evaluate(inspectNavigationControls,{selectors}));report.controlBatch={selectors,elapsedMs:Date.now()-batchBegan,count:boxes.length};assert.equal(boxes.length,selectors.length);for(const box of boxes)recordControl(box);assert.equal(report.controlChecks.length,36,'All original navigation control checks must complete');
     assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.networkAuthorityAttempts,[]);assert.ok(state.fixture.providerCalls.every(method=>['eth_accounts','eth_chainId'].includes(method)),'no wallet connect, signer, chain switch or transaction requests');
     assert.ok(state.fixture.native.some(event=>event.id==='navigationGo'&&event.isTrusted));assert.ok(state.fixture.native.some(event=>event.id==='navigationAutoStart'&&event.isTrusted));assert.ok(state.fixture.native.filter(event=>event.type==='click').every(event=>event.isTrusted),'navigation actions use native rendered controls');
     report.functional='PASS';
   }catch(error){report.functional='FAIL';report.error=String(error?.stack||error);try{await shot('failure')}catch{}throw error}
-  finally{try{report.final=await snapshot()}catch{}await fs.writeFile(`${out}/${width}x${height}-navigation-result.json`,JSON.stringify(report,null,2));await page.close()}
+  finally{try{report.final=await snapshot()}catch{}phaseTiming.finish(navigationPhase,report.functional==='PASS'?'COMPLETE':'FAILED');report.timing=phaseTiming.snapshot();await fs.writeFile(`${out}/${width}x${height}-navigation-result.json`,JSON.stringify(report,null,2));await page.close()}
 }
 
 // Opt-in P0 acceptance at the actual game entry. This lane never calls a model
@@ -604,11 +704,11 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     };
     const select=async ({plane,axis,c})=>{
       await game();for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
-        const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await page.locator('#joy').tap();
+        const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await showRetainedControls(page);await page.locator('#joy').tap();
         await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
       }
       await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
-      await page.locator('#cNumericInput').fill(String(c));await page.locator('#cNumericInput').press('Enter');
+      await showRetainedControls(page);await page.locator('#cNumericInput').fill(String(c));await page.locator('#cNumericInput').press('Enter');
       await page.locator('#lotsNumericInput').fill('1');await page.locator('#lotsNumericInput').press('Enter');
       await page.waitForFunction(({axis,c})=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis&&__K11520_SIGNED_C_IMMERSIVE__.signedC===c&&__K11520_SIGNED_C_IMMERSIVE__.lots===1,{axis,c});
     };
@@ -838,7 +938,7 @@ async function localCandidateBrowserQA(){
         const oid=await trigger.nextOrderId();await send(trigger.connect(signers[player]),'createOrder',[1,parseEther('1'),2,parseEther('100')]);await send(trigger,'observeOrder',[oid]);
         const pid=(await trigger.order(oid)).positionId;await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.lockedMargin===2);
         assert.equal(await page.locator('#testnetApprove').isDisabled(),true);assert.equal(await page.locator('#testnetDeposit').isDisabled(),true);await shot('legacy-exit-only');
-        await game();await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click();
+        await game();await showRetainedControls(page);await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click();
         await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('LEGACY_EXIT_ONLY_NO_NEW_RISK'));assert.equal(await page.locator('#confirmOrder').isDisabled(),true);await page.locator('#cancelOrder').click();
         await price(100.5);await organ('positions');await page.locator(`[data-sim-close="${pid}"]`).click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.every(p=>p.status!=='OPEN'));
         assert.equal((await snap()).wallet.free,1001);await shot('legacy-close-preserved');
@@ -858,7 +958,7 @@ async function localCandidateBrowserQA(){
       await page.locator('[data-deposit-preset="1000"]').click();await page.locator('#testnetApprove').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.allowanceUnlimited===true);
       await page.locator('#testnetDeposit').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===1000);assert.equal(await page.locator('#testnetApprove').isDisabled(),true);
       await shot('deposit-controls');await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('brain-account');
-      stage='order';await game();await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
+      stage='order';await game();await showRetainedControls(page);await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
 await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100.001');await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('INDEX_DELTA_C_LOTS_V1')&&!document.querySelector('#confirmOrder').disabled,null,{timeout:120000});await page.locator('#confirm').evaluate(el=>el.scrollTop=0);await page.locator('#confirmBody').evaluate(el=>el.scrollTop=0);await shot('100c100lots-preview');await page.locator('#confirmOrder').click();await wait(()=>__K11520_EXECUTION__.snapshot().orders.some(o=>o.status==='PENDING'));
       let book=await snap(),order=book.orders.at(-1);await shot('pending');await price(100.002);await send(trigger,'observeOrder',[BigInt(order.orderId)]);await wallet();await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.some(p=>p.status==='OPEN'));
       book=await snap();const pid=book.positions.at(-1).positionId;assert.equal(book.wallet.lockedMargin,100);await price(100.007);await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet.unrealizedPnl>0);
@@ -1031,8 +1131,8 @@ async function publicTestnetBrowserQA(){
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});await shot('deposit');
       }
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await page.locator('#walletToggle').click();await page.locator('#k11520UtilityMaster').click();
-      for(let i=0;i<3&&(await page.evaluate(()=>__K11520_TRADE_AXIS_API__.current()))!=='KX';i++){await page.locator('#joy').tap();await page.waitForTimeout(200)}
-      await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
+      for(let i=0;i<3&&(await page.evaluate(()=>__K11520_TRADE_AXIS_API__.current()))!=='KX';i++){await showRetainedControls(page);await page.locator('#joy').tap();await page.waitForTimeout(200)}
+      await showRetainedControls(page);await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
       stage='CREATE_ORDER';const before=new Set((await snapshot()).orders.map(o=>o.orderId));
       const accountBeforeOrder=(await snapshot()).wallet,capitalBeforeOrder=(await snapshot()).capital;
       let order;

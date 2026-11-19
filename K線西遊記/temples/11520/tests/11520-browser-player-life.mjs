@@ -106,8 +106,18 @@ async function closePanels(page){
   if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
   if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
 }
+// Request the retained controls through their actual UI. This also works in
+// storage-failure profiles and does not change a guest's saved HUD preference.
+async function showControls(page){
+  if(await page.locator('html').evaluate(el=>el.classList.contains('k11520ControlsOpen')))return;
+  if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+  if(!await page.locator('#k11520UiSettings').evaluate(el=>el.classList.contains('open')))await page.locator('#gameModeToggle').click();
+  await page.locator('#k11520ShowControls').click();
+  if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+}
 async function killFirstMonster(page){
   await closePanels(page);
+  await showControls(page);
   await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40,{steps:5});
@@ -129,7 +139,7 @@ async function audioProbe(context){await context.addInitScript(()=>{
 async function audioState(page){return page.evaluate(async()=>{const {getKaiosAudio}=await import('../../../assets/kaios-audio.mjs');return getKaiosAudio().snapshot()})}
 async function signal(page){return page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<16;i++){for(const probe of __v29Probes){const values=new Float32Array(probe.fftSize);probe.getFloatTimeDomainData(values);let sum=0;for(const v of values){peak=Math.max(peak,Math.abs(v));sum+=v*v}rms=Math.max(rms,Math.sqrt(sum/values.length))}await new Promise(r=>setTimeout(r,90))}return {peak,rms}})}
 async function approachEncounter(page){
-  await closePanels(page);await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await closePanels(page);await showControls(page);await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
   const before=await page.evaluate(()=>({distance:__K11520_KSPACE_COMBAT__.distance,xyz:{...__K11520_WORLD_COORDS__.physical}}));
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40,{steps:6});

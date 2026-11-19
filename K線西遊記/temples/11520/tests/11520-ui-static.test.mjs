@@ -14,6 +14,44 @@ const logistics=read('../runtime/digital-ant-logistics-runtime.mjs');
 const marketLayout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
 const walletRuntime=read('../runtime/evm-wallet-runtime.mjs');
 
+test('fresh minimal HUD collapses transient cards while saved full/off organ preferences remain authoritative',async()=>{
+  const {runInNewContext}=await import('node:vm'),ui=read('../runtime/mobile-ui-settings.mjs');
+  const load=ui.slice(ui.indexOf('function load(){'),ui.indexOf('function save(){'));
+  for(const [saved,expected] of [
+    [null,{profile:'MINIMAL',controlsOpen:false,infoOpen:false,allOn:true,params:true}],
+    [{profile:'FULL'},{profile:'FULL',controlsOpen:true,infoOpen:true,allOn:true,params:true}],
+    [{profile:'FULL',allOn:false},{profile:'FULL',controlsOpen:false,infoOpen:false,allOn:false,params:true}],
+    [{profile:'FULL',params:false},{profile:'FULL',controlsOpen:false,infoOpen:true,allOn:true,params:false}],
+    [{profile:'MINIMAL',markets:false},{profile:'MINIMAL',controlsOpen:false,infoOpen:false,allOn:true,params:true}],
+    ['CORRUPT',{profile:'MINIMAL',controlsOpen:false,infoOpen:false,allOn:true,params:true}],
+    ['UNAVAILABLE',{profile:'MINIMAL',controlsOpen:false,infoOpen:false,allOn:true,params:true}],
+  ]){
+    const context={localStorage:{getItem(){if(saved==='UNAVAILABLE')throw new Error('storage unavailable');return saved==='CORRUPT'?'{broken':saved?JSON.stringify(saved):null},setItem(){assert.fail('loading a disclosure must not rewrite saved preferences')}}};
+    runInNewContext("const STORE='k11520.ui.settings',LEGACY_STORE='k11520.ui.settings.v267',HUD_PROFILES=['MINIMAL','STANDARD','FULL'];let state={hud:true,markets:true,status:true,map:true,params:true},allOn=true,profile='MINIMAL',marketOpen=false,controlsOpen=false,infoOpen=false,disclosedSurfaces=new Set();"+load+"load();globalThis.result={profile,controlsOpen,infoOpen,allOn,params:state.params};",context);
+    assert.deepEqual(JSON.parse(JSON.stringify(context.result)),expected);
+  }
+  assert.equal(ui.includes("if(e.detail?.active)setControlsOpen(true)"),false,'moving must not reopen parameter cards');
+});
+
+test('world movement excludes actual foreground panels while hidden retained panels and the trade status badge do not block fixed controls',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('../runtime/joystick-xzxyyz.mjs');
+  const functions=source.slice(source.indexOf('function foregroundVisible('),source.indexOf('export function floating11520JoystickEnabled(')).replaceAll('export function ','function ');
+  const classes=new Set(),nodes=new Map();
+  const context={$:selector=>nodes.get(selector)||null,document:{hidden:false,documentElement:{classList:{contains:name=>classes.has(name)}}},getComputedStyle:element=>element.style};
+  runInNewContext(functions+'globalThis.blocked=()=>({fixed:joystickInputBlocked(),world:world11520InputBlocked()});',context);
+  const check=expected=>assert.deepEqual(JSON.parse(JSON.stringify(context.blocked())),expected);
+  const panel=()=>({hidden:false,inert:false,style:{display:'block',visibility:'visible'},getClientRects:()=>[{}]});
+  nodes.set('#k11520RealTradePreflight',panel());check({fixed:false,world:false});
+  for(const selector of ['#walletPanel:not(.collapsed)','#walletLaunchSheet.open','#sheet.open','#confirm.open','#backpackPanel.open','#aiChatPanel.open','#gameChat.open']){
+    const element=panel();nodes.set(selector,element);check({fixed:true,world:true});
+    element.style.display='none';check({fixed:false,world:false});element.style.display='block';element.style.visibility='hidden';check({fixed:false,world:false});
+    element.style.visibility='visible';element.hidden=true;check({fixed:false,world:false});nodes.delete(selector);
+  }
+  classes.add('k11520UtilitiesOpen');check({fixed:false,world:false});classes.clear();
+  for(const name of ['k11520SettingsOpen','k11520HudCollapsed']){classes.add(name);check({fixed:true,world:true});classes.clear()}
+  context.document.hidden=true;check({fixed:true,world:true});
+});
+
 test('visible parameter controls retain the original explicit order path without bypassing financial owners',async()=>{
   const ui=read('../runtime/mobile-ui-settings.mjs'),layout=read('../runtime/mobile-control-layout.mjs');
   assert.ok(layout.includes(':not(.k11520TradeOpen):not(.k11520ControlsOpen) :is(#orderFire,#flat)'));
@@ -91,7 +129,7 @@ test('market and ATM organs surface cross-market engine and wallet-bound KAIOS c
 
 test('journey monster has an always-visible find-and-attack guide',()=>{
   assert.ok(main.includes('k11520MonsterGuide'));
-  assert.ok(main.includes('用左下搖桿靠近'));
+  assert.ok(main.includes('用空白拖曳靠近'));
   assert.ok(main.includes('靠近再攻擊'));
   assert.ok(main.includes('⚔ 可攻擊'));
   assert.ok(main.includes('KAIOS 戰利品已記帳'));
@@ -389,6 +427,24 @@ test('Camera Recenter is context-only and never gains movement or settlement aut
   assert.ok(main.includes('cameraView.manual=true;cameraGesture=true;syncCameraResetContext();return;'),'existing pinch owner must reveal Recenter');assert.ok(main.includes('showCameraStatus();syncCameraResetContext()};'),'existing Recenter handler must hide its own control again');
 });
 
+test('floating movement follows the player while idle and explicit camera modes keep their original focus rules',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  class Camera{constructor(){this.position={x:0,y:4.2,z:-8.5};this.userData={}}lookAt(x,y,z){this.lastTarget={x,y,z};return this.lastTarget}}
+  const context={THREE:{PerspectiveCamera:Camera},is11520Game:true};
+  runInNewContext(mobileShell.slice(mobileShell.indexOf('function installDeadZoneCamera(){'),mobileShell.indexOf('function installGameChat(){'))+'installDeadZoneCamera();',context);
+  const camera=new Camera();camera.lookAt(0,.8,1.8);camera.position={x:10,y:4.2,z:-8.5};camera.lookAt(10,.8,1.8);
+  assert.ok(camera.position.x>0&&camera.position.x<10,'ordinary non-floating movement retains the original dead zone');
+  for(const focus of ['PLAYER_CONTROL','PLAYER_HOME','MANUAL_CAMERA']){
+    camera.userData.k11520NavigationFocus=focus;camera.position={x:20,y:8,z:12};camera.lookAt(20,4,22);
+    assert.deepEqual(camera.position,{x:20,y:8,z:12},focus+' leaves the canonical camera position intact');assert.deepEqual(camera.lastTarget,{x:20,y:4,z:22});
+  }
+  delete camera.userData.k11520NavigationFocus;camera.position={x:20,y:8,z:12};camera.lookAt(20,4,22);assert.deepEqual(camera.position,{x:20,y:8,z:12},'release resumes the dead zone from the last actual focus without a jump');
+  const assignment=main.split('\n').find(line=>line.includes('camera.userData.k11520NavigationFocus='));assert.ok(assignment);
+  for(const [manual,recenter,floating,home,expected] of [[false,false,true,false,'PLAYER_CONTROL'],[false,false,false,false,null],[true,false,true,false,'MANUAL_CAMERA'],[false,true,true,false,'MANUAL_CAMERA'],[false,false,false,true,'PLAYER_HOME']]){
+    const ctx={camera:{userData:{}},cameraView:{manual},cameraRecenterPending:recenter,controlState:()=>({floating:{active:floating}}),playerHomeFraming:home,__K11520_XYZ_MAP_NAVIGATION__:{source:'PLAYER_HOME'}};runInNewContext(assignment,ctx);assert.equal(ctx.camera.userData.k11520NavigationFocus,expected);
+  }
+});
+
 test('World context uses existing mission eligibility, not idle or settled history',async()=>{
   const {runInNewContext}=await import('node:vm');const context={};runInNewContext(mobileShell.slice(mobileShell.indexOf('function contextActionWorldVisibility('),mobileShell.indexOf('function style(){'))+'globalThis.visibility=contextActionWorldVisibility;',context);
   const input={target:null,courier:null,digital:null,playerLifeId:'PLAYER-A',playerPosition:{x:0,y:0,z:0},raidDistance:5,now:2000};const visible=patch=>context.visibility({...input,...patch});
@@ -416,7 +472,11 @@ test('existing rail owners cancel capture on Settings and require a fresh pointe
     const ctx={$:()=>el,ROOT:root,document:doc,el,setTimeout:()=>1,clearTimeout(){},record:value=>commits.push(value),clear:()=>clears++,signedFromPointer:y=>y,paintSignedC:()=>{},applySignedValue:value=>commits.push(value)};
     if(owner==='lots')runInNewContext(main.slice(main.indexOf('function bindVertical('),main.indexOf("bindVertical('#lotsControl'"))+"bindVertical('#lotsControl',record);",ctx);
     if(owner==='C')runInNewContext('let cPointer=null,internalNative=false;'+signedC.slice(signedC.indexOf('function cancelCInput()'),signedC.indexOf('function onDocumentClick('))+signedC.slice(signedC.indexOf('function bindC()'),signedC.indexOf('function publish()'))+'bindC();',ctx);
-    if(owner==='Y')runInNewContext('let railPid=null,discPid=null,holdTimer=0,centerTap=null,discStart=null,rail={active:false,value:0};function syncMembrane(){}function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
+    if(owner==='Y'){
+      ctx.$=selector=>selector==='#yControl'?el:null;
+      const blockers=xyzControl.slice(xyzControl.indexOf('function foregroundVisible('),xyzControl.indexOf('export function world11520InputBlocked('));
+      runInNewContext('let railPid=null,discPid=null,holdTimer=0,centerTap=null,discStart=null,rail={active:false,value:0};function syncMembrane(){}function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+blockers+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
+    }
     const emit=(type,pointerId,clientY=25)=>{const e={type,pointerId,clientY,target:el,preventDefault(){},stopImmediatePropagation(){}};for(const fn of listeners.get(type)||[])fn(e)};
     const context=open=>{settings=open;for(const fn of documentListeners.get('k11520:settings-context')||[])fn({detail:{open}})};
     emit('pointerdown',1);assert.equal(commits.length,1,owner+' fresh down');assert.ok(captured.has(1));
@@ -658,7 +718,9 @@ test('one open-PR push stays within four heavy runners including bounded diagnos
 test('contextual entry tolerates only a completed intro transition and still requires character readiness',async()=>{
   const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
   const contextual=browserSource.slice(browserSource.indexOf('async function verifyContextualHud(){'));
-  const entry=contextual.slice(contextual.indexOf("if(await page.locator('#enter11520')"),contextual.indexOf("      assert.equal(await page.locator('#axes')"));
+  const entryEnd=contextual.indexOf('      await assertInformationClosed(');
+  assert.ok(entryEnd>0,'entry fixture ends before the separate HUD disclosure assertions');
+  const entry=contextual.slice(contextual.indexOf("if(await page.locator('#enter11520')"),entryEnd);
   assert.ok(entry.includes("await page.waitForFunction(()=>/READY|FALLBACK/.test"),'runtime readiness remains mandatory after intro dismissal');
   for(const scenario of [
     {name:'native click',button:true,dismiss:true},
@@ -875,7 +937,11 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Human authorized the #523 replacement/UI integration on 2026-11-18.
   // Keep the ancestry table and historical headers; pin the reviewed candidate
   // bytes separately. These fingerprints do not claim browser acceptance.
-  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'a8c9d8d4dbd8a259b37ac7fb0f1e4b99623b6b1ba9f42d8b46b71d1e73579c00'},
+  // Previous integrated navigation body: a8c9d8d4dbd8a259b37ac7fb0f1e4b99623b6b1ba9f42d8b46b71d1e73579c00.
+  // Human's floating-control request changes the original canvas arbitration
+  // and help text. This pin records those executable bytes, not visual PASS.
+  // Prior floating-input body: 105221614e4f33cecf4ffb9302cbfb6319bdab0552e290989564555767bcc34c.
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'bf5c2cbaacedeba8015c9447753111437afe9f11e4758e2e20ab418a36db0539'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
   'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078'},
   'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'d36f9eeacb703b9540db56e212c9c1c5af428c0386a3b5a56508b9a96f173d03'},
@@ -919,6 +985,48 @@ test('camera origin endpoint prefilter preserves the exact ordered result while 
  const movement=source.slice(source.indexOf('const attempt={name,origin:gesturePoint'),source.indexOf('result.pointerTrace=await page.evaluate'));assert.match(movement,/sign>8/);assert.match(movement,/timeout:3000/);assert.match(movement,/after\.camera\.playerXYZ,start\.playerXYZ/);
 });
 
+
+test('pinch picker uses fresh two-dimensional clear areas and fails closed in the source DOM model',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs');
+ const start=source.indexOf('function selectWorldFirstPanOrigin('),helper=source.slice(start,source.indexOf('// Qualify the actual trusted down',start));
+ const pickStart=source.indexOf('const pickPinch='),picker=source.slice(pickStart,source.indexOf('const inspectPinchDowns=',pickStart));
+ // Execute the actual helper and its actual caller. This is a synthetic DOM
+ // model of the source contract, not native touch targeting or recovery proof.
+ for(const kind of ['top-band','thin-rows']){
+  const width=480,height=900,r={top:0,left:0,right:width,bottom:height},canvas={id:'three',getBoundingClientRect:()=>r},hud={id:'k11520MonsterGuide'},areas=[];
+  const clear=(x,y)=>x>=0&&x<width&&y>=0&&y<height&&(kind==='top-band'?y>156:y%12===8);
+  let clock=0;
+  const context={innerWidth:width,innerHeight:height,worldFirstPointerTrace:[],document:{querySelector:()=>canvas,elementFromPoint:(x,y)=>clear(x,y)?canvas:hud},performance:{now:()=>++clock},__K11520_WORLD_SELECTION_PROJECTION__:{playerHomeSnapshot:()=>({playerScreen:{x:240,y:450}})},__K11520_CAMERA__:{snapshot:()=>({zoom:1,panX:0,panZ:0,manual:false}),isWorldGestureArea:(x,y,radius)=>{assert.equal(radius,10);areas.push({x,y});return[-radius,0,radius].every(dx=>[-radius,0,radius].every(dy=>clear(x+dx,y+dy)))}},page:{evaluate:async(fn,arg)=>fn(arg)}};
+  const actual=await runInNewContext(helper+'(async()=>{const y=164;'+picker+'return await pickPinch();})()',context);
+  if(kind==='thin-rows'){assert.equal(actual,null,'center-only gaps cannot admit a pinch without its clear neighborhoods');continue}
+  assert.ok(actual&&actual.y>164,'a new two-dimensional origin must replace the inherited row164');
+  assert.equal(actual.x,100,'the original pinch horizontal footprint stays inside the canvas');
+  assert.deepEqual(areas.filter(p=>p.y===actual.y).map(p=>p.x),[10,70,130,190],'both finger origins and endpoints use the canonical area predicate');
+  assert.equal(actual.traceStart,0,'the fresh selection retains its own native-event cursor');
+  assert.equal(actual.pickDiagnostics.gesture,'PINCH');
+ }
+});
+
+test('settlement timing retains pending phases, original values and rejections without business payloads',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs'),start=source.indexOf('function createSettlementTiming(');
+ const context={};runInNewContext(source.slice(start,source.indexOf('// Trading regressions',start))+'globalThis.create=createSettlementTiming;',context);
+ let clock=100;const timing=context.create(()=>clock,100),outer=timing.begin('generic');
+ let release,calls=0;const value={business:'must not enter timing report'},blocked=new Promise(resolve=>{release=resolve});clock=105;
+ const pending=timing.measure('snapshot',()=>{calls++;return blocked});clock=110;
+ const before=timing.snapshot();assert.equal(before.events[1].status,'RUNNING');assert.equal(before.events[1].startMs,5);
+ before.events[1].label='mutated-copy';assert.equal(timing.snapshot().events[1].label,'snapshot');
+ clock=140;release(value);assert.equal(await pending,value);assert.equal(calls,1);timing.finish(outer,'COMPLETE');
+ assert.equal(before.events[1].status,'RUNNING','an exported partial report stays independent of later completion');
+ let thrown;const originalError={privatePayload:'must not enter timing report'};clock=150;
+ try{await timing.measure('control',()=>{throw originalError})}catch(error){thrown=error}assert.equal(thrown,originalError);
+ let rejected=false;try{await timing.measure('screenshot',()=>Promise.reject(null))}catch(error){rejected=true;assert.equal(error,null)}assert.equal(rejected,true,'even a falsy rejection is preserved');
+ const report=JSON.parse(JSON.stringify(timing.snapshot()));
+ assert.equal(report.clock,'NODE_MONOTONIC_RELATIVE_MS');assert.equal(report.events[0].durationMs,40);assert.equal(report.events[1].durationMs,35);
+ assert.deepEqual(report.events.map(row=>row.status),['COMPLETE','COMPLETE','FAILED','FAILED']);
+ assert.ok(report.events.every(row=>Object.keys(row).every(key=>['label','startMs','endMs','durationMs','status'].includes(key))));
+ assert.ok(!JSON.stringify(report).includes('must not enter'));
+ clock=200;const nextProfile=context.create(()=>clock,100);assert.equal(nextProfile.begin('navigation').startMs,100,'separate reports share one host-clock origin');
+});
 
 test('simulation ticks retain canonical market cards and normal-owner decorations while updating leaves',async()=>{
 const vm=await import('node:vm');
@@ -977,4 +1085,105 @@ test('XZ XY YZ joystick loads the canonical module and preserves old imports',as
   const previous=await import('../runtime/joystick-xzxy.mjs');
   assert.equal(typeof current.install11520JoystickXZXY,'function');
   assert.equal(previous.install11520JoystickXZXY,current.install11520JoystickXZXY,'legacy import must resolve to the same implementation');
+});
+
+async function floatingHudFixture(width,height,{hud=true}={}){
+  const {runInNewContext}=await import('node:vm'),nodes=new Map(),values=new Map(),classes=new Set();
+  const rect=(x,y,w,h)=>({x,y,left:x,top:y,width:w,height:h,right:x+w,bottom:y+h});
+  const joy={dataset:{},clientWidth:160,clientHeight:160,hasPointerCapture:()=>false,style:{setProperty:(k,v)=>values.set(k,v),removeProperty:k=>values.delete(k)},getBoundingClientRect:()=>rect(parseFloat(values.get('--k11520-floating-x')||80)-80,parseFloat(values.get('--k11520-floating-y')||80)-80,160,160)};
+  const knob={offsetWidth:44,offsetHeight:44,style:{},getBoundingClientRect:()=>{const r=joy.getBoundingClientRect();return rect(r.x+58,r.y+58,44,44)}};
+  nodes.set('#joy',joy);nodes.set('#knob',knob);
+  if(hud)for(const [selector,bounds] of [['.monsterHud',[6,24,110,44]],['.axes',[124,24,Math.min(244,width-182),44]],['.tele',[6,74,width-64,32]],['#k11520MonsterGuide',[6,112,Math.min(320,width-64),44]],['#k11520MovePlane',[6,height-50,70,44]]])nodes.set(selector,{hidden:false,inert:false,computed:{display:'block',visibility:'visible',opacity:'1'},getClientRects:()=>[{}],getBoundingClientRect:()=>rect(...bounds)});
+  const document={hidden:false,documentElement:{dataset:{k11520HudMode:'ON_DEMAND'},classList:{contains:n=>classes.has(n),toggle:(n,on)=>on?classes.add(n):classes.delete(n)}},querySelector:s=>nodes.get(s)||null,querySelectorAll:s=>s.split(',').map(k=>nodes.get(k)).filter(Boolean),dispatchEvent:()=>{}};
+  const context={document,innerWidth:width,innerHeight:height,getComputedStyle:el=>el.computed,clearTimeout:()=>{},CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail}}};
+  runInNewContext(read('../runtime/joystick-xzxyyz.mjs').replaceAll('export function ','function ')+"\ninstallStarted=true;globalThis.begin=begin11520FloatingJoystick;globalThis.move=move11520FloatingJoystick;globalThis.end=end11520FloatingJoystick;globalThis.setPlane=value=>{mode=value;exposeMotion()};",context);
+  return{context,nodes,joy,knob,rect,snapshot:()=>JSON.parse(JSON.stringify(context.__K11520_3D_CONTROL__))};
+}
+
+test('floating visual base avoids visible HUD while preserving clear origins and failing closed without space',async()=>{
+  for(const [width,height] of [[390,844],[844,390],[480,900]])for(const x of [80,12,width-12]){
+    const f=await floatingHudFixture(width,height);assert.equal(f.context.begin({pointerId:7,x,y:80,isTrusted:true}),true);
+    const state=f.snapshot(),b=f.joy.getBoundingClientRect();assert.deepEqual(state.floating.pressOrigin,{x,y:80});assert.deepEqual(state.vector,{x:0,y:0,z:0});
+    assert.ok(b.left>=0&&b.top>=0&&b.right<=width&&b.bottom<=height,'the whole visual base remains in the viewport');
+    for(const [selector,node] of f.nodes)if(selector!=='#joy'&&selector!=='#knob'){
+      const r=node.getBoundingClientRect();assert.ok(b.right+4<=r.left||b.left-4>=r.right||b.bottom+4<=r.top||b.top-4>=r.bottom,width+'x'+height+' visual base must avoid '+selector);
+    }
+  }
+  const clear=await floatingHudFixture(390,844);assert.equal(clear.context.begin({pointerId:1,x:190,y:400}),true);assert.deepEqual(clear.snapshot().floating.origin,{x:190,y:400},'a clear origin must not move');
+  for(const key of ['hidden','display','visibility','opacity','offscreen','empty']){
+    const f=await floatingHudFixture(390,844,{hud:false}),node={hidden:false,inert:false,computed:{display:'block',visibility:'visible',opacity:'1'},getClientRects:()=>[{}],getBoundingClientRect:()=>f.rect(0,0,390,844)};
+    if(key==='hidden'){node.hidden=true;node.computed.display='none'}else if(key==='display')node.computed.display='none';else if(key==='visibility')node.computed.visibility='hidden';else if(key==='opacity')node.computed.opacity='0';else if(key==='offscreen')node.getBoundingClientRect=()=>f.rect(-500,0,100,100);else node.getClientRects=()=>[];
+    f.nodes.set('.monsterHud',node);assert.equal(f.context.begin({pointerId:1,x:190,y:400}),true,key);assert.deepEqual(f.snapshot().floating.origin,{x:190,y:400},key+' HUD must not displace the base');
+  }
+  for(const attributes of [{},{inert:true},{hidden:true}]){
+    const full=await floatingHudFixture(390,844,{hud:false});full.nodes.set('.monsterHud',{...attributes,computed:{display:'block',visibility:'visible',opacity:'1'},getClientRects:()=>[{}],getBoundingClientRect:()=>full.rect(0,0,390,844)});
+    assert.equal(full.context.begin({pointerId:1,x:80,y:80}),false,'visible HUD remains protected when inert or when CSS overrides hidden');assert.equal(full.snapshot().floating.active,false);assert.deepEqual(full.snapshot().vector,{x:0,y:0,z:0});
+  }
+});
+
+test('floating HUD relocation retains raw deltas, every plane, a fixed base, thumb clamp and release',async()=>{
+  for(const mode of ['XZ','XY','YZ']){
+    const shifted=await floatingHudFixture(390,844),clear=await floatingHudFixture(390,844,{hud:false});
+    for(const f of [shifted,clear]){f.context.setPlane(mode);assert.equal(f.context.begin({pointerId:7,x:80,y:80,isTrusted:true}),true)}
+    const origin=shifted.snapshot().floating.origin;assert.notDeepEqual(origin,{x:80,y:80});
+    for(const [dx,dy] of [[0,0],[20,-20],[-20,20],[300,-300]]){
+      for(const f of [shifted,clear])assert.equal(f.context.move({pointerId:7,x:80+dx,y:80+dy}),true);
+      const a=shifted.snapshot(),b=clear.snapshot();assert.deepEqual(a.vector,b.vector,'same raw delta has identical '+mode+' intent');assert.deepEqual(a.floating.pressOrigin,{x:80,y:80});assert.deepEqual(a.floating.origin,origin,'base does not chase the moving finger');
+      const offsets=shifted.knob.style.transform.match(/-?\d+(?:\.\d+)?/g).map(Number);assert.ok(Math.hypot(...offsets)<=54.01,'original thumb travel remains clamped');
+    }
+    const before=shifted.snapshot();assert.equal(shifted.context.move({pointerId:99,x:100,y:60}),false);assert.deepEqual(shifted.snapshot(),before,'foreign pointer cannot take over');
+    assert.equal(shifted.context.end(7),true);assert.equal(shifted.snapshot().floating.active,false);assert.deepEqual(shifted.snapshot().vector,{x:0,y:0,z:0});assert.equal(shifted.knob.style.transform,'translate(0px, 0px)');assert.equal(shifted.joy.dataset.k11520FloatingActive,'0');
+  }
+});
+
+test('compact landscape camera status follows measured guide bounds without changing camera or other HUD modes',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('../runtime/mobile-control-layout.mjs');
+  const fn=source.slice(source.indexOf('function syncCompactCameraStatus('),source.indexOf('function syncStatusFlow('));assert.ok(fn.startsWith('function syncCompactCameraStatus('));
+  const values=new Map(),writes=[],rect=(x,y,width,height)=>({left:x,top:y,width,height,right:x+width,bottom:y+height});let compact=true,landscape=true;
+  const status={textContent:'🔍 2.50×',getBoundingClientRect:()=>rect(160,114,126,26)},guide={textContent:'取經守關猴 · 120HP',computed:{display:'block',visibility:'visible',opacity:'1'},getClientRects:()=>[{}],getBoundingClientRect:()=>rect(6,112,320,44)},nodes=new Map([['#k11520CameraZoomStatus',status],['#k11520MonsterGuide',guide]]);
+  const context={$:s=>nodes.get(s),compactHud:()=>compact,matchMedia:()=>({matches:landscape}),innerWidth:844,innerHeight:390,getComputedStyle:el=>el.computed,document:{documentElement:{style:{getPropertyValue:k=>values.get(k)||'',setProperty:(k,v)=>{values.set(k,v);writes.push([k,v])},removeProperty:k=>values.delete(k)}}}};
+  runInNewContext(fn+'globalThis.sync=syncCompactCameraStatus;',context);
+  for(const width of [844,640,480,432,390,320]){
+    context.innerWidth=width;guide.getBoundingClientRect=()=>rect(6,112,Math.min(320,width-64),44);context.sync();
+    const g=guide.getBoundingClientRect(),x=parseFloat(values.get('--k11520-compact-zoom-left')),y=parseFloat(values.get('--k11520-compact-zoom-top'));
+    assert.ok(x>=6&&y>=6&&x+126<=width-6&&y+26<=384);assert.ok(x>=g.right+8||y>=g.bottom+8,'the real measured guide keeps an 8px gap');
+    if(width>=480){assert.equal(x,g.right+8);assert.equal(y,121)}else{assert.equal(x,6);assert.equal(y,164)}
+    const count=writes.length;context.sync();assert.equal(writes.length,count,'unchanged layout must not rewrite its variables');
+  }
+  context.innerWidth=844;guide.getBoundingClientRect=()=>rect(24,136,320,44);guide.inert=true;guide.hidden=true;context.sync();assert.equal(values.get('--k11520-compact-zoom-left'),'352px');assert.equal(values.get('--k11520-compact-zoom-top'),'145px','visible inert/CSS-overridden-hidden guide remains protected');
+  for(const mode of ['FULL','portrait','display-none','visibility-hidden','transparent','missing-guide','missing-status']){
+    compact=mode!=='FULL';landscape=mode!=='portrait';guide.computed={display:mode==='display-none'?'none':'block',visibility:mode==='visibility-hidden'?'hidden':'visible',opacity:mode==='transparent'?'0':'1'};
+    if(mode==='missing-guide')nodes.delete('#k11520MonsterGuide');if(mode==='missing-status')nodes.delete('#k11520CameraZoomStatus');
+    context.sync();assert.equal(values.size,0,mode+' returns to the original CSS placement');nodes.set('#k11520MonsterGuide',guide);nodes.set('#k11520CameraZoomStatus',status);
+  }
+  assert.equal(status.textContent,'🔍 2.50×');assert.equal(guide.textContent,'取經守關猴 · 120HP');
+  assert.match(source,/syncHeaderFlow\(\);\r?\n\s+syncCompactCameraStatus\(\);/,'the existing layout flow invokes the same owner before its compact early return');
+  assert.ok(source.includes('left:var(--k11520-compact-zoom-left,160px);top:var(--k11520-compact-zoom-top,114px)'),'the original compact landscape CSS consumes the measured position');
+});
+
+test('shared camera status observation exposes the original guide collision and retains native FULL evidence',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs'),fn=source.slice(source.indexOf('function inspectCameraZoomStatus('),source.indexOf('// Same ordered candidate grid'));
+  const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height}),nodes=new Map();let statusRect=rect(160,114,126,26);
+  const node=b=>({computed:{display:'block',visibility:'visible',opacity:'1'},getBoundingClientRect:()=>b});
+  const status={...node(null),textContent:'🔍 2.50×',classList:{contains:c=>c==='show'},getBoundingClientRect:()=>statusRect,computed:{opacity:'.7',pointerEvents:'none'}},reset={...node(rect(160,66,44,44)),contains:()=>false};
+  nodes.set('#k11520CameraZoomStatus',status);nodes.set('#k11520CameraReset',reset);nodes.set('#k11520MonsterGuide',node(rect(6,112,320,44)));nodes.set('.tele',node(rect(6,74,774,32)));nodes.set('.monsterHud',node(rect(6,24,110,44)));
+  const camera={zoom:2.5,playerXYZ:{x:0,y:0,z:0}},native=[{isTrusted:true,type:'pointerdown',id:6},{isTrusted:true,type:'pointerdown',id:7}];
+  const context={document:{querySelector:s=>nodes.get(s)||null,elementFromPoint:()=>reset},getComputedStyle:el=>el.computed,innerWidth:844,innerHeight:390,performance:{now:()=>80},__K11520_CAMERA__:{snapshot:()=>camera},__K11520_WORLD_SELECTION_PROJECTION__:{playerHomeSnapshot:()=>({playerScreen:{x:430,y:300}}),journeyLifeSnapshot:()=>[{visible:true,inView:true,screen:{x:230,y:200}}]},worldFirstPointerTrace:native};
+  runInNewContext(fn+'globalThis.inspect=inspectCameraZoomStatus;',context);
+  const prior=context.inspect();assert.equal(prior.controls.find(c=>c.selector==='#k11520MonsterGuide').overlap,true,'the actual old114px position cannot escape the observation');assert.equal(prior.shown,true);assert.equal(prior.opacity,.7);assert.equal(prior.pointerEvents,'none');assert.equal(prior.text,'🔍 2.50×');assert.equal(prior.capturedAt,80);assert.equal(prior.reset.owned,true);assert.equal(prior.pointerTrace,native);assert.equal(prior.camera,camera);
+  statusRect=rect(334,121,126,26);const clear=context.inspect();assert.deepEqual(Array.from(clear.controls.filter(c=>c.overlap)),[]);assert.deepEqual(Array.from(clear.summaries.filter(c=>c.overlap)),[]);assert.equal(clear.playerOverlap,false);assert.equal(clear.monsterOverlaps,0);assert.equal(clear.rect.right,460);
+  statusRect=rect(100,80,126,26);assert.equal(context.inspect().summaries.find(c=>c.selector==='.tele').overlap,true,'HP/XYZ observation stays separate from the retained FULL control list');
+  const full=[{isTrusted:true,id:11},{isTrusted:true,id:12}];context.fullHudPointerTrace=full;assert.equal(context.inspect().pointerTrace,full,'FULL still reports its original native trace');assert.ok(source.includes('const zoomSafety=await page.evaluate(inspectCameraZoomStatus)'));
+});
+
+test('layout reentry observes late guide nodes through its original single ResizeObserver',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('../runtime/mobile-control-layout.mjs');
+  const fn=source.slice(source.indexOf('function observeFlowRoots('),source.indexOf('// Restore current values')).replace('export function install11520MobileControlLayout','function install11520MobileControlLayout');
+  const market={},telemetry={},guide={},brand={},nodes=new Map([['.axes',market],['.tele',telemetry]]),instances=[],subscriptions=[];let applied=0,guards=0,flows=0,measured=0;
+  const context={$:s=>nodes.get(s)||null,apply:()=>applied++,installGuard:()=>guards++,addEventListener:type=>subscriptions.push(type),syncStatusFlow:()=>flows++,measure:()=>({generation:++measured}),ResizeObserver:class{constructor(callback){this.callback=callback;this.nodes=[];instances.push(this)}observe(el){this.nodes.push(el)}}};
+  runInNewContext('let booted=false,flowObserver=null;const flowObserved=new WeakSet();'+fn+'globalThis.install=install11520MobileControlLayout;',context);
+  context.install();assert.equal(instances.length,1);assert.deepEqual(instances[0].nodes,[market,telemetry]);
+  nodes.set('#k11520MonsterGuide',guide);context.install();assert.equal(instances.length,1,'late main-owned guide cannot create another observer');assert.deepEqual(instances[0].nodes,[market,telemetry,guide]);
+  nodes.set('.brand',brand);context.install();context.install();assert.deepEqual(instances[0].nodes,[market,telemetry,guide,brand],'each real node is observed once even after repeated install');assert.equal(guards,1);assert.deepEqual(subscriptions,['resize']);assert.equal(applied,4,'every original install still applies the current layout');
+  instances[0].callback();assert.equal(flows,1);assert.equal(context.__K11520_MOBILE_CONTROL_LAYOUT__.generation,1,'a late guide resize runs the existing flow and measured report');
 });
