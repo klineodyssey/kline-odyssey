@@ -1,5 +1,5 @@
 import './wallet-game-bridge.mjs';
-import {clampPositionPnl,pnlForMove,requiredMargin} from './kgen-margin-runtime.mjs';
+import {clampPositionPnl,pnlForMove,requiredMargin,LEGACY_SIMULATION_PNL_MODEL} from './kgen-margin-runtime.mjs';
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
 
 export const WALK_SPEED = 0.07;
@@ -39,6 +39,6 @@ export function executeOrder(state,order){
   if(state.kgen<margin)return{ok:false,reason:'INSUFFICIENT_KGEN'};
   const side=c>0?'多':'空';state.kgen-=margin;state.pos[order.axis]={side,lots:order.lots,c,signedC:c,leverage:Math.abs(c),entry:Number(order.price),symbol:order.symbol,margin,maintenance:margin*.75};state.history.unshift({time:new Date().toLocaleTimeString(),axis:order.axis,symbol:order.symbol,event:`${side}開倉`,pnl:0});return{ok:true}
 }
-export function positionPnl(position,quote){if(!position)return 0;const legacyC=position.c??position.leverage,c=position.signedC??(Number(legacyC)<0?normalizeSignedC(legacyC):signedCFromLegacyMagnitude(legacyC,position.side));return pnlForMove({entry:position.entry,mark:quote??position.entry,side:position.side,lots:position.lots,c})}
+export function positionPnl(position,quote){if(!position)return 0;const legacyC=position.c??position.leverage,c=position.signedC??(Number(legacyC)<0?normalizeSignedC(legacyC):signedCFromLegacyMagnitude(legacyC,position.side));return pnlForMove({entry:position.entry,mark:quote??position.entry,side:position.side,lots:position.lots,c,pnlModel:LEGACY_SIMULATION_PNL_MODEL})}
 export function closePosition(state,axis,quote){const p=state.pos[axis];if(!p)return{ok:false,reason:'NO_POSITION'};const pnl=clampPositionPnl({principal:p.margin,pnl:positionPnl(p,quote)}),refund=Math.max(0,p.margin+pnl);state.kgen+=refund;state.history.unshift({time:new Date().toLocaleTimeString(),axis,symbol:p.symbol,event:'平倉',pnl});state.pos[axis]=null;return{ok:true,pnl,refund}}
 export function tradeStats(history){const closed=history.filter(h=>h.event==='平倉'),wins=closed.filter(h=>Number(h.pnl)>0).length,pnl=closed.reduce((s,h)=>s+Number(h.pnl||0),0);return{closed:closed.length,wins,winRate:closed.length?wins/closed.length:0,realizedPnl:pnl,best:closed.length?Math.max(...closed.map(h=>Number(h.pnl||0))):0,worst:closed.length?Math.min(...closed.map(h=>Number(h.pnl||0))):0}}

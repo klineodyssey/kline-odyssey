@@ -9,9 +9,9 @@ import {PUBLIC_WALLET_IDENTITY_KEY,PLAYER_SESSION_KEY,readPublicWalletIdentity,s
 
 assert.equal(requiredMargin({lots:1}),1);
 assert.equal(requiredMargin({lots:100}),100);
-assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-10000);
-assert.equal(maxAdversePoints(100,100),.01);
-assert.equal(maxAdversePoints(50,100),.02);
+assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-100);
+assert.equal(maxAdversePoints(100,100),1);
+assert.equal(maxAdversePoints(50,100),2);
 const r=positionRisk({entry:100,mark:99,side:'多',lots:100,c:100});
 assert.equal(r.principal,100);assert.equal(r.pnl,-100);assert.equal(r.remaining,0);assert.equal(r.liquidated,true);
 
@@ -49,15 +49,17 @@ for(const runtime of [main,signedC,shell,fixesV23])assert.ok(!runtime.includes('
 for(const runtime of [legacyRuntime,nonlinearControls,backend])assert.ok(!runtime.includes('max:1000')&&!runtime.includes('<=1000'),'all executable 11520 C/leverage surfaces must stop at 100');
 assert.ok(!backend.includes('lots / leverage'),'off-chain backend must not discount principal by leverage');
 assert.ok(backend.includes('deltaIndex*signedC*lots'),'off-chain backend metadata must disclose canonical index-delta PnL');
-assert.ok(legacyRuntime.includes("import {clampPositionPnl,pnlForMove,requiredMargin}"),'legacy UI runtime must reuse the canonical bounded margin engine');
+assert.ok(legacyRuntime.includes("import {clampPositionPnl,pnlForMove,requiredMargin,LEGACY_SIMULATION_PNL_MODEL}"),'legacy UI runtime must reuse the canonical bounded margin engine');
 assert.ok(signedC.includes('cRange:[-100,100]'),'signed C numeric range must be capped at ±100C');
 assert.ok(signedC.includes("invalidCPolicy:'REJECT_OUTSIDE_100C_AND_KEEP_PREVIOUS'"),'out-of-range numeric C must fail closed');
-assert.ok(main.includes('INDEX_DELTA_C_LOTS_V1')&&main.includes('每 1 index point 變動'),'candidate preview must explain index-delta PnL');
+assert.ok(main.includes('INDEX_DELTA_C_LOTS_V1')&&main.includes('每 1 index point 變動'),'testnet preview must explain retained index-delta PnL');
+assert.ok(main.includes('成交樓層每 1 K 變動')&&main.includes('使用實際成交價固定'),'simulation preview must explain fixed-entry-floor PnL');
 assert.ok(main.includes('舊部署'),'old deployed bytecode retains explicit legacy model label');
 assert.ok(guidance.includes('ΔIndex × C × 口數'),'customer guidance must match index-delta PnL');
 assert.ok(!walletTrade.includes('<option value="1000">'),'standalone wallet trade UI must not expose 1000C');
 assert.ok(walletTrade.includes('PnL = ΔIndex × C × 口數'),'standalone wallet trade formula must use index delta');
 assert.ok(walletTrade.includes('每 1 index 損益'),'standalone wallet trade preview must use index semantics');
+assert.ok(walletTrade.includes('maxAdversePoints(c,entry,LEGACY_SIMULATION_PNL_MODEL)')&&walletTrade.includes('pnlModel:LEGACY_SIMULATION_PNL_MODEL'),'standalone wallet trade must opt into its original risk and PnL model');
 for(const [temple,id] of [[temple12345,'12345'],[temple16888,'16888']]){
   if(id==='12345'){
     assert.ok(temple.includes('window.location.replace(new URL("./cockpit.html", window.location.href).href)'),'12345 canonical bootstrap stays on the original cockpit');

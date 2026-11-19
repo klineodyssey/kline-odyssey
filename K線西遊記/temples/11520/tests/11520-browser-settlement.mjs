@@ -215,13 +215,18 @@ try {
     assert.equal((await snap()).positions[0].positionId,openId,'address A restores its own position');
     await page.evaluate(()=>{__walletFixture.chain='0x38';__walletFixture.emit('chainChanged','0x38')});
     await page.waitForFunction(()=>document.querySelector('#wKgen').textContent==='12345');
-    quoteStale=true;eth=3920;await page.waitForTimeout(6000);
+    const gapQuote=2900; // First fill 4002 at k=3 has a long liquidation mark of 3002.
+    quoteStale=true;eth=gapQuote;await page.waitForTimeout(6000);
     assert.equal((await snap()).positions[0].status,'OPEN','stale liquidation must not mutate position');
     assert.match(await page.locator('#feed').innerText(),/MARKET DATA STALE/);await shot('stale-position-preserved');
     quoteStale=false;
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='LIQUIDATED',null,{timeout:15000});
     s=await snap();assert.equal(s.positions[0].margin,0);assert.equal(s.wallet.free,90);assert.equal(s.wallet.lockedMargin,0);
     assert.equal(s.receipts.filter(r=>r.kind==='SETTLEMENT').length,1);assert.ok(s.receipts.at(-1).badDebt>0);
+    const liquidation=s.receipts.at(-1);
+    assert.equal(liquidation.liquidationTrigger,3002,'liquidation uses the fixed entry floor unit in USDT');
+    assert.equal(liquidation.settlementPrice,gapQuote,'receipt retains the observed raw USDT price');
+    assert.equal(liquidation.realizedPnl,-10,'liquidation loss is limited to the position margin');
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('liquidation-receipt');
     await organ('assets');await shot('wallet');
     const walletText=await page.locator('#sheetBody').innerText();
@@ -229,7 +234,7 @@ try {
     for(const label of ['AVAILABLE','LOCKED MARGIN','EQUITY','UNREALIZED PNL','REALIZED PNL'])assert.match(walletText,new RegExp(label));
 
     const liquidationQuote=s.observations.ETHUSDT;
-    assert.equal(liquidationQuote?.price,3920,'the stale-price fixture must have recovered before liquidation');
+    assert.equal(liquidationQuote?.price,gapQuote,'the stale-price fixture must have recovered before liquidation');
     assert.ok(liquidationQuote.source&&Number.isSafeInteger(liquidationQuote.at)&&Number.isSafeInteger(liquidationQuote.sequence),'liquidation must carry a provider source, time and sequence');
     const receiptsBeforeRecovery=s.receipts.map(receipt=>receipt.receiptId);
     eth=4002;
@@ -245,12 +250,14 @@ try {
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().orders[1]?.status==='PENDING',null,{timeout:15000});
     const secondFillQuote=await driveQuote('generic.second-fill-quote',4004);
     assert.equal(secondFillQuote.positions[1]?.status,'OPEN');
+    assert.equal(secondFillQuote.positions[1].entry,4004,'the indexed PnL model keeps the raw fill price');
     const markQuote=await driveQuote('generic.profitable-mark-quote',4008);
-    assert.ok(markQuote.wallet.unrealizedPnl>0);
+    assert.ok(Math.abs(markQuote.wallet.unrealizedPnl-.04)<1e-8,'four USDT at k=3 across ten lots gives 0.04 KGEN');
     await organ('positions');await shot('pnl');
     await page.locator('[data-sim-close]').click();
     s=await snap();assert.equal(s.positions[1].status,'CLOSED');assert.equal(s.wallet.lockedMargin,0);assert.ok(s.wallet.free>90);
     assert.equal(s.receipts.length,4);assert.equal(s.receipts.at(-1).status,'CLOSED');
+    assert.ok(Math.abs(s.receipts.at(-1).realizedPnl-.04)<1e-8,'close settles the normalized PnL from the same mark');
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('close-receipt');
     await page.evaluate(()=>__walletFixture.emit('disconnect',{}));
     await page.waitForFunction(()=>document.querySelector('#wAddr').textContent==='DISCONNECTED');
@@ -480,9 +487,11 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     await page.waitForFunction(()=>__K11520_LOCAL_MOTION__?.speedSource==='FILLED_POSITION');state=await snapshot();assert.equal(state.motion.appliedC,1);assert.ok(state.motion.speedKPerSecond>pendingMotion.motion.speedKPerSecond);report.checks.filledSpeed={motion:state.motion,position:state.book.positions[0]};
     await setC(-1);await organ('worldmap');const filledMotion=await moveAndStop('filled-c-move','FILLED_POSITION');assert.ok(filledMotion.motion.observedSpeedKPerSecond>pendingMotion.motion.observedSpeedKPerSecond,'a filled position changes measured physical speed, rather than presentation alone');state=await snapshot();assert.equal(state.motion.appliedC,1,'changing the draft C preserves the filled position engine');
     const position=state.book.positions[0],receiptIds=state.book.receipts.map(row=>row.receiptId);report.checks.scenarios=[];
-    for(const mark of [position.entry+5,1]){
+    assert.equal(position.entry,4002,'entry floor comes from the raw USDT fill');
+    for(const [mark,pnl] of [[10002,6],[1,-1]]){
       await page.locator('#navigationTargetPrice').fill(String(mark));const current=await snapshot(),expected=positionRisk({...position,mark});
       assert.equal(current.view.scenario.status,'ESTIMATE');assert.equal(current.view.scenario.source,'OPEN_POSITION');assert.equal(current.view.scenario.c,position.c);assert.equal(current.view.scenario.feeKgen,0);near(current.view.scenario.pnl,expected.pnl,'original scenario PnL');assert.ok(current.view.scenario.pnl>=-expected.principal);
+      near(current.view.scenario.pnl,pnl,'scenario retains the actual fill floor across a natural price boundary');
       assert.deepEqual(current.book.receipts.map(row=>row.receiptId),receiptIds,'scenario preview never settles the real simulation position');assert.equal(current.book.orders.length,1);report.checks.scenarios.push(current.view.scenario);
       await shot(mark===1?'loss-floor-preview':'profit-preview','#navigationTargetPrice');
     }
@@ -581,6 +590,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     const result={profile,head,baseline,simulatedBrowserClock:true,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};results.push(result);
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage();
     page.setDefaultTimeout(12000);let stage='raw-source-proof',networkSequence=0;
+    let seedLiquidationAnchor=!baseline&&profile.width===390;
     page.on('pageerror',error=>result.pageErrors.push(String(error)));
     page.on('requestfailed',request=>result.requestFailures.push({url:request.url(),error:request.failure()?.errorText}));
     const finishBrowserSource=attachM1PageSourceProof(page,{base,sourceSha:head,assets,createHash});
@@ -609,13 +619,18 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         if(target)fixture.native.push({type,id:target.id||target.dataset.simClose||target.dataset.simCancel,isTrusted:event.isTrusted,at:Date.now()});
       },true);
     },profile);
-    // Deliberately unavailable REAL/public references. Runtime source remains
-    // untouched; only external read-only responses are deterministic fixtures.
+    // Only routed read-only fixtures are served. A single warm profile starts
+    // below 10 USDT so its real deterministic fallback can cross a 1C adverse
+    // distance of one USDT before proving the same receipt and account lifecycle.
     await page.route('https://data-api.binance.vision/**',request=>{
-      const url=new URL(request.request().url()),prices={BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600};
-      const payload=profile.quote==='INVALID'?[{p:'not-a-price',T:Date.now(),a:++networkSequence}]:[{p:String(prices[url.searchParams.get('symbol')]),T:Date.now()-60000,a:++networkSequence}];
-      result.referenceResponses.push({market:url.searchParams.get('symbol'),state:profile.quote,status:profile.quote==='WAIT'?503:200,payload});
-      return request.fulfill({status:profile.quote==='WAIT'?503:200,contentType:'application/json',body:JSON.stringify(profile.quote==='WAIT'?{code:'OFFLINE_QA_REFERENCE_UNAVAILABLE'}:payload)});
+      const url=new URL(request.request().url()),market=url.searchParams.get('symbol');
+      const prices={BTCUSDT:100000,ETHUSDT:seedLiquidationAnchor?4:4000,BNBUSDT:600};
+      const fixtureState=seedLiquidationAnchor?'WARM_LIQUIDATION_ANCHOR':profile.quote;
+      const age=seedLiquidationAnchor?500:fixtureState==='INVALID'?0:60000;
+      const at=Date.now()-age;
+      const payload=[{p:fixtureState==='INVALID'?'not-a-price':String(prices[market]),T:at,a:++networkSequence}];
+      result.referenceResponses.push({market,state:fixtureState,status:fixtureState==='WAIT'?503:200,payload});
+      return request.fulfill({status:fixtureState==='WAIT'?503:200,contentType:'application/json',body:JSON.stringify(fixtureState==='WAIT'?{code:'OFFLINE_QA_REFERENCE_UNAVAILABLE'}:payload)});
     });
     await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
     await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async r=>{
@@ -740,6 +755,20 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();
       await page.locator('#intro11520').waitFor({state:'hidden'});
       await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
+      if(seedLiquidationAnchor){
+        stage='warm-liquidation-anchor';
+        await page.waitForFunction(account=>{
+          const quote=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT;
+          return document.querySelector('#wAddr')?.textContent===account&&quote?.price===4&&quote.source==='BINANCE_PUBLIC_MARKET_DATA_ONLY';
+        },profile.account);
+        result.liquidationSeed=(await snap()).observations.ETHUSDT;
+        seedLiquidationAnchor=false;
+        await page.clock.fastForward(16000);
+        await page.waitForFunction(source=>{
+          const quote=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT;
+          return quote?.source===source&&quote.simulationAnchorPrice===4;
+        },source);
+      }
       if(!baseline)await page.waitForFunction(source=>['BTCUSDT','ETHUSDT','BNBUSDT'].every(market=>__K11520_SIMULATION_EXCHANGE__.snapshot().observations[market]?.source===source),source);
       await sourceProof();
       await shot('boot');result.boot=await state();assertNoAuthority(result.boot);
@@ -771,7 +800,8 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         await page.locator('#confirm.open').waitFor();
         const anchor=(await snap()).observations[testCase.market]?.simulationAnchorPrice;
         assert.ok(Number.isFinite(anchor)&&anchor>0,'The observed simulation source must expose its deterministic anchor');
-        await page.locator('#simulationTriggerPrice').fill(String(anchor+.125));
+        const triggerPrice=anchor+.125;
+        await page.locator('#simulationTriggerPrice').fill(String(triggerPrice));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);
         evidence.preview=await state();assert.match(evidence.preview.preview,new RegExp(source));assertNoAuthority(evidence.preview);
         evidence.submitHit=await usable('#confirmOrder');await shot(stage+'-preview');
@@ -780,7 +810,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         await page.waitForFunction(count=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length===count+1,count);
         evidence.submitted=await state();const order=evidence.submitted.simulation.orders.at(-1);
         assert.equal(order.market,testCase.market);assert.equal(order.axis,testCase.axis);assert.equal(order.c,testCase.c);assert.equal(order.lots,1);
-        assert.equal(order.side,testCase.side);assert.equal(order.priceSource,source);
+        assert.equal(order.side,testCase.side);assert.equal(order.priceSource,source);assert.equal(order.triggerPrice,triggerPrice);
         assert.equal(evidence.submitted.native.filter(event=>event.id==='confirmOrder'&&event.type==='click'&&event.isTrusted).length,clickCount+1,'One trusted native Submit must reach the application');
         assert.ok(['PENDING','FILLED'].includes(order.status),'Submission must create an actual lifecycle record');
         // One full 128-second source cycle is the domain bound, rather than an
@@ -793,7 +823,9 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         assert.equal(book.receipts.filter(r=>r.orderId===order.orderId&&r.kind==='FILL').length,1,'Fill is exactly once');
         assert.equal(book.wallet.lockedMargin,1);evidence.filled=await state();await shot(stage+'-filled');
         await page.clock.fastForward(4000);book=await snap();const marked=book.positions.find(p=>p.positionId===position.positionId);
-        assert.equal(marked.status,'OPEN');const expectedPnl=(marked.mark-marked.entry)*marked.c*marked.lots;
+        assert.equal(marked.status,'OPEN');
+        const entryUnit=10**Number(position.entry.toExponential().split('e')[1]);
+        const expectedPnl=(marked.mark-position.entry)/entryUnit*marked.c*marked.lots;
         assert.ok(Math.abs(book.wallet.unrealizedPnl-expectedPnl)<1e-7,'PnL must follow signed C and real simulation mark');
         evidence.marked=await state();
         if(testCase===cases[0]){await organ('positions');assert.match(await page.locator('#sheetBody').innerText(),/UNREALIZED PNL/);await shot(stage+'-position-pnl')}
@@ -802,7 +834,8 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         evidence.closed=await state();book=evidence.closed.simulation;assert.equal(book.wallet.lockedMargin,0);
         const receipt=book.receipts.find(r=>r.positionId===position.positionId&&r.kind==='SETTLEMENT');
         assert.equal(receipt.status,'CLOSED');assert.equal(receipt.priceSource,source);assert.ok(Number.isFinite(receipt.realizedPnl));
-        assert.ok(Math.abs(receipt.rawPnl-(receipt.settlementPrice-receipt.entryPrice)*testCase.c)<1e-7,'Settlement receipt must preserve the signed index-delta PnL');
+        assert.equal(receipt.entryPrice,position.entry);
+        assert.ok(Math.abs(receipt.rawPnl-(receipt.settlementPrice-receipt.entryPrice)/entryUnit*testCase.c)<1e-7,'settlement receipt must preserve the opened price floor and signed C');
         assert.equal(book.receipts.filter(r=>r.positionId===position.positionId&&r.kind==='SETTLEMENT').length,1);
         if(testCase===cases[0]){await organ('history');await page.locator(`[data-receipt="${receipt.receiptId}"] > summary`).click();assert.match(await page.locator('#sheetBody').innerText(),new RegExp(source));await shot(stage+'-close-receipt')}
         assertNoAuthority(evidence.closed);evidence.result='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
@@ -815,7 +848,9 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         await page.locator(`[data-sim-cancel="${pending.orderId}"]`).click();await page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.find(o=>o.orderId===id)?.status==='CANCELLED',pending.orderId);
         result.cancel=await state();assert.equal(result.cancel.simulation.receipts.filter(r=>r.orderId===pending.orderId).length,0);await shot('pending-cancelled');
         stage='liquidation';await select(cases.find(c=>c.market==='ETHUSDT'&&c.c===1));await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
-        const ethAnchor=(await snap()).observations.ETHUSDT.simulationAnchorPrice;await page.locator('#simulationTriggerPrice').fill(String(ethAnchor+.125));
+        const ethAnchor=(await snap()).observations.ETHUSDT.simulationAnchorPrice;
+        assert.equal(ethAnchor,4,'the warmed deterministic price can reach the 1C liquidation threshold');
+        await page.locator('#simulationTriggerPrice').fill(String(ethAnchor+.125));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
         const liquidationOrder=(await snap()).orders.at(-1);
         for(let elapsed=0;elapsed<=128000&&(await snap()).orders.find(o=>o.orderId===liquidationOrder.orderId).status==='PENDING';elapsed+=4000)await page.clock.fastForward(4000);
@@ -823,6 +858,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         for(let elapsed=0;elapsed<=128000&&(await snap()).positions.find(p=>p.positionId===liquidationPosition.positionId).status==='OPEN';elapsed+=4000)await page.clock.fastForward(4000);
         result.liquidation=await state();const liquidationReceipt=result.liquidation.simulation.receipts.find(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT');
         assert.equal(liquidationReceipt?.status,'LIQUIDATED');assert.equal(liquidationReceipt.priceSource,source);assert.equal(liquidationReceipt.realizedPnl,-1);assert.equal(liquidationReceipt.marginAfter,0);assert.equal(result.liquidation.simulation.wallet.lockedMargin,0);
+        assert.equal(liquidationReceipt.liquidationTrigger,liquidationPosition.entry-1);
         await organ('history');await page.locator(`[data-receipt="${liquidationReceipt.receiptId}"] > summary`).click();await shot('liquidation');await page.clock.fastForward(8000);assert.equal((await snap()).receipts.filter(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT').length,1,'Liquidation must not replay');
         stage='account-isolation';const owned=await snap();
         await page.evaluate(()=>{__offlineSimulationQA.account='0x2222222222222222222222222222222222222222';__offlineSimulationQA.emit('accountsChanged',[__offlineSimulationQA.account])});
