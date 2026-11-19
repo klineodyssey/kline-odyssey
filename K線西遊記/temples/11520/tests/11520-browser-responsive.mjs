@@ -14,9 +14,11 @@ import {chromium} from 'playwright';
 
 function inspectCameraZoomStatus(){
   const status=document.querySelector('#k11520CameraZoomStatus'),r=status.getBoundingClientRect(),style=getComputedStyle(status),box=b=>({left:b.left,top:b.top,right:b.right,bottom:b.bottom,width:b.width,height:b.height}),overlap=b=>r.left<b.right&&r.right>b.left&&r.top<b.bottom&&r.bottom>b.top;
-  const inspect=selectors=>selectors.map(selector=>{const el=document.querySelector(selector),b=el?.getBoundingClientRect(),s=el?getComputedStyle(el):null;return{selector,overlap:!!b&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&overlap(b),rect:b?box(b):null}}),controls=inspect(['#k11520MonsterGuide','#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','.axes','.minimapWrap','#joy']),summaries=inspect(['.monsterHud','.tele']);
+  const inspect=selectors=>selectors.map(selector=>{const el=document.querySelector(selector),b=el?.getBoundingClientRect(),s=el?getComputedStyle(el):null;return{selector,overlap:!!b&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&overlap(b),rect:b?box(b):null}});
+  const controls=inspect(['#k11520MonsterGuide','#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','.axes','.minimapWrap','#joy','#attack','#skill','#dodge','#tradeSword','#flat','#orderFire']);
+  const summaries=inspect(['.monsterHud','.tele']);
   const player=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen,monsters=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().filter(m=>m.visible&&m.inView).map(m=>m.screen),reset=document.querySelector('#k11520CameraReset'),resetRect=reset.getBoundingClientRect(),resetHit=document.elementFromPoint(resetRect.left+resetRect.width/2,resetRect.top+resetRect.height/2);
-  return{camera:__K11520_CAMERA__.snapshot(),capturedAt:performance.now(),pointerTrace:globalThis.fullHudPointerTrace||globalThis.worldFirstPointerTrace||[],shown:status.classList.contains('show'),text:status.textContent,opacity:Number(style.opacity),pointerEvents:style.pointerEvents,controls,summaries,playerOverlap:player.x>=r.left&&player.x<=r.right&&player.y>=r.top&&player.y<=r.bottom,monsterOverlaps:monsters.filter(p=>p.x>=r.left&&p.x<=r.right&&p.y>=r.top&&p.y<=r.bottom).length,rect:box(r),viewport:{width:innerWidth,height:innerHeight},reset:{rect:box(resetRect),owned:resetHit===reset||reset.contains(resetHit)}};
+  return{camera:__K11520_CAMERA__.snapshot(),capturedAt:performance.now(),pointerTrace:globalThis.fullHudPointerTrace||globalThis.worldFirstPointerTrace||[],shown:status.classList.contains('show'),text:status.textContent,textFits:status.scrollWidth<=status.clientWidth,opacity:Number(style.opacity),pointerEvents:style.pointerEvents,controls,summaries,playerOverlap:player.x>=r.left&&player.x<=r.right&&player.y>=r.top&&player.y<=r.bottom,monsterOverlaps:monsters.filter(p=>p.x>=r.left&&p.x<=r.right&&p.y>=r.top&&p.y<=r.bottom).length,rect:box(r),viewport:{width:innerWidth,height:innerHeight},reset:{rect:box(resetRect),owned:resetHit===reset||reset.contains(resetHit)}};
 }
 
 // Same ordered candidate grid and predicates; reject a covered endpoint before
@@ -128,7 +130,7 @@ async function verifyWorldFirst(){
     const result={profile,checks:{}};results.push(result);
     const verifyZoomStatus=async label=>{
       const state=await page.evaluate(inspectCameraZoomStatus);(result.cameraZoomSafety??=[]).push({label,...state});
-      assert.ok(state.shown&&state.opacity>0,label+' status must still be visible, not expired');assert.equal(state.pointerEvents,'none');
+      assert.ok(state.shown&&state.opacity>0,label+' status must still be visible, not expired');assert.equal(state.pointerEvents,'none');assert.equal(state.textFits,true,label+' zoom value must fit inside the status');
       assert.deepEqual(state.controls.filter(x=>x.overlap),[],label+' zoom status overlaps a visible control');assert.deepEqual(state.summaries.filter(x=>x.overlap),[],label+' zoom status overlaps HP/XYZ');
       assert.equal(state.playerOverlap,false,label+' zoom status overlaps Player');assert.equal(state.monsterOverlaps,0,label+' zoom status overlaps a Monster target');
       assert.ok(state.rect.width>0&&state.rect.height>0&&state.rect.left>=0&&state.rect.top>=0&&state.rect.right<=state.viewport.width&&state.rect.bottom<=state.viewport.height,label+' zoom status must stay in the viewport');
@@ -873,11 +875,11 @@ async function verifyFullHudControlOwnership(page,report){
   await pointer('pointermove',11,pinch.x-pinch.ex,pinch.y-pinch.ey,1);await pointer('pointermove',12,pinch.x+pinch.ex,pinch.y+pinch.ey,1);
   await page.waitForTimeout(40);
   const zoomSafety=await page.evaluate(inspectCameraZoomStatus);
-  report.fullHudPinch.after={camera:zoomSafety.camera,capturedAt:zoomSafety.capturedAt,statusShown:zoomSafety.shown,pointerTrace:zoomSafety.pointerTrace};
+  report.fullHudPinch.after={camera:zoomSafety.camera,capturedAt:zoomSafety.capturedAt,statusShown:zoomSafety.shown,zoomStatus:zoomSafety.rect,textFits:zoomSafety.textFits,pointerTrace:zoomSafety.pointerTrace};
   assert.notEqual(zoomSafety.camera.zoom,pinch.beforeCamera.zoom,'a lingering Recenter label must not masquerade as a successful pinch');
   assert.equal(zoomSafety.camera.zoom,zoomSafety.camera.bounds.maxZoom,'FULL native pinch must reach the same maximum zoom bound as world-first');
   assert.deepEqual(zoomSafety.camera.playerXYZ,start.playerXYZ,'FULL pinch changes Camera only, never Player XYZ');
-  assert.equal(zoomSafety.shown,true,'zoom status must be visible during FULL HUD pinch');assert.equal(zoomSafety.pointerEvents,'none','zoom status must stay non-blocking');assert.deepEqual(zoomSafety.controls.filter(x=>x.overlap),[],'zoom status overlaps a visible HUD/world control');assert.equal(zoomSafety.playerOverlap,false,'zoom status overlaps Player');assert.equal(zoomSafety.monsterOverlaps,0,'zoom status overlaps a visible Monster target');
+  assert.equal(zoomSafety.shown,true,'zoom status must be visible during FULL HUD pinch');assert.equal(zoomSafety.pointerEvents,'none','zoom status must stay non-blocking');assert.equal(zoomSafety.textFits,true,'FULL zoom value must fit inside the status');assert.deepEqual(zoomSafety.controls.filter(x=>x.overlap),[],'zoom status overlaps a visible HUD/world control');assert.equal(zoomSafety.playerOverlap,false,'zoom status overlaps Player');assert.equal(zoomSafety.monsterOverlaps,0,'zoom status overlaps a visible Monster target');
   await page.screenshot({path:`${OUT}/${report.profile.name}-zoom-status-safe.png`});await pointer('pointerup',11,pinch.x-pinch.ex,pinch.y-pinch.ey,0);await pointer('pointerup',12,pinch.x+pinch.ex,pinch.y+pinch.ey,0);
 
   let openedUtilityForContextAction=false;

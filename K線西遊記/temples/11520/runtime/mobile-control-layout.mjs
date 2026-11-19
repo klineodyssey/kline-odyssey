@@ -129,6 +129,10 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
    retaining a clear gap above the 44px movement controls. */
 #k11520CameraZoomStatus{position:fixed;z-index:589;left:54px;right:auto;top:auto;bottom:max(170px,calc(env(safe-area-inset-bottom) + 170px));width:116px;transform:translateY(6px);padding:6px 8px;border:1px solid #68e4ff66;border-radius:999px;background:#071018e8;color:#dffaff;font:800 11px system-ui;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
 #k11520CameraZoomStatus.show{opacity:1;transform:translateY(0)}
+@media(orientation:portrait) and (max-width:${MOBILE_MAX}px){
+  /* Fit between Recenter and the combat row without rising over the map. */
+  #k11520CameraZoomStatus{width:72px;padding-inline:4px}
+}
 #k11520FollowMonster{position:fixed;left:54px;right:auto;top:116px;width:calc(100vw - 224px);height:44px;z-index:620;border:1px solid #68e4ff88;border-radius:10px;background:#071018dd;color:#dffaff;font:700 10px system-ui;overflow:hidden;text-overflow:ellipsis}
 #k11520CameraReset[hidden],#k11520FollowMonster[hidden],#k11520MarketRow[hidden]{display:none!important}
 @media(orientation:landscape) and (max-height:600px){
