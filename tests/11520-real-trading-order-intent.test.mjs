@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
-import {createKgenLedger} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
+import {createKgenLedger,C_PNL_MODEL} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 import {createRequire} from 'node:module';
 import {TESTNET_EXECUTION_ABI,CAPITAL_EXECUTION_ABI} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
@@ -90,7 +90,7 @@ test('single adapter preview is pure; pending is not a fill; cross reserves once
  const {ledger,adapter}=fixture(),before=structuredClone(ledger);
  const preview=adapter.preview(simulationInput,{now:1001});
  assert.equal(preview.ok,true);assert.equal(preview.requiredMargin,10);assert.equal(preview.available,1000);
- assert.equal(preview.estimatedLiquidationPrice,100.99);assert.equal(preview.executionMode,'SIMULATION');
+ assert.equal(preview.estimatedLiquidationPrice,100);assert.equal(preview.executionMode,'SIMULATION');
  assert.deepEqual(ledger,before);
  const pending=adapter.submit(preview.intent,{now:1002});
  assert.equal(pending.status,'PENDING_TRIGGER');assert.equal(pending.order.status,'PENDING');assert.equal(ledger.free,1000);assert.equal(ledger.lockedMargin,0);
@@ -683,9 +683,13 @@ test('fallback source stays pinned through pending, position, public recovery an
 test('offline fallback liquidates both directions once with isolated collateral and source-bound receipts',()=>{
  for(const c of [1,-1]){
   const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
-  adapter.submit({axis:'KY',market:'ETHUSDT',c,lots:2,triggerPrice:4000},{now:1000});adapter.tick({now:2000});
-  adapter.tick({now:1000+(c>0?96000:32000)});const book=adapter.snapshot();assert.equal(book.positions[0].status,'LIQUIDATED');assert.equal(ledger.free,98);assert.equal(ledger.lockedMargin,0);assert.equal(book.receipts.length,2);
-  adapter.tick({now:130000});assert.equal(adapter.snapshot().receipts.length,2);
+  // Explicit low-price fixture: the unchanged +/-2 deterministic path crosses
+  // the actual one-floor-unit boundary at 1C in both directions.
+  assert.equal(adapter.observe({market:'ETHUSDT',price:4,observedAt:1000,now:1000}).ok,true);
+  const now=17000;
+  assert.equal(adapter.submit({axis:'KY',market:'ETHUSDT',c,lots:2,triggerPrice:4},{now}).ok,true);adapter.tick({now:now+1000});
+  adapter.tick({now:now+(c>0?96000:32000)});const book=adapter.snapshot();assert.equal(book.positions[0].status,'LIQUIDATED');assert.equal(ledger.free,98);assert.equal(ledger.lockedMargin,0);assert.equal(book.receipts.length,2);
+  adapter.tick({now:now+130000});assert.equal(adapter.snapshot().receipts.length,2);
  }
 });
 
@@ -805,15 +809,43 @@ function autopilotFixture({parameters={},balance=1000,hooks={}}={}){
  const pilot=createSimulationAutopilot({adapter,getContext:()=>playerContext});
  return {ledger,adapter,config,pilot,observe,setContext:value=>{playerContext=value}};
 }
-async function openAutopilotLong(f){
+async function openAutopilotLong(f,fillPrice=100){
+ if(fillPrice!==100)f.observe(fillPrice,1001);
  assert.equal(f.pilot.arm(f.config).ok,true);
  assert.equal((await f.pilot.step({now:1001})).ok,true);
  assert.equal(f.adapter.snapshot().orders[0].status,'PENDING');
  assert.equal(f.adapter.snapshot().positions.length,0,'an autopilot submit does not fabricate a fill');
- f.observe(100,1002);
+ f.observe(fillPrice,1002);
  const position=f.adapter.snapshot().positions.find(p=>p.status==='OPEN');
  assert.equal(position.side,'LONG');return position;
 }
+
+test('manual and autopilot use the same actual-fill floor model and signed settlement receipts',async()=>{
+ for(const [c,entry,exit] of [[1,75000,85000],[-1,85000,75000]]){
+  const results=[];
+  for(const automated of [false,true]){
+   const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true});
+   assert.equal(adapter.observe({market:'BTCUSDT',price:entry,observedAt:1000,now:1000}).ok,true);
+   let pilot;
+   if(automated){
+    pilot=createSimulationAutopilot({adapter,getContext:()=>({id:'SYNTHETIC_FLOOR_PLAYER',readOnly:false})});
+    assert.equal(pilot.arm({axis:'KX',market:'BTCUSDT',cMagnitude:1,lots:1,longAbove:c>0?entry:90000,shortBelow:c<0?entry:70000,maxLossKgen:5,maxOrders:2,...(c>0?{longTakeProfitPrice:exit}:{shortTakeProfitPrice:exit})}).ok,true);
+    assert.equal((await pilot.step({now:1001})).ok,true);
+   }else assert.equal(adapter.submit({axis:'KX',market:'BTCUSDT',c,lots:1,currentPrice:entry,triggerPrice:entry,takeProfitPrice:exit},{now:1001}).ok,true);
+   assert.equal(adapter.snapshot().orders[0].status,'PENDING');assert.equal(ledger.lockedMargin,0);
+   assert.equal(adapter.observe({market:'BTCUSDT',price:entry,observedAt:1002,now:1002}).ok,true);
+   const open=adapter.snapshot();assert.equal(open.positions[0].status,'OPEN');assert.equal(open.positions[0].entry,entry);assert.equal(open.positions[0].pnlModel,C_PNL_MODEL);
+   assert.equal(open.receipts[0].entryFloorUnit,10000);assert.equal(open.receipts[0].pnlModel,C_PNL_MODEL);assert.equal(ledger.lockedMargin,1);
+   assert.equal(adapter.observe({market:'BTCUSDT',price:exit,observedAt:1003,now:1003}).ok,true);
+   const book=adapter.snapshot(),receipt=book.receipts.at(-1);
+   assert.equal(receipt.status,'TAKE_PROFIT');assert.equal(receipt.pnlModel,C_PNL_MODEL);assert.equal(receipt.entryFloorUnit,10000);assert.equal(receipt.realizedPnl,1);assert.equal(receipt.rawPnl,1);assert.equal(receipt.marginBefore,1);assert.equal(receipt.marginAfter,0);
+   assert.equal(book.receipts.length,2);assert.equal(ledger.free,101);assert.equal(ledger.lockedMargin,0);
+   if(pilot){assert.equal((await pilot.step({now:1004})).ok,true);assert.equal(pilot.snapshot().submittedOrders,1);assert.equal(pilot.snapshot().realizedPnl,1);assert.equal(pilot.snapshot().broadcast,false)}
+   results.push(book);
+  }
+  assert.deepEqual(results[1],results[0],'manual intent and autopilot settle through the same adapter and receipt owner');
+ }
+});
 
 test('autopilot requires every strategy and risk parameter without economic defaults',async()=>{
  for(const key of Object.keys(autopilotParameters)){
@@ -971,7 +1003,7 @@ test('autopilot close rejection or a missing persisted settlement cannot authori
 
 test('autopilot loss budget and order budget stop new decisions on the existing settlement evidence',async()=>{
  const loss=autopilotFixture({parameters:{maxLossKgen:.05}}),lossPosition=await openAutopilotLong(loss);
- loss.observe(99.7,1003);assert.equal((await loss.pilot.step({now:1004})).reason,'LOSS_LIMIT_REACHED');
+ loss.observe(74,1003);assert.equal((await loss.pilot.step({now:1004})).reason,'LOSS_LIMIT_REACHED');
  assert.equal(loss.adapter.snapshot().positions.find(p=>p.positionId===lossPosition.positionId).status,'CLOSED');
  assert.equal(loss.adapter.snapshot().orders.length,1);assert.ok(loss.pilot.snapshot().realizedPnl<-.05);
  const limited=autopilotFixture({parameters:{maxOrders:1}}),limitedPosition=await openAutopilotLong(limited);
@@ -992,8 +1024,8 @@ test('autopilot never adopts manual positions, ignores neither external close no
  assert.equal(manual.ok,true);await inFlight;
  assert.deepEqual(collision.adapter.snapshot().orders.map(o=>o.orderId),[manual.order.orderId]);assert.equal(collision.pilot.snapshot().state,'STOPPED');
  for(const terminal of ['external-close','liquidated']){
-  const f=autopilotFixture(),position=await openAutopilotLong(f);
-  if(terminal==='external-close')assert.equal(f.adapter.close(position.positionId,{now:1003}).ok,true);else f.observe(89,1003);
+  const liquidated=terminal==='liquidated',f=autopilotFixture({parameters:liquidated?{cMagnitude:1}:{}}),position=await openAutopilotLong(f,liquidated?101:100);
+  if(terminal==='external-close')assert.equal(f.adapter.close(position.positionId,{now:1003}).ok,true);else f.observe(.5,1003);
   const before=structuredClone(f.ledger);assert.equal((await f.pilot.step({now:1004})).ok,false);
   assert.equal(f.pilot.snapshot().reason,terminal==='external-close'?'POSITION_CLOSED_EXTERNALLY':'AUTOPILOT_LIQUIDATED');assert.deepEqual(f.ledger,before);
  }

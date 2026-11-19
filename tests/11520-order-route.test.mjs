@@ -8,7 +8,7 @@ test('slow order preview is not starved by polling and newer input invalidates s
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
  const fn=source.slice(source.indexOf('async function paintOrderPreview('),source.indexOf('\nfunction openOrder('));
  const button={disabled:false},panel={textContent:''},resolvers=[];
- const context=vm.createContext({pending:{axis:'KY',market:'ETHUSDT'},executionBusy:false,previewSequence:0,previewRequests:0,execution:{preview:()=>new Promise(resolve=>resolvers.push(resolve))},orderInput:()=>({}),$:id=>id==='#confirmOrder'?button:panel});
+ const context=vm.createContext({pending:{axis:'KY',market:'ETHUSDT'},executionBusy:false,previewSequence:0,previewRequests:0,reviewedOrder:null,execution:{preview:()=>new Promise(resolve=>resolvers.push(resolve))},orderInput:()=>({}),$:id=>id==='#confirmOrder'?button:panel});
  vm.runInContext(fn,context);const first=context.paintOrderPreview();
  for(let i=0;i<10;i++)await context.paintOrderPreview({background:true});
  assert.equal(resolvers.length,1,'background polling must not supersede in-flight preview');
@@ -16,6 +16,55 @@ test('slow order preview is not starved by polling and newer input invalidates s
  resolvers[0]({ok:false,code:'OLD',reason:'old'});await first;assert.equal(panel.textContent,'');
  resolvers[1]({ok:false,code:'NEW',reason:'latest input'});await newer;assert.match(panel.textContent,/NEW/);assert.equal(context.previewRequests,0);
  const disconnected=context.paintOrderPreview();context.pending=null;resolvers[2]({ok:true});await disconnected;assert.equal(button.disabled,true,'closed or disconnected preview cannot re-enable confirm');
+});
+
+test('direction changes review the signed draft again and confirmation submits only the visible terms',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const functions=source.slice(source.indexOf('async function paintOrderPreview('),source.indexOf('\nfunction openOrder('));
+ const handler=source.slice(source.indexOf("$('#cancelOrder').onclick="),source.indexOf('\nasync function closePos('));
+ const nodes={
+  '#confirmOrder':{disabled:true,textContent:''},
+  '#simulationOrderPreview':{innerHTML:''},
+  '#cancelOrder':{},'#confirmX':{},'#confirm':{classList:{remove(){}}}
+ };
+ const directionButtons=['LONG','SHORT'].map(orderSide=>({dataset:{orderSide},setAttribute(name,value){this[name]=value}}));
+ const previews=[],submits=[];
+ const adapter={preview(input){return new Promise(resolve=>previews.push({input,resolve}))},submit(input){submits.push(input);return {ok:true}}};
+ let trigger=4001;
+ const context=vm.createContext({
+  pending:{axis:'KY',market:'ETHUSDT',c:2,lots:3},execution:adapter,executionBusy:false,previewSequence:0,previewRequests:0,reviewedOrder:null,
+  $:id=>nodes[id],$$:()=>directionButtons,isTestnet:()=>false,C_PNL_MODEL:'ENTRY_FLOOR',
+  orderInput:()=>({...context.pending,triggerPrice:trigger}),receiptRows:rows=>JSON.stringify(rows),receiptTime:()=> '--',fmt:String,
+  executionAction:async action=>action(),productEvent(){},openOrgan(){},renderAxes(){},hud(){},toast(){},executionLabel:()=> 'SIMULATION'
+ });
+ vm.runInContext(functions+'\n'+handler,context);
+ const before=context.paintOrderPreview();
+ const selected=context.selectOrderDirection('SHORT');
+ assert.deepEqual(directionButtons.map(b=>b['aria-pressed']),['false','true']);
+ assert.equal(nodes['#confirmOrder'].textContent,'確認做空（模擬）');
+ assert.equal(previews[1].input.c,-2);
+ assert.equal(previews[1].input.lots,3);
+ previews[0].resolve({ok:false,code:'STALE_LONG',reason:'old'});
+ await before;
+ await nodes['#confirmOrder'].onclick();
+ assert.equal(submits.length,0,'a new choice must finish its own preview before submit');
+ previews[1].resolve({ok:true,side:'SHORT',leverage:2,pnlModel:'ENTRY_FLOOR',...previews[1].input});
+ await selected;
+ assert.match(nodes['#simulationOrderPreview'].innerHTML,/SHORT/);
+ assert.equal(nodes['#confirmOrder'].disabled,false);
+ trigger=4002;
+ const newReview=nodes['#confirmOrder'].onclick();
+ assert.equal(submits.length,0,'a changed trigger requires a new visible review');
+ const changedPreview=previews[2];
+ changedPreview.resolve({ok:true,side:'SHORT',leverage:2,pnlModel:'ENTRY_FLOOR',...changedPreview.input});
+ await newReview;
+ const confirm=nodes['#confirmOrder'].onclick();
+ await nodes['#confirmOrder'].onclick();
+ await confirm;
+ assert.equal(submits.length,1);
+ assert.equal(submits[0].c,-2);
+ assert.equal(submits[0].triggerPrice,4002,'confirmation uses the newly reviewed trigger');
+ assert.equal(context.pending,null);
 });
 
 test('public browser QA fails closed on legacy manifest before touching signer and retains bounded candidate writes',async()=>{
@@ -230,9 +279,9 @@ for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']])
  const ledger=createKgenLedger(100),execution=createExecutionAdapter({ledger,productV1:true,simulationFallback:true}),before=structuredClone(ledger);
  const nodes={'#confirmOrder':{},'#confirmBody':{},'#confirm':{classList:{add:v=>{nodes.open=v}}}},toasts=[];
  const state={axis,quotes:{},axes:{[axis]:{market,c,lots:1}}};let previews=0;
- const context=vm.createContext({S:state,execution,pending:null,axis:()=>state.axes[axis],syncTradeAxisFromPlane(){},isTestnet:()=>false,price:()=>0,toast:x=>toasts.push(x),normalizeSignedC,signedCFromLegacyMagnitude,$:id=>nodes[id],$$:()=>[],paintOrderPreview:()=>previews++,journey:{event:()=>false},__K11520_SIGNED_C_IMMERSIVE__:{signedByAxis:{[axis]:c}}});
+  const context=vm.createContext({S:state,execution,executionBusy:false,pending:null,reviewedOrder:null,axis:()=>state.axes[axis],syncTradeAxisFromPlane(){},isTestnet:()=>false,price:()=>0,toast:x=>toasts.push(x),normalizeSignedC,signedCFromLegacyMagnitude,$:id=>nodes[id],$$:()=>[],paintOrderPreview:()=>previews++,journey:{event:()=>false},__K11520_SIGNED_C_IMMERSIVE__:{signedByAxis:{[axis]:c}}});
  vm.runInContext(source.slice(source.indexOf('function executionQuote('),source.indexOf('function orderInput(')),context);
- vm.runInContext(source.slice(source.indexOf('function openOrder(){'),source.indexOf("$('#cancelOrder').onclick")),context);context.openOrder();
+  vm.runInContext(source.slice(source.indexOf('function renderOrderDirection(){'),source.indexOf("$('#cancelOrder').onclick")),context);context.openOrder();
  assert.equal(nodes.open,'open');assert.equal(previews,1);assert.equal(context.pending.market,market);assert.equal(context.pending.c,c);assert.deepEqual(toasts,[]);assert.deepEqual(ledger,before,'opening preview must not debit or mutate simulation');assert.deepEqual(state.quotes,{},'never relabel fallback as LIVE public data');
 });
 
@@ -240,7 +289,7 @@ test('actual order UI catches corrupt-source and rollback quote failures and cle
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
  for(const message of ['INVALID_SIMULATION_SOURCE','provider payload with private content']){
   const nodes={'#confirmOrder':{disabled:false},'#confirm':{classList:{remove:value=>{nodes.removed=value}}}},toasts=[];
-  const context=vm.createContext({execution:{mode:'SIMULATION',quote(){throw new Error(message)}},pending:{axis:'KY'},axis:()=>({market:'ETHUSDT'}),syncTradeAxisFromPlane(){},$:id=>nodes[id],toast:value=>toasts.push(value)});
+   const context=vm.createContext({execution:{mode:'SIMULATION',quote(){throw new Error(message)}},executionBusy:false,reviewedOrder:null,pending:{axis:'KY'},axis:()=>({market:'ETHUSDT'}),syncTradeAxisFromPlane(){},$:id=>nodes[id],toast:value=>toasts.push(value)});
   vm.runInContext(source.slice(source.indexOf('function executionQuote('),source.indexOf('function orderInput(')),context);
   vm.runInContext(source.slice(source.indexOf('function openOrder(){'),source.indexOf("$('#cancelOrder').onclick")),context);
   assert.doesNotThrow(()=>context.openOrder());assert.equal(context.pending,null);assert.equal(nodes['#confirmOrder'].disabled,true);assert.equal(nodes.removed,'open');

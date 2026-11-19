@@ -8,6 +8,9 @@ const OUT='artifacts/11520-visual-qa';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+// Fixed-controller regression; the default floating native gestures are covered
+// by the responsive suite without a saved HUD preference.
+await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
 // This controller/FX regression exercises the unlocked Phantom Axe. Use earned
 // local events, not hand-written XP/level; new-guest gates have separate QA.
 const skillStorage=new Map(),skillStore=createLocalPlayerStore({storage:{getItem:k=>skillStorage.get(k)??null,setItem:(k,v)=>skillStorage.set(k,v)}});

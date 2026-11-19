@@ -6,6 +6,8 @@ const OUT='artifacts/11520-visual-qa';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+// Plane-map fixed-controller regression; fresh floating input has native QA.
+await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
 await page.addInitScript(()=>{try{if(!localStorage.getItem('k11520.joystick.plane'))localStorage.setItem('k11520.joystick.plane','XZ')}catch{}});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 const GAME=(process.env.K11520_BASE_URL||'http://127.0.0.1:4173')+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html';

@@ -28,6 +28,8 @@ if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
   await page.route('https://raw.githubusercontent.com/**',route=>route.abort());
 }
 await page.addInitScript(()=>{
+  // This existing fixed-control/market regression opts into its full HUD.
+  localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'}));
   localStorage.setItem('k11520.player-session.v1',JSON.stringify({version:1,world:'K11520',xyz:{x:4,y:2,z:-3},intentXYZ:{x:4,y:2,z:-3},savedAt:new Date().toISOString()}));
   localStorage.setItem('klineodyssey.public-wallet-identity.v1',JSON.stringify({version:1,address:'0x1234567890123456789012345678901234567890',chainId:56,sourceWorld:'K12345',updatedAt:new Date().toISOString()}));
 });

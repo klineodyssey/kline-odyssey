@@ -17,7 +17,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
 import {createWorldState,createKSpaceEncounter,selectJourneyEncounter,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES,KSPACE_SKILLS} from './world-runtime.mjs';
 import {getKaiosAudio} from '../../../../assets/kaios-audio.mjs';
-import {createKgenLedger,positionRisk,snapshot} from './kgen-margin-runtime.mjs';
+import {C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL,createKgenLedger,positionRisk,snapshot} from './kgen-margin-runtime.mjs';
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
 import {createExecutionAdapter,createSimulationAutopilot} from './real-trading-order-intent.mjs';
 import {getWalletSession11520} from './wallet-game-bridge.mjs';
@@ -25,6 +25,7 @@ import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimul
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK,formatUniverseAddress,gameUnitsToK,advanceLocalMotionClock,integrateLocalMotion} from './spatial-coordinate-runtime.mjs';
 import {readCanonicalDriveState} from './combat-drive-adapter.mjs';
 import {rawVectorFromControl} from './combat-drive-live-runtime.mjs';
+import {world11520InputBlocked,floating11520JoystickEnabled,begin11520FloatingJoystick,move11520FloatingJoystick,end11520FloatingJoystick,cancel11520JoystickInput} from './joystick-xzxyyz.mjs';
 import {collectInspectableEntities,inspectMapPoint,waypointSummary} from './map-object-navigation-runtime.mjs';
 import {createLifeVisual,syncLifeVisual} from './life-visual-runtime.mjs';
 import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
@@ -73,7 +74,7 @@ addEventListener('k11520:replay-journey',replayJourney);
 globalThis.__K11520_JOURNEY__=Object.freeze({snapshot:journey.snapshot});
 const simulationExecution=createExecutionAdapter({ledger,productV1:true,simulationFallback:true,beforeMutation:()=>playerStore.check(),afterMutation:()=>playerStore.save()});
 // Startup combat/HUD callbacks may render axes before the remaining boot completes.
-let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
+let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0,reviewedOrder=null;
 function navigationContext(){return {
   id:playerLife.activePlayer().playerId+'|'+String(getWalletSession11520().snapshot().account||'GUEST'),
   readOnly:execution.mode!=='SIMULATION'||execution.readOnly===true||playerLifeSwitching||document.visibilityState==='hidden',
@@ -160,7 +161,7 @@ function syncWorldFeedback(){const p=playerLife.activePlayer(),key=p.playerId+':
   if(Date.now()>=musicHoldUntil){const target=combatSnapshot()?.target,distance=combatSnapshot()?.distance??Infinity;getKaiosAudio().setMusicState(target?.state==='DEAD'?'EXPLORE':target?.boss&&distance<20?(target.lowHp?'BOSS_LOW_HP':'BOSS'):Date.now()-lastCombatAt<4500?'COMBAT':playerHomeFraming?'HOME':distance<10?'ENCOUNTER':'EXPLORE')}
 }
 function trackJourneyMovement(){if(playerLifeSwitching)return;const d=Math.hypot(S.xyz.x-lastExplorationPosition.x,S.xyz.y-lastExplorationPosition.y,S.xyz.z-lastExplorationPosition.z);lastExplorationPosition={...S.xyz};if(d>0&&d<=2)explorationMeters+=d;if(explorationMeters>=5){explorationMeters-=5;try{playerLife.recordExplorationStep()}catch(error){toast('探索保存：'+error.message)}}}
-function startJourneyEncounter(profileId){const p=playerLife.activePlayer(),result=selectJourneyEncounter(world,S.xyz,{profileId,playerLevel:p.level,engineLevel:p.engineLevel,now:Date.now()});if(!result.ok)throw new Error(result.reason||'ENCOUNTER_LOCKED');toast('新遭遇在附近 · 搖桿靠近後攻擊')}
+function startJourneyEncounter(profileId){const p=playerLife.activePlayer(),result=selectJourneyEncounter(world,S.xyz,{profileId,playerLevel:p.level,engineLevel:p.engineLevel,now:Date.now()});if(!result.ok)throw new Error(result.reason||'ENCOUNTER_LOCKED');toast('新遭遇在附近 · 拖曳空白處靠近後攻擊')}
 function claimDailyJourney(){
   const already=playerLife.gameplayProfile().daily.claimed;
   if(!already)playerLife.claimDailyJourney();
@@ -384,7 +385,7 @@ function performCombat(skill){
 }
 $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performCombat('goldenRain');
 $('#tradeSword').onclick=()=>performCombat('phantomAxe');
-$('#dodge').onclick=()=>{cancelNavigation('閃避');if(S.hp<=0){showJourneyRecovery();return}for(const turn of [0,Math.PI/2,-Math.PI/2,Math.PI]){const heading=S.heading+turn,next={x:S.xyz.x+Math.sin(heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(heading)*1.4},mid={x:(S.xyz.x+next.x)/2,y:S.xyz.y,z:(S.xyz.z+next.z)/2};if(!resolvePlayerMove(S.xyz,mid).blocked&&!resolvePlayerMove(S.xyz,next).blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast(turn?'側向閃避 · 避開障礙':'閃避');return}}toast('閃避受阻 · 先用搖桿離開障礙')};
+$('#dodge').onclick=()=>{cancelNavigation('閃避');if(S.hp<=0){showJourneyRecovery();return}for(const turn of [0,Math.PI/2,-Math.PI/2,Math.PI]){const heading=S.heading+turn,next={x:S.xyz.x+Math.sin(heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(heading)*1.4},mid={x:(S.xyz.x+next.x)/2,y:S.xyz.y,z:(S.xyz.z+next.z)/2};if(!resolvePlayerMove(S.xyz,mid).blocked&&!resolvePlayerMove(S.xyz,next).blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast(turn?'側向閃避 · 避開障礙':'閃避');return}}toast('閃避受阻 · 拖曳空白處或顯示操作移開')};
 $('#flat').onclick=closePos;$('#orderFire').onclick=openOrder;
 const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 取經目標：點擊展開座標與六相部位';targetHud.hidden=true;document.body.appendChild(targetHud);
 const monsterHud=document.querySelector('.monsterHud');if(monsterHud){monsterHud.style.cursor='pointer';monsterHud.title='點擊查看 K-space 六相戰鬥詳情';monsterHud.addEventListener('click',e=>{if(e.target.closest('details'))return;showCombatTarget()})}
@@ -420,7 +421,7 @@ function monsterScreenGuide(snapshot){
   if(onScreen){const phase=snapshot.selection?.body?` · 攻 ${snapshot.selection.body}`:' · 0C 自動取經';monsterGuide.textContent=`🎯 ${snapshot.target.name} · ${Math.round(snapshot.target.hp)}/${snapshot.target.maxHp}HP · ${snapshot.distance.toFixed(1)}m${phase}${snapshot.distance<=KSPACE_SKILLS.slash.radius?' · ⚔ 可攻擊':' · 靠近再攻擊'}`;monsterGuide.style.left=`${Math.max(18,Math.min(innerWidth-18,(p.x*.5+.5)*innerWidth))}px`;monsterGuide.style.top=`${Math.max(310,Math.min(innerHeight-245,(-p.y*.5+.5)*innerHeight-36))}px`;monsterGuide.style.transform='translate(-50%,-100%)';monsterGuide.style.display='block';return}
   const rel=snapshot.relative,angle=Math.atan2(rel.x,rel.z)-S.camYaw,side=Math.sin(angle),forward=Math.cos(angle);
   const arrow=forward<-.15?(side>=0?'↙':'↘'):(side>.22?'←':side<-.22?'→':'↑');
-  monsterGuide.textContent=`${arrow} 怪物：${snapshot.target.name} · ${snapshot.distance.toFixed(1)}m · 用左下搖桿靠近`;
+  monsterGuide.textContent=`${arrow} 怪物：${snapshot.target.name} · ${snapshot.distance.toFixed(1)}m · 用空白拖曳靠近`;
   monsterGuide.style.left='50%';monsterGuide.style.top='62%';monsterGuide.style.transform='translate(-50%,-50%)';monsterGuide.style.display='block';
 }
 function renderCombatTarget(){
@@ -504,12 +505,13 @@ function simulationOrganHTML(id){
   }).join('')||'<p>尚無委託</p>');
   if(id==='positions'){const c=crossMarketSnapshot();return tag+'<div class="card"><b>跨市場 KGEN 組合</b>'+receiptRows([['BTC / KX',c.byAxis.KX.length],['ETH / KY',c.byAxis.KY.length],['BNB / KZ',c.byAxis.KZ.length],['LOCKED KGEN',c.lockedMargin],['UNREALIZED PNL',c.unrealizedPnl],['REALIZED PNL',c.realizedPnl]])+'</div>'+(x.positions.slice().reverse().map(p=>{
     const risk=isTestnet()?{liquidationMark:p.liquidationPrice,pnl:p.unrealizedPnl}:positionRisk(p),r=x.receipts.find(r=>r.positionId===p.positionId&&r.kind==='SETTLEMENT');
-return '<div class="card"><b>'+p.positionId+' · '+(p.status==='OPEN'?'POSITION OPEN':p.status==='LIQUIDATED'?'斷頭 / LIQUIDATED':p.status)+'</b>'+receiptRows([['MARKET',p.market],['PRICE SOURCE',p.priceSource||(isTestnet()?'ON_CHAIN_ORACLE':'SIMULATION_OBSERVATION')],['SIDE / C / LOTS',p.side+' / '+p.c+'C / '+p.lots],['ENTRY / MARK',fmt(p.entry,6)+' / '+fmt(p.mark,6)],['LIQUIDATION',risk.liquidationMark==null?'UNAVAILABLE':fmt(Math.max(0,risk.liquidationMark),6)],['ΔINDEX',p.deltaIndex==null?'--':fmt(p.deltaIndex,8)],['POSITION EQUITY',p.equity==null?'--':fmt(p.equity,6)],[isTestnet()?'ORACLE TIME':'OBSERVED AT (SIMULATION)',receiptTime(p.observedAt)],['POSITION OBSERVATION SEQUENCE',p.observationSequence??'--'],['MARGIN',fmt(p.margin,6)],['UNREALIZED PNL',p.status==='OPEN'&&risk.pnl==null?'UNAVAILABLE':fmt(p.status==='OPEN'?risk.pnl:0,6)],...(r?[['REALIZED PNL',fmt(r.realizedPnl,6)],['SETTLED AT',receiptTime(r.settledAt)],['RECEIPT ID',r.receiptId]]:[])])+(p.status==='OPEN'?'<button class="btn" data-sim-close="'+p.positionId+'">CLOSE · 平倉（'+executionLabel()+'）</button>':'')+'</div>';
+return '<div class="card"><b>'+p.positionId+' · '+(p.status==='OPEN'?'POSITION OPEN':p.status==='LIQUIDATED'?'斷頭 / LIQUIDATED':p.status)+'</b>'+receiptRows([['MARKET',p.market],['PRICE SOURCE',p.priceSource||(isTestnet()?'ON_CHAIN_ORACLE':'SIMULATION_OBSERVATION')],['SIDE / C / LOTS',p.side+' / '+p.c+'C / '+p.lots],['ENTRY / MARK',fmt(p.entry,6)+' / '+fmt(p.mark,6)],['LIQUIDATION',risk.liquidationMark==null?'UNAVAILABLE':fmt(Math.max(0,risk.liquidationMark),6)],[isTestnet()?'ΔINDEX':'USDT 價差',p.deltaIndex==null?'--':fmt(p.deltaIndex,8)],...(!isTestnet()&&p.pnlModel===LEGACY_SIMULATION_PNL_MODEL?[['PnL MODEL','舊部位 · 原結算規則']]:[]),['POSITION EQUITY',p.equity==null?'--':fmt(p.equity,6)],[isTestnet()?'ORACLE TIME':'OBSERVED AT (SIMULATION)',receiptTime(p.observedAt)],['POSITION OBSERVATION SEQUENCE',p.observationSequence??'--'],['MARGIN',fmt(p.margin,6)],['UNREALIZED PNL',p.status==='OPEN'&&risk.pnl==null?'UNAVAILABLE':fmt(p.status==='OPEN'?risk.pnl:0,6)],...(r?[['REALIZED PNL',fmt(r.realizedPnl,6)],['SETTLED AT',receiptTime(r.settledAt)],['RECEIPT ID',r.receiptId]]:[])])+(p.status==='OPEN'?'<button class="btn" data-sim-close="'+p.positionId+'">CLOSE · 平倉（'+executionLabel()+'）</button>':'')+'</div>';
   }).join('')||'<p>尚無部位</p>');}
   if(id==='history')return tag+(isTestnet()?'<p>CHAIN RECEIPTS · 重新載入後由合約／events／receipts 恢復，不使用模擬帳本。</p>':'<p>ORDER / SETTLEMENT RECEIPTS · 依地址保存於本機；reload 恢復。非鏈上收據，可被本機修改；清除網站資料會刪除此模擬紀錄。</p>')+(x.receipts.slice().reverse().map(r=>{
     if(isTestnet()&&['Approval','MarginDeposited','MarginWithdrawn','TEST_TOKEN_MINT','SettlementClaimRecorded','SettlementClaimPaid'].includes(r.kind))return '<details class="card" data-receipt="'+escapeUI(r.receiptId)+'"><summary>'+escapeUI(r.kind)+' · '+escapeUI(r.status)+'</summary>'+receiptRows([['TX HASH',r.txHash],['BLOCK',r.block],['TIME',receiptTime(r.timestamp)],['CONTRACT',r.contract],['METHOD',r.method],['AMOUNT',r.amount??'--'],['CLAIM PAID',r.paid??'--'],['CLAIM REMAINING',r.remaining??'--'],['TX STATUS',r.transactionStatus]])+'</details>';
     const order=x.orders.find(o=>o.orderId===r.orderId),fill=x.receipts.find(f=>f.positionId===r.positionId&&f.kind==='FILL');
     const rows=[...(isTestnet()?[['TX HASH',r.txHash],['BLOCK',r.block],['CONTRACT',r.contract],['METHOD',r.method],['TX STATUS',r.transactionStatus||r.status]]:[]),['ORDER ID',r.orderId],['POSITION ID',r.positionId],['MARKET',r.market],['PRICE SOURCE',r.priceSource||(isTestnet()?'ON_CHAIN_ORACLE':'SIMULATION_OBSERVATION')],['SIDE / C / LOTS',r.side+' / '+r.c+'C / '+r.lots],['CREATED AT',receiptTime(order?.createdAt)],['TRIGGERED AT',receiptTime(r.triggeredAt)],['TRIGGER / FILL',order?.triggerPrice+' / '+fill?.fillPrice],['PREVIOUS / OBSERVED',r.previousPrice+' / '+r.observedPrice]];
+    if(!isTestnet()&&r.pnlModel)rows.push(['PnL MODEL',r.pnlModel],...(r.pnlModel===C_PNL_MODEL?[['成交樓層 · 1 K（USDT）',r.entryFloorUnit]]:[]));
     if(r.kind==='FILL')rows.push(['WALLET BEFORE',r.walletBefore],['MARGIN LOCKED',r.marginLocked],['WALLET AFTER',r.walletAfter]);
     else rows.push(['SETTLED AT',receiptTime(r.settledAt)],['ENTRY / LIQUIDATION',r.entryPrice+' / '+r.liquidationTrigger],['SETTLEMENT / EXIT',r.settlementPrice],['MARGIN BEFORE / AFTER',r.marginBefore+' / '+r.marginAfter],['RAW / REALIZED PNL',fmt(r.rawPnl,6)+' / '+fmt(r.realizedPnl,6)],['BAD DEBT / GAP LOSS',fmt(r.badDebt,6)]);
     return '<details class="card" data-receipt="'+r.receiptId+'"><summary>'+r.receiptId+' · '+r.status+' · '+r.axis+'</summary>'+receiptRows(rows)+'<details><summary>原始 '+executionLabel()+' 收據 JSON</summary><pre class="receiptRaw">'+escapeUI(JSON.stringify(r,null,2))+'</pre></details></details>';
@@ -601,7 +603,7 @@ function navigationPreviewSnapshot(){
       if(!resolveCMode(c).canTrade)throw new Error('請選擇可交易的 V1 C 檔位');
       const entry=existing?.entry??quote?.price,lots=existing?.lots??axis().lots;
       if(!Number.isFinite(entry)||entry<=0)throw new Error('模擬行情尚未就緒');
-      const risk=positionRisk({entry,mark:targetPrice,lots,c});
+      const risk=positionRisk({entry,mark:targetPrice,lots,c,pnlModel:existing?.pnlModel});
       scenario={status:'ESTIMATE',market:axis().market,entry,targetPrice,c,lots,side:c<0?'SHORT':'LONG',...risk,feeKgen:0,simulationOnly:true,source:existing?'OPEN_POSITION':'CURRENT_CONTROL'};
     }catch{scenario={status:'WAIT',reason:'請確認模擬行情、口數與非零 V1 C。'}}
   }
@@ -672,26 +674,83 @@ globalThis.__K11520_NAVIGATION_CONSOLE__=Object.freeze({open:()=>openOrgan('worl
 function executionQuote(market){try{return execution.mode==='SIMULATION'?execution.quote(market):execution.snapshot().observations[market]}catch(error){return {price:null,error:/^[A-Z][A-Z0-9_]{0,95}$/.test(error?.message)?error.message:'INVALID_EXECUTION_QUOTE'}}}
 function orderInput(){const optional=id=>$(id)?.value.trim()?Number($(id).value):null,q=executionQuote(pending.market);return {...pending,currentPrice:q?.price,priceSource:q?.source,triggerPrice:Number($('#simulationTriggerPrice').value),stopPrice:optional('#simulationStopPrice'),takeProfitPrice:optional('#simulationTakeProfitPrice')}}
 async function paintOrderPreview({background=false}={}){
-  if(!pending||(background&&previewRequests>0))return;const sequence=++previewSequence,adapter=execution;if(!background)$('#confirmOrder').disabled=true;let p;previewRequests++;try{p=await adapter.preview(orderInput())}finally{previewRequests--}const el=$('#simulationOrderPreview');if(!pending||sequence!==previewSequence||adapter!==execution||!el)return;$('#confirmOrder').disabled=!p.ok||executionBusy;
+  if(!pending||executionBusy||(background&&previewRequests>0))return;
+  const sequence=++previewSequence,adapter=execution,draft=pending,input=orderInput();
+  if(!background){reviewedOrder=null;$('#confirmOrder').disabled=true}
+  let p;previewRequests++;
+  try{p=await adapter.preview(input)}finally{previewRequests--}
+  const el=$('#simulationOrderPreview');
+  if(draft!==pending||sequence!==previewSequence||adapter!==execution||!el)return;
+  reviewedOrder=p.ok?{draft,adapter,input}:null;
+  $('#confirmOrder').disabled=!reviewedOrder||executionBusy;
   if(!p.ok){el.textContent=pending.axis+' '+pending.market+' · '+p.code+' · '+p.reason;return}
-el.innerHTML=receiptRows([['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['PRICE SOURCE',p.priceSource||(isTestnet()?'ON_CHAIN_ORACLE':'SIMULATION_OBSERVATION')],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+(isTestnet()?' tKGEN TEST':' KGEN')],['PnL MODEL',p.pnlModel||'NOTIONAL_RETURN_V1'],[p.pnlModel==='INDEX_DELTA_C_LOTS_V1'?'每 1 index point 變動':'每 1% 變動（舊部署）',fmt(p.lots*p.leverage/(p.pnlModel==='INDEX_DELTA_C_LOTS_V1'?1:100),6)+(isTestnet()?' tKGEN TEST':' KGEN')],['AVAILABLE',fmt(p.available,6)+(isTestnet()?' tKGEN TEST':' KGEN')],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+(isTestnet()?'<small>TESTNET · NO REAL VALUE。風險與 liquidation threshold 來自鏈上設定。Oracle stale 時拒絕送出；不以 public browser quote 結算。</small>':'<small>SIMULATION ONLY · 非真實行情／非鏈上成交。若 PRICE SOURCE 為 K11520_DETERMINISTIC_SIMULATION，使用本機時鐘的可重現模擬價格；真實行情恢復也不跳換此市場來源。模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。PnL = ΔIndex × C × Lots；反向歸零 '+fmt(1/p.leverage,6)+' index points。跳空以 observed price 計算實際斷頭價。</small>');
+  const fixedFloor=p.pnlModel===C_PNL_MODEL,indexDelta=p.pnlModel==='INDEX_DELTA_C_LOTS_V1';
+  const testnet=isTestnet(),currency=testnet?' tKGEN TEST':' KGEN';
+  const rows=[
+    ['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],
+    ['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],
+    ['PRICE SOURCE',p.priceSource||(testnet?'ON_CHAIN_ORACLE':'SIMULATION_OBSERVATION')],
+    ['報價時間',receiptTime(p.priceObservedAt)],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],
+    ['REQUIRED MARGIN',p.requiredMargin+currency],['PnL MODEL',p.pnlModel||'NOTIONAL_RETURN_V1'],
+    [fixedFloor?'成交樓層每 1 K 變動':indexDelta?'每 1 index point 變動':'每 1% 變動（舊部署）',fmt(p.lots*p.leverage/(fixedFloor||indexDelta?1:100),6)+currency],
+    ['AVAILABLE',fmt(p.available,6)+currency],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]
+  ];
+  el.innerHTML=receiptRows(rows)+(testnet?'<small>TESTNET · NO REAL VALUE。風險與 liquidation threshold 來自鏈上設定。Oracle stale 時拒絕送出；不以 public browser quote 結算。</small>':'<small>SIMULATION ONLY · 非真實行情／非鏈上成交。若 PRICE SOURCE 為 K11520_DETERMINISTIC_SIMULATION，使用本機時鐘的可重現模擬價格；真實行情恢復也不跳換此市場來源。模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。PnL =（USDT 價差 ÷ 成交樓層每 K 的 USDT）× 帶方向的 C × 口數。反向 '+fmt(1/p.leverage,6)+' K 本金歸零。強平預估以觸發價樓層試算，成交後使用實際成交價固定。跳價按實際觀測價結算。</small>');
+}
+function renderOrderDirection(){
+  if(!pending)return;
+  const side=pending.c<0?'SHORT':'LONG',label=side==='LONG'?'做多':'做空';
+  const blocked=execution.readOnly||execution.exitOnly;
+  for(const button of $$('#confirmBody [data-order-side]')){
+    button.setAttribute('aria-pressed',String(button.dataset.orderSide===side));
+    button.disabled=!!blocked;
+  }
+  $('#confirmOrder').textContent=blocked?'目前不可建立委託':isTestnet()?'以測試網錢包確認'+label:'確認'+label+'（模擬）';
+}
+function selectOrderDirection(side){
+  if(!pending||executionBusy||execution.readOnly||execution.exitOnly)return;
+  const c=Math.abs(pending.c)*(side==='SHORT'?-1:1);
+  if(c===pending.c)return;
+  pending={...pending,c};
+  renderOrderDirection();
+  return paintOrderPreview();
 }
 function openOrder(){
-  syncTradeAxisFromPlane();const a=axis(),q=executionQuote(a.market),p=q?.price;pending=null;$('#confirmOrder').disabled=true;if(!p){$('#confirm').classList.remove('open');toast(q?.error?'ORDER_REJECTED · '+q.error:'ORACLE_STALE · 行情未就緒');return}
+  if(executionBusy)return;
+  syncTradeAxisFromPlane();const a=axis(),q=executionQuote(a.market),p=q?.price;pending=null;reviewedOrder=null;$('#confirmOrder').disabled=true;if(!p){$('#confirm').classList.remove('open');toast(q?.error?'ORDER_REJECTED · '+q.error:'ORACLE_STALE · 行情未就緒');return}
   let c;try{const signed=globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[S.axis];c=signed===undefined?signedCFromLegacyMagnitude(a.c,a.side):normalizeSignedC(signed)}catch{toast('ORDER_REJECTED · C 必須非 0 且介於 -100 與 +100');return}
   pending={axis:S.axis,market:a.market,lots:a.lots,c};
-  $('#confirmOrder').textContent=isTestnet()?'Testnet：錢包確認下單':'建立模擬委託';
-  $('#confirmBody').innerHTML='<div class="card" id="simulationOrderPreview" aria-live="polite"></div><div class="card"><label>TRIGGER · 觸發價格<input id="simulationTriggerPrice" type="number" min="0" step="any" value="'+p+'"></label><details><summary>選填停損 / 止盈</summary><label>停損價<input id="simulationStopPrice" type="number" min="0" step="any"></label><label>止盈價<input id="simulationTakeProfitPrice" type="number" min="0" step="any"></label></details></div><p class="bad">CONFIRM ORDER → PENDING_TRIGGER。PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈、不簽名。</p>';
+  $('#confirmBody').innerHTML='<div class="grid2" role="group" aria-label="委託方向"><button class="btn" type="button" data-order-side="LONG">做多</button><button class="btn" type="button" data-order-side="SHORT">做空</button></div><div class="card" id="simulationOrderPreview" aria-live="polite"></div><div class="card"><label>TRIGGER · 觸發價格<input id="simulationTriggerPrice" type="number" min="0" step="any" value="'+p+'"></label><details><summary>選填停損 / 止盈</summary><label>停損價<input id="simulationStopPrice" type="number" min="0" step="any"></label><label>止盈價<input id="simulationTakeProfitPrice" type="number" min="0" step="any"></label></details></div><p class="bad">CONFIRM ORDER → PENDING_TRIGGER。PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈、不簽名。</p>';
   if(isTestnet()){$('#confirmBody details').hidden=true;$('#confirmBody .bad').textContent='BSC TESTNET 97 · NO REAL VALUE。CONFIRM ORDER → WALLET CONFIRM → TX → RECEIPT CONFIRMED；其後仍為 PENDING，只有 keeper 有效 observation 才能成交。'}
   for(const input of $$('#confirmBody input'))input.addEventListener('input',paintOrderPreview);
+  for(const button of $$('#confirmBody [data-order-side]'))button.onclick=()=>selectOrderDirection(button.dataset.orderSide);
+  renderOrderDirection();
   paintOrderPreview();$('#confirm').classList.add('open');if(journey.event('PREVIEW',{c})){emit11520WorldFeedback('QUEST_COMPLETE');try{playerLife.recordEvent({id:'quest:FIRST_JOURNEY',type:'QUEST_COMPLETE'})}catch(error){if(error.message!=='EVENT_REPLAY')toast(error.message)}toast('序章完成 · 可繼續探索；錢包稍後再連，不需確認下單')}
 }
-$('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};
-$('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confirmOrder').disabled=true;const input=orderInput();const r=await executionAction(()=>execution.submit(input));if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜委託已建立');openOrgan('orders');renderAxes();hud()};
+$('#cancelOrder').onclick=$('#confirmX').onclick=()=>{
+  if(executionBusy)return;
+  pending=null;reviewedOrder=null;$('#confirm').classList.remove('open')
+};
+$('#confirmOrder').onclick=async()=>{
+  const review=reviewedOrder;
+  if(!review||review.draft!==pending||review.adapter!==execution||executionBusy)return;
+  const current=orderInput();
+  if(['triggerPrice','stopPrice','takeProfitPrice'].some(key=>current[key]!==review.input[key])){
+    return paintOrderPreview()
+  }
+  reviewedOrder=null;
+  $('#confirmOrder').disabled=true;
+  const r=await executionAction(()=>review.adapter.submit(review.input));
+  if(review.draft!==pending||review.adapter!==execution)return;
+  if(!r.ok){toast(r.code+' · '+r.reason);void paintOrderPreview();return}
+  productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');
+  toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜委託已建立');
+  openOrgan('orders');renderAxes();hud()
+};
 async function closePos(){if(execution.readOnly){toast('M1_READ_ONLY · 部位 NOT_REQUESTED；退出請返回原錢包檢視');return}if(execution.mode==='BSC_TESTNET'&&isPrincipalExitOnlyView()){toast('舊部位資料尚未恢復，暫不提供平倉；可用本金可至錢包提款。');return}const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=await executionAction(()=>execution.close(p.positionId));if(!r.ok){toast(r.reason);return}if(r.receipt)recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
 
 const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open');$('#rail').innerHTML=RAIL_ORGANS.map(([id,ic,n])=>`<button data-organ="${id}" title="${n}">${ic}</button>`).join('');$$('[data-organ]').forEach(b=>b.onclick=()=>openOrgan(b.dataset.organ));$('#sheetClose').onclick=()=>{kgenPoolReference.pause();$('#sheet').classList.remove('open');fullMapCanvas=null};
-function openOrgan(id){if(id!=='assets'&&id!=='market')kgenPoolReference.pause();if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h=navigationConsoleHTML();else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點左下圓盤中央圖循環 XZ／XY／YZ。圓盤控制所選兩軸；右下縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas);bindNavigationConsole()}mountKgenReference(id)}
+function openOrgan(id){if(id!=='assets'&&id!=='market')kgenPoolReference.pause();if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h=navigationConsoleHTML();else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點「XZ 移動」切換 XZ／XY／YZ。預設拖曳遊戲空白處叫出移動盤，放開即收起；輕點空白處導航，點生命或物件查看。雙指縮放。由資訊設定選「顯示操作」叫回固定圓盤及縱桿，並恢復單指拖曳鏡頭。圓盤控制所選兩軸；縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas);bindNavigationConsole()}mountKgenReference(id)}
 
 const walletSession=getWalletSession11520();
 let deploymentManifest=null,readOnlyDeployment=null,legacyExecution=null,readOnlyExecution=null,returnExecution=null,testnetGate='CHECKING_DEPLOYMENT',chainRefreshBusy=false;
@@ -942,7 +1001,9 @@ function routeMonsterTap(m){if(!m||m.state==='DEAD')return null;if(m.simulationC
 function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){const routed=routeMonsterTap(latchedMonster);if(routed)return routed}const rect=renderer.domElement.getBoundingClientRect();tapPointer.x=((clientX-rect.left)/rect.width)*2-1;tapPointer.y=-((clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);const hits=raycaster.intersectObjects(scene.children,true);for(const hit of hits){if(ancestorData(hit.object,'playerHome')){playerLifeUI.open();return emitWorldTapRoute('ENTITY',{entityType:'PLAYER_HOME'})}if(ancestorData(hit.object,'isPlayer')){renderer.domElement.dispatchEvent(new CustomEvent('k11520:player-tap',{detail:{source:'WORLD_RAYCAST'}}));return emitWorldTapRoute('PLAYER')}const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null){const m=[...world.monsters,...(world.ambientLife||[])].find(x=>String(x.id)===String(mid));const routed=routeMonsterTap(m);if(routed)return routed}const oid=ancestorData(hit.object,'worldObjectId');if(oid!=null){const o=WORLD_OBJECTS.find(x=>String(x.id)===String(oid));if(o){showEntityInfo(objectEntity(o));toast(`發現 ${o.name||o.label||o.kind||'物件'}`);return emitWorldTapRoute('ENTITY',{entityType:'WORLD_OBJECT',entityId:String(oid)})}}}
   let pointHit=hits.find(h=>ancestorData(h.object,'isGround'));let p=pointHit?.point;if(!p){const q=new THREE.Vector3();if(raycaster.ray.intersectPlane(groundPlane,q))p=q}if(p){cancelNavigation('切換世界目標');S.navTarget=null;document.getElementById('waypointAction')?.remove();setWorldTarget3D({x:p.x,y:p.y,z:p.z},{mode:'WORLD',source:'WORLD_GROUND'});startWorldNavigation3D();toast(`XYZ 前往 X ${fmt(p.x,1)} · Y ${fmt(p.y,1)} · Z ${fmt(p.z,1)}`);return emitWorldTapRoute('GROUND',{x:p.x,y:p.y,z:p.z})}toast('這裡沒有可到達目標');return emitWorldTapRoute('NONE')
 }
-const cameraPointers=new Map();let pinchDistance=null,pinchZoom=1,cameraGesture=false,cameraStatusTimer=0;
+const cameraPointers=new Map();let nativeWorldDown=null,pinchDistance=null,pinchZoom=1,cameraGesture=false,cameraStatusTimer=0,suppressSingleWorldPointer=false;
+function cancelWorldInput(){const held=[...cameraPointers.keys()];cameraPointers.clear();nativeWorldDown=null;worldTapStart=null;pinchDistance=null;cameraGesture=false;suppressSingleWorldPointer=false;cancel11520JoystickInput();resetJoy();for(const id of held)try{if(renderer.domElement.hasPointerCapture?.(id))renderer.domElement.releasePointerCapture(id)}catch{}}
+function worldGestureSnapshot(){return{phase:cameraPointers.size>=2?'PINCH':suppressSingleWorldPointer?'SUPPRESSED':worldTapStart?.floatingActive?'FLOATING_MOVE':worldTapStart?.floating?'PENDING_MOVE':cameraGesture?'CAMERA':worldTapStart?'ENTITY':'IDLE',pointerCount:cameraPointers.size,suppressedSingle:suppressSingleWorldPointer}}
 function canPanAt(x,y){
   if(document.elementFromPoint(x,y)!==renderer.domElement)return false;
   const r=renderer.domElement.getBoundingClientRect(),rayX=renderer.domElement.dataset.xVisualMirror==='1'?r.left+r.width-(x-r.left):x;
@@ -961,7 +1022,7 @@ const cameraReset=document.createElement('button');cameraReset.id='k11520CameraR
 function syncCameraResetContext(){const contextual=cameraView.manual;cameraReset.hidden=!contextual;cameraReset.inert=!contextual;cameraReset.dataset.contextState=contextual?'manual':'following'}
 const cameraStatus=document.createElement('output');cameraStatus.id='k11520CameraZoomStatus';cameraStatus.setAttribute('aria-live','polite');cameraStatus.setAttribute('aria-atomic','true');document.body.appendChild(cameraStatus);
 function showCameraStatus(){cameraStatus.textContent=`🔍 ${cameraView.zoom.toFixed(2)}×`;cameraStatus.classList.add('show');clearTimeout(cameraStatusTimer);cameraStatusTimer=setTimeout(()=>cameraStatus.classList.remove('show'),1500)}
-cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false;showCameraStatus();syncCameraResetContext()};
+cameraReset.onclick=()=>{cancelWorldInput();Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;showCameraStatus();syncCameraResetContext()};
 // Retire the transparent half-screen yaw interceptor. HUD controls above the
 // canvas keep their own pointer owners; only world-origin pointers enter here.
 $('#lookPad').style.setProperty('pointer-events','none','important');
@@ -971,10 +1032,11 @@ function pointerDistance(){const [a,b]=[...cameraPointers.values()];return a&&b?
 // throughout; worldTapAt still receives the canonical raycast coordinates.
 function cameraScreenX(e){const r=renderer.domElement.getBoundingClientRect();return renderer.domElement.dataset.xVisualMirror==='1'&&e.type!=='pointermove'?r.left+r.width-(e.clientX-r.left):e.clientX}
 renderer.domElement.addEventListener('pointerdown',e=>{
-  if(e.button!==0)return;
+  const nativeDown=nativeWorldDown?.id===e.pointerId?nativeWorldDown:null;nativeWorldDown=null;
+  if(e.button!==0||world11520InputBlocked())return;
   const x=cameraScreenX(e);e.preventDefault();cameraPointers.set(e.pointerId,{x,y:e.clientY});try{renderer.domElement.setPointerCapture?.(e.pointerId)}catch{}
-  if(cameraPointers.size===1){cameraGesture=false;worldTapStart={id:e.pointerId,x,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY),panAllowed:canPanAt(x,e.clientY)}}
-  else{pinchDistance=pointerDistance();pinchZoom=cameraView.zoom;worldTapStart=null;cameraGesture=true}
+  if(cameraPointers.size===1){cameraGesture=false;const panAllowed=canPanAt(x,e.clientY);worldTapStart={id:e.pointerId,x,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY),panAllowed,floating:panAllowed&&floating11520JoystickEnabled(),floatingActive:false,isTrusted:e.isTrusted===true||!!nativeDown&&Math.abs(nativeDown.x-x)<.5&&Math.abs(nativeDown.y-e.clientY)<.5}}
+  else{cancel11520JoystickInput();suppressSingleWorldPointer=true;pinchDistance=pointerDistance();pinchZoom=cameraView.zoom;worldTapStart=null;cameraGesture=true}
 },{passive:false});
 renderer.domElement.addEventListener('pointermove',e=>{
   const old=cameraPointers.get(e.pointerId);if(!old)return;
@@ -982,6 +1044,18 @@ renderer.domElement.addEventListener('pointermove',e=>{
   if(cameraPointers.size>=2){
     if(pinchDistance>0){cameraView.zoom=clampCamera(pinchZoom*pointerDistance()/pinchDistance,CAMERA_BOUNDS.minZoom,CAMERA_BOUNDS.maxZoom);const panLimit=cameraPanLimit();cameraView.panX=clampCamera(cameraView.panX,-panLimit,panLimit);cameraView.panZ=clampCamera(cameraView.panZ,-panLimit,panLimit);showCameraStatus()}
     cameraView.manual=true;cameraGesture=true;syncCameraResetContext();return;
+  }
+  // After a pinch, its surviving pointer cannot become a new movement/camera
+  // gesture. A fresh down is required after every contact has ended.
+  if(suppressSingleWorldPointer)return;
+  if(worldTapStart?.floating){
+    if(!floating11520JoystickEnabled()){cancelWorldInput();return}
+    if(!worldTapStart.floatingActive){
+      if(Math.hypot(e.clientX-worldTapStart.x,e.clientY-worldTapStart.y)<=10)return;
+      if(!begin11520FloatingJoystick({pointerId:e.pointerId,x:worldTapStart.x,y:worldTapStart.y,isTrusted:worldTapStart.isTrusted})){cancelWorldInput();return}
+      worldTapStart.floatingActive=true;cameraGesture=true;cancelNavigation('手動移動');
+    }
+    move11520FloatingJoystick({pointerId:e.pointerId,x:e.clientX,y:e.clientY});return;
   }
   // A gesture started on an actionable monster remains a monster interaction.
   if(!worldTapStart?.panAllowed||pinchDistance!==null)return;
@@ -996,20 +1070,33 @@ renderer.domElement.addEventListener('pointermove',e=>{
 },{passive:true});
 function finishCameraPointer(e){
   if(!cameraPointers.has(e.pointerId))return;
-  const start=worldTapStart;cameraPointers.delete(e.pointerId);worldTapStart=null;
-  if(e.type==='pointerup'&&!cameraGesture&&start?.id===e.pointerId&&Math.hypot(cameraScreenX(e)-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420)worldTapAt(e.clientX,e.clientY,start.monster);
-  if(!cameraPointers.size){pinchDistance=null;cameraGesture=false}
+  const start=worldTapStart;end11520FloatingJoystick(e.pointerId);cameraPointers.delete(e.pointerId);worldTapStart=null;
+  if(e.type==='pointerup'&&!cameraGesture&&!suppressSingleWorldPointer&&start?.id===e.pointerId&&Math.hypot(cameraScreenX(e)-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420)worldTapAt(e.clientX,e.clientY,start.monster);
+  if(!cameraPointers.size){pinchDistance=null;cameraGesture=false;suppressSingleWorldPointer=false}
 }
 for(const type of ['pointerup','pointercancel','lostpointercapture'])renderer.domElement.addEventListener(type,finishCameraPointer,{passive:true});
 // Character priority consumes pointerup before the world listener. Clear its
 // completed gesture too, so a later world tap cannot become a phantom pinch.
-renderer.domElement.addEventListener('k11520:player-tap',()=>{cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false});
+renderer.domElement.addEventListener('k11520:player-tap',cancelWorldInput);
+addEventListener('blur',cancelWorldInput);addEventListener('resize',cancelWorldInput);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelWorldInput()});
+document.addEventListener('k11520:controls-cancel-input',cancelWorldInput);
+document.addEventListener('k11520:settings-context',e=>{if(e.detail?.open)cancelWorldInput()});
+// The pre-existing visual-mirror owner clones down/up for raycasting. Keep
+// one original trusted-down record for this exact pointer/physical origin;
+// never label a standalone synthetic event as native and never redispatch it.
+document.addEventListener('pointerdown',e=>{if(e.target===renderer.domElement&&e.isTrusted&&e.button===0)nativeWorldDown={id:e.pointerId,x:e.clientX,y:e.clientY};else if(cameraPointers.size&&e.target!==renderer.domElement)cancelWorldInput()},{capture:true});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(nativeWorldDown?.id===e.pointerId)nativeWorldDown=null},{capture:true});
+// Observe only existing context owners, not the changing world/card subtree.
+// Closing a foreground never resurrects an old pointer or its vector.
+let worldInputContext='';
+function observeWorldInputContext(){const root=document.documentElement,key=[root.dataset.k11520HudProfile,root.dataset.k11520HudMode,...['k11520ControlsOpen','k11520TradeOpen','k11520InfoOpen','k11520SettingsOpen','k11520UtilitiesOpen','k11520HudCollapsed','k11520WorldInputBlocked'].map(c=>root.classList.contains(c)),...['#walletPanel','#walletLaunchSheet','#sheet','#confirm','#backpackPanel','#aiChatPanel','#gameChat'].map(selector=>{const el=$(selector);return el?`${el.className}|${el.hidden}|${el.inert}`:''})].join(';');if(worldInputContext&&key!==worldInputContext)cancelWorldInput();worldInputContext=key}
+const worldInputContextObserver=new MutationObserver(observeWorldInputContext);worldInputContextObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-k11520-hud-profile','data-k11520-hud-mode']});function bindWorldInputContextPanels(){for(const selector of ['#walletPanel','#walletLaunchSheet','#sheet','#confirm','#backpackPanel','#aiChatPanel','#gameChat']){const el=$(selector);if(el)worldInputContextObserver.observe(el,{attributes:true,attributeFilter:['class','hidden','inert']})}observeWorldInputContext()}bindWorldInputContextPanels();
 function applyWorldCamera(){
   const dist=8.5/cameraView.zoom,x=S.xyz.x+cameraView.panX,z=S.xyz.z+cameraView.panZ;
   camera.position.set(x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2/cameraView.zoom,z-Math.cos(S.camYaw)*dist);
   // Recenter must also reset the existing dead-zone's remembered focus. A zero
   // pan alone leaves the old manual-camera focus inside its hysteresis region.
-  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
+  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':controlState()?.floating?.active?'PLAYER_CONTROL':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
   camera.lookAt(x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,z+Math.cos(S.camYaw)*1.8);
   cameraRecenterPending=false;
   revealPlayerBehindOccluders();
@@ -1035,7 +1122,7 @@ function revealPlayerBehindOccluders(){
     for(const material of occlusionMaterials.get(mesh)){if(fadedMaterials.has(material))continue;fadedMaterials.set(material,{opacity:material.opacity,transparent:material.transparent,depthWrite:material.depthWrite});material.opacity=Math.min(material.opacity,.18);material.transparent=true;material.depthWrite=false}
   });
 }
-globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:{...CAMERA_BOUNDS,currentPan:cameraPanLimit()},playerXYZ:{...S.xyz},authority:'CAMERA_ONLY'}),canPanAt,isWorldGestureArea});
+globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:{...CAMERA_BOUNDS,currentPan:cameraPanLimit()},playerXYZ:{...S.xyz},authority:'CAMERA_ONLY',worldGesture:worldGestureSnapshot()}),canPanAt,isWorldGestureArea});
 
 function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);moveManual(now);persistPlayerSession();ground.position.set(S.xyz.x,0,S.xyz.z);avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);appearanceRing.position.set(S.xyz.x,S.xyz.y+.06,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play(lastLocalMotion?.distanceMoved>0?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();applyWorldCamera();combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
 
@@ -1047,4 +1134,4 @@ let gameplayObserver=setInterval(observeGameplay,100);
 addEventListener('pagehide',()=>{clearInterval(gameplayObserver);gameplayObserver=null});
 addEventListener('pageshow',()=>{if(gameplayObserver===null){lastExplorationPosition={...S.xyz};gameplayObserver=setInterval(observeGameplay,100)}});
 globalThis.__K11520_GAMEPLAY__=Object.freeze({snapshot:()=>({progress:playerLife.gameplayProfile(),target:combatSnapshot()?.target,music:getKaiosAudio().snapshot().musicState,ga600FullEngine:'NOT_INTEGRATED',realTradingCapUnchanged:true})});
-renderAxes();syncControls();quotes();setInterval(quotes,5000);install11520ProductFixes();requestAnimationFrame(frame);$('#charState').textContent='3D LOADING';toast('11520 canonical runtime 已啟動');
+renderAxes();syncControls();quotes();setInterval(quotes,5000);install11520ProductFixes();bindWorldInputContextPanels();requestAnimationFrame(frame);$('#charState').textContent='3D LOADING';toast('11520 canonical runtime 已啟動');

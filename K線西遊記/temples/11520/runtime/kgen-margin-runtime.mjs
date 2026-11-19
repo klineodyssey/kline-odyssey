@@ -14,8 +14,11 @@ SOURCE_OF_TRUTH: TRUE
 PURPOSE: Existing signed-C isolated simulation ledger and settlement owner; historical financial revision notes remain below.
 */
 import {C_MAX,requireCanonicalC,resolveCMode} from '../controls/nonlinear-controls.mjs';
-// REVISION 2026-09-29: Human-approved absolute index delta, not percentage return.
-export const C_PNL_MODEL='INDEX_DELTA_C_LOTS_V1';
+import {signedUniverseAddress} from './spatial-coordinate-runtime.mjs';
+
+export const C_PNL_MODEL='UNIVERSE_ENTRY_FLOOR_DELTA_C_LOTS_V1';
+// Positions already open before the fix keep the model under which they filled.
+export const LEGACY_SIMULATION_PNL_MODEL='INDEX_DELTA_C_LOTS_V1';
 
 export const MAX_C_LEVERAGE=C_MAX;
 export const MAX_LOTS=100;
@@ -69,38 +72,43 @@ export function requiredMargin({lots}){
   return n;
 }
 
-export function pnlForMove({entry,mark,side,lots,c}){
-  const e=Number(entry);
-  if(!Number.isFinite(e)||e<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
-  const m=Number(mark);
+function settlementPriceUnit(entry,pnlModel){
+  const price=Number(entry);
+  if(!Number.isFinite(price)||price<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
+  if(pnlModel===LEGACY_SIMULATION_PNL_MODEL)return 1;
+  if(pnlModel!==C_PNL_MODEL)throw new RangeError('UNSUPPORTED_SIMULATION_PNL_MODEL');
+  // Use only the scalar decade of the actual fill, independent of player XYZ.
+  const unit=10**signedUniverseAddress(price).k;
+  if(!Number.isFinite(unit)||unit<=0)throw new RangeError('UNIVERSE_FLOOR_UNIT_OUT_OF_RANGE');
+  return unit;
+}
+
+export function pnlForMove({entry,mark,side,lots,c,pnlModel=C_PNL_MODEL}){
+  const unit=settlementPriceUnit(entry,pnlModel),m=Number(mark);
   if(!Number.isFinite(m)||m<=0)throw new RangeError('MARK_PRICE_MUST_BE_POSITIVE');
   const quantity=requiredMargin({lots});
   const direction=signedPositionSide(c,side)==='SHORT'?-1:1;
-  const leverage=normalizeLeverage(c);
-  return (m-e)*direction*quantity*leverage;
+  const pnl=((m-Number(entry))/unit)*direction*quantity*normalizeLeverage(c);
+  if(!Number.isFinite(pnl))throw new RangeError('PNL_MUST_BE_FINITE');
+  return pnl;
 }
 
-export function maxAdverseFraction(c,entry=1){
-  const leverage=normalizeLeverage(c);
-  const e=Number(entry);
-  if(!Number.isFinite(e)||e<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
-  return leverage===0?Infinity:1/(leverage*e);
+export function maxAdverseFraction(c,entry=1,pnlModel=C_PNL_MODEL){
+  return maxAdversePoints(c,entry,pnlModel)/Number(entry);
 }
 
-export function maxAdversePoints(c,entry=1){
-  const leverage=normalizeLeverage(c);
-  const e=Number(entry);
-  if(!Number.isFinite(e)||e<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
-  return leverage===0?Infinity:1/leverage;
+// Raw USDT distance, because liquidation compares raw observed prices.
+export function maxAdversePoints(c,entry=1,pnlModel=C_PNL_MODEL){
+  const leverage=normalizeLeverage(c),unit=settlementPriceUnit(entry,pnlModel);
+  return leverage===0?Infinity:unit/leverage;
 }
 
-export function liquidationMark({entry,side,c}){
-  const e=Number(entry);
-  if(!Number.isFinite(e)||e<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
-  const distance=maxAdversePoints(c,e);
+export function liquidationMark({entry,side,c,pnlModel=C_PNL_MODEL}){
+  const e=Number(entry),distance=maxAdversePoints(c,e,pnlModel);
   if(!Number.isFinite(distance))return null;
   const long=signedPositionSide(c,side)==='LONG';
-  return e+(long?-distance:distance);
+  const boundary=e+(long?-distance:distance);
+  return Number.isFinite(boundary)?boundary:null;
 }
 
 export function clampPositionPnl({principal,pnl}){
@@ -110,15 +118,18 @@ export function clampPositionPnl({principal,pnl}){
   return Math.max(-p,x);
 }
 
-export function positionRisk({entry,mark,side,lots,c}){
+export function positionRisk({entry,mark,side,lots,c,pnlModel=C_PNL_MODEL}){
   const principal=requiredMargin({lots});
-  const rawPnl=pnlForMove({entry,mark,side,lots,c});
+  const rawPnl=pnlForMove({entry,mark,side,lots,c,pnlModel});
   const pnl=clampPositionPnl({principal,pnl:rawPnl});
   const remaining=Math.max(0,principal+pnl);
-  const boundary=liquidationMark({entry,side,c});
+  const boundary=liquidationMark({entry,side,c,pnlModel});
   // Match the lifecycle's exact price threshold; raw PnL can round above -principal.
-  const liquidated=Number(c)>0?Number(mark)<=boundary:Number(mark)>=boundary;
-  return {principal,pnl,rawPnl,remaining,liquidated,pnlModel:C_PNL_MODEL,maxAdverseFraction:maxAdverseFraction(c,entry),maxAdversePoints:maxAdversePoints(c,entry),liquidationMark:boundary};
+  const liquidated=boundary!==null&&(Number(c)>0?Number(mark)<=boundary:Number(mark)>=boundary);
+  const adverse=maxAdversePoints(c,entry,pnlModel);
+  return {principal,pnl,rawPnl,remaining,liquidated,pnlModel,
+    entryFloorUnit:settlementPriceUnit(entry,pnlModel),maxAdverseFraction:adverse/Number(entry),
+    maxAdversePoints:adverse,liquidationMark:boundary};
 }
 
 export function reserveOrder(ledger,amount){
@@ -170,8 +181,11 @@ export function touchedOrCrossed(previous,trigger,observed){
   const p=positivePrice(previous),t=positivePrice(trigger),q=positivePrice(observed);
   return q===t||(p<t&&q>t)||(p>t&&q<t);
 }
+function simulationPositionRisk(position,mark=position.mark){
+  return positionRisk({...position,mark,pnlModel:position.pnlModel??LEGACY_SIMULATION_PNL_MODEL});
+}
 function updateSimulationEquity(draft,book){
-  draft.unrealizedPnl=book.positions.filter(p=>p.status==='OPEN').reduce((sum,p)=>sum+positionRisk({...p,mark:p.mark}).pnl,0);
+  draft.unrealizedPnl=book.positions.filter(p=>p.status==='OPEN').reduce((sum,p)=>sum+simulationPositionRisk(p).pnl,0);
   draft.total=draft.free+draft.lockedMargin+draft.reservedOrders;
 }
 export function placeSimulationOrder(ledger,{axis,market,c,side,lots,triggerPrice,stopPrice=null,takeProfitPrice=null,now=Date.now()}={}){
@@ -195,12 +209,12 @@ export function cancelSimulationOrder(ledger,orderId){
   order.status='CANCELLED';commitSimulation(ledger,draft,book);return {ok:true,order:{...order}};
 }
 function settleSimulationPosition(draft,book,position,{previousPrice,observedPrice,at,status}){
-  const risk=positionRisk({...position,mark:observedPrice}),marginBefore=position.margin;
+  const risk=simulationPositionRisk(position,observedPrice),marginBefore=position.margin;
   if(draft.lockedMargin<marginBefore)throw new RangeError('COLLATERAL_INVARIANT');
   const realizedPnl=status==='LIQUIDATED'?-marginBefore:risk.pnl;
   closeMargin(draft,{margin:marginBefore,pnl:realizedPnl});
   position.status=status;position.margin=0;position.mark=observedPrice;position.settledAt=at;
-  const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'SETTLEMENT',simulationOnly:true,trader:position.trader,positionId:position.positionId,orderId:position.orderId,market:position.market,priceSource:position.priceSource||'SIMULATION_OBSERVATION',axis:position.axis,side:position.side,c:position.c,lots:position.lots,entryPrice:position.entry,liquidationTrigger:liquidationMark(position),previousPrice,observedPrice,settlementPrice:observedPrice,triggeredAt:at,settledAt:at,marginBefore,marginAfter:0,rawPnl:risk.rawPnl,realizedPnl,badDebt:Math.max(0,-marginBefore-risk.rawPnl),status};
+  const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'SETTLEMENT',simulationOnly:true,trader:position.trader,positionId:position.positionId,orderId:position.orderId,market:position.market,priceSource:position.priceSource||'SIMULATION_OBSERVATION',axis:position.axis,side:position.side,c:position.c,lots:position.lots,entryPrice:position.entry,pnlModel:risk.pnlModel,entryFloorUnit:risk.entryFloorUnit,liquidationTrigger:risk.liquidationMark,previousPrice,observedPrice,settlementPrice:observedPrice,triggeredAt:at,settledAt:at,marginBefore,marginAfter:0,rawPnl:risk.rawPnl,realizedPnl,badDebt:Math.max(0,-marginBefore-risk.rawPnl),status};
   book.receipts.push(receipt);return receipt;
 }
 export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(),now=Date.now(),sequence=null,productV1=false,source='SIMULATION_OBSERVATION',simulationAnchorPrice,simulationAnchorAt}={}){
@@ -226,15 +240,16 @@ export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(
       const reserved=reserveOrder(draft,margin),locked=reserved.ok&&activateMargin(draft,margin);
       if(!reserved.ok||!locked?.ok||locked.amount!==margin)throw new RangeError('COLLATERAL_INVARIANT');
       const positionId=`SIM-P-${++book.sequence}`;
-      const position={trader:order.trader,positionId,orderId:order.orderId,axis:order.axis,market,priceSource:source,side:order.side,c:order.c,signedC:order.c,lots:order.lots,entry:observedPrice,mark:observedPrice,principal:margin,margin,stopPrice:order.stopPrice,takeProfitPrice:order.takeProfitPrice,status:'OPEN',openedAt:at};
+      const entryFloorUnit=settlementPriceUnit(observedPrice,C_PNL_MODEL);
+      const position={trader:order.trader,positionId,orderId:order.orderId,axis:order.axis,market,priceSource:source,side:order.side,c:order.c,signedC:order.c,lots:order.lots,entry:observedPrice,mark:observedPrice,pnlModel:C_PNL_MODEL,principal:margin,margin,stopPrice:order.stopPrice,takeProfitPrice:order.takeProfitPrice,status:'OPEN',openedAt:at};
       book.positions.push(position);Object.assign(order,{status:'FILLED',triggeredAt:at,observedPrice,fillPrice:observedPrice,positionId});
-      const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'FILL',simulationOnly:true,trader:order.trader,orderId:order.orderId,positionId,market,priceSource:source,axis:order.axis,side:order.side,c:order.c,lots:order.lots,createdAt:order.createdAt,triggeredAt:at,previousPrice,triggerPrice:order.triggerPrice,observedPrice,fillPrice:observedPrice,walletBefore,marginLocked:margin,walletAfter:draft.free,status:'FILLED'};
+      const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'FILL',simulationOnly:true,trader:order.trader,orderId:order.orderId,positionId,market,priceSource:source,axis:order.axis,side:order.side,c:order.c,lots:order.lots,createdAt:order.createdAt,triggeredAt:at,previousPrice,triggerPrice:order.triggerPrice,observedPrice,fillPrice:observedPrice,pnlModel:C_PNL_MODEL,entryFloorUnit,walletBefore,marginLocked:margin,walletAfter:draft.free,status:'FILLED'};
       book.receipts.push(receipt);events.push({...receipt});
     }
     for(const position of book.positions){
       if(position.market!==market||position.status!=='OPEN')continue;
-      const risk=positionRisk({...position,mark:observedPrice});position.priceSource=source;position.mark=observedPrice;position.observedAt=at;position.observationSequence=sequence;position.deltaIndex=observedPrice-position.entry;position.equity=position.margin+risk.pnl;
-      const long=position.c>0,liquidated=long?observedPrice<=risk.liquidationMark:observedPrice>=risk.liquidationMark;
+      const risk=simulationPositionRisk(position,observedPrice);position.priceSource=source;position.mark=observedPrice;position.observedAt=at;position.observationSequence=sequence;position.deltaIndex=observedPrice-position.entry;position.equity=position.margin+risk.pnl;
+      const long=position.c>0,liquidated=risk.liquidated;
       const stopped=position.stopPrice!==null&&(long?observedPrice<=position.stopPrice:observedPrice>=position.stopPrice);
       const takeProfit=position.takeProfitPrice!==null&&(long?observedPrice>=position.takeProfitPrice:observedPrice<=position.takeProfitPrice);
       if(liquidated||stopped||takeProfit)events.push({...settleSimulationPosition(draft,book,position,{previousPrice,observedPrice,at,status:liquidated?'LIQUIDATED':stopped?'STOPPED':'TAKE_PROFIT'})});
@@ -252,4 +267,9 @@ export function closeSimulationPosition(ledger,positionId,{now=Date.now()}={}){
     updateSimulationEquity(draft,book);commitSimulation(ledger,draft,book);return {ok:true,receipt:{...receipt}};
   }catch(e){return {ok:false,reason:e.message}}
 }
-export function simulationSnapshot(ledger){return {mode:'SIMULATION_WALLET',wallet:snapshot(ledger),...structuredClone(simulationBook(ledger))}}
+export function simulationSnapshot(ledger){
+  const book=structuredClone(simulationBook(ledger));
+  // Label old positions in the detached view without rewriting the saved book.
+  for(const position of book.positions)position.pnlModel??=LEGACY_SIMULATION_PNL_MODEL;
+  return {mode:'SIMULATION_WALLET',wallet:snapshot(ledger),...book};
+}

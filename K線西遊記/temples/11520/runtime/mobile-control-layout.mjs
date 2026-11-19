@@ -1,3 +1,6 @@
+// 2026-11-18 / Codex / Human clean-combat HUD: existing live edge summaries,
+// original explicit detail surfaces, and one canvas-owned floating-disc visual.
+// Earlier presentation notes remain below as source ancestry.
 // 2026-11-17 / Codex /root / PR672: original action visibility follows retained
 // controls OR explicit trade context. Compact overlays fit the existing world;
 // no financial state, world coordinate or gesture admission rule is changed.
@@ -19,13 +22,16 @@ const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
 let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const thumbObservers=new WeakMap();
+const flowObserved=new WeakSet();
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 const paramsHidden=()=>!!$('.sliderDock')?.classList.contains('k11520HiddenBySettings');
 const onDemand=()=>document.documentElement.dataset.k11520HudMode==='ON_DEMAND';
+const compactHud=()=>{const root=document.documentElement;return onDemand()&&root.dataset.k11520HudProfile==='MINIMAL'&&!['k11520InfoOpen','k11520TradeOpen','k11520SettingsOpen','k11520UtilitiesOpen','k11520HudCollapsed'].some(name=>root.classList.contains(name))};
 const railDisclosed=sel=>!onDemand()||document.documentElement.classList.contains('k11520ControlsOpen')||document.documentElement.classList.contains('k11520TradeOpen')||(sel==='#yControl'&&document.documentElement.classList.contains('k11520MovementActive'));
 function installStyle(){
   let s=$('#k11520MobileControlLayout');
   if(!s){s=document.createElement('style');s.id='k11520MobileControlLayout';document.head.appendChild(s)}
+  const compact='html[data-k11520-hud-mode="ON_DEMAND"][data-k11520-hud-profile="MINIMAL"]:not(.k11520InfoOpen):not(.k11520TradeOpen):not(.k11520SettingsOpen):not(.k11520UtilitiesOpen):not(.k11520HudCollapsed)';
   const css=`
 @media(max-width:${MOBILE_MAX}px){
   .hud-drawer-toggle,#yJoyV250{display:none!important;visibility:hidden!important;pointer-events:none!important}
@@ -123,6 +129,10 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
    retaining a clear gap above the 44px movement controls. */
 #k11520CameraZoomStatus{position:fixed;z-index:589;left:54px;right:auto;top:auto;bottom:max(170px,calc(env(safe-area-inset-bottom) + 170px));width:116px;transform:translateY(6px);padding:6px 8px;border:1px solid #68e4ff66;border-radius:999px;background:#071018e8;color:#dffaff;font:800 11px system-ui;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
 #k11520CameraZoomStatus.show{opacity:1;transform:translateY(0)}
+@media(orientation:portrait) and (max-width:${MOBILE_MAX}px){
+  /* Fit between Recenter and the combat row without rising over the map. */
+  #k11520CameraZoomStatus{width:72px;padding-inline:4px}
+}
 #k11520FollowMonster{position:fixed;left:54px;right:auto;top:116px;width:calc(100vw - 224px);height:44px;z-index:620;border:1px solid #68e4ff88;border-radius:10px;background:#071018dd;color:#dffaff;font:700 10px system-ui;overflow:hidden;text-overflow:ellipsis}
 #k11520CameraReset[hidden],#k11520FollowMonster[hidden],#k11520MarketRow[hidden]{display:none!important}
 @media(orientation:landscape) and (max-height:600px){
@@ -153,7 +163,7 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
 /* V2.9.6 candidate: visibility changes never resize/reanchor the world. */
 /* Information disclosure must not own Settings, Wallet, camera recovery or
    explicit controls. Each original organ keeps its own foreground/hidden gate. */
-html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :is(.axes,.tele,.monsterHud,.minimapWrap,#k11520MonsterGuide){display:none!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520InfoOpen):not(.k11520TradeOpen) :where(.axes,.tele,.monsterHud,.minimapWrap,#k11520MonsterGuide){display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:not([data-k11520-hud-profile="FULL"]):not(.k11520InfoOpen):not(.k11520TradeOpen) .top{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) .controls{display:none!important;visibility:hidden!important;pointer-events:none!important}
 /* Explicit information restores original status/map cards even in the compact
@@ -185,6 +195,47 @@ html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!
 @media(orientation:landscape) and (max-height:600px){
   html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{top:var(--k11520-landscape-guide-top,252px)!important;bottom:auto!important}
 }
+/* Compact combat reuses the live HP/XYZ/selected-market organs. Full cards
+   remain in their original explicit information and trading contexts. */
+${compact}:not(.k11520ControlsOpen) #k11520RealTradePreflight{display:none!important;pointer-events:none!important}
+${compact} #k11520BuildStamp{display:none!important}
+${compact} .monsterHud:not(.k11520HiddenBySettings){display:flex!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;bottom:auto!important;width:110px!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;padding:4px 6px!important;gap:3px;flex-direction:column;justify-content:center;background:#071018b8!important;border:1px solid #68e4ff44!important;border-radius:9px!important;z-index:610!important;font-size:12px!important;line-height:1.2!important}
+${compact} .monsterHud .bar{height:5px!important;margin:0!important}
+${compact} .monsterHud details{display:none!important}
+${compact} .monsterHud :is(#k11520MotionCombat,#k11520HpDetail,#k11520DriveHud){display:none!important}
+${compact} .axes:not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;left:max(124px,calc(env(safe-area-inset-left) + 118px))!important;right:auto!important;top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;bottom:auto!important;width:min(244px,calc(100vw - max(124px,calc(env(safe-area-inset-left) + 118px)) - max(58px,calc(env(safe-area-inset-right) + 52px))))!important;height:44px!important;min-height:44px!important;max-width:none!important;transform:none!important;z-index:610!important}
+${compact} .axes .axis:not(.active){display:none!important}
+${compact} .axes .axis.active{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;align-items:center;column-gap:6px;position:static!important;width:100%!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;margin:0!important;padding:3px 6px!important;outline:none!important;box-shadow:none!important;border:1px solid #68e4ff44!important;border-radius:9px!important;background:#071018b8!important;font-size:11px!important;line-height:1.2!important;overflow:hidden}
+${compact} .axis .axisHead{display:contents!important}
+${compact} .axis .axisHead>span,${compact} .axis .pos,${compact} .axis .marketKValue,${compact} .axis .universeFloorBadge{display:none!important}
+${compact} .axis .axisHead>b{grid-column:2;grid-row:1;font-size:9px!important}
+${compact} .axis .marketName{grid-column:1;grid-row:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px!important}
+${compact} .axis .q{grid-column:1/-1;grid-row:2;white-space:nowrap;font-size:12px!important;line-height:1.2!important}
+${compact} .tele:not(.k11520HiddenBySettings){display:flex!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:max(58px,calc(env(safe-area-inset-right) + 52px))!important;top:max(74px,calc(env(safe-area-inset-top) + 70px))!important;bottom:auto!important;width:auto!important;height:32px!important;min-height:32px!important;box-sizing:border-box!important;padding:4px 6px!important;align-items:center;background:#07101899!important;border:0!important;border-radius:7px!important;z-index:609!important;font-size:11px!important;line-height:1.25!important;overflow:hidden}
+${compact} .tele>b{display:block;width:100%;min-width:0;font-size:0!important;line-height:12px!important;white-space:normal;overflow:visible;text-overflow:clip}
+${compact} .tele #xyz{display:block;font-size:10px!important;line-height:12px!important;white-space:normal;overflow-wrap:anywhere}
+${compact} .tele>div{display:none!important}
+${compact} #k11520MonsterGuide[style*="display: block"]:not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:max(112px,calc(env(safe-area-inset-top) + 108px))!important;bottom:auto!important;width:min(320px,calc(100vw - max(6px,env(safe-area-inset-left)) - max(58px,calc(env(safe-area-inset-right) + 52px))))!important;max-width:none!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;margin:0!important;padding:6px 8px!important;transform:none!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;background:#07101899!important;border:1px solid #68e4ff33!important;border-radius:9px!important;z-index:609!important;font-size:11px!important;line-height:30px!important}
+${compact}:not(.k11520ControlsOpen) .controls:not(.k11520HiddenBySettings){display:block!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:auto!important;right:max(58px,calc(env(safe-area-inset-right) + 52px))!important;top:auto!important;bottom:max(72px,calc(env(safe-area-inset-bottom) + 64px))!important;width:154px!important;height:156px!important;transform:none!important;z-index:470!important}
+${compact} .controls>button{min-width:44px!important;min-height:44px!important}
+${compact}:not(.k11520ControlsOpen) .controls :is(#attack,#skill,#dodge,#tradeSword){position:absolute!important;left:auto!important;top:auto!important;pointer-events:auto!important;border-radius:50%!important}
+${compact}:not(.k11520ControlsOpen) .controls #attack{right:0!important;bottom:0!important;width:56px!important;height:56px!important;font-size:13px!important}
+${compact}:not(.k11520ControlsOpen) .controls #skill{right:66px!important;bottom:0!important;width:44px!important;height:44px!important;font-size:13px!important}
+${compact}:not(.k11520ControlsOpen) .controls #tradeSword{right:0!important;bottom:66px!important;width:44px!important;height:44px!important;font-size:15px!important}
+${compact}:not(.k11520ControlsOpen) .controls #dodge{right:66px!important;bottom:56px!important;width:44px!important;height:44px!important;font-size:15px!important}
+@media(orientation:landscape) and (max-height:600px){
+  ${compact} #k11520CameraZoomStatus{left:var(--k11520-compact-zoom-left,160px);top:var(--k11520-compact-zoom-top,114px)}
+}
+/* The same canvas-owned joystick is only a visual while floating. Neither it
+   nor its children can steal the second contact from the existing pinch owner. */
+html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) #joy:not([data-k11520-floating-active="1"]){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"]{position:fixed!important;left:var(--k11520-floating-x,50vw)!important;right:auto!important;top:var(--k11520-floating-y,50vh)!important;bottom:auto!important;transform:translate(-50%,-50%)!important;opacity:.88!important;visibility:visible!important;pointer-events:none!important;background:#07101844!important;border:1px solid #9eeeff88!important;border-radius:50%!important;box-shadow:none!important;z-index:450!important}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] *{pointer-events:none!important;opacity:1!important}
+html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] #k11520PlaneLabel{display:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) #joy:not([data-k11520-floating-active="1"]){visibility:visible!important;pointer-events:auto!important}
+#k11520MovePlane{position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;width:70px!important;height:44px!important;min-width:70px!important;min-height:44px!important;box-sizing:border-box!important;display:grid!important;place-items:center!important;padding:4px!important;border:1px solid #68e4ff66!important;border-radius:10px!important;background:#071018d9!important;color:#dffaff!important;font:700 12px system-ui!important;z-index:590!important;touch-action:manipulation!important}
+#k11520MovePlane[hidden],html:is(.k11520ControlsOpen,.k11520TradeOpen,.k11520SettingsOpen,.k11520UtilitiesOpen,.k11520HudCollapsed) #k11520MovePlane,html.k11520WorldInputBlocked #k11520MovePlane{display:none!important;visibility:hidden!important;pointer-events:none!important}
+html:is(.k11520SettingsOpen,.k11520UtilitiesOpen,.k11520HudCollapsed) #joy[data-k11520-floating-active="1"],html.k11520WorldInputBlocked #joy[data-k11520-floating-active="1"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 `;
   if(s.textContent!==css)s.textContent=css;
 }
@@ -252,7 +303,7 @@ function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwn
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
-  const isVisible=sel=>{const el=$(sel);if(!el)return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0};
+  const isVisible=sel=>{const el=$(sel);if(!el)return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&r.width>0&&r.height>0};
   const statusVisible=isVisible('.tele')||isVisible('.monsterHud'),marketVisible=isVisible('.axes');
   const report={version:'1.3.14',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),axisTrack:rect('#yControl .track'),axisThumb:rect('#yThumb'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.axisRailCentered=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&Math.abs((report.axisRail.left+report.axisRail.width/2)-innerWidth/2)<2);
@@ -264,7 +315,16 @@ function measure(){
   report.mapBelowStatus=innerWidth>MOBILE_MAX||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
   report.overlaps={joyRail:overlap(report.joy,report.axisRail),warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketHud,report.worldHud),marketLife:overlap(report.marketHud,report.lifeHud),worldMap:overlap(report.worldHud,report.minimap),lifeMap:overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();report.paramsHidden=paramsHidden();report.settingsOpen=document.documentElement.classList.contains('k11520SettingsOpen');
-  report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.settingsOpen||(report.paramsHidden||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned)&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v));
+  report.compact=compactHud();report.floatingActive=$('#joy')?.dataset.k11520FloatingActive==='1';
+  // A compact summary is intentionally not the equal-width diagnostic cards.
+  // Measure its actual visible edge organs; hidden rails retain their values.
+  const compactSelectors=['.axes','.tele','.monsterHud','#k11520MonsterGuide','#k11520MovePlane','#k11520MarketRow','#k11520UtilityMaster','#attack','#skill','#dodge','#tradeSword','#orderFire','#flat','#yControl','#cControl','#lotsControl'];
+  const compactBoxes=compactSelectors.filter(isVisible).map(selector=>({selector,rect:rect(selector)}));
+  report.compactContained=compactBoxes.every(({rect:r})=>r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight);
+  report.compactOverlaps=[];for(let i=0;i<compactBoxes.length;i++)for(let j=i+1;j<compactBoxes.length;j++)if(overlap(compactBoxes[i].rect,compactBoxes[j].rect))report.compactOverlaps.push([compactBoxes[i].selector,compactBoxes[j].selector]);
+  report.compactTouchTargets=compactBoxes.filter(({selector})=>!['.axes','.tele','.monsterHud','#k11520MonsterGuide','#yControl','#cControl','#lotsControl'].includes(selector)).every(({rect:r})=>r.width>=44&&r.height>=44);
+  const fullGeometry=innerWidth>MOBILE_MAX||(report.paramsHidden||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned)&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v);
+  report.ok=report.collapsed||report.settingsOpen||(report.compact?report.compactContained&&report.compactTouchTargets&&report.compactOverlaps.length===0:fullGeometry);
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
   return report;
 }
@@ -284,8 +344,25 @@ function syncHeaderFlow(){
   const contentBottom=Math.max(box($('.top'))?.bottom||0,box(brand)?.bottom||0,box(title)?.bottom||0);
   put('--k11520-market-top',Math.max(landscape?54:116,Math.ceil(contentBottom+8)));
 }
+// Only the compact landscape presentation follows the actual guide bounds.
+// Keep the camera owner, Recenter control, zoom text and 1500ms timer intact.
+function syncCompactCameraStatus(){
+  const root=document.documentElement,leftKey='--k11520-compact-zoom-left',topKey='--k11520-compact-zoom-top';
+  const reset=()=>{root.style.removeProperty(leftKey);root.style.removeProperty(topKey)};
+  if(!compactHud()||!globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches){reset();return}
+  const guide=$('#k11520MonsterGuide'),status=$('#k11520CameraZoomStatus');
+  if(!guide||!status||!guide.getClientRects().length){reset();return}
+  const style=getComputedStyle(guide),g=guide.getBoundingClientRect(),s=status.getBoundingClientRect();
+  if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0||!(g.width>0&&g.height>0&&s.width>0&&s.height>0)){reset();return}
+  const gap=8,inset=6,right={x:g.right+gap,y:g.top+Math.max(0,(g.height-s.height)/2)},below={x:Math.max(inset,Math.min(innerWidth-inset-s.width,g.left)),y:g.bottom+gap};
+  const fits=p=>p.x>=inset&&p.y>=inset&&p.x+s.width<=innerWidth-inset&&p.y+s.height<=innerHeight-inset;
+  const position=fits(right)?right:fits(below)?below:null;
+  if(!position){reset();return}
+  for(const [key,n] of [[leftKey,position.x],[topKey,position.y]]){const value=n+'px';if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value)}
+}
 function syncStatusFlow(){
   syncHeaderFlow();
+  syncCompactCameraStatus();
   const root=document.documentElement;
   if(hudCollapsed()||root.classList.contains('k11520SettingsOpen'))return;
   if(onDemand()&&!root.classList.contains('k11520InfoOpen')&&!root.classList.contains('k11520TradeOpen'))return;
@@ -307,13 +384,20 @@ function syncStatusFlow(){
   const guide=visibleRect($('#k11520MonsterGuide')),guideHeight=Math.max(44,guide?.height||0);
   if(!landscape)put('--k11520-map-top',Math.ceil(guideTop+guideHeight+10));
 }
+function observeFlowRoots(){
+  if(!flowObserver)return;
+  for(const el of [$('.axes'),$('.tele'),$('.monsterHud'),$('#k11520MonsterGuide'),$('#k11520BuildStamp'),$('.top'),$('.brand')].filter(Boolean)){
+    if(flowObserved.has(el))continue;
+    flowObserver.observe(el);flowObserved.add(el);
+  }
+}
 export function install11520MobileControlLayout(){
   apply();
-  if(booted)return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__;
+  if(booted){observeFlowRoots();return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__}
   booted=true;installGuard();addEventListener('resize',apply,{passive:true});
   if(typeof ResizeObserver==='function'){
     flowObserver=new ResizeObserver(()=>{syncStatusFlow();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
-    for(const el of [$('.axes'),$('.tele'),$('.monsterHud'),$('#k11520MonsterGuide'),$('#k11520BuildStamp'),$('.top'),$('.brand')].filter(Boolean))flowObserver.observe(el);
+    observeFlowRoots();
   }
   return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__;
 }

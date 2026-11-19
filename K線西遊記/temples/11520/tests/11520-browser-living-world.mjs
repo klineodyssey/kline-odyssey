@@ -228,9 +228,10 @@ await page.screenshot({path:`${OUT}/11520-living-world-digital-ant.png`,fullPage
 // panels cover different world regions on different mobile aspect ratios, so
 // place the QA Life through its real UPDATE ingress at the first raycast-visible
 // and physically uncovered point instead of assuming one hard-coded coordinate.
-const qaLifePlacement=await page.evaluate(async()=>{
+const qaLifeId='LIFE-QA-DIGITAL-ANT-VISUAL';
+const qaLifePlacement=await page.evaluate(async lifeId=>{
   const src=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/market-life-source-runtime.mjs');
-  const lifeId='LIFE-QA-DIGITAL-ANT-VISUAL',sourceId='QA-LIVING-WORLD',canvas=document.querySelector('#three');
+  const sourceId='QA-LIVING-WORLD',canvas=document.querySelector('#three');
   const player=globalThis.__K11520_WORLD_COORDS__?.physical||{x:0,y:0,z:0};
   const offsets=[];
   for(const z of[-8,-6,-4,-2,2,4,6,8])for(const x of[0,-2,2,-4,4,-6,6])offsets.push({x,y:0,z});
@@ -241,29 +242,50 @@ const qaLifePlacement=await page.evaluate(async()=>{
     if(point)return{offset,point};
   }
   return null;
-});
+},qaLifeId);
 assert.ok(qaLifePlacement,`QA Digital Ant must have an uncovered, raycast-routable canvas point after home delivery: ${JSON.stringify(await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.playerHomeSnapshot?.()))}`);
 await page.evaluate(()=>{globalThis.__K11520_QA_WORLD_TAP_ROUTES__=[];document.querySelector('#three')?.addEventListener('k11520:world-tap',e=>globalThis.__K11520_QA_WORLD_TAP_ROUTES__.push(e.detail||null))});
-let pickedRoute=null,tapDiagnostic=null;
+let pickedRoute=null;
+const tapAttempts=[];
 for(let attempt=0;attempt<24;attempt+=1){
-  const point=await page.evaluate(()=>{
-    const canvas=document.querySelector('#three'),points=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.visibleLifeCanvasHitPoints();
+  const point=await page.evaluate(lifeId=>{
+    const canvas=document.querySelector('#three');
+    const points=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.lifeCanvasHitPoints(lifeId);
     return points.find(p=>document.elementFromPoint(p.clientX,p.clientY)===canvas)||null;
-  });
-  if(!point){await page.waitForTimeout(60);continue}
+  },qaLifeId);
+  if(!point){
+    tapAttempts.push({attempt,point:null});
+    await page.waitForTimeout(60);
+    continue;
+  }
   await page.evaluate(()=>{globalThis.__K11520_QA_WORLD_TAP_ROUTES__=[]});
   await page.mouse.move(point.clientX,point.clientY);
   await page.mouse.down();
   await page.waitForTimeout(45);
   await page.mouse.up();
   await page.waitForTimeout(140);
-  tapDiagnostic=await page.evaluate(()=>({routes:structuredClone(globalThis.__K11520_QA_WORLD_TAP_ROUTES__||[]),selectedLifeId:document.querySelector('#selectedLifeHud')?.dataset.lifeId||null}));
-  pickedRoute=tapDiagnostic.routes.at(-1)||null;
-  if(pickedRoute?.route==='ENTITY'&&pickedRoute.entityType==='MONSTER'&&pickedRoute.lifeId)break;
-  pickedRoute=null;
+  const diagnostic=await page.evaluate(()=>({
+    routes:structuredClone(globalThis.__K11520_QA_WORLD_TAP_ROUTES__||[]),
+    selectedLifeId:document.querySelector('#selectedLifeHud')?.dataset.lifeId||null,
+    openSheetTitle:document.querySelector('#sheet.open #sheetTitle')?.textContent||null,
+  }));
+  tapAttempts.push({attempt,point,...diagnostic});
+  const route=diagnostic.routes.at(-1);
+  if(route?.route==='ENTITY'&&route.entityType==='MONSTER'&&route.lifeId===qaLifeId){
+    pickedRoute=route;
+    break;
+  }
+  // A different object can open a sheet and block later world input.
+  if(await page.locator('#sheet.open').isVisible()){
+    try{
+      await page.locator('#sheetClose').click({timeout:1500});
+    }catch(error){
+      throw new Error('Could not close the sheet after a mismatched Life tap: '+JSON.stringify(tapAttempts),{cause:error});
+    }
+  }
   await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.stop?.('selected-Life QA retry'));
 }
-assert.ok(pickedRoute,`a real Chromium pointer tap must route a raycast-visible Life through the canonical MONSTER path: ${JSON.stringify(tapDiagnostic)}`);
+assert.ok(pickedRoute,`a real Chromium pointer tap must route the QA Digital Ant through the canonical MONSTER path: ${JSON.stringify(tapAttempts)}`);
 await page.waitForFunction(()=>{const hud=document.getElementById('selectedLifeHud');return hud&&!hud.hidden&&hud.dataset.lifeId},{timeout:3000});
 const picked=await page.locator('#selectedLifeHud').evaluate(hud=>({lifeId:hud.dataset.lifeId,text:hud.textContent||''}));
 const selectedText=await page.locator('#selectedLifeHud').textContent();
@@ -281,7 +303,14 @@ assert.deepEqual(errors,[],'page errors after selected-Life click: '+errors.join
 if(await page.locator('#sheet').evaluate(sheet=>sheet.classList.contains('open')))await page.locator('#sheetClose').click();
 async function verifyActiveLandscapeContext(kind,{eligible=true}={}){
   await page.setViewportSize({width:844,height:390});await page.waitForTimeout(250);
-  if(await page.locator('#k11520UtilityMaster').getAttribute('aria-expanded')==='true')await page.locator('#k11520UtilityMaster').click();
+  // The clean default intentionally hides financial quick actions. These
+  // retained eight-control hit checks exercise explicit expanded controls.
+  if(!await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__?.controlsOpen===true)){
+    if(!await page.locator('#gameModeToggle').isVisible())await page.locator('#k11520UtilityMaster').click();
+    await page.locator('#gameModeToggle').click();await page.locator('#k11520UiSettings').waitFor({state:'visible'});
+    await page.locator('#k11520ShowControls').click();await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.controlsOpen===true);
+  }
+  if(await page.evaluate(()=>document.documentElement.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
   for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(id).isVisible(),false,'landscape context actions stay in More even when active');
   // Human 12:43: a mission is not by itself an eligible raid. The closed
   // attack window stays out of World; explicit More still opens its explanation.

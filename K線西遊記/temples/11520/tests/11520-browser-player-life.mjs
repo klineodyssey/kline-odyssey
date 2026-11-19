@@ -106,8 +106,18 @@ async function closePanels(page){
   if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
   if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
 }
+// Request the retained controls through their actual UI. This also works in
+// storage-failure profiles and does not change a guest's saved HUD preference.
+async function showControls(page){
+  if(await page.locator('html').evaluate(el=>el.classList.contains('k11520ControlsOpen')))return;
+  if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+  if(!await page.locator('#k11520UiSettings').evaluate(el=>el.classList.contains('open')))await page.locator('#gameModeToggle').click();
+  await page.locator('#k11520ShowControls').click();
+  if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+}
 async function killFirstMonster(page){
   await closePanels(page);
+  await showControls(page);
   await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40,{steps:5});
@@ -129,7 +139,7 @@ async function audioProbe(context){await context.addInitScript(()=>{
 async function audioState(page){return page.evaluate(async()=>{const {getKaiosAudio}=await import('../../../assets/kaios-audio.mjs');return getKaiosAudio().snapshot()})}
 async function signal(page){return page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<16;i++){for(const probe of __v29Probes){const values=new Float32Array(probe.fftSize);probe.getFloatTimeDomainData(values);let sum=0;for(const v of values){peak=Math.max(peak,Math.abs(v));sum+=v*v}rms=Math.max(rms,Math.sqrt(sum/values.length))}await new Promise(r=>setTimeout(r,90))}return {peak,rms}})}
 async function approachEncounter(page){
-  await closePanels(page);await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await closePanels(page);await showControls(page);await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
   const before=await page.evaluate(()=>({distance:__K11520_KSPACE_COMBAT__.distance,xyz:{...__K11520_WORLD_COORDS__.physical}}));
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40,{steps:6});
@@ -221,7 +231,17 @@ async function runV29(width,height){
     await selectEncounterUI(bossPage,'MARKET_BOSS');
     await shot(bossPage,`${width}x${height}-v29-boss-spawn`);await approachEncounter(bossPage);
     await bossPage.waitForFunction(()=>__K11520_GAMEPLAY__.snapshot().music==='BOSS');
-    let a=await audioState(bossPage);if(a.needsGesture||!a.musicEnabled||a.settings.muted){if(!await bossPage.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await bossPage.locator('#k11520UtilityMaster').click();await bossPage.locator('#bgmButton').click();await closePanels(bossPage);await bossPage.waitForTimeout(400)}
+    let a=await audioState(bossPage);
+    if(a.needsGesture||!a.musicEnabled||a.settings.muted){
+      if(!await bossPage.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await bossPage.locator('#k11520UtilityMaster').click();
+      await bossPage.locator('#bgmButton').click();
+      const panel=bossPage.locator('.kaios-audio-panel');
+      if(a.settings.muted)await panel.locator('[data-audio-action="mute"]').click();
+      if(a.needsGesture||!a.musicEnabled)await panel.getByRole('button',{name:'播放音樂',exact:true}).click();
+      await bossPage.waitForFunction(()=>__K11520_BGM__.playing);
+      await panel.getByRole('button',{name:'關閉設定',exact:true}).click();
+      await closePanels(bossPage);
+    }
     a=await audioState(bossPage);assert.equal(a.contextState,'running');assert.equal(a.activeMusicLayers,1);boss.signal=await signal(bossPage);assert(boss.signal.rms>.001&&boss.signal.peak<.95,'Boss BGM must have nonzero unclipped digital signal');
     const before=await snap(bossPage);boss.recoveries=[];boss.attackTrace=[];const defeated=await defeatUsingSlash(bossPage,{tag:'MARKET_BOSS',recoveryEvidence:boss.recoveries,attackTrace:boss.attackTrace,onAttack:async()=>{
       const t=await bossPage.evaluate(()=>__K11520_KSPACE_COMBAT__.target);if(!boss.phases.includes(t.phase)){boss.phases.push(t.phase);await shot(bossPage,`${width}x${height}-v29-boss-phase-${t.phase}`)}
