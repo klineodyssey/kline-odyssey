@@ -189,6 +189,16 @@ try {
     await page.locator('#walletToggle').click();
     await organ('trade');await page.locator('#sheetClose').click();await page.locator('#k11520UtilityMaster').click();await page.locator('#orderFire').click();
     await page.locator('#simulationTriggerPrice').fill('4001');
+    const orderDirection=side=>page.locator(`#confirmBody [data-order-side="${side}"]`);
+    const orderCount=await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length);
+    await orderDirection('SHORT').click();
+    await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled&&/SHORT/.test(document.querySelector('#simulationOrderPreview').textContent));
+    assert.equal(await orderDirection('SHORT').getAttribute('aria-pressed'),'true');
+    assert.match(await page.locator('#confirmOrder').textContent(),/確認做空/);
+    assert.equal(await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length),orderCount);
+    await orderDirection('LONG').click();
+    await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled&&/LONG/.test(document.querySelector('#simulationOrderPreview').textContent));
+    assert.equal(await orderDirection('LONG').getAttribute('aria-pressed'),'true');
     await shot('pending-confirm');
     await page.locator('#confirmOrder').click();
     // PENDING ledger state is observable before the async click handler opens
@@ -196,7 +206,7 @@ try {
     await page.locator('#confirm').waitFor({state:'hidden'});
     await page.locator('#sheet.open').waitFor({state:'visible'});
     const snap=()=>phaseTiming.measure('generic.snapshot',()=>page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot()));
-    let s=await snap();assert.equal(s.orders[0].status,'PENDING');assert.equal(s.wallet.lockedMargin,0);
+    let s=await snap();assert.equal(s.orders[0].status,'PENDING');assert.equal(s.orders[0].side,'LONG');assert.equal(s.wallet.lockedMargin,0);
     await organ('orders');await shot('pending');
     const filledQuote=await driveQuote('generic.pending-fill-quote',4002);
     assert.equal(filledQuote.orders[0]?.status,'FILLED');

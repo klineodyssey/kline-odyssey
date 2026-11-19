@@ -231,7 +231,17 @@ async function runV29(width,height){
     await selectEncounterUI(bossPage,'MARKET_BOSS');
     await shot(bossPage,`${width}x${height}-v29-boss-spawn`);await approachEncounter(bossPage);
     await bossPage.waitForFunction(()=>__K11520_GAMEPLAY__.snapshot().music==='BOSS');
-    let a=await audioState(bossPage);if(a.needsGesture||!a.musicEnabled||a.settings.muted){if(!await bossPage.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await bossPage.locator('#k11520UtilityMaster').click();await bossPage.locator('#bgmButton').click();await closePanels(bossPage);await bossPage.waitForTimeout(400)}
+    let a=await audioState(bossPage);
+    if(a.needsGesture||!a.musicEnabled||a.settings.muted){
+      if(!await bossPage.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await bossPage.locator('#k11520UtilityMaster').click();
+      await bossPage.locator('#bgmButton').click();
+      const panel=bossPage.locator('.kaios-audio-panel');
+      if(a.settings.muted)await panel.locator('[data-audio-action="mute"]').click();
+      if(a.needsGesture||!a.musicEnabled)await panel.getByRole('button',{name:'播放音樂',exact:true}).click();
+      await bossPage.waitForFunction(()=>__K11520_BGM__.playing);
+      await panel.getByRole('button',{name:'關閉設定',exact:true}).click();
+      await closePanels(bossPage);
+    }
     a=await audioState(bossPage);assert.equal(a.contextState,'running');assert.equal(a.activeMusicLayers,1);boss.signal=await signal(bossPage);assert(boss.signal.rms>.001&&boss.signal.peak<.95,'Boss BGM must have nonzero unclipped digital signal');
     const before=await snap(bossPage);boss.recoveries=[];boss.attackTrace=[];const defeated=await defeatUsingSlash(bossPage,{tag:'MARKET_BOSS',recoveryEvidence:boss.recoveries,attackTrace:boss.attackTrace,onAttack:async()=>{
       const t=await bossPage.evaluate(()=>__K11520_KSPACE_COMBAT__.target);if(!boss.phases.includes(t.phase)){boss.phases.push(t.phase);await shot(bossPage,`${width}x${height}-v29-boss-phase-${t.phase}`)}

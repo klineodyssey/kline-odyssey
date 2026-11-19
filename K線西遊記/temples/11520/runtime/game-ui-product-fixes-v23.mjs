@@ -167,13 +167,30 @@ function installPortalNav(){if(document.getElementById('kaiosPortalButton'))retu
 function installAi(){if(document.getElementById('aiChatButton'))return true;const b=document.createElement('button');b.id='aiChatButton';b.type='button';b.textContent='AI';document.body.appendChild(b);const p=document.createElement('section');p.id='aiChatPanel';p.innerHTML='<div class="aiHead"><b>🧚 11520 AI 客服</b><button id="aiVoice" type="button" aria-label="AI 語音開關">🔊</button><button id="aiClose" type="button">×</button></div><div class="aiMsgs" id="aiMsgs"><div class="aiMsg">可問座標、導航、宇宙樓層。</div></div><div class="aiComposer"><input id="aiInput" placeholder="輸入問題"><button id="aiSend" type="button">➤</button></div>';document.body.appendChild(p);const msgs=p.querySelector('#aiMsgs'),input=p.querySelector('#aiInput');const send=()=>{const q=input.value.trim();if(!q)return;input.value='';const u=document.createElement('div');u.className='aiMsg user';u.textContent=q;msgs.appendChild(u);const reply=localAiReply(q),a=document.createElement('div');a.className='aiMsg';a.textContent=reply;msgs.appendChild(a);msgs.scrollTop=msgs.scrollHeight;speakAi(reply)};b.onclick=()=>p.classList.toggle('open');p.querySelector('#aiClose').onclick=()=>p.classList.remove('open');const voice=p.querySelector('#aiVoice');voice.onclick=()=>{aiVoiceOn=!aiVoiceOn;voice.textContent=aiVoiceOn?'🔊':'🔇';if(!aiVoiceOn&&'speechSynthesis' in globalThis)speechSynthesis.cancel()};p.querySelector('#aiSend').onclick=send;input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send()}});return true}
 
 function stopBgm(){getKaiosAudio().setMusicEnabled(false)}
-let enteredWorld=false;
-function startBgm(){const audio=getKaiosAudio();audio.setWorld('11520');audio.setMusicEnabled(true);audio.unlock().then(ok=>{if(ok&&!enteredWorld){enteredWorld=true;emit11520WorldFeedback('WORLD_ENTER')}}).catch(()=>{});return true}
+let enteredWorld=false,manualMusicSelection=false;
+function startBgm(){
+  const audio=getKaiosAudio();
+  audio.setWorld('11520');
+  if(!manualMusicSelection)audio.setMusicEnabled(true);
+  audio.unlock().then(ok=>{
+    if(ok&&!enteredWorld){enteredWorld=true;emit11520WorldFeedback('WORLD_ENTER')}
+  }).catch(()=>{});
+  return true;
+}
 function gameSfx(kind='hit'){
   return getKaiosAudio().play(kind);
 }
 globalThis.__K11520_AUDIO_FX__={play:gameSfx,speak:speakAi,startBgm,stopBgm};
-function installBgm(){if(document.getElementById('bgmButton'))return true;const audio=getKaiosAudio();audio.setWorld('11520');const b=document.createElement('button');b.id='bgmButton';b.type='button';b.textContent='🔊';b.title='KAIOS 聲音設定';b.setAttribute('aria-label','KAIOS 聲音設定');document.body.appendChild(b);mountAudioControl({button:b,world:'11520'});globalThis.__K11520_BGM__={version:'2.0.0',title:'花果山・星際戰場',original:true,synthetic:true,start:startBgm,stop:stopBgm,get playing(){return audio.snapshot().playing},get contextState(){return audio.snapshot().contextState}};return true}
+function installBgm(){
+  if(document.getElementById('bgmButton'))return true;
+  const audio=getKaiosAudio();
+  const button=document.createElement('button');
+  button.id='bgmButton';
+  document.body.appendChild(button);
+  mountAudioControl({button,world:'11520',openOnTrigger:true,onMusicSelection:()=>{manualMusicSelection=true;}});
+  globalThis.__K11520_BGM__={version:'2.0.0',title:'花果山・星際戰場',original:true,synthetic:true,start:startBgm,stop:stopBgm,get playing(){return audio.snapshot().playing},get contextState(){return audio.snapshot().contextState}};
+  return true;
+}
 // The persistent bootstrap marker owns entry even after its overlay is removed.
 // A late optional skin must never reopen an intro over the running game.
 function intro(){if(document.getElementById('k11520Bootstrap')||sessionStorage.getItem('11520.intro.seen.v2')||document.getElementById('intro11520'))return true;const o=document.createElement('div');o.id='intro11520';o.innerHTML='<div class="introCore"><div class="introLogo"></div><div class="introTitle">11520 花果山 5D</div><div class="introSub">先取經，再交易。你的市場冒險從 0C 開始。</div><div class="introPath"><span><b>①</b>走路取經<br>探索 XYZ</span><span><b>②</b>斬妖掉寶<br>累積戰利品</span><span><b>③</b>0.001C<br>解鎖 K 場交易</span></div><div class="introHint">不用連錢包也能先玩 · 0 手續費模擬交易 · >1C 高速模式暫鎖</div><button class="introSkip" type="button">開始取經</button></div>';document.body.appendChild(o);const close=(withAudio=false)=>{sessionStorage.setItem('11520.intro.seen.v2','1');if(withAudio){startBgm();speakAi('歡迎來到花果山。先用左下搖桿取經，找到附近妖怪，靠近後按打怪。')}o.classList.add('hide');setTimeout(()=>o.remove(),480)};o.querySelector('button').onclick=()=>close(true);setTimeout(()=>close(false),6000);return true}

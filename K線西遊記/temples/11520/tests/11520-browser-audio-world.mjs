@@ -11,7 +11,23 @@ const audio=p=>p.evaluate(async()=>{const {getKaiosAudio}=await import('/assets/
 try{
  for(const [width,height]of [[390,844],[844,390]]){
   const context=await browser.newContext({viewport:{width,height},hasTouch:true,isMobile:true});
-  await context.addInitScript(()=>{globalThis.__audioAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const a=this.context.createAnalyser();connect.call(this,a);__audioAnalysers.push(a);}return result;};});
+  await context.addInitScript(()=>{
+   globalThis.__audioAnalysers=[];
+   const connect=AudioNode.prototype.connect;
+   AudioNode.prototype.connect=function(destination,...args){
+    const result=connect.call(this,destination,...args);
+    if(destination===this.context.destination){const analyser=this.context.createAnalyser();connect.call(this,analyser);__audioAnalysers.push(analyser);}
+    return result;
+   };
+   const resume=AudioContext.prototype.resume;
+   AudioContext.prototype.resume=function(...args){
+    if(globalThis.__rejectNext11520AudioResume){
+     globalThis.__rejectNext11520AudioResume=false;
+     return Promise.reject(new DOMException('QA interruption','NotAllowedError'));
+    }
+    return resume.apply(this,args);
+   };
+  });
   await context.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile('node_modules/three/'+route.request().url().slice(prefix.length),'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);await route.fulfill({status:200,contentType:'text/javascript',body});});
   const page=await context.newPage(),row={width,height,errors:[]};report.rows.push(row);page.on('pageerror',e=>row.errors.push(String(e)));page.setDefaultTimeout(20000);
   await page.goto(base+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html');await ready(page);
@@ -20,11 +36,34 @@ try{
   assert.equal((await audio(page)).activeMusicLayers,1);
   row.signal=await page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<30;i++){for(const a of __audioAnalysers){const v=new Float32Array(a.fftSize);a.getFloatTimeDomainData(v);let sum=0;for(const x of v){peak=Math.max(peak,Math.abs(x));sum+=x*x;}rms=Math.max(rms,Math.sqrt(sum/v.length));}await new Promise(r=>setTimeout(r,100));}return{peak,rms};});
   assert.ok(row.signal.rms>.008&&row.signal.peak>.02&&row.signal.peak<.95,'11520 destination signal above near-silence and below clipping');
-  await page.locator('#k11520UtilityMaster').click();await page.locator('#bgmButton').click();
+  await page.evaluate(()=>__audioAnalysers[0].context.suspend());
+  await page.waitForFunction(()=>__K11520_BGM__.contextState==='suspended'&&!__K11520_BGM__.playing);
+  await page.locator('#k11520UtilityMaster').click();
+  const trigger=page.locator('#bgmButton');
+  await trigger.click();
   const panel=page.locator('.kaios-audio-panel');await panel.waitFor({state:'visible'});
+  assert.equal(await trigger.getAttribute('aria-expanded'),'true');
+  assert.equal((await audio(page)).settings.musicEnabled,true,'opening the player leaves the saved play preference alone');
+  assert.equal((await audio(page)).musicPlaying,false,'opening the player does not claim the suspended track is playing');
   assert.equal(await page.locator('.kaios-audio-settings:visible').count(),0,'no second permanent settings button');
   const box=await panel.boundingBox();assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=width+1&&box.y+box.height<=height+1);
   await page.screenshot({path:`${out}/${width}-audio-settings.png`});
+  const status=panel.locator('[data-audio-status]');
+  await page.evaluate(()=>{globalThis.__rejectNext11520AudioResume=true;});
+  await panel.getByRole('button',{name:'播放音樂',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('[data-audio-status]')?.textContent.includes('USER_GESTURE_REQUIRED'));
+  assert.equal((await audio(page)).musicPlaying,false);
+  assert.equal((await audio(page)).settings.musicEnabled,true,'failed recovery leaves the prior playback choice intact');
+  await panel.getByRole('button',{name:'播放音樂',exact:true}).click();
+  await page.waitForFunction(()=>__K11520_BGM__.playing);
+  assert.match(await status.textContent(),/播放中/);
+  await panel.getByRole('button',{name:'暫停音樂',exact:true}).click();
+  assert.equal((await audio(page)).musicPlaying,false);
+  assert.match(await status.textContent(),/音樂已暫停/);
+  await panel.getByRole('button',{name:'播放音樂',exact:true}).click();
+  await page.waitForFunction(()=>__K11520_BGM__.playing);
+  assert.equal((await audio(page)).activeMusicLayers,1,'retry and resume retain one scheduled track');
+  await panel.locator('[data-audio-volume="music"]').fill('35');assert.equal((await audio(page)).settings.music,.35);
   await panel.locator('[data-audio-action="mute"]').click();assert.equal((await audio(page)).settings.muted,true);
   await panel.locator('[data-audio-volume="voice"]').fill('25');assert.equal((await audio(page)).settings.voice,.25);
   await panel.getByRole('button',{name:'關閉設定'}).click();await life(page);await page.locator('#playerLifeBuild').click();
@@ -33,7 +72,7 @@ try{
   assert.equal((await audio(page)).settings.muted,true,'visual home feedback must not unmute');
   await page.waitForTimeout(250);assert.equal(await page.locator('#toast').evaluate(el=>getComputedStyle(el).opacity), '1');
   await page.screenshot({path:`${out}/${width}-home-muted-feedback.png`});
-  await page.reload();await ready(page);assert.equal((await audio(page)).settings.muted,true);assert.equal((await audio(page)).settings.voice,.25);
+  await page.reload();await ready(page);assert.equal((await audio(page)).settings.muted,true);assert.equal((await audio(page)).settings.voice,.25);assert.equal((await audio(page)).settings.music,.35);
   await page.waitForTimeout(500);assert.equal(await page.evaluate(()=>__K11520_WORLD_AUDIO__.snapshot().events.some(e=>e.event==='HOME_BUILD')),false,'reload must not replay house creation');
   row.audio=await audio(page);
   if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();

@@ -74,7 +74,7 @@ addEventListener('k11520:replay-journey',replayJourney);
 globalThis.__K11520_JOURNEY__=Object.freeze({snapshot:journey.snapshot});
 const simulationExecution=createExecutionAdapter({ledger,productV1:true,simulationFallback:true,beforeMutation:()=>playerStore.check(),afterMutation:()=>playerStore.save()});
 // Startup combat/HUD callbacks may render axes before the remaining boot completes.
-let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
+let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0,reviewedOrder=null;
 function navigationContext(){return {
   id:playerLife.activePlayer().playerId+'|'+String(getWalletSession11520().snapshot().account||'GUEST'),
   readOnly:execution.mode!=='SIMULATION'||execution.readOnly===true||playerLifeSwitching||document.visibilityState==='hidden',
@@ -674,23 +674,79 @@ globalThis.__K11520_NAVIGATION_CONSOLE__=Object.freeze({open:()=>openOrgan('worl
 function executionQuote(market){try{return execution.mode==='SIMULATION'?execution.quote(market):execution.snapshot().observations[market]}catch(error){return {price:null,error:/^[A-Z][A-Z0-9_]{0,95}$/.test(error?.message)?error.message:'INVALID_EXECUTION_QUOTE'}}}
 function orderInput(){const optional=id=>$(id)?.value.trim()?Number($(id).value):null,q=executionQuote(pending.market);return {...pending,currentPrice:q?.price,priceSource:q?.source,triggerPrice:Number($('#simulationTriggerPrice').value),stopPrice:optional('#simulationStopPrice'),takeProfitPrice:optional('#simulationTakeProfitPrice')}}
 async function paintOrderPreview({background=false}={}){
-  if(!pending||(background&&previewRequests>0))return;const sequence=++previewSequence,adapter=execution;if(!background)$('#confirmOrder').disabled=true;let p;previewRequests++;try{p=await adapter.preview(orderInput())}finally{previewRequests--}const el=$('#simulationOrderPreview');if(!pending||sequence!==previewSequence||adapter!==execution||!el)return;$('#confirmOrder').disabled=!p.ok||executionBusy;
+  if(!pending||executionBusy||(background&&previewRequests>0))return;
+  const sequence=++previewSequence,adapter=execution,draft=pending,input=orderInput();
+  if(!background){reviewedOrder=null;$('#confirmOrder').disabled=true}
+  let p;previewRequests++;
+  try{p=await adapter.preview(input)}finally{previewRequests--}
+  const el=$('#simulationOrderPreview');
+  if(draft!==pending||sequence!==previewSequence||adapter!==execution||!el)return;
+  reviewedOrder=p.ok?{draft,adapter,input}:null;
+  $('#confirmOrder').disabled=!reviewedOrder||executionBusy;
   if(!p.ok){el.textContent=pending.axis+' '+pending.market+' · '+p.code+' · '+p.reason;return}
   const fixedFloor=p.pnlModel===C_PNL_MODEL,indexDelta=p.pnlModel==='INDEX_DELTA_C_LOTS_V1';
-  el.innerHTML=receiptRows([['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['PRICE SOURCE',p.priceSource||(isTestnet()?'ON_CHAIN_ORACLE':'SIMULATION_OBSERVATION')],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+(isTestnet()?' tKGEN TEST':' KGEN')],['PnL MODEL',p.pnlModel||'NOTIONAL_RETURN_V1'],[fixedFloor?'成交樓層每 1 K 變動':indexDelta?'每 1 index point 變動':'每 1% 變動（舊部署）',fmt(p.lots*p.leverage/(fixedFloor||indexDelta?1:100),6)+(isTestnet()?' tKGEN TEST':' KGEN')],['AVAILABLE',fmt(p.available,6)+(isTestnet()?' tKGEN TEST':' KGEN')],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+(isTestnet()?'<small>TESTNET · NO REAL VALUE。風險與 liquidation threshold 來自鏈上設定。Oracle stale 時拒絕送出；不以 public browser quote 結算。</small>':'<small>SIMULATION ONLY · 非真實行情／非鏈上成交。若 PRICE SOURCE 為 K11520_DETERMINISTIC_SIMULATION，使用本機時鐘的可重現模擬價格；真實行情恢復也不跳換此市場來源。模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。PnL =（USDT 價差 ÷ 成交樓層每 K 的 USDT）× 帶方向的 C × 口數。反向 '+fmt(1/p.leverage,6)+' K 本金歸零。強平預估以觸發價樓層試算，成交後使用實際成交價固定。跳價按實際觀測價結算。</small>');
+  const testnet=isTestnet(),currency=testnet?' tKGEN TEST':' KGEN';
+  const rows=[
+    ['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],
+    ['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],
+    ['PRICE SOURCE',p.priceSource||(testnet?'ON_CHAIN_ORACLE':'SIMULATION_OBSERVATION')],
+    ['報價時間',receiptTime(p.priceObservedAt)],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],
+    ['REQUIRED MARGIN',p.requiredMargin+currency],['PnL MODEL',p.pnlModel||'NOTIONAL_RETURN_V1'],
+    [fixedFloor?'成交樓層每 1 K 變動':indexDelta?'每 1 index point 變動':'每 1% 變動（舊部署）',fmt(p.lots*p.leverage/(fixedFloor||indexDelta?1:100),6)+currency],
+    ['AVAILABLE',fmt(p.available,6)+currency],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]
+  ];
+  el.innerHTML=receiptRows(rows)+(testnet?'<small>TESTNET · NO REAL VALUE。風險與 liquidation threshold 來自鏈上設定。Oracle stale 時拒絕送出；不以 public browser quote 結算。</small>':'<small>SIMULATION ONLY · 非真實行情／非鏈上成交。若 PRICE SOURCE 為 K11520_DETERMINISTIC_SIMULATION，使用本機時鐘的可重現模擬價格；真實行情恢復也不跳換此市場來源。模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。PnL =（USDT 價差 ÷ 成交樓層每 K 的 USDT）× 帶方向的 C × 口數。反向 '+fmt(1/p.leverage,6)+' K 本金歸零。強平預估以觸發價樓層試算，成交後使用實際成交價固定。跳價按實際觀測價結算。</small>');
+}
+function renderOrderDirection(){
+  if(!pending)return;
+  const side=pending.c<0?'SHORT':'LONG',label=side==='LONG'?'做多':'做空';
+  const blocked=execution.readOnly||execution.exitOnly;
+  for(const button of $$('#confirmBody [data-order-side]')){
+    button.setAttribute('aria-pressed',String(button.dataset.orderSide===side));
+    button.disabled=!!blocked;
+  }
+  $('#confirmOrder').textContent=blocked?'目前不可建立委託':isTestnet()?'以測試網錢包確認'+label:'確認'+label+'（模擬）';
+}
+function selectOrderDirection(side){
+  if(!pending||executionBusy||execution.readOnly||execution.exitOnly)return;
+  const c=Math.abs(pending.c)*(side==='SHORT'?-1:1);
+  if(c===pending.c)return;
+  pending={...pending,c};
+  renderOrderDirection();
+  return paintOrderPreview();
 }
 function openOrder(){
-  syncTradeAxisFromPlane();const a=axis(),q=executionQuote(a.market),p=q?.price;pending=null;$('#confirmOrder').disabled=true;if(!p){$('#confirm').classList.remove('open');toast(q?.error?'ORDER_REJECTED · '+q.error:'ORACLE_STALE · 行情未就緒');return}
+  if(executionBusy)return;
+  syncTradeAxisFromPlane();const a=axis(),q=executionQuote(a.market),p=q?.price;pending=null;reviewedOrder=null;$('#confirmOrder').disabled=true;if(!p){$('#confirm').classList.remove('open');toast(q?.error?'ORDER_REJECTED · '+q.error:'ORACLE_STALE · 行情未就緒');return}
   let c;try{const signed=globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[S.axis];c=signed===undefined?signedCFromLegacyMagnitude(a.c,a.side):normalizeSignedC(signed)}catch{toast('ORDER_REJECTED · C 必須非 0 且介於 -100 與 +100');return}
   pending={axis:S.axis,market:a.market,lots:a.lots,c};
-  $('#confirmOrder').textContent=isTestnet()?'Testnet：錢包確認下單':'建立模擬委託';
-  $('#confirmBody').innerHTML='<div class="card" id="simulationOrderPreview" aria-live="polite"></div><div class="card"><label>TRIGGER · 觸發價格<input id="simulationTriggerPrice" type="number" min="0" step="any" value="'+p+'"></label><details><summary>選填停損 / 止盈</summary><label>停損價<input id="simulationStopPrice" type="number" min="0" step="any"></label><label>止盈價<input id="simulationTakeProfitPrice" type="number" min="0" step="any"></label></details></div><p class="bad">CONFIRM ORDER → PENDING_TRIGGER。PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈、不簽名。</p>';
+  $('#confirmBody').innerHTML='<div class="grid2" role="group" aria-label="委託方向"><button class="btn" type="button" data-order-side="LONG">做多</button><button class="btn" type="button" data-order-side="SHORT">做空</button></div><div class="card" id="simulationOrderPreview" aria-live="polite"></div><div class="card"><label>TRIGGER · 觸發價格<input id="simulationTriggerPrice" type="number" min="0" step="any" value="'+p+'"></label><details><summary>選填停損 / 止盈</summary><label>停損價<input id="simulationStopPrice" type="number" min="0" step="any"></label><label>止盈價<input id="simulationTakeProfitPrice" type="number" min="0" step="any"></label></details></div><p class="bad">CONFIRM ORDER → PENDING_TRIGGER。PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈、不簽名。</p>';
   if(isTestnet()){$('#confirmBody details').hidden=true;$('#confirmBody .bad').textContent='BSC TESTNET 97 · NO REAL VALUE。CONFIRM ORDER → WALLET CONFIRM → TX → RECEIPT CONFIRMED；其後仍為 PENDING，只有 keeper 有效 observation 才能成交。'}
   for(const input of $$('#confirmBody input'))input.addEventListener('input',paintOrderPreview);
+  for(const button of $$('#confirmBody [data-order-side]'))button.onclick=()=>selectOrderDirection(button.dataset.orderSide);
+  renderOrderDirection();
   paintOrderPreview();$('#confirm').classList.add('open');if(journey.event('PREVIEW',{c})){emit11520WorldFeedback('QUEST_COMPLETE');try{playerLife.recordEvent({id:'quest:FIRST_JOURNEY',type:'QUEST_COMPLETE'})}catch(error){if(error.message!=='EVENT_REPLAY')toast(error.message)}toast('序章完成 · 可繼續探索；錢包稍後再連，不需確認下單')}
 }
-$('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};
-$('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confirmOrder').disabled=true;const input=orderInput();const r=await executionAction(()=>execution.submit(input));if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜委託已建立');openOrgan('orders');renderAxes();hud()};
+$('#cancelOrder').onclick=$('#confirmX').onclick=()=>{
+  if(executionBusy)return;
+  pending=null;reviewedOrder=null;$('#confirm').classList.remove('open')
+};
+$('#confirmOrder').onclick=async()=>{
+  const review=reviewedOrder;
+  if(!review||review.draft!==pending||review.adapter!==execution||executionBusy)return;
+  const current=orderInput();
+  if(['triggerPrice','stopPrice','takeProfitPrice'].some(key=>current[key]!==review.input[key])){
+    return paintOrderPreview()
+  }
+  reviewedOrder=null;
+  $('#confirmOrder').disabled=true;
+  const r=await executionAction(()=>review.adapter.submit(review.input));
+  if(review.draft!==pending||review.adapter!==execution)return;
+  if(!r.ok){toast(r.code+' · '+r.reason);void paintOrderPreview();return}
+  productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');
+  toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜委託已建立');
+  openOrgan('orders');renderAxes();hud()
+};
 async function closePos(){if(execution.readOnly){toast('M1_READ_ONLY · 部位 NOT_REQUESTED；退出請返回原錢包檢視');return}if(execution.mode==='BSC_TESTNET'&&isPrincipalExitOnlyView()){toast('舊部位資料尚未恢復，暫不提供平倉；可用本金可至錢包提款。');return}const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=await executionAction(()=>execution.close(p.positionId));if(!r.ok){toast(r.reason);return}if(r.receipt)recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
 
 const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open');$('#rail').innerHTML=RAIL_ORGANS.map(([id,ic,n])=>`<button data-organ="${id}" title="${n}">${ic}</button>`).join('');$$('[data-organ]').forEach(b=>b.onclick=()=>openOrgan(b.dataset.organ));$('#sheetClose').onclick=()=>{kgenPoolReference.pause();$('#sheet').classList.remove('open');fullMapCanvas=null};
