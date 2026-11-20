@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {SCHEMA,MAP_POINT_ID,K_COORDINATE,ORIGINAL_HUMAN_LANGUAGE_SEQUENCE,
+ ORDERED_CHANNELS,LANGUAGE_CHANNELS,E_STAGES,INTENTS,TRIALS,
+ createStudent,validateStudent,studentRank,nextTrial,answerTrial,channelStatus,checkK5Codebook,createGraduationRecord} from './levels.mjs';
+test('K6888 uses original map Point ID, not a new point',()=>{assert.equal(MAP_POINT_ID,'P_6888p0_松樹國_R26');assert.equal(K_COORDINATE,6888);});
+test('Human original string is not silently altered',()=>{assert.equal(ORIGINAL_HUMAN_LANGUAGE_SEQUENCE,'K1K2K3KK4K5K7');});
+test('K channel list excludes unrequested K6',()=>{assert.deepEqual(ORDERED_CHANNELS,['K1','K2','K3','K4','K5','K7']);assert.equal(LANGUAGE_CHANNELS.K6.status,'UNSPECIFIED_NOT_ASSUMED');});
+test('K5 is not claimed as a working Mars numeric language',()=>assert.equal(channelStatus('K5').status,'CANONICAL_FIVE_DIGIT_DICTIONARY_NOT_VERIFIED'));
+test('K300 cannot masquerade as K5',()=>assert.equal(checkK5Codebook({protocol:'KAIOS-K300'}).status,'K300_IS_NOT_K5'));
+test('arbitrary purported K5 codebook is not an authority',()=>assert.equal(checkK5Codebook({protocol:'K5-UNPROVEN'}).eligible,false));
+test('all eight E ranks exactly preserve human named progression',()=>assert.deepEqual(E_STAGES.map(x=>x.title),['修練佛','魔族後知後決','凡人不知不覺','先知先決','龍','神仙','神明','神君']));
+test('student starts E0 with stable point and schema',()=>{const s=createStudent();assert.equal(s.schema,SCHEMA);assert.equal(s.pointId,MAP_POINT_ID);assert.equal(studentRank(s).id,'E0');});
+test('bad trainee ids reject',()=>{for(const id of ['','../bad','bad id','我',null])assert.throws(()=>createStudent(id),/INVALID_TRAINEE_ID/) ;});
+test('trials are unique and exactly two per rank E1–E7',()=>{assert.equal(TRIALS.length,14);assert.equal(new Set(TRIALS.map(t=>t.id)).size,14);for(let rank=1;rank<=7;rank++)assert.equal(TRIALS.filter(t=>t.rank===`E${rank}`).length,2);});
+test('all trials use declared pilot channels and controlled intents',()=>{for(const t of TRIALS){assert.ok(ORDERED_CHANNELS.includes(t.channel));assert.ok(INTENTS.includes(t.intent));assert.notEqual(t.channel,'K5');}});
+test('wrong answer increments mistakes and does not progress',()=>{const s=createStudent();const t=nextTrial(s);const x=answerTrial(s,{trialId:t.id,intent:'FOOD'});assert.equal(x.status,'TRIAL_RETRY');assert.equal(x.student.completed.length,0);assert.equal(x.student.mistakes,1);assert.equal(studentRank(x.student).id,'E0');});
+test('unknown intent refuses and leaves original untouched',()=>{const s=createStudent();assert.throws(()=>answerTrial(s,{trialId:TRIALS[0].id,intent:'BUY_KGEN'}));assert.deepEqual(s.completed,[]);});
+test('out-of-order answer refuses',()=>assert.throws(()=>answerTrial(createStudent(),{trialId:TRIALS[3].id,intent:TRIALS[3].intent}),/TRIAL_ORDER_OR_REPLAY_INVALID/));
+test('cannot replay successful challenge',()=>{let s=createStudent();s=answerTrial(s,{trialId:TRIALS[0].id,intent:TRIALS[0].intent}).student;assert.throws(()=>answerTrial(s,{trialId:TRIALS[0].id,intent:TRIALS[0].intent}),/REPLAY/);});
+test('two passing challenges raise exactly one E level',()=>{let s=createStudent();s=answerTrial(s,{trialId:TRIALS[0].id,intent:TRIALS[0].intent}).student;assert.equal(studentRank(s).id,'E0');const r=answerTrial(s,{trialId:TRIALS[1].id,intent:TRIALS[1].intent});assert.equal(r.rank.id,'E1');assert.equal(r.rankUp,true);});
+test('all 14 distinct trials reach E7 without pretending K5 verified',()=>{let s=createStudent('PINE-001');for(const t of TRIALS){const r=answerTrial(s,{trialId:t.id,intent:t.intent});s=r.student;assert.equal(r.financialOrder,null);assert.equal(r.realLifeRank,false);}assert.equal(studentRank(s).id,'E7');assert.equal(nextTrial(s),null);assert.equal(createGraduationRecord(s).unverifiedK5,true);});
+test('all E rank boundaries by 2 trials',()=>{let s=createStudent();for(let i=0;i<14;i++){s=answerTrial(s,{trialId:TRIALS[i].id,intent:TRIALS[i].intent}).student;assert.equal(studentRank(s).id,`E${Math.floor((i+1)/2)}`);}});
+test('completion is idempotent and no financial event',()=>{let s=createStudent();for(const t of TRIALS)s=answerTrial(s,{trialId:t.id,intent:t.intent}).student;let r=answerTrial(s,{trialId:'random',intent:'FOLLOW'});assert.equal(r.status,'TRAINING_COMPLETED');assert.equal(r.financialOrder,null);assert.deepEqual(r.student.completed,s.completed);});
+test('forged/duplicate stored progress is rejected',()=>{const s=createStudent();assert.throws(()=>validateStudent({...s,completed:[TRIALS[1].id]}));assert.throws(()=>validateStudent({...s,completed:[TRIALS[0].id,TRIALS[0].id]}));});
+test('corrupt point ID is rejected',()=>assert.throws(()=>studentRank({...createStudent(),pointId:'P_FAKE'})));
+test('out of range mistakes reject',()=>assert.throws(()=>validateStudent({...createStudent(),mistakes:-1})));
+test('random JSON does not grant E7',()=>assert.throws(()=>createGraduationRecord({rank:'E7'})));
+test('cross-species, voice and live financial rights remain unverified',()=>{const record=createGraduationRecord(createStudent());assert.equal(record.voiceSpeechVerified,false);assert.equal(record.naturalLanguageVerified,false);assert.equal(record.actualAnimalAITrained,false);assert.equal(record.lifeIdIssued,false);assert.equal(record.worldCanonModified,false);assert.equal(record.financialOrder,null);});
+test('language channel unknown stays unknown',()=>assert.equal(channelStatus('K999').status,'UNKNOWN_CHANNEL'));
