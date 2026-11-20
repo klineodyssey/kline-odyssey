@@ -320,6 +320,10 @@ async function verifyAutomatically(){
   lastError=message(error);
   const code=String(error?.code||''),technical=(!code||error?.name==='TimeoutError'||['RPC_READ_FAILED','NETWORK_ERROR','SERVER_ERROR','TIMEOUT','TRANSPORT_CLOSED','-32000','-32603'].includes(code))&&!/revert|denied|forbidden|permission|unauthori[sz]ed|quota|rate.limit|limit.exceeded|拒絕|權限|政策|額度/i.test(String(error?.message||''));
   if(['CONTEXT_CHANGED','DISPOSED'].includes(code))return;
+  if(code==='ANOTHER_TAB_ACTIVE'){
+   lastError='另一分頁正在處理錢包操作。操作鎖釋放後，面板會自動核對原回執。';
+   return;
+  }
   if(technical)verifyFailures++;
   if(!technical||verifyFailures>=2)verifyStopped=technical?'已發生兩次讀查錯誤；請按查詢鏈上狀態後重新核對。':lastError;
  }

@@ -1712,6 +1712,29 @@ async function runAutomaticScenarios(browser,profile){
     await connect(page);await autoSettled(page);await phase(page,'PENDING');
     assert.equal(row.sendRequests.length,1,'explicit original-account reconnection only reads the saved hash');
     const mined=await mineReviewedPending(page,row);
+    const receiptReadsBeforeLock=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
+    await page.evaluate(()=>new Promise(resolve=>{
+      window.__18911TestReceiptLock=navigator.locks.request('kaios18911:financial',()=>new Promise(release=>{
+        window.__18911ReleaseTestReceiptLock=release;
+        resolve();
+      }));
+    }));
+    try{
+      await automaticRead(page,row);
+      await phase(page,'BLOCKED');
+      assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','contention leaves the read-only schedule active');
+      assert.match(await page.locator('#appStatus').textContent(),/另一分頁正在處理錢包操作/);
+      assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,receiptReadsBeforeLock,'the original lock blocks receipt reconciliation');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'contention preserves the original pending bytes');
+      assert.equal(row.sendRequests.length,1,'contention never issues another wallet request');
+    }finally{
+      await page.evaluate(async()=>{
+        window.__18911ReleaseTestReceiptLock();
+        await window.__18911TestReceiptLock;
+        delete window.__18911ReleaseTestReceiptLock;
+        delete window.__18911TestReceiptLock;
+      });
+    }
     await automaticRead(page,row);
     await page.waitForFunction(address=>document.querySelector('#deploySteps .step-address')?.textContent.toLowerCase()===address.toLowerCase(),mined.address);
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'complete automatic receipt verification clears only the original verified pending intent');
