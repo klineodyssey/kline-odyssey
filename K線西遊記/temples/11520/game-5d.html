@@ -99,6 +99,9 @@ SOURCE_OF_TRUTH: TRUE
 </style>
 <style>
 :is(#k11520InstallOffer,#k11520UpdateNotice){position:fixed;left:50%;top:54%;transform:translateX(-50%);z-index:610;align-items:center;gap:4px;max-width:calc(100% - 24px);padding:4px;border-radius:14px}
+@media(orientation:portrait){
+ :is(#k11520InstallOffer,#k11520UpdateNotice){left:auto;right:max(8px,env(safe-area-inset-right));transform:none;max-width:min(240px,calc(100% - 140px))}
+}
 :is(#k11520InstallOffer,#k11520UpdateNotice):not([hidden]){display:flex}
 body:has(#k11520UpdateNotice:not([hidden])) #k11520InstallOffer{display:none}
 :is(#k11520InstallOffer,#k11520UpdateNotice) button{min-height:44px;padding:6px 10px;border-radius:9px;border:1px solid #a77b3570;background:#101923;white-space:nowrap;cursor:pointer}
