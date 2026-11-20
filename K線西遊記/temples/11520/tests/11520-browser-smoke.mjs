@@ -45,6 +45,26 @@ if(await page.locator('#intro11520').count()){
   await page.waitForTimeout(250)
 }
 
+const installOffer=page.locator('#k11520InstallOffer');
+assert.equal(await installOffer.isVisible(),false,'hide installation before browser eligibility');
+const nativePromptDeferred=await page.evaluate(()=>{
+ const event=new Event('beforeinstallprompt',{cancelable:true});
+ event.prompt=async()=>{
+  window.__k11520InstallCalls=(window.__k11520InstallCalls||0)+1;
+  window.__k11520InstallActivated=navigator.userActivation.isActive;
+  return {outcome:'dismissed'};
+ };
+ return !window.dispatchEvent(event);
+});
+assert.equal(nativePromptDeferred,true,'the game defers the fixture prompt until a tap');
+const installGame=page.getByRole('button',{name:'安裝遊戲'});
+await installGame.waitFor({state:'visible',timeout:2000});
+const installBox=await installGame.boundingBox();
+assert.ok(installBox && installBox.height>=44 && installBox.x>=0 && installBox.y+installBox.height<=844,'install button remains on screen and touch-sized');
+await page.screenshot({path:ARTIFACT_DIR+'/11520-mobile-install-offer.png'});
+await installGame.tap({timeout:2000});
+await installOffer.waitFor({state:'hidden',timeout:2000});
+assert.deepEqual(await page.evaluate(()=>[window.__k11520InstallCalls,window.__k11520InstallActivated]),[1,true]);
 const assertVisible=async selector=>{const loc=page.locator(selector);const d=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{display:s.display,visibility:s.visibility,pointer:s.pointerEvents,w:r.width,h:r.height,x:r.x,y:r.y,right:r.right,bottom:r.bottom,text:(el.textContent||'').trim()}});assert.ok(d.w>0&&d.h>0&&d.display!=='none'&&d.visibility!=='hidden',`${selector} not visible: ${JSON.stringify(d)}`);return d};
 const xyz=async()=>{assert.match(await page.locator('#xyz').textContent(),/LOCAL X .*K.*Y .*K.*Z .*K/);return page.evaluate(()=>({...globalThis.__K11520_WORLD_COORDS__.physical}))};
 const dragReal=async(selector,toX,toY,hold=260)=>{const b=await page.locator(selector).boundingBox();assert.ok(b,selector+' missing box');const sx=b.x+b.width*.5,sy=b.y+b.height*.5,tx=b.x+b.width*toX,ty=b.y+b.height*toY;await page.mouse.move(sx,sy);await page.mouse.down();await page.mouse.move(tx,ty,{steps:5});await page.waitForTimeout(hold);await page.mouse.up()};

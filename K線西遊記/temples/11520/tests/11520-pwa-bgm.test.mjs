@@ -63,5 +63,60 @@ test('PWA checks updates at startup and online resume without reloading or clear
  document.visibilityState='visible';documentEvents.visibilitychange();assert.equal(updates,3);releaseUpdate();await new Promise(resolve=>setImmediate(resolve));
  assert.doesNotMatch(source,/\blocation\s*\.|\breload\s*\(|localStorage|indexedDB|deleteDatabase|\.clear\s*\(/);
 });
+test('K11520 offers installation only after browser eligibility and consumes the prompt on the install tap',async()=>{
+ const h=await installOfferHarness();
+ assert.equal(h.offer.hidden,true);
+ await h.install.click();
+ assert.equal(h.promptCalls,0);
+ h.eligible();
+ assert.equal(h.offer.hidden,false);
+ assert.equal(h.prevented,1);
+ assert.equal(h.promptCalls,0);
+ await h.install.click();
+ await h.install.click();
+ h.eligible();
+ assert.equal(h.promptCalls,1);
+ assert.equal(h.offer.hidden,true);
+});
+test('K11520 can dismiss the offer or hide it when installed',async()=>{
+ for(const dismiss of [h=>h.later.click(),h=>h.events.appinstalled()]){
+  const h=await installOfferHarness();
+  h.eligible();
+  dismiss(h);
+  await h.install.click();
+  h.eligible();
+  assert.equal(h.offer.hidden,true);
+  assert.equal(h.promptCalls,0);
+ }
+});
+test('K11520 explains when the browser could not open installation',async()=>{
+ const h=await installOfferHarness({fail:true});
+ h.eligible();
+ await h.install.click();
+ assert.equal(h.promptCalls,1);
+ assert.equal(h.offer.hidden,false);
+ assert.equal(h.install.hidden,true);
+ assert.equal(h.message.hidden,false);
+ h.later.click();
+ assert.equal(h.offer.hidden,true);
+});
+async function installOfferHarness({fail=false}={}){
+ const {runInNewContext}=await import('node:vm');
+ const html=read('game-5d.html');
+ const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match=>match[1]).find(code=>code.includes('beforeinstallprompt'));
+ assert.ok(script);
+ assert.match(html,/<aside\b[^>]+id="k11520InstallOffer"[^>]+\bhidden>/);
+ const events={},h={events,promptCalls:0,prevented:0};
+ const nodes={};
+ for(const [suffix,property,hidden] of [['Offer','offer',true],['Game','install',false],['Later','later',false],['Message','message',true]]){
+  h[property]=nodes['k11520Install'+suffix]={hidden,addEventListener(name,fn){this[name]=fn}};
+ }
+ runInNewContext(script,{document:{getElementById:id=>nodes[id]},addEventListener:(name,fn)=>events[name]=fn});
+ h.eligible=()=>events.beforeinstallprompt({
+  preventDefault:()=>h.prevented++,
+  prompt:async()=>{h.promptCalls++;if(fail)throw Error('prompt unavailable')}
+ });
+ return h;
+}
 test('K11520 PWA standalone shell is installable and does not force orientation',()=>{const m=JSON.parse(read('manifest.webmanifest'));assert.equal(m.display,'standalone');assert.equal(m.orientation,'any');assert.ok(m.display_override.includes('fullscreen'));for(const size of [192,512]){const icon=m.icons.find(x=>x.sizes===`${size}x${size}`);assert.ok(icon,`${size}px PWA icon missing`);assert.equal(icon.type,'image/png');assert.match(icon.purpose,/maskable/);assert.deepEqual(pngSize(icon.src),{width:size,height:size})}const h=read('game-5d.html');assert.ok(h.includes('rel="manifest"'));assert.ok(h.includes("serviceWorker.register('./sw.js'"));});
 test('K11520 original theme uses only the shared bounded synth and no commercial assets',()=>{const c=read('runtime/game-ui-product-fixes-v23.mjs'),fx=read('runtime/combat-fx-runtime.mjs');assert.ok(c.includes("title:'花果山・星際戰場'"));assert.ok(c.includes('original:true'));assert.ok(c.includes('synthetic:true'));assert.ok(c.includes('getKaiosAudio'));assert.ok(fx.includes('getKaiosAudio'));assert.equal(/new (?:AudioContext|C)\(/.test(c+fx),false);for(const name of ['Just The Way You Are.mp3','Greatest Love Of All.mp3','Take My Breath Away.mp3','情難枕.mp3'])assert.equal(c.includes(name),false);});
