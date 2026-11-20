@@ -1,11 +1,20 @@
 /*
 KGEN_META
-VERSION: 1.1.0
-REVISION: 2026-09-08.MARKET-LIFE-LIFESTYLE-ECONOMY
+VERSION: 1.2.0
+VERSION_SCOPE: MARKET_LIFE_COMPONENT_ONLY; GAME_RELEASE_UNCHANGED
+REVISION: 2026-10-06.LIVING-MARKET-LOCAL-PROTOTYPE
 STATUS: ACTIVE / SIMULATION-FIRST
 SOURCE_OF_TRUTH: MARKET_LIFE_AI_SPEC.md / LIVING_WORLD_ECOSYSTEM_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md
 CHANGE_REASON: Extend Market Life from combat-only strategy into work, travel, rest, social, exploration and retirement behavior while preserving survival, market and Naihe lifecycle semantics.
+PROTOTYPE_SCOPE: Causal session prediction audit and opt-in NPC-only interactions; no scene, navigation or financial activation.
+SOURCE_COMMIT: e26f3a76ef0be7f43058225f46def3fbe123371e
+TASK_ID: K11520-LIVING-MARKET-ZONE-20261006
+UPDATED_BY: dot / temporary Human-authorized engineering maintainer
+REVIEWED_BY: PENDING_ROOT_REVIEW
 */
+
+import {HOSTILE_MONSTER_SPECIES} from './monster-aggression-runtime.mjs';
+import {getRealTradingBinding} from './real-trading-market-binding.mjs';
 
 export const MARKET_LIFE_ACTIONS=Object.freeze(['HOLD','FOLLOW','OPPOSE','HEDGE','REALLOCATE','REDUCE','RETREAT','REENTER']);
 export const MARKET_LIFE_STATES=Object.freeze(['ALIVE','WOUNDED','RETREATING','DEAD','NAIHE','MENGPO_RECOVERY','REBIRTH']);
@@ -79,39 +88,216 @@ export function createTrainingMemory(storage){
   });
 }
 
-// Training extension of this owner, not an order engine or a GA600 backtest.
-// One prediction spans 60s of fresh observations. Missing/stale gaps invalidate
-// it rather than manufacturing a win. Growth/memory remain the only score state.
-export function observeTrainingMarket(life,market,{now=Date.now(),contrarian=false}={}){
-  const t=life.training??={scope:'GAME_TRAINING_ONLY',lastAt:null,quotes:{},intent:null,pending:null};
-  if(market?.status!=='LIVE'||!Number.isFinite(market.receivedAt)||now-market.receivedAt>15000||now<market.receivedAt){t.pending=null;t.intent=null;return null}
-  if(t.lastAt!==null&&market.receivedAt<=t.lastAt)return t.intent;
-  const rows=(market.markets||[]).filter(r=>life.marketDimensions.includes(r.symbol)&&Number.isFinite(r.price)&&r.price>0);
-  if(!rows.length){t.pending=null;t.intent=null;return null}
-  const gap=t.lastAt===null?Infinity:market.receivedAt-t.lastAt;
-  if(gap>15000)t.pending=null;
-  const pending=t.pending,g=life.growth;
-  if(pending&&market.receivedAt>=pending.deadline){
-    const result=rows.find(r=>r.symbol===pending.market);
-    if(result){
-      const change=Math.sign(result.price-pending.price),win=change===pending.sign;
-      g.predictionCount=(g.predictionCount||0)+1;
-      if(change===0){g.flat=(g.flat||0)+1;g.streak=0}
-      else if(win){g.wins++;g.streak=(g.streak||0)+1;g.experience++}
-      else{g.losses++;g.streak=0}
-      remember(life,{type:'GAME_PREDICTION_RESULT',at:market.receivedAt,market:pending.market,sign:pending.sign,entry:pending.price,exit:result.price,outcome:change===0?'FLAT':win?'CORRECT':'WRONG',scope:t.scope});
-    }
+// These are bounded local teaching parameters, not Physics/vehicle constants.
+export const LIVING_MARKET_TRAINING_RULES=Object.freeze({horizonMs:60000,maxGapMs:15000,auditLimit:128,bossEvidencePerStage:5});
+const TRAINING_PROFILES=Object.freeze(['MOMENTUM','COUNTERTREND','CAUTIOUS','ADAPTIVE_BOSS']);
+const INTERACTIONS=Object.freeze(['FOLLOW','ALLY','COMPETE','FLEE','ABSORB']);
+const safeUnits=v=>Number.isSafeInteger(v)&&v>=0;
+// Host provenance references are deliberately absent from serialized Life state.
+// Cloning/loading a Life does not re-admit it or confer interaction capability.
+const livingSourceContexts=new WeakMap();
+function localFixtureContext(life,entity,sourceEventId,sourceClass){
+  if(!entity||entity.marketLife!==life||entity.lifeId!==life.lifeId||entity.sourceManaged!==false||entity.simulationOnly!==true||
+    entity.sourceMeta?.scope!=='LOCAL_GAME_NPC_ONLY'||entity.sourceMeta?.sourceEventId!==sourceEventId||
+    (entity.sourceLifeId!=null&&entity.sourceLifeId!==life.lifeId))return false;
+  const declared=entity.sourceMeta.sourceType??entity.sourceMeta.sourceClass;
+  if(declared!==sourceClass||!['WORLD_EVENT','WILD_ECOLOGY'].includes(declared))return false;
+  return [life,life.world,life.meta,entity,entity.meta,entity.sourceMeta].filter(Boolean).every(record=>
+    !record.ownerPlayerId&&!record.ownerLandId&&!record.sourceManaged&&!record.mission&&!record.cargo&&
+    !['PLAYER_OWNED','COLLECTED','IN_BACKPACK'].includes(record.state)&&
+    [record.sourceType,record.sourceClass].every(type=>type==null||type===sourceClass));
+}
+function trainingState(life){
+  if(!life.training)life.training={scope:'GAME_TRAINING_ONLY',lastAt:null,quotes:{},intent:null,pending:null};
+  const t=life.training;
+  if(!t.audit){
+    // Old in-memory pending entries lack an issuance record and cannot be scored.
     t.pending=null;
+    Object.assign(t,{dataStatus:'WAIT',reason:'WARMUP',source:null,batchKey:null,lastNow:null,sequence:0,predictionSequence:0,
+      audit:[],droppedAuditEvents:0,policyGeneration:0,strategyBias:1,
+      session:{issued:0,resolved:0,correct:0,wrong:0,flat:0,invalidated:0,streak:0,wrongStreak:0,
+        score:0,peakScore:0,maxDrawdownPoints:0,calibrationCount:0,brierSum:0,
+        bins:Array.from({length:5},()=>({count:0,correct:0,confidenceSum:0}))}});
   }
-  const signals=rows.map(r=>({...r,change:gap<=15000&&t.quotes[r.symbol]>0?r.price/t.quotes[r.symbol]-1:0})).sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
-  const selected=signals[0],sign=Math.sign(selected.change)*(contrarian?-1:1);
-  // A displayed confidence is an observed session hit-rate, never a fabricated model probability.
-  const measured=g.wins+g.losses,confidence=measured?g.wins/measured:null;
-  t.intent={scope:t.scope,market:selected.symbol,axis:selected.axis,direction:sign>0?'LONG':sign<0?'SHORT':'NEUTRAL',sign,confidence,fitness:confidence,at:market.receivedAt,reason:gap>15000?'WARMUP':contrarian?'LOCAL_COUNTERTREND':'LOCAL_MOMENTUM',fullGA600:'NOT_INTEGRATED'};
-  if(!t.pending&&sign)t.pending={market:selected.symbol,price:selected.price,sign,deadline:market.receivedAt+60000};
-  t.lastAt=market.receivedAt;t.quotes=Object.fromEntries(rows.map(r=>[r.symbol,r.price]));
+  return t;
+}
+function auditTraining(life,type,at,detail={}){
+  const t=trainingState(life),event=Object.freeze({sequence:++t.sequence,type,at,lifeId:life.lifeId,scope:t.scope,...detail});
+  t.audit.push(event);
+  if(t.audit.length>LIVING_MARKET_TRAINING_RULES.auditLimit){t.audit.shift();t.droppedAuditEvents++}
+  return event;
+}
+function invalidatePrediction(life,reason,at){
+  const t=trainingState(life);
+  if(t.pending){t.session.invalidated++;auditTraining(life,'PREDICTION_INVALIDATED',at,{predictionId:t.pending.id,reason});t.pending=null}
+}
+function unavailableTraining(life,status,reason,now){
+  const t=trainingState(life);invalidatePrediction(life,reason,Number.isFinite(now)?now:null);
+  t.intent=null;t.dataStatus=status;t.reason=reason;life.strategy='HOLD';life.confidence=null;
+  // Preserve last-good evidence; a recovery warms up on two new batches.
+  t.needsWarmup=true;return null;
+}
+function sessionConfidence(t){const n=t.session.correct+t.session.wrong;return n?t.session.correct/n:null}
+function settleTrainingPrediction(life,result,at){
+  const t=trainingState(life),p=t.pending,s=t.session,g=life.growth;
+  const change=Math.sign(result.price-p.price),outcome=change===0?'FLAT':change===p.sign?'CORRECT':'WRONG';
+  s.resolved++;g.predictionCount=(g.predictionCount||0)+1;
+  if(outcome==='FLAT'){s.flat++;g.flat=(g.flat||0)+1;s.streak=0;s.wrongStreak=0;g.streak=0}
+  else if(outcome==='CORRECT'){s.correct++;s.streak++;s.wrongStreak=0;s.score++;g.wins++;g.streak=(g.streak||0)+1;g.experience++}
+  else{s.wrong++;s.wrongStreak++;s.streak=0;s.score--;g.losses++;g.streak=0}
+  s.peakScore=Math.max(s.peakScore,s.score);s.maxDrawdownPoints=Math.max(s.maxDrawdownPoints,s.peakScore-s.score);
+  if(change!==0&&Number.isFinite(p.confidence)){
+    const actual=outcome==='CORRECT'?1:0,bin=s.bins[Math.min(4,Math.floor(p.confidence*5))];
+    s.calibrationCount++;s.brierSum+=(p.confidence-actual)**2;bin.count++;bin.correct+=actual;bin.confidenceSum+=p.confidence;
+  }
+  const event=auditTraining(life,'PREDICTION_SETTLED',at,{predictionId:p.id,market:p.market,axis:p.axis,source:p.source,
+    entryAt:p.entryAt,issuedAt:p.issuedAt,deadline:p.deadline,exitAt:at,settlementDelayMs:at-p.deadline,
+    sign:p.sign,entry:p.price,exit:result.price,confidenceAtIssue:p.confidence,outcome,score:s.score});
+  remember(life,{...event,type:'GAME_PREDICTION_RESULT'});t.pending=null;
+  if(life.livingMarket?.profile==='ADAPTIVE_BOSS'&&s.wrongStreak>0&&s.wrongStreak%2===0){
+    t.strategyBias*=-1;t.policyGeneration++;
+    auditTraining(life,'BOSS_POLICY_ADAPTED',at,{reason:'TWO_RESOLVED_ERRORS',strategyBias:t.strategyBias,
+      policyGeneration:t.policyGeneration,evidencePredictionId:p.id,simulationOnly:true});
+  }
+}
+
+// Existing observer remains the only training engine. Source time is explicitly
+// HOST_RECEIVED_AT, not exchange time, authenticated truth, or an execution oracle.
+export function observeTrainingMarket(life,market,{now=Date.now(),contrarian=false}={}){
+  const t=trainingState(life),rules=LIVING_MARKET_TRAINING_RULES;
+  if(!['ALIVE','WOUNDED','RETREATING'].includes(life.state))return unavailableTraining(life,'WAIT','LIFECYCLE_LOCK',now);
+  if(!Number.isSafeInteger(now)||now<0||!Number.isSafeInteger(market?.receivedAt)||market.receivedAt<0||market.receivedAt>Number.MAX_SAFE_INTEGER-rules.horizonMs)
+    return unavailableTraining(life,market?.status==='WAIT'?'WAIT':'INVALID','INVALID_OBSERVATION_TIME',now);
+  if(now<market.receivedAt||(t.lastNow!==null&&now<t.lastNow))return unavailableTraining(life,'INVALID','CLOCK_REGRESSION_OR_FUTURE_OBSERVATION',now);
+  t.lastNow=now;
+  if(market.status!=='LIVE')return unavailableTraining(life,market.status==='STALE'?'STALE':market.status==='WAIT'?'WAIT':'INVALID','SOURCE_NOT_LIVE',now);
+  if(now-market.receivedAt>rules.maxGapMs)return unavailableTraining(life,'STALE','OBSERVATION_EXPIRED',now);
+  if(!Array.isArray(market.markets))return unavailableTraining(life,'INVALID','MALFORMED_BATCH',now);
+  if(market.source!=null&&(typeof market.source!=='string'||!market.source.trim()))return unavailableTraining(life,'INVALID','INVALID_SOURCE',now);
+  const rows=market.markets.filter(r=>life.marketDimensions.includes(r?.symbol));
+  const seen=new Set();
+  if(!rows.length||rows.some(r=>!Number.isFinite(r.price)||r.price<=0||!['KX','KY','KZ'].includes(r.axis)||seen.has(r.symbol)||!seen.add(r.symbol))||
+    life.marketDimensions.some(symbol=>!seen.has(symbol)))return unavailableTraining(life,'INVALID','INCOMPLETE_OR_INVALID_BATCH',now);
+  // Reuse only the existing pure identity lookup. This does not consult or
+  // grant trading eligibility, provenance, chain, wallet or execution authority.
+  if(rows.some(r=>getRealTradingBinding(r.axis).market!==r.symbol))return unavailableTraining(life,'INVALID','AXIS_MARKET_BINDING_MISMATCH',now);
+  const source=typeof market.source==='string'&&market.source.trim()?market.source:'UNSPECIFIED_REFERENCE';
+  const batchKey=JSON.stringify(rows.map(r=>[r.symbol,r.axis,r.price]).sort((a,b)=>a[0].localeCompare(b[0])));
+  if(t.lastAt!==null&&market.receivedAt<=t.lastAt){
+    if(market.receivedAt===t.lastAt&&source===t.source&&batchKey===t.batchKey)return t.intent;
+    return unavailableTraining(life,'INVALID','REPLAY_OR_CONFLICTING_OBSERVATION',now);
+  }
+  const sourceChanged=t.source!==null&&t.source!==source;
+  const axisChanged=rows.some(r=>t.axisBindings?.[r.symbol]&&t.axisBindings[r.symbol]!==r.axis);
+  const pendingMarketMissing=t.pending&&!rows.some(r=>r.symbol===t.pending.market);
+  const gap=t.lastAt===null?Infinity:market.receivedAt-t.lastAt;
+  if(sourceChanged||axisChanged||pendingMarketMissing||gap>rules.maxGapMs){
+    invalidatePrediction(life,sourceChanged?'SOURCE_CHANGED':axisChanged?'AXIS_BINDING_CHANGED':pendingMarketMissing?'MARKET_CAPABILITY_CHANGED':'OBSERVATION_GAP',now);t.needsWarmup=true;
+  }
+  const warmup=t.needsWarmup||rows.some(r=>!(t.quotes[r.symbol]>0));
+  const signals=rows.map(r=>({...r,change:warmup?0:r.price/t.quotes[r.symbol]-1})).sort((a,b)=>Math.abs(b.change)-Math.abs(a.change)||a.symbol.localeCompare(b.symbol));
+  if(signals.some(r=>!Number.isFinite(r.change)))return unavailableTraining(life,'INVALID','INVALID_SIGNAL_ARITHMETIC',now);
+  if(t.pending&&market.receivedAt>=t.pending.deadline)settleTrainingPrediction(life,rows.find(r=>r.symbol===t.pending.market),market.receivedAt);
+  const selected=signals[0],profile=life.livingMarket?.profile||(contrarian?'COUNTERTREND':'MOMENTUM');
+  const bias=profile==='COUNTERTREND'?-1:profile==='ADAPTIVE_BOSS'?t.strategyBias:1;
+  const cautious=profile==='CAUTIOUS'&&Math.abs(selected.change)<(life.livingMarket?.signalThreshold??0.001);
+  const sign=warmup||cautious?0:Math.sign(selected.change)*bias,confidence=sessionConfidence(t);
+  const reason=warmup?'WARMUP':cautious?'BELOW_GAME_SIGNAL_THRESHOLD':sign===0?'NO_PRICE_CHANGE':bias<0?'LOCAL_COUNTERTREND':'LOCAL_MOMENTUM';
+  t.dataStatus=warmup?'WAIT':'LIVE';t.reason=reason;t.source=source;
+  t.intent=Object.freeze({scope:t.scope,status:t.dataStatus,market:selected.symbol,axis:selected.axis,
+    direction:sign>0?'LONG':sign<0?'SHORT':'NEUTRAL',decision:sign>0?'LONG':sign<0?'SHORT':'WAIT',sign,confidence,fitness:confidence,
+    confidenceKind:'EMPIRICAL_SESSION_HIT_RATE_NOT_FORECAST_PROBABILITY',confidenceSamples:t.session.correct+t.session.wrong,
+    at:market.receivedAt,issuedAt:now,source,timeBasis:'HOST_RECEIVED_AT',sourceTimestamp:null,reason,signalChange:selected.change,
+    policyGeneration:t.policyGeneration,fullGA600:'NOT_INTEGRATED'});
+  if(!t.pending&&sign){
+    t.pending=Object.freeze({id:`${life.lifeId}:P${++t.predictionSequence}`,market:selected.symbol,axis:selected.axis,price:selected.price,sign,
+      entryAt:market.receivedAt,issuedAt:now,deadline:market.receivedAt+rules.horizonMs,source,confidence,
+      confidenceSamples:t.session.correct+t.session.wrong,policyGeneration:t.policyGeneration});
+    t.session.issued++;auditTraining(life,'PREDICTION_ISSUED',now,{...t.pending,predictionId:t.pending.id,timeBasis:'HOST_RECEIVED_AT'});
+  }
+  t.lastAt=market.receivedAt;t.batchKey=batchKey;t.quotes=Object.fromEntries(rows.map(r=>[r.symbol,r.price]));
+  t.axisBindings=Object.fromEntries(rows.map(r=>[r.symbol,r.axis]));t.needsWarmup=false;
   life.strategy=sign?'FOLLOW':'HOLD';life.confidence=confidence;life.lastDecisionAt=now;
   return t.intent;
+}
+
+// Read-only presentation contract. It never writes a target, vector, C, XYZ,
+// player control, position, order, quote source or wallet balance.
+export function livingMarketDecisionSnapshot(life,{now=Date.now()}={}){
+  const t=life.training,hasSession=!!t?.session,expired=!Number.isFinite(now)||!Number.isFinite(t?.lastAt)||now<t.lastAt||now-t.lastAt>LIVING_MARKET_TRAINING_RULES.maxGapMs;
+  const lifecycleLocked=!['ALIVE','WOUNDED','RETREATING'].includes(life.state);
+  const clockInvalid=!safeUnits(now)||(t?.lastNow!=null&&now<t.lastNow)||(t?.intent?.issuedAt!=null&&now<t.intent.issuedAt);
+  const status=clockInvalid?'INVALID':lifecycleLocked?'WAIT':expired?(t?.lastAt==null?'WAIT':'STALE'):(t?.dataStatus||'WAIT');
+  const intent=status==='LIVE'?t?.intent:null,s=hasSession?t.session:null;
+  const choice=intent?.decision||'WAIT';
+  const speedFactor=choice==='WAIT'?0:Math.min(1,Math.abs(intent.signalChange)*100)*clamp(life.vitality/100,0,1)*(intent.confidence??0.5);
+  return copy({lifeId:life.lifeId,scope:'GAME_TRAINING_ONLY',status,decision:choice,market:intent?.market||null,axis:intent?.axis||null,
+    reason:clockInvalid?'CLOCK_REGRESSION_OR_INVALID_CLOCK':lifecycleLocked?'LIFECYCLE_LOCK':expired?'NO_FRESH_OBSERVATION':t?.reason||'WARMUP',confidence:intent?.confidence??null,confidenceSamples:intent?.confidenceSamples||0,
+    source:t?.source||null,timeBasis:'HOST_RECEIVED_AT',sourceTimestamp:null,
+    goal:{kind:choice==='WAIT'?'OBSERVE_WAIT':'OBSERVE_MARKET',market:intent?.market||null,sign:intent?.sign||0},
+    motion:{status:'NAVIGATION_DEPENDENCY_REQUIRED',requestedSpeedFactor:speedFactor,advisoryOnly:true,controlsPlayer:false,movesCoordinates:false},
+    fullGA600:'NOT_INTEGRATED',automatesTrading:false,profitPromise:false,
+    sessionMetrics:s?{scope:'CURRENT_SESSION_ONLY',issued:s.issued,predictions:s.resolved,correct:s.correct,wrong:s.wrong,flat:s.flat,invalidated:s.invalidated,
+      streak:s.streak,scorePoints:s.score,peakScorePoints:s.peakScore,maxDrawdownPoints:s.maxDrawdownPoints,
+      scoreDefinition:'CORRECT +1 / WRONG -1 / FLAT 0; NOT PNL OR MONEY',
+      calibration:{kind:'EMPIRICAL_HIT_RATE_DIAGNOSTIC',samples:s.calibrationCount,brier:s.calibrationCount?s.brierSum/s.calibrationCount:null,
+        excludes:'FLAT_OUTCOMES_AND_UNMEASURED_CONFIDENCE',bins:s.bins.map((b,i)=>({lower:i/5,upper:(i+1)/5,samples:b.count,
+          confidence:b.count?b.confidenceSum/b.count:null,accuracy:b.count?b.correct/b.count:null}))}}:null,
+    persistedGrowth:{...life.growth,scope:'UNTRUSTED_LOCAL_GROWTH_NOT_SESSION_CALIBRATION'},
+    boss:life.livingMarket?.profile==='ADAPTIVE_BOSS'?{scope:'SIMULATION_NPC_ONLY',evidenceStage:1+Math.floor((s?.resolved||0)/LIVING_MARKET_TRAINING_RULES.bossEvidencePerStage),
+      policyGeneration:t?.policyGeneration||0,strategyBias:t?.strategyBias||1,affectsRealMarket:false}:null,
+    audit:{events:t?.audit||[],droppedEvents:t?.droppedAuditEvents||0,completeSessionWindow:!(t?.droppedAuditEvents>0),persisted:false,
+      authority:'UNTRUSTED_LOCAL_OBSERVATIONS'},pending:t?.pending||null});
+}
+
+// Explicit, inert fixture admission. Existing species/ownership are preserved.
+// This opt-in game pool has abstract integer units, no KGEN/KAIOS/token meaning.
+export function configureLivingMarketLife(life,{sourceEntity,sourceEventId,sourceClass='WORLD_EVENT',profile='MOMENTUM',energyUnits=0,massUnits=0,signalThreshold=0.001,allowAbsorption=false}={}){
+  if(!life||!HOSTILE_MONSTER_SPECIES.includes(life.species)||life.ownerPlayerId||life.ownerLandId||life.sourceManaged||life.cargo||
+    life.sourceClass==='PLAYER_OWNED'||life.sourceType==='PLAYER_OWNED'||life.mission)return {ok:false,reason:'ONLY_UNOWNED_LOCAL_MONSTER_FIXTURES'};
+  if(life.livingMarket)return {ok:false,reason:'ALREADY_CONFIGURED'};
+  if(life.training?.lastAt!=null)return {ok:false,reason:'FRESH_FIXTURE_REQUIRED'};
+  if(typeof sourceEventId!=='string'||!sourceEventId.trim()||!['WORLD_EVENT','WILD_ECOLOGY'].includes(sourceClass)||!TRAINING_PROFILES.includes(profile)||
+    !safeUnits(energyUnits)||!safeUnits(massUnits)||!Number.isFinite(signalThreshold)||signalThreshold<0||signalThreshold>1)
+    return {ok:false,reason:'INVALID_LOCAL_GAME_CONFIGURATION'};
+  if(!localFixtureContext(life,sourceEntity,sourceEventId,sourceClass))return {ok:false,reason:'HOST_LOCAL_FIXTURE_CONTEXT_REQUIRED'};
+  life.livingMarket={scope:'LOCAL_GAME_NPC_ONLY',sourceEventId,sourceClass,profile,signalThreshold,energyUnits,massUnits,
+    allowAbsorption:allowAbsorption===true,revision:0,lastInteractionSequence:0,lastInteractionAt:null,relation:'OBSERVE',events:[]};
+  livingSourceContexts.set(life,sourceEntity);
+  return {ok:true,scope:'LOCAL_GAME_NPC_ONLY',activatedInWorld:false};
+}
+
+// Clones are deliberately not admitted; a future preview must revalidate host
+// context and construct fresh fixtures. The host supplies a reviewed, one-step
+// pair/revision-bound local capability; this is not security
+// against DevTools and cannot authorize another owner's financial/cargo state.
+export function interactLivingMarketLives(actor,target,{action,sequence,actorRevision,targetRevision,energyUnits=0,massUnits=0,capability,now=Date.now()}={}){
+  const a=actor?.livingMarket,b=target?.livingMarket,deny=reason=>({ok:false,reason});
+  if(!a||!b||a.scope!=='LOCAL_GAME_NPC_ONLY'||b.scope!=='LOCAL_GAME_NPC_ONLY'||actor.lifeId===target.lifeId)return deny('LOCAL_NPC_PAIR_REQUIRED');
+  if([actor,target].some(l=>!HOSTILE_MONSTER_SPECIES.includes(l.species)||
+    !localFixtureContext(l,livingSourceContexts.get(l),l.livingMarket.sourceEventId,l.livingMarket.sourceClass)))return deny('OWNED_OR_SOURCE_MANAGED_LIFE_DENIED');
+  if(!INTERACTIONS.includes(action)||!Number.isSafeInteger(now)||now<0)return deny('INVALID_INTERACTION');
+  if(!['ALIVE','WOUNDED','RETREATING'].includes(actor.state)||(!['ALIVE','WOUNDED','RETREATING'].includes(target.state)&&!(action==='ABSORB'&&target.state==='DEAD')))return deny('LIFECYCLE_LOCK');
+  if([a,b].some(pool=>!safeUnits(pool.energyUnits)||!safeUnits(pool.massUnits)||!safeUnits(pool.revision)||pool.revision>=Number.MAX_SAFE_INTEGER||
+    !safeUnits(pool.lastInteractionSequence)||pool.lastInteractionSequence>=Number.MAX_SAFE_INTEGER||
+    (pool.lastInteractionAt!==null&&(!safeUnits(pool.lastInteractionAt)||now<pool.lastInteractionAt))))return deny('INVALID_OR_STALE_GAME_STATE');
+  const c=capability;
+  if(!c||c.scope!=='LOCAL_GAME_NPC_INTERACTION'||c.actorLifeId!==actor.lifeId||c.targetLifeId!==target.lifeId||
+    c.actorSourceEventId!==a.sourceEventId||c.targetSourceEventId!==b.sourceEventId||!Array.isArray(c.actions)||!c.actions.includes(action)||
+    !Number.isFinite(c.issuedAt)||!Number.isFinite(c.expiresAt)||now<c.issuedAt||now>=c.expiresAt||!safeUnits(c.maxEnergyUnits)||!safeUnits(c.maxMassUnits))return deny('LOCAL_CAPABILITY_REQUIRED');
+  if(!Number.isSafeInteger(sequence)||sequence!==a.lastInteractionSequence+1||actorRevision!==a.revision||targetRevision!==b.revision)return deny('REPLAY_OR_STALE_REVISION');
+  if(c.sequence!==sequence||c.actorRevision!==a.revision||c.targetRevision!==b.revision)return deny('CAPABILITY_ALREADY_USED_OR_STALE');
+  if(!safeUnits(energyUnits)||!safeUnits(massUnits)||energyUnits>c.maxEnergyUnits||massUnits>c.maxMassUnits)return deny('INVALID_GAME_UNITS');
+  if(action!=='ABSORB'&&(energyUnits!==0||massUnits!==0))return deny('NON_TRANSFER_ACTION');
+  if(action==='ABSORB'&&(!b.allowAbsorption||energyUnits>b.energyUnits||massUnits>b.massUnits||!safeUnits(a.energyUnits+energyUnits)||!safeUnits(a.massUnits+massUnits)))return deny('ABSORPTION_CAPABILITY_OR_POOL_LIMIT');
+  if(action==='ABSORB'){a.energyUnits+=energyUnits;b.energyUnits-=energyUnits;a.massUnits+=massUnits;b.massUnits-=massUnits}
+  a.lastInteractionSequence=sequence;a.revision++;b.revision++;a.lastInteractionAt=now;b.lastInteractionAt=now;
+  a.relation=action;b.relation=action==='ALLY'?'ALLY':action==='COMPETE'?'COMPETE':b.relation;
+  const event=Object.freeze({id:`${actor.lifeId}:I${sequence}`,sequence,action,actorLifeId:actor.lifeId,targetLifeId:target.lifeId,
+    sourceEventId:a.sourceEventId,targetSourceEventId:b.sourceEventId,at:now,energyUnits,massUnits,scope:'LOCAL_GAME_NPC_ONLY',
+    movesCoordinates:false,changesOwnership:false,changesWallet:false,changesMarketPrices:false});
+  for(const pool of [a,b]){pool.events.push(event);if(pool.events.length>32)pool.events.shift()}
+  return {ok:true,event,actorRevision:a.revision,targetRevision:b.revision};
 }
 
 export function decideMarketLife(life,perception,{random=()=>0.5}={}){
