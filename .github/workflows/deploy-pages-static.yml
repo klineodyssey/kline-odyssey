@@ -147,10 +147,19 @@ jobs:
           copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE"
           copy_dir "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4"
 
+          # Stamp the game inputs in the existing deployment record.
+          game_root="K線西遊記/temples/11520"
+          game_release_id="$(git ls-files --stage -- "$game_root/game-5d.html" "$game_root/sw.js" \
+            "$game_root/manifest.webmanifest" "$game_root/runtime" "$game_root/controls" "$game_root/assets" \
+            ':(exclude,glob)**/*.md' \
+            assets/kaios-audio.mjs assets/kaios-audio-ui.mjs assets/kaios-audio.css assets/kaios-world-registry.mjs \
+            "K線西遊記/assets/ethers-5.7.2.umd.min.js" docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json \
+            core/integrations/kgen-pancakeswap-v2.mjs | sha256sum | cut -c1-64)"
           mkdir -p "_site/KGEN-KAIOS/dashboard"
           cat > "_site/KGEN-KAIOS/dashboard/build-info.json" <<EOF
           {
             "main_commit": "${GITHUB_SHA}",
+            "game_release_id": "${game_release_id}",
             "branch": "${GITHUB_REF_NAME}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",

@@ -118,5 +118,51 @@ async function installOfferHarness({fail=false}={}){
  });
  return h;
 }
+test('K11520 reports a genuine deployed game revision change once without force-reloading',async()=>{
+ const {runInNewContext}=await import('node:vm'),html=read('game-5d.html');
+ const source=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match=>match[1]).find(code=>code.includes('checkGameRelease'));
+ assert.ok(source);
+ assert.match(html,/<aside\b[^>]+id="k11520UpdateNotice"[^>]+\bhidden>/);
+ const notice={hidden:true},events={},docEvents={},calls=[];
+ let dismiss,poll,published={main_commit:'1',game_release_id:'a'.repeat(64)},fail=false;
+ const navigator={onLine:true},document={
+  visibilityState:'visible',addEventListener:(name,fn)=>docEvents[name]=fn,
+  getElementById:id=>id==='k11520UpdateNotice'?notice:{addEventListener:(name,fn)=>dismiss=fn}
+ };
+ runInNewContext(source,{navigator,document,AbortSignal,
+  fetch:async(url,options)=>{calls.push({url,options});if(fail)throw Error('offline');return{ok:true,json:async()=>published}},
+  addEventListener:(name,fn)=>events[name]=fn,setInterval:(fn,ms)=>{assert.equal(ms,300000);poll=fn}
+ });
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(notice.hidden,true);
+ assert.equal(calls.length,1);
+ assert.equal(calls[0].url,'../../../KGEN-KAIOS/dashboard/build-info.json');
+ assert.equal(calls[0].options.cache,'no-cache');
+ published={...published,main_commit:'unrelated-site-change'};
+ await events.online();
+ assert.equal(notice.hidden,true);
+ document.visibilityState='hidden';
+ published={game_release_id:'b'.repeat(64)};
+ const before=calls.length;
+ await poll();
+ assert.equal(calls.length,before);
+ document.visibilityState='visible';
+ await docEvents.visibilitychange();
+ assert.equal(notice.hidden,false);
+ dismiss();
+ await poll();
+ assert.equal(notice.hidden,true);
+ published={game_release_id:'invalid'};
+ await poll();
+ fail=true;
+ await poll();
+ assert.equal(notice.hidden,true);
+ fail=false;
+ published={game_release_id:'c'.repeat(64)};
+ await Promise.all([poll(),events.online(),docEvents.visibilitychange()]);
+ assert.equal(calls.length,before+5);
+ assert.equal(notice.hidden,false,'a later release can notify again');
+ assert.doesNotMatch(source,/\blocation\s*\.|\breload\s*\(|localStorage|indexedDB/);
+});
 test('K11520 PWA standalone shell is installable and does not force orientation',()=>{const m=JSON.parse(read('manifest.webmanifest'));assert.equal(m.display,'standalone');assert.equal(m.orientation,'any');assert.ok(m.display_override.includes('fullscreen'));for(const size of [192,512]){const icon=m.icons.find(x=>x.sizes===`${size}x${size}`);assert.ok(icon,`${size}px PWA icon missing`);assert.equal(icon.type,'image/png');assert.match(icon.purpose,/maskable/);assert.deepEqual(pngSize(icon.src),{width:size,height:size})}const h=read('game-5d.html');assert.ok(h.includes('rel="manifest"'));assert.ok(h.includes("serviceWorker.register('./sw.js'"));});
 test('K11520 original theme uses only the shared bounded synth and no commercial assets',()=>{const c=read('runtime/game-ui-product-fixes-v23.mjs'),fx=read('runtime/combat-fx-runtime.mjs');assert.ok(c.includes("title:'花果山・星際戰場'"));assert.ok(c.includes('original:true'));assert.ok(c.includes('synthetic:true'));assert.ok(c.includes('getKaiosAudio'));assert.ok(fx.includes('getKaiosAudio'));assert.equal(/new (?:AudioContext|C)\(/.test(c+fx),false);for(const name of ['Just The Way You Are.mp3','Greatest Love Of All.mp3','Take My Breath Away.mp3','情難枕.mp3'])assert.equal(c.includes(name),false);});

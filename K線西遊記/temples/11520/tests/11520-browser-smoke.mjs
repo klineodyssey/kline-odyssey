@@ -33,6 +33,8 @@ await page.addInitScript(()=>{
   localStorage.setItem('k11520.player-session.v1',JSON.stringify({version:1,world:'K11520',xyz:{x:4,y:2,z:-3},intentXYZ:{x:4,y:2,z:-3},savedAt:new Date().toISOString()}));
   localStorage.setItem('klineodyssey.public-wallet-identity.v1',JSON.stringify({version:1,address:'0x1234567890123456789012345678901234567890',chainId:56,sourceWorld:'K12345',updatedAt:new Date().toISOString()}));
 });
+let deployedGameRelease='a'.repeat(64);
+await page.route('**/KGEN-KAIOS/dashboard/build-info.json',route=>route.fulfill({json:{game_release_id:deployedGameRelease}}));
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(1500);
@@ -65,6 +67,16 @@ await page.screenshot({path:ARTIFACT_DIR+'/11520-mobile-install-offer.png'});
 await installGame.tap({timeout:2000});
 await installOffer.waitFor({state:'hidden',timeout:2000});
 assert.deepEqual(await page.evaluate(()=>[window.__k11520InstallCalls,window.__k11520InstallActivated]),[1,true]);
+const updateNotice=page.locator('#k11520UpdateNotice');
+assert.equal(await updateNotice.isVisible(),false,'first release read establishes the baseline');
+deployedGameRelease='b'.repeat(64);
+await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+await updateNotice.waitFor({state:'visible',timeout:2500});
+await page.screenshot({path:ARTIFACT_DIR+'/11520-mobile-update-notice.png'});
+await updateNotice.getByRole('button',{name:'知道了'}).tap({timeout:2000});
+await updateNotice.waitFor({state:'hidden',timeout:2000});
+assert.equal(await page.evaluate(()=>window.__k11520InstallCalls),1,'update acknowledgement keeps the current game document');
+
 const assertVisible=async selector=>{const loc=page.locator(selector);const d=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{display:s.display,visibility:s.visibility,pointer:s.pointerEvents,w:r.width,h:r.height,x:r.x,y:r.y,right:r.right,bottom:r.bottom,text:(el.textContent||'').trim()}});assert.ok(d.w>0&&d.h>0&&d.display!=='none'&&d.visibility!=='hidden',`${selector} not visible: ${JSON.stringify(d)}`);return d};
 const xyz=async()=>{assert.match(await page.locator('#xyz').textContent(),/LOCAL X .*K.*Y .*K.*Z .*K/);return page.evaluate(()=>({...globalThis.__K11520_WORLD_COORDS__.physical}))};
 const dragReal=async(selector,toX,toY,hold=260)=>{const b=await page.locator(selector).boundingBox();assert.ok(b,selector+' missing box');const sx=b.x+b.width*.5,sy=b.y+b.height*.5,tx=b.x+b.width*toX,ty=b.y+b.height*toY;await page.mouse.move(sx,sy);await page.mouse.down();await page.mouse.move(tx,ty,{steps:5});await page.waitForTimeout(hold);await page.mouse.up()};

@@ -98,9 +98,11 @@ SOURCE_OF_TRUTH: TRUE
 .navigationConsole{font-size:13px;line-height:1.5}.navigationConsole .card{min-width:0}.navigationConsole h3{margin:0 0 10px;font-size:16px}.navigationConsole label{display:block;min-width:0;margin:8px 0}.navigationConsole input:not([type=checkbox]),.navigationConsole select{display:block;width:100%;min-height:44px;box-sizing:border-box;margin-top:4px;padding:8px;border:1px solid #638596;border-radius:7px;background:#08131e;color:#edf8ff;font:inherit}.navigationGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.navigationGrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.navigationActions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.navigationActions>.btn{flex:1 1 130px;min-height:44px;white-space:normal}.navigationConsole .navigationCheck{display:flex;align-items:flex-start;gap:9px}.navigationCheck input{flex:0 0 24px;width:24px;height:24px;margin:2px 0}.navigationConsole p{overflow-wrap:anywhere}.navigationConsole .mapStage{height:240px;max-height:40dvh}.navigationConsole #fullMap{width:100%;height:100%;touch-action:none}.navigationConsole #navigationAutoStatus{padding:8px;border:1px solid #456477;border-radius:7px;background:#071018}.navigationConsole .muted{font-size:12px}@media(max-width:360px){.navigationGrid{grid-template-columns:1fr}.navigationGrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
 <style>
-#k11520InstallOffer{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:610;align-items:center;gap:4px;max-width:calc(100% - 24px);padding:4px;border-radius:14px}
-#k11520InstallOffer:not([hidden]){display:flex}
-#k11520InstallOffer button{min-height:44px;padding:6px 10px;border-radius:9px;border:1px solid #a77b3570;background:#101923;white-space:nowrap;cursor:pointer}
+:is(#k11520InstallOffer,#k11520UpdateNotice){position:fixed;left:50%;top:54%;transform:translateX(-50%);z-index:610;align-items:center;gap:4px;max-width:calc(100% - 24px);padding:4px;border-radius:14px}
+:is(#k11520InstallOffer,#k11520UpdateNotice):not([hidden]){display:flex}
+body:has(#k11520UpdateNotice:not([hidden])) #k11520InstallOffer{display:none}
+:is(#k11520InstallOffer,#k11520UpdateNotice) button{min-height:44px;padding:6px 10px;border-radius:9px;border:1px solid #a77b3570;background:#101923;white-space:nowrap;cursor:pointer}
+#k11520UpdateNotice [role="status"]{max-width:13rem;padding:0 6px;font-size:12px}
 #k11520InstallGame:not([hidden]){display:flex;align-items:center;gap:7px;color:var(--gold);font-weight:700}
 #k11520InstallMessage{padding:0 6px;font-size:12px}
 #walletPanel.collapsed #executionControls{display:none}#executionControls{font-size:12px;overflow-wrap:anywhere}#executionControls button,#executionControls input{min-height:44px;box-sizing:border-box;width:100%;margin:4px 0}#executionControls input{background:#08131e;color:#e6f4ff;border:1px solid #456477;padding:8px}#testnetActions[hidden]{display:none}.depositPresets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.allowanceChoice{display:flex;align-items:center;gap:8px}#executionControls #testnetUnlimited{width:24px;flex:0 0 24px}#executionControls button:disabled{opacity:.5}
@@ -125,6 +127,10 @@ SOURCE_OF_TRUTH: TRUE
   <button type="button" id="k11520InstallGame"><img src="./assets/ui/k11520-pwa-192.png" alt="" width="24" height="24">安裝遊戲</button>
   <button type="button" id="k11520InstallLater">稍後</button>
   <span id="k11520InstallMessage" role="status" hidden>這次無法開啟安裝。請從 Chrome 選單安裝。</span>
+</aside>
+<aside id="k11520UpdateNotice" class="panel" aria-label="遊戲更新" hidden>
+  <span role="status">遊戲有新版。這局結束後，重新開啟遊戲即可更新。</span>
+  <button type="button" id="k11520UpdateLater">知道了</button>
 </aside>
 <script type="module" src="./runtime/game-5d-bootstrap.mjs?v=271"></script>
 <script>
@@ -164,6 +170,36 @@ SOURCE_OF_TRUTH: TRUE
    offer.hidden=false;
   }
  });
+}
+</script>
+<script>
+{
+ const notice=document.getElementById('k11520UpdateNotice');
+ let observedRelease;
+ let checking=false;
+ async function checkGameRelease(){
+  if(checking||navigator.onLine===false||document.visibilityState!=='visible')return;
+  checking=true;
+  try{
+   const response=await fetch('../../../KGEN-KAIOS/dashboard/build-info.json',{
+    cache:'no-cache',credentials:'omit',signal:AbortSignal.timeout?.(5000)
+   });
+   if(!response.ok)return;
+   const {game_release_id:release}=await response.json();
+   if(typeof release!=='string'||!/^[a-f0-9]{64}$/.test(release))return;
+   if(observedRelease&&observedRelease!==release)notice.hidden=false;
+   observedRelease=release;
+  }catch{
+   // A missing, offline or invalid release record leaves the game open.
+  }finally{
+   checking=false;
+  }
+ }
+ document.getElementById('k11520UpdateLater').addEventListener('click',()=>{notice.hidden=true});
+ addEventListener('online',checkGameRelease);
+ document.addEventListener('visibilitychange',checkGameRelease);
+ setInterval(checkGameRelease,300000);
+ checkGameRelease();
 }
 </script>
 <script>
