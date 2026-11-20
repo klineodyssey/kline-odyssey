@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LOCAL ISOLATED MEDIA FIXTURE</title><style>html,body{margin:0;height:100%;background:#101927;color:#e3f5ee;font:13px system-ui}body{display:grid;grid-template-rows:auto minmax(0,1fr)}p{margin:0;padding:8px;background:#173d38;text-align:center;line-height:1.4}video{display:block;width:100%;height:100%;min-height:0;object-fit:contain;background:#090f18}</style></head><body><p>LOCAL FIXTURE · 本地合成影片與音軌<br>非 YouTube 播放，未連接外網</p><video id="fixture-video" controls playsinline muted loop preload="auto" aria-label="本地合成影片與音軌，隔離測試"></video><script>
+(()=>{
+ 'use strict';
+ const CHANNEL='KGEN_LOCAL_YT_MEDIA_FIXTURE_V1';
+ const video=document.getElementById('fixture-video');
+ const supplied=new URL(location.href).searchParams.get('origin');
+ let parentOrigin='';
+ try{const u=new URL(supplied);if(['http:','https:'].includes(u.protocol)&&['127.0.0.1','localhost','[::1]'].includes(u.hostname))parentOrigin=u.origin;}catch{}
+ let key='',state=-1,playCalls=0,pauseCalls=0;const nativeEvents=[];const errors=[];
+ const snapshot=()=>({state,paused:video.paused,muted:video.muted,defaultMuted:video.defaultMuted,currentTime:video.currentTime,duration:Number.isFinite(video.duration)?video.duration:null,readyState:video.readyState,networkState:video.networkState,videoWidth:video.videoWidth,videoHeight:video.videoHeight,playCalls,pauseCalls,nativeEvents:nativeEvents.slice(),errors:errors.slice(),audioTrack:'LOCAL_OPUS_TRACK_CONFIRMED_BY_FFPROBE_NOT_HUMAN_LISTENED'});
+ function send(kind,error){if(!key||!parentOrigin)return;parent.postMessage({channel:CHANNEL,key,kind,snapshot:snapshot(),...(error?{error}:{} )},parentOrigin);}
+ for(const type of ['loadedmetadata','loadeddata','canplay','play','playing','pause','waiting','stalled','ended','volumechange','timeupdate','error']){
+  video.addEventListener(type,()=>{
+   nativeEvents.push({type,time:performance.now(),currentTime:video.currentTime,paused:video.paused,muted:video.muted});
+   if(type==='loadeddata'&&state===-1)state=5;
+   if(type==='play'||(type==='waiting'&&!video.paused))state=3;
+   if(type==='playing')state=1;
+   if(type==='pause')state=2;
+   if(type==='ended')state=0;
+   if(type==='error'){state=-1;const error={name:'NativeMediaError',code:video.error?.code,message:video.error?.message||'Native fixture media failed'};errors.push(error);send('error',error);return;}
+   send(type);
+  });
+ }
+ addEventListener('message',event=>{
+  if(!parentOrigin||event.source!==parent||event.origin!==parentOrigin)return;
+  const data=event.data;if(!data||data.channel!==CHANNEL||typeof data.key!=='string')return;
+  if(data.command==='hello'){key=data.key;send('hello');if(video.error)send('error',{name:'NativeMediaError',code:video.error.code,message:video.error.message||'Native fixture media failed'});return;}
+  if(data.key!==key)return;
+  if(data.command==='mute'){video.muted=true;send('muted');return;}
+  if(data.command==='unmute'){video.muted=false;send('unmuted');return;}
+  if(data.command==='pause'){pauseCalls++;video.pause();send('pause-ack');return;}
+  if(data.command==='destroy'){pauseCalls++;video.pause();send('destroyed');return;}
+  if(data.command==='inspect'){send('inspect');return;}
+  if(data.command==='play'){
+   playCalls++;
+   video.play().then(()=>send('play-resolved')).catch(error=>{const info={name:error.name,message:error.message};errors.push(info);send(error.name==='NotAllowedError'?'autoplay-blocked':error.name==='AbortError'&&video.paused?'play-cancelled':'error',info);});
+  }
+ });
+ video.muted=true;video.playsInline=true;video.loop=true;video.src='__KGEN_LOCAL_MEDIA_DATA_URI__';video.load();
+})();
+</script></body></html>
