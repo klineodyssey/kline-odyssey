@@ -43,10 +43,10 @@
 <section id="walletBridgePanel" class="panel" aria-labelledby="walletBridgeTitle" hidden>
 <h2 id="walletBridgeTitle">選擇錢包</h2>
 <div id="injectedWalletOptions" class="row" role="group" aria-label="瀏覽器偵測到的錢包" hidden></div>
-<p class="muted">可選擇已偵測到的錢包，或使用 WalletConnect 選擇支援 BSC 的手機錢包。使用幣安 App 時，也可把 18911 網址貼到幣安 Web3 錢包的 DApp 瀏覽器。</p>
-<label for="walletDestination">在錢包內開啟</label><select id="walletDestination"><option value="furnace">18911 煉丹爐</option><option value="site">官網首頁</option></select>
+<p class="muted">從 BSC 錢包目錄可搜尋 OKX Wallet、幣安 Web3 錢包及其他 WalletConnect 相容錢包，也可用錢包掃碼。錢包 App 內也可貼上 18911 網址。</p>
+<label for="walletDestination">要在錢包內開啟的頁面</label><select id="walletDestination"><option value="furnace">18911 煉丹爐</option><option value="site">官網首頁</option></select>
 <a id="walletDestinationLink" class="mono" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18911/index.html">https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18911/index.html</a>
-<div class="button-group"><button id="connectMobileWallet" class="primary" type="button">連接目前頁面 · 選錢包／掃碼</button><a id="openMetaMask" class="action" rel="noopener noreferrer">只在 MetaMask 內開啟18911</a><a id="openTrustWallet" class="action" rel="noopener noreferrer">只在 Trust Wallet 內開啟18911</a><button id="cancelWalletBridge" type="button">取消錢包連線</button></div>
+<div class="button-group"><button id="connectMobileWallet" class="primary" type="button">瀏覽 BSC 錢包／掃碼</button><a id="openMetaMask" class="action" rel="noopener noreferrer">只在 MetaMask 內開啟18911</a><a id="openTrustWallet" class="action" rel="noopener noreferrer">只在 Trust Wallet 內開啟18911</a><button id="cancelWalletBridge" type="button">取消錢包連線</button></div>
 <p id="walletBridgeStatus" class="hint" role="status" aria-live="polite">請在錢包批准後返回原頁查看連線；另開官網或18911不會把連線移到這裡。</p><p class="subtle">錢包內頁與目前瀏覽器各自核對帳戶。只開啟 App 不代表目前瀏覽器已連線；連線不授權代幣，原交易狀態未知時保留紀錄，不重送。</p>
 </section>
 <div class="grid">

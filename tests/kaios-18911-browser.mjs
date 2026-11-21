@@ -20,6 +20,10 @@ const PUBLIC_RPC=new URL('https://bsc-dataseed.bnbchain.org').href;
 const WALLET_SDK_URL='https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js';
 const WALLET_SDK_SRI='sha384-Fuh8lPTDFjBwwB4D6KOigvxCgDcPV9rAbE7m0OcFJ5IISKrEqq76h7EANVG5Vy6S';
 const WALLET_HINT_KEY='kaios18911.walletconnect.hint.v1';
+const CATALOG_WALLET_IDS=[
+  '971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709',
+  '8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4',
+];
 const PUBLIC_READS=new Set(['eth_chainId','eth_accounts','eth_getBlockByNumber','eth_getBlockByHash','eth_getCode','eth_call','eth_getBalance','eth_getTransactionReceipt','eth_getTransactionByHash']);
 const report={
   head:process.env.KAIOS_SOURCE_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
@@ -365,7 +369,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
     if(walletBridge){
       // Pairing is always synthetic. One dedicated scenario first evaluates
       // the actual pinned SDK; no relay or real wallet is contacted.
-      const sdkSessionKey='18911.qa.walletconnect.session',initModeKey='18911.qa.sdk-init-mode',bridge={mode:'success',initializations:[],enableCalls:0,closeCalls:0,disconnectCalls:0,waiting:false,release:null,initWaiting:false,releaseInit:null,sdkGlobalValidated:false};
+      const sdkSessionKey='18911.qa.walletconnect.session',initModeKey='18911.qa.sdk-init-mode',bridge={mode:'success',initializations:[],enableCalls:0,connectCalls:[],closeCalls:0,disconnectCalls:0,waiting:false,release:null,initWaiting:false,releaseInit:null,sdkGlobalValidated:false};
       const init=async options=>{
         bridge.initializations.push(JSON.parse(JSON.stringify(options)));
         if(sessionStorage.getItem(initModeKey)==='deferred'){
@@ -374,18 +378,28 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         provider.session=JSON.parse(sessionStorage.getItem(sdkSessionKey)||'null');
         provider.modal={closeModal(){bridge.closeCalls++;}};
         provider.disconnect=async()=>{bridge.disconnectCalls++;provider.session=null;state.authorized=false;sessionStorage.removeItem(sdkSessionKey);};
-        provider.enable=async()=>{
-          bridge.enableCalls++;
+        const approveSession=async topic=>{
           if(bridge.mode==='reject'){const error=new Error('Synthetic WalletConnect: holder rejected');error.code=4001;throw error;}
           if(bridge.mode==='deferred'){
             bridge.waiting=true;
             await new Promise(resolve=>{bridge.release=()=>{bridge.waiting=false;bridge.release=null;resolve();};});
           }
-          provider.session={topic:'synthetic-18911-walletconnect-topic',expiry:Math.floor(Date.now()/1000)+3600,
+          if(bridge.mode==='reuse-topic')return;
+          provider.session={topic,expiry:Math.floor(Date.now()/1000)+3600,
             self:{publicKey:'synthetic-dapp-public-key',metadata:JSON.parse(JSON.stringify(options.metadata))},
             namespaces:{eip155:{chains:['eip155:56'],methods:['eth_chainId','eth_accounts','eth_requestAccounts','eth_sendTransaction'],events:['accountsChanged','chainChanged'],accounts:['eip155:56:'+state.account]}}};
           sessionStorage.setItem(sdkSessionKey,JSON.stringify(provider.session));
-          state.authorized=true;sessionStorage.setItem('18911.qa.authorized','true');return [state.account];
+          state.authorized=true;sessionStorage.setItem('18911.qa.authorized','true');
+        };
+        provider.enable=async()=>{
+          bridge.enableCalls++;
+          await approveSession('synthetic-18911-walletconnect-topic');
+          return [state.account];
+        };
+        provider.connect=async()=>{
+          const previousTopic=provider.session?.topic??null;
+          bridge.connectCalls.push(previousTopic);
+          await approveSession((previousTopic||'synthetic-18911-walletconnect-topic')+'-fresh-'+bridge.connectCalls.length);
         };
         return provider;
       };
@@ -401,7 +415,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         },true);
       }else window.WalletConnectEthereumProvider={init};
       window.__18911BridgeQA={
-        setMode(value){if(!['success','reject','deferred'].includes(value))throw Error('Unknown synthetic bridge mode');bridge.mode=value;},
+        setMode(value){if(!['success','reject','deferred','reuse-topic'].includes(value))throw Error('Unknown synthetic bridge mode');bridge.mode=value;},
         release(){if(!bridge.release)throw Error('No synthetic pairing is waiting');bridge.release();},
         setInitMode(value){if(!['ready','deferred'].includes(value))throw Error('Unknown synthetic init mode');value==='ready'?sessionStorage.removeItem(initModeKey):sessionStorage.setItem(initModeKey,value);},
         releaseInit(){if(!bridge.releaseInit)throw Error('No synthetic SDK init is waiting');bridge.releaseInit();},
@@ -418,7 +432,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         },
         storedSession(){return JSON.parse(sessionStorage.getItem(sdkSessionKey)||'null');},
         installStoredSession(session){sessionStorage.setItem(sdkSessionKey,JSON.stringify(session));},
-        snapshot(){return {mode:bridge.mode,initializations:bridge.initializations,enableCalls:bridge.enableCalls,
+        snapshot(){return {mode:bridge.mode,initializations:bridge.initializations,enableCalls:bridge.enableCalls,connectCalls:bridge.connectCalls,
           closeCalls:bridge.closeCalls,disconnectCalls:bridge.disconnectCalls,waiting:bridge.waiting,initWaiting:bridge.initWaiting,sdkGlobalValidated:bridge.sdkGlobalValidated,sdkIntegrity:bridge.sdkIntegrity};},
       };
     }
@@ -1153,6 +1167,13 @@ async function runBscConnectionScenarios(browser,profile){
   });
 }
 
+function assertBscWalletCatalog(options){
+  assert.equal(options.showQrModal,true);
+  assert.equal(options.qrModalOptions.enableExplorer,true);
+  assert.deepEqual(options.qrModalOptions.explorerRecommendedWalletIds,CATALOG_WALLET_IDS);
+  assert.deepEqual(options.chains,[56]);
+}
+
 async function runWalletBridgeScenarios(browser,profile){
   await runScenario(browser,profile,'bridge-connected',{guest:true,walletBridge:true},async(page,row)=>{
     assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),0,'opening the page does not pair a wallet');
@@ -1165,7 +1186,7 @@ async function runWalletBridgeScenarios(browser,profile){
     assert.equal(bridge.initializations.length,1);assert.equal(bridge.enableCalls,1);
     const options=bridge.initializations[0];
     assert.deepEqual(options.chains,[56]);assert.equal(options.storageOptions.database,'kaios18911-walletconnect');
-    assert.equal(options.showQrModal,true);assert.ok(options.projectId,'the existing public WalletConnect project is configured');
+    assertBscWalletCatalog(options);assert.ok(options.projectId,'the existing public WalletConnect project is configured');
     assert.equal(options.metadata.url,ENTRY);assert.match(options.metadata.name,/18911/);
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,1,'only the explicitly selected bridge connects the real client');
     assert.equal(row.sendRequests.length,0);assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
@@ -1351,10 +1372,57 @@ async function runWalletBridgeScenarios(browser,profile){
     assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
     const restored=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
     assert.equal(restored.initializations.length,1);assert.equal(restored.enableCalls,0,'reload restores SDK-owned approved session without opening a new pairing');
+    assert.deepEqual(restored.connectCalls,[]);assertBscWalletCatalog(restored.initializations[0]);
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,authorizations,'passive restoration never requests account authorization');
     assert.equal(await page.evaluate(()=>Boolean(window.ethereum)),false,'the external browser restores its own bridge, not an injected-wallet claim');
     assert.equal(row.sendRequests.length,0);row.walletBridge={scope:'SYNTHETIC_SDK_SESSION_STORAGE_RESTORE',passive:true,...restored};
     await capture(page,row,'original-session-restored');
+  });
+  for(const entry of ['primary','picker'])await runScenario(browser,profile,'bridge-mobile-catalog-'+entry,{guest:true,walletBridge:true},async(page,row)=>{
+    const seedTopic='synthetic-old-walletconnect-topic';
+    await page.evaluate(({topic,account,entry})=>{
+      const origin=entry==='primary'?'https://unrelated.example/18911/':location.href;
+      window.__18911BridgeQA.installStoredSession({
+        topic,expiry:Math.floor(Date.now()/1000)+3600,
+        self:{metadata:{name:'K18911 KUFO 煉丹爐',url:origin}},
+        namespaces:{eip155:{accounts:['eip155:56:'+account]}},
+      });
+      window.__18911BridgeQA.setMode(entry==='picker'?'reuse-topic':'deferred');
+    },{topic:seedTopic,account:OWNER,entry});
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
+    const journal=await journalBytes(page);
+    const accountRequests=()=>row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
+    if(entry==='picker'){
+      await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
+      const picker=page.locator('#connectMobileWallet');
+      assert.match(await picker.textContent(),/瀏覽 BSC 錢包/);
+      await touchTarget(page,'#connectMobileWallet');await picker.click();
+      await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().connectCalls.length===1&&!document.querySelector('#connectMobileWallet').disabled);
+      assert.equal((await page.evaluate(()=>window.__18911BridgeQA.storedSession())).topic,seedTopic);
+      assert.equal(accountRequests(),0,'a reused topic must be rejected before requesting an account');
+      assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+    }else{
+      await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
+      await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().waiting);
+      assert.equal(accountRequests(),0,'the old session cannot supply an account while the fresh approval is pending');
+      assert.equal((await page.evaluate(()=>window.__18911BridgeQA.storedSession())).topic,seedTopic);
+      await page.evaluate(()=>window.__18911BridgeQA.release());
+      await phase(page,'CONNECTED');await originalConnectionInView(page,row,'fresh-catalog-approval');
+      assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+      assert.notEqual((await page.evaluate(()=>window.__18911BridgeQA.storedSession())).topic,seedTopic);
+      assert.equal(accountRequests(),1,'only the fresh pairing authorizes the account');
+    }
+    const bridge=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
+    assert.deepEqual(bridge.connectCalls,[seedTopic],'a stored session needs a fresh WalletConnect request');
+    assert.equal(bridge.enableCalls,0,'the old session must not be enabled');
+    assert.equal(bridge.disconnectCalls,0,'the picker must not disconnect the old SDK session');
+    assert.equal(bridge.initializations.length,1);
+    assertBscWalletCatalog(bridge.initializations[0]);
+    assert.equal(row.sendRequests.length,0);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending);
+    assert.deepEqual(await journalBytes(page),journal);
+    row.walletBridge={scope:'SYNTHETIC_BSC_WALLET_CATALOG',entry,reusedTopicRejected:entry==='picker',catalogOptions:bridge.initializations[0].qrModalOptions};
+    await capture(page,row,entry==='picker'?'old-topic-not-adopted':'foreign-session-replaced-after-approval');
   });
   await runScenario(browser,profile,'bridge-invalid-session-not-authority',{guest:true,walletBridge:true},async(page,row)=>{
     await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
@@ -1884,6 +1952,7 @@ try{
   report.checks.push('Two added scenarios per viewport discover synthetic active routes with the real payload and an existing exact100 KAIOS allowance. A100 KAIOS→100000 KUFO review with an explicit0.6 BNB cap shows confirmation preflight without a test scroll, requests only one burn, keeps the genuine wallet-response wait beyond the read deadline, then preserves its unmined hash without claiming minted KUFO. Review expiry and the original15-second preflight read timeout remain zero-send, clear consent, preserve the holder cap and pending/journal, and cannot overwrite a newer review when the provider replies late. Existing rejection and hashless unknown-intent scenarios also require visible confirmation feedback. These are synthetic-provider and viewport checks, not physical-wallet, mainnet-burn or mint acceptance.');
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
+  report.checks.push('Both viewports check the BSC WalletConnect directory configuration and a fresh pairing when an SDK session already exists. A repeated topic cannot authorize an account, foreign sessions are not disconnected, and financial pending and history remain untouched. Wallet catalog and pairing are simulated.');
   report.checks.push('Both viewports retain the original bridge rejection/cancellation/late reply and financial-pending guards. One dedicated case independently reads the exact pinned WalletConnect2.12.2 script, verifies SHA384/SRI and its actual browser global, then replaces only init/pairing before any SDK relay operation; every other pairing/session fixture is synthetic. This is loader acceptance, not real relay or wallet acceptance.');
   report.checks.push('Without an injected provider, one explicit primary Connect click starts the existing WalletConnect pairing for this original page, with one enable/account authorization and no financial request. Synthetic hidden approval plus pending-enable pagehide/pageshow returns to the original page without a duplicate pairing; its explicit original-page connection label is checked. A sixty-second first-pairing timeout retains the unresolved request and rejects late authority. Native-only navigation remains under Choose wallet and cannot replace or mutate the original page topic, account, pending or journal. These synthetic events do not prove automatic OS return, a ChatGPT browser handoff, real BFCache or a physical wallet.');
   report.checks.push('Native URL targets resolve to the complete original18911 page. Delayed injection, bounded discovery, account cancellation/timeout, unresolved SDK restore init/read, original sixty-second deadlines, late replies and passive SDK-session reload are exercised without automatic financial requests. An untrusted restoration hint alone never provides account authority.');
