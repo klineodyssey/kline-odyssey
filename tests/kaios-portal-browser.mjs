@@ -1402,12 +1402,19 @@ async function verifyVisitorInfo(){
     const base=new URL(layout==='pages-prefix'?BASE+'/kline-odyssey/':BASE+'/');
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
     const alternateId='abcdefghijk';
-    page.on('pageerror',error=>errors.push(String(error)));let videoState='actual';
+    page.on('pageerror',error=>errors.push(String(error)));let videoState='actual',apiRequests=0;
     await page.route('**/*',async route=>{
       const url=new URL(route.request().url());
       // This task never retries the denied YouTube read or exercises live wallets.
       if(url.origin!==base.origin){
-        const response=videoFixture.responseFor(route.request());if(response)return route.fulfill(response);
+        if(url.href==='https://www.youtube.com/iframe_api'&&++apiRequests===1)return route.abort('failed');
+        const response=videoFixture.responseFor(route.request());
+        if(response&&width>height&&url.pathname==='/embed/akp4K_uzJ28'){
+          const firstPlay='   playCalls++;';
+          assert.ok(response.body.includes(firstPlay),'native fixture still supports intercepting the first play');
+          response.body=response.body.replace(firstPlay,firstPlay+"\n   if(playCalls===1){send('autoplay-blocked',{name:'NotAllowedError',message:'Controlled test denial'});return;}");
+        }
+        if(response)return route.fulfill(response);
         return route.abort('blockedbyclient');
       }
       const upstream=new URL(url);if(layout==='pages-prefix')upstream.pathname=url.pathname.replace(/^\/kline-odyssey\//,'/');
@@ -1455,7 +1462,31 @@ async function verifyVisitorInfo(){
       for(const [id,name] of [['youtube','film'],['latestVideo','links'],['support','contact']]){
         await page.locator('#'+id).evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-${name}-${layout}-${width}x${height}`);
       }
-      await page.locator('.brand-film .brand-film-play').click();await page.locator('.brand-film iframe').waitFor();assertVideoSource(await page.locator('.brand-film iframe').getAttribute('src'),'akp4K_uzJ28',base.origin);await page.locator('.brand-film[data-playback-state="playing"]').waitFor();assert.equal(await page.frameLocator('.brand-film iframe').locator('video').evaluate(v=>v.muted&&!v.paused),true,'native local media plays after muted manual activation');
+      const brandPlay=page.locator('.brand-film .brand-film-play');
+      await brandPlay.tap();
+      await page.locator('.brand-film[data-playback-state="error"]').waitFor();
+      const brandFallback=page.locator('.brand-film .video-watch');
+      assert.equal(await brandFallback.isVisible(),true,'API failure exposes the brand-video fallback');
+      assert.equal(await brandFallback.getAttribute('href'),'https://www.youtube.com/watch?v=akp4K_uzJ28');
+      assert.equal(apiRequests,1,'no automatic retry after API failure');
+      await brandPlay.tap();
+      const brandFrame=page.locator('.brand-film iframe');
+      await brandFrame.waitFor();
+      assertVideoSource(await brandFrame.getAttribute('src'),'akp4K_uzJ28',base.origin);
+      if(width>height){
+        await page.locator('.brand-film[data-playback-state="blocked"]').waitFor();
+        const frameId=await brandFrame.getAttribute('id');
+        await brandPlay.evaluate(button=>button.scrollIntoView({block:'center',behavior:'instant'}));
+        await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+        assert.equal(await brandFrame.getAttribute('id',{timeout:1500}),frameId,'scrolling to the retry control preserves the blocked player');
+        const button=await brandPlay.boundingBox();
+        await page.touchscreen.tap(button.x+button.width/2,button.y+button.height/2);
+        assert.equal(await brandFrame.getAttribute('id'),frameId,'manual retry uses the same ready player');
+      }
+      await page.locator('.brand-film[data-playback-state="playing"]').waitFor();
+      assert.equal(await page.frameLocator('.brand-film iframe').locator('video').evaluate(v=>v.muted&&!v.paused),true,'native local media plays after a fresh API load');
+      assert.equal(apiRequests,2,'a second tap requests the API without reloading the homepage');
+      assert.equal(await page.locator('script[src="https://www.youtube.com/iframe_api"]').count(),1,'only the current API script remains');
       await page.frameLocator('.brand-film iframe').getByText('LOCAL FIXTURE',{exact:false}).waitFor();await page.locator('.brand-film').evaluate(el=>el.scrollIntoView({block:'start'}));await shot(page,`visitor-film-loaded-${layout}-${width}x${height}`);
       await page.locator('#latestVideo .latest-film-play').scrollIntoViewIfNeeded();const latestButton=await reachable(page,'#latestVideo .latest-film-play');assert.ok(latestButton.hit&&latestButton.inView&&latestButton.width>=44&&latestButton.height>=44,'latest playback is a native reachable touch target');
       await page.locator('#latestVideo .latest-film-play').click();await page.locator('#latestVideo iframe').waitFor();assertVideoSource(await page.locator('#latestVideo iframe').getAttribute('src'),cached.videoId,base.origin);await page.locator('#latestVideo .latest-film[data-playback-state="playing"]').waitFor();assert.equal(await page.locator('#latestVideo iframe').count(),1);assert.equal(await page.locator('#latestVideo .latest-film-play').count(),1,'manual playback remains available');assert.equal(await page.locator('.brand-film iframe').count(),0,'switching removes the old player before latest plays');assert.equal(await page.locator('#youtube iframe').count(),1,'one connected video player maximum');
@@ -1480,6 +1511,11 @@ async function verifyVisitorInfo(){
       }
       await page.locator('#latestVideo').scrollIntoViewIfNeeded();await shot(page,`visitor-unavailable-${layout}-${width}x${height}`);
       await page.locator('.portal-footer a[href="official/"]').click();await page.waitForURL(new URL('official/',base).href);await page.locator('a[href="mailto:klineodyssey.io@gmail.com"]').waitFor();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('a[href="mailto:klineodyssey.io@gmail.com"]').evaluate(el=>el.closest('.card').scrollIntoView({block:'center'}));await shot(page,`visitor-official-${layout}-${width}x${height}`);
+      await page.goBack({waitUntil:'domcontentloaded'});
+      await page.getByRole('link',{name:'KGEN 錢包教學',exact:true}).tap();
+      await page.waitForURL(new URL('official/#kgen-manual-import',base).href);
+      await page.getByRole('heading',{name:'手動新增 KGEN 到錢包',exact:true}).waitFor();
+      await shot(page,`visitor-wallet-guide-${layout}-${width}x${height}`);
       assert.deepEqual(errors,[]);report.profiles.push({layout,width,height,status:'PASS'});
     }finally{await context.close()}
   }
