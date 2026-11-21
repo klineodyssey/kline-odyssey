@@ -478,8 +478,10 @@ function renderReview(review){
  text('reviewTitle',isApproval?'授權 KAIOS':isBurn?'確認煉丹':'核對這一筆交易');
  text('confirmReview',isApproval?'用錢包確認授權':isBurn?'用錢包確認煉丹':'交由本人錢包確認');
  const continuation=$('alchemyContinuation');
- continuation.hidden=!isApproval&&review.reviewId!==continuedReviewId;
- continuation.textContent=isApproval?'授權核實後會接續煉丹，金額會保留。':'授權完成，請確認煉丹。';
+ if(continuation){
+  continuation.hidden=!isApproval&&review.reviewId!==continuedReviewId;
+  continuation.textContent=isApproval?'授權核實後會接續煉丹，金額會保留。':'授權完成，請確認煉丹。';
+ }
  const host=$('reviewDetails');host.replaceChildren();
  addDefinition(host,'操作',KIND_LABELS[review.kind]||review.kind);
  if(review.contract)addDefinition(host,'合約',LABELS[review.contract]||review.contract);
