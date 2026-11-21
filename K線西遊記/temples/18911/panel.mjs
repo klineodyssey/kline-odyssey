@@ -1,4 +1,4 @@
-import {createKufoClient} from './kufo-client.mjs';
+import {createKufoClient} from './kufo-client.mjs?v=84609d91';
 
 const PAYLOAD_SHA256='b4c9a5f85dc50074bf016796110c891e0d010561a66e8042163bf3cb29a6714c';
 const ORDER=['KUFO','KAIOSAlchemyFurnace','KUFOOutputJindouyun168888','KSHIP','KSHIPConverter'];
@@ -278,7 +278,7 @@ async function connectNativeLanding(){
  finally{clearTimeout(timeout);if(nativeAttempt===attempt)nativeAttempt=null;render();scheduleVerification();}
 }
 const VERIFY_INTERVAL_MS=30000;
-const UNKNOWN_HASH_STOP='原交易尚無 hash，請從本人錢包取回此次原請求的 hash，再於下方唯讀核對。';
+const UNKNOWN_HASH_STOP='尚未取得原交易編號。可從煉丹區查詢進度。';
 let verifyTimer=null,verifyFailures=0,verifyStopped='',lastVerifiedAt=null,pageAway=false;
 const errors={
  WRONG_CHAIN:'錢包尚未切換至 BSC 主網（56），請在錢包確認後再連接。',
@@ -321,10 +321,11 @@ function text(id,value){$(id).textContent=String(value??'—');}
 function ether(value){try{return window.ethers.utils.formatEther(String(value));}catch{return '尚未核對';}}
 function dateTW(seconds){try{return new Date(Number(seconds)*1000).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})+' UTC+8';}catch{return '尚未核對';}}
 function clearVerificationTimer(){if(verifyTimer!==null)clearTimeout(verifyTimer);verifyTimer=null;}
+function idlePlayer(){return !!view&&!view.pending&&!same(view.account,payload?.expectedOwner);}
 function renderVerification(){
  const el=$('autoVerifyStatus');if(!el)return;
  const last=lastVerifiedAt?'；上次 '+dateTW(lastVerifiedAt/1000):'';
- const state=verifyStopped?'已停止：'+verifyStopped:pageAway||document.visibilityState==='hidden'?'頁面在背景，已暫停':view?.review?'預覽中，暫停自動查核':uiBusy||view?.active?'等待目前操作完成':'前景每 30 秒查核，不會自動送交易';
+ const state=verifyStopped?'已停止：'+verifyStopped:pageAway||document.visibilityState==='hidden'?'頁面在背景，已暫停':view?.review?'預覽中，暫停自動查核':uiBusy||view?.active?'等待目前操作完成':idlePlayer()?'回到此頁或按「查詢鏈上狀態」更新':'前景每 30 秒查核，不會自動送交易';
  el.textContent='自動唯讀查核：'+state+last;
  el.dataset.state=verifyStopped?'STOPPED':pageAway||document.visibilityState==='hidden'?'HIDDEN':view?.review?'REVIEW':uiBusy||view?.active?'BUSY':'READY';
 }
@@ -332,7 +333,7 @@ function resetVerification(){clearVerificationTimer();verifyFailures=0;verifySto
 function scheduleVerification(delay=VERIFY_INTERVAL_MS){
  if(view?.phase==='CONFIRMED_REVERTED'&&!verifyStopped)verifyStopped='原交易已在鏈上失敗，證據已保存；請先按查詢鏈上狀態核對。';
  clearVerificationTimer();renderVerification();
- if(!client||pageAway||document.visibilityState==='hidden'||verifyStopped||bridgeAttempt||nativeIntent||nativeAttempt||restoreAttempt)return;
+ if(!client||pageAway||document.visibilityState==='hidden'||verifyStopped||bridgeAttempt||nativeIntent||nativeAttempt||restoreAttempt||delay>0&&idlePlayer())return;
  verifyTimer=setTimeout(()=>{verifyTimer=null;void verifyAutomatically();},delay);
 }
 async function verifyAutomatically(){
@@ -564,6 +565,10 @@ function renderConfirmFeedback(s){
 function canCheckPending(s){
  return Number(s.chainId)===56&&same(s.account,s.pending?.account);
 }
+function playerCandidate(s){
+ const item=s.receiptCandidate;
+ return item&&s.pending&&!s.pending.hash&&item.intentId===s.pending.intentId&&canCheckPending(s)?item:null;
+}
 function render(){
  if(!client||!view)return;
  const s=view,busy=uiBusy||!!s.active||!!bridgeAttempt||!!nativeAttempt||!!restoreAttempt,pending=!!s.pending,connected=!!s.account&&Number(s.chainId)===56;
@@ -590,12 +595,18 @@ function render(){
  renderInjectedWallets();
  $('prepareDeploy').disabled=busy||pending||!owner||s.chainActive||Object.keys(deployments||{}).length===5;
  $('prepareAlchemy').disabled=busy||pending||!connected;
- const pendingAction=$('checkAlchemyPending');
+ const pendingAction=$('checkAlchemyPending'),found=playerCandidate(s);
  if(pendingAction){
   $('prepareAlchemy').hidden=pending;
   pendingAction.hidden=!pending;
   pendingAction.disabled=busy;
-  if(pending)pendingAction.textContent=!canCheckPending(s)?'連接原交易錢包':s.pending.hash?'查核原交易回執':'找回原交易編號';
+  if(pending)pendingAction.textContent=!canCheckPending(s)?'連接原交易錢包':found?'確認這筆回執':'查詢煉丹進度';
+ }
+ const fallback=$('openReceiptFallback'),candidateLink=$('openCandidateReceipt');
+ if(fallback)fallback.hidden=!pending||!!s.pending.hash||!canCheckPending(s);
+ if(candidateLink){
+  candidateLink.hidden=!found;
+  if(found)candidateLink.href='https://bscscan.com/tx/'+found.hash;
  }
  $('activationTime').disabled=busy||pending||!!deployments.KUFO?.address;
  $('activationNow').disabled=$('activationTime').disabled;
@@ -606,7 +617,12 @@ function render(){
  if(pending){
   if(!canCheckPending(s))alchemyReason='請連接原交易的錢包帳戶及 BSC 56，再查核這筆交易。';
   else if(lastError)alchemyReason=lastError;
-  else if(!s.pending.hash)alchemyReason='請從原錢包取回這一次的交易編號，再查核回執。';
+  else if(found){
+   const operation=found.kind==='approve'?'授權':'煉丹';
+   const outcome=found.status==='CONFIRMED_REVERTED'?'未成功':'已確認';
+   alchemyReason='找到 '+ether(found.amountWei).replace(/\.0$/,'')+' KAIOS 的'+operation+'回執（'+outcome+'）。請確認是你的原交易。';
+  }
+  else if(!s.pending.hash)alchemyReason=s.status==='目前尚未找到可確認的原回執。'?s.status:'正在等待原交易。可查詢進度。';
   else if(s.pending.intentId===approvalFollowUp?.intentId)alchemyReason='授權回執核實後會接續煉丹。';
   else alchemyReason='上一筆交易仍待核對。請先查核原回執。';
  }
@@ -633,12 +649,13 @@ function render(){
  $('cancelReview').disabled=busy;
  $('pendingPanel').hidden=!pending;
  if(pending){
-  text('pendingState',!s.pending.hash?'正在等待本人錢包結果。若已送出，請從原錢包取回交易編號。':s.phase==='PENDING'?s.status:'保留原交易，只查核原回執，不會自動送下一筆。');
+  text('pendingState',!s.pending.hash?'原交易仍待核對。可從煉丹區查詢進度。':s.phase==='PENDING'?s.status:'保留原交易，只查核原回執，不會自動送下一筆。');
   text('pendingHash',s.pending.hash||'尚未取得交易 hash；請先查看本人錢包的原請求。');
+  $('pendingHash').hidden=!s.pending.hash;
  }
   const unknown=pending&&!s.pending.hash,identity=s.pending?.intentId||null;
-  if(identity!==recoveryIntentId){recoveryIntentId=identity;$('receiptHash').value='';$('acceptRecoveryHash').checked=false;}
-  $('hashRecovery').hidden=!unknown;
+  if(identity!==recoveryIntentId){recoveryIntentId=identity;$('receiptHash').value='';$('acceptRecoveryHash').checked=false;$('hashRecovery').open=false;}
+  $('hashRecovery').hidden=!unknown||!canCheckPending(s);
   $('receiptHash').disabled=busy||!unknown;
   $('acceptRecoveryHash').disabled=busy||!unknown;
   $('recoverPendingHash').disabled=busy||!unknown||!connected||!$('acceptRecoveryHash').checked||!/^0x[0-9a-fA-F]{64}$/.test($('receiptHash').value.trim());
@@ -654,6 +671,12 @@ function originalReceipt(current,{intentId,hash}){
  const {journal}=current.exportEvidence();
  return journal.evidence.find(({intent})=>intent?.intentId===intentId&&same(intent.hash,hash));
 }
+function rememberPlayerReceipt(current,pending){
+ if(current.snapshot().pending)return;
+ const receipt=originalReceipt(current,pending),verification=receipt?.verification;
+ if(receipt?.intent.kind==='approve'&&verification?.status==='CONFIRMED')playerReceiptStatus={account:pending.account,approved:true};
+ if(receipt?.intent.kind==='burn'&&verification?.status==='VERIFIED_ALCHEMY')playerReceiptStatus={account:pending.account,kufoMinted:verification.kufoMinted};
+}
 function checkAlchemyPending(){
  if(uiBusy||!view?.pending)return;
  if(!canCheckPending(view)){
@@ -662,21 +685,25 @@ function checkAlchemyPending(){
   walletAction.focus({preventScroll:true});
   return;
  }
- if(!view.pending.hash){
-  $('pendingPanel').scrollIntoView({block:'start'});
-  $('receiptHash').focus({preventScroll:true});
-  return;
- }
- const pending=view.pending;
+ const pending=view.pending,found=playerCandidate(view);
  void run(async(current,isCurrent)=>{
+  if(!pending.hash){
+   if(found){
+    await current.recoverPendingHash({hash:found.hash,accepted:true,expectedIntentId:pending.intentId});
+    if(!isCurrent())return;
+    rememberPlayerReceipt(current,{...pending,hash:found.hash});
+    if(verifyStopped===UNKNOWN_HASH_STOP)verifyStopped='';
+    if(current.snapshot().phase!=='CONFIRMED_REVERTED')await current.refresh();
+   }else{
+    await current.findPendingReceipt();
+    if(isCurrent()&&!['approve','burn'].includes(pending.kind))$('pendingPanel').scrollIntoView({block:'start'});
+   }
+   return;
+  }
   await current.verify();
   if(!isCurrent())return;
   lastVerifiedAt=Date.now();
-  if(!current.snapshot().pending){
-   const receipt=originalReceipt(current,pending),verification=receipt?.verification;
-   if(receipt?.intent.kind==='approve'&&verification?.status==='CONFIRMED')playerReceiptStatus={account:pending.account,approved:true};
-   if(receipt?.intent.kind==='burn'&&verification?.status==='VERIFIED_ALCHEMY')playerReceiptStatus={account:pending.account,kufoMinted:verification.kufoMinted};
-  }
+  rememberPlayerReceipt(current,pending);
   await continueAlchemy(current,isCurrent);
   if(isCurrent()&&current.snapshot().pending)$('pendingPanel').scrollIntoView({block:'start'});
  });
@@ -801,6 +828,7 @@ async function boot(){
   $('prepareDeploy').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();await applyActivation(current,readActivation());await current.prepare({kind:'deploy'});if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
  $('prepareAlchemy').addEventListener('click',()=>run(async(current,isCurrent)=>{approvalFollowUp=null;playerReceiptStatus=null;resetConsent();const request=alchemyRequest();try{await current.prepare(request);}catch(error){if(!isCurrent())return;if(!['ALLOWANCE_REQUIRED','APPROVAL_REQUIRED'].includes(error.code))throw error;await current.prepare({...request,kind:'approve'});}if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
  $('checkAlchemyPending')?.addEventListener('click',checkAlchemyPending);
+ $('openReceiptFallback')?.addEventListener('click',()=>{$('hashRecovery').open=true;});
  $('cancelReview').addEventListener('click',()=>{resetConsent();invalidate('預覽已取消；沒有送交錢包。');});
  for(const id of ['acceptReview','reviewCap'])$(id).addEventListener('input',render);
  $('confirmReview').addEventListener('click',confirmReviewed);
