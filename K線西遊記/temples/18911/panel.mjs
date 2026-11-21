@@ -340,6 +340,7 @@ function scheduleVerification(delay=VERIFY_INTERVAL_MS){
 async function verifyAutomatically(){
  if(!client||pageAway||document.visibilityState==='hidden'||verifyStopped)return;
  if(uiBusy||view?.active||view?.review||bridgeAttempt||nativeIntent||nativeAttempt||restoreAttempt){scheduleVerification();return;}
+ if(view?.account&&Number(view.chainId)===56&&view.pending&&!view.pending.hash&&same(view.account,view.pending.account)){verifyStopped=UNKNOWN_HASH_STOP;renderVerification();return;}
  const epoch=uiEpoch,current=client,isCurrent=()=>epoch===uiEpoch&&current===client;
  uiBusy=true;render();
  try{
