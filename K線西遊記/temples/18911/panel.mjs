@@ -1,4 +1,4 @@
-import {createKufoClient} from './kufo-client.mjs?v=84609d91';
+import {createKufoClient} from './kufo-client.mjs?v=15c88a7b';
 
 const PAYLOAD_SHA256='b4c9a5f85dc50074bf016796110c891e0d010561a66e8042163bf3cb29a6714c';
 const ORDER=['KUFO','KAIOSAlchemyFurnace','KUFOOutputJindouyun168888','KSHIP','KSHIPConverter'];
@@ -296,6 +296,7 @@ const errors={
  REVIEW_INVALID:'原預覽已失效，請重新核對。',
  CONTEXT_CHANGED:'頁面或錢包已變更；請本人重新連接並重新預覽。',
  SUBMISSION_UNKNOWN:'錢包送出狀態未知。保留原紀錄，請先核對，不能重送。',
+ RECEIPT_LOOKUP_PROVIDER_ERROR:'錢包暫時無法查核交易（-32603）。請稍後再查，或用原交易編號核對。',
  PENDING_INTENT:'已有待確認交易，請先查核原交易回執。',
  PENDING_ACCOUNT_MISMATCH:'請使用原交易帳戶核對；原紀錄保留。',
  STORAGE_READ_FAILED:'無法讀取交易紀錄，停止送出。請確認此站可使用瀏覽器儲存。',
@@ -339,7 +340,6 @@ function scheduleVerification(delay=VERIFY_INTERVAL_MS){
 async function verifyAutomatically(){
  if(!client||pageAway||document.visibilityState==='hidden'||verifyStopped)return;
  if(uiBusy||view?.active||view?.review||bridgeAttempt||nativeIntent||nativeAttempt||restoreAttempt){scheduleVerification();return;}
- if(view?.pending&&!view.pending.hash){verifyStopped=UNKNOWN_HASH_STOP;renderVerification();return;}
  const epoch=uiEpoch,current=client,isCurrent=()=>epoch===uiEpoch&&current===client;
  uiBusy=true;render();
  try{
@@ -351,6 +351,7 @@ async function verifyAutomatically(){
   lastError=message(error);
   const code=String(error?.code||''),technical=(!code||error?.name==='TimeoutError'||['RPC_READ_FAILED','NETWORK_ERROR','SERVER_ERROR','TIMEOUT','TRANSPORT_CLOSED','-32000','-32603'].includes(code))&&!/revert|denied|forbidden|permission|unauthori[sz]ed|quota|rate.limit|limit.exceeded|拒絕|權限|政策|額度/i.test(String(error?.message||''));
   if(['CONTEXT_CHANGED','DISPOSED'].includes(code))return;
+  if(code==='SUBMISSION_UNKNOWN'){verifyStopped=UNKNOWN_HASH_STOP;return;}
   if(code==='ANOTHER_TAB_ACTIVE'){
    lastError='另一分頁正在處理錢包操作。操作鎖釋放後，面板會自動核對原回執。';
    return;
@@ -457,7 +458,10 @@ function initializeClient(selected){
  client=createKufoClient({provider,ethers:window.ethers,payload,storage,lockManager:navigator.locks});
  unsubscribe=client.subscribe(snapshot=>{
   if(approvalFollowUp&&(!same(snapshot.account,approvalFollowUp.account)||Number(snapshot.chainId)!==56))approvalFollowUp=null;
-  view=snapshot;render();
+  const accountInvalidated=view?.account&&snapshot.pending&&snapshot.phase==='STALE'&&!snapshot.account;
+  view=snapshot;
+  if(accountInvalidated){verifyStopped='';verifyFailures=0;lastError='';playerReceiptStatus=null;scheduleVerification(0);}
+  render();
  });
  scheduleVerification(0);
 }
@@ -695,7 +699,11 @@ function checkAlchemyPending(){
     if(verifyStopped===UNKNOWN_HASH_STOP)verifyStopped='';
     if(current.snapshot().phase!=='CONFIRMED_REVERTED')await current.refresh();
    }else{
-    await current.findPendingReceipt();
+    try{await current.findPendingReceipt();}
+    catch(error){
+     if(String(error?.code)==='-32603')throw Object.assign(new Error(errors.RECEIPT_LOOKUP_PROVIDER_ERROR),{code:'RECEIPT_LOOKUP_PROVIDER_ERROR'});
+     throw error;
+    }
     if(isCurrent()&&!['approve','burn'].includes(pending.kind))$('pendingPanel').scrollIntoView({block:'start'});
    }
    return;
