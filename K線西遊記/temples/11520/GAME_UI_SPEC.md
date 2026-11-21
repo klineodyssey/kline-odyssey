@@ -88,12 +88,12 @@
 
 每一器官必須可開/關，有實際 handler/runtime/state；不得以 decorative button 或 `alert()` 冒充完成。
 
-## 8. 下單確認與語音客服
-確認窗至少顯示：axis、market、side、lots、C、本金 KGEN、每 1% 價格變動損益、反向歸零百分比與價格距離/風險、reference price、market-data age、Free KGEN、Cancel、Confirm。
+## 8. 手動下單確認、自駕啟動與語音客服
+手動下單確認窗至少顯示：axis、market、side、lots、C、本金 KGEN、每 1% 價格變動損益、反向歸零百分比與價格距離/風險、reference price、market-data age、Free KGEN、Cancel、Confirm。
 
 - Preview/Cancel 不得改 balance/position/order。
 - 語音可播報 Preview、Confirm、Filled、Rejected、Liquidated、Closed。
-- 語音不能代替使用者 Confirm 或 wallet signature。
+- 手動下單由使用者確認。模擬自駕在原面板明確啟動後，按[交易規格第 9 節](./KGEN_TRADING_SPEC.md)的既有策略與限額自動建立模擬委託。語音可回報結果，確認與錢包授權由相應控制完成。
 - AI/客服必須能詳細說明「為什麼能/不能下單」、本金、C、每 1% 價格變動損益、錢包狀態、simulation/real-chain boundary。
 - 必須有文字說明書 fallback。
 
@@ -103,7 +103,7 @@
 - 新 C-order 使用 `ΔIndex × signed C × lots`，詳細 authority 見 KGEN_TRADING_SPEC。部署模型必須清楚區分；100C理想歸零距離0.01 index，不可套舊固定1%。
 - Position/receipt 顯示 accepted oracle observation、entry/mark/settlement、margin、PnL、claim及chain receipt；reload/hot-switch從對應account鏈上狀態恢復，不以localStorage當資產帳本。
 - 可連線 EVM wallet、查 chain/account/native balance/ERC-20 `balanceOf`。
-- 真實 settlement 下單只有在正式 contract address + ABI + chain + custody + receipt 全部驗證後才能啟用。
+- 正式下單以[交易規格](./KGEN_TRADING_SPEC.md)的主網部署與執行條件為準。啟用前核對正式合約、ABI、鏈別、託管、授權與回執。
 - 未驗證前必須 fail-closed 或清楚標示 simulation/off-chain；不得把 local FILLED 冒充真成交。
 - GitHub Pages 是 static frontend，不是 persistent multiplayer/trading backend。
 
