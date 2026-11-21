@@ -1024,7 +1024,7 @@ async function downloadEvidence(page,row,label){
   return JSON.parse(await fs.readFile(`${OUT}/${filename}`,'utf8'));
 }
 
-async function manuallyRecover(page,hash){
+async function manuallyRecover(page,hash,{settle=true}={}){
   assert.equal(typeof hash,'string','manual recovery fixture must supply the concrete original transaction hash');
   assert.match(hash,/^0x[0-9a-f]{64}$/i,'manual recovery fixture hash is a complete bytes32 value');
   const details=page.locator('#hashRecovery');
@@ -1034,7 +1034,19 @@ async function manuallyRecover(page,hash){
   if(!await page.locator('#acceptRecoveryHash').isChecked())await page.locator(label).click();
   assert.ok(await page.locator('#acceptRecoveryHash').isChecked());
   await touchTarget(page,'#recoverPendingHash');assert.ok(await page.locator('#recoverPendingHash').isEnabled());
-  await page.locator('#recoverPendingHash').click();await autoSettled(page);
+  await page.locator('#recoverPendingHash').click();
+  if(settle)await autoSettled(page);
+}
+
+async function recoveredStatusInView(page,selector,expectedText){
+  // Success hides the recovery form. Verify the page itself brings the result
+  // into view, with no test click or scroll after the explicit confirmation.
+  await page.waitForFunction(({selector,expectedText})=>{
+    const el=document.querySelector(selector),r=el?.getBoundingClientRect();
+    return r&&r.width>0&&r.height>0&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight&&el.textContent.includes(expectedText);
+  },{selector,expectedText});
+  const rect=await geometry(page,selector);
+  assert.ok(rect.visible&&rect.inView&&rect.hit,'the post-recovery status is fully visible without a test scroll');
 }
 
 async function runInjectedWalletSelectionScenarios(browser,profile){
@@ -1640,13 +1652,36 @@ async function runP1RecoveryScenarios(browser,profile){
     assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'an unsupported lookup does not read receipts');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
     assert.equal(row.sendRequests.length,2);
+    const recoveryStatus=page.locator('#receiptRecoveryStatus');
     await manuallyRecover(page,kufo.hash);await phase(page,'BLOCKED');
     assert.equal(await page.locator('#appStatus').getAttribute('data-error-code'),'HASH_ALREADY_ARCHIVED','the historical receipt is rejected as another archived intent, not an unrelated read failure');
+    assert.equal(await recoveryStatus.getAttribute('role'),'status');
+    assert.equal(await recoveryStatus.getAttribute('data-state'),'ERROR');
+    assert.match(await recoveryStatus.textContent(),/已核對過/);
+    assert.ok((await geometry(page,'#receiptRecoveryStatus')).inView,'the archived-hash explanation appears beside the recovery form');
+    assert.equal(await page.locator('#receiptHash').inputValue(),kufo.hash,'an error preserves the field so the holder can correct it');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'a historical successful KUFO hash cannot replace this Furnace intent');
     assert.deepEqual(await journalBytes(page),originalJournal);assert.equal(row.sendRequests.length,2);
     await capture(page,row,'historical-hash-rejected');
-    await manuallyRecover(page,furnaceHash);await phase(page,'BLOCKED');
+    const recoveryGate='advanced-receipt-check';
+    await page.evaluate(id=>window.__18911WalletQA.gateRead(id),recoveryGate);
+    await manuallyRecover(page,furnaceHash,{settle:false});
+    await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,recoveryGate);
+    assert.equal(await recoveryStatus.getAttribute('data-state'),'CHECKING');
+    assert.match(await recoveryStatus.textContent(),/查核|核對/);
+    assert.ok((await geometry(page,'#receiptRecoveryStatus')).inView,'the read-in-progress feedback appears beside the clicked button');
+    assert.equal(await page.locator('#recoverPendingHash').isEnabled(),false,'the pending read cannot be started twice');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
+    assert.deepEqual(await journalBytes(page),originalJournal);assert.equal(row.sendRequests.length,2);
+    await capture(page,row,'manual-receipt-read-in-progress');
+    await page.evaluate(id=>window.__18911WalletQA.releaseRead(id,'resolve'),recoveryGate);
+    await phase(page,'BLOCKED');await autoSettled(page);
     assert.equal(await page.locator('#appStatus').getAttribute('data-error-code'),'RECOVERY_NOT_CONFIRMED','an exact but unmined hash must remain canonically unconfirmed');
+    assert.equal(await recoveryStatus.getAttribute('data-state'),'ERROR');
+    assert.match(await recoveryStatus.textContent(),/尚未取得|尚無完整/);
+    assert.ok((await geometry(page,'#receiptRecoveryStatus')).inView,'the unmined result appears beside the recovery form');
+    assert.equal(await page.locator('#receiptHash').inputValue(),furnaceHash);
+    assert.ok(await page.locator('#recoverPendingHash').isEnabled(),'an unconfirmed receipt can be deliberately checked again');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'an unmined matching transaction does not release the canonical-evidence lock');
     assert.deepEqual(await journalBytes(page),originalJournal);assert.equal(row.sendRequests.length,2);
     const mined=await page.evaluate(hash=>window.__18911WalletQA.mineDeployment(hash),furnaceHash);
@@ -1654,6 +1689,9 @@ async function runP1RecoveryScenarios(browser,profile){
     (row.syntheticMinedDeployments??=[]).push({...mined,hash:furnaceHash});
     await manuallyRecover(page,furnaceHash);
     await page.waitForFunction(()=>Array.from(document.querySelectorAll('#deploySteps .step-status')).filter(el=>el.textContent==='鏈上已核').length===2);
+    assert.ok(await recoveryStatus.isHidden(),'the finished form no longer remains open');
+    await recoveredStatusInView(page,'#appStatus','證據已保存');
+    await capture(page,row,'recovered-deployment-result');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'only a fully matched canonical Furnace receipt completes the recovered original intent');
     assert.doesNotMatch(await page.locator('#autoVerifyStatus').textContent(),/尚未取得原交易編號/,'successful recovery clears only the obsolete hashless stop reason');
     assert.equal(row.sendRequests.length,2,'read-only recovery must never issue a third transaction');
@@ -1876,6 +1914,30 @@ async function runPlayerConfirmationScenarios(browser,profile){
     assert.ok(await page.locator('#prepareAlchemy').isEnabled());
     assert.equal(row.sendRequests.length,1,'finding and confirming the original receipt never requests another wallet send');
     row.hashlessReceiptLookup={idlePollingRequests:0,nonceReads:nonceReads.length,fullBlocks:1,recoveredHash:hash,recoverySends:0};
+  });
+  await runScenario(browser,profile,'player-manual-approval-recovery',{account:OTHER,activeAlchemy:true,initialAllowance:'0',sendMode:'broadcast-unknown',clock:true},async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');
+    await page.locator('#kaiosAmount').fill('10');
+    await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+    assert.equal(await page.locator('#reviewTitle').textContent(),'授權 KAIOS');
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,'BLOCKED');await autoSettled(page);
+    const pending=JSON.parse(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY));
+    assert.equal(pending.kind,'approve');assert.equal(pending.hash,null);
+    const hash=await page.evaluate(()=>window.__18911WalletQA.lastBroadcastHash());
+    await page.evaluate(id=>window.__18911WalletQA.mineApproval(id,false),hash);
+    await page.locator('#openReceiptFallback').click();
+    await page.locator('#receiptHash').waitFor({state:'visible'});
+    await manuallyRecover(page,hash);
+    assert.ok(await page.locator('#receiptRecoveryStatus').isHidden());
+    await recoveredStatusInView(page,'#alchemyReason','原授權已核實。按「煉丹」後會重新核對目前可用額度。');
+    assert.ok(await page.locator('#prepareAlchemy').isEnabled(),'the player can explicitly check the burn and current allowance');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    const records=Object.values(await journalBytes(page)).flatMap(raw=>JSON.parse(raw).evidence);
+    assert.equal(records.length,1);
+    assert.equal(records[0].intent.hash,hash);
+    assert.equal(records[0].verification.status,'CONFIRMED');
+    assert.equal(row.sendRequests.length,1,'manual confirmation of the original approval does not submit a burn');
+    await capture(page,row,'manual-approval-result');
   });
   const secondPlayer='0x2222222222222222222222222222222222222222';
   await runScenario(browser,profile,'player-pending-account-isolation',{
@@ -2244,6 +2306,7 @@ try{
   report.checks.push('The original pending approval has an action in the player card after reload. It preserves unmined intent bytes and restores the verified allowance after mining. Hashless lookup reads one full identified block, preserves pending until holder confirmation, and never requests another wallet send. Advanced recovery stays collapsed and idle guests and ordinary players do not run recurring reads.');
   report.checks.push('On the same origin a second player reads their own KAIOS, opens a distinct burn preview and submits only their own synthetic transaction. Adding it preserves the legacy first-player record byte for byte, and switching back restores the original receipt check and prevents duplicate sends. A temporary -32603 during receipt discovery keeps the original record and allows a deliberate retry.');
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
+  report.checks.push('Manual recovery displays a live busy state and the archived/unmined error beside the pressed button while preserving the original record. It moves to the visible verified result after restoring a synthetic deployment or player approval and sends no new transaction.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.checks.push('Both viewports check the BSC WalletConnect directory configuration and a fresh pairing when an SDK session already exists. A repeated topic cannot authorize an account, foreign sessions are not disconnected, and financial pending and history remain untouched. Wallet catalog and pairing are simulated.');
   report.checks.push('Both viewports retain the original bridge rejection/cancellation/late reply and financial-pending guards. One dedicated case independently reads the exact pinned WalletConnect2.12.2 script, verifies SHA384/SRI and its actual browser global, then replaces only init/pairing before any SDK relay operation; every other pairing/session fixture is synthetic. This is loader acceptance, not real relay or wallet acceptance.');
