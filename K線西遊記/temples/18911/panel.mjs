@@ -11,7 +11,7 @@ let payload=null,client=null,provider=null,unsubscribe=null,view=null,uiBusy=fal
 let mobileProvider=null,mobileRaw=null,mobileMetadata=null,mobileTopic=null,sdkLoading=null,bridgePending=null,bridgeReadPending=null,bridgeAttempt=null;
 let publicProvider=null,nativeIntent=false,nativeAttempt=null,restorePending=null,restoreAttempt=null,nextNativeWallet='',bridgeMessage='';
 let mobileNetworkRaw=null;
-let confirmAttempt=null,approvalFollowUp=null,continuedReviewId=null;
+let confirmAttempt=null,approvalFollowUp=null,continuedReviewId=null,playerReceiptStatus=null;
 const BRIDGE_MS=60000;
 const SESSION_HINT='kaios18911.walletconnect.hint.v1';
 const networkRequests=new WeakMap();
@@ -449,7 +449,7 @@ function connectSelectedProvider(selected){
 }
 function initializeClient(selected){
  clearVerificationTimer();
- uiEpoch++;uiBusy=false;confirmAttempt=null;approvalFollowUp=null;
+ uiEpoch++;uiBusy=false;confirmAttempt=null;approvalFollowUp=null;playerReceiptStatus=null;
  unsubscribe?.();client?.dispose();provider=selected;
  let storage;
  try{storage=window.localStorage;}catch{throw Object.assign(new Error('瀏覽器拒絕存取交易紀錄，無法安全送單。'),{code:'STORAGE_READ_FAILED'});}
@@ -461,7 +461,7 @@ function initializeClient(selected){
  scheduleVerification(0);
 }
 function invalidate(reason){
- lastError='';approvalFollowUp=null;
+ lastError='';approvalFollowUp=null;playerReceiptStatus=null;
  try{client?.invalidate?.(reason);}catch(error){lastError=message(error);}
  if(view?.review&&!client?.invalidate){view={...view,review:null};}
  $('acceptReview').checked=false;render();
@@ -561,6 +561,9 @@ function renderConfirmFeedback(s){
   if(!pageAway&&document.visibilityState==='visible')requestAnimationFrame(()=>{if(confirmAttempt===attempt&&client===attempt.client&&uiEpoch===attempt.epoch&&!pageAway&&document.visibilityState==='visible'&&!el.hidden)el.scrollIntoView({behavior:'auto',block:'center'});});
  }
 }
+function canCheckPending(s){
+ return Number(s.chainId)===56&&same(s.account,s.pending?.account);
+}
 function render(){
  if(!client||!view)return;
  const s=view,busy=uiBusy||!!s.active||!!bridgeAttempt||!!nativeAttempt||!!restoreAttempt,pending=!!s.pending,connected=!!s.account&&Number(s.chainId)===56;
@@ -587,19 +590,37 @@ function render(){
  renderInjectedWallets();
  $('prepareDeploy').disabled=busy||pending||!owner||s.chainActive||Object.keys(deployments||{}).length===5;
  $('prepareAlchemy').disabled=busy||pending||!connected;
+ const pendingAction=$('checkAlchemyPending');
+ if(pendingAction){
+  $('prepareAlchemy').hidden=pending;
+  pendingAction.hidden=!pending;
+  pendingAction.disabled=busy;
+  if(pending)pendingAction.textContent=!canCheckPending(s)?'連接原交易錢包':s.pending.hash?'查核原交易回執':'找回原交易編號';
+ }
  $('activationTime').disabled=busy||pending||!!deployments.KUFO?.address;
  $('activationNow').disabled=$('activationTime').disabled;
  if(cfg?.activationTime&&deployments.KUFO?.address)$('activationTime').value=localTW(cfg.activationTime);
  text('ownerReason',pending?'先查核原交易，不能重新部署或變更啟用時間。':owner?'請核對不可變啟用時間。每次只預覽及確認下一筆，沒有自動批次送單。':'此區由王母本人操作。連線帳戶須同時符合指定王母與目前 Registry Owner。');
  const allowanceWei=connected&&!s.error&&!lastError&&s.alchemy?.source==='VERIFIED_CHAIN_ROUTES'?s.alchemy.allowanceWei:null;
  let alchemyReason;
- if(pending)alchemyReason=s.pending.intentId===approvalFollowUp?.intentId?'正在查核授權回執，核實後會接續煉丹。':'原交易待確認，請先核回執；授權成功也不代表 KUFO 已產出。';
+ if(pending){
+  if(!canCheckPending(s))alchemyReason='請連接原交易的錢包帳戶及 BSC 56，再查核這筆交易。';
+  else if(lastError)alchemyReason=lastError;
+  else if(!s.pending.hash)alchemyReason='請從原錢包取回這一次的交易編號，再查核回執。';
+  else if(s.pending.intentId===approvalFollowUp?.intentId)alchemyReason='授權回執核實後會接續煉丹。';
+  else alchemyReason='上一筆交易仍待核對。請先查核原回執。';
+ }
+ else if(s.phase==='CONFIRMED_REVERTED')alchemyReason=s.status;
+ else if(connected&&same(s.account,playerReceiptStatus?.account)&&playerReceiptStatus.kufoMinted){
+  alchemyReason='原煉丹已完成，已鑄出 '+ether(playerReceiptStatus.kufoMinted)+' KUFO。';
+ }
  else if(scheduled)alchemyReason='正式啟用時間尚未到，請於 '+dateTW(s.chainConfig.activationTime)+' 後重新核對。';
  else if(!s.chainActive)alchemyReason='請先查核新版五合約與原 Registry 啟用狀態；不會改用舊 49 Epoch 煉丹爐。';
  else if(!connected)alchemyReason='連接本人 BSC 錢包後，這裡會顯示可用的煉丹授權。';
  else if(allowanceWei==null)alchemyReason='目前的煉丹授權尚未核對。';
  else if(BigInt(allowanceWei)===0n)alchemyReason='輸入金額並按「煉丹」，依畫面確認授權及煉丹。';
  else alchemyReason='目前尚有 '+ether(allowanceWei).replace(/\.0$/,'')+' KAIOS 授權可用。完成煉丹須另由本人錢包確認。KUFO 產出以煉丹回執為準。';
+ if(!pending&&connected&&same(s.account,playerReceiptStatus?.account)&&playerReceiptStatus.approved)alchemyReason='原授權已核實。'+alchemyReason;
  const alchemyNotice=$('alchemyReason');
  if(alchemyNotice.textContent!==alchemyReason)alchemyNotice.textContent=alchemyReason;
  text('playerBalance',connected&&s.alchemy?.kaiosBalanceWei!=null?ether(s.alchemy.kaiosBalanceWei)+' KAIOS':'連線並查詢後顯示');
@@ -612,7 +633,7 @@ function render(){
  $('cancelReview').disabled=busy;
  $('pendingPanel').hidden=!pending;
  if(pending){
-  text('pendingState',s.pending.phase==='AWAITING_WALLET'?'正在等待本人錢包；送出結果未取得前不能重送。':'保留原交易，只查核原回執，不會自動送下一筆。');
+  text('pendingState',!s.pending.hash?'正在等待本人錢包結果。若已送出，請從原錢包取回交易編號。':s.phase==='PENDING'?s.status:'保留原交易，只查核原回執，不會自動送下一筆。');
   text('pendingHash',s.pending.hash||'尚未取得交易 hash；請先查看本人錢包的原請求。');
  }
   const unknown=pending&&!s.pending.hash,identity=s.pending?.intentId||null;
@@ -629,13 +650,43 @@ function resetConsent(){confirmAttempt=null;lastError='';$('acceptReview').check
 function alchemyRequest(){
  return {kind:'burn',amount:$('kaiosAmount').value.trim(),lifeId:$('lifeId').value.trim()||ZERO_ID};
 }
+function originalReceipt(current,{intentId,hash}){
+ const {journal}=current.exportEvidence();
+ return journal.evidence.find(({intent})=>intent?.intentId===intentId&&same(intent.hash,hash));
+}
+function checkAlchemyPending(){
+ if(uiBusy||!view?.pending)return;
+ if(!canCheckPending(view)){
+  const walletAction=$('switchWalletChain').hidden?$('connectWallet'):$('switchWalletChain');
+  $('walletTitle').scrollIntoView({block:'start'});
+  walletAction.focus({preventScroll:true});
+  return;
+ }
+ if(!view.pending.hash){
+  $('pendingPanel').scrollIntoView({block:'start'});
+  $('receiptHash').focus({preventScroll:true});
+  return;
+ }
+ const pending=view.pending;
+ void run(async(current,isCurrent)=>{
+  await current.verify();
+  if(!isCurrent())return;
+  lastVerifiedAt=Date.now();
+  if(!current.snapshot().pending){
+   const receipt=originalReceipt(current,pending),verification=receipt?.verification;
+   if(receipt?.intent.kind==='approve'&&verification?.status==='CONFIRMED')playerReceiptStatus={account:pending.account,approved:true};
+   if(receipt?.intent.kind==='burn'&&verification?.status==='VERIFIED_ALCHEMY')playerReceiptStatus={account:pending.account,kufoMinted:verification.kufoMinted};
+  }
+  await continueAlchemy(current,isCurrent);
+  if(isCurrent()&&current.snapshot().pending)$('pendingPanel').scrollIntoView({block:'start'});
+ });
+}
 async function continueAlchemy(current,isCurrent){
  const followUp=approvalFollowUp;
  const s=current.snapshot();
  if(!followUp||!isCurrent()||pageAway||document.visibilityState!=='visible'||s.pending||s.review)return;
  if(!same(s.account,followUp.account)||Number(s.chainId)!==56){approvalFollowUp=null;return;}
- const {journal}=current.exportEvidence();
- const record=journal.evidence.find(({intent})=>intent?.intentId===followUp.intentId&&same(intent.hash,followUp.hash));
+ const record=originalReceipt(current,followUp);
  if(!record)return;
  approvalFollowUp=null;
  if(record.verification.status!=='CONFIRMED'||record.intent.kind!=='approve')return;
@@ -748,7 +799,8 @@ async function boot(){
   $('activationTime').addEventListener('change',()=>run(async current=>{resetConsent();await applyActivation(current,readActivation());}));
  for(const id of ['kaiosAmount','lifeId'])$(id).addEventListener('input',()=>invalidate('煉丹內容已變更，請重新預覽。'));
   $('prepareDeploy').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();await applyActivation(current,readActivation());await current.prepare({kind:'deploy'});if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
- $('prepareAlchemy').addEventListener('click',()=>run(async(current,isCurrent)=>{approvalFollowUp=null;resetConsent();const request=alchemyRequest();try{await current.prepare(request);}catch(error){if(!isCurrent())return;if(!['ALLOWANCE_REQUIRED','APPROVAL_REQUIRED'].includes(error.code))throw error;await current.prepare({...request,kind:'approve'});}if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
+ $('prepareAlchemy').addEventListener('click',()=>run(async(current,isCurrent)=>{approvalFollowUp=null;playerReceiptStatus=null;resetConsent();const request=alchemyRequest();try{await current.prepare(request);}catch(error){if(!isCurrent())return;if(!['ALLOWANCE_REQUIRED','APPROVAL_REQUIRED'].includes(error.code))throw error;await current.prepare({...request,kind:'approve'});}if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
+ $('checkAlchemyPending')?.addEventListener('click',checkAlchemyPending);
  $('cancelReview').addEventListener('click',()=>{resetConsent();invalidate('預覽已取消；沒有送交錢包。');});
  for(const id of ['acceptReview','reviewCap'])$(id).addEventListener('input',render);
  $('confirmReview').addEventListener('click',confirmReviewed);

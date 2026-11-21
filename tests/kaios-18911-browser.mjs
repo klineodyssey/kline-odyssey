@@ -269,6 +269,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         abi();
         const E=window.ethers.utils,event={method,lane:qaLane,at:Date.now()};
         if(method==='wallet_switchEthereumChain')event.requestedChain=params[0]?.chainId;
+        if(method==='eth_getTransactionReceipt')event.receiptHash=params[0];
         counters.set(method,(counters.get(method)||0)+1);
         if(method==='eth_sendTransaction'){
           const tx=params[0];
@@ -1615,6 +1616,14 @@ async function runP1RecoveryScenarios(browser,profile){
     assert.equal(await page.locator('#acceptRecoveryHash').isChecked(),false);
     assert.equal(await page.locator('#recoverPendingHash').isEnabled(),false,'recovery requires both the original hash and explicit holder acknowledgement');
     await connect(page);await autoSettled(page);
+    const findOriginal=page.locator('#playerPanel #checkAlchemyPending');
+    assert.equal(await findOriginal.textContent(),'找回原交易編號');
+    const originalReceiptReads=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
+    await touchTarget(page,'#checkAlchemyPending');await findOriginal.click();
+    await page.waitForFunction(()=>document.activeElement?.id==='receiptHash');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'a hashless shortcut only opens the original recovery field');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
+    assert.equal(row.sendRequests.length,2);
     await manuallyRecover(page,kufo.hash);await phase(page,'BLOCKED');
     assert.equal(await page.locator('#appStatus').getAttribute('data-error-code'),'HASH_ALREADY_ARCHIVED','the historical receipt is rejected as another archived intent, not an unrelated read failure');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'a historical successful KUFO hash cannot replace this Furnace intent');
@@ -1748,6 +1757,57 @@ async function runPlayerConfirmationScenarios(browser,profile){
       row.continuousAlchemy={amount,lifeId,receiptVerified:true,automaticBurnRequests:0,approvalRequests:1,explicitBurnRequests:1};
     });
   }
+  await runScenario(browser,profile,'player-check-saved-approval',{account:OTHER,activeAlchemy:true,initialAllowance:'0',clock:true},async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');
+    await page.locator('#kaiosAmount').fill('10');
+    await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+    assert.equal(await page.locator('#reviewTitle').textContent(),'授權 KAIOS');
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    const pendingRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending=JSON.parse(pendingRaw);
+    assert.equal(pending.kind,'approve');assert.match(pending.hash,/^0x[0-9a-f]{64}$/i);
+    const originalJournal=await journalBytes(page);
+    assert.equal(row.sendRequests.length,1);
+
+    await page.reload({waitUntil:'load'});await phase(page,'PENDING');await autoSettled(page);
+    const checkOriginal=page.locator('#playerPanel #checkAlchemyPending');
+    assert.ok(await page.locator('#prepareAlchemy').isHidden(),'pending player card does not leave an unusable burn button');
+    assert.ok(await page.locator('#prepareAlchemy').isDisabled(),'pending still blocks a new burn');
+    assert.equal(await checkOriginal.textContent(),'查核原交易回執');
+    await touchTarget(page,'#checkAlchemyPending');await capture(page,row,'check-original-in-player-card');
+    const beforeUnmined=row.rpc.length;
+    await checkOriginal.click();await phase(page,'PENDING');await autoSettled(page);
+    const unminedReads=row.rpc.slice(beforeUnmined).filter(item=>item.method==='eth_getTransactionReceipt');
+    assert.ok(unminedReads.length>0&&unminedReads.every(item=>item.receiptHash===pending.hash),'only the saved approval hash is queried');
+    assert.ok((await geometry(page,'#pendingTitle')).inView,'an unmined check brings the pending status into view');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'unmined or reloaded approval retains its original pending bytes');
+    assert.deepEqual(await journalBytes(page),originalJournal);
+    assert.equal(row.sendRequests.length,1);
+
+    await page.evaluate(()=>window.__18911WalletQA.disconnect());await autoSettled(page);
+    assert.equal(await checkOriginal.textContent(),'連接原交易錢包');
+    const beforeReconnectLink=row.rpc.length;
+    await touchTarget(page,'#checkAlchemyPending');await checkOriginal.click();
+    await page.waitForFunction(()=>document.activeElement?.id==='connectWallet');
+    assert.ok((await geometry(page,'#walletTitle')).inView,'the original-wallet direction leads to the existing wallet section');
+    assert.equal(row.rpc.slice(beforeReconnectLink).filter(item=>['eth_getTransactionReceipt','eth_requestAccounts'].includes(item.method)).length,0,'the wallet direction neither checks a receipt nor opens a new prompt');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
+    await connect(page);await phase(page,'PENDING');await autoSettled(page);
+
+    await page.evaluate(hash=>window.__18911WalletQA.mineApproval(hash,false),pending.hash);
+    await touchTarget(page,'#checkAlchemyPending');
+    const beforeMined=row.rpc.length;
+    await checkOriginal.click();await phase(page,'CONNECTED');await autoSettled(page);
+    const minedReads=row.rpc.slice(beforeMined).filter(item=>item.method==='eth_getTransactionReceipt');
+    assert.ok(minedReads.length>0&&minedReads.every(item=>item.receiptHash===pending.hash),'the terminal check verifies only the original approval');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    const records=Object.values(await journalBytes(page)).flatMap(raw=>JSON.parse(raw).evidence);
+    assert.equal(records.length,1);assert.equal(records[0].intent.hash,pending.hash);assert.equal(records[0].verification.status,'CONFIRMED');
+    assert.match(await page.locator('#alchemyReason').textContent(),/10 KAIOS 授權可用/);
+    assert.ok(await page.locator('#prepareAlchemy').isVisible());assert.ok(await page.locator('#prepareAlchemy').isEnabled());
+    assert.ok(await checkOriginal.isHidden());assert.ok(await page.locator('#reviewPanel').isHidden());
+    assert.equal(row.sendRequests.length,1,'checking the original receipt does not send an approval or burn again');
+    row.savedApprovalCheck={intentRetainedUntilVerified:true,receiptHash:pending.hash,availableAllowance:'10',sendRequests:1};
+  });
   await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
     const alchemyNotice=page.locator('#alchemyReason');
     assert.match(await alchemyNotice.textContent(),/連接本人 BSC 錢包後/);
@@ -2035,6 +2095,7 @@ try{
   report.checks.push('Official Playwright Clock drives visible-only thirty-second reads; synthetic visibility, review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal stop. No automatic financial request.');
   report.checks.push('Two added scenarios per viewport discover synthetic active routes with the real payload and an existing exact100 KAIOS allowance. A100 KAIOS→100000 KUFO review with an explicit0.6 BNB cap shows confirmation preflight without a test scroll, requests only one burn, keeps the genuine wallet-response wait beyond the read deadline, then preserves its unmined hash without claiming minted KUFO. Review expiry and the original15-second preflight read timeout remain zero-send, clear consent, preserve the holder cap and pending/journal, and cannot overwrite a newer review when the provider replies late. Existing rejection and hashless unknown-intent scenarios also require visible confirmation feedback. These are synthetic-provider and viewport checks, not physical-wallet, mainnet-burn or mint acceptance.');
   report.checks.push('A synthetic zero-allowance player starts alchemy once. Only a verified original approval advances to a burn review for the same amount and lifeId, with fresh consent and a fresh fee cap. Pending and reverted approvals never advance. Only a separate explicit confirmation opens the synthetic burn request.');
+  report.checks.push('The original pending approval has an action in the player card after reload. It reads only the original hash, preserves unmined intent bytes, and restores the verified allowance and burn control after mining. The same card directs disconnected holders to the existing wallet control and hashless holders to the original recovery field without asking a wallet to send.');
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.checks.push('Both viewports check the BSC WalletConnect directory configuration and a fresh pairing when an SDK session already exists. A repeated topic cannot authorize an account, foreign sessions are not disconnected, and financial pending and history remain untouched. Wallet catalog and pairing are simulated.');
