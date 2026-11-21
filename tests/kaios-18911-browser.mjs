@@ -1523,7 +1523,14 @@ async function mineReviewedPending(page,row){
 
 async function runPlayerConfirmationScenarios(browser,profile){
   await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
+    const alchemyNotice=page.locator('#alchemyReason');
+    assert.match(await alchemyNotice.textContent(),/連接本人 BSC 錢包後/);
     await connect(page);await phase(page,'CONNECTED');
+    assert.match(await alchemyNotice.textContent(),/目前尚有 100 KAIOS 授權可用。完成煉丹須另由本人錢包確認/);
+    assert.equal(await alchemyNotice.getAttribute('role'),'status');
+    assert.equal(row.sendRequests.length,0,'reading the existing allowance must not open a wallet transaction');
+    await alchemyNotice.scrollIntoViewIfNeeded();
+    await capture(page,row,'verified-allowance-before-preview');
     assert.equal(await page.locator('#prepareDeploy').isEnabled(),false,'the player is not granted the Owner deployment role');
     const originalJournal=await journalBytes(page);
     await playerBurnReview(page,row);await accept(page,'0.6');

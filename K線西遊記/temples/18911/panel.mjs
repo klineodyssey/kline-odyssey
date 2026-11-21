@@ -488,7 +488,17 @@ function render(){
  $('activationNow').disabled=$('activationTime').disabled;
  if(cfg?.activationTime&&deployments.KUFO?.address)$('activationTime').value=localTW(cfg.activationTime);
  text('ownerReason',pending?'先查核原交易，不能重新部署或變更啟用時間。':owner?'請核對不可變啟用時間。每次只預覽及確認下一筆，沒有自動批次送單。':'此區由王母本人操作。連線帳戶須同時符合指定王母與目前 Registry Owner。');
- text('alchemyReason',pending?'原交易待確認，請先核回執；授權成功也不代表 KUFO 已產出。':scheduled?'正式啟用時間尚未到，請於 '+dateTW(s.chainConfig.activationTime)+' 後重新核對。':s.chainActive?'先預覽。若需要 KAIOS 授權，錢包會先確認該筆；其後由你再預覽煉丹。':'請先查核新版五合約與原 Registry 啟用狀態；不會改用舊 49 Epoch 煉丹爐。');
+ const allowanceWei=connected&&!s.error&&!lastError&&s.alchemy?.source==='VERIFIED_CHAIN_ROUTES'?s.alchemy.allowanceWei:null;
+ let alchemyReason;
+ if(pending)alchemyReason='原交易待確認，請先核回執；授權成功也不代表 KUFO 已產出。';
+ else if(scheduled)alchemyReason='正式啟用時間尚未到，請於 '+dateTW(s.chainConfig.activationTime)+' 後重新核對。';
+ else if(!s.chainActive)alchemyReason='請先查核新版五合約與原 Registry 啟用狀態；不會改用舊 49 Epoch 煉丹爐。';
+ else if(!connected)alchemyReason='連接本人 BSC 錢包後，這裡會顯示可用的煉丹授權。';
+ else if(allowanceWei==null)alchemyReason='目前的煉丹授權尚未核對。';
+ else if(BigInt(allowanceWei)===0n)alchemyReason='目前沒有可用的 KAIOS 煉丹授權。可先預覽金額，再由本人錢包確認所需授權。';
+ else alchemyReason='目前尚有 '+ether(allowanceWei).replace(/\.0$/,'')+' KAIOS 授權可用。完成煉丹須另由本人錢包確認。KUFO 產出以煉丹回執為準。';
+ const alchemyNotice=$('alchemyReason');
+ if(alchemyNotice.textContent!==alchemyReason)alchemyNotice.textContent=alchemyReason;
  text('playerBalance',connected&&s.alchemy?.kaiosBalanceWei!=null?ether(s.alchemy.kaiosBalanceWei)+' KAIOS':'連線並查詢後顯示');
  if(s.review?.amountWei){text('requiredKgen',ether(BigInt(s.review.amountWei)/1000n)+' KGEN（只查）');text('expectedKufo',ether(BigInt(s.review.amountWei)*1000n)+' KUFO');}
  else{text('requiredKgen','依預覽數量核對');text('expectedKufo','依原 1 : 1,000 比例');}
