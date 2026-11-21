@@ -41,7 +41,9 @@
 </section>
 <section class="panel" aria-labelledby="rulesTitle"><p class="eyebrow">FROM KAIOS TO KUFO</p><h2 id="rulesTitle">仙丹的規則</h2><div class="rule-grid"><div class="rule"><strong>1 : 1,000</strong><span>1 KAIOS 煉出 1,000 KUFO</span></div><div class="rule"><strong>KGEN 不扣除</strong><span>只核對持有量門檻，不授權或轉走 KGEN</span></div><div class="rule"><strong>三年轉化</strong><span>共同跨年依序取得 50%／75%／100% 轉化資格</span></div></div><p class="muted">轉化須由持有人發起，不會到時自動扣餘額。KUFO 與 KSHIP 的後續轉化，沿原合約權利記帳。</p><details><summary>查看 12 整月等級與星座</summary><div class="table-wrap"><table><thead><tr><th>月份</th><th>等級</th><th>星座</th></tr></thead><tbody id="monthTable"></tbody></table></div><p class="subtle">第 10 等為十三生肖（十二生肖＋AI類），第 11 等人類，第 12 等萬靈。月份標記本次仙丹的出生類別，不改寫玩家既有境界或資產。</p></details></section>
 <section id="walletBridgePanel" class="panel" aria-labelledby="walletBridgeTitle" hidden>
-<h2 id="walletBridgeTitle">連接目前頁面，或另開錢包內頁</h2><p>要讓目前這個頁面連上錢包，請按「連接目前頁面」，在錢包批准後返回這裡。MetaMask／Trust 的另開入口只連接錢包內的新頁。</p>
+<h2 id="walletBridgeTitle">選擇錢包</h2>
+<div id="injectedWalletOptions" class="row" role="group" aria-label="瀏覽器偵測到的錢包" hidden></div>
+<p class="muted">可選擇已偵測到的錢包，或使用 WalletConnect 選擇支援 BSC 的手機錢包。使用幣安 App 時，也可把 18911 網址貼到幣安 Web3 錢包的 DApp 瀏覽器。</p>
 <label for="walletDestination">在錢包內開啟</label><select id="walletDestination"><option value="furnace">18911 煉丹爐</option><option value="site">官網首頁</option></select>
 <a id="walletDestinationLink" class="mono" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18911/index.html">https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/18911/index.html</a>
 <div class="button-group"><button id="connectMobileWallet" class="primary" type="button">連接目前頁面 · 選錢包／掃碼</button><a id="openMetaMask" class="action" rel="noopener noreferrer">只在 MetaMask 內開啟18911</a><a id="openTrustWallet" class="action" rel="noopener noreferrer">只在 Trust Wallet 內開啟18911</a><button id="cancelWalletBridge" type="button">取消錢包連線</button></div>

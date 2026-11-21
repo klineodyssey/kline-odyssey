@@ -16,6 +16,9 @@ const BRIDGE_MS=60000;
 const SESSION_HINT='kaios18911.walletconnect.hint.v1';
 const networkRequests=new WeakMap();
 const networkProviderRoots=new WeakMap();
+const announcedWallets=new Map();
+const BINANCE_WALLET='幣安 Web3 錢包';
+let visibleWallets=[];
 
 export function walletBridgeLanding(href,{connect=true}={}){
  const url=new URL(href);
@@ -84,7 +87,10 @@ export function walletConnectSessionPermits(raw,metadata,topic,account){
 function showWalletBridge(){
  const linked=!!view?.account&&Number(view.chainId)===56&&provider!==publicProvider&&(provider!==mobileProvider||walletConnectSessionPermits(mobileRaw,mobileMetadata,mobileTopic,view.account));
  resetConsent();invalidate(linked?'此頁已連線；另開錢包內頁不會移走此頁的連線，交易仍須重新預覽。':'連接目前頁面後，在錢包確認並返回這裡查看帳戶；連線不會送出交易。');
- $('walletBridgePanel').hidden=false;$('walletBridgePanel').scrollIntoView({behavior:'auto',block:'start'});
+ $('walletBridgePanel').hidden=false;
+ requestInjectedWallets();
+ renderInjectedWallets();
+ $('walletBridgePanel').scrollIntoView({behavior:'auto',block:'start'});
 }
 function cancelWalletBridge(){
  sessionHint(false);
@@ -240,7 +246,9 @@ async function connectNativeLanding(){
   const selected=await Promise.race([waitForWalletProvider(chooseInjectedProvider,{signal:attempt.controller.signal}),stopped]);
   if(nativeAttempt!==attempt||attempt.epoch!==uiEpoch||pageAway||document.visibilityState!=='visible')return;
   nativeIntent=false;consumeNativeIntent();
-  if(selected){
+  if(injectedWallets().length>1){
+   showWalletBridge();
+  }else if(selected){
    initializeClient(selected);attempt.client=client;attempt.adoptedProvider=selected;
    const connection=run(connectOnBsc);bridgeReadPending=connection;
    connection.finally(()=>{if(bridgeReadPending===connection){bridgeReadPending=null;render();scheduleVerification();}}).catch(()=>{});
@@ -349,12 +357,73 @@ function makeReadonlyProvider(){
   return result.result;
  }};
 }
-function chooseInjectedProvider(announced){
- return [window.KGEN_Wallet?.getEthereum?.(),window.okxwallet?.ethereum,window.okxwallet,window.trustwallet?.ethereum,window.trustwallet,window.ethereum,announced].find(p=>typeof p?.request==='function')||null;
+function injectedWallets(){
+ const wallets=new Map();
+ const add=(candidate,name='')=>{
+  if(typeof candidate?.request!=='function'||wallets.has(candidate))return;
+  const label=name||(
+   candidate.isBinance===true?BINANCE_WALLET:
+   candidate.isOkxWallet===true?'OKX Wallet':
+   candidate.isTrust===true||candidate.isTrustWallet===true?'Trust Wallet':
+   candidate.isCoinbaseWallet===true?'Coinbase Wallet':
+   candidate.isMetaMask===true?'MetaMask':'瀏覽器錢包'
+  );
+  wallets.set(candidate,label);
+ };
+ add(window.binancew3w?.ethereum,BINANCE_WALLET);
+ add(window.BinanceChain,BINANCE_WALLET);
+ add(window.okxwallet?.ethereum||window.okxwallet,'OKX Wallet');
+ add(window.trustwallet?.ethereum||window.trustwallet,'Trust Wallet');
+ for(const [candidate,name] of announcedWallets)add(candidate,name);
+ const ethereum=window.ethereum;
+ const legacy=Array.isArray(ethereum?.providers)?ethereum.providers.filter(candidate=>typeof candidate?.request==='function'):[];
+ for(const candidate of legacy)add(candidate);
+ if(!legacy.length)add(ethereum);
+ return [...wallets];
 }
-function chooseProvider(){
+function requestInjectedWallets(){
+ window.dispatchEvent(new Event('eip6963:requestProvider'));
+}
+function chooseInjectedProvider(){
+ return injectedWallets()[0]?.[0]||null;
+}
+function chooseProvider(wallets=injectedWallets()){
+ if(wallets.some(([candidate])=>candidate===provider))return provider;
  if(mobileProvider&&walletConnectSessionPermits(mobileRaw,mobileMetadata,mobileTopic))return mobileProvider;
- return chooseInjectedProvider();
+ return wallets.length===1?wallets[0][0]:null;
+}
+function renderInjectedWallets(){
+ if($('walletBridgePanel').hidden)return;
+ const options=$('injectedWalletOptions'),wallets=injectedWallets();
+ if(wallets.length!==visibleWallets.length||wallets.some(([candidate,label],i)=>candidate!==visibleWallets[i][0]||label!==visibleWallets[i][1])){
+  const buttons=wallets.map(([candidate,label])=>{
+   const button=document.createElement('button');
+   button.type='button';
+   button.textContent=label;
+   button.addEventListener('click',()=>connectSelectedProvider(candidate));
+   return button;
+  });
+  options.replaceChildren(...buttons);
+  visibleWallets=wallets;
+ }
+ options.hidden=wallets.length===0;
+ const locked=$('chooseWallet').disabled;
+ for(const [i,button] of Array.from(options.children).entries()){
+  button.disabled=locked;
+  button.setAttribute('aria-pressed',String(wallets[i][0]===provider&&!!view?.account));
+ }
+}
+function walletConnectionBusy(){
+ return (provider!==publicProvider&&(uiBusy||!!view?.active))||walletNetworkRequestPending(provider)||mobileNetworkPending()||!!bridgePending||!!bridgeReadPending||!!bridgeAttempt||!!nativeAttempt||!!restoreAttempt;
+}
+function connectSelectedProvider(selected){
+ if(!selected||selected===publicProvider||walletConnectionBusy())return;
+ if(selected!==mobileProvider&&!injectedWallets().some(([candidate])=>candidate===selected))return;
+ resetVerification();
+ try{
+  if(selected!==provider||uiBusy)initializeClient(selected);
+  void run(connectOnBsc);
+ }catch(error){lastError=message(error);render();}
 }
 function initializeClient(selected){
  clearVerificationTimer();
@@ -482,6 +551,7 @@ function render(){
  $('connectWallet').disabled=(busy&&provider!==publicProvider)||walletNetworkRequestPending(provider)||mobileNetworkPending()||!!bridgePending||!!bridgeReadPending||!!nativeAttempt||!!restoreAttempt;$('refreshStatus').disabled=busy;
  $('chooseWallet').disabled=busy||walletNetworkRequestPending(provider)||mobileNetworkPending()||!!bridgePending||!!bridgeReadPending;
  $('connectMobileWallet').disabled=busy||walletNetworkRequestPending(provider)||mobileNetworkPending()||!!bridgePending||!!bridgeReadPending||!!restorePending;
+ renderInjectedWallets();
  $('prepareDeploy').disabled=busy||pending||!owner||s.chainActive||Object.keys(deployments||{}).length===5;
  $('prepareAlchemy').disabled=busy||pending||!connected;
  $('activationTime').disabled=busy||pending||!!deployments.KUFO?.address;
@@ -572,6 +642,15 @@ async function boot(){
  setupWalletUrls();
  if(!window.ethers||!window.KGEN_Wallet)await new Promise(resolve=>window.addEventListener('load',resolve,{once:true}));
  if(!window.ethers?.utils||!window.KGEN_Wallet?.getEthereum)throw new Error('既有錢包或 ABI 工具未載入。');
+ window.addEventListener('eip6963:announceProvider',event=>{
+  const {provider:candidate,info}=event.detail||{};
+  if(typeof candidate?.request!=='function'||announcedWallets.has(candidate))return;
+  const name=typeof info?.name==='string'?info.name.trim().slice(0,64):'';
+  announcedWallets.set(candidate,candidate.isBinance===true?BINANCE_WALLET:name);
+  renderInjectedWallets();
+ });
+ window.addEventListener('ethereum#initialized',renderInjectedWallets);
+ requestInjectedWallets();
  payload=await verifyPayload();
  if(window.__K18911_MOCK__===true)$('mockNotice').hidden=false;
  const month=new Date(Date.now()+28800000).getUTCMonth(),tier=payload.presentation.tierNames[month],star=payload.presentation.constellationNames[payload.calendar.constellationByMonth[month]-1];
@@ -582,9 +661,19 @@ async function boot(){
  const incoming=new URL(window.location.href);nativeIntent=incoming.searchParams.get('walletBridge')==='1';
  publicProvider=makeReadonlyProvider();
  initializeClient(chooseProvider()||publicProvider);
- const connectSelected=()=>{if((uiBusy&&provider!==publicProvider)||walletNetworkRequestPending(provider)||mobileNetworkPending()||bridgePending||bridgeAttempt||nativeAttempt||restoreAttempt)return;resetVerification();try{const selected=chooseProvider();if(uiBusy&&provider===publicProvider)initializeClient(selected||publicProvider);if(!selected){nextNativeWallet='';void connectMobileWallet();return;}if(selected!==provider)initializeClient(selected);run(connectOnBsc);}catch(error){lastError=message(error);render();}};
- $('connectWallet').addEventListener('click',connectSelected);
- $('switchWalletChain').addEventListener('click',connectSelected);
+ $('connectWallet').addEventListener('click',()=>{
+  if(walletConnectionBusy())return;
+  requestInjectedWallets();
+  const wallets=injectedWallets();
+  if(wallets.length>1){showWalletBridge();return;}
+  const selected=chooseProvider(wallets);
+  if(selected){connectSelectedProvider(selected);return;}
+  resetVerification();
+  if(uiBusy&&provider===publicProvider)initializeClient(publicProvider);
+  nextNativeWallet='';
+  void connectMobileWallet();
+ });
+ $('switchWalletChain').addEventListener('click',()=>connectSelectedProvider(provider));
  $('chooseWallet').addEventListener('click',()=>{if(!uiBusy&&!walletNetworkRequestPending(provider)&&!mobileNetworkPending()&&!bridgeAttempt&&!nativeAttempt&&!restoreAttempt){nextNativeWallet='';showWalletBridge();}});
  $('connectMobileWallet').addEventListener('click',connectMobileWallet);
  $('cancelWalletBridge').addEventListener('click',cancelWalletBridge);
