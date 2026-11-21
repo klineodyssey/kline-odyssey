@@ -145,13 +145,13 @@ report.payload={chainId:PAYLOAD.chainId,sourceMain:PAYLOAD.sourceMain,programCom
   dependencyPins:Object.fromEntries(Object.entries(PAYLOAD.dependencies).map(([name,item])=>[name,{address:item.address,codeHash:item.codeHash}])),
   scope:'SYNTHETIC_READS_AND_EXPLICIT_QA_MINED_DEPLOYMENTS_ONLY',realVerifiedMinedDeployments:0};
 
-async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false,binanceInjected=''}={}){
+async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false,initialAllowance='100',binanceInjected=''}={}){
   row.rpc=[];row.sendRequests=[];
   await page.exposeFunction('__record18911SyntheticRpc',event=>{
     row.rpc.push(event);
     if(event.method==='eth_sendTransaction')row.sendRequests.push(event);
   });
-  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,binanceInjected})=>{
+  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,initialAllowance,binanceInjected})=>{
     // The only application flag is a display-only notice. Authorization still
     // goes through the real client, real shared selector and real payload.
     window.__K18911_MOCK__=true;
@@ -165,7 +165,9 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
     // This QA-only chain ledger survives a real page reload. It is separate
     // from every production localStorage pending/journal/archive key.
     const transactions=new Map(storedLedger?.transactions),receipts=new Map(storedLedger?.receipts),blocks=new Map(storedLedger?.blocks),deployed=new Map(storedLedger?.deployed),proposals=new Map(storedLedger?.proposals),codeOverrides=new Map();
-    function persistLedger(){sessionStorage.setItem(qaLedgerKey,JSON.stringify({scope:'SYNTHETIC_CHAIN_ONLY',programCommit:payload.programCommit,sendCount:state.sendCount,transactions:[...transactions],receipts:[...receipts],blocks:[...blocks],deployed:[...deployed],proposals:[...proposals]}));}
+    const allowances=new Map(storedLedger?.allowances);
+    const allowanceKey=(owner,spender)=>JSON.stringify([normalized(owner),normalized(spender)]);
+    function persistLedger(){sessionStorage.setItem(qaLedgerKey,JSON.stringify({scope:'SYNTHETIC_CHAIN_ONLY',programCommit:payload.programCommit,sendCount:state.sendCount,transactions:[...transactions],receipts:[...receipts],blocks:[...blocks],deployed:[...deployed],proposals:[...proposals],allowances:[...allowances]}));}
     const counters=new Map();
     let qaVisibility='visible';
     let readFailure=null;
@@ -213,7 +215,10 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='KGEN')return [payload.dependencies.kgen.address];
         if(method==='ORGAN_REGISTRY')return [payload.dependencies.registry.address];
         if(method==='balanceOf')return [E.parseEther('100')];
-        if(method==='allowance')return [activeAlchemy&&normalized(args[0])===normalized(state.account)&&normalized(args[1])===normalized(deployed.get('KAIOSAlchemyFurnace')?.address)?E.parseEther('100'):0];
+        if(method==='allowance'){
+          const initial=activeAlchemy&&normalized(args[0])===normalized(state.account)&&normalized(args[1])===normalized(deployed.get('KAIOSAlchemyFurnace')?.address)?E.parseEther(initialAllowance):0;
+          return [allowances.get(allowanceKey(args[0],args[1]))??initial];
+        }
         if(method==='decimals')return [18];
         if(method==='totalSupply')return [E.parseEther('10000')];
       }
@@ -488,6 +493,24 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         persistLedger();
         return {contract:name,address:reverted?null:address,blockNumber:b.number,status:reverted?'0x0':'0x1',scope:'SYNTHETIC_MINED_DEPLOYMENT_ONLY'};
       },
+      mineApproval(hash,reverted){
+        const tx=transactions.get(hash),kaios=payload.dependencies.kaios.address;
+        if(!tx||receipts.has(hash)||normalized(tx.to)!==normalized(kaios))throw Error('Synthetic mining requires an original unmined KAIOS approval');
+        const iface=interfaces.kaios,parsed=iface.parseTransaction({data:tx.input});
+        const [spender,value]=parsed.args;
+        if(parsed.name!=='approve'||normalized(spender)!==normalized(deployed.get('KAIOSAlchemyFurnace')?.address))throw Error('Synthetic approval must target the active furnace');
+        const amount=value.toString(),b=block(Math.max(...blocks.keys())+1),status=reverted?'0x0':'0x1';
+        Object.assign(tx,{blockNumber:b.number,blockHash:b.hash});
+        const logs=[];
+        if(!reverted){
+          allowances.set(allowanceKey(tx.from,spender),amount);
+          const event=iface.encodeEventLog(iface.getEvent('Approval'),[tx.from,spender,value]);
+          logs.push({...event,address:kaios,transactionHash:hash,blockHash:b.hash,removed:false});
+        }
+        receipts.set(hash,{transactionHash:hash,status,blockNumber:b.number,blockHash:b.hash,from:tx.from,to:kaios,logs});
+        persistLedger();
+        return {hash,status,amount,spender,scope:'SYNTHETIC_MINED_APPROVAL_ONLY'};
+      },
       setPendingOrgan(organ,remainingSeconds){
         const names={Furnace:['KAIOSAlchemyFurnace','KAIOS.ORGAN.FURNACE.18911'],Output:['KUFOOutputJindouyun168888','KAIOS.ORGAN.KUFO.OUTPUT.168888'],Converter:['KSHIPConverter','KAIOS.ORGAN.KSHIP.CONVERTER']};
         const [name,key]=names[organ]||[];if(!deployed.has(name))throw Error('Pending proposal needs the verified synthetic contract');
@@ -501,7 +524,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         else if(mode==='resolve')gate.resolve();else throw Error('Unknown synthetic gate release mode');
       },
     };
-  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,binanceInjected});
+  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,initialAllowance,binanceInjected});
 }
 
 async function phase(page,expected){
@@ -1664,6 +1687,67 @@ async function mineReviewedPending(page,row){
 }
 
 async function runPlayerConfirmationScenarios(browser,profile){
+  for(const reverted of [false,true]){
+    const name=reverted?'player-reverted-approval-stops':'player-continuous-alchemy';
+    await runScenario(browser,profile,name,{account:OTHER,activeAlchemy:true,initialAllowance:'0',clock:true},async(page,row)=>{
+      await connect(page);await phase(page,'CONNECTED');
+      assert.match(await page.locator('#alchemyReason').textContent(),/輸入金額並按「煉丹」/);
+      assert.equal(await page.locator('#prepareAlchemy').textContent(),'煉丹');
+      const originalJournal=await journalBytes(page);
+      const amount='12.345',amountWei='12345000000000000000',lifeId='0x'+'12'.repeat(32);
+      await page.locator('#kaiosAmount').fill(amount);
+      await page.locator('#lifeId').fill(lifeId);
+      await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+      assert.equal(await page.locator('#reviewTitle').textContent(),'授權 KAIOS');
+      assert.equal(row.sendRequests.length,0);
+      await accept(page);
+      await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+      const pending=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),PENDING_KEY);
+      assert.equal(pending.kind,'approve');assert.equal(pending.amountWei,amountWei);
+      assert.match(pending.hash,/^0x[0-9a-f]{64}$/i);assert.equal(row.sendRequests.length,1);
+      assert.equal(row.sendRequests[0].transaction.to.toLowerCase(),PAYLOAD.dependencies.kaios.address.toLowerCase());
+      await automaticRead(page,row);await phase(page,'PENDING');
+      assert.ok(await page.locator('#reviewPanel').isHidden(),'an unmined approval cannot advance to the burn review');
+      assert.deepEqual(await journalBytes(page),originalJournal,'an unmined approval cannot create a receipt record');
+      assert.equal(row.sendRequests.length,1);
+
+      const mined=await page.evaluate(({hash,reverted})=>window.__18911WalletQA.mineApproval(hash,reverted),{hash:pending.hash,reverted});
+      assert.equal(mined.amount,amountWei);assert.equal(mined.spender.toLowerCase(),pending.spender.toLowerCase());
+      await automaticRead(page,row);
+      if(reverted){
+        await phase(page,'CONFIRMED_REVERTED');
+        assert.ok(await page.locator('#reviewPanel').isHidden(),'a reverted approval cannot advance to the burn review');
+        assert.ok(await page.locator('#confirmReview').isDisabled());
+        assert.notDeepEqual(await journalBytes(page),originalJournal,'the reverted approval remains in the journal');
+        assert.equal(row.sendRequests.length,1);
+        await capture(page,row,'reverted-approval-preserved');
+        return;
+      }
+
+      await phase(page,'REVIEW');
+      assert.equal(await page.locator('#reviewTitle').textContent(),'確認煉丹');
+      assert.ok(await page.locator('#alchemyContinuation').isVisible());
+      assert.equal(await page.locator('#alchemyContinuation').textContent(),'授權完成，請確認煉丹。');
+      const fields=await page.locator('#reviewDetails').evaluate(host=>Object.fromEntries(Array.from(host.querySelectorAll('dt'),el=>[el.textContent,el.nextElementSibling.textContent])));
+      assert.equal(fields['KAIOS 數量'],amount);assert.match(fields['預計 KUFO'],/^12345(?:\.0+)?$/);
+      assert.equal(fields.lifeId,lifeId);assert.equal(fields['本人帳戶'].toLowerCase(),OTHER.toLowerCase());
+      assert.equal(await page.locator('#kaiosAmount').inputValue(),amount);assert.equal(await page.locator('#lifeId').inputValue(),lifeId);
+      assert.equal(await page.locator('#reviewCap').inputValue(),'');
+      assert.equal(await page.locator('#acceptReview').isChecked(),false);
+      assert.ok(await page.locator('#confirmReview').isDisabled());
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'the new preview creates no pending burn');
+      assert.equal(row.sendRequests.length,1,'automatic continuation must never open the burn wallet prompt');
+      assert.ok((await geometry(page,'#reviewTitle')).inView,'the burn review is brought into view without user scrolling');
+      await capture(page,row,'automatically-advanced-burn-review');
+
+      await accept(page,'0.2');await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+      const burn=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),PENDING_KEY);
+      assert.equal(burn.kind,'burn');assert.equal(burn.amountWei,amountWei);assert.equal(burn.lifeId,lifeId);
+      assert.equal(row.sendRequests.length,2,'only another explicit confirmation requests the burn');
+      assert.equal(row.sendRequests[1].transaction.to.toLowerCase(),mined.spender.toLowerCase());
+      row.continuousAlchemy={amount,lifeId,receiptVerified:true,automaticBurnRequests:0,approvalRequests:1,explicitBurnRequests:1};
+    });
+  }
   await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
     const alchemyNotice=page.locator('#alchemyReason');
     assert.match(await alchemyNotice.textContent(),/連接本人 BSC 錢包後/);
@@ -1950,6 +2034,7 @@ try{
   report.checks.push('Unresolved synthetic refresh survives persisted lifecycle reconstruction; old late resolve/reject cannot override a new in-flight operation or alter an existing financial pending intent.');
   report.checks.push('Official Playwright Clock drives visible-only thirty-second reads; synthetic visibility, review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal stop. No automatic financial request.');
   report.checks.push('Two added scenarios per viewport discover synthetic active routes with the real payload and an existing exact100 KAIOS allowance. A100 KAIOS→100000 KUFO review with an explicit0.6 BNB cap shows confirmation preflight without a test scroll, requests only one burn, keeps the genuine wallet-response wait beyond the read deadline, then preserves its unmined hash without claiming minted KUFO. Review expiry and the original15-second preflight read timeout remain zero-send, clear consent, preserve the holder cap and pending/journal, and cannot overwrite a newer review when the provider replies late. Existing rejection and hashless unknown-intent scenarios also require visible confirmation feedback. These are synthetic-provider and viewport checks, not physical-wallet, mainnet-burn or mint acceptance.');
+  report.checks.push('A synthetic zero-allowance player starts alchemy once. Only a verified original approval advances to a burn review for the same amount and lifeId, with fresh consent and a fresh fee cap. Pending and reverted approvals never advance. Only a separate explicit confirmation opens the synthetic burn request.');
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.checks.push('Both viewports check the BSC WalletConnect directory configuration and a fresh pairing when an SDK session already exists. A repeated topic cannot authorize an account, foreign sessions are not disconnected, and financial pending and history remain untouched. Wallet catalog and pairing are simulated.');

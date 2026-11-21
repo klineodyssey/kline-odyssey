@@ -11,7 +11,7 @@ let payload=null,client=null,provider=null,unsubscribe=null,view=null,uiBusy=fal
 let mobileProvider=null,mobileRaw=null,mobileMetadata=null,mobileTopic=null,sdkLoading=null,bridgePending=null,bridgeReadPending=null,bridgeAttempt=null;
 let publicProvider=null,nativeIntent=false,nativeAttempt=null,restorePending=null,restoreAttempt=null,nextNativeWallet='',bridgeMessage='';
 let mobileNetworkRaw=null;
-let confirmAttempt=null;
+let confirmAttempt=null,approvalFollowUp=null,continuedReviewId=null;
 const BRIDGE_MS=60000;
 const SESSION_HINT='kaios18911.walletconnect.hint.v1';
 const networkRequests=new WeakMap();
@@ -286,8 +286,8 @@ const errors={
  OWNER_REQUIRED:'這是王母部署／啟用操作，普通玩家仍可使用已啟用的煉丹功能。',
  OWNER_CHANGED:'Registry Owner 已變更；請由合法持有人核定後再操作。',
  DEPLOYMENTS_REQUIRED:'新五合約尚未全部核實，煉丹尚未啟用。',
- ALLOWANCE_REQUIRED:'請先核准這次確切 KAIOS 數量，再重新預覽煉丹。',
- APPROVAL_REQUIRED:'請先核准這次確切 KAIOS 數量，再重新預覽煉丹。',
+ ALLOWANCE_REQUIRED:'此金額需要先授權 KAIOS，授權核實後會接續煉丹確認。',
+ APPROVAL_REQUIRED:'此金額需要先授權 KAIOS，授權核實後會接續煉丹確認。',
  KAIOS_BALANCE_INSUFFICIENT:'本人 KAIOS 餘額不足。',
  KGEN_BALANCE_INSUFFICIENT:'KGEN 持有量未達門檻；這裡只查餘額，不會扣除 KGEN。',
  BNB_BALANCE_INSUFFICIENT:'BNB 餘額不足以支付本筆估算費用。',
@@ -341,7 +341,10 @@ async function verifyAutomatically(){
  if(view?.pending&&!view.pending.hash){verifyStopped=UNKNOWN_HASH_STOP;renderVerification();return;}
  const epoch=uiEpoch,current=client,isCurrent=()=>epoch===uiEpoch&&current===client;
  uiBusy=true;render();
- try{await current.verify();if(isCurrent()){lastError='';lastVerifiedAt=Date.now();}}
+ try{
+  await current.verify();
+  if(isCurrent()){lastError='';lastVerifiedAt=Date.now();await continueAlchemy(current,isCurrent);}
+ }
  catch(error){
   if(!isCurrent()||pageAway||document.visibilityState==='hidden')return;
   lastError=message(error);
@@ -446,16 +449,19 @@ function connectSelectedProvider(selected){
 }
 function initializeClient(selected){
  clearVerificationTimer();
- uiEpoch++;uiBusy=false;confirmAttempt=null;
+ uiEpoch++;uiBusy=false;confirmAttempt=null;approvalFollowUp=null;
  unsubscribe?.();client?.dispose();provider=selected;
  let storage;
  try{storage=window.localStorage;}catch{throw Object.assign(new Error('瀏覽器拒絕存取交易紀錄，無法安全送單。'),{code:'STORAGE_READ_FAILED'});}
  client=createKufoClient({provider,ethers:window.ethers,payload,storage,lockManager:navigator.locks});
- unsubscribe=client.subscribe(snapshot=>{view=snapshot;render();});
+ unsubscribe=client.subscribe(snapshot=>{
+  if(approvalFollowUp&&(!same(snapshot.account,approvalFollowUp.account)||Number(snapshot.chainId)!==56))approvalFollowUp=null;
+  view=snapshot;render();
+ });
  scheduleVerification(0);
 }
 function invalidate(reason){
- lastError='';
+ lastError='';approvalFollowUp=null;
  try{client?.invalidate?.(reason);}catch(error){lastError=message(error);}
  if(view?.review&&!client?.invalidate){view={...view,review:null};}
  $('acceptReview').checked=false;render();
@@ -468,6 +474,14 @@ function renderReview(review){
  reviewDecodeFailed=false;
  $('reviewPanel').hidden=!review;
  if(!review)return;
+ const isApproval=review.kind==='approve',isBurn=review.kind==='burn';
+ text('reviewTitle',isApproval?'授權 KAIOS':isBurn?'確認煉丹':'核對這一筆交易');
+ text('confirmReview',isApproval?'用錢包確認授權':isBurn?'用錢包確認煉丹':'交由本人錢包確認');
+ const continuation=$('alchemyContinuation');
+ if(continuation){
+  continuation.hidden=!isApproval&&review.reviewId!==continuedReviewId;
+  continuation.textContent=isApproval?'授權核實後會接續煉丹，金額會保留。':'授權完成，請確認煉丹。';
+ }
  const host=$('reviewDetails');host.replaceChildren();
  addDefinition(host,'操作',KIND_LABELS[review.kind]||review.kind);
  if(review.contract)addDefinition(host,'合約',LABELS[review.contract]||review.contract);
@@ -579,12 +593,12 @@ function render(){
  text('ownerReason',pending?'先查核原交易，不能重新部署或變更啟用時間。':owner?'請核對不可變啟用時間。每次只預覽及確認下一筆，沒有自動批次送單。':'此區由王母本人操作。連線帳戶須同時符合指定王母與目前 Registry Owner。');
  const allowanceWei=connected&&!s.error&&!lastError&&s.alchemy?.source==='VERIFIED_CHAIN_ROUTES'?s.alchemy.allowanceWei:null;
  let alchemyReason;
- if(pending)alchemyReason='原交易待確認，請先核回執；授權成功也不代表 KUFO 已產出。';
+ if(pending)alchemyReason=s.pending.intentId===approvalFollowUp?.intentId?'正在查核授權回執，核實後會接續煉丹。':'原交易待確認，請先核回執；授權成功也不代表 KUFO 已產出。';
  else if(scheduled)alchemyReason='正式啟用時間尚未到，請於 '+dateTW(s.chainConfig.activationTime)+' 後重新核對。';
  else if(!s.chainActive)alchemyReason='請先查核新版五合約與原 Registry 啟用狀態；不會改用舊 49 Epoch 煉丹爐。';
  else if(!connected)alchemyReason='連接本人 BSC 錢包後，這裡會顯示可用的煉丹授權。';
  else if(allowanceWei==null)alchemyReason='目前的煉丹授權尚未核對。';
- else if(BigInt(allowanceWei)===0n)alchemyReason='目前沒有可用的 KAIOS 煉丹授權。可先預覽金額，再由本人錢包確認所需授權。';
+ else if(BigInt(allowanceWei)===0n)alchemyReason='輸入金額並按「煉丹」，依畫面確認授權及煉丹。';
  else alchemyReason='目前尚有 '+ether(allowanceWei).replace(/\.0$/,'')+' KAIOS 授權可用。完成煉丹須另由本人錢包確認。KUFO 產出以煉丹回執為準。';
  const alchemyNotice=$('alchemyReason');
  if(alchemyNotice.textContent!==alchemyReason)alchemyNotice.textContent=alchemyReason;
@@ -612,6 +626,33 @@ function render(){
  renderConfirmFeedback(s);renderVerification();
 }
 function resetConsent(){confirmAttempt=null;lastError='';$('acceptReview').checked=false;$('reviewCap').value='';}
+function alchemyRequest(){
+ return {kind:'burn',amount:$('kaiosAmount').value.trim(),lifeId:$('lifeId').value.trim()||ZERO_ID};
+}
+async function continueAlchemy(current,isCurrent){
+ const followUp=approvalFollowUp;
+ const s=current.snapshot();
+ if(!followUp||!isCurrent()||pageAway||document.visibilityState!=='visible'||s.pending||s.review)return;
+ if(!same(s.account,followUp.account)||Number(s.chainId)!==56){approvalFollowUp=null;return;}
+ const {journal}=current.exportEvidence();
+ const record=journal.evidence.find(({intent})=>intent?.intentId===followUp.intentId&&same(intent.hash,followUp.hash));
+ if(!record)return;
+ approvalFollowUp=null;
+ if(record.verification.status!=='CONFIRMED'||record.intent.kind!=='approve')return;
+ const request=alchemyRequest();
+ if(request.amount!==followUp.request.amount||request.lifeId!==followUp.request.lifeId)return;
+ resetConsent();
+ await current.prepare(request);
+ if(!isCurrent())return;
+ const review=current.snapshot().review;
+ if(!review||!same(review.account,followUp.account)||review.amountWei!==record.intent.amountWei||
+    !ORDER.every(name=>same(review.deploymentAddresses?.[name],record.intent.deploymentAddresses?.[name]))){
+  current.invalidate('煉丹路由或帳戶已變更，請重新核對。');
+  return;
+ }
+ continuedReviewId=review.reviewId;
+ $('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});
+}
 async function applyActivation(current,activationTime){
  if(current.snapshot().config.activationTime===activationTime)return;
  try{current.setConfig({activationTime});}
@@ -644,7 +685,13 @@ async function confirmReviewed(){
  await run(async(current,isCurrent)=>{
   try{
    const s=current.snapshot();if(!s.review)throw Object.assign(new Error('請重新預覽。'),{code:'REVIEW_INVALID'});
-   await current.confirm(s.review.reviewId,{accepted:$('acceptReview').checked,maxCostBNB:$('reviewCap').value.trim()});
+   const request=s.review.kind==='approve'?alchemyRequest():null;
+   const result=await current.confirm(s.review.reviewId,{accepted:$('acceptReview').checked,maxCostBNB:$('reviewCap').value.trim()});
+   if(request&&isCurrent()&&confirmAttempt===attempt&&result.pending?.kind==='approve'&&result.pending.hash&&
+      same(result.account,s.review.account)&&Number(result.chainId)===56){
+    const {intentId,hash,account}=result.pending;
+    approvalFollowUp={intentId,hash,account,request};
+   }
   }finally{if(isCurrent()&&confirmAttempt===attempt){attempt.finished=true;$('acceptReview').checked=false;}}
  });
 }
@@ -696,16 +743,16 @@ async function boot(){
  $('chooseWallet').addEventListener('click',()=>{if(!uiBusy&&!walletNetworkRequestPending(provider)&&!mobileNetworkPending()&&!bridgeAttempt&&!nativeAttempt&&!restoreAttempt){nextNativeWallet='';showWalletBridge();}});
  $('connectMobileWallet').addEventListener('click',()=>{void connectMobileWallet({chooseAgain:true});});
  $('cancelWalletBridge').addEventListener('click',cancelWalletBridge);
- $('refreshStatus').addEventListener('click',()=>{if(uiBusy)return;resetVerification();run(async current=>{resetConsent();current.invalidate('正在重新查核鏈上狀態。');await current.verify();lastVerifiedAt=Date.now();});});
+ $('refreshStatus').addEventListener('click',()=>{if(uiBusy)return;resetVerification();run(async(current,isCurrent)=>{resetConsent();current.invalidate('正在重新查核鏈上狀態。');await current.verify();if(isCurrent()){lastVerifiedAt=Date.now();await continueAlchemy(current,isCurrent);}});});
   $('activationNow').addEventListener('click',()=>run(async current=>{resetConsent();$('activationTime').value=localTW(Math.floor(Date.now()/1000));await applyActivation(current,readActivation());}));
   $('activationTime').addEventListener('change',()=>run(async current=>{resetConsent();await applyActivation(current,readActivation());}));
  for(const id of ['kaiosAmount','lifeId'])$(id).addEventListener('input',()=>invalidate('煉丹內容已變更，請重新預覽。'));
   $('prepareDeploy').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();await applyActivation(current,readActivation());await current.prepare({kind:'deploy'});if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
- $('prepareAlchemy').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();const request={kind:'burn',amount:$('kaiosAmount').value.trim(),lifeId:$('lifeId').value.trim()||ZERO_ID};try{await current.prepare(request);}catch(error){if(!isCurrent())return;if(!['ALLOWANCE_REQUIRED','APPROVAL_REQUIRED'].includes(error.code))throw error;await current.prepare({...request,kind:'approve'});}if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
+ $('prepareAlchemy').addEventListener('click',()=>run(async(current,isCurrent)=>{approvalFollowUp=null;resetConsent();const request=alchemyRequest();try{await current.prepare(request);}catch(error){if(!isCurrent())return;if(!['ALLOWANCE_REQUIRED','APPROVAL_REQUIRED'].includes(error.code))throw error;await current.prepare({...request,kind:'approve'});}if(isCurrent())$('reviewPanel').scrollIntoView({behavior:'auto',block:'start'});}));
  $('cancelReview').addEventListener('click',()=>{resetConsent();invalidate('預覽已取消；沒有送交錢包。');});
  for(const id of ['acceptReview','reviewCap'])$(id).addEventListener('input',render);
  $('confirmReview').addEventListener('click',confirmReviewed);
- $('resumePending').addEventListener('click',()=>run(current=>current.resume()));
+ $('resumePending').addEventListener('click',()=>run(async(current,isCurrent)=>{await current.resume();await continueAlchemy(current,isCurrent);}));
   $('receiptHash').addEventListener('input',()=>{$('acceptRecoveryHash').checked=false;render();});
   $('acceptRecoveryHash').addEventListener('change',render);
   $('recoverPendingHash').addEventListener('click',()=>run(async(current,isCurrent)=>{resetConsent();await current.recoverPendingHash({hash:$('receiptHash').value.trim(),accepted:$('acceptRecoveryHash').checked});if(isCurrent()){$('acceptRecoveryHash').checked=false;if(verifyStopped===UNKNOWN_HASH_STOP)verifyStopped='';}}));
