@@ -50,19 +50,21 @@ async function sourceFingerprint(relative){
   return createHash('sha256').update(bytes).digest('hex');
 }
 
-async function geometry(page,selector){
-  return page.locator(selector).evaluate(el=>{
+async function geometry(page,selector,{center=false}={}){
+  return page.locator(selector).evaluate((el,center)=>{
+    if(center)el.scrollIntoView({block:'center',inline:'center',behavior:'instant'});
     const rect=el.getBoundingClientRect(),style=getComputedStyle(el);
     const hit=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2);
     return {width:rect.width,height:rect.height,inView:rect.left>=0&&rect.right<=innerWidth&&rect.top>=0&&rect.bottom<=innerHeight,
-      hit:!!hit&&(hit===el||el.contains(hit)),visible:style.visibility!=='hidden'&&style.display!=='none'&&Number(style.opacity)!==0};
-  });
+      hit:!!hit&&(hit===el||el.contains(hit)),visible:style.visibility!=='hidden'&&style.display!=='none'&&Number(style.opacity)!==0,
+      hitElement:hit?.id||hit?.tagName||null,viewportTop:rect.top,viewportBottom:rect.bottom};
+  },center);
 }
 
 async function touchTarget(page,selector){
-  await page.locator(selector).evaluate(el=>el.scrollIntoView({block:'center',inline:'center',behavior:'instant'}));
-  const rect=await geometry(page,selector);
-  assert.ok(rect.visible&&rect.inView&&rect.hit,selector+' is visible and center-hit reachable');
+  // Measure the user-scrolled position before a different frame can scroll to a status message.
+  const rect=await geometry(page,selector,{center:true});
+  assert.ok(rect.visible&&rect.inView&&rect.hit,selector+' is visible and center-hit reachable '+JSON.stringify(rect));
   assert.ok(rect.width>=44&&rect.height>=44,selector+' has a 44px touch target');
   targetRecords.get(page)?.push({selector,...rect});
   return rect;
@@ -139,13 +141,13 @@ report.payload={chainId:PAYLOAD.chainId,sourceMain:PAYLOAD.sourceMain,programCom
   dependencyPins:Object.fromEntries(Object.entries(PAYLOAD.dependencies).map(([name,item])=>[name,{address:item.address,codeHash:item.codeHash}])),
   scope:'SYNTHETIC_READS_AND_EXPLICIT_QA_MINED_DEPLOYMENTS_ONLY',realVerifiedMinedDeployments:0};
 
-async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false}={}){
+async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false,binanceInjected=''}={}){
   row.rpc=[];row.sendRequests=[];
   await page.exposeFunction('__record18911SyntheticRpc',event=>{
     row.rpc.push(event);
     if(event.method==='eth_sendTransaction')row.sendRequests.push(event);
   });
-  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy})=>{
+  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,binanceInjected})=>{
     // The only application flag is a display-only notice. Authorization still
     // goes through the real client, real shared selector and real payload.
     window.__K18911_MOCK__=true;
@@ -173,9 +175,8 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       interfaces={registry:new E.Interface(payload.registryABI),kaios:new E.Interface(payload.kaiosABI),kgen:new E.Interface(payload.kgenABI),
         ...Object.fromEntries(Object.entries(payload.contracts).map(([name,item])=>[name,new E.Interface(item.abi)]))};
       if(activeAlchemy&&!deployed.size){
-        // Only the two player-confirmation scenarios start with a synthetic
-        // active chain. The real client still verifies every payload runtime,
-        // immutable getter and route; no product journal or pending is seeded.
+        // The client still verifies each runtime, immutable getter and route
+        // on the synthetic active chain. No product journal or pending is seeded.
         for(const [nonce,name]of ['KUFO','KAIOSAlchemyFurnace','KUFOOutputJindouyun168888','KSHIP','KSHIPConverter'].entries()){
           const item={address:E.getContractAddress({from:payload.expectedOwner,nonce})};
           if(name==='KUFO')item.config={...payload.calendar,activationTime:String(Math.floor(Date.now()/1000)-86400)};
@@ -252,7 +253,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       }
       throw Error('Unmodeled synthetic read '+name+'.'+method);
     }
-    const provider={isMetaMask:true,
+    const provider={isMetaMask:!binanceInjected,
       on(type,listener){if(!listeners.has(type))listeners.set(type,new Set());listeners.get(type).add(listener);return provider;},
       removeListener(type,listener){listeners.get(type)?.delete(listener);return provider;},
       async request({method,params=[],qaLane='wallet'}){
@@ -337,7 +338,30 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         throw Error('Unmodeled EIP1193 method; network fallback forbidden: '+method);
       },
     };
-    if(guest||lateInjection){delete window.ethereum;delete window.BinanceChain;}else window.ethereum=provider;
+    if(guest||lateInjection||binanceInjected){delete window.ethereum;delete window.BinanceChain;}else window.ethereum=provider;
+    if(binanceInjected)window.binancew3w={ethereum:provider};
+    if(binanceInjected==='with-announced'){
+      let alternateAuthorized=false;
+      const alternate={async request({method,params=[]}){
+        if(method==='eth_requestAccounts'||method==='eth_accounts'){
+          await window.__record18911SyntheticRpc({method,lane:'announced-wallet',at:Date.now()});
+          if(method==='eth_requestAccounts')alternateAuthorized=true;
+          return alternateAuthorized?[payload.expectedOwner]:[];
+        }
+        if(method==='eth_sendTransaction'){
+          await window.__record18911SyntheticRpc({method,lane:'announced-wallet',at:Date.now()});
+          throw Error('No transaction is expected from the alternate wallet');
+        }
+        return provider.request({method,params,qaLane:'announced-wallet'});
+      }};
+      const announce=()=>window.dispatchEvent(new CustomEvent('eip6963:announceProvider',{detail:{
+        info:{uuid:'3b036d18-e7eb-465a-9bbb-b639757d65ae',name:'另一測試錢包',rdns:'com.example.testwallet',icon:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a3ikAAAAASUVORK5CYII='},provider:alternate,
+      }}));
+      window.ethereum=alternate;
+      window.BinanceChain=provider;
+      window.addEventListener('eip6963:requestProvider',announce);
+      announce();
+    }
     if(walletBridge){
       // Pairing is always synthetic. One dedicated scenario first evaluates
       // the actual pinned SDK; no relay or real wallet is contacted.
@@ -463,7 +487,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         else if(mode==='resolve')gate.resolve();else throw Error('Unknown synthetic gate release mode');
       },
     };
-  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy});
+  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,binanceInjected});
 }
 
 async function phase(page,expected){
@@ -768,6 +792,7 @@ async function runProfile(browser,width,height){
     assert.equal(row.sendRequests.length,0);await capture(page,row,'wallet-chooser');
   });
   await runWalletBridgeScenarios(browser,profile);
+  await runInjectedWalletSelectionScenarios(browser,profile);
   await runScenario(browser,profile,'wrong-chain',{chainId:1},async(page,row)=>{
     await phase(page,'BLOCKED');
     await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await autoSettled(page);await phase(page,'BLOCKED');
@@ -957,6 +982,55 @@ async function manuallyRecover(page,hash){
   assert.ok(await page.locator('#acceptRecoveryHash').isChecked());
   await touchTarget(page,'#recoverPendingHash');assert.ok(await page.locator('#recoverPendingHash').isEnabled());
   await page.locator('#recoverPendingHash').click();await autoSettled(page);
+}
+
+async function runInjectedWalletSelectionScenarios(browser,profile){
+  const binanceButton='#injectedWalletOptions button:has-text("幣安 Web3 錢包")';
+  const alternateButton='#injectedWalletOptions button:has-text("另一測試錢包")';
+  const accountRequests=row=>row.rpc.filter(item=>item.method==='eth_requestAccounts').map(item=>item.lane);
+  const selectedAccount=async(page,account)=>{
+    await page.waitForFunction(expected=>document.querySelector('#walletAccount')?.textContent.toLowerCase()===expected,account.toLowerCase());
+    await phase(page,'CONNECTED');
+    await autoSettled(page);
+  };
+  const noFinancialAction=async(page,row,journal)=>{
+    assert.equal(row.sendRequests.length,0,'wallet selection cannot request a transaction');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    assert.deepEqual(await journalBytes(page),journal,'wallet selection cannot change the financial journal');
+  };
+
+  await runScenario(browser,profile,'binance-namespaced-only',{account:OTHER,activeAlchemy:true,binanceInjected:'only'},async(page,row)=>{
+    assert.equal(await page.evaluate(()=>typeof window.ethereum),'undefined');
+    const journal=await journalBytes(page);
+    await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
+    await touchTarget(page,binanceButton);
+    assert.deepEqual(accountRequests(row),[],'opening the chooser cannot request account permission');
+    await capture(page,row,'binance-wallet-option');
+    await page.locator(binanceButton).click();
+    await selectedAccount(page,OTHER);
+    assert.deepEqual(accountRequests(row),['wallet'],'only Binance handles the explicit account request');
+    assert.match(await page.locator('#alchemyReason').textContent(),/目前尚有 100 KAIOS 授權可用/);
+    await noFinancialAction(page,row,journal);
+  });
+
+  await runScenario(browser,profile,'binance-with-another-injected-wallet',{account:OTHER,activeAlchemy:true,binanceInjected:'with-announced'},async(page,row)=>{
+    const journal=await journalBytes(page);
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
+    await touchTarget(page,binanceButton);
+    const choices=page.locator('#injectedWalletOptions');
+    assert.equal(await choices.getByRole('button',{name:'幣安 Web3 錢包',exact:true}).count(),1,'modern and legacy Binance aliases represent one provider');
+    assert.ok(await page.locator(alternateButton).isVisible(),'an independent EIP-6963 wallet remains selectable');
+    assert.deepEqual(accountRequests(row),[],'multiple providers require a choice before requesting an account');
+    await capture(page,row,'choose-between-wallets');
+    await page.locator(binanceButton).click();
+    await selectedAccount(page,OTHER);
+    assert.deepEqual(accountRequests(row),['wallet'],'the provider at window.ethereum cannot intercept the selected Binance account request');
+    await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
+    await touchTarget(page,alternateButton);await page.locator(alternateButton).click();
+    await selectedAccount(page,OWNER);
+    assert.deepEqual(accountRequests(row),['wallet','announced-wallet'],'a later explicit wallet choice connects the discovered EIP-6963 provider');
+    await noFinancialAction(page,row,journal);
+  });
 }
 
 async function runBscConnectionScenarios(browser,profile){
@@ -1801,6 +1875,7 @@ try{
   for(const [width,height]of [[390,844],[1280,900]])await runProfile(browser,width,height);
   report.checks.push('Actual 18911 HTML, panel, client, shared wallet selector and ethers5. Original unmined scenarios stay pending; new explicit QA-mined creation receipts exercise the unchanged complete verifier. No real RPC, wallet, mined deployment or transaction.');
   report.checks.push('Guest, wrong chain, non-owner, owner preview/cancel, wallet rejection, durable pending/resume/reload, disconnect and account switch at both viewports.');
+  report.checks.push('A Binance namespaced provider connects without a window.ethereum global. With two providers the chooser waits for an explicit selection, deduplicates Binance aliases, and connects the selected Binance or EIP-6963 provider without a transaction request. Both viewports inspect synthetic wallets only.');
   report.checks.push('Passive wrong-chain verification never switches or authorizes. Explicit injected, native-return and WalletConnect connections request only BSC0x38, tolerate a synchronous chainChanged event, re-read network56 before account permission, and never send funds. Rejected/unknown/unsupported/unverified switches stop with specific messages. Original sixty-second timeout, late result, changed account and same-raw WalletConnect reselect locks preserve pending/journal and cannot revive authorization or resubmit. All chain switching is synthetic; real wallet acceptance remains NOT_TESTED.');
   report.checks.push('Constructor preview shows actual Registry/KAIOS/version/timestamp/UTC+8/month IDs. Synthetic persisted pagehide/pageshow handler smoke only; actual BFCache and physical phone restoration remain NOT_TESTED.');
   report.checks.push('Keyboard skip link is reachable when focused and clipped when unfocused; each state includes an actual viewport shot and full-page shot, with bounding-rectangle evidence.');
