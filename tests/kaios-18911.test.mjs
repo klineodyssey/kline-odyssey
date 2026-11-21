@@ -398,6 +398,27 @@ test('18911 player amount remains exact and only KAIOS receives approval before 
   assert.equal(h.kufoBalance,BigInt(raw.toString())*1000n);assert.equal(h.client.snapshot().pending,null);
 });
 
+test('18911 approval for 100 KAIOS requires 0.1 KGEN before preview and again before wallet submission',async()=>{
+  const h=harness({account:PLAYER});
+  activateFixture(h);
+  await h.client.connect();
+  const approve={kind:'approve',amount:'100'};
+  const required=BigInt(wei('0.1'));
+  h.kgenBalance=required-1n;
+  await assert.rejects(h.client.prepare(approve),{code:'KGEN_BALANCE_INSUFFICIENT'});
+  assert.equal(h.client.snapshot().review,null);
+  assert.equal(h.storage.getItem('kaios18911.pending.v1'),null);
+  assert.equal(h.sends.length,0);
+
+  h.kgenBalance=required;
+  const review=await reviewed(h,approve);
+  h.kgenBalance=required-1n;
+  await assert.rejects(h.client.confirm(review.reviewId,{accepted:true,maxCostBNB:'0.1'}),{code:'KGEN_BALANCE_INSUFFICIENT'});
+  assert.equal(h.storage.getItem('kaios18911.pending.v1'),null);
+  assert.equal(h.sends.length,0);
+  h.client.dispose();
+});
+
 test('18911 stale legacy Furnace route, missing KGEN and mismatched burn proof cannot report alchemy success',async()=>{
   const h=await deployed(harness());
   h.routes.set(normalize(h.organIds.Furnace),'0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1');
@@ -504,7 +525,8 @@ test('18911 automatic verification preserves unmined, unknown, disconnected, for
     if(mode==='version'){const p=JSON.parse(h.storage.data.get('kaios18911.pending.v1'));p.payloadHash=ethers.utils.id('different-program');h.storage.data.set('kaios18911.pending.v1',JSON.stringify(p));}
     const original=h.storage.data.get('kaios18911.pending.v1'),start=h.requests.length;
     if(mode==='unmined'){const result=await h.client.verify();assert.equal(result.phase,'PENDING');assert.equal(result.pending.hash,hash);}
-    else await assert.rejects(h.client.verify(),error=>error.code===({unknown:'SUBMISSION_UNKNOWN',guest:'PENDING_ACCOUNT_MISMATCH',foreign:'PENDING_ACCOUNT_MISMATCH',version:'FOREIGN_PENDING'}[mode]));
+    else if(mode==='foreign'){const result=await h.client.verify();assert.equal(result.account,OTHER);assert.equal(result.pending,null);}
+    else await assert.rejects(h.client.verify(),error=>error.code===({unknown:'SUBMISSION_UNKNOWN',guest:'PENDING_ACCOUNT_MISMATCH',version:'FOREIGN_PENDING'}[mode]));
     assert.equal(h.storage.data.get('kaios18911.pending.v1'),original,'a read cannot replace or clear an unresolved intent');assert.equal(h.sends.length,1);assert.equal(h.client.snapshot().review,null);
     const reads=h.requests.slice(start);assert.equal(reads.filter(x=>['eth_requestAccounts','eth_sendTransaction','eth_estimateGas'].includes(x.method)).length,0);
     assert.equal(reads.filter(x=>x.method==='eth_getTransactionReceipt').length,mode==='unmined'?1:0);h.client.dispose();
@@ -637,6 +659,61 @@ async function hashlessAlchemy(kind='approve') {
   const request=kind==='burn'?{kind,amount:'1',lifeId:ethers.utils.id('synthetic-original-life')}:{kind,amount:'1'};
   return lostHash(h,request,{mine:false});
 }
+
+test('18911 one wallet can finish alchemy while another wallet preserves its original hashless intent',async()=>{
+  const {h,hash:originalHash}=await hashlessAlchemy();
+  const key='kaios18911.pending.v1';
+  const originalRaw=h.storage.getItem(key),original=JSON.parse(originalRaw);
+  assert.equal(original.schemaVersion,1);
+  assert.equal(original.account,PLAYER);
+  assert.equal(original.hash,null);
+  await assert.rejects(h.client.prepare({kind:'approve',amount:'1'}),{code:'PENDING_INTENT'});
+
+  h.account=OTHER;
+  h.provider.emit('accountsChanged',[OTHER]);
+  const ready=await h.client.connect();
+  assert.equal(ready.account,OTHER);
+  assert.equal(ready.pending,null);
+  assert.equal(ready.chainActive,true);
+  await assert.rejects(h.client.recoverPendingHash({hash:originalHash,accepted:true,expectedIntentId:original.intentId}),{code:'NO_PENDING_INTENT'});
+  assert.equal(h.storage.getItem(key),originalRaw);
+
+  const furnace=h.addresses.KAIOSAlchemyFurnace;
+  h.allowances.set(normalize(OTHER)+'/'+normalize(furnace),BigInt(wei('100')));
+  const burn={kind:'burn',amount:'100',lifeId:ethers.constants.HashZero};
+  const burnHash=await submit(h,burn);
+  const pending=JSON.parse(h.storage.getItem(key));
+  assert.equal(pending.schemaVersion,2);
+  assert.deepEqual(pending.records[normalize(PLAYER)],original);
+  assert.equal(pending.records[normalize(OTHER)].hash,burnHash);
+  assert.equal(normalize(h.sends.at(-1).from),normalize(OTHER));
+  await assert.rejects(h.client.prepare(burn),{code:'PENDING_INTENT'});
+
+  h.mine(burnHash);
+  const finished=await h.client.resume();
+  assert.equal(finished.pending,null);
+  const remaining=JSON.parse(h.storage.getItem(key));
+  assert.equal(remaining.schemaVersion,2);
+  assert.deepEqual(remaining.records,{[normalize(PLAYER)]:original});
+  const burned=h.client.exportEvidence().journal.evidence[0];
+  assert.equal(burned.intent.hash,burnHash);
+  assert.equal(burned.verification.status,'VERIFIED_ALCHEMY');
+  assert.equal(h.kufoBalance,BigInt(wei('100000')));
+  assert.equal(h.kgenBalance,BigInt(wei('10')));
+
+  h.client.dispose();
+  h.account=PLAYER;
+  h.client=h.makeClient();
+  assert.deepEqual((await h.client.connect()).pending,original);
+  await assert.rejects(h.client.verify(),{code:'SUBMISSION_UNKNOWN'});
+  await assert.rejects(h.client.prepare({kind:'approve',amount:'1'}),{code:'PENDING_INTENT'});
+  assert.equal(h.sends.length,2,'only the original two wallet requests were sent');
+  h.mine(originalHash);
+  await h.client.recoverPendingHash({hash:originalHash,accepted:true,expectedIntentId:original.intentId});
+  assert.equal(h.storage.getItem(key),null);
+  assert.deepEqual(h.client.exportEvidence().journal.evidence.map(row=>row.intent.hash),[burnHash,originalHash]);
+  h.client.dispose();
+});
 
 const fullBlockReads=(h,start)=>h.requests.slice(start).filter(r=>r.method==='eth_getBlockByNumber'&&r.params[1]===true);
 

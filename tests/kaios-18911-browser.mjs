@@ -145,13 +145,13 @@ report.payload={chainId:PAYLOAD.chainId,sourceMain:PAYLOAD.sourceMain,programCom
   dependencyPins:Object.fromEntries(Object.entries(PAYLOAD.dependencies).map(([name,item])=>[name,{address:item.address,codeHash:item.codeHash}])),
   scope:'SYNTHETIC_READS_AND_EXPLICIT_QA_MINED_DEPLOYMENTS_ONLY',realVerifiedMinedDeployments:0};
 
-async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false,initialAllowance='100',binanceInjected=''}={}){
+async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false,initialAllowance='100',kaiosBalances={},binanceInjected=''}={}){
   row.rpc=[];row.sendRequests=[];
   await page.exposeFunction('__record18911SyntheticRpc',event=>{
     row.rpc.push(event);
     if(event.method==='eth_sendTransaction')row.sendRequests.push(event);
   });
-  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,initialAllowance,binanceInjected})=>{
+  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,initialAllowance,kaiosBalances,binanceInjected})=>{
     // The only application flag is a display-only notice. Authorization still
     // goes through the real client, real shared selector and real payload.
     window.__K18911_MOCK__=true;
@@ -214,7 +214,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       if(name==='kaios'){
         if(method==='KGEN')return [payload.dependencies.kgen.address];
         if(method==='ORGAN_REGISTRY')return [payload.dependencies.registry.address];
-        if(method==='balanceOf')return [E.parseEther('100')];
+        if(method==='balanceOf')return [E.parseEther(kaiosBalances[normalized(args[0])]??'100')];
         if(method==='allowance'){
           const initial=activeAlchemy&&normalized(args[0])===normalized(state.account)&&normalized(args[1])===normalized(deployed.get('KAIOSAlchemyFurnace')?.address)?E.parseEther(initialAllowance):0;
           return [allowances.get(allowanceKey(args[0],args[1]))??initial];
@@ -285,7 +285,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
           }
         }
         await window.__record18911SyntheticRpc(event);
-        if(readFailure?.remaining>0&&method===readFailure.method){readFailure.remaining--;const error=new Error('Synthetic technical read failure');error.code=-32000;throw error;}
+        if(readFailure?.remaining>0&&method===readFailure.method){readFailure.remaining--;const error=new Error('Synthetic technical read failure');error.code=readFailure.code;throw error;}
         const gate=Array.from(readGates.values()).find(item=>item.method===method&&(!item.lane||item.lane===qaLane)&&!item.waiting&&!item.settled);
         if(gate){
           gate.waiting=true;
@@ -488,7 +488,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       gateWalletAuthorization(id){if(readGates.has(id))throw Error('Synthetic authorization gate must be unique');readGates.set(id,{method:'eth_requestAccounts',waiting:false,settled:false});},
       gateWalletChain(id){if(readGates.has(id))throw Error('Synthetic chain-switch gate must be unique');readGates.set(id,{method:'wallet_switchEthereumChain',lane:'wallet',waiting:false,settled:false});},
       armReloadWalletReadGate(id){sessionStorage.setItem('18911.qa.wallet-read-gate',id);},
-      failReads(count){readFailure={remaining:count,method:'eth_getBlockByNumber'};},
+      failReads(count,method='eth_getBlockByNumber',code=-32000){readFailure={remaining:count,method,code};},
       overrideDependencyCode(name,code){codeOverrides.set(normalized(payload.dependencies[name].address),code);},
       mineDeployment(hash,reverted=false){
         const tx=transactions.get(hash);if(!tx||tx.to!==null)throw Error('Synthetic mining requires an existing reviewed creation transaction');
@@ -538,7 +538,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         else if(mode==='resolve')gate.resolve();else throw Error('Unknown synthetic gate release mode');
       },
     };
-  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,initialAllowance,binanceInjected});
+  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,initialAllowance,kaiosBalances,binanceInjected});
 }
 
 async function phase(page,expected){
@@ -1848,6 +1848,13 @@ async function runPlayerConfirmationScenarios(browser,profile){
     assert.equal(row.rpc.slice(beforeUnmined).filter(item=>item.fullTransactions).length,0,'unchanged nonce does not read full blocks');
 
     await page.evaluate(hash=>window.__18911WalletQA.mineApproval(hash,false),hash);
+    await page.evaluate(()=>window.__18911WalletQA.failReads(1,'eth_getTransactionCount',-32603));
+    await progress.click();await phase(page,'BLOCKED');await autoSettled(page);
+    assert.equal(await page.locator('#alchemyReason').textContent(),'錢包暫時無法查核交易（-32603）。請稍後再查，或用原交易編號核對。');
+    assert.ok(await progress.isEnabled(),'a failed read leaves the original lookup available for a deliberate retry');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending);
+    assert.deepEqual(await journalBytes(page),originalJournal);
+    assert.equal(row.sendRequests.length,1,'an RPC read failure never sends a replacement transaction');
     const beforeLookup=row.rpc.length;
     await touchTarget(page,'#checkAlchemyPending');await progress.click();await autoSettled(page);
     assert.equal(await progress.textContent(),'確認這筆回執');
@@ -1869,6 +1876,70 @@ async function runPlayerConfirmationScenarios(browser,profile){
     assert.ok(await page.locator('#prepareAlchemy').isEnabled());
     assert.equal(row.sendRequests.length,1,'finding and confirming the original receipt never requests another wallet send');
     row.hashlessReceiptLookup={idlePollingRequests:0,nonceReads:nonceReads.length,fullBlocks:1,recoveredHash:hash,recoverySends:0};
+  });
+  const secondPlayer='0x2222222222222222222222222222222222222222';
+  await runScenario(browser,profile,'player-pending-account-isolation',{
+    account:OTHER,activeAlchemy:true,kaiosBalances:{[secondPlayer]:'182'},clock:true,
+  },async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');
+    await playerBurnReview(page,row);await accept(page);
+    await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    const originalRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
+    const original=JSON.parse(originalRaw);
+    assert.equal(original.schemaVersion,1,'the first pending transaction uses the legacy singleton format');
+    assert.equal(original.account.toLowerCase(),OTHER.toLowerCase());
+    assert.match(original.hash,/^0x[0-9a-f]{64}$/i);
+    assert.equal(row.sendRequests.length,1);
+    const originalJournal=await journalBytes(page);
+
+    const beforeSecondAccount=row.rpc.length;
+    await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),secondPlayer);
+    await phase(page,'CONNECTED');await autoSettled(page);
+    assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),secondPlayer);
+    assert.equal(await page.locator('#playerBalance').textContent(),'182.0 KAIOS');
+    assert.ok(await page.locator('#playerPanel #checkAlchemyPending').isHidden(),'the second player has no previous transaction to check');
+    assert.ok(await page.locator('#pendingPanel').isHidden(),'the first player pending receipt is not exposed on switch');
+    assert.ok(await page.locator('#prepareAlchemy').isEnabled());
+    await touchTarget(page,'#prepareAlchemy');await capture(page,row,'second-player-ready-with-first-pending');
+
+    await page.locator('#kaiosAmount').fill('70');
+    await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+    const fields=await page.locator('#reviewDetails').evaluate(host=>Object.fromEntries(
+      Array.from(host.querySelectorAll('dt'),term=>[term.textContent,term.nextElementSibling.textContent])));
+    assert.equal(fields['本人帳戶'].toLowerCase(),secondPlayer);
+    assert.equal(fields['操作'],'煉丹：銷毀 KAIOS 並取得 KUFO');
+    assert.match(fields['KGEN 持有量門檻'],/^0\.070*$/);
+    assert.match(fields['預計 KUFO'],/^70000(?:\.0+)?$/);
+    assert.equal(row.sendRequests.length,1,'the account switch and second player preview are read-only');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalRaw,'connecting and previewing preserve the first legacy bytes');
+    assert.ok(!row.rpc.slice(beforeSecondAccount).some(item=>item.receiptHash===original.hash),'the second player never checks the first player receipt');
+
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    assert.equal(row.sendRequests.length,2);
+    assert.equal(row.sendRequests[1].transaction.from.toLowerCase(),secondPlayer);
+    const scopedRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
+    const scoped=JSON.parse(scopedRaw);
+    assert.equal(scoped.schemaVersion,2);
+    assert.equal(JSON.stringify(scoped.records[OTHER.toLowerCase()]),originalRaw,'promotion retains every first player field and byte');
+    const second=scoped.records[secondPlayer];
+    assert.equal(second.account.toLowerCase(),secondPlayer);
+    assert.equal(second.amountWei,'70000000000000000000');
+    assert.notEqual(second.hash,original.hash);
+    assert.ok(await page.locator('#playerPanel #checkAlchemyPending').isVisible());
+    assert.deepEqual(await journalBytes(page),originalJournal,'unmined intentions do not change receipts');
+
+    const beforeFirstAccount=row.rpc.length;
+    await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),OTHER);
+    await phase(page,'PENDING');await autoSettled(page);
+    assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OTHER.toLowerCase());
+    assert.ok(await page.locator('#playerPanel #checkAlchemyPending').isVisible());
+    assert.equal(await page.locator('#prepareAlchemy').isEnabled(),false,'the first player still cannot send a duplicate');
+    await page.locator('#playerPanel #checkAlchemyPending').click();await phase(page,'PENDING');await autoSettled(page);
+    assert.ok(row.rpc.slice(beforeFirstAccount).some(item=>item.receiptHash===original.hash),'the first player still checks the original hash');
+    assert.ok(!row.rpc.slice(beforeFirstAccount).some(item=>item.receiptHash===second.hash),'the first player never checks the second player receipt');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),scopedRaw);
+    assert.deepEqual(await journalBytes(page),originalJournal);
+    assert.equal(row.sendRequests.length,2,'switching accounts and verifying never resubmit either transaction');
   });
   await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
     const alchemyNotice=page.locator('#alchemyReason');
@@ -2060,11 +2131,11 @@ async function runAutomaticScenarios(browser,profile){
     assert.match(pending.hash,/^0x[0-9a-f]{64}$/i);
     const originalReceiptReads=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
     await page.evaluate(other=>window.__18911WalletQA.changeAccount(other),OTHER);
-    await page.clock.fastForward(31_000);await autoSettled(page);
-    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
+    await phase(page,'CONNECTED');await autoSettled(page);
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'READY');
     assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'another account cannot automatically resume the original financial hash');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
-    await capture(page,row,'original-account-required');
+    await capture(page,row,'second-account-original-retained');
     await page.evaluate(()=>{
       window.__18911WalletQA.removeInjectedWallet();
       window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));
@@ -2108,7 +2179,7 @@ async function runAutomaticScenarios(browser,profile){
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'complete automatic receipt verification clears only the original verified pending intent');
     assert.equal(await page.locator('#deploySteps .step-status').filter({hasText:'鏈上已核'}).count(),1);
     assert.equal(row.sendRequests.length,1,'a verified synthetic deployment never auto-submits its successor');
-    row.automatic={reviewPaused:true,walletBusyPaused:true,foreignAndGuestPendingStopped:true,originalAccountRequired:true,verifiedSyntheticDeploymentCount:1,automaticSendRequests:0};
+    row.automatic={reviewPaused:true,walletBusyPaused:true,foreignAccountReady:true,guestPendingStopped:true,originalAccountRequired:true,verifiedSyntheticDeploymentCount:1,automaticSendRequests:0};
     await capture(page,row,'receipt-verified-no-successor-send');
   });
   await runScenario(browser,profile,'auto-timelock',{clock:true},async(page,row)=>{
@@ -2171,6 +2242,7 @@ try{
   report.checks.push('Two added scenarios per viewport discover synthetic active routes with the real payload and an existing exact100 KAIOS allowance. A100 KAIOS→100000 KUFO review with an explicit0.6 BNB cap shows confirmation preflight without a test scroll, requests only one burn, keeps the genuine wallet-response wait beyond the read deadline, then preserves its unmined hash without claiming minted KUFO. Review expiry and the original15-second preflight read timeout remain zero-send, clear consent, preserve the holder cap and pending/journal, and cannot overwrite a newer review when the provider replies late. Existing rejection and hashless unknown-intent scenarios also require visible confirmation feedback. These are synthetic-provider and viewport checks, not physical-wallet, mainnet-burn or mint acceptance.');
   report.checks.push('A synthetic zero-allowance player starts alchemy once. Only a verified original approval advances to a burn review for the same amount and lifeId, with fresh consent and a fresh fee cap. Pending and reverted approvals never advance. Only a separate explicit confirmation opens the synthetic burn request.');
   report.checks.push('The original pending approval has an action in the player card after reload. It preserves unmined intent bytes and restores the verified allowance after mining. Hashless lookup reads one full identified block, preserves pending until holder confirmation, and never requests another wallet send. Advanced recovery stays collapsed and idle guests and ordinary players do not run recurring reads.');
+  report.checks.push('On the same origin a second player reads their own KAIOS, opens a distinct burn preview and submits only their own synthetic transaction. Adding it preserves the legacy first-player record byte for byte, and switching back restores the original receipt check and prevents duplicate sends. A temporary -32603 during receipt discovery keeps the original record and allows a deliberate retry.');
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.checks.push('Both viewports check the BSC WalletConnect directory configuration and a fresh pairing when an SDK session already exists. A repeated topic cannot authorize an account, foreign sessions are not disconnected, and financial pending and history remain untouched. Wallet catalog and pairing are simulated.');
