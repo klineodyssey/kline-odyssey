@@ -18,6 +18,10 @@ const networkRequests=new WeakMap();
 const networkProviderRoots=new WeakMap();
 const announcedWallets=new Map();
 const BINANCE_WALLET='幣安 Web3 錢包';
+const WALLET_DIRECTORY_RECOMMENDATIONS=[
+ '971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709', // OKX Wallet
+ '8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4', // Binance Wallet
+];
 let visibleWallets=[];
 
 export function walletBridgeLanding(href,{connect=true}={}){
@@ -152,6 +156,17 @@ async function loadWalletFactory(){
  }
  const factory=walletFactory();if(!factory?.init)throw new Error('錢包橋接套件入口不可用。');return factory;
 }
+function mobileWalletOptions(metadata){
+ return {
+  projectId:'ed256d3118a9c971d550ed5ee522b4d9',
+  chains:[56],
+  optionalMethods:['wallet_switchEthereumChain'],
+  metadata,
+  storageOptions:{database:'kaios18911-walletconnect'},
+  showQrModal:true,
+  qrModalOptions:{themeMode:'dark',enableExplorer:true,explorerRecommendedWalletIds:[...WALLET_DIRECTORY_RECOMMENDATIONS]},
+ };
+}
 function guardedMobile(raw,metadata,topic){
  const guarded={async request(args){
   const sender=args.method==='eth_sendTransaction'?args.params?.[0]?.from:undefined;
@@ -162,7 +177,7 @@ function guardedMobile(raw,metadata,topic){
  },on:(...args)=>raw.on?.(...args),removeListener:(...args)=>raw.removeListener?.(...args)};
  networkProviderRoots.set(guarded,raw);return guarded;
 }
-async function connectMobileWallet(){
+async function connectMobileWallet({chooseAgain=false}={}){
  if(bridgePending||bridgeReadPending||bridgeAttempt||restorePending||nativeAttempt||uiBusy||walletNetworkRequestPending(provider)||mobileNetworkPending())return;
  $('walletBridgePanel').hidden=false;$('cancelWalletBridge').scrollIntoView({behavior:'auto',block:'center'});
  resetVerification();resetConsent();invalidate('正在連接這個頁面；請在錢包確認連線後返回這裡查看帳戶。');
@@ -171,11 +186,15 @@ async function connectMobileWallet(){
  const attempt={cancel,previousProvider:provider,previousMobile:[mobileProvider,mobileRaw,mobileMetadata,mobileTopic]};bridgeAttempt=attempt;lastError='';
  const work=(async()=>{
   const factory=await loadWalletFactory();if(bridgeAttempt!==attempt)return null;
-  const raw=await factory.init({projectId:'ed256d3118a9c971d550ed5ee522b4d9',chains:[56],optionalMethods:['wallet_switchEthereumChain'],metadata,storageOptions:{database:'kaios18911-walletconnect'},showQrModal:true,qrModalOptions:{themeMode:'dark'}});
+  const raw=await factory.init(mobileWalletOptions(metadata));
   if(bridgeAttempt!==attempt)return null;mobileRaw=raw;
-  if(raw.session&&(raw.session.self?.metadata?.url!==metadata.url||raw.session.self?.metadata?.name!==metadata.name))throw new Error('舊錢包連線不屬於本煉丹頁，請先在錢包核對連線。');
-  await raw.enable();if(bridgeAttempt!==attempt)return null;
+  const previousTopic=raw.session?.topic;
+  const pairAgain=!!raw.session&&(chooseAgain||!walletConnectSessionPermits(raw,metadata,previousTopic));
+  if(pairAgain)await raw.connect();
+  else await raw.enable();
+  if(bridgeAttempt!==attempt)return null;
   const topic=raw.session?.topic;
+  if(pairAgain&&topic===previousTopic)throw new Error('未收到新的錢包連線。請重新選擇錢包並批准本頁。');
   if(!walletConnectSessionPermits(raw,metadata,topic))throw new Error('錢包未授權有效的 BSC 56 帳戶，尚未連線。');
   return {raw,topic};
  })();
@@ -219,7 +238,7 @@ async function restoreMobileSession(){
  $('walletBridgePanel').hidden=false;
  const restoring=(async()=>{
   const factory=await loadWalletFactory();if(restoreAttempt!==attempt||epoch!==uiEpoch||pageAway||document.visibilityState!=='visible')return false;
-  const raw=await factory.init({projectId:'ed256d3118a9c971d550ed5ee522b4d9',chains:[56],optionalMethods:['wallet_switchEthereumChain'],metadata,storageOptions:{database:'kaios18911-walletconnect'},showQrModal:true,qrModalOptions:{themeMode:'dark'}});
+  const raw=await factory.init(mobileWalletOptions(metadata));
   if(restoreAttempt!==attempt||epoch!==uiEpoch||pageAway||document.visibilityState!=='visible')return false;
   const topic=raw.session?.topic;
   if(!walletConnectSessionPermits(raw,metadata,topic)){sessionHint(false);bridgeMessage='先前連線已到期或尚未獲准，請按連線重新選擇本人錢包。';return false;}
@@ -531,7 +550,7 @@ function renderConfirmFeedback(s){
 function render(){
  if(!client||!view)return;
  const s=view,busy=uiBusy||!!s.active||!!bridgeAttempt||!!nativeAttempt||!!restoreAttempt,pending=!!s.pending,connected=!!s.account&&Number(s.chainId)===56;
- text('walletBridgeStatus',nativeAttempt?'正在等待錢包內18911連線，可隨時取消。':restoreAttempt?'正在恢復原頁已核准的連線，不會重新配對或送交易。':bridgeAttempt?'正在連接這個頁面；請在錢包批准後返回此頁完成連線，可隨時取消。':bridgePending||bridgeReadPending?'原連線請求尚未結束；遲到回覆不會自動接入。':restorePending?'原恢復查核尚未結束，同類請求不重複；仍可查詢狀態。':lastError||bridgeMessage||'「連接目前頁面」會把錢包接回這裡；下方錢包入口只會另開官網或18911。');
+ text('walletBridgeStatus',nativeAttempt?'正在等待錢包內18911連線，可隨時取消。':restoreAttempt?'正在恢復原頁已核准的連線，不會重新配對或送交易。':bridgeAttempt?'正在連接這個頁面；請在錢包批准後返回此頁完成連線，可隨時取消。':bridgePending||bridgeReadPending?'原連線請求尚未結束；遲到回覆不會自動接入。':restorePending?'原恢復查核尚未結束，同類請求不重複；仍可查詢狀態。':lastError||bridgeMessage||'從 BSC 錢包目錄配對後，請返回這裡核對帳戶。App 內開啟入口會另開頁面。');
  const deployments={...(s.chainActive?s.chainDeployments:{}),...s.deployments};
  const cfg=s.chainActive?s.chainConfig:s.config;
  const scheduled=s.chainActive&&s.chainConfig?.activationTime&&s.block?.timestamp&&BigInt(s.block.timestamp)<BigInt(s.chainConfig.activationTime);
@@ -675,7 +694,7 @@ async function boot(){
  });
  $('switchWalletChain').addEventListener('click',()=>connectSelectedProvider(provider));
  $('chooseWallet').addEventListener('click',()=>{if(!uiBusy&&!walletNetworkRequestPending(provider)&&!mobileNetworkPending()&&!bridgeAttempt&&!nativeAttempt&&!restoreAttempt){nextNativeWallet='';showWalletBridge();}});
- $('connectMobileWallet').addEventListener('click',connectMobileWallet);
+ $('connectMobileWallet').addEventListener('click',()=>{void connectMobileWallet({chooseAgain:true});});
  $('cancelWalletBridge').addEventListener('click',cancelWalletBridge);
  $('refreshStatus').addEventListener('click',()=>{if(uiBusy)return;resetVerification();run(async current=>{resetConsent();current.invalidate('正在重新查核鏈上狀態。');await current.verify();lastVerifiedAt=Date.now();});});
   $('activationNow').addEventListener('click',()=>run(async current=>{resetConsent();$('activationTime').value=localTW(Math.floor(Date.now()/1000));await applyActivation(current,readActivation());}));
