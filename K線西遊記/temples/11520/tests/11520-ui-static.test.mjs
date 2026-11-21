@@ -949,7 +949,8 @@ test('simulation component revisions expose complete provenance and recorded exe
   'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'496168804b40899cd28d6e719084501dd080fa32d5fbddf5b5b86915ff0a620f'},
   'runtime/kgen-margin-runtime.mjs':{nonMetadataSha256:'51044cbfcecd761d0d9d2f05bd86db7ed89644e497383a48e61a1d854f44c576'},
    'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'ea364a05c794f635d0c03eb267fdd5dfa390428e5c15f01eb0f31757579a51d4'},
-   'game-5d.html':{nonMetadataSha256:'f4ae42eca3c7c68622747423bfff3981fdd2438dab2a891ca696026b153364cc'}
+   // Prior published game shell body: f4ae42eca3c7c68622747423bfff3981fdd2438dab2a891ca696026b153364cc.
+   'game-5d.html':{nonMetadataSha256:'66f2ec1d2aa7081f14f07f1f6338666b12e8539acb3f4d2fe3ba35334712d9da'}
  };
  for(const ancestor of assets){
   const asset={...ancestor,...current[ancestor.path]};
