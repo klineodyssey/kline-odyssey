@@ -632,6 +632,154 @@ function civilizationAction(action, successMessage) {
   }
 }
 
+async function mutateNationResources(action, { requireLock = false } = {}) {
+  if (navigator.locks) return navigator.locks.request("kaios-world-viewer-resource-mutation", action);
+  if (requireLock) throw new Error("RESOURCE_LOCK_UNAVAILABLE");
+  return action();
+}
+
+async function tradeNationResource(resourceId, direction, quantity) {
+  if (!civilizationRuntime || !activeSessionRequired()) return;
+  try {
+    const traded = await mutateNationResources(() => {
+      if (!activeSessionRequired()) return false;
+      civilizationRuntime.tradeNationResource(resourceId, direction, quantity);
+      return true;
+    });
+    if (traded) shell.showToast(`${direction} of ${quantity} ${resourceId} completed inside the bounded synthetic resource economy.`, "success");
+  } catch (error) {
+    shell.showToast(error.message, "warning");
+  }
+}
+
+function openMineDevelopment(storage) {
+  if (new URLSearchParams(location.search).get("mine") !== "5168") return null;
+
+  const dialog = document.getElementById("mine-dialog");
+  const form = document.getElementById("mine-budget-form");
+  const budget = document.getElementById("mine-budget");
+  const proposeButton = document.getElementById("mine-propose");
+  const investButton = document.getElementById("mine-invest");
+  const closeButton = document.getElementById("mine-close");
+  const review = document.getElementById("mine-review");
+  const summary = document.getElementById("mine-proposal-summary");
+  const feedback = document.getElementById("mine-feedback");
+  const runs = document.getElementById("mine-runs");
+  const historyPanel = document.getElementById("mine-history");
+  const format = new Intl.NumberFormat("zh-Hant-TW");
+  const messages = {
+    MINE_DEPLETED: "礦脈已採盡。",
+    MINE_BUDGET_INSUFFICIENT: "模擬預算不足或超過可用能源。請調整後再提出。",
+    MINE_INVENTORY_FULL: "黃金庫存已達容量上限，未投入能源。",
+    MINE_ALREADY_COMMITTED: "這份方案已完成，沒有再次投入。",
+    MINE_STALE_PROPOSAL: "共用庫存已更新，請重新提出開發方案。",
+    RESOURCE_STORAGE_FAILED: "無法保存共用庫存，未完成採礦。",
+    RESOURCE_LOCK_UNAVAILABLE: "目前瀏覽器無法安全保存，請使用支援的瀏覽器。"
+  };
+  const readResources = () => civilizationRuntime.getSnapshot().nation.resources;
+  const unavailable = !storage ? messages.RESOURCE_STORAGE_FAILED
+    : !navigator.locks ? messages.RESOURCE_LOCK_UNAVAILABLE : "";
+  const savedDraft = history.state?.k5168MineProposal;
+  let draft = Number.isSafeInteger(savedDraft?.budget) ? savedDraft : null;
+  let busy = false;
+
+  function showFeedback(message, error = false) {
+    feedback.textContent = message;
+    feedback.dataset.error = String(error);
+  }
+
+  function rememberDraft(url = location.href) {
+    try {
+      history.replaceState({ ...history.state, k5168MineProposal: draft }, "", url);
+    } catch {
+      // The uncommitted proposal can still be used during this visit.
+    }
+  }
+
+  function render(resources = readResources()) {
+    const { mine } = resources;
+    const energy = resources.resources.find(({ resource_id: id }) => id === "ENERGY");
+    const gold = resources.resources.find(({ resource_id: id }) => id === "GOLD");
+    document.getElementById("mine-energy").textContent = format.format(energy.available_for_export);
+    document.getElementById("mine-gold").textContent = format.format(gold.quantity);
+    document.getElementById("mine-remaining").textContent = format.format(mine.remaining);
+    document.getElementById("mine-rules").textContent =
+      `試玩暫用每輪 ${mine.energy_cost} 能源、${mine.gold_yield} 黃金，共 ${mine.capacity} 輪。這些都是遊戲內模擬資源。銀礦品項、正式成本及產量待確認。`;
+    budget.disabled = proposeButton.disabled = Boolean(unavailable || busy || mine.remaining === 0);
+    investButton.disabled = budget.disabled || !draft;
+    closeButton.disabled = busy;
+    review.hidden = !draft;
+    summary.textContent = draft
+      ? `預算上限 ${draft.budget}，確認後將投入 ${mine.energy_cost} 能源，產出 ${mine.gold_yield} 黃金。` : "";
+    historyPanel.hidden = mine.rounds.length === 0;
+    runs.replaceChildren(...mine.rounds.map((round) => {
+      const item = document.createElement("li");
+      item.textContent = `投入 ${round.energy_used} 模擬能源，黃金 +${round.gold_produced} 已入庫`;
+      return item;
+    }));
+  }
+
+  function showFailure(error) {
+    const code = error.code ?? error.message;
+    showFeedback(messages[code] ?? "無法完成本輪開發，請重新提出方案。", true);
+  }
+
+  const initial = readResources();
+  budget.value = draft?.budget ?? initial.mine.energy_cost;
+  render(initial);
+  if (unavailable) showFeedback(unavailable, true);
+  else if (initial.mine.remaining === 0) showFeedback(messages.MINE_DEPLETED);
+  else if (initial.mine.rounds.length) showFeedback("已載入共用庫存的採礦成果。");
+
+  budget.addEventListener("input", () => {
+    if (!draft) return;
+    draft = null;
+    rememberDraft();
+    render();
+    showFeedback("預算已調整，請重新提出開發方案。");
+  });
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (busy || unavailable) return;
+    draft = null;
+    try {
+      draft = civilizationRuntime.quoteMineDevelopment(budget.valueAsNumber);
+      showFeedback("開發方案已備妥，確認後才會投入模擬能源。");
+    } catch (error) {
+      showFailure(error);
+    }
+    rememberDraft();
+    render();
+  });
+  investButton.addEventListener("click", async () => {
+    if (busy || !draft || unavailable) return;
+    busy = true;
+    render();
+    try {
+      const round = await mutateNationResources(() => civilizationRuntime.developMine(draft), { requireLock: true });
+      const exhausted = readResources().mine.remaining === 0 ? "礦脈已採盡。" : "";
+      showFeedback(`採礦完成，已投入 ${round.energy_used} 模擬能源，黃金 +${round.gold_produced} 已入庫。${exhausted}`);
+    } catch (error) {
+      showFailure(error);
+    } finally {
+      busy = false;
+      draft = null;
+      rememberDraft();
+      render();
+    }
+  });
+  closeButton.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("cancel", (event) => { if (busy) event.preventDefault(); });
+  dialog.addEventListener("close", () => {
+    draft = null;
+    const url = new URL(location.href);
+    url.searchParams.delete("mine");
+    rememberDraft(url);
+  });
+  dialog.showModal();
+  return () => { if (dialog.open) render(); };
+}
+
 function performLifeAction(action, snapshot) {
   const lifeId = snapshot?.life_id ?? snapshot?.lifeId ?? snapshot?.id;
   if (!lifeId) return;
@@ -928,10 +1076,7 @@ async function start() {
       () => civilizationRuntime.allocateNationBudget(category, amount),
       `${amount} KAIOS Credit allocated to ${category}.`
     ),
-    onTradeResource: (resourceId, direction, quantity) => civilizationAction(
-      () => civilizationRuntime.tradeNationResource(resourceId, direction, quantity),
-      `${direction} of ${quantity} ${resourceId} completed inside the bounded synthetic resource economy.`
-    ),
+    onTradeResource: tradeNationResource,
     onProposeDiplomacy: (type) => civilizationAction(
       () => civilizationRuntime.proposeNationDiplomacy(type),
       `${type} proposal entered independent synthetic review.`
@@ -1133,6 +1278,13 @@ async function start() {
   shell.setCoordinates("K280 / Earth surface shell");
   shell.setSimulationClock(civilizationRuntime.getSnapshot().clock);
   shell.showToast("Cosmic Technology Alpha ready", "success");
+  const refreshMine = openMineDevelopment(storage);
+  const resourceStorageKey = `${world.meta.storage_namespace}.civilization.nation.resources`;
+  window.addEventListener("storage", (event) => {
+    if (event.storageArea !== storage || event.key !== resourceStorageKey) return;
+    refreshMine?.();
+    if (mode === "CIVILIZATION") renderInspector();
+  });
 }
 
 start().catch((error) => {
