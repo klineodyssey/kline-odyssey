@@ -169,10 +169,20 @@ function harness({storage=memoryStorage(),lockManager=memoryLocks(),account=PAYL
       h.requests.push({method,params});
       await h.requestHook?.({method,params});
       if(method==='eth_chainId')return hex(h.chainId);if(method==='eth_requestAccounts'||method==='eth_accounts')return h.account==null?[]:[h.account];
-      if(method==='eth_getBlockByNumber')return h.blocks.get(params[0]==='latest'?h.blockNumber:Number(BigInt(params[0])))??null;
+      if(method==='eth_getBlockByNumber'){
+        const frame=h.blocks.get(params[0]==='latest'?h.blockNumber:Number(BigInt(params[0])))??null;
+        if(!frame||params[1]!==true)return frame;
+        return {...frame,transactions:[...h.transactions.values()].filter(tx=>tx.blockNumber===frame.number)};
+      }
       if(method==='eth_getBlockByHash')return [...h.blocks.values()].find(b=>b.hash===params[0])??null;
       if(method==='eth_getBalance')return wei('0.5');if(method==='eth_gasPrice')return hex(50_000_000);if(method==='eth_estimateGas')return '0x100000';
-      if(method==='eth_getTransactionCount')return hex(h.sends.length);
+      if(method==='eth_getTransactionCount'){
+        const [holder,tag]=params;
+        if(tag==null||tag==='pending')return hex(h.sends.length);
+        const height=tag==='latest'?h.blockNumber:Number(BigInt(tag));
+        const mined=[...h.transactions.values()].filter(tx=>normalize(tx.from)===normalize(holder)&&tx.blockNumber!=null&&Number(BigInt(tx.blockNumber))<=height);
+        return hex(mined.reduce((count,tx)=>Math.max(count,Number(BigInt(tx.nonce))+1),0));
+      }
       if(method==='eth_getCode') {
         const addr=normalize(params[0]);if(h.codeOverrides.has(addr))return h.codeOverrides.get(addr);
         const dependency=Object.values(payload.dependencies).find(d=>normalize(d.address)===addr);if(dependency)return dependency.code;
@@ -620,6 +630,88 @@ async function failedCreation() {
   Object.assign(h.receipts.get(hash),{status:'0x0',contractAddress:null,logs:[]});await h.client.resume();
   assert.equal(h.client.snapshot().phase,'CONFIRMED_REVERTED');assert.equal(h.client.snapshot().pending,null);return h;
 }
+
+async function hashlessAlchemy(kind='approve') {
+  const h=harness({account:PLAYER});activateFixture(h);
+  if(kind==='burn')h.allowances.set(normalize(PLAYER)+'/'+normalize(h.addresses.KAIOSAlchemyFurnace),BigInt(wei('100')));
+  const request=kind==='burn'?{kind,amount:'1',lifeId:ethers.utils.id('synthetic-original-life')}:{kind,amount:'1'};
+  return lostHash(h,request,{mine:false});
+}
+
+const fullBlockReads=(h,start)=>h.requests.slice(start).filter(r=>r.method==='eth_getBlockByNumber'&&r.params[1]===true);
+
+test('18911 hashless player receipt search matches the original mined approve or burn with one full-block read',async()=>{
+  for(const kind of ['approve','burn']){
+    const {h,hash}=await hashlessAlchemy(kind);
+    if(kind==='approve')h.blockNumber+=65535;
+    else for(let i=0;i<23;i++)h.advance(1);
+    const receipt=h.mine(hash);
+    if(kind==='burn')for(let i=0;i<41;i++)h.advance(1);
+    const before=[...h.storage.data],start=h.requests.length;
+    const pending=h.client.snapshot().pending;
+    const result=await h.client.findPendingReceipt();
+    assert.deepEqual(result.receiptCandidate,{intentId:pending.intentId,hash,kind,status:kind==='burn'?'VERIFIED_ALCHEMY':'CONFIRMED',amountWei:pending.amountWei});
+    assert.deepEqual(result.pending,pending);
+    assert.deepEqual([...h.storage.data],before,'showing a candidate cannot attach its hash or archive evidence');
+    assert.equal(h.sends.length,1);
+    readonlyRequests(h,start);
+    const nonceReads=h.requests.slice(start).filter(r=>r.method==='eth_getTransactionCount');
+    const nonceLimit=kind==='approve'?18:9;
+    assert.ok(nonceReads.length>=2&&nonceReads.length<=nonceLimit,'the configured block window uses logarithmically bounded nonce search');
+    assert.ok(nonceReads.every(({params})=>normalize(params[0])===normalize(PLAYER)&&/^0x[0-9a-f]+$/i.test(params[1])),'every nonce lookup pins an explicit confirmed block');
+    assert.deepEqual(fullBlockReads(h,start).map(r=>r.params),[[receipt.blockNumber,true]]);
+    const recovered=await h.client.recoverPendingHash({hash,accepted:true});
+    assert.equal(recovered.pending,null);
+    assert.equal(h.client.exportEvidence().journal.evidence[0].intent.recovery.holderAttested,true);
+    assert.equal(h.sends.length,1);
+    h.client.dispose();
+  }
+});
+
+test('18911 hashless player search leaves missing, unrelated or ambiguous mined transactions untouched',async()=>{
+  for(const scenario of ['none','multiple','wrongData','wrongTarget','wrongValue','oldReceipt','reorg','legacy','oldWindow']){
+    const {h,hash}=await hashlessAlchemy();
+    const key='kaios18911.pending.v1',item=JSON.parse(h.storage.getItem(key));
+    const anchor=h.blocks.get(Number(BigInt(item.submissionAnchor.number)));
+    if(scenario!=='none')h.mine(hash);
+    if(scenario==='multiple'){
+      const secondHash=ethers.utils.id('second-synthetic-approval');
+      h.transactions.set(secondHash,{...h.transactions.get(hash),hash:secondHash,nonce:'0x1'});
+      h.mine(secondHash);
+    }
+    const transaction=h.transactions.get(hash);
+    if(scenario==='wrongData')transaction.input+='00';
+    if(scenario==='wrongTarget')transaction.to=OTHER;
+    if(scenario==='wrongValue')transaction.value='0x1';
+    if(scenario==='oldReceipt')for(const record of [h.receipts.get(hash),transaction])Object.assign(record,{blockNumber:anchor.number,blockHash:anchor.hash});
+    if(scenario==='reorg')h.blocks.set(Number(BigInt(anchor.number)),{...anchor,hash:ethers.utils.id('reorged-search-anchor')});
+    if(scenario==='legacy'){delete item.submissionAnchor;h.storage.setItem(key,JSON.stringify(item));}
+    if(scenario==='oldWindow'){h.blockNumber=Number(BigInt(anchor.number))+65536;h.advance(1);}
+    const before=[...h.storage.data],start=h.requests.length;
+    const result=await h.client.findPendingReceipt();
+    assert.equal(result.receiptCandidate,null,scenario);
+    assert.equal(result.pending.hash,null,scenario);
+    assert.deepEqual([...h.storage.data],before,scenario);
+    assert.equal(h.sends.length,1,scenario);
+    assert.ok(fullBlockReads(h,start).length<=1,scenario);
+    if(['none','multiple','oldReceipt','reorg','legacy','oldWindow'].includes(scenario))assert.equal(fullBlockReads(h,start).length,0,scenario);
+    h.client.dispose();
+  }
+});
+
+test('18911 unsupported wallet history leaves the original player intent and evidence bytes unchanged',async()=>{
+  const {h,hash}=await hashlessAlchemy();h.mine(hash);
+  h.requestHook=({method})=>{if(method==='eth_getTransactionCount')throw Object.assign(Error('Synthetic unauthorized history query'),{code:4100});};
+  const before=[...h.storage.data],start=h.requests.length;
+  await assert.rejects(h.client.findPendingReceipt());
+  assert.equal(h.client.snapshot().receiptCandidate,null);
+  assert.deepEqual([...h.storage.data],before);
+  assert.equal(fullBlockReads(h,start).length,0);
+  const nonceReads=h.requests.slice(start).filter(r=>r.method==='eth_getTransactionCount');
+  assert.ok(nonceReads.length>=1&&nonceReads.length<=2,'a rejected pinned nonce read never starts another scan');
+  assert.equal(h.sends.length,1);
+  h.client.dispose();
+});
 
 test('18911 a holder recovers a RAM-only hash after reload using canonical anchored evidence without resending',async()=>{
   const {h,hash}=await lostHash(),raw=h.storage.data.get('kaios18911.pending.v1'),start=h.requests.length;

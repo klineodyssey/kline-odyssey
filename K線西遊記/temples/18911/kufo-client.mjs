@@ -6,6 +6,7 @@ const ORGANS = Object.freeze({Furnace:['KAIOSAlchemyFurnace','KAIOS.ORGAN.FURNAC
 const ZERO = '0x'+'0'.repeat(40), HASH = /^0x[0-9a-f]{64}$/i, HEX = /^0x(?:[0-9a-f]{2})*$/i;
 const REVIEW_MS = 120000;
 const VERIFY_MS = 60000, VERIFY_RPC_MS = 15000;
+const RECEIPT_LOOKUP_BLOCK_LIMIT = 65536n;
 const ERC20_ABI = ['function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)','function approve(address,uint256) returns(bool)','event Approval(address indexed owner,address indexed spender,uint256 value)','event Transfer(address indexed from,address indexed to,uint256 value)'];
 const DESTINATION = 'KAIOS.POINT.168888.JINDOUYUN.KUFO.OUTLET';
 function failure(code, message=code) { const error = new Error(message); error.code=code; return error; }
@@ -50,7 +51,7 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   const isVisible=()=>typeof document==='undefined'||document.visibilityState!=='hidden';
   const snapshot=()=>copy({...view,config,review,active,disposed,payloadHash,evidenceKey,blockedReasons:view.blockedReasons,blockers:view.blockedReasons});
   function publish() { const value=snapshot();for(const listener of listeners){try{listener(value);}catch{}}return value; }
-  function invalidate(reason='錢包或頁面已變更，請重新預覽。') { ++generation;review=null;view.status=reason;view.phase=disposed?'DISPOSED':'STALE';publish(); }
+  function invalidate(reason='錢包或頁面已變更，請重新預覽。') { ++generation;review=null;view.receiptCandidate=null;view.status=reason;view.phase=disposed?'DISPOSED':'STALE';publish(); }
   function current(g) { assert(!disposed&&g===generation&&isVisible(),'CONTEXT_CHANGED','錢包、設定或頁面已變更，原預覽作廢。'); }
   async function rpc(method,params=[],g=generation) {
     current(g);let result;
@@ -279,6 +280,47 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
     assert(integer(evidence.block.timestamp)>=BigInt(Math.floor(item.createdAt/1000)),'RECOVERY_BEFORE_SUBMISSION','候選回執早於原交易紀錄；不能取代原交易。');
     return 'LEGACY_HOLDER_ATTESTED_CLOCK_BOUND';
   }
+  async function locatePlayerReceipt(item,g) {
+    const anchor=item.submissionAnchor;
+    if(item.hash||!['approve','burn'].includes(item.kind)||!HASH.test(anchor?.hash))return null;
+    const start=integer(anchor.number);
+    if(start<0n||integer(anchor.timestamp)<=0n)return null;
+    const account=await identity(g);
+    assert(equal(account,item.account),'PENDING_ACCOUNT_MISMATCH','請使用原交易帳戶核對；原紀錄保留。');
+    const [anchorBlock,head]=await Promise.all([
+      rpc('eth_getBlockByNumber',[quantity(start),false],g),
+      rpc('eth_getBlockByNumber',['latest',false],g),
+    ]);
+    if(!anchorBlock||!equal(anchorBlock.hash,anchor.hash)||integer(anchorBlock.number)!==start||
+       integer(anchorBlock.timestamp)!==integer(anchor.timestamp)||!HASH.test(head?.hash))return null;
+    const end=integer(head.number);
+    if(end<=start||end-start>RECEIPT_LOOKUP_BLOCK_LIMIT)return null;
+    const nonceAt=async number=>integer(await rpc('eth_getTransactionCount',[account,quantity(number)],g));
+    const [before,after]=await Promise.all([nonceAt(start),nonceAt(end)]);
+    // An exact call is only a candidate. Do not guess when the account sent more than one transaction.
+    if(before<0n||after!==before+1n)return null;
+    let low=start,high=end;
+    while(high-low>1n){
+      const middle=(low+high)/2n,count=await nonceAt(middle);
+      if(count===before)low=middle;
+      else if(count===after)high=middle;
+      else return null;
+    }
+    const block=await rpc('eth_getBlockByNumber',[quantity(high),true],g);
+    if(!HASH.test(block?.hash)||integer(block.number)!==high||!Array.isArray(block.transactions))return null;
+    const matches=block.transactions.filter(tx=>HASH.test(tx?.hash)&&equal(tx.from,account)&&
+      equal(tx.to,item.tx.to)&&equal(tx.input??tx.data,item.tx.data)&&integer(tx.value)===0n&&integer(tx.nonce)===before);
+    if(matches.length!==1)return null;
+    const hash=matches[0].hash;
+    if(journal().evidence.some(entry=>equal(entry.intent?.hash,hash)))return null;
+    const evidence=await verifyTransaction({...item,hash},g);
+    if(!evidence||!equal(evidence.receipt.blockHash,block.hash)||integer(evidence.transaction.nonce)!==before)return null;
+    const pinnedHead=await rpc('eth_getBlockByNumber',[quantity(end),false],g);
+    if(!pinnedHead||!equal(pinnedHead.hash,head.hash))return null;
+    await recoveryAssurance(item,evidence,g);
+    assert(equal(await identity(g),item.account)&&sameRecord(pending(),item),'PENDING_CHANGED','原帳戶或交易已變更，保留原紀錄。');
+    return {intentId:item.intentId,hash,kind:item.kind,status:evidence.verification.status,amountWei:item.amountWei};
+  }
   async function boundedRead(g,fn) {
     const scope={generation:g,deadline:Date.now()+VERIFY_MS};verifyReads=scope;
     try{return await fn();}finally{if(verifyReads===scope)verifyReads=null;}
@@ -311,9 +353,17 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
       }));
     },
     setConfig(value){assert(!disposed,'DISPOSED');assert(!active,'BUSY');assert(!pending(),'PENDING_INTENT','先核對原交易；不能改啟用設定。');assert(!journal().evidence.some(x=>x.intent?.kind==='deploy'),'CONFIG_LOCKED','已有部署紀錄，啟用時間不可改。');assert(value&&typeof value.activationTime==='string'&&/^[1-9][0-9]*$/.test(value.activationTime)&&BigInt(value.activationTime)<=2n**64n-1n,'INVALID_ACTIVATION');config={activationTime:value.activationTime};invalidate('啟用時間已變更，請重新預覽與確認。');return snapshot();},
-    async recoverPendingHash({hash:providedHash,accepted}={}){return action(g=>boundedRead(g,()=>withLock(async()=>{
-      review=null;assert(accepted===true,'RECOVERY_CONSENT_REQUIRED','請本人確認這是原錢包請求的交易 hash；核對不會重新送出。');assert(HASH.test(providedHash),'INVALID_RECOVERY_HASH');
+    async findPendingReceipt(){return action(g=>boundedRead(g,()=>withLock(async()=>{
+      view.receiptCandidate=null;
+      const item=pendingOwned(restorePendingView());
+      view.receiptCandidate=await locatePlayerReceipt(item,g);
+      view.phase='PENDING';
+      view.status=view.receiptCandidate?'找到符合這次請求的回執，請核對。':'目前尚未找到可確認的原回執。';
+    })));},
+    async recoverPendingHash({hash:providedHash,accepted,expectedIntentId}={}){return action(g=>boundedRead(g,()=>withLock(async()=>{
+      review=null;view.receiptCandidate=null;assert(accepted===true,'RECOVERY_CONSENT_REQUIRED','請本人確認這是原錢包請求的交易 hash；核對不會重新送出。');assert(HASH.test(providedHash),'INVALID_RECOVERY_HASH');
       const pendingRaw=readStorage(KUFO_PENDING_KEY),stored=parseStored(pendingRaw,'PENDING_CORRUPT'),item=pendingOwned(restorePendingView());
+      if(expectedIntentId!==undefined)assert(item.intentId===expectedIntentId,'PENDING_CHANGED','原待確認交易已變更，請重新查核。');
       assert(stored?.intentId===item.intentId&&stored.payloadHash===payloadHash,'PENDING_CHANGED');assert(!item.hash||equal(item.hash,providedHash),'KNOWN_HASH_MISMATCH','原交易已有 hash，不能替換成另一筆。');
       const journalRaw=readStorage(evidenceKey),saved=journal(),existing=saved.evidence.find(x=>equal(x.intent?.hash,providedHash));
       assert(!existing||existing.intent?.intentId===item.intentId,'HASH_ALREADY_ARCHIVED','這個 hash 已屬於另一筆已保存交易；原待確認交易保持不變。');

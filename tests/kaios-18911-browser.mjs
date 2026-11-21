@@ -270,6 +270,8 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         const E=window.ethers.utils,event={method,lane:qaLane,at:Date.now()};
         if(method==='wallet_switchEthereumChain')event.requestedChain=params[0]?.chainId;
         if(method==='eth_getTransactionReceipt')event.receiptHash=params[0];
+        if(method==='eth_getBlockByNumber')event.fullTransactions=params[1]===true;
+        if(method==='eth_getTransactionCount')event.nonceTag=params[1];
         counters.set(method,(counters.get(method)||0)+1);
         if(method==='eth_sendTransaction'){
           const tx=params[0];
@@ -307,16 +309,27 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='eth_accounts')return qaLane!=='public'&&state.authorized?[state.account]:[];
         if(method==='eth_getBlockByNumber'){
           // Numeric historical reads never invent a previously unknown block.
-          if(params[0]!=='latest')return blocks.get(Number(BigInt(params[0])))||null;
-          let number=blocks.size?Math.max(...blocks.keys()):100,latest=blocks.get(number);
-          if(latest&&Number(BigInt(latest.timestamp))<Math.floor(Date.now()/1000))number++;
-          return block(number);
+          let result;
+          if(params[0]!=='latest')result=blocks.get(Number(BigInt(params[0])))||null;
+          else{
+            let number=blocks.size?Math.max(...blocks.keys()):100,latest=blocks.get(number);
+            if(latest&&Number(BigInt(latest.timestamp))<Math.floor(Date.now()/1000))number++;
+            result=block(number);
+          }
+          if(!result||params[1]!==true)return result;
+          return {...result,transactions:Array.from(transactions.values()).filter(tx=>tx.blockHash===result.hash)};
         }
         if(method==='eth_getBlockByHash')return Array.from(blocks.values()).find(item=>item.hash===params[0])||null;
         if(method==='eth_getBalance')return hex(E.parseEther('0.5').toString());
         if(method==='eth_gasPrice')return hex(50_000_000);
         if(method==='eth_estimateGas')return '0x100000';
-        if(method==='eth_getTransactionCount')return hex(state.sendCount);
+        if(method==='eth_getTransactionCount'){
+          const tag=params[1]||'latest';
+          const height=['latest','pending'].includes(tag)?BigInt(Math.max(100,...blocks.keys())):BigInt(tag);
+          const count=Array.from(transactions.values()).filter(tx=>normalized(tx.from)===normalized(params[0])&&
+            (tx.blockNumber!=null?BigInt(tx.blockNumber)<=height:tag==='pending')).length;
+          return hex(count);
+        }
         if(method==='eth_getCode'){
           if(codeOverrides.has(normalized(params[0])))return codeOverrides.get(normalized(params[0]));
           const dep=Object.values(payload.dependencies).find(item=>normalized(item.address)===normalized(params[0]));
@@ -1014,6 +1027,8 @@ async function downloadEvidence(page,row,label){
 async function manuallyRecover(page,hash){
   assert.equal(typeof hash,'string','manual recovery fixture must supply the concrete original transaction hash');
   assert.match(hash,/^0x[0-9a-f]{64}$/i,'manual recovery fixture hash is a complete bytes32 value');
+  const details=page.locator('#hashRecovery');
+  if(!await details.evaluate(el=>el.open))await details.locator('summary').click();
   await touchTarget(page,'#receiptHash');await page.locator('#receiptHash').fill(hash);
   const label='label:has(#acceptRecoveryHash)';await touchTarget(page,label);
   if(!await page.locator('#acceptRecoveryHash').isChecked())await page.locator(label).click();
@@ -1612,16 +1627,17 @@ async function runP1RecoveryScenarios(browser,profile){
     assert.deepEqual({number:anchorAfterReload.number,hash:anchorAfterReload.hash,timestamp:BigInt(anchorAfterReload.timestamp).toString()},pending.submissionAnchor,'QA canonical submission header remains fixed across elapsed clock time and real reload');
     assert.deepEqual(await journalBytes(page),originalJournal,'real reload preserves the existing verified deployment journal');
     assert.equal(row.sendRequests.length,2,'reload does not resend an unknown transaction');
-    assert.ok(await page.locator('#receiptHash').isVisible(),'holder can paste the hash from this original wallet request');
+    assert.ok(await page.locator('#receiptHash').isHidden(),'advanced recovery is collapsed by default');
     assert.equal(await page.locator('#acceptRecoveryHash').isChecked(),false);
     assert.equal(await page.locator('#recoverPendingHash').isEnabled(),false,'recovery requires both the original hash and explicit holder acknowledgement');
     await connect(page);await autoSettled(page);
     const findOriginal=page.locator('#playerPanel #checkAlchemyPending');
-    assert.equal(await findOriginal.textContent(),'找回原交易編號');
+    assert.equal(await findOriginal.textContent(),'查詢煉丹進度');
     const originalReceiptReads=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
-    await touchTarget(page,'#checkAlchemyPending');await findOriginal.click();
-    await page.waitForFunction(()=>document.activeElement?.id==='receiptHash');
-    assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'a hashless shortcut only opens the original recovery field');
+    await touchTarget(page,'#checkAlchemyPending');await findOriginal.click();await autoSettled(page);
+    assert.ok(await page.locator('#hashRecovery > summary').isVisible(),'the original governance request can reach advanced recovery');
+    assert.ok(await page.locator('#receiptHash').isHidden(),'looking up a governance request does not open or focus the hash field');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'an unsupported lookup does not read receipts');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
     assert.equal(row.sendRequests.length,2);
     await manuallyRecover(page,kufo.hash);await phase(page,'BLOCKED');
@@ -1639,7 +1655,7 @@ async function runP1RecoveryScenarios(browser,profile){
     await manuallyRecover(page,furnaceHash);
     await page.waitForFunction(()=>Array.from(document.querySelectorAll('#deploySteps .step-status')).filter(el=>el.textContent==='鏈上已核').length===2);
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'only a fully matched canonical Furnace receipt completes the recovered original intent');
-    assert.doesNotMatch(await page.locator('#autoVerifyStatus').textContent(),/尚無 hash/,'successful recovery clears only the obsolete hashless stop reason');
+    assert.doesNotMatch(await page.locator('#autoVerifyStatus').textContent(),/尚未取得原交易編號/,'successful recovery clears only the obsolete hashless stop reason');
     assert.equal(row.sendRequests.length,2,'read-only recovery must never issue a third transaction');
     const journalAfter=await journalBytes(page),beforeRecord=JSON.parse(Object.values(originalJournal)[0]).evidence[0],afterRecords=JSON.parse(Object.values(journalAfter)[0]).evidence;
     assert.equal(afterRecords.length,2);assert.deepEqual(afterRecords[0],beforeRecord,'recovery appends without rewriting the first verified receipt');
@@ -1772,7 +1788,7 @@ async function runPlayerConfirmationScenarios(browser,profile){
     const checkOriginal=page.locator('#playerPanel #checkAlchemyPending');
     assert.ok(await page.locator('#prepareAlchemy').isHidden(),'pending player card does not leave an unusable burn button');
     assert.ok(await page.locator('#prepareAlchemy').isDisabled(),'pending still blocks a new burn');
-    assert.equal(await checkOriginal.textContent(),'查核原交易回執');
+    assert.equal(await checkOriginal.textContent(),'查詢煉丹進度');
     await touchTarget(page,'#checkAlchemyPending');await capture(page,row,'check-original-in-player-card');
     const beforeUnmined=row.rpc.length;
     await checkOriginal.click();await phase(page,'PENDING');await autoSettled(page);
@@ -1807,6 +1823,52 @@ async function runPlayerConfirmationScenarios(browser,profile){
     assert.ok(await checkOriginal.isHidden());assert.ok(await page.locator('#reviewPanel').isHidden());
     assert.equal(row.sendRequests.length,1,'checking the original receipt does not send an approval or burn again');
     row.savedApprovalCheck={intentRetainedUntilVerified:true,receiptHash:pending.hash,availableAllowance:'10',sendRequests:1};
+  });
+  await runScenario(browser,profile,'player-hashless-receipt-lookup',{account:OTHER,activeAlchemy:true,initialAllowance:'0',sendMode:'broadcast-unknown',clock:true},async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');await autoSettled(page);
+    const idleReads=row.rpc.length;
+    await page.clock.fastForward(90_000);await autoSettled(page);
+    assert.equal(row.rpc.length,idleReads,'a connected idle player does not repeatedly poll the chain');
+    await page.locator('#kaiosAmount').fill('10');
+    await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+    assert.equal(await page.locator('#reviewTitle').textContent(),'授權 KAIOS');
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,'BLOCKED');await autoSettled(page);
+    const originalPending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending=JSON.parse(originalPending);
+    assert.equal(pending.kind,'approve');assert.equal(pending.hash,null);
+    const originalJournal=await journalBytes(page),hash=await page.evaluate(()=>window.__18911WalletQA.lastBroadcastHash());
+    const progress=page.locator('#playerPanel #checkAlchemyPending');
+    assert.equal(await progress.textContent(),'查詢煉丹進度');
+    assert.ok(await page.locator('#receiptHash').isHidden());
+    const beforeUnmined=row.rpc.length;
+    await touchTarget(page,'#checkAlchemyPending');await progress.click();await autoSettled(page);
+    assert.equal(await progress.textContent(),'查詢煉丹進度','an unmined transaction does not become a recovery candidate');
+    assert.ok(await page.locator('#receiptHash').isHidden(),'normal recovery keeps the advanced field collapsed');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending);
+    assert.deepEqual(await journalBytes(page),originalJournal);
+    assert.equal(row.rpc.slice(beforeUnmined).filter(item=>item.fullTransactions).length,0,'unchanged nonce does not read full blocks');
+
+    await page.evaluate(hash=>window.__18911WalletQA.mineApproval(hash,false),hash);
+    const beforeLookup=row.rpc.length;
+    await touchTarget(page,'#checkAlchemyPending');await progress.click();await autoSettled(page);
+    assert.equal(await progress.textContent(),'確認這筆回執');
+    assert.ok(await page.locator('#receiptHash').isHidden(),'a found receipt is confirmed on the player card');
+    const lookupReads=row.rpc.slice(beforeLookup),nonceReads=lookupReads.filter(item=>item.method==='eth_getTransactionCount');
+    assert.ok(nonceReads.length>=2&&nonceReads.length<=16&&nonceReads.every(item=>/^0x[0-9a-f]+$/i.test(item.nonceTag)),'lookup uses bounded canonical nonce tags');
+    assert.equal(lookupReads.filter(item=>item.fullTransactions).length,1,'only the identified block is opened');
+    assert.ok(lookupReads.filter(item=>item.method==='eth_getTransactionReceipt').some(item=>item.receiptHash===hash));
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending,'a candidate does not rewrite the original pending intent');
+    assert.deepEqual(await journalBytes(page),originalJournal,'a candidate is not archived before holder confirmation');
+    assert.equal(row.sendRequests.length,1);
+    await touchTarget(page,'#checkAlchemyPending');await capture(page,row,'confirm-found-receipt-in-player-card');
+    await progress.click();await phase(page,'CONNECTED');await autoSettled(page);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    const records=Object.values(await journalBytes(page)).flatMap(raw=>JSON.parse(raw).evidence);
+    assert.equal(records.length,1);assert.equal(records[0].intent.hash,hash);assert.equal(records[0].verification.status,'CONFIRMED');
+    assert.equal(records[0].intent.recovery.holderAttested,true);assert.equal(records[0].intent.recovery.uniqueRequestProven,false);
+    assert.match(await page.locator('#alchemyReason').textContent(),/10 KAIOS 授權可用/);
+    assert.ok(await page.locator('#prepareAlchemy').isEnabled());
+    assert.equal(row.sendRequests.length,1,'finding and confirming the original receipt never requests another wallet send');
+    row.hashlessReceiptLookup={idlePollingRequests:0,nonceReads:nonceReads.length,fullBlocks:1,recoveredHash:hash,recoverySends:0};
   });
   await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
     const alchemyNotice=page.locator('#alchemyReason');
@@ -1925,26 +1987,39 @@ async function runAutomaticScenarios(browser,profile){
     assert.equal(await page.locator('#walletAccount').textContent(),'尚未連接');
     assert.equal((await page.locator('#ownerAddress').textContent()).toLowerCase(),OWNER.toLowerCase());
     assert.match(await page.locator('#autoVerifyStatus').textContent(),/自動唯讀查核.*上次/);
-    const firstRead=row.rpc.find(item=>item.method==='eth_getBlockByNumber').at;
-    await automaticRead(page,row);
-    const latestRead=row.rpc.filter(item=>item.method==='eth_getBlockByNumber').at(-1).at;
-    assert.ok(latestRead-firstRead>=30_000,'visible automatic reads follow the thirty-second schedule');
+    await autoSettled(page);
+    const idleReads=row.rpc.length;
+    await page.clock.fastForward(90_000);await autoSettled(page);
+    assert.equal(row.rpc.length,idleReads,'an idle visible guest does not repeatedly poll the chain');
     await page.evaluate(()=>window.__18911WalletQA.setVisibility('hidden'));
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'HIDDEN');
     const hiddenReads=row.rpc.length;
     await page.clock.fastForward(90_000);assert.equal(row.rpc.length,hiddenReads,'synthetic hidden page does not poll');
+    const beforeReturnBlocks=row.rpc.filter(item=>item.method==='eth_getBlockByNumber').length;
     await page.evaluate(()=>window.__18911WalletQA.setVisibility('visible'));
     await autoSettled(page);await phase(page,'PUBLIC_VERIFIED');
-    assert.ok(row.rpc.length>hiddenReads,'returning visible verifies immediately without a wallet prompt');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_getBlockByNumber').length,beforeReturnBlocks+1,'returning visible runs one status check without a wallet prompt');
+    const returnedReads=row.rpc.length;
+    await page.clock.fastForward(90_000);await autoSettled(page);
+    assert.equal(row.rpc.length,returnedReads,'returning visible does not restart the recurring guest timer');
     assert.equal(row.rpc.filter(item=>['eth_requestAccounts','eth_estimateGas','eth_sendTransaction'].includes(item.method)).length,0);
-    row.automatic={publicNoWallet:true,visibility:'SYNTHETIC_DOCUMENT_VISIBILITY_EVENT',physicalBackground:'NOT_TESTED',intervalMilliseconds:30_000};
+    row.automatic={publicNoWallet:true,visibility:'SYNTHETIC_DOCUMENT_VISIBILITY_EVENT',physicalBackground:'NOT_TESTED',guestIdleRecurringReads:0,foregroundReturnChecks:1};
     await capture(page,row,'visible-resumed');
   });
   await runScenario(browser,profile,'auto-two-failure-stop',{guest:true,clock:true},async(page,row)=>{
+    async function readOnVisibilityReturn(){
+      const before=row.rpc.filter(item=>item.method==='eth_getBlockByNumber').length;
+      await page.evaluate(()=>{
+        window.__18911WalletQA.setVisibility('hidden');
+        window.__18911WalletQA.setVisibility('visible');
+      });
+      await page.waitForFunction(count=>window.__18911RpcQA.count('eth_getBlockByNumber')>count,before);
+      await autoSettled(page);
+    }
     await page.evaluate(()=>window.__18911WalletQA.failReads(2));
-    await automaticRead(page,row);
+    await readOnVisibilityReturn();
     assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','first ordinary transport failure leaves one remaining attempt');
-    await automaticRead(page,row);
+    await readOnVisibilityReturn();
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
     assert.match(await page.locator('#autoVerifyStatus').textContent(),/兩次/);
     const stoppedReads=row.rpc.length;
@@ -1954,9 +2029,9 @@ async function runAutomaticScenarios(browser,profile){
     await autoSettled(page);assert.equal(row.rpc.length,stoppedReads,'visibility return does not reset the failed-attempt counter');
     await capture(page,row,'technical-stopped');
     await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await phase(page,'PUBLIC_VERIFIED');
-    await automaticRead(page,row);assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','manual query explicitly reopens automatic reads');
+    await readOnVisibilityReturn();assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','manual query explicitly reopens visibility-return checks');
     await page.evaluate(()=>window.__18911WalletQA.overrideDependencyCode('kgen','0x00'));
-    await automaticRead(page,row);assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','a dependency identity mismatch stops on its first occurrence');
+    await readOnVisibilityReturn();assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','a dependency identity mismatch stops on its first occurrence');
     const policyReads=row.rpc.length;await page.clock.fastForward(90_000);assert.equal(row.rpc.length,policyReads);
     assert.equal(row.sendRequests.length,0);assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);
     row.automatic={technicalAttemptsBeforeStop:2,policyAttemptsBeforeStop:1,visibilityDoesNotReset:true,manualQueryResets:true};
@@ -2067,7 +2142,7 @@ async function runAutomaticScenarios(browser,profile){
     const reads=row.rpc.length;
     await page.clock.fastForward(31_000);await autoSettled(page);
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
-    assert.match(await page.locator('#autoVerifyStatus').textContent(),/尚無 hash/);
+    assert.match(await page.locator('#autoVerifyStatus').textContent(),/尚未取得原交易編號/);
     assert.equal(row.rpc.length,reads,'hashless unknown submission stops before any automatic RPC');
     await page.clock.fastForward(90_000);assert.equal(row.rpc.length,reads);assert.equal(row.sendRequests.length,1);
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),saved);
@@ -2092,10 +2167,10 @@ try{
   report.checks.push('Constructor preview shows actual Registry/KAIOS/version/timestamp/UTC+8/month IDs. Synthetic persisted pagehide/pageshow handler smoke only; actual BFCache and physical phone restoration remain NOT_TESTED.');
   report.checks.push('Keyboard skip link is reachable when focused and clipped when unfocused; each state includes an actual viewport shot and full-page shot, with bounding-rectangle evidence.');
   report.checks.push('Unresolved synthetic refresh survives persisted lifecycle reconstruction; old late resolve/reject cannot override a new in-flight operation or alter an existing financial pending intent.');
-  report.checks.push('Official Playwright Clock drives visible-only thirty-second reads; synthetic visibility, review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal stop. No automatic financial request.');
+  report.checks.push('Official Playwright Clock checks visible owner and known-pending timers. Guests and idle ordinary players only check on entry, visibility return or request. Review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal still stop. No automatic financial request.');
   report.checks.push('Two added scenarios per viewport discover synthetic active routes with the real payload and an existing exact100 KAIOS allowance. A100 KAIOS→100000 KUFO review with an explicit0.6 BNB cap shows confirmation preflight without a test scroll, requests only one burn, keeps the genuine wallet-response wait beyond the read deadline, then preserves its unmined hash without claiming minted KUFO. Review expiry and the original15-second preflight read timeout remain zero-send, clear consent, preserve the holder cap and pending/journal, and cannot overwrite a newer review when the provider replies late. Existing rejection and hashless unknown-intent scenarios also require visible confirmation feedback. These are synthetic-provider and viewport checks, not physical-wallet, mainnet-burn or mint acceptance.');
   report.checks.push('A synthetic zero-allowance player starts alchemy once. Only a verified original approval advances to a burn review for the same amount and lifeId, with fresh consent and a fresh fee cap. Pending and reverted approvals never advance. Only a separate explicit confirmation opens the synthetic burn request.');
-  report.checks.push('The original pending approval has an action in the player card after reload. It reads only the original hash, preserves unmined intent bytes, and restores the verified allowance and burn control after mining. The same card directs disconnected holders to the existing wallet control and hashless holders to the original recovery field without asking a wallet to send.');
+  report.checks.push('The original pending approval has an action in the player card after reload. It preserves unmined intent bytes and restores the verified allowance after mining. Hashless lookup reads one full identified block, preserves pending until holder confirmation, and never requests another wallet send. Advanced recovery stays collapsed and idle guests and ordinary players do not run recurring reads.');
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
   report.checks.push('Both viewports check the BSC WalletConnect directory configuration and a fresh pairing when an SDK session already exists. A repeated topic cannot authorize an account, foreign sessions are not disconnected, and financial pending and history remain untouched. Wallet catalog and pairing are simulated.');
