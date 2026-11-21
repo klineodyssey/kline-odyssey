@@ -50,19 +50,21 @@ async function sourceFingerprint(relative){
   return createHash('sha256').update(bytes).digest('hex');
 }
 
-async function geometry(page,selector){
-  return page.locator(selector).evaluate(el=>{
+async function geometry(page,selector,{center=false}={}){
+  return page.locator(selector).evaluate((el,center)=>{
+    if(center)el.scrollIntoView({block:'center',inline:'center',behavior:'instant'});
     const rect=el.getBoundingClientRect(),style=getComputedStyle(el);
     const hit=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2);
     return {width:rect.width,height:rect.height,inView:rect.left>=0&&rect.right<=innerWidth&&rect.top>=0&&rect.bottom<=innerHeight,
-      hit:!!hit&&(hit===el||el.contains(hit)),visible:style.visibility!=='hidden'&&style.display!=='none'&&Number(style.opacity)!==0};
-  });
+      hit:!!hit&&(hit===el||el.contains(hit)),visible:style.visibility!=='hidden'&&style.display!=='none'&&Number(style.opacity)!==0,
+      hitElement:hit?.id||hit?.tagName||null,viewportTop:rect.top,viewportBottom:rect.bottom};
+  },center);
 }
 
 async function touchTarget(page,selector){
-  await page.locator(selector).evaluate(el=>el.scrollIntoView({block:'center',inline:'center',behavior:'instant'}));
-  const rect=await geometry(page,selector);
-  assert.ok(rect.visible&&rect.inView&&rect.hit,selector+' is visible and center-hit reachable');
+  // Measure the user-scrolled position before a different frame can scroll to a status message.
+  const rect=await geometry(page,selector,{center:true});
+  assert.ok(rect.visible&&rect.inView&&rect.hit,selector+' is visible and center-hit reachable '+JSON.stringify(rect));
   assert.ok(rect.width>=44&&rect.height>=44,selector+' has a 44px touch target');
   targetRecords.get(page)?.push({selector,...rect});
   return rect;
