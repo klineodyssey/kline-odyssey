@@ -42,26 +42,6 @@ function createSettlementTiming(now=()=>performance.now(),origin=now()){
   return{begin,finish,measure,snapshot:()=>({clock:'NODE_MONOTONIC_RELATIVE_MS',elapsedMs:now()-origin,events:events.map(event=>({...event}))})};
 }
 
-// Keep the application's normal quote poll. For fixture transitions whose
-// assertions concern the accepted price rather than wall-clock latency, ask
-// that same callback to consume one new routed response immediately.
-function captureSettlementQuoteRefresh(){
-  const nativeSetInterval=globalThis.setInterval;
-  globalThis.setInterval=function register(callback,delay,...args){
-    const interval=Reflect.apply(nativeSetInterval,globalThis,[callback,delay,...args]);
-    if(typeof callback==='function'&&callback.name==='quotes'&&delay===5000){
-      globalThis.setInterval=nativeSetInterval;
-      globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__=()=>{
-        if(document.querySelector('#sheet.open [data-kgen-pool-reference]')){
-          throw new Error('Fixture quote refresh cannot request a reserve reference');
-        }
-        return callback(...args);
-      };
-    }
-    return interval;
-  };
-}
-
 async function waitForAcceptedFixtureQuote(page,price,previous){
   const observation=await page.waitForFunction(({price,previous})=>{
     const book=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot();
@@ -80,15 +60,7 @@ async function driveSettlementFixtureQuote(page,phaseTiming,label,price,setPrice
     assert.ok(previous?.source&&Number.isSafeInteger(previous.at)&&Number.isSafeInteger(previous.sequence),
       'Fixture transition requires an existing provider observation');
     await setPrice(price);
-    const [book]=await Promise.all([
-      waitForAcceptedFixtureQuote(page,price,previous),
-      page.evaluate(()=>{
-        const refresh=globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__;
-        if(typeof refresh!=='function')throw new Error('Expected the original game quote interval');
-        return refresh();
-      }),
-    ]);
-    return book;
+    return waitForAcceptedFixtureQuote(page,price,previous);
   });
 }
 
@@ -136,7 +108,6 @@ try {
     let eth=4000;
     const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true,serviceWorkers:'block'});
     page.setDefaultTimeout(20000);
-    await page.addInitScript(captureSettlementQuoteRefresh);
     const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,async value=>{eth=value;await backend.poll()});
     const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE_ERROR',String(e))});
     // Ordinary simulation QA must remain independent of a public rehearsal.
@@ -446,7 +417,6 @@ async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin
   const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],controlChecks:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
   let eth=4000,trial,orderPosts=0;
   const marketPrice=market=>({BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600})[market];
-  await page.addInitScript(captureSettlementQuoteRefresh);
   const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,async value=>{eth=value;await trial.poll()});
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   page.on('pageerror',error=>report.pageErrors.push(String(error)));
@@ -617,7 +587,7 @@ async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin
     assert.deepEqual(state.book.orders,beforeAutoSnapshot.book.orders);assert.deepEqual(state.book.receipts,beforeAutoSnapshot.book.receipts);report.checks.blockedAutopilot=state;
     await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
     await phaseTiming.measure('navigation.stopped-opposite-quote',async()=>{
-      eth=3988;await trial.poll();await page.evaluate(()=>globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__());
+      eth=3988;await trial.poll();
       await page.waitForFunction(()=>globalThis.__K11520_FREE_ORACLE__?.ETHUSDT?.price===3988);
     });
     await page.waitForTimeout(2200);state=await snapshot();assert.equal(orderPosts,1,'autopilot emitted no new order request');
@@ -771,12 +741,19 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     page.on('websocket',socket=>result.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
     const snap=()=>page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot());
     const driveMarket=async(market,price)=>{
-      const previous=await page.evaluate(market=>__K11520_FREE_ORACLE__[market],market);
+      const previous=await page.evaluate(market=>{
+        const book=__K11520_SIMULATION_EXCHANGE__.snapshot();
+        const active=book.orders.some(order=>order.market===market&&order.status==='PENDING')||
+          book.positions.some(position=>position.market===market&&position.status==='OPEN');
+        return {marketSequence:__K11520_FREE_ORACLE__[market].sequence,active,bookSequence:book.observations[market]?.sequence};
+      },market);
       prices[market]=price;await trial.poll();
-      await page.evaluate(()=>globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__());
       await page.waitForFunction(({market,price,previous,source})=>{
         const observation=globalThis.__K11520_FREE_ORACLE__?.[market];
-        return observation?.price===price&&observation.source===source&&observation.sequence>previous.sequence;
+        if(observation?.price!==price||observation.source!==source||observation.sequence<=previous.marketSequence)return false;
+        if(!previous.active)return true;
+        const settled=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations[market];
+        return settled?.price===price&&settled.source===source&&settled.sequence>previous.bookSequence;
       },{market,price,previous,source});
     };
     const state=()=>page.evaluate(()=>{
@@ -869,7 +846,6 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       await verifyRawSource('BEFORE_BROWSER');
       stage='boot';
       if(baseline)await page.clock.install({time:new Date()});
-      else await page.addInitScript(captureSettlementQuoteRefresh);
       await page.goto(base+'/'+encodeURI(route),{waitUntil:'domcontentloaded'});
       await waitForSimulationBoot();
       if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();
@@ -1444,6 +1420,27 @@ function attachM1PageSourceProof(page,{base,sourceSha,assets,createHash}){
   finish.snapshot=snapshot;return finish;
 }
 
+async function verifyM1AddressLabels(page,account){
+  const tokenSelector='#k11520Bsc56UnsignedReview dd[data-bsc56-review-field="TOKEN"]';
+  const walletSelector='#k11520Bsc56UnsignedReview dd[data-bsc56-review-field="WALLET"]';
+  assert.equal(await page.locator(tokenSelector).textContent(),'KGEN · '+KGEN_TOKEN_ADDRESS+' · 18 decimals');
+  const wallet=(await page.locator(walletSelector).textContent()).toLowerCase();
+  assert.equal(wallet,account?account.toLowerCase():'未連線 / unknown');
+  const playerAddresses=await page.evaluate(tokenSelector=>{
+    const token=document.querySelector(tokenSelector);
+    return [...document.querySelectorAll('body *')]
+      .filter(el=>el!==token&&el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden')
+      .flatMap(el=>el.textContent.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]);
+  },tokenSelector);
+  if(!account){
+    assert.deepEqual(playerAddresses,[],'disconnect must clear all visible player address labels');
+    return;
+  }
+  const full=account.toLowerCase(),short=full.slice(0,6)+'…'+full.slice(-4);
+  assert.ok(playerAddresses.length>0);
+  for(const label of playerAddresses)assert.ok([full,short].includes(label.toLowerCase()),'every player address must match the active account: '+label);
+}
+
 // M1 uses real public chain97 reads through a synthetic injected EIP-1193
 // transport. No Wallet/signer is constructed; this is not Human MetaMask QA.
 async function m1ReadOnlyBrowserQA(){
@@ -1538,18 +1535,7 @@ async function m1ReadOnlyBrowserQA(){
         await page.waitForFunction(a=>document.querySelector('#k11520RealTradePreflight')?.dataset.walletAddress?.toLowerCase()===a.toLowerCase(),expected);
         assert.equal(await preflight.getAttribute('data-wallet-identity-scope'),'ACTIVE_SESSION');
         assert.equal((await preflight.getAttribute('data-wallet-address')).toLowerCase(),expected.toLowerCase());
-        const review=page.locator('#k11520Bsc56UnsignedReview');
-        const tokenField='dd[data-bsc56-review-field="TOKEN"]';
-        assert.equal(await review.locator(tokenField).textContent(),'KGEN · '+KGEN_TOKEN_ADDRESS+' · 18 decimals');
-        assert.equal((await review.locator('dd[data-bsc56-review-field="WALLET"]').textContent()).toLowerCase(),expected.toLowerCase());
-        const playerAddresses=await page.evaluate(tokenField=>{
-          const token=document.querySelector('#k11520Bsc56UnsignedReview '+tokenField);
-          return [...document.querySelectorAll('body *')]
-            .filter(el=>el!==token&&el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden')
-            .flatMap(el=>el.textContent.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]);
-        },tokenField);
-        const expectedShort=expected.slice(0,6)+'…'+expected.slice(-4);assert.ok(playerAddresses.length>0);
-        for(const label of playerAddresses)assert.ok([expected.toLowerCase(),expectedShort.toLowerCase()].includes(label.toLowerCase()),'every player address must match the active account: '+label);
+        await verifyM1AddressLabels(page,expected);
         assert.equal(await page.locator('#wBnb').textContent(),s.wallet.testBnbBalance);assert.equal(await page.locator('#wKgen').textContent(),String(s.wallet.testTokenBalance));
         assert.equal(await page.locator('#testnetFinancialControls').isVisible(),false);assert.equal(await page.locator('#executionMode').isVisible(),false);assert.equal(s.writeBlocked,true);
         // Observe two real canonical-owner timer ticks; no sleep or forced UI success.
@@ -1573,7 +1559,7 @@ async function m1ReadOnlyBrowserQA(){
         state.connected=false;await page.evaluate(()=>__m1WalletEvents.emit('disconnect',{}));await page.waitForFunction(()=>!__K11520_EXECUTION__.snapshot().wallet);await page.waitForFunction(()=>document.querySelector('#wBnb').textContent==='UNVERIFIED');assert.equal((await page.locator('#walletMsg').textContent()).includes('WRONG NETWORK'),false,'unknown network is not a confirmed wrong network');
         assert.equal(await page.locator('#k11520RealTradePreflight').getAttribute('data-wallet-identity-scope'),'DISCONNECTED');
         assert.equal(await page.locator('#k11520RealTradePreflight').getAttribute('data-wallet-address'),'');
-        const disconnectedAddresses=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden').flatMap(el=>el.textContent.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]));assert.deepEqual(disconnectedAddresses,[],'disconnect must clear all visible current-address labels');await shot('disconnected');stage='RECONNECT';
+        await verifyM1AddressLabels(page,null);await shot('disconnected');stage='RECONNECT';
         state.connected=true;await page.locator('#walletConnect').click();evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reconnected');stage='RETURN_LEGACY';
         assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);
         phase='LEGACY';await page.locator('#walletM1ReadOnly').click();assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);await page.locator('#executionMode').click();await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.exitOnly&&s.wallet&&s.account?.toLowerCase()===a.toLowerCase()},state.account,{timeout:150000});
