@@ -13,6 +13,11 @@ await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stri
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 async function boot(){await page.goto(`${BASE}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1900);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});await page.waitForTimeout(900);assert.deepEqual(errors,[],'page errors: '+errors.join('\n'))}
 await boot();
+await page.locator('#hpRecovery').tap();
+await page.locator('#sheet.open #journeyRecover').waitFor({state:'visible',timeout:4000});
+assert.equal(await page.locator('#journeyRecover').isDisabled(),true,'full health must not debit local KGEN');
+await page.screenshot({path:`${OUT}/11520-mobile-vitality-full.png`,fullPage:true});
+await page.locator('#sheetClose').click();
 // Market quote refresh replaces card nodes. Read geometry in one page task,
 // rather than retaining a CDP node across the refresh and getting a null box.
 const box=async sel=>page.locator(sel).evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);if(!el.isConnected||s.display==='none'||s.visibility==='hidden'||r.width<=0||r.height<=0)throw new Error('Visible geometry missing: '+el.outerHTML.slice(0,160));return{x:r.x,y:r.y,width:r.width,height:r.height}});

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs';
-import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
+import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_MAX_KAIOS_HP,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
 import {C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL,createKgenLedger,positionRisk} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
 import {createJourneyTutorial,JOURNEY_ENCOUNTER_PROFILES,GAME_LOOT_TABLE,GA600_GAME_TRAINING,selectJourneyLoot,selectJourneyEncounter,drainJourneyEvents,serializeWorld} from '../runtime/world-runtime.mjs';
@@ -1201,4 +1201,50 @@ test('order execution rejects forged C, lots, side, margin and duplicate positio
  const state={kgen:1000,pos:{KX:null},history:[]};assert.equal(executeOrder(state,base).ok,true);
  const once=structuredClone(state);assert.equal(executeOrder(state,base).reason,'POSITION_EXISTS');assert.deepEqual(state,once);
  assert.equal(previewOrder({axis:'KX',fire:-1,leverage:1,price:100,kgen:1000}).reason,'BAD_LOTS');
+});
+
+test('KAIOS recovery debits free simulation margin and saves both values atomically',()=>{
+  const data=new Map();
+  let failWrites=false,staleAfterReads=0;
+  const storage={getItem:k=>{
+    const raw=data.get(k);
+    if(staleAfterReads>0&&--staleAfterReads===0){
+      const newer=JSON.parse(raw);
+      newer.revision++;
+      return JSON.stringify(newer);
+    }
+    return raw;
+  },setItem:(k,v)=>{
+    if(failWrites)throw new Error('Storage quota');
+    data.set(k,v);
+  }};
+  const ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage});
+  store.activate(null);
+  assert.equal(store.battleHealth(),PLAYER_MAX_KAIOS_HP);
+  assert.equal(store.recoverBattleHealth(10).reason,'FULL_HEALTH');
+  store.changeBattleHealth(-1100);
+  Object.assign(ledger,{free:2200,lockedMargin:2,reservedOrders:3,total:2205,realizedPnl:10});
+  store.save();
+  assert.equal(store.recoverBattleHealth(1001).reason,'INVALID_RECOVERY_LIMIT');
+  assert.deepEqual(store.recoverBattleHealth(1000),{ok:true,kgenSpent:1000,kaiosRecovered:1000,battleHealthKaios:99900});
+  assert.deepEqual(store.recoverBattleHealth(1000),{ok:true,kgenSpent:100,kaiosRecovered:100,battleHealthKaios:100000});
+  assert.deepEqual([ledger.free,ledger.total,ledger.lockedMargin,ledger.reservedOrders,ledger.realizedPnl],[1100,1105,2,3,10]);
+  store.changeBattleHealth(-2000);
+  staleAfterReads=2;
+  assert.throws(()=>store.recoverBattleHealth(1000),/PLAYER_SESSION_CHANGED_RELOAD_REQUIRED/);
+  assert.deepEqual([ledger.free,ledger.total,store.battleHealth()],[1100,1105,98000]);
+  failWrites=true;
+  assert.equal(store.recoverBattleHealth(1000).reason,'LOCAL_SAVE_UNAVAILABLE');
+  assert.deepEqual([ledger.free,ledger.total,store.battleHealth()],[1100,1105,98000]);
+  failWrites=false;
+  const restoredLedger=createKgenLedger(),restored=createSimulationPlayerStore({ledger:restoredLedger,storage});
+  restored.activate(null);
+  assert.deepEqual([restored.battleHealth(),restoredLedger.free],[98000,1100]);
+  restored.activate('0x'+'9'.repeat(40));
+  assert.deepEqual([restored.battleHealth(),restoredLedger.free],[100000,100]);
+  restored.activate(null);
+  assert.deepEqual([restored.battleHealth(),restoredLedger.free],[98000,1100]);
+  restoredLedger.free=0;
+  assert.equal(restored.recoverBattleHealth(1000).reason,'INSUFFICIENT_FREE_KGEN');
+  assert.equal(restoredLedger.lockedMargin,2);
 });

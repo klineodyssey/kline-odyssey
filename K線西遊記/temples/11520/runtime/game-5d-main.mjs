@@ -21,7 +21,7 @@ import {C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL,createKgenLedger,positionRisk,sn
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
 import {createExecutionAdapter,createSimulationAutopilot} from './real-trading-order-intent.mjs';
 import {getWalletSession11520} from './wallet-game-bridge.mjs';
-import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimulationPlayerStore,createPlayerScopedStorage} from './evm-wallet-runtime.mjs';
+import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_MAX_KAIOS_HP,PLAYER_KAIOS_RECOVERY_PER_SECOND} from './evm-wallet-runtime.mjs';
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK,formatUniverseAddress,gameUnitsToK,advanceLocalMotionClock,integrateLocalMotion} from './spatial-coordinate-runtime.mjs';
 import {readCanonicalDriveState} from './combat-drive-adapter.mjs';
 import {rawVectorFromControl} from './combat-drive-live-runtime.mjs';
@@ -45,14 +45,26 @@ const MARKETS=Object.freeze(Object.values(AXIS_MARKETS));
 const PLANE_TRADE_AXIS=Object.freeze({XZ:'KY',XY:'KZ',YZ:'KX'});
 const ORGANS=[['world','🌍','主城世界'],['trade','⚔','K場交易'],['positions','📌','持倉'],['orders','🧾','委託'],['history','🕘','歷史'],['assets','💰','資產'],['records','📊','統計'],['market','📈','市場'],['character','🧍','角色'],['worldmap','🗺','導航／自駕地圖'],['atm','🛸','ATM'],['bag','🎒','背包'],['settings','⚙','設定'],['help','✨','客服/說明']];
 const RAIL_ORGANS=ORGANS.filter(([id])=>id!=='bag');
-const PLAYER_KAIOS_HEALTH=Object.freeze({fullHp:100,kaiosPerHp:GAME_KAIOS_PER_HP,regenKaiosPerSecond:1000});
+const PLAYER_KAIOS_HEALTH=Object.freeze({fullHp:PLAYER_MAX_KAIOS_HP/GAME_KAIOS_PER_HP,kaiosPerHp:GAME_KAIOS_PER_HP});
 const S={axis:'KX',axes:{KX:{market:'BTCUSDT',side:'多',lots:1,c:0,pos:null},KY:{market:'ETHUSDT',side:'多',lots:1,c:0,pos:null},KZ:{market:'BNBUSDT',side:'多',lots:1,c:0,pos:null}},quotes:{},kaios:1000,hp:PLAYER_KAIOS_HEALTH.fullHp,xyz:{x:0,y:0,z:0},intentXYZ:{x:0,y:0,z:0},heading:0,camYaw:0,joy:{sx:0,sy:0,x:0,z:0},history:[],walletKgen:null,mapZoom:1.3,navTarget:null,navActive:false};
 function playerActivityRatio(){
   return Math.max(0,Math.min(1,S.hp/PLAYER_KAIOS_HEALTH.fullHp));
 }
+let recoveryRemaining=0,recoveryElapsed=0;
+function stopVitalityRecovery(){recoveryRemaining=0;recoveryElapsed=0}
 function recoverPlayerVitality(visibleSeconds){
-  const {fullHp,kaiosPerHp,regenKaiosPerSecond}=PLAYER_KAIOS_HEALTH;
-  S.hp=Math.min(fullHp,S.hp+visibleSeconds*regenKaiosPerSecond/kaiosPerHp);
+  if(!recoveryRemaining)return;
+  if(isTestnet()||playerLifeSwitching||document.visibilityState==='hidden'){stopVitalityRecovery();return}
+  recoveryElapsed+=visibleSeconds;
+  if(recoveryElapsed<1)return;
+  recoveryElapsed-=1;
+  let result;
+  try{result=playerStore.recoverBattleHealth(Math.min(recoveryRemaining,PLAYER_KAIOS_RECOVERY_PER_SECOND))}
+  catch{stopVitalityRecovery();toast('另一頁已更新玩家紀錄，請重新載入');return}
+  if(!result.ok){stopVitalityRecovery();toast(result.reason==='LOCAL_SAVE_UNAVAILABLE'?'本機存檔不可用，回血已停止':'回血已停止：血量已滿或可用 KGEN 不足');return}
+  S.hp=result.battleHealthKaios/GAME_KAIOS_PER_HP;
+  recoveryRemaining-=result.kgenSpent;
+  if(!recoveryRemaining||result.battleHealthKaios===PLAYER_MAX_KAIOS_HP){stopVitalityRecovery();toast('回血完成 · 活動力隨血量恢復')}
 }
 let selectedTradingAxis=null,navigationAutopilot=null,localMotionClock=null,lastLocalMotion=null;
 let navAutoBusy=false,navConsoleLastPaint=0,navAutoMessage='',navContinueAfterArrival=false,navAutoWalletKey=null,navConsoleLastTargetKey=null;
@@ -73,7 +85,7 @@ let playerLifeSwitching=false,lastSessionSave=0,lastSessionSnapshot='',lastLifeS
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
 world.trainingMemory=createTrainingMemory(scopedStorage);
 let legacyGuestCandidate=null;try{legacyGuestCandidate=scopedStorage.getItem('k11520.local-product.v1:guest')}catch{}
-const playerStore=createSimulationPlayerStore({ledger,storage:playerLifeStorage,playerId});playerStore.activate(null);
+const playerStore=createSimulationPlayerStore({ledger,storage:playerLifeStorage,playerId});playerStore.activate(null);S.hp=playerStore.battleHealth()/GAME_KAIOS_PER_HP;
 world.journeyEnabled=true;createKSpaceEncounter(world,undefined,S.xyz);
 const journey=createJourneyTutorial({storage:scopedStorage,returning:!!restoredSession});let journeyOrigin={...S.xyz};
 if(playerLife.snapshot().createdThisBoot&&playerLife.snapshot().persistent&&(restoredSession||legacyGuestCandidate)){try{const guest=playerStore.snapshot();playerLife.migrateLegacy({lastXYZ:{...S.xyz},journeyProgress:{tutorialStage:journey.snapshot().stage},legacyProgress:{xp:guest.xp||0,engineXp:guest.engineXp||0}})}catch{}}
@@ -91,7 +103,7 @@ navigationAutopilot=createSimulationAutopilot({adapter:simulationExecution,getCo
 function stopNavigationAutopilot(message='已停止自駕'){
   navigationAutopilot?.stop();navAutoMessage=message+'；既有委託與持倉仍保留，可至委託／持倉處理。';
 }
-function suspendLocalNavigation(){stopNavigationAutopilot('離開畫面，已停止自駕');stopWorldNavigation3D(null,{clearTarget:true});localMotionClock=null}
+function suspendLocalNavigation(){stopVitalityRecovery();stopNavigationAutopilot('離開畫面，已停止自駕');stopWorldNavigation3D(null,{clearTarget:true});localMotionClock=null}
 addEventListener('pagehide',suspendLocalNavigation);
 addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')suspendLocalNavigation()});
 function productEvent(event,details){try{playerStore.record(event,details)}catch{toast('另一頁已更新玩家紀錄，請重新載入')}const p=playerStore.snapshot();S.kaios=p.kaios;return p}
@@ -156,11 +168,29 @@ installKgenReferenceContext();
 
 let progressCache=playerLife.gameplayProfile(),progressKey='',musicHoldUntil=0,lastCombatAt=0,explorationMeters=0,lastExplorationPosition={...S.xyz};
 function showJourneyRecovery(){
+
   kgenPoolReference.pause();
-  if($('#journeyRecover')){$('#sheet').classList.add('open');return}
-  $('#sheetTitle').textContent='休整後再出發';$('#sheetBody').innerHTML='<div class="card"><h3>旅人暫時倒下</h3><p>休整會退回怪物外圍。遊戲血量每秒恢復 1,000 KAIOS，持倉與資產照原帳本管理。</p><button id="journeyRecover" class="btn" style="min-height:44px">休整並退回安全距離</button></div>';
-  $('#sheet').classList.add('open');$('#journeyRecover').onclick=()=>{const target=combatSnapshot()?.monsterLocal;if(target){S.xyz={x:target.x,y:Math.max(0,target.y),z:target.z-7};S.intentXYZ={...S.xyz}}lastExplorationPosition={...S.xyz};explorationMeters=0;cancelNavigation('休整');$('#sheet').classList.remove('open');$('#sheetBody').innerHTML='';toast('正在回血 · 活動力隨血量恢復')};
+  const health=playerStore.battleHealth(),free=Math.max(0,Math.floor(ledger.free));
+  const amount=isTestnet()?0:Math.min(PLAYER_MAX_KAIOS_HP-health,free);
+  const recovering=recoveryRemaining>0,owner=playerStore.snapshot().owner;
+  const explanation=isTestnet()?'請切回模擬遊戲使用本機 KGEN。':amount===0?(health===PLAYER_MAX_KAIOS_HP?'血量已滿。':'可用模擬 KGEN 不足。'):`可回 ${fmt(amount,0)} KAIOS，最多扣 ${fmt(amount,0)} 可用模擬 KGEN。`;
+  $('#sheetTitle').textContent='生命與回血';
+  $('#sheetBody').innerHTML=`<div class="card"><p>${fmt(health,0)} / 100,000 KAIOS · 活動力 ${fmt(playerActivityRatio()*100,2)}%</p><p>${explanation}</p><p>1 KGEN 回復 1 KAIOS，每秒最多回復 1,000 KAIOS。已鎖定的保證金不能使用。</p><button id="journeyRecover" class="btn" style="min-height:44px" ${!recovering&&!amount?'disabled':''}>${recovering?'停止回血':'確認回血'}</button></div>`;
+  $('#sheet').classList.add('open');
+  $('#journeyRecover').onclick=()=>{
+    if(playerLifeSwitching||playerStore.snapshot().owner!==owner||isTestnet()){
+      $('#sheet').classList.remove('open');return;
+    }
+    if(recovering)stopVitalityRecovery();
+    else{
+      recoveryRemaining=amount;
+      recoveryElapsed=0;
+      toast('回血已開始');
+    }
+    $('#sheet').classList.remove('open');
+  };
 }
+$('#hpRecovery').onclick=showJourneyRecovery;
 function holdMusic(state,milliseconds=2400){getKaiosAudio().setMusicState(state);musicHoldUntil=Date.now()+milliseconds}
 function syncWorldFeedback(){const p=playerLife.activePlayer(),key=p.playerId+':'+p.events.length;world.playerLevel=p.level;world.engineLevel=p.engineLevel;
   if(key!==progressKey){progressKey=key;progressCache=playerLife.gameplayProfile();for(const [id,unlock,label] of [['skill','GOLDEN_RAIN','天罡金陣'],['tradeSword','PHANTOM_AXE','盤古幻斧']]){const b=$('#'+id);if(b){b.dataset.gameplayUnlocked=String(progressCache.unlocks[unlock]);b.setAttribute('aria-label',label+(progressCache.unlocks[unlock]?'':` · 玩家 Lv.${unlock==='GOLDEN_RAIN'?2:3} 解鎖`));b.title=b.getAttribute('aria-label')}}}
@@ -292,7 +322,7 @@ function selectTradingMarket(axisId){
 }
 globalThis.__K11520_TRADE_AXIS_API__=Object.freeze({version:'1.1.0',authority:'EXPLICIT_MARKET_OR_PLANE_DEFAULT',current:()=>syncTradeAxisFromPlane(),select:selectTradingMarket,market:()=>axis().market,snapshot:()=>({axis:syncTradeAxisFromPlane(),market:axis().market,mode:controlState()?.mode||'XZ',selection:selectedTradingAxis?'MARKET':'PLANE'})})
 function controlVector(){const c=controlState(),v=c?.vector;if(v)return{x:Number(v.x)||0,y:Number(v.y)||0,z:Number(v.z)||0};return{x:S.joy.x,y:0,z:S.joy.z}}
-function hud(){syncTradeAxisFromPlane();const s=walletExecutionView().wallet||{},c=controlState(),rail=c?.railAxis||'Y',ri=rail.toLowerCase();$('#topFree').textContent=s.free==null?'--':fmt(s.free,3);$('#topFree').previousElementSibling.textContent=isTestnet()?'TESTNET Brain Available':'KGEN Local Free';$('#topKaios').textContent=fmt(S.kaios,1);$('#topKaios').previousElementSibling.textContent='KAIOS LOCAL';$('#xyz').textContent=`LOCAL X ${formatGameDistanceK(S.intentXYZ.x)} · Y ${formatGameDistanceK(S.intentXYZ.y)} · Z ${formatGameDistanceK(S.intentXYZ.z)}`;$('#yRead').textContent=formatGameDistanceK(S.intentXYZ[ri],{compact:true});$('#hp').textContent=Math.max(0,Math.round(S.hp));$('#hpbar').style.width=Math.max(0,S.hp)+'%';$('#monsterList').innerHTML=world.monsters.filter(m=>m.state!=='DEAD'&&(m.name||m.baseName)).map(m=>`<div>${m.name||m.baseName} · ${Math.round(m.hp)}/${m.maxHp}</div>`).join('')||'<div class="muted">等待 Market Life</div>';const xyzNav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;if(xyzNav?.target){const t=xyzNav.target,d=Math.hypot((t.x||0)-S.xyz.x,(t.y||0)-S.xyz.y,(t.z||0)-S.xyz.z);$('#navState').textContent=`${xyzNav.active?'XYZ 前往中':'XYZ 目標'} ${xyzNav.source||xyzNav.mode||''} · ${formatGameDistanceK(d)} · X ${formatGameDistanceK(t.x)} Y ${formatGameDistanceK(t.y)} Z ${formatGameDistanceK(t.z)}`}else if(S.navTarget){const w=waypointSummary(S.xyz,S.navTarget);$('#navState').textContent=`${S.navActive?'前往中':'目標'} ${w.direction} · ${formatGameDistanceK(w.distance)} · X ${formatGameDistanceK(w.targetX)} Z ${formatGameDistanceK(w.targetZ)}`}else $('#navState').textContent='雙指縮放 · 點圖選目標';renderNavigationConsole();globalThis.__K11520_WORLD_COORDS__={intent:{...S.intentXYZ},physical:{...S.xyz},physicalK:localPositionToK(S.xyz),distanceUnit:'METERS',mode:c?.mode||'XZ',unboundedIntent:true}}
+function hud(){syncTradeAxisFromPlane();const s=walletExecutionView().wallet||{},c=controlState(),rail=c?.railAxis||'Y',ri=rail.toLowerCase();$('#topFree').textContent=s.free==null?'--':fmt(s.free,3);$('#topFree').previousElementSibling.textContent=isTestnet()?'TESTNET Brain Available':'KGEN Local Free';$('#topKaios').textContent=fmt(S.kaios,1);$('#topKaios').previousElementSibling.textContent='KAIOS LOCAL';$('#xyz').textContent=`LOCAL X ${formatGameDistanceK(S.intentXYZ.x)} · Y ${formatGameDistanceK(S.intentXYZ.y)} · Z ${formatGameDistanceK(S.intentXYZ.z)}`;$('#yRead').textContent=formatGameDistanceK(S.intentXYZ[ri],{compact:true});$('#hp').textContent=String(S.hp);$('#hpbar').style.width=Math.max(0,S.hp)+'%';$('#monsterList').innerHTML=world.monsters.filter(m=>m.state!=='DEAD'&&(m.name||m.baseName)).map(m=>`<div>${m.name||m.baseName} · ${Math.round(m.hp)}/${m.maxHp}</div>`).join('')||'<div class="muted">等待 Market Life</div>';const xyzNav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;if(xyzNav?.target){const t=xyzNav.target,d=Math.hypot((t.x||0)-S.xyz.x,(t.y||0)-S.xyz.y,(t.z||0)-S.xyz.z);$('#navState').textContent=`${xyzNav.active?'XYZ 前往中':'XYZ 目標'} ${xyzNav.source||xyzNav.mode||''} · ${formatGameDistanceK(d)} · X ${formatGameDistanceK(t.x)} Y ${formatGameDistanceK(t.y)} Z ${formatGameDistanceK(t.z)}`}else if(S.navTarget){const w=waypointSummary(S.xyz,S.navTarget);$('#navState').textContent=`${S.navActive?'前往中':'目標'} ${w.direction} · ${formatGameDistanceK(w.distance)} · X ${formatGameDistanceK(w.targetX)} Z ${formatGameDistanceK(w.targetZ)}`}else $('#navState').textContent='雙指縮放 · 點圖選目標';renderNavigationConsole();globalThis.__K11520_WORLD_COORDS__={intent:{...S.intentXYZ},physical:{...S.xyz},physicalK:localPositionToK(S.xyz),distanceUnit:'METERS',mode:c?.mode||'XZ',unboundedIntent:true}}
 function setThumb(el,t){el.style.top=(100-Math.max(0,Math.min(1,t))*100)+'%'}
 function syncControls(){const a=axis();$('#lotsRead').textContent=`${a.lots}口`;setThumb($('#lotsThumb'),Math.min(1,a.lots/100));globalThis.__K11520_SIGNED_C_IMMERSIVE__?.api?.paintSignedC?.(S.axis);if(!controlState())setThumb($('#yThumb'),.5)}
 function bindVertical(sel,fn){
@@ -367,6 +397,10 @@ const mini=$('#minimap');bindMap(mini);let fullMapCanvas=null;function drawAllMa
 
 function combatSelection(){syncTradeAxisFromPlane();return {plane:controlState()?.mode||'XZ',c:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[S.axis]??0}}
 function combatSnapshot(){return kCombatSnapshot(world,S.xyz,combatSelection())}
+function changePlayerBattleHealth(hpDelta){
+  try{S.hp=playerStore.changeBattleHealth(hpDelta*GAME_KAIOS_PER_HP)/GAME_KAIOS_PER_HP}
+  catch{stopVitalityRecovery();toast('另一頁已更新玩家紀錄，請重新載入')}
+}
 function combatVitalityContext(){
   const local=execution.mode==='SIMULATION'&&!execution.readOnly&&!playerLifeSwitching&&document.visibilityState!=='hidden';
   return {
@@ -384,7 +418,7 @@ function performCombat(skill){
   const unlock={slash:'SLASH',goldenRain:'GOLDEN_RAIN',phantomAxe:'PHANTOM_AXE'}[skill];
   if(!progressCache.unlocks[unlock]){toast(`${skill==='goldenRain'?'天罡金陣 · Lv.2':'盤古幻斧 · Lv.3'} 解鎖；先用普通攻擊取經升級`);return {hit:false,reason:'GAMEPLAY_LEVEL_LOCKED'}}
   const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now(),powerLevel:playerLife.activePlayer().level,vitality:combatVitalityContext()}),audioFx=globalThis.__K11520_AUDIO_FX__;
-  if(r.playerHealHp>0)S.hp=Math.min(PLAYER_KAIOS_HEALTH.fullHp,S.hp+r.playerHealHp);
+  if(r.playerHealHp>0)changePlayerBattleHealth(r.playerHealHp);
   toast(attackFeedback(r),true);
   if(r.hit)journey.event('HIT');if(r.loot)journey.event('LOOT');
   if(r.reason!=='COOLDOWN'){audioFx?.play?.(skill==='slash'?'SLASH':'ATTACK');lastCombatAt=Date.now()}
@@ -402,7 +436,7 @@ function performCombat(skill){
 }
 $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performCombat('goldenRain');
 $('#tradeSword').onclick=()=>performCombat('phantomAxe');
-$('#dodge').onclick=()=>{cancelNavigation('閃避');if(S.hp<=0){showJourneyRecovery();return}for(const turn of [0,Math.PI/2,-Math.PI/2,Math.PI]){const heading=S.heading+turn,next={x:S.xyz.x+Math.sin(heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(heading)*1.4},mid={x:(S.xyz.x+next.x)/2,y:S.xyz.y,z:(S.xyz.z+next.z)/2};if(!resolvePlayerMove(S.xyz,mid).blocked&&!resolvePlayerMove(S.xyz,next).blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast(turn?'側向閃避 · 避開障礙':'閃避');return}}toast('閃避受阻 · 拖曳空白處或顯示操作移開')};
+$('#dodge').onclick=()=>{cancelNavigation('閃避');if(S.hp<=0){showJourneyRecovery();return}const distance=1.4*playerActivityRatio();for(const turn of [0,Math.PI/2,-Math.PI/2,Math.PI]){const heading=S.heading+turn,next={x:S.xyz.x+Math.sin(heading)*distance,y:S.xyz.y,z:S.xyz.z+Math.cos(heading)*distance},mid={x:(S.xyz.x+next.x)/2,y:S.xyz.y,z:(S.xyz.z+next.z)/2};if(!resolvePlayerMove(S.xyz,mid).blocked&&!resolvePlayerMove(S.xyz,next).blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast(turn?'側向閃避 · 避開障礙':'閃避');return}}toast('閃避受阻 · 拖曳空白處或顯示操作移開')};
 $('#flat').onclick=closePos;$('#orderFire').onclick=openOrder;
 const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 取經目標：點擊展開座標與六相部位';targetHud.hidden=true;document.body.appendChild(targetHud);
 const monsterHud=document.querySelector('.monsterHud');if(monsterHud){monsterHud.style.cursor='pointer';monsterHud.title='點擊查看 K-space 六相戰鬥詳情';monsterHud.addEventListener('click',e=>{if(e.target.closest('details'))return;showCombatTarget()})}
@@ -906,6 +940,7 @@ walletSession.subscribe(value=>{
   const nextAutoWallet=String(value.account||'GUEST');if(navAutoWalletKey!==null&&nextAutoWallet!==navAutoWalletKey){stopNavigationAutopilot('切換錢包');stopWorldNavigation3D(null,{clearTarget:true});localMotionClock=null}navAutoWalletKey=nextAutoWallet;
   if(!execution.readOnly&&!readOnlyViewRequested()&&(value.account||['DISCONNECTED','NO_WALLET'].includes(value.status))){
     if(playerStore.activate(value.account)){
+      stopVitalityRecovery();S.hp=playerStore.battleHealth()/GAME_KAIOS_PER_HP;
       pending=null;$('#confirm').classList.remove('open');S.history=[];S.kaios=playerStore.snapshot().kaios;
       syncSimulationPositions();renderAxes();refreshSimulationSheet();if(!isTestnet())void quotes();
     }
@@ -938,7 +973,7 @@ function syncPlayerHome(){const p=playerLife.activePlayer(),h=playerLife.loadHom
   if(h.houseLevel>0){const wall=new THREE.Mesh(new THREE.BoxGeometry(2,1.6,1.7),new THREE.MeshStandardMaterial({color:h.houseLevel>1?0xd7c79c:0x9b6d38}));wall.position.y=.8;const roof=new THREE.Mesh(new THREE.ConeGeometry(1.65,.9,4),new THREE.MeshStandardMaterial({color:0xb79b46}));roof.rotation.y=Math.PI/4;roof.position.y=2.05;const door=new THREE.Mesh(new THREE.PlaneGeometry(.6,1.05),new THREE.MeshStandardMaterial({color:0x392614,side:THREE.DoubleSide}));door.position.set(0,.525,-.856);playerHome.add(wall,roof,door)}
   playerHome.traverse(n=>{n.userData.playerHome=true});
 }
-const playerLifeUI=installPlayerLifeUI({store:playerLife,getXYZ:()=>({...S.xyz}),saveSession:()=>persistPlayerSession(true),onChange:()=>{if(!playerLifeSwitching){syncPlayerHome();syncWorldFeedback()}},beforePlayerChange:()=>{stopNavigationAutopilot('切換玩家');stopWorldNavigation3D(null,{clearTarget:true});localMotionClock=null;playerLifeSwitching=true;explorationMeters=0},startEncounter:startJourneyEncounter,claimDaily:claimDailyJourney,toast,wallet:walletSession,navigate:xyz=>{if(!xyz)return;cancelNavigation('前往起家地');playerHomeFraming=true;S.navTarget=null;setWorldTarget3D({x:xyz.x,y:xyz.y,z:xyz.z-2.2},{mode:'WORLD',source:'PLAYER_HOME'});startWorldNavigation3D()}});
+const playerLifeUI=installPlayerLifeUI({store:playerLife,getXYZ:()=>({...S.xyz}),saveSession:()=>persistPlayerSession(true),onChange:()=>{if(!playerLifeSwitching){syncPlayerHome();syncWorldFeedback()}},beforePlayerChange:()=>{stopVitalityRecovery();stopNavigationAutopilot('切換玩家');stopWorldNavigation3D(null,{clearTarget:true});localMotionClock=null;playerLifeSwitching=true;explorationMeters=0},startEncounter:startJourneyEncounter,claimDaily:claimDailyJourney,toast,wallet:walletSession,navigate:xyz=>{if(!xyz)return;cancelNavigation('前往起家地');playerHomeFraming=true;S.navTarget=null;setWorldTarget3D({x:xyz.x,y:xyz.y,z:xyz.z-2.2},{mode:'WORLD',source:'PLAYER_HOME'});startWorldNavigation3D()}});
 syncPlayerHome();
 const lifeVisuals=new Map(),lifeVisualPending=new Set();async function ensureLifeVisual(m){if(m.state==='DEAD'||!(m.name||m.baseName))return null;const key=`${m.lifeId||m.id}|${m.species}`;const current=lifeVisuals.get(m.id);if(current?.key===key)return current.root;if(current){scene.remove(current.root);lifeVisuals.delete(m.id)}if(lifeVisualPending.has(m.id))return null;lifeVisualPending.add(m.id);try{const v=await createLifeVisual(THREE,{species:m.species,name:m.baseName||m.name,scale:.75});v.root.userData.worldMonsterId=m.id;v.root.userData.lifeId=m.lifeId||null;v.root.traverse?.(n=>{n.userData.worldMonsterId=m.id;n.userData.lifeId=m.lifeId||null});scene.add(v.root);lifeVisuals.set(m.id,{key,root:v.root,mode:v.mode});return v.root}finally{lifeVisualPending.delete(m.id)}}
 function syncLifeVisuals(){restoreOcclusionMaterials();renderCombatTarget();for(const m of [...world.monsters,...(world.ambientLife||[])]){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m);if(m.simulationCombat)syncPhaseBody(rec.root,m)}}
@@ -1166,7 +1201,7 @@ function frame(now){
   const tr=tickWorld(world,S.xyz,Date.now(),combatVitalityContext());
   for(const e of tr.events){
     if(e.type!=='PLAYER_HIT')continue;
-    S.hp=Math.max(0,S.hp-e.damage);
+    changePlayerBattleHealth(-e.damage);
     if(e.siphon)toast('被吸血 −'+fmt(e.siphon.kaios,2)+' KAIOS',true);
   }
   syncLifeVisuals();applyWorldCamera();combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);
