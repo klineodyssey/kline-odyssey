@@ -180,6 +180,162 @@ export function watchWallet({provider,onAccountsChanged,onChainChanged,onDisconn
   return ()=>{provider.removeListener?.('accountsChanged',a);provider.removeListener?.('chainChanged',c);provider.removeListener?.('disconnect',d)};
 }
 
+const HASH32 = /^0x[0-9a-f]{64}$/i;
+const RPC_QUANTITY = /^0x(?:0|[1-9a-f][0-9a-f]*)$/i;
+const WITHDRAW_SELECTOR = '0x0cea7534'; // withdrawMargin(uint256)
+const WITHDRAW_EVENT = '0xa633914e4e8c156017d6b25c76553167f0e357050e1c7bb31e23cf108ea001f7';
+const TRANSFER_EVENT = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+const IMPLEMENTATION_SLOT = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
+const EMPTY_CODE_HASH = '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+
+function matchesHex(a, b) {
+  return typeof a === 'string' && typeof b === 'string' && a.toLowerCase() === b.toLowerCase();
+}
+
+function withdrawalBinding(manifest) {
+  if (manifest?.documentType !== 'K11520_MAINNET_DEPLOYMENT_MANIFEST' ||
+      manifest.status !== 'DEPLOYED_CONFIG_VERIFIED' || manifest.CHAIN_ID !== KGEN_CHAIN_ID ||
+      !matchesHex(manifest.KGEN_TOKEN, KGEN_TOKEN_ADDRESS)) return null;
+  const roles = [
+    [KGEN_TOKEN_ADDRESS, manifest.codeHashes?.kgenToken],
+    [manifest.BRAIN_PROXY, manifest.codeHashes?.brainProxy],
+    [manifest.BRAIN_IMPLEMENTATION, manifest.codeHashes?.brainImplementation],
+  ];
+  if (!roles.every(([address, hash]) => EVM_ADDRESS.test(address) && !/^0x0{40}$/i.test(address) &&
+      HASH32.test(hash) && !/^0x0{64}$/i.test(hash) && !matchesHex(hash, EMPTY_CODE_HASH))) return null;
+  if (new Set(roles.map(([address]) => address.toLowerCase())).size !== roles.length) return null;
+  return {brain: roles[1][0], implementation: roles[2][0], roles};
+}
+
+function includedInBlock(block, receipt) {
+  if (!block || !matchesHex(block.hash, receipt.blockHash) || block.number !== receipt.blockNumber ||
+      !Array.isArray(block.transactions) || !RPC_QUANTITY.test(receipt.transactionIndex)) return false;
+  const index = Number(BigInt(receipt.transactionIndex));
+  return Number.isSafeInteger(index) && matchesHex(block.transactions[index], receipt.transactionHash);
+}
+
+function withdrawalCredit(receipt, brain, account, amount) {
+  const walletWord = '0x' + padAddress(account), brainWord = '0x' + padAddress(brain);
+  let received = null, debited = 0n, priorIndex = -1n, withdrawal = false;
+  if (!Array.isArray(receipt.logs)) return null;
+  for (const log of receipt.logs) {
+    const topics = log?.topics;
+    const isToken = matchesHex(log?.address, KGEN_TOKEN_ADDRESS) && matchesHex(topics?.[0], TRANSFER_EVENT);
+    const isBrain = matchesHex(log?.address, brain) && matchesHex(topics?.[0], WITHDRAW_EVENT);
+    if (!isToken && !isBrain) continue;
+    if (!Array.isArray(topics) || log.removed === true || !matchesHex(log.transactionHash, receipt.transactionHash) ||
+        !matchesHex(log.blockHash, receipt.blockHash) || log.blockNumber !== receipt.blockNumber ||
+        log.transactionIndex !== receipt.transactionIndex || !RPC_QUANTITY.test(log.logIndex) ||
+        BigInt(log.logIndex) <= priorIndex || !HASH32.test(log.data) || withdrawal) return null;
+    priorIndex = BigInt(log.logIndex);
+    const value = BigInt(log.data);
+    if (isBrain) {
+      if (topics.length !== 2 || !matchesHex(topics[1], walletWord) || value !== amount) return null;
+      withdrawal = true;
+    } else {
+      if (topics.length !== 3 || !matchesHex(topics[1], brainWord) ||
+          !/^0x0{24}[0-9a-f]{40}$/i.test(topics[2]) || matchesHex(topics[2], brainWord)) return null;
+      debited += value;
+      if (matchesHex(topics[2], walletWord)) {
+        if (received !== null || value === 0n) return null;
+        received = value;
+      }
+    }
+  }
+  return withdrawal && debited === amount ? received : null;
+}
+
+// The caller supplies the site's reviewed manifest and the currently selected account.
+// This function only reads the original hash. It never applies a credit to a local ledger.
+export async function readK11520WithdrawalReceipt({provider, manifest, account, txHash, amountWei} = {}) {
+  const result = (status, details = {}) => ({ok: status === 'CREDIT_CONFIRMED', status, txHash, ...details});
+  const binding = withdrawalBinding(manifest);
+  if (!binding) return result('BINDING_UNAVAILABLE');
+  if (!HASH32.test(txHash) || /^0x0{64}$/i.test(txHash) || !EVM_ADDRESS.test(account) ||
+      /^0x0{40}$/i.test(account) || binding.roles.some(([address]) => matchesHex(address, account)) ||
+      (amountWei !== undefined && (typeof amountWei !== 'string' || !/^[1-9]\d{0,77}$/.test(amountWei) ||
+       BigInt(amountWei) >= 1n << 256n))) return result('INVALID_INPUT');
+  if (typeof provider?.request !== 'function') return result('UNKNOWN', {reason: 'PROVIDER_UNAVAILABLE'});
+  let finished = false;
+  const request = (method, params = []) => {
+    if (finished) throw new Error('READ_EXPIRED');
+    return provider.request({method, params});
+  };
+  async function walletStatus() {
+    const [chain, accounts] = await Promise.all([request('eth_chainId'), request('eth_accounts')]);
+    if (parseChainId(chain) !== KGEN_CHAIN_ID) return 'WRONG_CHAIN';
+    if (!Array.isArray(accounts) || !matchesHex(accounts[0], account)) return 'ACCOUNT_MISMATCH';
+    return null;
+  }
+  async function read() {
+    const context = await walletStatus();
+    if (context) return result(context);
+    const [tx, receipt] = await Promise.all([
+      request('eth_getTransactionByHash', [txHash]), request('eth_getTransactionReceipt', [txHash]),
+    ]);
+    if (!tx) return result('UNKNOWN', {reason: 'TRANSACTION_NOT_FOUND'});
+    // Some nodes return only the EIP-155 signature v for a legacy transaction.
+    let txChain = RPC_QUANTITY.test(tx.chainId) ? BigInt(tx.chainId) : null;
+    if (tx.chainId == null && (tx.type == null || tx.type === '0x0') && RPC_QUANTITY.test(tx.v) && BigInt(tx.v) >= 35n) {
+      txChain = (BigInt(tx.v) - 35n) / 2n;
+    }
+    if (txChain === null) return result('UNKNOWN', {reason: 'TRANSACTION_CHAIN_UNCONFIRMED'});
+    if (!matchesHex(tx.hash, txHash) || !matchesHex(tx.from, account) || !matchesHex(tx.to, binding.brain) ||
+        txChain !== BigInt(KGEN_CHAIN_ID) || tx.value !== '0x0' || typeof tx.input !== 'string' ||
+        !tx.input.toLowerCase().startsWith(WITHDRAW_SELECTOR) || !HASH32.test('0x' + tx.input.slice(10))) {
+      return result('EVIDENCE_MISMATCH', {reason: 'TRANSACTION_TERMS'});
+    }
+    const amount = BigInt('0x' + tx.input.slice(10));
+    if (amount === 0n || (amountWei !== undefined && amount !== BigInt(amountWei))) {
+      return result('EVIDENCE_MISMATCH', {reason: 'WITHDRAWAL_AMOUNT'});
+    }
+    if (!receipt) {
+      const pending = tx.blockHash === null && tx.blockNumber === null && tx.transactionIndex === null;
+      return result(pending ? 'PENDING' : 'UNKNOWN', {reason: 'RECEIPT_NOT_AVAILABLE'});
+    }
+    if (!matchesHex(receipt.transactionHash, txHash) || !matchesHex(receipt.from, account) ||
+        !matchesHex(receipt.to, binding.brain) || !HASH32.test(receipt.blockHash) || /^0x0{64}$/i.test(receipt.blockHash) ||
+        !matchesHex(receipt.blockHash, tx.blockHash) || !RPC_QUANTITY.test(receipt.blockNumber) ||
+        receipt.blockNumber !== tx.blockNumber || receipt.transactionIndex !== tx.transactionIndex) {
+      return result('EVIDENCE_MISMATCH', {reason: 'RECEIPT_IDENTITY'});
+    }
+    const block = receipt.blockNumber;
+    const canonical = async () => includedInBlock(await request('eth_getBlockByNumber', [block, false]), receipt);
+    if (!await canonical()) return result('UNKNOWN', {reason: 'CANONICAL_BLOCK_UNCONFIRMED'});
+    if (receipt.status === '0x0') return result(await walletStatus() ?? 'REVERTED');
+    if (receipt.status !== '0x1') return result('UNKNOWN', {reason: 'RECEIPT_STATUS_UNAVAILABLE'});
+    const [implementation, token, ...accounts] = await Promise.all([
+      request('eth_getStorageAt', [binding.brain, IMPLEMENTATION_SLOT, block]),
+      request('eth_call', [{to: binding.brain, data: '0x28991fa7'}, block]), // kgen()
+      ...binding.roles.map(([address]) => request('eth_getProof', [address, [], block])),
+    ]);
+    if (!matchesHex(implementation, '0x' + padAddress(binding.implementation)) ||
+        !matchesHex(token, '0x' + padAddress(KGEN_TOKEN_ADDRESS)) || !binding.roles.every(([address, hash], i) =>
+          matchesHex(accounts[i]?.address, address) && matchesHex(accounts[i]?.codeHash, hash))) {
+      return result('EVIDENCE_MISMATCH', {reason: 'DEPLOYMENT_CODE_OR_ROUTING'});
+    }
+    const received = withdrawalCredit(receipt, binding.brain, account, amount);
+    if (received === null) return result('EVIDENCE_MISMATCH', {reason: 'WITHDRAWAL_OR_TRANSFERS'});
+    if (!await canonical()) return result('UNKNOWN', {reason: 'CANONICAL_BLOCK_UNCONFIRMED'});
+    const finalContext = await walletStatus();
+    if (finalContext) return result(finalContext);
+    return result('CREDIT_CONFIRMED', {account, brainAddress: binding.brain, tokenAddress: KGEN_TOKEN_ADDRESS,
+      blockNumber: block, blockHash: receipt.blockHash, confirmationScope: 'CANONICAL_AT_READ', requestedWei: amount.toString(),
+      receivedWei: received.toString(), feeWei: (amount - received).toString()});
+  }
+  let timer;
+  try {
+    return await Promise.race([read(), new Promise(resolve => {
+      timer = setTimeout(() => resolve(result('UNKNOWN', {reason: 'RPC_TIMEOUT'})), 12000);
+    })]);
+  } catch {
+    return result('UNKNOWN', {reason: 'RPC_READ_UNAVAILABLE'});
+  } finally {
+    finished = true;
+    clearTimeout(timer);
+  }
+}
+
 /** One read-only EIP-1193 connection organ. No chain switch, signing or send methods. */
 export function createWalletSession({ethereum,storage,timeoutMs=12000}={}){
   let provider=null,stopWatch=()=>{},generation=0,disposed=false,active=false;
@@ -238,10 +394,22 @@ export function createWalletSession({ethereum,storage,timeoutMs=12000}={}){
     return true;
   }
   function detach(error=null){++generation;active=false;stopWatch();stopWatch=()=>{};return publish({...clear,account:null,chainId:null,network:null,status:'DISCONNECTED',error})}
+  async function readWithdrawalReceipt({manifest, txHash, amountWei} = {}) {
+    const ticket = generation, account = state.account, selected = provider;
+    const unavailable = reason => ({ok: false, status: 'UNKNOWN', reason, txHash});
+    if (!current(ticket) || !account || !selected) return unavailable('WALLET_NOT_CONNECTED');
+    if (state.chainId !== KGEN_CHAIN_ID) return {ok: false, status: 'WRONG_CHAIN', txHash};
+    const scoped = {request(args) {
+      if (!current(ticket) || provider !== selected) throw new Error('WALLET_SESSION_CHANGED');
+      return selected.request(args);
+    }};
+    const result = await readK11520WithdrawalReceipt({manifest, account, txHash, amountWei, provider: scoped});
+    return current(ticket) && selected === provider ? result : unavailable('WALLET_SESSION_CHANGED');
+  }
   return Object.freeze({
     connect:()=>attach()?sync({prompt:true}):Promise.resolve(snapshot()),
     refresh:()=>attach()?sync():Promise.resolve(snapshot()),
-    disconnect:()=>detach(),snapshot,
+    disconnect:()=>detach(),snapshot,readWithdrawalReceipt,
     subscribe(listener){if(typeof listener!=='function'||disposed)return ()=>{};listeners.add(listener);try{listener(snapshot())}catch{}return ()=>listeners.delete(listener)},
     dispose(){detach();disposed=true;listeners.clear()}
   });

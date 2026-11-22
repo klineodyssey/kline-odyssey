@@ -1004,3 +1004,48 @@ test('K11520 LAN preview pairs the device and shares only the authenticated simu
   await f.restart();
   assert.deepEqual((await f.book(token)).receipts, receipts);
 });
+
+test('BSC56 wallet panel reads one withdrawal without replay and clears stale account results', async () => {
+  const {bindWithdrawalLookup} = await import('../K線西遊記/temples/11520/runtime/wallet-game-bridge.mjs');
+  const input = new EventTarget(), button = new EventTarget(), status = {};
+  input.value = '0x' + 'ab'.repeat(32);
+  let walletListener, pendingRead, signalStarted;
+  let started = new Promise(resolve => { signalStarted = resolve; });
+  const evidence = {status:'CREDIT_CONFIRMED', requestedWei:'1000000000000000000', receivedWei:'997000000000000000', feeWei:'3000000000000000', blockNumber:'0x12'};
+  const checked = [];
+  const session = {
+    subscribe(fn) { walletListener = fn; fn({status:'CONNECTED',chainId:56}); return () => {}; },
+    async readWithdrawalReceipt({manifest, txHash}) {
+      assert.equal(manifest.fixture, true);
+      checked.push(txHash);
+      signalStarted();
+      return new Promise(resolve => { pendingRead = resolve; });
+    }
+  };
+  const dispose = bindWithdrawalLookup({session, input, button, status, fetchManifest:async (url, options) => {
+    assert.ok(url.pathname.endsWith('/docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json'));
+    assert.equal(options.redirect, 'error');
+    return {ok:true,json:async () => ({fixture:true})};
+  }});
+  button.dispatchEvent(new Event('click'));
+  button.dispatchEvent(new Event('click'));
+  await started;
+  walletListener({status:'DISCONNECTED',chainId:null});
+  pendingRead(evidence);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.match(status.textContent, /請連接/);
+  assert.equal(button.disabled, true);
+  walletListener({status:'CONNECTED',chainId:56});
+  started = new Promise(resolve => { signalStarted = resolve; });
+  button.dispatchEvent(new Event('click'));
+  await started;
+  pendingRead(evidence);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.deepEqual(checked, [input.value,input.value]);
+  assert.match(status.textContent, /錢包實收 0\.997 KGEN。提款 1 KGEN，費用 0\.003 KGEN。區塊 18/);
+  input.value = '';
+  input.dispatchEvent(new Event('input'));
+  assert.equal(status.textContent, '');
+  assert.equal(button.disabled, true);
+  dispose();
+});
