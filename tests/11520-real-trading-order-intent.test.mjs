@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createPreviewSimulationExecutionAdapter,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
+import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createPreviewSimulationExecutionAdapter,createK11520PreviewRequestId,k11520ServerPreviewType,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 import {createKgenLedger,C_PNL_MODEL} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 import {PUBLIC_MARKET_QUOTE_SOURCE,SIMULATION_PRICE_SOURCE} from '../K線西遊記/temples/11520/runtime/public-market-quotes.mjs';
@@ -772,6 +772,44 @@ test('verified public simulation can replace an idle synthetic observation witho
  assert.equal(snapshot.observations.ETHUSDT.source,SIMULATION_PRICE_SOURCE);
  assert.deepEqual(snapshot.orders,[]);
  assert.deepEqual(snapshot.receipts,[]);
+});
+
+test('Android HTTP preview requires the server marker on a private host and uses same-origin admission',async()=>{
+ const origin='http://192.168.1.108:11520';
+ const location=new URL(origin+'/?preview=server&world=12682');
+ const shell={querySelector:selector=>selector==='meta[name="k11520-private-preview"]'?{content:'lan'}:null};
+ assert.equal(k11520ServerPreviewType(location,shell),'lan');
+ assert.equal(k11520ServerPreviewType(location,{querySelector:()=>null}),null);
+ assert.equal(k11520ServerPreviewType(new URL(origin+'/?world=12682'),shell),null);
+ assert.equal(k11520ServerPreviewType(new URL('http://172.32.0.42:11520/?preview=server'),shell),null);
+ assert.equal(k11520ServerPreviewType(new URL('http://127.0.0.1:11520/?preview=server')),'loopback');
+ const webCrypto={getRandomValues:bytes=>bytes.fill(0xc7)};
+ assert.equal(createK11520PreviewRequestId(webCrypto),'c7'.repeat(16));
+ assert.throws(()=>createK11520PreviewRequestId({}),/SECURE_RANDOM_UNAVAILABLE/);
+ assert.throws(()=>createPreviewSimulationExecutionAdapter({origin}),/LOCAL_PREVIEW_ORIGIN_REQUIRED/);
+ assert.throws(()=>createPreviewSimulationExecutionAdapter({origin:'http://203.0.113.1:11520',lanPreview:true}),/LOCAL_PREVIEW_ORIGIN_REQUIRED/);
+
+ const saved=new Map(),requests=[];
+ const adapter=createPreviewSimulationExecutionAdapter({
+   origin,lanPreview:true,
+   storage:{getItem:key=>saved.get(key)??null,setItem:(key,value)=>saved.set(key,value)},
+   fetchImpl:async(url,options)=>{
+     assert.equal(new URL(url).origin,origin);
+     assert.equal(options.credentials,'same-origin');
+     assert.equal(options.mode,'same-origin');
+     const path=new URL(url).pathname;
+     requests.push(path);
+     const replies={
+       '/api/v1/markets':{observations:{},statuses:{}},
+       '/api/v1/login':{ok:true,token:'a'.repeat(48),player:{id:'wifi-demo'}},
+       '/api/v1/orders':{ok:true,mode:'SIMULATION_WALLET',wallet:{free:10},orders:[],positions:[],receipts:[],observations:{}},
+     };
+     assert.ok(Object.hasOwn(replies,path));
+     return {status:200,ok:true,json:async()=>replies[path]};
+   },
+ });
+ assert.equal((await adapter.refresh()).ok,true);
+ assert.deepEqual(requests.sort(),['/api/v1/login','/api/v1/markets','/api/v1/orders']);
 });
 
 test('local preview restores one server identity and replays the exact reviewed order after a lost response',async()=>{

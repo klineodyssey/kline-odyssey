@@ -947,14 +947,14 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Prior floating-input body: 105221614e4f33cecf4ffb9302cbfb6319bdab0552e290989564555767bcc34c.
   // Fixed entry floor: prior published main body bf5c2cbaacedeba8015c9447753111437afe9f11e4758e2e20ab418a36db0539.
    // Prior published fixed-entry-floor body: e5ca793767852c87ec296bed46aa789e4b66ab04e8929a5e0cd217a48cca005a.
-   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'9ee1db9748e79f779ded945fe02ba83620ffe1af76441d2aaff923b6a9955e36'},
+   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'fbd9dddecdb1c7f2cf439d727dfa1c7361ee820f9d7616de9316badcd34e8881'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'f3eee0ef282b388496d9b5c485304899aa7f4d608d14f5b8f854273ee409b1a1'},
   // Prior published order adapter body bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078.
-  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'8723fdeecbbb04442798aa2bd908adea89fe2efc7c3527b42f83c7341df415e3'},
+  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'e39454c964545311404b98efaad8449e74a0d07d7369602eec28bb401c76465d'},
   'runtime/kgen-margin-runtime.mjs':{nonMetadataSha256:'d52d6cf29d78f5b81dce1b34359bb31382c2976d5656ffcc97b2303f545d6dbd'},
    'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'ea364a05c794f635d0c03eb267fdd5dfa390428e5c15f01eb0f31757579a51d4'},
    // Prior published game shell body: f4ae42eca3c7c68622747423bfff3981fdd2438dab2a891ca696026b153364cc.
-   'game-5d.html':{nonMetadataSha256:'c3ac8f28e9d784b9508920f5028285491ecc4aa11bd00b48eec3151f4c82678d'}
+   'game-5d.html':{nonMetadataSha256:'f2988732b4ccecf5bd2d6cca07586cb251a61c79bff43d0ee8b05f0d1c42c999'}
  };
  for(const ancestor of assets){
   const asset={...ancestor,...current[ancestor.path]};

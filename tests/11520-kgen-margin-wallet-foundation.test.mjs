@@ -464,7 +464,7 @@ const K11520_TEST_MARKETS = Object.freeze({
   BNBUSDT: {axis:'KZ', price:620},
 });
 
-async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0} = {}) {
+async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPreview} = {}) {
   const {mkdtemp, readFile, writeFile, unlink, rmdir} = await import('node:fs/promises');
   const {join} = await import('node:path');
   const {tmpdir} = await import('node:os');
@@ -509,6 +509,7 @@ async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0} = {}) {
       },
       readIndependent: async ({market}) => independent.get(market) ?? null,
       pollIntervalMs,
+      lanPreview,
     });
     const {port} = await service.listen({port: 0});
     origin = 'http://127.0.0.1:' + port;
@@ -556,6 +557,7 @@ async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0} = {}) {
   await start();
   return {
     request, login, book, prime, quote, unavailable,
+    get origin() { return origin; },
     poll: () => service.poll(),
     advance: (ms = 1000) => currentTime += ms,
     restart: async () => { await stop(); await start(); },
@@ -798,4 +800,124 @@ test('K11520 background poll persists a single touch without a connected player 
 
   await f.restart();
   assert.deepEqual((await f.book(token)).receipts, [persisted]);
+});
+
+test('K11520 LAN preview pairs the device and shares only the authenticated simulation book', async t => {
+  const {randomBytes} = await import('node:crypto');
+  const {request} = await import('node:http');
+  const {networkInterfaces} = await import('node:os');
+  const address = Object.values(networkInterfaces()).flat().find(entry =>
+    entry?.family === 'IPv4' && !entry.internal &&
+    /^(?:10\.|172\.(?:1[6-9]|2[0-9]|3[01])\.|192\.168\.)/.test(entry.address)
+  )?.address;
+  if (!address) {
+    t.skip('No assigned private IPv4 interface');
+    return;
+  }
+
+  const accessCode = randomBytes(24).toString('hex');
+  const f = await makeK11520BackendFixture(t, {lanPreview: {address, accessCode}});
+  const lanOrigin = 'http://' + address + ':' + new URL(f.origin).port;
+  const gamePath = encodeURI('/K線西遊記/temples/11520/game-5d.html');
+  const gameUrl = gamePath + '?world=88888&preview=server';
+  const previewMarker = '<meta name="k11520-private-preview" content="lan">';
+
+  function send(path, {method = 'GET', headers, body} = {}) {
+    return new Promise((resolve, reject) => {
+      const req = request(new URL(path, lanOrigin), {
+        method, headers, signal: AbortSignal.timeout(5000),
+      }, res => {
+        let text = '';
+        res.setEncoding('utf8');
+        res.on('data', chunk => { text += chunk; });
+        res.on('error', reject);
+        res.on('end', () => resolve({status: res.statusCode, headers: res.headers, text}));
+      });
+      req.on('error', reject);
+      req.end(body);
+    });
+  }
+
+  function pair(code, origin = lanOrigin) {
+    return send('/preview/access', {
+      method: 'POST',
+      headers: {origin, 'content-type': 'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({code, world: '88888'}).toString(),
+    });
+  }
+
+  const unpaired = await send(gameUrl);
+  assert.equal(unpaired.status, 401);
+  assert.match(unpaired.headers['content-type'], /^text\/html\b/);
+  assert.match(unpaired.text, /action="\/preview\/access"/);
+  assert.match(unpaired.text, /name="world" value="88888"/);
+  assert.equal(unpaired.text.includes(previewMarker), false);
+  assert.equal(unpaired.text.includes(accessCode), false);
+  assert.equal((await send('/api/v1/markets')).status, 401);
+
+  const wrongCode = await pair('0'.repeat(accessCode.length));
+  assert.equal(wrongCode.status, 401);
+  assert.equal(wrongCode.headers['set-cookie'], undefined);
+  const wrongOrigin = await pair(accessCode, f.origin);
+  assert.equal(wrongOrigin.status, 403);
+  assert.equal(wrongOrigin.headers['set-cookie'], undefined);
+
+  const paired = await pair(accessCode);
+  assert.equal(paired.status, 303);
+  assert.equal(paired.headers.location, gameUrl);
+  assert.equal(paired.headers['set-cookie']?.length, 1);
+  const [setCookie] = paired.headers['set-cookie'];
+  assert.match(setCookie, /;\s*HttpOnly(?:;|$)/i);
+  assert.match(setCookie, /;\s*SameSite=Strict(?:;|$)/i);
+  assert.equal(setCookie.includes(accessCode), false);
+  const [cookie] = setCookie.split(';', 1);
+
+  const shell = await send(gameUrl, {headers: {cookie}});
+  assert.equal(shell.status, 200);
+  assert.ok(shell.text.includes(previewMarker));
+  const localShell = await fetch(f.origin + gameUrl, {signal: AbortSignal.timeout(5000)});
+  assert.equal(localShell.status, 200);
+  assert.equal((await localShell.text()).includes(previewMarker), false);
+  assert.equal((await send(gameUrl, {headers: {cookie, host: 'unrelated.invalid'}})).status, 403);
+  assert.equal((await send('/api/v1/markets', {headers: {cookie, origin: f.origin}})).status, 403);
+  assert.equal((await send('/api/v1/orders', {headers: {cookie}})).status, 401);
+
+  const jsonHeaders = {cookie, origin: lanOrigin, 'content-type': 'application/json'};
+  const login = await send('/api/v1/login', {
+    method: 'POST', headers: jsonHeaders, body: JSON.stringify({name: '區網試玩'}),
+  });
+  assert.equal(login.status, 200);
+  const {ok, token} = JSON.parse(login.text);
+  assert.equal(ok, true);
+  assert.equal(typeof token, 'string');
+  assert.ok(token.length > 0);
+  const authorization = 'Bearer ' + token;
+  assert.equal((await send('/api/v1/orders', {headers: {authorization}})).status, 401);
+
+  f.prime();
+  await f.poll();
+  const posted = await send('/api/v1/order', {
+    method: 'POST', headers: {...jsonHeaders, authorization},
+    body: JSON.stringify(k11520OrderRequest('BTCUSDT', 'lan-preview-btc-order-001', {triggerPrice: 65100})),
+  });
+  assert.equal(posted.status, 200, posted.text);
+  const {order} = JSON.parse(posted.text);
+  assert.equal(order.status, 'PENDING');
+  assert.deepEqual((await f.book(token)).orders, [order]);
+
+  const touchedAt = f.advance();
+  f.quote('BTCUSDT', 65100, 2);
+  await f.poll();
+  const filled = await send('/api/v1/orders', {headers: {cookie, authorization}});
+  assert.equal(filled.status, 200);
+  const {receipts} = JSON.parse(filled.text);
+  assert.equal(receipts.length, 1);
+  assert.equal(receipts[0].kind, 'FILL');
+  assert.equal(receipts[0].orderId, order.orderId);
+  assert.equal(receipts[0].fillPrice, 65100);
+  assert.equal(receipts[0].triggeredAt, touchedAt);
+  assert.deepEqual((await f.book(token)).receipts, receipts);
+
+  await f.restart();
+  assert.deepEqual((await f.book(token)).receipts, receipts);
 });

@@ -198,17 +198,42 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   return adapter;
 }
 
+const LOOPBACK_PREVIEW_HOSTS=Object.freeze(['127.0.0.1','localhost']);
+
+export function isK11520PrivatePreviewHost(hostname){
+  if(typeof hostname!=='string'||!/^(?:0|[1-9][0-9]{0,2})(?:\.(?:0|[1-9][0-9]{0,2})){3}$/.test(hostname))return false;
+  const octets=hostname.split('.').map(Number),[first,second]=octets;
+  if(octets.some(octet=>octet>255))return false;
+  return first===10||(first===172&&second>=16&&second<=31)||(first===192&&second===168);
+}
+
+export function k11520ServerPreviewType(location,document){
+  if(new URLSearchParams(location?.search).get('preview')!=='server')return null;
+  if(LOOPBACK_PREVIEW_HOSTS.includes(location?.hostname))return 'loopback';
+  if(location?.protocol==='http:'&&isK11520PrivatePreviewHost(location.hostname)&&
+    document?.querySelector('meta[name="k11520-private-preview"]')?.content==='lan')return 'lan';
+  return null;
+}
+
+export function createK11520PreviewRequestId(crypto=globalThis.crypto){
+  if(typeof crypto?.getRandomValues!=='function')throw new Error('SECURE_RANDOM_UNAVAILABLE');
+  const bytes=new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes,byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+
 const PREVIEW_SESSION_KEY='k11520.server-preview.session.v1';
 const PREVIEW_TOKEN_PATTERN=/^[a-f0-9]{48}$/;
 const PREVIEW_REQUEST_PATTERN=/^[a-zA-Z0-9_.:-]{1,128}$/;
 
 export function createPreviewSimulationExecutionAdapter({
-  origin=globalThis.location?.origin,fetchImpl=globalThis.fetch,storage,now=Date.now,
+  origin=globalThis.location?.origin,fetchImpl=globalThis.fetch,storage,now=Date.now,lanPreview=false,
 }={}){
   let base;
   try{base=new URL(origin)}catch{throw new Error('LOCAL_PREVIEW_ORIGIN_REQUIRED')}
-  if(!['http:','https:'].includes(base.protocol)||!['127.0.0.1','localhost'].includes(base.hostname)||
-    base.origin!==origin||typeof fetchImpl!=='function')throw new Error('LOCAL_PREVIEW_ORIGIN_REQUIRED');
+  const loopback=LOOPBACK_PREVIEW_HOSTS.includes(base.hostname)&&['http:','https:'].includes(base.protocol);
+  const privateLan=lanPreview===true&&base.protocol==='http:'&&isK11520PrivatePreviewHost(base.hostname);
+  if((!loopback&&!privateLan)||base.origin!==origin||typeof fetchImpl!=='function')throw new Error('LOCAL_PREVIEW_ORIGIN_REQUIRED');
   if(storage===undefined)try{storage=globalThis.localStorage}catch{storage=null}
   let marketState={observations:{},statuses:{}};
   let book={mode:'SIMULATION_WALLET',wallet:null,orders:[],positions:[],receipts:[],observations:{}};
@@ -234,7 +259,7 @@ export function createPreviewSimulationExecutionAdapter({
     if(token)headers.authorization='Bearer '+token;
     if(body!==undefined)headers['content-type']='application/json';
     const response=await fetchImpl(new URL(path,base).href,{
-      method,mode:'same-origin',credentials:'omit',redirect:'error',cache:'no-store',headers,signal,
+      method,mode:'same-origin',credentials:privateLan?'same-origin':'omit',redirect:'error',cache:'no-store',headers,signal,
       ...(body===undefined?{}:{body:JSON.stringify(body)}),
     });
     const data=await response.json();
@@ -342,7 +367,7 @@ export function createPreviewSimulationExecutionAdapter({
           const checked=preview(terms);
           if(!checked.ok)return checked;
         }
-        requestId=pending?.requestId??input.clientRequestId??globalThis.crypto?.randomUUID?.();
+        requestId=pending?.requestId??input.clientRequestId??createK11520PreviewRequestId();
         if(typeof requestId!=='string'||!PREVIEW_REQUEST_PATTERN.test(requestId))throw new Error('INVALID_REQUEST_ID');
         body={...terms,requestId};
         if(!pending)saveSession({...session,pendingOrder:{requestId,fingerprint}});

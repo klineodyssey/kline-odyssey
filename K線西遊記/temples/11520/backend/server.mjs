@@ -1,5 +1,7 @@
 import http from 'node:http';
-import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
+import { isIPv4 } from 'node:net';
+import { networkInterfaces } from 'node:os';
 import { mkdir, readFile, realpath, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, extname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,6 +23,11 @@ const markets = Object.freeze({ KX: 'BTCUSDT', KY: 'ETHUSDT', KZ: 'BNBUSDT' });
 const symbols = Object.values(markets);
 const requestKeyPattern = /^[a-zA-Z0-9_.:-]{1,128}$/;
 const tokenPattern = /^[a-f0-9]{48}$/;
+const accessCodePattern = /^[a-f0-9]{32,128}$/;
+const privateIpv4Pattern = /^(?:10\.|172\.(?:1[6-9]|2[0-9]|3[01])\.|192\.168\.)/;
+const accessCookie = 'k11520_lan_preview';
+const accessLifetimeSeconds = 8 * 60 * 60;
+const lanMarker = '<meta name="k11520-private-preview" content="lan">';
 
 export const BINANCE_AGGREGATE_SOURCE = PUBLIC_MARKET_QUOTE_SOURCE.id;
 export const BYBIT_TRADES_SOURCE = 'BYBIT_PUBLIC_RECENT_TRADES';
@@ -45,7 +52,7 @@ function response(res, status, payload) {
   res.end(body);
 }
 
-async function bodyOf(req) {
+async function requestBody(req) {
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
@@ -53,7 +60,12 @@ async function bodyOf(req) {
     if (size > 16384) throw new RangeError('BODY_TOO_LARGE');
     chunks.push(chunk);
   }
-  const body = size ? JSON.parse(Buffer.concat(chunks).toString('utf8')) : {};
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+async function bodyOf(req) {
+  const text = await requestBody(req);
+  const body = text ? JSON.parse(text) : {};
   if (!record(body)) throw new TypeError('INVALID_JSON_OBJECT');
   return body;
 }
@@ -129,6 +141,40 @@ function safeStaticPath(pathname) {
   return /^\/(assets|core|docs|K線西遊記\/data)\//.test(pathname);
 }
 
+function ipv4Number(address) {
+  return address.split('.').reduce((value, part) => value * 256 + Number(part), 0);
+}
+
+function privateLanInterface(config) {
+  if (!config) return null;
+  const { address, accessCode } = config;
+  if (!isIPv4(address) || !privateIpv4Pattern.test(address) ||
+      !accessCodePattern.test(accessCode ?? '')) throw new Error('INVALID_PRIVATE_PREVIEW_CONFIGURATION');
+  const selected = Object.values(networkInterfaces()).flat().find(entry =>
+    entry && entry.family === 'IPv4' && !entry.internal && entry.address === address);
+  if (!selected || !isIPv4(selected.netmask)) throw new Error('PRIVATE_PREVIEW_INTERFACE_NOT_ASSIGNED');
+  return { address, mask: ipv4Number(selected.netmask), expectedCode: digest(accessCode), sessionKey: randomBytes(32) };
+}
+
+function lanAccessForm(res, world) {
+  const html = `<!doctype html><html lang="zh-Hant"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K11520 私人試玩</title><style>
+body{color:#f2f6fa;background:#071422;font:17px system-ui,sans-serif;padding:24px;margin:0}
+main{max-width:28rem;margin:5vh auto} h1{font-size:24px} label,input,button{display:block}
+input,button{box-sizing:border-box;min-height:48px;font:inherit;border-radius:8px;margin:8px 0 16px;padding:8px 12px}
+input{width:100%} button{background:#a9dfbf;border:0;color:#102a21;font-weight:700}
+</style><main><h1>K11520 私人試玩</h1><p>請輸入私人試玩碼。模擬下單不需要錢包。</p>
+<form method="post" action="/preview/access"><input type="hidden" name="world" value="${world}">
+<label for="code">試玩碼</label><input id="code" name="code" type="password" maxlength="128"
+autocomplete="off" autocapitalize="none" required><button type="submit">進入遊戲</button></form></main></html>`;
+  res.writeHead(401, {
+    'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store',
+    'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'",
+  });
+  return res.end(html);
+}
+
 async function load(file) {
   let bytes;
   try {
@@ -173,9 +219,10 @@ export async function createK11520Server({
   dataFile = dataFileDefault, now = Date.now, fetchImpl = globalThis.fetch,
   readMarket = input => binanceObservationBatch(fetchImpl, input),
   readIndependent = input => bybitObservation(fetchImpl, input),
-  pollIntervalMs = 1200, jumpRatio = 0.05, corroborationRatio = 0.02, serveStatic = true,
+  pollIntervalMs = 1200, jumpRatio = 0.05, corroborationRatio = 0.02, serveStatic = true, lanPreview = null,
 } = {}) {
   const file = resolve(dataFile);
+  const lan = privateLanInterface(lanPreview);
   let state = await load(file);
   let tail = Promise.resolve();
   let loop = null;
@@ -408,7 +455,7 @@ export async function createK11520Server({
     });
   }
 
-  async function staticResponse(res, path, method) {
+  async function staticResponse(res, path, method, privatePreview) {
     if (path === '/') {
       res.writeHead(302, { location: gameUrl, 'cache-control': 'no-store' });
       return res.end();
@@ -421,7 +468,12 @@ export async function createK11520Server({
       const key = relative(await realpath(repo), target);
       if (key.startsWith('..' + sep) || !safeStaticPath('/' + key.split(sep).join('/')) ||
           !(await stat(target)).isFile()) return response(res, 404, { ok: false, reason: 'NOT_FOUND' });
-      const bytes = method === 'HEAD' ? undefined : await readFile(target);
+      let bytes = method === 'HEAD' ? undefined : await readFile(target);
+      if (bytes && privatePreview && path === gamePath + 'game-5d.html') {
+        const shell = bytes.toString('utf8');
+        if (!shell.includes('</head>')) throw new Error('PRIVATE_PREVIEW_SHELL_UNAVAILABLE');
+        bytes = shell.replace('</head>', lanMarker + '</head>');
+      }
       res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
       return res.end(bytes);
     } catch (error) {
@@ -430,17 +482,67 @@ export async function createK11520Server({
     }
   }
 
-  const server = http.createServer(async (req, res) => {
+  function sessionSignature(address, expires) {
+    return createHmac('sha256', lan.sessionKey).update(address + ':' + expires).digest('hex');
+  }
+
+  function lanAuthorized(req) {
+    const raw = (req.headers.cookie ?? '').split(';').map(item => item.trim())
+      .find(item => item.startsWith(accessCookie + '='));
+    const match = raw?.slice(accessCookie.length + 1).match(/^(\d{10,14})\.([a-f0-9]{64})$/);
+    return !!match && Number(match[1]) > now() &&
+      timingSafeEqual(Buffer.from(match[2]), Buffer.from(sessionSignature(req.socket.remoteAddress, match[1])));
+  }
+
+  async function handleLanAccess(req, res, base) {
+    if (req.headers.origin !== base.origin) {
+      return response(res, 403, { ok: false, reason: 'SAME_ORIGIN_REQUIRED' });
+    }
+    if (req.headers['content-type']?.split(';', 1)[0] !== 'application/x-www-form-urlencoded') {
+      return response(res, 400, { ok: false, reason: 'INVALID_PREVIEW_ACCESS_FORM' });
+    }
+    const fields = new URLSearchParams(await requestBody(req));
+    const world = fields.get('world') === '88888' ? '88888' : '12682';
+    const code = fields.get('code') ?? '';
+    if (!accessCodePattern.test(code) ||
+        !timingSafeEqual(Buffer.from(digest(code)), Buffer.from(lan.expectedCode))) return lanAccessForm(res, world);
+    const expiry = String(now() + accessLifetimeSeconds * 1000);
+    res.writeHead(303, {
+      location: gameUrl.replace('world=12682', 'world=' + world),
+      'set-cookie': `${accessCookie}=${expiry}.${sessionSignature(req.socket.remoteAddress, expiry)}; Path=/; Max-Age=${accessLifetimeSeconds}; HttpOnly; SameSite=Strict`,
+      'cache-control': 'no-store',
+    });
+    return res.end();
+  }
+
+  async function handle(req, res, privatePreview) {
     const method = req.method;
     try {
-      if (!/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(req.headers.host ?? '')) {
+      const host = req.headers.host ?? '';
+      if (privatePreview) {
+        const remote = req.socket.remoteAddress;
+        if (host !== `${lan.address}:${req.socket.localPort}` || req.socket.localAddress !== lan.address ||
+            !isIPv4(remote) || !privateIpv4Pattern.test(remote) || (ipv4Number(remote) & lan.mask) !== (ipv4Number(lan.address) & lan.mask)) {
+          return response(res, 403, { ok: false, reason: 'PRIVATE_PREVIEW_NETWORK_REQUIRED' });
+        }
+        res.setHeader('referrer-policy', 'same-origin');
+        res.setHeader('x-frame-options', 'DENY');
+      } else if (!/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(host)) {
         return response(res, 403, { ok: false, reason: 'LOCAL_HOST_REQUIRED' });
       }
-      const base = new URL('http://' + req.headers.host);
+      const base = new URL('http://' + host);
       if (req.headers.origin && req.headers.origin !== base.origin) {
         return response(res, 403, { ok: false, reason: 'SAME_ORIGIN_REQUIRED' });
       }
-      const path = decodeURIComponent(new URL(req.url, base).pathname);
+      const url = new URL(req.url, base);
+      const path = decodeURIComponent(url.pathname);
+      if (privatePreview && method === 'POST' && path === '/preview/access') return await handleLanAccess(req, res, base);
+      if (privatePreview && !lanAuthorized(req)) {
+        if (method === 'GET' && (path === '/' || path === gamePath + 'game-5d.html')) {
+          return lanAccessForm(res, url.searchParams.get('world') === '88888' ? '88888' : '12682');
+        }
+        return response(res, 401, { ok: false, reason: 'PRIVATE_PREVIEW_ACCESS_REQUIRED' });
+      }
       if (method === 'GET' && path === '/health') {
         return response(res, 200, { ok: true, service: 'k11520-backend', mode: 'OFFCHAIN_SIMULATION' });
       }
@@ -459,7 +561,7 @@ export async function createK11520Server({
         return response(res, result ? 200 : 401, result ?? { ok: false, reason: 'UNAUTHORIZED' });
       }
       if (!path.startsWith('/api/') && serveStatic && (method === 'GET' || method === 'HEAD')) {
-        return await staticResponse(res, path, method);
+        return await staticResponse(res, path, method, privatePreview);
       }
       const player = account(state, bearer(req));
       if (!player) return response(res, 401, { ok: false, reason: 'UNAUTHORIZED' });
@@ -492,16 +594,28 @@ export async function createK11520Server({
         error instanceof URIError ? 400 : 500;
       return response(res, status, { ok: false, reason: status === 400 ? 'INVALID_REQUEST' : 'SIMULATION_SERVER_ERROR' });
     }
+  }
+
+  const server = http.createServer((req, res) => handle(req, res, false));
+  const lanServer = lan && http.createServer((req, res) => handle(req, res, true));
+  const bind = (listener, address, port) => new Promise((resolveListen, reject) => {
+    listener.once('error', reject);
+    listener.listen(port, address, () => {
+      listener.removeListener('error', reject);
+      resolveListen();
+    });
   });
+  const stopListener = listener => new Promise((resolveClose, reject) =>
+    listener.close(error => error ? reject(error) : resolveClose()));
 
   async function listen({ port = 11520 } = {}) {
-    await new Promise((resolveListen, reject) => {
-      server.once('error', reject);
-      server.listen(port, '127.0.0.1', () => {
-        server.removeListener('error', reject);
-        resolveListen();
-      });
-    });
+    await bind(server, '127.0.0.1', port);
+    try {
+      if (lanServer) await bind(lanServer, lan.address, server.address().port);
+    } catch (error) {
+      await stopListener(server);
+      throw error;
+    }
     if (pollIntervalMs > 0) {
       void poll();
       loop = setInterval(() => { void poll(); }, pollIntervalMs);
@@ -514,15 +628,20 @@ export async function createK11520Server({
     if (loop !== null) clearInterval(loop);
     await Promise.all(pendingPolls.values());
     await tail;
-    if (server.listening) await new Promise((resolveClose, reject) =>
-      server.close(error => error ? reject(error) : resolveClose()));
+    await Promise.all([server, lanServer].filter(listener => listener?.listening).map(stopListener));
   }
 
   return { server, poll, listen, close };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const app = await createK11520Server({ dataFile: process.env.K11520_PREVIEW_DATA_FILE || dataFileDefault });
+  const lanAddress = process.env.K11520_PREVIEW_LAN_ADDRESS;
+  const lanCode = process.env.K11520_PREVIEW_LAN_CODE;
+  const app = await createK11520Server({
+    dataFile: process.env.K11520_PREVIEW_DATA_FILE || dataFileDefault,
+    lanPreview: lanAddress || lanCode ? { address: lanAddress, accessCode: lanCode } : null,
+  });
   const address = await app.listen({ port: Number(process.env.PORT || 11520) });
   console.log('K11520 local simulation preview: http://' + address.address + ':' + address.port + '/');
+  if (lanAddress) console.log('K11520 private Wi-Fi preview: http://' + lanAddress + ':' + address.port + '/');
 }

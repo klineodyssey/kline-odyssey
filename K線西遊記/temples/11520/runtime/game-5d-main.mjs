@@ -19,7 +19,8 @@ import {createWorldState,createKSpaceEncounter,selectJourneyEncounter,resolvePla
 import {getKaiosAudio} from '../../../../assets/kaios-audio.mjs';
 import {C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL,createKgenLedger,positionRisk,snapshot} from './kgen-margin-runtime.mjs';
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
-import {createExecutionAdapter,createSimulationAutopilot,createPreviewSimulationExecutionAdapter} from './real-trading-order-intent.mjs';
+import {createExecutionAdapter,createSimulationAutopilot,createPreviewSimulationExecutionAdapter,
+  createK11520PreviewRequestId,k11520ServerPreviewType} from './real-trading-order-intent.mjs';
 import {getWalletSession11520} from './wallet-game-bridge.mjs';
 import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimulationPlayerStore,createPlayerScopedStorage} from './evm-wallet-runtime.mjs';
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK,formatUniverseAddress,gameUnitsToK,advanceLocalMotionClock,integrateLocalMotion} from './spatial-coordinate-runtime.mjs';
@@ -73,8 +74,10 @@ function replayJourney(){journey.replay();journeyOrigin={...S.xyz};showCombatTar
 addEventListener('k11520:replay-journey',replayJourney);
 globalThis.__K11520_JOURNEY__=Object.freeze({snapshot:journey.snapshot});
 const localSimulationExecution=createExecutionAdapter({ledger,productV1:true,verifiedPublicQuotes:true,beforeMutation:()=>playerStore.check(),afterMutation:()=>playerStore.save()});
-const previewExecution=['127.0.0.1','localhost'].includes(location.hostname)&&new URLSearchParams(location.search).get('preview')==='server'
-  ?createPreviewSimulationExecutionAdapter():null;
+const serverPreviewType=k11520ServerPreviewType(location,document);
+const lanPreview=serverPreviewType==='lan';
+if(lanPreview)document.documentElement.dataset.k11520PrivatePreview='lan';
+const previewExecution=serverPreviewType?createPreviewSimulationExecutionAdapter({lanPreview}):null;
 const noSettlementService=()=>({ok:false,code:'ORACLE_STALE',reason:'等候有效報價 · 後端結算服務未接通'});
 const simulationExecution=previewExecution??Object.freeze({...localSimulationExecution,
   quote:()=>null,preview:noSettlementService,submit:noSettlementService,close:noSettlementService});
@@ -756,7 +759,11 @@ function openOrder(){
   if(previewExecution?.pendingOrder()){openOrgan('orders');return}
   syncTradeAxisFromPlane();const a=axis(),q=executionQuote(a.market),p=q?.price;pending=null;reviewedOrder=null;$('#confirmOrder').disabled=true;if(!p){$('#confirm').classList.remove('open');toast('等候有效報價'+(q?.error?' · '+q.error:''));return}
   let c;try{const signed=globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[S.axis];c=signed===undefined?signedCFromLegacyMagnitude(a.c,a.side):normalizeSignedC(signed)}catch{toast('ORDER_REJECTED · C 必須非 0 且介於 -100 與 +100');return}
-  pending={axis:S.axis,market:a.market,lots:a.lots,c,clientRequestId:globalThis.crypto.randomUUID()};
+  let clientRequestId;
+  if(previewExecution){
+    try{clientRequestId=createK11520PreviewRequestId()}catch{toast('無法建立安全的模擬委託編號');return}
+  }
+  pending={axis:S.axis,market:a.market,lots:a.lots,c,clientRequestId};
   $('#confirmBody').innerHTML='<div class="grid2" role="group" aria-label="委託方向"><button class="btn" type="button" data-order-side="LONG">做多</button><button class="btn" type="button" data-order-side="SHORT">做空</button></div><div class="card" id="simulationOrderPreview" aria-live="polite"></div><div class="card"><label>TRIGGER · 觸發價格<input id="simulationTriggerPrice" type="number" min="0" step="any" value="'+p+'"></label><details><summary>選填停損 / 止盈</summary><label>停損價<input id="simulationStopPrice" type="number" min="0" step="any"></label><label>止盈價<input id="simulationTakeProfitPrice" type="number" min="0" step="any"></label></details></div><p class="bad">CONFIRM ORDER → PENDING_TRIGGER。PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈、不簽名。</p>';
   if(isTestnet()){$('#confirmBody details').hidden=true;$('#confirmBody .bad').textContent='BSC TESTNET 97 · NO REAL VALUE。CONFIRM ORDER → WALLET CONFIRM → TX → RECEIPT CONFIRMED；其後仍為 PENDING，只有 keeper 有效 observation 才能成交。'}
   for(const input of $$('#confirmBody input'))input.addEventListener('input',paintOrderPreview);
@@ -796,6 +803,17 @@ const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open')
 function openOrgan(id){if(id!=='assets'&&id!=='market')kgenPoolReference.pause();if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h=navigationConsoleHTML();else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點「XZ 移動」切換 XZ／XY／YZ。預設拖曳遊戲空白處叫出移動盤，放開即收起；輕點空白處導航，點生命或物件查看。雙指縮放。由資訊設定選「顯示操作」叫回固定圓盤及縱桿，並恢復單指拖曳鏡頭。圓盤控制所選兩軸；縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas);bindNavigationConsole()}mountKgenReference(id)}
 
 const walletSession=getWalletSession11520();
+if(lanPreview){
+  for(const id of ['walletPanel','walletToggle']){
+    const control=$('#'+id);
+    control.inert=true;
+    // The legacy mobile skin can override display when pinning the wallet.
+    control.style.setProperty('visibility','hidden','important');
+  }
+  for(const id of ['walletToggle','walletConnect','walletRefresh','executionMode','walletM1ReadOnly']){
+    $('#'+id).disabled=true;
+  }
+}
 let deploymentManifest=null,readOnlyDeployment=null,legacyExecution=null,readOnlyExecution=null,returnExecution=null,testnetGate='CHECKING_DEPLOYMENT',chainRefreshBusy=false;
 const executionPreferenceKey='k11520.execution-mode';
 const readOnlyViewPreferenceKey='k11520.wallet-readonly-view';
@@ -881,6 +899,7 @@ function walletExecutionView(value){
   return {...chain,status:ownedReceipt?chain.status:'RECONNECT_REQUIRED',wallet:null,capital:null,claims:[],orders:[],positions:[],receipts:[],observations:{},transaction:ownedReceipt?tx:null};
 }
 function renderWallet(value=walletSession.snapshot()){
+  if(lanPreview)return;
   S.walletKgen=value.kgen;
   $('#wAddr').textContent=value.account||'DISCONNECTED';
   const retainedHint=$('#walletRetained');if(retainedHint)retainedHint.hidden=!!value.account;
@@ -921,7 +940,7 @@ function renderWallet(value=walletSession.snapshot()){
 const summary=$('#walletSimulation');if(summary)summary.innerHTML='<b>'+executionLabel()+(isTestnet()?' · BRAIN ACCOUNT':' WALLET')+'</b>'+walletMetrics(chain.wallet)+(chain.capital?'<details><summary>Exchange Capital（非玩家本金）</summary>'+receiptRows([['FREE SETTLEMENT CAPITAL',fmt(chain.capital.settlementCapital,6)],['RESERVED LIABILITY',fmt(chain.capital.reservedSettlementLiability,6)],['ADMISSION CAPACITY',fmt(chain.capital.availableRiskCapacity,6)]])+'</details>':'')+(isTestnet()?receiptRows([['TEST TOKEN BALANCE',chain.wallet?.testTokenBalance??'UNVERIFIED'],['TX STATUS',chain.transaction?.status||chain.status],['TX HASH',chain.transaction?.txHash||'--']]):'');
   if($('#sheetBody')?.dataset.simOrgan==='assets')refreshSimulationSheet();
 }
-walletSession.subscribe(value=>{
+if(!lanPreview)walletSession.subscribe(value=>{
   const nextAutoWallet=String(value.account||'GUEST');if(navAutoWalletKey!==null&&nextAutoWallet!==navAutoWalletKey){stopNavigationAutopilot('切換錢包');stopWorldNavigation3D(null,{clearTarget:true});localMotionClock=null}navAutoWalletKey=nextAutoWallet;
   if(!execution.readOnly&&!readOnlyViewRequested()&&(value.account||['DISCONNECTED','NO_WALLET'].includes(value.status))){
     if(playerStore.activate(value.account)){
@@ -930,19 +949,22 @@ walletSession.subscribe(value=>{
     }
   }
   renderWallet(value);if(isTestnet()){syncSimulationPositions();refreshSimulationSheet();void refreshTestnet()}
-});renderWallet();void walletSession.refresh();void loadTestnetManifest();
-$('#walletM1ReadOnly').onclick=selectReadOnlyWalletView;
-$('#walletConnect').onclick=()=>{$('#walletPanel').classList.remove('collapsed');return walletSession.connect()};
-$('#walletRefresh').onclick=async()=>{await walletSession.refresh();await refreshTestnet()};
-$('#executionMode').onclick=selectExecutionMode;
-$('#testnetSwitch').onclick=async()=>{const r=await executionAction(()=>execution.switchChain());if(!r.ok)toast(r.reason);await walletSession.refresh()};
-$('#testnetFaucet').onclick=async()=>{const r=await executionAction(()=>execution.faucet());toast(r.ok?'TEST ONLY FAUCET RECEIPT CONFIRMED':r.reason)};
-for(const method of ['approve','deposit','withdraw'])$('#testnet'+method[0].toUpperCase()+method.slice(1)).onclick=async()=>{const amount=$('#testnetAmount').value;const r=await executionAction(()=>execution[method](amount,{unlimited:$('#testnetUnlimited').checked}));toast(r.ok?'TESTNET '+method.toUpperCase()+' RECEIPT CONFIRMED':r.reason)};
-$('#testnetAmount').oninput=()=>renderWallet();$('#testnetUnlimited').onchange=()=>renderWallet();
-for(const b of $$('[data-deposit-preset]'))b.onclick=()=>{$('#testnetAmount').value=b.dataset.depositPreset;renderWallet()};
-$('#walletToggle').onclick=()=>{$('#walletPanel').classList.toggle('collapsed');renderWallet()};
-setInterval(()=>{if(!$('#walletPanel').classList.contains('collapsed'))renderWallet()},1000);
-setInterval(()=>void refreshTestnet(),5000);
+});
+if(!lanPreview){
+  renderWallet();void walletSession.refresh();void loadTestnetManifest();
+  $('#walletM1ReadOnly').onclick=selectReadOnlyWalletView;
+  $('#walletConnect').onclick=()=>{$('#walletPanel').classList.remove('collapsed');return walletSession.connect()};
+  $('#walletRefresh').onclick=async()=>{await walletSession.refresh();await refreshTestnet()};
+  $('#executionMode').onclick=selectExecutionMode;
+  $('#testnetSwitch').onclick=async()=>{const r=await executionAction(()=>execution.switchChain());if(!r.ok)toast(r.reason);await walletSession.refresh()};
+  $('#testnetFaucet').onclick=async()=>{const r=await executionAction(()=>execution.faucet());toast(r.ok?'TEST ONLY FAUCET RECEIPT CONFIRMED':r.reason)};
+  for(const method of ['approve','deposit','withdraw'])$('#testnet'+method[0].toUpperCase()+method.slice(1)).onclick=async()=>{const amount=$('#testnetAmount').value;const r=await executionAction(()=>execution[method](amount,{unlimited:$('#testnetUnlimited').checked}));toast(r.ok?'TESTNET '+method.toUpperCase()+' RECEIPT CONFIRMED':r.reason)};
+  $('#testnetAmount').oninput=()=>renderWallet();$('#testnetUnlimited').onchange=()=>renderWallet();
+  for(const b of $$('[data-deposit-preset]'))b.onclick=()=>{$('#testnetAmount').value=b.dataset.depositPreset;renderWallet()};
+  $('#walletToggle').onclick=()=>{$('#walletPanel').classList.toggle('collapsed');renderWallet()};
+  setInterval(()=>{if(!$('#walletPanel').classList.contains('collapsed'))renderWallet()},1000);
+  setInterval(()=>void refreshTestnet(),5000);
+}
 
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x08110d);scene.fog=new THREE.FogExp2(0x08110d,.025);const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,500),renderer=new THREE.WebGLRenderer({canvas:$('#three'),antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));scene.add(new THREE.HemisphereLight(0xddeeff,0x223311,2.5));const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(5,12,6);scene.add(sun);const ground=new THREE.Mesh(new THREE.PlaneGeometry(120,120),new THREE.MeshStandardMaterial({color:0x294f2d}));ground.rotation.x=-Math.PI/2;ground.userData.isGround=true;scene.add(ground);
 for(let i=0;i<28;i++){const x=Math.sin(i*17.31)*22,z=Math.cos(i*9.71)*22;if(Math.abs(x)<4&&z>-10&&z<12)continue;const g=new THREE.Group(),tr=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,1.2,8),new THREE.MeshStandardMaterial({color:0x5c3920})),leaf=new THREE.Mesh(new THREE.ConeGeometry(.55,1.4,8),new THREE.MeshStandardMaterial({color:0x1e6b32}));tr.position.y=.6;leaf.position.y=1.7;g.add(tr,leaf);g.position.set(x,0,z);scene.add(g)}

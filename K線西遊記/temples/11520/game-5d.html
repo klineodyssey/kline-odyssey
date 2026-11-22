@@ -109,6 +109,7 @@ body:has(#k11520UpdateNotice:not([hidden])) #k11520InstallOffer{display:none}
 #k11520InstallGame:not([hidden]){display:flex;align-items:center;gap:7px;color:var(--gold);font-weight:700}
 #k11520InstallMessage{padding:0 6px;font-size:12px}
 #walletPanel.collapsed #executionControls{display:none}#executionControls{font-size:12px;overflow-wrap:anywhere}#executionControls button,#executionControls input{min-height:44px;box-sizing:border-box;width:100%;margin:4px 0}#executionControls input{background:#08131e;color:#e6f4ff;border:1px solid #456477;padding:8px}#testnetActions[hidden]{display:none}.depositPresets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.allowanceChoice{display:flex;align-items:center;gap:8px}#executionControls #testnetUnlimited{width:24px;flex:0 0 24px}#executionControls button:disabled{opacity:.5}
+html[data-k11520-private-preview="lan"] :is(#walletPanel,#walletToggle,#walletLaunchSheet,#playerLifeBind,#k11520RealTradePreflight,#k11520InstallOffer,#k11520UpdateNotice){display:none!important}
 </style>
 </head>
 <body>
@@ -206,7 +207,10 @@ body:has(#k11520UpdateNotice:not([hidden])) #k11520InstallOffer{display:none}
 }
 </script>
 <script>
-if('serviceWorker' in navigator&&!(['127.0.0.1','localhost'].includes(location.hostname)&&new URLSearchParams(location.search).get('preview')==='server')){
+const serverPreviewRequested=new URLSearchParams(location.search).get('preview')==='server';
+const privatePreviewDocument=location.protocol==='http:'&&document.querySelector('meta[name="k11520-private-preview"]')?.content==='lan';
+if(serverPreviewRequested&&privatePreviewDocument)document.documentElement.dataset.k11520PrivatePreview='lan';
+if('serviceWorker' in navigator&&!(serverPreviewRequested&&(privatePreviewDocument||['127.0.0.1','localhost'].includes(location.hostname)))){
  addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).then(registration=>{
   let checking=false;
   const checkForUpdate=async()=>{
