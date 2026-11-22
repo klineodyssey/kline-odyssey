@@ -21,10 +21,439 @@
     "current_state": { "$ref": "#/$defs/currentState" },
     "session_birth_records": { "type": "array", "items": { "$ref": "#/$defs/sessionBirth" } },
     "handoffs": { "type": "array", "items": { "$ref": "#/$defs/handoff" } },
-    "boot_results": { "type": "array", "items": { "$ref": "#/$defs/bootResult" } }
+    "boot_results": { "type": "array", "items": { "$ref": "#/$defs/bootResult" } },
+    "workflow_evidence_records": { "type": "array", "items": { "$ref": "#/$defs/engineeringWorkflowEvidence" } }
   },
   "additionalProperties": false,
   "$defs": {
+    "engineeringWorkflowEvidence": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "work_id",
+        "session_id",
+        "workspace_id",
+        "checkpoints",
+        "record_sha256"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "BOOT_FIRST_WORKFLOW_V1"
+        },
+        "work_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "workspace_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/engineeringWorkflowCheckpoint"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        },
+        "record_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Additional self-reported new-work/session evidence. Consistency is not authorship, cognitive reading, remote freshness or execution permission. Historical identity records are unchanged."
+    },
+    "engineeringWorkflowCheckpoint": {
+      "type": "object",
+      "required": [
+        "checkpoint_id",
+        "phase",
+        "recorded_at",
+        "BOOT_FILE",
+        "BOOT_BLOB",
+        "LATEST_MAIN",
+        "ORDER",
+        "READ_RECEIPTS",
+        "PATH_RESOLUTIONS",
+        "COMPANY_SYNC",
+        "DOMAIN_CANON_READ",
+        "CANON_CONFLICT",
+        "STAGES"
+      ],
+      "properties": {
+        "checkpoint_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "phase": {
+          "enum": [
+            "PRE_CODE",
+            "POST_TEST"
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "BOOT_FILE": {
+          "const": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md"
+        },
+        "BOOT_BLOB": {
+          "$ref": "#/$defs/gitSha"
+        },
+        "LATEST_MAIN": {
+          "$ref": "#/$defs/gitSha"
+        },
+        "ORDER": {
+          "const": [
+            "BOOT",
+            "COMPANY_SYNC",
+            "HUMAN_PROMPT"
+          ]
+        },
+        "READ_RECEIPTS": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "blob"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "blob": {
+                "$ref": "#/$defs/gitSha"
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 256
+        },
+        "PATH_RESOLUTIONS": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "requested",
+              "resolved",
+              "index",
+              "reason"
+            ],
+            "properties": {
+              "requested": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "resolved": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "index": {
+                "enum": [
+                  "neural/NEURAL_MAP.json",
+                  "neural/ORGAN_INDEX.json",
+                  "neural/RUNTIME_DEPENDENCY.json",
+                  "docs/KGEN_MASTER_INDEX.md",
+                  "KGEN_MASTER_LIBRARY_INDEX.md"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 32
+        },
+        "COMPANY_SYNC": {
+          "type": "object",
+          "required": [
+            "main_sha",
+            "observed_at",
+            "checks"
+          ],
+          "properties": {
+            "main_sha": {
+              "$ref": "#/$defs/gitSha"
+            },
+            "observed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "checks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "category",
+                  "status",
+                  "source_ref",
+                  "source_revision",
+                  "summary"
+                ],
+                "properties": {
+                  "category": {
+                    "enum": [
+                      "company_runtime",
+                      "worker_registry",
+                      "active_work",
+                      "handoffs",
+                      "queue",
+                      "prs",
+                      "ci",
+                      "p0_p1",
+                      "owners",
+                      "closeout",
+                      "outages",
+                      "human_decisions"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "CHECKED",
+                      "WAITING_EXTERNAL",
+                      "UNAVAILABLE",
+                      "NOT_APPLICABLE"
+                    ]
+                  },
+                  "source_ref": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "source_revision": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/gitSha"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  }
+                },
+                "additionalProperties": false
+              },
+              "minItems": 12,
+              "maxItems": 12
+            }
+          },
+          "additionalProperties": false
+        },
+        "DOMAIN_CANON_READ": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "CANON_CONFLICT": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "source_ref",
+              "disposition",
+              "resolution_ref",
+              "reason"
+            ],
+            "properties": {
+              "source_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "disposition": {
+                "enum": [
+                  "RESOLVED_BY_PRECEDENCE",
+                  "RECORDED_OUTSIDE_SCOPE",
+                  "BLOCKED_AFFECTED_SCOPE"
+                ]
+              },
+              "resolution_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "STAGES": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "stage",
+              "evidence_ref"
+            ],
+            "properties": {
+              "stage": {
+                "enum": [
+                  "READ_CANON",
+                  "LINEAGE",
+                  "EXISTING_RUNTIME",
+                  "ACTIVE_WORK",
+                  "DESIGN",
+                  "CODE",
+                  "TEST"
+                ]
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 5,
+          "maxItems": 7
+        },
+        "CYCLE": {
+          "$ref": "#/$defs/engineeringWorkflowCycle"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "phase": {
+                "const": "PRE_CODE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "STAGES": {
+                "minItems": 5,
+                "maxItems": 5
+              },
+              "CYCLE": {
+                "properties": {
+                  "test_outcome": {
+                    "const": "NOT_RUN"
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "STAGES": {
+                "minItems": 7,
+                "maxItems": 7
+              },
+              "CYCLE": {
+                "properties": {
+                  "test_outcome": {
+                    "enum": [
+                      "PASS",
+                      "FAIL",
+                      "BLOCKED"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "CYCLE is required for current checkpoints by the executable validator. Legacy checkpoints without it may occur only in an immutable historical prefix; they never establish current cycle readiness."
+    },
+    "engineeringWorkflowCycle": {
+      "type": "object",
+      "required": [
+        "number",
+        "previous_checkpoint_id",
+        "pre_code_checkpoint_id",
+        "reason",
+        "reason_ref",
+        "test_outcome"
+      ],
+      "properties": {
+        "number": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "previous_checkpoint_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pre_code_checkpoint_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "reason": {
+          "enum": [
+            "INITIAL",
+            "REWORK",
+            "SOURCE_REFRESH",
+            "TEST_RESULT",
+            "LEGACY_FORWARD_CHECKPOINT"
+          ]
+        },
+        "reason_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "test_outcome": {
+          "enum": [
+            "NOT_RUN",
+            "PASS",
+            "FAIL",
+            "BLOCKED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "gitSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
     "allowedAction": {

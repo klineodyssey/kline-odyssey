@@ -94,3 +94,35 @@ This governance file defines policy only. It does not create:
 - automation engine
 - merge authority beyond existing governance
 
+## 8. BOOT-FIRST evidence for new engineering work (2026-10-06)
+
+Human order `Sentinel_b9c9a6cfa0a08191b922a26478c6d8fa` requires V1.4 Boot as
+the first repository document for each new KAIOS work item and Cloud/worktree/
+session, followed by its CURRENT/Neural lineage, Company sync, then execution of
+the Human prompt. The current [Worker Boot SOP](../workforce/WORKER_BOOT_SOP.md)
+defines the complete process and source/conflict rules.
+
+The engineering sequence is `READ_CANON -> LINEAGE -> EXISTING_RUNTIME ->
+ACTIVE_WORK -> DESIGN -> CODE -> TEST`. A PRE_CODE checkpoint cannot claim CODE
+or TEST. Later completion and source refreshes append checkpoints to the same
+work/session record. New work/session contexts must not reuse an old receipt.
+Retain old records as history; missing old evidence is `NOT_RECORDED`.
+
+Iteration is explicit: PRE_CODE refreshes remain in the current numbered cycle;
+after POST_TEST, a REWORK/SOURCE_REFRESH opens the next cycle and clears only its
+new test outcome to NOT_RUN. Earlier results remain immutable. Each POST_TEST
+must bind its matching latest PRE_CODE and source snapshot, and records the real
+PASS/FAIL/BLOCKED outcome. An old pass cannot establish the new cycle's readiness.
+
+The existing Company Boot Runtime V0.1 schema and `validate-workflow` CLI check
+record integrity, stage order, path/blob/main bindings, Company snapshot coverage,
+domain reads, explicit conflicts and append-only continuity. No second Worker
+runtime, live identity registry, scheduler or authority service is established.
+
+The operator/reviewer must independently refresh main and evaluate source
+relevance, authenticated Human authorization and action-specific gates.
+Consistency hashes prove neither authorship nor cognitive reading. Receipt
+validation is an additional prerequisite and grants no permissions. Separately
+authorized bounded external-maintainer work remains bounded; existing financial,
+protected-path and release restrictions remain in force. Record other tracks'
+P0/P1 or external waits without turning them into unrelated blanket stops.
