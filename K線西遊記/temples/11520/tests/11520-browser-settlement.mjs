@@ -5,6 +5,28 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createK11520Server,BINANCE_AGGREGATE_SOURCE,BYBIT_TRADES_SOURCE} from '../backend/server.mjs';
 import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
+import {KGEN_TOKEN_ADDRESS} from '../runtime/evm-wallet-runtime.mjs';
+
+async function startBrowserTrial(prices,stale=()=>false){
+  const directory=await fs.mkdtemp(join(tmpdir(),'k11520-settlement-browser-'));
+  const dataFile=join(directory,'players.json'),sequence=new Map();
+  let backend;
+  async function close(){
+    if(backend)await backend.close();
+    await fs.rm(dataFile,{force:true});await fs.rmdir(directory);
+  }
+  try{
+    backend=await createK11520Server({dataFile,pollIntervalMs:800,
+      readMarket:async({market,now})=>{
+        const next=(sequence.get(market)??0)+1;sequence.set(market,next);
+        return [{market,price:prices(market),updatedAt:now-(stale()?60000:0),sequence:next,source:BINANCE_AGGREGATE_SOURCE}];
+      },
+      readIndependent:async({market,now})=>({market,price:prices(market),updatedAt:now,source:BYBIT_TRADES_SOURCE}),
+    });
+    const {port}=await backend.listen({port:0});
+    return {origin:'http://127.0.0.1:'+port,poll:()=>backend.poll(),close};
+  }catch(error){await close();throw error}
+}
 
 // Host-only relative timings in the existing reports. No timer, browser read,
 // retry or budget change; each original operation still runs exactly once.
@@ -107,7 +129,7 @@ const receiptReviewOnly=process.argv.includes('--wallet-receipt-review');
 await fs.mkdir(out,{recursive:true});
 const settlementStarted=performance.now();
 const browser=await chromium.launch({headless:true});
-let backend, ledgerDirectory;
+let backend;
 try {
   for(const [width,height] of [[390,844],[844,390]]) {
     const phaseTiming=createSettlementTiming(()=>performance.now(),settlementStarted),generalPhase=phaseTiming.begin('generic');
@@ -242,17 +264,9 @@ try {
 
     // Exercise the anonymous trial through the original server and its own
     // persistent ledger. Only the two upstream market readers are fixtures.
-    ledgerDirectory=await fs.mkdtemp(join(tmpdir(),'k11520-settlement-browser-'));
-    const sequence=new Map();
     const marketPrice=market=>({BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600})[market];
-    backend=await createK11520Server({dataFile:join(ledgerDirectory,'players.json'),pollIntervalMs:800,
-      readMarket:async({market,now})=>{
-        const n=(sequence.get(market)??0)+1;sequence.set(market,n);
-        return [{market,price:marketPrice(market),updatedAt:now-(quoteStale?60000:0),sequence:n,source:BINANCE_AGGREGATE_SOURCE}];
-      },
-      readIndependent:async({market,now})=>({market,price:marketPrice(market),updatedAt:now,source:BYBIT_TRADES_SOURCE}),
-    });
-    const {port}=await backend.listen({port:0}),trialOrigin='http://127.0.0.1:'+port;
+    backend=await startBrowserTrial(marketPrice,()=>quoteStale);
+    const trialOrigin=backend.origin;
     await page.goto(trialOrigin,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets.some(m=>m.symbol==='ETHUSDT'&&m.status==='LIVE')&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().wallet);
     await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
@@ -412,29 +426,28 @@ try {
     assert.deepEqual(errors,[]);phaseTiming.finish(generalPhase,'COMPLETE');await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'DETERMINISTIC_SIMULATION_FIXTURES',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:s,timing:phaseTiming.snapshot()},null,2));
     await page.close();
     await backend.close();backend=null;
-    await fs.rm(join(ledgerDirectory,'players.json'),{force:true});await fs.rmdir(ledgerDirectory);ledgerDirectory=null;
   }
   if(receiptReviewOnly)console.log('PASS: static order block and both chain56 lookup forms at 390x844 and 844x390');
   else{
-    for(const [width,height] of [[390,844],[844,390]])await navigationConsoleBrowserQA({browser,width,height,base,out,timingOrigin:settlementStarted});
+    for(const [width,height] of [[390,844],[844,390]])await navigationConsoleBrowserQA({browser,width,height,out,timingOrigin:settlementStarted});
     console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
   }
 } finally {
   await browser.close();
   if(backend)await backend.close();
-  if(ledgerDirectory){await fs.rm(join(ledgerDirectory,'players.json'),{force:true});await fs.rmdir(ledgerDirectory)}
 }
 
 // The same two existing CI viewports get a separate guest context and ledger.
 // Only external read-only quote responses are fixtures; every decision uses the
 // real rendered controls, original adapter and original actor/collision clock.
-async function navigationConsoleBrowserQA({browser,width,height,base,out,timingOrigin}){
+async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin}){
   const phaseTiming=createSettlementTiming(()=>performance.now(),timingOrigin),navigationPhase=phaseTiming.begin('navigation');
   const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
   const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],controlChecks:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
-  let eth=4000,sequence=0;
+  let eth=4000,trial,orderPosts=0;
+  const marketPrice=market=>({BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600})[market];
   await page.addInitScript(captureSettlementQuoteRefresh);
-  const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,value=>{eth=value});
+  const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,async value=>{eth=value;await trial.poll()});
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   page.on('pageerror',error=>report.pageErrors.push(String(error)));
   page.on('websocket',socket=>report.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
@@ -451,11 +464,6 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
       if(element)__navigationQA.native.push({type,id:element.id||element.dataset.simClose,isTrusted:event.isTrusted});
     },true);
   });
-  await page.route('https://data-api.binance.vision/**',route=>{
-    const url=new URL(route.request().url()),prices={BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600};
-    const payload=url.pathname.endsWith('/aggTrades')?[{p:String(prices[url.searchParams.get('symbol')]),T:Date.now(),a:++sequence}]:Object.entries(prices).map(([symbol,price])=>({symbol,price:String(price)}));
-    return route.fulfill({contentType:'application/json',body:JSON.stringify(payload)});
-  });
   await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
   await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{
     const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile('node_modules/three/'+route.request().url().slice(prefix.length),'utf8');
@@ -463,7 +471,11 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     await route.fulfill({contentType:'text/javascript',body});
   });
   await page.route('**/*',async route=>{
-    const request=route.request(),url=new URL(request.url()),external=url.origin!==new URL(base).origin;
+    const request=route.request(),url=new URL(request.url()),external=url.origin!==trial.origin;
+    if(!external&&['POST /api/v1/login','POST /api/v1/order','POST /api/v1/order/close','PUT /api/v1/player'].includes(request.method()+' '+url.pathname)){
+      if(url.pathname==='/api/v1/order')orderPosts++;
+      return route.continue();
+    }
     if(request.url()===new URL(KGEN_POOL_REFERENCE_SOURCE.rpc).href&&request.method()==='POST'){
       let payload;try{payload=request.postDataJSON()}catch{}
       if(payload?.jsonrpc==='2.0'&&payload.method==='eth_chainId'&&Array.isArray(payload.params)&&payload.params.length===0){
@@ -560,8 +572,9 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     report.checks[label]={planned:planned.view,moved:{view:moved.view,motion:moved.motion},stopped:stopped.view};await shot(label,'#navigationStop');return moved;
   };
   try{
-    await page.goto(`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
-    await page.waitForFunction(()=>globalThis.__K11520_NAVIGATION_CONSOLE__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT,null,{timeout:15000});
+    trial=await startBrowserTrial(marketPrice);
+    await page.goto(trial.origin,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>globalThis.__K11520_NAVIGATION_CONSOLE__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&globalThis.__K11520_FREE_ORACLE__?.ETHUSDT?.price===4000&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().wallet,null,{timeout:15000});
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();await page.locator('#intro11520').waitFor({state:'hidden'});
     await organ('worldmap');const initial=await snapshot();report.checks.markets=[];
     for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']]){
@@ -590,26 +603,32 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     await (await control('#navigationManagePositions')).click();await page.locator('[data-sim-close]').click();await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='CLOSED');
     await organ('worldmap');await page.locator('#navigationAutopilotSettings summary').click();const beforeAutoSnapshot=await snapshot(),beforeAuto=beforeAutoSnapshot.book.orders.length,beforeAutoState=beforeAutoSnapshot.view.autopilot.state;assert.ok(['DISARMED','STOPPED'].includes(beforeAutoState));
     await (await control('#navigationAutoStart')).click();const missingAck=await snapshot();assert.equal(missingAck.view.autopilot.state,beforeAutoState);assert.equal(missingAck.book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/請先確認/);
+    assert.equal(orderPosts,1,'the single manual order went through the same-origin backend');
     await page.locator('#navigationAutopilotAck').check();const invalidStart=await control('#navigationAutoStart',{expectedToast:'請先確認模擬自駕設定'});
     const feedbackFile=`${width}x${height}-navigation-autopilot-ack-feedback-SYNTHETIC-header.png`,feedbackBegan=Date.now();await page.locator('#sheet .sheetHead').screenshot({path:`${out}/${feedbackFile}`});report.toastEvidence=[{file:feedbackFile,controlIndex:report.controlChecks.length-1,captureElapsedMs:Date.now()-feedbackBegan}];
-    await invalidStart.click();assert.equal((await snapshot()).view.autopilot.state,beforeAutoState);assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/設定未通過/);
+    await invalidStart.click();assert.equal((await snapshot()).view.autopilot.state,'STOPPED');assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/設定未通過/);
     for(const [id,value] of Object.entries({navigationLongAbove:4001,navigationShortBelow:3990,navigationAutoC:1,navigationAutoLots:1,navigationMaxLoss:2,navigationMaxOrders:2}))await page.locator('#'+id).fill(String(value));
     // Staying at the current physical position prevents arrival from being a
     // second reason to stop; this explicit checkbox authorizes continued SIM.
     await setTarget((await snapshot()).view.playerXYZ);await page.locator('#navigationContinue').check();await (await control('#navigationAutoStart')).click();
-    await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.submittedOrders===1);state=await snapshot();assert.equal(state.view.autopilot.config.market,'ETHUSDT');assert.equal(state.view.autopilot.config.axis,'KY');assert.equal(state.view.autopilot.signerRequested,false);assert.equal(state.view.autopilot.broadcast,false);assert.equal(state.book.orders.length,beforeAuto+1);
-    const autoOrderId=state.view.autopilot.orderIds[0];assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.armed=state;
-    await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId),'stop cannot cancel an already-created order');report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
-    const oppositeQuote=await driveQuote('navigation.stopped-opposite-quote',3988);
-    assert.equal(oppositeQuote.observations.ETHUSDT?.price,3988);
-    await page.waitForTimeout(2200);state=await snapshot();assert.equal(state.book.orders.length,beforeAuto+1,'stopped decisions cannot reverse on a later opposite signal');assert.equal(state.view.autopilot.state,'STOPPED');assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.afterOppositeSignal=state;
+    await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.reason==='READ_ONLY_CONTEXT');
+    state=await snapshot();assert.equal(state.view.autopilot.state,'STOPPED');assert.equal(state.view.autopilot.submittedOrders,0);assert.deepEqual(state.view.autopilot.orderIds,[]);
+    assert.equal(state.view.autopilot.signerRequested,false);assert.equal(state.view.autopilot.broadcast,false);
+    assert.deepEqual(state.book.orders,beforeAutoSnapshot.book.orders);assert.deepEqual(state.book.receipts,beforeAutoSnapshot.book.receipts);report.checks.blockedAutopilot=state;
+    await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
+    await phaseTiming.measure('navigation.stopped-opposite-quote',async()=>{
+      eth=3988;await trial.poll();await page.evaluate(()=>globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__());
+      await page.waitForFunction(()=>globalThis.__K11520_FREE_ORACLE__?.ETHUSDT?.price===3988);
+    });
+    await page.waitForTimeout(2200);state=await snapshot();assert.equal(orderPosts,1,'autopilot emitted no new order request');
+    assert.deepEqual(state.book.orders,beforeAutoSnapshot.book.orders);assert.deepEqual(state.book.receipts,beforeAutoSnapshot.book.receipts);assert.equal(state.view.autopilot.state,'STOPPED');report.checks.afterOppositeSignal=state;
     const selectors=['navigationMarket','navigationX','navigationY','navigationZ','navigationGo','navigationStop','navigationTargetPrice','navigationLongAbove','navigationShortBelow','navigationAutoC','navigationAutoLots','navigationMaxLoss','navigationMaxOrders','navigationAutoStart','navigationAutoStop'].map(id=>'#'+id),batchBegan=Date.now();
     const boxes=await phaseTiming.measure('navigation.control-batch',()=>page.locator('body').evaluate(inspectNavigationControls,{selectors}));report.controlBatch={selectors,elapsedMs:Date.now()-batchBegan,count:boxes.length};assert.equal(boxes.length,selectors.length);for(const box of boxes)recordControl(box);assert.equal(report.controlChecks.length,36,'All original navigation control checks must complete');
     assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.networkAuthorityAttempts,[]);assert.ok(state.fixture.providerCalls.every(method=>['eth_accounts','eth_chainId'].includes(method)),'no wallet connect, signer, chain switch or transaction requests');
     assert.ok(state.fixture.native.some(event=>event.id==='navigationGo'&&event.isTrusted));assert.ok(state.fixture.native.some(event=>event.id==='navigationAutoStart'&&event.isTrusted));assert.ok(state.fixture.native.filter(event=>event.type==='click').every(event=>event.isTrusted),'navigation actions use native rendered controls');
     report.functional='PASS';
   }catch(error){report.functional='FAIL';report.error=String(error?.stack||error);try{await shot('failure')}catch{}throw error}
-  finally{try{report.final=await snapshot()}catch{}phaseTiming.finish(navigationPhase,report.functional==='PASS'?'COMPLETE':'FAILED');report.timing=phaseTiming.snapshot();await fs.writeFile(`${out}/${width}x${height}-navigation-result.json`,JSON.stringify(report,null,2));await page.close()}
+  finally{try{report.final=await snapshot()}catch{}phaseTiming.finish(navigationPhase,report.functional==='PASS'?'COMPLETE':'FAILED');report.timing=phaseTiming.snapshot();try{await fs.writeFile(`${out}/${width}x${height}-navigation-result.json`,JSON.stringify(report,null,2))}finally{await page.close();if(trial)await trial.close()}}
 }
 
 // Opt-in P0 acceptance at the actual game entry. This lane never calls a model
@@ -666,7 +685,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
   const expected=Object.fromEntries(assets.map(asset=>[asset.path,asset.sha256]));
   const out=`artifacts/11520-settlement-qa/${baseline?'offline-baseline':'offline-simulation'}`;
   await fs.mkdir(out,{recursive:true});
-  const source='K11520_DETERMINISTIC_SIMULATION',results=[],failures=[];
+  const source=BINANCE_AGGREGATE_SOURCE,results=[],failures=[];
   const profiles=[
     {width:360,height:740,quote:'WAIT',account:null,chain:'0x38'},
     {width:390,height:844,quote:'STALE',account:'0x1111111111111111111111111111111111111111',chain:'0x38'},
@@ -679,10 +698,11 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
   const browser=await chromium.launch({headless:true});
   try{for(const profile of profiles){
     const name=`${profile.width}x${profile.height}-${profile.quote.toLowerCase()}`;
-    const result={profile,head,baseline,simulatedBrowserClock:true,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};results.push(result);
+    const result={profile,head,baseline,simulatedBrowserClock:baseline,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};results.push(result);
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage();
     page.setDefaultTimeout(12000);let stage='raw-source-proof',networkSequence=0;
-    let seedLiquidationAnchor=!baseline&&profile.width===390;
+    let trial,finishTrialSource;
+    const prices={BTCUSDT:100000,ETHUSDT:profile.width===390?4:4000,BNBUSDT:600};
     page.on('pageerror',error=>result.pageErrors.push(String(error)));
     page.on('requestfailed',request=>result.requestFailures.push({url:request.url(),error:request.failure()?.errorText}));
     const finishBrowserSource=attachM1PageSourceProof(page,{base,sourceSha:head,assets,createHash});
@@ -711,14 +731,12 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         if(target)fixture.native.push({type,id:target.id||target.dataset.simClose||target.dataset.simCancel,isTrusted:event.isTrusted,at:Date.now()});
       },true);
     },profile);
-    // Only routed read-only fixtures are served. A single warm profile starts
-    // below 10 USDT so its real deterministic fallback can cross a 1C adverse
-    // distance of one USDT before proving the same receipt and account lifecycle.
+    // The static site sees the specified failure; the separate trial receives
+    // sequenced upstream observations through the real backend's market readers.
     await page.route('https://data-api.binance.vision/**',request=>{
       const url=new URL(request.request().url()),market=url.searchParams.get('symbol');
-      const prices={BTCUSDT:100000,ETHUSDT:seedLiquidationAnchor?4:4000,BNBUSDT:600};
-      const fixtureState=seedLiquidationAnchor?'WARM_LIQUIDATION_ANCHOR':profile.quote;
-      const age=seedLiquidationAnchor?500:fixtureState==='INVALID'?0:60000;
+      const fixtureState=profile.quote;
+      const age=fixtureState==='INVALID'?0:60000;
       const at=Date.now()-age;
       const payload=[{p:fixtureState==='INVALID'?'not-a-price':String(prices[market]),T:at,a:++networkSequence}];
       result.referenceResponses.push({market,state:fixtureState,status:fixtureState==='WAIT'?503:200,payload});
@@ -752,6 +770,15 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     });
     page.on('websocket',socket=>result.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
     const snap=()=>page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot());
+    const driveMarket=async(market,price)=>{
+      const previous=await page.evaluate(market=>__K11520_FREE_ORACLE__[market],market);
+      prices[market]=price;await trial.poll();
+      await page.evaluate(()=>globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__());
+      await page.waitForFunction(({market,price,previous,source})=>{
+        const observation=globalThis.__K11520_FREE_ORACLE__?.[market];
+        return observation?.price===price&&observation.source===source&&observation.sequence>previous.sequence;
+      },{market,price,previous,source});
+    };
     const state=()=>page.evaluate(()=>{
       const text=selector=>document.querySelector(selector)?.textContent||'',s=globalThis.__K11520_SIGNED_C_IMMERSIVE__,button=document.querySelector('#confirmOrder');
       return {at:Date.now(),url:location.href,plane:globalThis.__K11520_3D_CONTROL__?.mode,axis:s?.activeAxis,c:s?.signedC,lots:s?.lots,canonicalSide:s?.canonicalSide,
@@ -801,7 +828,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       await page.locator('#confirm').waitFor({state:'hidden',timeout:12000});
       if(await page.locator('#sheet').evaluate(e=>e.classList.contains('open')))await page.locator('#sheetClose').click();
       await page.locator('#sheet').waitFor({state:'hidden',timeout:12000});
-      if(!await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click();
+      if(await page.locator('#walletPanel').evaluate(e=>!e.inert&&!e.classList.contains('collapsed')))await page.locator('#walletToggle').click();
       if(await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     };
     const organ=async name=>{
@@ -825,7 +852,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       assert.ok(s.providerCalls.every(call=>['eth_accounts','eth_chainId','eth_getBalance','eth_call'].includes(call.method)),'No connect, signer, chain switch or TX request is permitted');
       assert.deepEqual(result.networkAuthorityAttempts,[],'No unmocked RPC, network write or wallet websocket may be attempted');
       assert.ok(result.blockedReadOnlyReferences.every(row=>row.url===new URL(KGEN_POOL_REFERENCE_SOURCE.rpc).href&&row.method==='eth_chainId'&&row.forwarded===false),'only the exact original public-reference first read is failed locally; no real RPC or synthetic price');
-      for(const observation of Object.values(s.publicReference))assert.notEqual(observation.source,source,'Simulation must never become public/REAL provenance');
+      for(const observation of Object.values(s.publicReference))assert.notEqual(observation.source,'K11520_DETERMINISTIC_SIMULATION','Simulation must never become public/REAL provenance');
     };
     const verifyRawSource=async phase=>{
       // APIRequestContext returns raw HTTP bytes. This mandatory exact gate
@@ -841,29 +868,40 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     try{
       await verifyRawSource('BEFORE_BROWSER');
       stage='boot';
-      await page.clock.install({time:new Date()});
+      if(baseline)await page.clock.install({time:new Date()});
+      else await page.addInitScript(captureSettlementQuoteRefresh);
       await page.goto(base+'/'+encodeURI(route),{waitUntil:'domcontentloaded'});
       await waitForSimulationBoot();
       if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();
       await page.locator('#intro11520').waitFor({state:'hidden'});
       await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
-      if(seedLiquidationAnchor){
-        stage='warm-liquidation-anchor';
-        await page.waitForFunction(account=>{
-          const quote=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT;
-          return document.querySelector('#wAddr')?.textContent===account&&quote?.price===4&&quote.source==='BINANCE_PUBLIC_MARKET_DATA_ONLY';
-        },profile.account);
-        result.liquidationSeed=(await snap()).observations.ETHUSDT;
-        seedLiquidationAnchor=false;
-        await page.clock.fastForward(16000);
-        await page.waitForFunction(source=>{
-          const quote=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT;
-          return quote?.source===source&&quote.simulationAnchorPrice===4;
-        },source);
-      }
-      if(!baseline)await page.waitForFunction(source=>['BTCUSDT','ETHUSDT','BNBUSDT'].every(market=>__K11520_SIMULATION_EXCHANGE__.snapshot().observations[market]?.source===source),source);
       await sourceProof();
       await shot('boot');result.boot=await state();assertNoAuthority(result.boot);
+      if(!baseline){
+        stage='unavailable-quotes';result.blockedOrders=[];
+        for(const market of Object.keys(prices))assert.ok(result.referenceResponses.some(row=>row.market===market&&row.state===profile.quote),'missing unavailable quote fixture for '+market);
+        for(const testCase of cases){
+          await select(testCase);
+          const before=await state();await usable('#orderFire');await page.locator('#orderFire').click();
+          await page.waitForFunction(count=>__offlineSimulationQA.feedback.slice(count).some(event=>event.text.includes('等候有效報價'))||document.querySelector('#toast').textContent.includes('等候有效報價'),before.feedback.length);
+          const after=await state();assert.equal(after.confirmOpen,false);assert.equal(after.submitDisabled,true);
+          assert.deepEqual(after.simulation.orders,before.simulation.orders);assert.deepEqual(after.simulation.receipts,before.simulation.receipts);
+          assert.equal(after.native.filter(e=>e.isTrusted&&e.type==='click'&&e.id==='orderFire').length,before.native.filter(e=>e.isTrusted&&e.type==='click'&&e.id==='orderFire').length+1);
+          result.blockedOrders.push({market:testCase.market,side:testCase.side,feedback:after.toast});
+        }
+        await shot('no-effective-quote');stage='backend-boot';
+        trial=await startBrowserTrial(market=>prices[market]);finishTrialSource=attachM1PageSourceProof(page,{base:trial.origin,sourceSha:head,assets,createHash});
+        await page.route(trial.origin+'/api/v1/**',request=>{
+          const req=request.request(),path=new URL(req.url()).pathname;
+          if(['POST /api/v1/login','POST /api/v1/order','POST /api/v1/order/cancel','POST /api/v1/order/close','PUT /api/v1/player'].includes(req.method()+' '+path))return request.continue();
+          return request.fallback();
+        });
+        await page.goto(trial.origin,{waitUntil:'domcontentloaded'});await waitForSimulationBoot();
+        await page.waitForFunction(source=>__K11520_SIMULATION_EXCHANGE__.snapshot().wallet&&['BTCUSDT','ETHUSDT','BNBUSDT'].every(market=>globalThis.__K11520_FREE_ORACLE__?.[market]?.source===source),source);
+        await page.locator('#intro11520').waitFor({state:'hidden'});
+        await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
+        result.trialSource=await finishTrialSource();result.trialBoot=await state();assertNoAuthority(result.trialBoot);
+      }
       if(!baseline&&profile.width===390){
         stage='input-validation';await select({...cases[0],c:0});const count=(await snap()).orders.length;await page.locator('#orderFire').click();
         await page.waitForTimeout(150);const neutral=await state();assert.ok(!neutral.confirmOpen||neutral.submitDisabled,'0C must remain blocked');assert.equal(neutral.simulation.orders.length,count);
@@ -890,8 +928,8 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
           evidence.result='BASELINE_REPRODUCED';assertNoAuthority(evidence.after);continue;
         }
         await page.locator('#confirm.open').waitFor();
-        const anchor=(await snap()).observations[testCase.market]?.simulationAnchorPrice;
-        assert.ok(Number.isFinite(anchor)&&anchor>0,'The observed simulation source must expose its deterministic anchor');
+        const anchor=await page.evaluate(market=>__K11520_FREE_ORACLE__[market].price,testCase.market);
+        assert.ok(Number.isFinite(anchor)&&anchor>0,'The backend must expose a valid raw quote before submission');
         const triggerPrice=anchor+.125;
         await page.locator('#simulationTriggerPrice').fill(String(triggerPrice));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);
@@ -904,17 +942,14 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         assert.equal(order.market,testCase.market);assert.equal(order.axis,testCase.axis);assert.equal(order.c,testCase.c);assert.equal(order.lots,1);
         assert.equal(order.side,testCase.side);assert.equal(order.priceSource,source);assert.equal(order.triggerPrice,triggerPrice);
         assert.equal(evidence.submitted.native.filter(event=>event.id==='confirmOrder'&&event.type==='click'&&event.isTrusted).length,clickCount+1,'One trusted native Submit must reach the application');
-        assert.ok(['PENDING','FILLED'].includes(order.status),'Submission must create an actual lifecycle record');
-        // One full 128-second source cycle is the domain bound, rather than an
-        // arbitrary retry count. Advance only the browser clock; the app's own
-        // timer, observe guard, trigger crossing and settlement remain in use.
-        for(let elapsed=0;elapsed<=128000&&(await snap()).orders.find(o=>o.orderId===order.orderId)?.status==='PENDING';elapsed+=4000)await page.clock.fastForward(4000);
+        assert.equal(order.status,'PENDING','The unchanged quote must not fill the order');
+        await driveMarket(testCase.market,triggerPrice+.125);
         let book=await snap(),filled=book.orders.find(o=>o.orderId===order.orderId);
-        assert.equal(filled.status,'FILLED','The actual deterministic source tick must fill the submitted trigger');
+        assert.equal(filled.status,'FILLED','The first accepted quote across the trigger must fill the submitted order');
         const position=book.positions.find(p=>p.positionId===filled.positionId);assert.equal(position.status,'OPEN');
         assert.equal(book.receipts.filter(r=>r.orderId===order.orderId&&r.kind==='FILL').length,1,'Fill is exactly once');
         assert.equal(book.wallet.lockedMargin,1);evidence.filled=await state();await shot(stage+'-filled');
-        await page.clock.fastForward(4000);book=await snap();const marked=book.positions.find(p=>p.positionId===position.positionId);
+        await driveMarket(testCase.market,position.entry+.125);book=await snap();const marked=book.positions.find(p=>p.positionId===position.positionId);
         assert.equal(marked.status,'OPEN');
         const entryUnit=10**Number(position.entry.toExponential().split('e')[1]);
         const expectedPnl=(marked.mark-position.entry)/entryUnit*marked.c*marked.lots;
@@ -934,47 +969,56 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       }
       if(!baseline&&profile.width===390){
         stage='pending-cancel';await select(cases[0]);await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
-        const anchor=(await snap()).observations.BTCUSDT.simulationAnchorPrice;await page.locator('#simulationTriggerPrice').fill(String(anchor+10));
+        const anchor=await page.evaluate(()=>__K11520_FREE_ORACLE__.BTCUSDT.price);await page.locator('#simulationTriggerPrice').fill(String(anchor+10));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
-        const pending=(await snap()).orders.at(-1);await page.clock.fastForward(4000);assert.equal((await snap()).orders.at(-1).status,'PENDING');
+        const pending=(await snap()).orders.at(-1);await driveMarket('BTCUSDT',anchor+1);assert.equal((await snap()).orders.at(-1).status,'PENDING');
         await page.locator(`[data-sim-cancel="${pending.orderId}"]`).click();await page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.find(o=>o.orderId===id)?.status==='CANCELLED',pending.orderId);
         result.cancel=await state();assert.equal(result.cancel.simulation.receipts.filter(r=>r.orderId===pending.orderId).length,0);await shot('pending-cancelled');
         stage='liquidation';await select(cases.find(c=>c.market==='ETHUSDT'&&c.c===1));await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
-        const ethAnchor=(await snap()).observations.ETHUSDT.simulationAnchorPrice;
-        assert.equal(ethAnchor,4,'the warmed deterministic price can reach the 1C liquidation threshold');
+        const ethAnchor=await page.evaluate(()=>__K11520_FREE_ORACLE__.ETHUSDT.price);
+        assert.ok(ethAnchor>1&&ethAnchor<9,'The fixture remains on floor zero to exercise a one-USDT 1C liquidation distance');
         await page.locator('#simulationTriggerPrice').fill(String(ethAnchor+.125));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
         const liquidationOrder=(await snap()).orders.at(-1);
-        for(let elapsed=0;elapsed<=128000&&(await snap()).orders.find(o=>o.orderId===liquidationOrder.orderId).status==='PENDING';elapsed+=4000)await page.clock.fastForward(4000);
+        await driveMarket('ETHUSDT',ethAnchor+.25);
         const liquidationPosition=(await snap()).positions.find(p=>p.orderId===liquidationOrder.orderId);assert.equal(liquidationPosition.status,'OPEN');result.beforeLiquidation=await state();
-        for(let elapsed=0;elapsed<=128000&&(await snap()).positions.find(p=>p.positionId===liquidationPosition.positionId).status==='OPEN';elapsed+=4000)await page.clock.fastForward(4000);
+        await driveMarket('ETHUSDT',liquidationPosition.entry-1.25);
         result.liquidation=await state();const liquidationReceipt=result.liquidation.simulation.receipts.find(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT');
         assert.equal(liquidationReceipt?.status,'LIQUIDATED');assert.equal(liquidationReceipt.priceSource,source);assert.equal(liquidationReceipt.realizedPnl,-1);assert.equal(liquidationReceipt.marginAfter,0);assert.equal(result.liquidation.simulation.wallet.lockedMargin,0);
         assert.equal(liquidationReceipt.liquidationTrigger,liquidationPosition.entry-1);
-        await organ('history');await page.locator(`[data-receipt="${liquidationReceipt.receiptId}"] > summary`).click();await shot('liquidation');await page.clock.fastForward(8000);assert.equal((await snap()).receipts.filter(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT').length,1,'Liquidation must not replay');
+        await organ('history');await page.locator(`[data-receipt="${liquidationReceipt.receiptId}"] > summary`).click();await shot('liquidation');await driveMarket('ETHUSDT',liquidationPosition.entry-1.5);assert.equal((await snap()).receipts.filter(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT').length,1,'Liquidation must not replay');
         stage='account-isolation';const owned=await snap();
-        await page.evaluate(()=>{__offlineSimulationQA.account='0x2222222222222222222222222222222222222222';__offlineSimulationQA.emit('accountsChanged',[__offlineSimulationQA.account])});
-        await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===0);result.otherAccount=await state();assert.equal(result.otherAccount.simulation.orders.length,0);assertNoAuthority(result.otherAccount);
-        await page.evaluate(()=>{__offlineSimulationQA.account='0x1111111111111111111111111111111111111111';__offlineSimulationQA.emit('accountsChanged',[__offlineSimulationQA.account])});
-        await page.waitForFunction(length=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===length,owned.receipts.length);result.ownerRestored=await state();assert.deepEqual(result.ownerRestored.simulation.receipts,owned.receipts);await shot('owner-restored');
+        const other=await browser.newContext();
+        try{
+          const login=await other.request.post(trial.origin+'/api/v1/login',{data:{},headers:{Origin:trial.origin}});assert.ok(login.ok());
+          const guest=await login.json(),response=await other.request.get(trial.origin+'/api/v1/orders',{headers:{Authorization:'Bearer '+guest.token}});assert.ok(response.ok());
+          const separate=await response.json();assert.deepEqual(separate.orders,[]);assert.deepEqual(separate.positions,[]);assert.deepEqual(separate.receipts,[]);
+          result.otherAccount={orders:separate.orders,positions:separate.positions,receipts:separate.receipts};
+        }finally{await other.close()}
+        result.ownerRestored=await state();assert.deepEqual(result.ownerRestored.simulation.receipts,owned.receipts);assertNoAuthority(result.ownerRestored);await shot('owner-restored');
       }
       if(!baseline){
         stage='reload-recovery';const before=await snap();await page.reload({waitUntil:'domcontentloaded'});
         await waitForSimulationBoot();
         await page.waitForFunction(length=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===length,before.receipts.length,{timeout:12000});
         await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
-        result.reload=await state();assert.deepEqual(result.reload.simulation.orders,before.orders);assert.deepEqual(result.reload.simulation.receipts,before.receipts);assertNoAuthority(result.reload);await shot('reload-recovery');
+        result.reload=await state();assert.deepEqual(result.reload.simulation.orders,before.orders);assert.deepEqual(result.reload.simulation.receipts,before.receipts);assertNoAuthority(result.reload);await shot('reload-recovery');result.trialSource=await finishTrialSource();
       }
       if(!baseline)assertOfflineToastCoverage(result,profile);
       await sourceProof();
       await verifyRawSource('AFTER_BROWSER');
       assert.deepEqual(result.pageErrors,[]);result.status=baseline?'BASELINE_REPRODUCED':'FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
     }catch(error){result.status='FAIL';result.stage=stage;result.error=String(error);result.stack=error.stack;failures.push(`${name}/${stage}: ${error.message}`);result.failureState=await state().catch(()=>null);await shot('failure').catch(()=>{})}
-    finally{result.browserSourceObservedAtExit={...finishBrowserSource.snapshot(),coverageScope:'EXPLICIT_OFFLINE_SIMULATION_ENTRY_AND_EXECUTION_ASSETS_ONLY'};result.lastState=await state().catch(()=>null);await page.evaluate(()=>globalThis.__offlineSimulationQA?.feedbackObserver?.disconnect()).catch(()=>{});await fs.writeFile(`${out}/${name}-result.json`,JSON.stringify(result,null,2));await context.close()}
+    finally{
+      result.browserSourceObservedAtExit={...finishBrowserSource.snapshot(),coverageScope:'EXPLICIT_OFFLINE_SIMULATION_ENTRY_AND_EXECUTION_ASSETS_ONLY'};
+      result.lastState=await state().catch(()=>null);await page.evaluate(()=>globalThis.__offlineSimulationQA?.feedbackObserver?.disconnect()).catch(()=>{});
+      try{await fs.writeFile(`${out}/${name}-result.json`,JSON.stringify(result,null,2))}finally{await context.close();if(trial)await trial.close()}
+    }
   }}finally{
     await browser.close();await fs.writeFile(`${out}/report.json`,JSON.stringify({head,base,baseline,harnessSha256:hash(await fs.readFile(new URL(import.meta.url))),capturedAt:new Date().toISOString(),expectedSourceHashes:expected,expectedSourceAssets:assets,
-      simulatedBrowserClock:true,clockEvidence:'PLAYWRIGHT_VIRTUAL_BROWSER_TIME_ADVANCES_REAL_APPLICATION_TIMERS; NOT_REAL_ELAPSED_MOVEMENT_OR_MARKET_TIME',
-      fixtureScope:'EXTERNAL_READ_ONLY_REFERENCE_AND_SYNTHETIC_EIP1193_ONLY',callChain:'native #orderFire → openOrder → orderInput → simulation adapter preview → native #confirmOrder → executionAction → adapter.submit → placeSimulationOrder → real app tick → observeSimulationPrice',
+      simulatedBrowserClock:baseline,clockEvidence:baseline?'PLAYWRIGHT_VIRTUAL_BROWSER_TIME':'WALL_CLOCK_WITH_SEQUENCED_UPSTREAM_FIXTURES',
+      fixtureScope:baseline?'STATIC_BASELINE_WITH_UNAVAILABLE_MARKET':'STATIC_UNAVAILABLE_QUOTES_AND_LOOPBACK_BACKEND_WITH_UPSTREAM_QUOTE_FIXTURES',
+      callChain:baseline?'historical native order attempt':'native order review and Submit → same-origin backend order → price observation → settlement receipt',
       functional:failures.length?'FAIL':baseline?'BASELINE_REPRODUCED':'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',results,failures},null,2));
   }
   assert.deepEqual(failures,[],'Offline simulation real-entry failures; inspect source-bound JSON and screenshots');
@@ -1055,7 +1099,10 @@ async function localCandidateBrowserQA(){
     const organ=async name=>{await wallet();await page.locator('#walletToggle').click();if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();await page.locator(`#dock [data-organ="${name}"]`).click()};
     try{
       await page.goto(`${process.env.K11520_BASE_URL||'http://127.0.0.1:4182'}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
-      await wait(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT);await page.locator('#intro11520').waitFor({state:'hidden'});
+      // The static candidate displays public market data. Settlement switches
+      // to the candidate EVM's own feed after the player selects its route.
+      await wait(()=>globalThis.__K11520_MARKET_K__?.markets.some(row=>row.symbol==='ETHUSDT'&&row.status==='LIVE'&&row.price===4000)&&globalThis.__K11520_FREE_ORACLE__?.ETHUSDT?.source==='BINANCE_PUBLIC_MARKET_DATA_ONLY');
+      await page.locator('#intro11520').waitFor({state:'hidden'});
       stage='wallet';await wallet();const before=writes;await page.locator('#walletConnect').click();await page.locator('#executionMode').click();await wait(()=>__K11520_EXECUTION__.snapshot().status==='READY');assert.equal(writes,before,'connect and mode read only');
       if((await snap()).exitOnly){
         stage='legacy-exit-only-fixture';
@@ -1491,9 +1538,18 @@ async function m1ReadOnlyBrowserQA(){
         await page.waitForFunction(a=>document.querySelector('#k11520RealTradePreflight')?.dataset.walletAddress?.toLowerCase()===a.toLowerCase(),expected);
         assert.equal(await preflight.getAttribute('data-wallet-identity-scope'),'ACTIVE_SESSION');
         assert.equal((await preflight.getAttribute('data-wallet-address')).toLowerCase(),expected.toLowerCase());
-        const addressLabels=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden').map(el=>el.textContent).flatMap(text=>text.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]));
-        const expectedShort=expected.slice(0,6)+'…'+expected.slice(-4);assert.ok(addressLabels.length>0);
-        for(const label of addressLabels)assert.ok([expected.toLowerCase(),expectedShort.toLowerCase()].includes(label.toLowerCase()),'every visible address label belongs to active account: '+label);
+        const review=page.locator('#k11520Bsc56UnsignedReview');
+        const tokenField='dd[data-bsc56-review-field="TOKEN"]';
+        assert.equal(await review.locator(tokenField).textContent(),'KGEN · '+KGEN_TOKEN_ADDRESS+' · 18 decimals');
+        assert.equal((await review.locator('dd[data-bsc56-review-field="WALLET"]').textContent()).toLowerCase(),expected.toLowerCase());
+        const playerAddresses=await page.evaluate(tokenField=>{
+          const token=document.querySelector('#k11520Bsc56UnsignedReview '+tokenField);
+          return [...document.querySelectorAll('body *')]
+            .filter(el=>el!==token&&el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden')
+            .flatMap(el=>el.textContent.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]);
+        },tokenField);
+        const expectedShort=expected.slice(0,6)+'…'+expected.slice(-4);assert.ok(playerAddresses.length>0);
+        for(const label of playerAddresses)assert.ok([expected.toLowerCase(),expectedShort.toLowerCase()].includes(label.toLowerCase()),'every player address must match the active account: '+label);
         assert.equal(await page.locator('#wBnb').textContent(),s.wallet.testBnbBalance);assert.equal(await page.locator('#wKgen').textContent(),String(s.wallet.testTokenBalance));
         assert.equal(await page.locator('#testnetFinancialControls').isVisible(),false);assert.equal(await page.locator('#executionMode').isVisible(),false);assert.equal(s.writeBlocked,true);
         // Observe two real canonical-owner timer ticks; no sleep or forced UI success.
