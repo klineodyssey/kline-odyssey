@@ -51,7 +51,7 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   const timestamp=()=>{const value=now();assert(Number.isFinite(value)&&value>=0,'INVALID_CLOCK');return value;};
   const isVisible=()=>typeof document==='undefined'||document.visibilityState!=='hidden';
   const snapshot=()=>copy({...view,config,review,active,disposed,payloadHash,evidenceKey,blockedReasons:view.blockedReasons,blockers:view.blockedReasons});
-  function publish() { const value=snapshot();for(const listener of listeners){try{listener(value);}catch{}}return value; }
+  function publish(event) { const value=snapshot();for(const listener of listeners){try{listener(value,event);}catch{}}return value; }
   function invalidate(reason='錢包或頁面已變更，請重新預覽。') { ++generation;review=null;view.receiptCandidate=null;view.status=reason;view.phase=disposed?'DISPOSED':'STALE';publish(); }
   function current(g) { assert(!disposed&&g===generation&&isVisible(),'CONTEXT_CHANGED','錢包、設定或頁面已變更，原預覽作廢。'); }
   async function rpc(method,params=[],g=generation) {
@@ -314,7 +314,12 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
     if(existing)assert(sameRecord({...existing,verifiedAt:undefined},{...evidence,verifiedAt:undefined}),'EVIDENCE_CONFLICT');else saved.evidence.push({...evidence,verifiedAt:timestamp()});
     writeStorage(evidenceKey,saved);current(g);assert(sameRecord(pending(item.account),item),'PENDING_CHANGED');clearPending(item);
     if(evidence.verification.status==='VERIFIED_DEPLOYMENT')view.deployments={...d,[item.contract]:{address:evidence.verification.address,txHash:item.hash,blockNumber:evidence.receipt.blockNumber}};
-    view.phase=evidence.verification.status;view.status=evidence.verification.status==='CONFIRMED_REVERTED'?'原交易已確認失敗，證據已保存；請重新核對原因後再手動預覽。':'原交易與完整證據已保存並讀回；下一步仍須本人重新預覽。';return publish();
+    view.phase=evidence.verification.status;view.status=evidence.verification.status==='CONFIRMED_REVERTED'?'原交易已確認失敗，證據已保存；請重新核對原因後再手動預覽。':'原交易與完整證據已保存並讀回；下一步仍須本人重新預覽。';
+    const {status,kufoMinted}=evidence.verification;
+    if((item.kind==='burn'&&status==='VERIFIED_ALCHEMY')||(item.kind==='approve'&&status==='CONFIRMED')){
+      return publish(Object.freeze({type:'playerReceiptVerified',account:item.account,kind:item.kind,kufoMinted}));
+    }
+    return publish();
   }
   async function recoveryAssurance(item,evidence,g) {
     if(item.submissionAnchor){
@@ -378,7 +383,16 @@ export function createKufoClient({provider,ethers,payload,storage,lockManager,no
   }
   async function withLock(fn) {assert(lockManager&&typeof lockManager.request==='function','WEB_LOCKS_REQUIRED','此瀏覽器缺少安全跨分頁鎖；不送交易。');return lockManager.request(KUFO_LOCK_NAME,{mode:'exclusive',ifAvailable:true},async lock=>{assert(lock,'ANOTHER_TAB_ACTIVE','另一分頁正在處理錢包操作。');return fn();});}
   const events=[];
-  if(typeof provider.on==='function')for(const type of ['accountsChanged','chainChanged','disconnect']){const listener=()=>{if(!(connecting&&type==='accountsChanged'))invalidate('錢包連線已變更，請重新連接並預覽；原交易保留。');view.account=null;view.chainId=null;publish();};provider.on(type,listener);events.push([type,listener]);}
+  if(typeof provider.on==='function')for(const type of ['accountsChanged','chainChanged','disconnect']){
+    const listener=accounts=>{
+      if(!(connecting&&type==='accountsChanged'))invalidate('錢包連線已變更，請重新連接並預覽；原交易保留。');
+      view.account=null;view.chainId=null;
+      // Tell the panel a published account is available, without trusting that event as wallet identity.
+      const visibleAccountChange=type==='accountsChanged'&&!connecting&&Array.isArray(accounts)&&accounts.length>0;
+      publish(visibleAccountChange?'accountsChanged':undefined);
+    };
+    provider.on(type,listener);events.push([type,listener]);
+  }
   const visibility=()=>{if(!isVisible())invalidate('頁面進入背景；不自動接續送出，請返回後重新預覽。');};
   if(typeof document!=='undefined')document.addEventListener('visibilitychange',visibility);
   try{restorePendingView();}catch(error){view.error={code:error.code,message:error.message};view.blockedReasons=[error.code];view.phase='BLOCKED';}

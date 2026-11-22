@@ -494,6 +494,84 @@ test('18911 automatic verification supports a guest while preserving dependency,
   }
 });
 
+test('18911 publishes the original player receipt once from each verification path',async()=>{
+  for(const route of ['verify','resume','recoverPendingHash','reverted']){
+    const h=harness({account:PLAYER});activateFixture(h);await connect(h);
+    const pendingKey='kaios18911.pending.v1';
+    for(const account of [PLAYER,OTHER]){
+      h.allowances.set(normalize(account)+'/'+normalize(h.addresses.KAIOSAlchemyFurnace),BigInt(wei('100')));
+    }
+    const burn={kind:'burn',amount:'100',lifeId:ethers.constants.HashZero};
+    const hash=await submit(h,burn),original=h.client.snapshot().pending;
+    h.account=OTHER;h.provider.emit('accountsChanged',[OTHER]);await h.client.verify();
+    await submit(h,{...burn,amount:'1'});
+    const other=JSON.parse(h.storage.getItem(pendingKey)).records[normalize(OTHER)];
+    h.account=PLAYER;h.provider.emit('accountsChanged',[PLAYER]);await h.client.verify();
+
+    const receipt=h.mine(hash);
+    if(route==='reverted'){receipt.status='0x0';receipt.logs=[];}
+    const events=[];
+    const stop=h.client.subscribe((snapshot,event)=>{
+      if(event?.type==='playerReceiptVerified')events.push({event,account:snapshot.account,pending:snapshot.pending});
+    });
+    const start=h.requests.length;
+    if(route==='recoverPendingHash')await h.client.recoverPendingHash({hash,accepted:true,expectedIntentId:original.intentId});
+    else if(route==='reverted')await h.client.verify();
+    else await h.client[route]();
+    assert.equal(h.client.snapshot().pending,null,route);
+    const expected={type:'playerReceiptVerified',account:PLAYER,kind:'burn',kufoMinted:wei('100000')};
+    assert.deepEqual(events,route==='reverted'?[]:[{event:expected,account:PLAYER,pending:null}],route);
+    const evidence=h.client.exportEvidence().journal.evidence;
+    assert.equal(evidence.length,1,route);
+    assert.equal(evidence[0].intent.hash,hash,route);
+    assert.equal(evidence[0].verification.status,route==='reverted'?'CONFIRMED_REVERTED':'VERIFIED_ALCHEMY',route);
+    const reads=readonlyRequests(h,start).filter(request=>request.method==='eth_getTransactionReceipt');
+    assert.ok(reads.length&&reads.every(request=>request.params[0]===hash),route);
+    await h.client.verify();
+    h.account=OTHER;h.provider.emit('accountsChanged',[OTHER]);await h.client.verify();
+    assert.equal(events.length,route==='reverted'?0:1,route);
+    assert.deepEqual(h.client.snapshot().pending,other,route);
+    assert.equal(h.sends.length,2,route);
+    stop();h.client.dispose();
+  }
+});
+
+test('18911 account events restore a pending player after leaving a wallet with only a cancelled preview',async()=>{
+  const h=harness({account:PLAYER});activateFixture(h);await connect(h);
+  for(const account of [PLAYER,OTHER]){
+    h.allowances.set(normalize(account)+'/'+normalize(h.addresses.KAIOSAlchemyFurnace),BigInt(wei('1')));
+  }
+  const request={kind:'burn',amount:'1',lifeId:ethers.constants.HashZero};
+  const hash=await submit(h,request), pendingKey='kaios18911.pending.v1',original=h.storage.data.get(pendingKey);
+  const changes=[];
+  const stop=h.client.subscribe((snapshot,event)=>{if(event)changes.push({phase:snapshot.phase,account:snapshot.account,pending:snapshot.pending,event});});
+
+  h.account=OTHER;h.provider.emit('accountsChanged',[OTHER]);
+  let start=h.requests.length;
+  const second=await h.client.verify();
+  assert.equal(second.account,OTHER);
+  assert.equal(second.pending,null);
+  assert.ok(!readonlyRequests(h,start).some(request=>request.method==='eth_getTransactionReceipt'));
+  await h.client.prepare(request);
+  assert.ok(h.client.snapshot().review);
+  h.client.invalidate('Preview cancelled');
+
+  h.account=PLAYER;h.provider.emit('accountsChanged',[PLAYER]);
+  assert.deepEqual(changes.at(-1),{phase:'STALE',account:null,pending:null,event:'accountsChanged'});
+  start=h.requests.length;
+  const first=await h.client.verify();
+  assert.equal(first.account,PLAYER);
+  assert.equal(first.pending.hash,hash);
+  assert.deepEqual(readonlyRequests(h,start).filter(request=>request.method==='eth_getTransactionReceipt').map(request=>request.params[0]),[hash]);
+  assert.equal(h.storage.data.get(pendingKey),original);
+  assert.equal(h.sends.length,1);
+
+  const signals=changes.length;
+  h.account=null;h.provider.emit('accountsChanged',[]);h.provider.emit('disconnect',{code:4900});h.provider.emit('chainChanged','0x38');
+  assert.equal(changes.length,signals,'no account refresh signal is created for empty, disconnect or chain-change events');
+  stop();h.client.dispose();
+});
+
 test('18911 automatic verification archives the exact mined intent and discovers newly activated routes without another send',async()=>{
   const first=harness();await connect(first);const hash=await submit(first,{kind:'deploy',contract:'KUFO'});first.mine(hash);const start=first.requests.length;
   const verified=await first.client.verify();assert.equal(verified.pending,null);assert.equal(verified.deployments.KUFO.txHash,hash);assert.equal(first.sends.length,1);assert.equal(verified.review,null);readonlyRequests(first,start);

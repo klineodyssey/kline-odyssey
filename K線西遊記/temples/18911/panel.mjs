@@ -1,4 +1,4 @@
-import {createKufoClient} from './kufo-client.mjs?v=15c88a7b';
+import {createKufoClient} from './kufo-client.mjs?v=dd461eab';
 
 const PAYLOAD_SHA256='b4c9a5f85dc50074bf016796110c891e0d010561a66e8042163bf3cb29a6714c';
 const ORDER=['KUFO','KAIOSAlchemyFurnace','KUFOOutputJindouyun168888','KSHIP','KSHIPConverter'];
@@ -462,11 +462,16 @@ function initializeClient(selected){
  let storage;
  try{storage=window.localStorage;}catch{throw Object.assign(new Error('瀏覽器拒絕存取交易紀錄，無法安全送單。'),{code:'STORAGE_READ_FAILED'});}
  client=createKufoClient({provider,ethers:window.ethers,payload,storage,lockManager:navigator.locks});
- unsubscribe=client.subscribe(snapshot=>{
+ unsubscribe=client.subscribe((snapshot,event)=>{
   if(approvalFollowUp&&(!same(snapshot.account,approvalFollowUp.account)||Number(snapshot.chainId)!==56))approvalFollowUp=null;
-  const accountInvalidated=view?.account&&snapshot.pending&&snapshot.phase==='STALE'&&!snapshot.account;
+  const accountInvalidated=view?.account&&snapshot.phase==='STALE'&&!snapshot.account&&
+    (snapshot.pending||(event==='accountsChanged'&&!verifyStopped));
   view=snapshot;
-  if(accountInvalidated){verifyStopped='';verifyFailures=0;lastError='';playerReceiptStatus=null;scheduleVerification(0);}
+  if(playerReceiptStatus&&(!same(snapshot.account,playerReceiptStatus.account)||Number(snapshot.chainId)!==56))playerReceiptStatus=null;
+  if(event?.type==='playerReceiptVerified'&&Number(snapshot.chainId)===56&&same(snapshot.account,event.account)){
+   playerReceiptStatus={account:event.account,approved:event.kind==='approve',kufoMinted:event.kufoMinted};
+  }
+  if(accountInvalidated){verifyStopped='';verifyFailures=0;lastError='';scheduleVerification(0);}
   render();
  });
  scheduleVerification(0);
@@ -687,12 +692,6 @@ function originalReceipt(current,{intentId,hash}){
  const {journal}=current.exportEvidence();
  return journal.evidence.find(({intent})=>intent?.intentId===intentId&&same(intent.hash,hash));
 }
-function rememberPlayerReceipt(current,pending){
- if(current.snapshot().pending)return;
- const receipt=originalReceipt(current,pending),verification=receipt?.verification;
- if(receipt?.intent.kind==='approve'&&verification?.status==='CONFIRMED')playerReceiptStatus={account:pending.account,approved:true};
- if(receipt?.intent.kind==='burn'&&verification?.status==='VERIFIED_ALCHEMY')playerReceiptStatus={account:pending.account,kufoMinted:verification.kufoMinted};
-}
 async function recoverReviewedHash(){
  if(uiBusy||$('recoverPendingHash').disabled||!canCheckPending(view))return;
  const pending=view.pending,hash=$('receiptHash').value.trim();
@@ -710,7 +709,6 @@ async function recoverReviewedHash(){
   $('acceptRecoveryHash').checked=false;
   if(verifyStopped===UNKNOWN_HASH_STOP)verifyStopped='';
   const player=['approve','burn'].includes(pending.kind);
-  if(player)rememberPlayerReceipt(current,{...pending,hash});
   render();
   if(!pageAway&&document.visibilityState==='visible')$(player?'alchemyReason':'appStatus').scrollIntoView({behavior:'auto',block:'center'});
  });
@@ -729,7 +727,6 @@ function checkAlchemyPending(){
    if(found){
     await current.recoverPendingHash({hash:found.hash,accepted:true,expectedIntentId:pending.intentId});
     if(!isCurrent())return;
-    rememberPlayerReceipt(current,{...pending,hash:found.hash});
     if(verifyStopped===UNKNOWN_HASH_STOP)verifyStopped='';
     if(current.snapshot().phase!=='CONFIRMED_REVERTED')await current.refresh();
    }else{
@@ -745,7 +742,6 @@ function checkAlchemyPending(){
   await current.verify();
   if(!isCurrent())return;
   lastVerifiedAt=Date.now();
-  rememberPlayerReceipt(current,pending);
   await continueAlchemy(current,isCurrent);
   if(isCurrent()&&current.snapshot().pending)$('pendingPanel').scrollIntoView({block:'start'});
  });

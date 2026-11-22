@@ -165,9 +165,9 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
     // This QA-only chain ledger survives a real page reload. It is separate
     // from every production localStorage pending/journal/archive key.
     const transactions=new Map(storedLedger?.transactions),receipts=new Map(storedLedger?.receipts),blocks=new Map(storedLedger?.blocks),deployed=new Map(storedLedger?.deployed),proposals=new Map(storedLedger?.proposals),codeOverrides=new Map();
-    const allowances=new Map(storedLedger?.allowances);
+    const allowances=new Map(storedLedger?.allowances),alchemyProofs=new Map(storedLedger?.alchemyProofs);
     const allowanceKey=(owner,spender)=>JSON.stringify([normalized(owner),normalized(spender)]);
-    function persistLedger(){sessionStorage.setItem(qaLedgerKey,JSON.stringify({scope:'SYNTHETIC_CHAIN_ONLY',programCommit:payload.programCommit,sendCount:state.sendCount,transactions:[...transactions],receipts:[...receipts],blocks:[...blocks],deployed:[...deployed],proposals:[...proposals],allowances:[...allowances]}));}
+    function persistLedger(){sessionStorage.setItem(qaLedgerKey,JSON.stringify({scope:'SYNTHETIC_CHAIN_ONLY',programCommit:payload.programCommit,sendCount:state.sendCount,transactions:[...transactions],receipts:[...receipts],blocks:[...blocks],deployed:[...deployed],proposals:[...proposals],allowances:[...allowances],alchemyProofs:[...alchemyProofs]}));}
     const counters=new Map();
     let qaVisibility='visible';
     let readFailure=null;
@@ -219,6 +219,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
           const initial=activeAlchemy&&normalized(args[0])===normalized(state.account)&&normalized(args[1])===normalized(deployed.get('KAIOSAlchemyFurnace')?.address)?E.parseEther(initialAllowance):0;
           return [allowances.get(allowanceKey(args[0],args[1]))??initial];
         }
+        if(method==='alchemyBurnRecord')return [alchemyProofs.get(normalized(args[0]))?.burn];
         if(method==='decimals')return [18];
         if(method==='totalSupply')return [E.parseEther('10000')];
       }
@@ -238,6 +239,8 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='firstBirthMonth')return [date.getUTCMonth()+1];
         if(method==='maximumGroupId')return [Math.min(4294967295,(4294967292-date.getUTCFullYear()+1)*12)];
         if(method==='calendarConfig')return [[cfg.version,cfg.activationTime,28800,cfg.constellationByMonth]];
+        if(method==='proofMinted')return [alchemyProofs.has(normalized(args[0]))];
+        if(method==='mintOrigin')return [alchemyProofs.get(normalized(args[0]))?.origin];
         if(method==='cap')return [E.parseEther('72000000000000')];
         if(method==='balanceOf'||method==='totalSupply'||method==='totalMintedFromAlchemy')return [0];
       }
@@ -524,6 +527,42 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         receipts.set(hash,{transactionHash:hash,status,blockNumber:b.number,blockHash:b.hash,from:tx.from,to:kaios,logs});
         persistLedger();
         return {hash,status,amount,spender,scope:'SYNTHETIC_MINED_APPROVAL_ONLY'};
+      },
+      mineBurn(hash,reverted=false){
+        const tx=transactions.get(hash),furnace=deployed.get('KAIOSAlchemyFurnace')?.address;
+        if(!tx||receipts.has(hash)||normalized(tx.to)!==normalized(furnace))throw Error('Synthetic mining requires an original unmined burn');
+        const parsed=interfaces.KAIOSAlchemyFurnace.parseTransaction({data:tx.input});
+        if(parsed.name!=='burnForKufo')throw Error('Unexpected synthetic alchemy operation');
+        const E=window.ethers.utils,[amount,beneficiary,lifeId]=parsed.args,owner=tx.from;
+        const b=block(Math.max(...blocks.keys())+1),bornAt=Number(BigInt(b.timestamp)),status=reverted?'0x0':'0x1';
+        Object.assign(tx,{blockNumber:b.number,blockHash:b.hash});
+        const logs=[];
+        if(!reverted){
+          const cfg=deployed.get('KUFO').config,kufo=amount.mul(1000),required=amount.div(1000),observed=E.parseEther('10');
+          const proofId=E.id('18911 synthetic alchemy proof '+hash),destinationCode=E.id('KAIOS.POINT.168888.JINDOUYUN.KUFO.OUTLET');
+          const date=new Date((bornAt+28800)*1000),birthYear=date.getUTCFullYear(),birthMonth=date.getUTCMonth()+1;
+          const firstYear=new Date((Number(cfg.activationTime)+28800)*1000).getUTCFullYear(),groupId=(birthYear-firstYear)*12+birthMonth;
+          const calendarHash=E.keccak256(E.defaultAbiCoder.encode(['bytes32','uint64','int32','uint8[12]'],[cfg.version,cfg.activationTime,cfg.utcOffsetSeconds,cfg.constellationByMonth]));
+          const event=(name,label,args)=>{
+            const iface=interfaces[name],encoded=iface.encodeEventLog(iface.getEvent(label),args);
+            return {...encoded,address:payload.dependencies[name]?.address??deployed.get(name).address,transactionHash:hash,blockHash:b.hash,removed:false};
+          };
+          logs.push(event('kaios','Transfer',[owner,zero,amount]),
+            event('kaios','KAIOSBurnedForAlchemy',[alchemyProofs.size+1,proofId,owner,beneficiary,furnace,amount,kufo,lifeId,destinationCode]),
+            event('KAIOSAlchemyFurnace','KgenBalanceVerified',[proofId,owner,observed,required]),
+            event('KAIOSAlchemyFurnace','ImmediateAlchemyCreated',[proofId,owner,beneficiary,amount,kufo,destinationCode]),
+            event('KAIOSAlchemyFurnace','ImmediateAlchemyConsumed',[proofId,beneficiary,kufo]),
+            event('KUFO','ImmediateAlchemyMinted',[proofId,groupId,beneficiary,kufo,bornAt]),
+            event('KUFOOutputJindouyun168888','KUFOReleased',[proofId,beneficiary,kufo,groupId]),
+            event('KUFO','Transfer',[zero,beneficiary,kufo]));
+          alchemyProofs.set(normalized(proofId),{
+            burn:{owner,beneficiary,furnace,kaiosBurned:amount.toString(),expectedKufo:kufo.toString(),lifeId,destinationCode,blockNumber:b.number,timestamp:bornAt},
+            origin:{beneficiary,amount:kufo.toString(),bornAt,birthYear,birthMonth,birthTierId:birthMonth,birthConstellation:cfg.constellationByMonth[birthMonth-1],groupId,calendarHash},
+          });
+          allowances.set(allowanceKey(owner,furnace),E.parseEther(initialAllowance).sub(amount).toString());
+        }
+        receipts.set(hash,{transactionHash:hash,status,blockNumber:b.number,blockHash:b.hash,from:owner,to:tx.to,logs});
+        persistLedger();
       },
       setPendingOrgan(organ,remainingSeconds){
         const names={Furnace:['KAIOSAlchemyFurnace','KAIOS.ORGAN.FURNACE.18911'],Output:['KUFOOutputJindouyun168888','KAIOS.ORGAN.KUFO.OUTPUT.168888'],Converter:['KSHIPConverter','KAIOS.ORGAN.KSHIP.CONVERTER']};
@@ -998,9 +1037,10 @@ async function runProfile(browser,width,height){
   });
   await runScenario(browser,profile,'account-switch',{},async(page,row)=>{
     await ownerReview(page,row);
-    await page.evaluate(other=>window.__18911WalletQA.changeAccount(other),OTHER);await phase(page,'STALE');
+    const beforeSwitch=row.rpc.length;
+    await page.evaluate(other=>window.__18911WalletQA.changeAccount(other),OTHER);await phase(page,'CONNECTED');await autoSettled(page);
     assert.equal(await page.locator('#reviewPanel').isVisible(),false);assert.equal(row.sendRequests.length,0);
-    await connect(page);await phase(page,'CONNECTED');
+    assert.ok(!row.rpc.slice(beforeSwitch).some(item=>item.method==='eth_requestAccounts'),'account readback does not request new authorization');
     assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OTHER.toLowerCase());
     assert.equal(await page.locator('#prepareDeploy').isEnabled(),false,'account switching cannot reuse the previous owner review');
     await capture(page,row,'switched');
@@ -1811,6 +1851,43 @@ async function runPlayerConfirmationScenarios(browser,profile){
       row.continuousAlchemy={amount,lifeId,receiptVerified:true,automaticBurnRequests:0,approvalRequests:1,explicitBurnRequests:1};
     });
   }
+  for(const route of ['player','page','automatic','pending','reverted']){
+    await runScenario(browser,profile,'player-original-burn-'+route,{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
+      const second='0x2222222222222222222222222222222222222222';
+      await connect(page);await phase(page,'CONNECTED');
+      await playerBurnReview(page,row);await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+      const original=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),PENDING_KEY);
+      await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),second);await phase(page,'CONNECTED');await autoSettled(page);
+      await page.locator('#kaiosAmount').fill('1');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+      await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+      const secondRecord=await page.evaluate(({key,second})=>JSON.parse(localStorage.getItem(key)).records[second],{key:PENDING_KEY,second});
+      await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),OTHER);await phase(page,'PENDING');await autoSettled(page);
+      const reverted=route==='reverted';
+      await page.evaluate(({hash,reverted})=>window.__18911WalletQA.mineBurn(hash,reverted),{hash:original.hash,reverted});
+      const start=row.rpc.length,sendCount=row.sendRequests.length;
+      if(route==='automatic')await automaticRead(page,row);
+      else await page.locator(route==='page'?'#refreshStatus':route==='pending'?'#resumePending':'#checkAlchemyPending').click();
+      await phase(page,reverted?'CONFIRMED_REVERTED':route==='pending'?'VERIFIED_ALCHEMY':'CONNECTED');await autoSettled(page);
+      const detail=await page.locator('#alchemyReason').textContent();
+      if(reverted)assert.match(detail,/原交易已確認失敗/);
+      else assert.match(detail,/已鑄出 100000\.0 KUFO/);
+      const evidence=Object.values(await journalBytes(page)).flatMap(raw=>JSON.parse(raw).evidence);
+      assert.equal(evidence.length,1);
+      assert.equal(evidence[0].intent.hash,original.hash);
+      assert.equal(evidence[0].verification.status,reverted?'CONFIRMED_REVERTED':'VERIFIED_ALCHEMY');
+      const reads=row.rpc.slice(start).filter(item=>item.method==='eth_getTransactionReceipt');
+      assert.ok(reads.length&&reads.every(item=>item.receiptHash===original.hash));
+      const result=await geometry(page,'#alchemyReason',{center:true});
+      assert.ok(result.visible&&result.inView,'the original alchemy result is readable in the viewport');
+      await capture(page,row,'original-burn-result');
+      await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),second);
+      if(reverted)await page.locator('#refreshStatus').click();
+      await phase(page,'PENDING');await autoSettled(page);
+      assert.doesNotMatch(await page.locator('#alchemyReason').textContent(),/100000\.0 KUFO|原交易已確認失敗/);
+      assert.deepEqual(await page.evaluate(({key,second})=>JSON.parse(localStorage.getItem(key)).records[second],{key:PENDING_KEY,second}),secondRecord);
+      assert.equal(row.sendRequests.length,sendCount);
+    });
+  }
   await runScenario(browser,profile,'player-check-saved-approval',{account:OTHER,activeAlchemy:true,initialAllowance:'0',clock:true},async(page,row)=>{
     await connect(page);await phase(page,'CONNECTED');
     await page.locator('#kaiosAmount').fill('10');
@@ -1954,6 +2031,26 @@ async function runPlayerConfirmationScenarios(browser,profile){
     assert.equal(row.sendRequests.length,1);
     const originalJournal=await journalBytes(page);
 
+    async function assertFirstReceiptOnly(start,expectedBytes,expectedSends){
+      const reads=row.rpc.slice(start);
+      const receipts=reads.filter(item=>item.method==='eth_getTransactionReceipt');
+      assert.ok(receipts.length>0&&receipts.every(item=>item.receiptHash===original.hash),'only the first account original hash is checked');
+      assert.ok(!reads.some(item=>item.method==='eth_requestAccounts'),'receipt readback never requests wallet authorization');
+      assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OTHER.toLowerCase());
+      assert.ok(await page.locator('#playerPanel #checkAlchemyPending').isVisible());
+      assert.ok(await page.locator('#prepareAlchemy').isDisabled());
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),expectedBytes,'original pending bytes stay unchanged');
+      assert.deepEqual(await journalBytes(page),originalJournal);
+      assert.equal(row.sendRequests.length,expectedSends,'receipt readback never resubmits');
+    }
+
+    async function reloadFirstAccount(expectedBytes,expectedSends,label){
+      const beforeReload=row.rpc.length;
+      await page.reload({waitUntil:'load'});await phase(page,'PENDING');await autoSettled(page);
+      await assertFirstReceiptOnly(beforeReload,expectedBytes,expectedSends);
+      await touchTarget(page,'#checkAlchemyPending');await capture(page,row,label);
+    }
+
     const beforeSecondAccount=row.rpc.length;
     await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),secondPlayer);
     await phase(page,'CONNECTED');await autoSettled(page);
@@ -1976,6 +2073,17 @@ async function runPlayerConfirmationScenarios(browser,profile){
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalRaw,'connecting and previewing preserve the first legacy bytes');
     assert.ok(!row.rpc.slice(beforeSecondAccount).some(item=>item.receiptHash===original.hash),'the second player never checks the first player receipt');
 
+    await page.locator('#cancelReview').click();await autoSettled(page);
+    const beforeReturningWithoutSecondOrder=row.rpc.length;
+    await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),OTHER);
+    await phase(page,'PENDING');await autoSettled(page);
+    await assertFirstReceiptOnly(beforeReturningWithoutSecondOrder,originalRaw,1);
+    await reloadFirstAccount(originalRaw,1,'first-original-reloaded-after-second-preview');
+
+    await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),secondPlayer);
+    await phase(page,'CONNECTED');await autoSettled(page);
+    await page.locator('#kaiosAmount').fill('70');
+    await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
     await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
     assert.equal(row.sendRequests.length,2);
     assert.equal(row.sendRequests[1].transaction.from.toLowerCase(),secondPlayer);
@@ -1993,15 +2101,11 @@ async function runPlayerConfirmationScenarios(browser,profile){
     const beforeFirstAccount=row.rpc.length;
     await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),OTHER);
     await phase(page,'PENDING');await autoSettled(page);
-    assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OTHER.toLowerCase());
-    assert.ok(await page.locator('#playerPanel #checkAlchemyPending').isVisible());
-    assert.equal(await page.locator('#prepareAlchemy').isEnabled(),false,'the first player still cannot send a duplicate');
+    await assertFirstReceiptOnly(beforeFirstAccount,scopedRaw,2);
+    const beforeManualCheck=row.rpc.length;
     await page.locator('#playerPanel #checkAlchemyPending').click();await phase(page,'PENDING');await autoSettled(page);
-    assert.ok(row.rpc.slice(beforeFirstAccount).some(item=>item.receiptHash===original.hash),'the first player still checks the original hash');
-    assert.ok(!row.rpc.slice(beforeFirstAccount).some(item=>item.receiptHash===second.hash),'the first player never checks the second player receipt');
-    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),scopedRaw);
-    assert.deepEqual(await journalBytes(page),originalJournal);
-    assert.equal(row.sendRequests.length,2,'switching accounts and verifying never resubmit either transaction');
+    await assertFirstReceiptOnly(beforeManualCheck,scopedRaw,2);
+    await reloadFirstAccount(scopedRaw,2,'first-original-reloaded-with-two-pending-accounts');
   });
   await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
     const alchemyNotice=page.locator('#alchemyReason');
