@@ -847,7 +847,7 @@ test('camera QA reacquires only rejected native origins with a fixed budget and 
 
 test('offline confirmation readiness observes rendered animation and geometry with a bounded fail-closed wait',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
- const start=source.indexOf('async function waitForOfflineConfirmationGeometry('),fn=source.slice(start,source.indexOf('async function offlineSimulationBrowserQA(',start));
+ const start=source.indexOf('async function waitForOfflineConfirmationGeometry('),fn=source.slice(start,source.indexOf('\n}',start)+2);
  async function scenario(kind){
   let frame=0;const record={selector:'#confirmOrder'},qa={};
   const surface={id:'confirm',tagName:'DIV',classList:{contains:()=>kind!=='hidden'},parentElement:null,getAnimations:()=>kind==='forever'||(kind==='animation'&&frame<3)?[{playState:'running',pending:frame===1,currentTime:frame*16,effect:{getComputedTiming:()=>({progress:.25})}}]:[]};
@@ -922,15 +922,42 @@ test('toast visual assertions cannot prevent the existing failure screenshot cap
 });
 
 
-test('offline toast visual gate cannot pass without actual preview and history observations',async()=>{
+test('offline order review requires the visible quote and terms for the selected side',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
- const start=source.indexOf('function assertOfflineToastCoverage('),fn=source.slice(start,source.indexOf('async function offlineSimulationBrowserQA(',start)),context={assert};
- runInNewContext(fn+'globalThis.check=assertOfflineToastCoverage;',context);
- assert.throws(()=>context.check({}, {width:390}),/order-preview feedback coverage/);
- const preview={panel:'confirm',stage:'BTCUSDT-LONG-preview'},history={panel:'sheet',stage:'BTCUSDT-LONG-close-receipt'};
- assert.throws(()=>context.check({toastLayout:[preview]}, {width:390}),/history feedback coverage/);
- assert.doesNotThrow(()=>context.check({toastLayout:[preview,history]}, {width:390}));assert.doesNotThrow(()=>context.check({toastLayout:[preview]}, {width:360}));
- assert.match(source,/if\(!baseline\)assertOfflineToastCoverage\(result,profile\);/,'immutable baseline stays a reproduction lane');
+ const checks=source.slice(source.indexOf('function assertRenderedExchangeRows('),source.indexOf('async function offlineSimulationBrowserQA('));
+ const {FREE_ORACLE_MAX_AGE_MS}=await import('../runtime/public-market-quotes.mjs');
+ const check=runInNewContext(checks+'assertOrderReview',{assert,FREE_ORACLE_MAX_AGE_MS});
+ const trade={market:'BTCUSDT',axis:'KX',side:'SHORT',c:-1},quote={source:'fixture',anchor:100000,triggerPrice:100000.125};
+ const rows={MARKET:'BTCUSDT',SIDE:'SHORT',AXIS:'KX','C / LEVERAGE / LOTS':'-1C / 1× / 1','PRICE SOURCE':'fixture',
+   'CURRENT PRICE':'100000','TRIGGER PRICE':'100000.125','REQUIRED MARGIN':'1 KGEN','報價時間':'2026-11-22T17:03:13Z'};
+ const panel={visible:true,scrolledRowInView:true,readAt:Date.parse(rows['報價時間']),rows,live:'polite'};
+ check(panel,trade,quote);
+ assert.throws(()=>check({...panel,visible:false},trade,quote),/visibly rendered/);
+ assert.throws(()=>check({...panel,scrolledRowInView:false},trade,quote),/inside the viewport/);
+ assert.throws(()=>check({...panel,readAt:panel.readAt+FREE_ORACLE_MAX_AGE_MS+1},trade,quote),/must be current/);
+ for(const [label,value] of Object.entries(rows)){
+   assert.throws(()=>check({...panel,rows:{...rows,[label]:value+' INVALID'}},trade,quote),{code:'ERR_ASSERTION'});
+ }
+ assert.match(source,/review\.evaluate\(readRenderedExchangePanel,'MARKET'\)/);
+ assert.match(source,/assertOrderReview\(evidence\.renderedPreview,testCase,/);
+});
+
+test('expanded settlement review binds the displayed receipt and locale-rounded profit to the ledger',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const checks=source.slice(source.indexOf('function assertRenderedExchangeRows('),source.indexOf('async function offlineSimulationBrowserQA('));
+ const check=runInNewContext(checks+'assertSettlementReview',{assert});
+ const receipt={receiptId:'SIM-R-29',axis:'KY',status:'LIQUIDATED',orderId:'SIM-O-26',positionId:'SIM-P-27',market:'ETHUSDT',
+   priceSource:'fixture',settlementPrice:3,marginBefore:1,marginAfter:0,rawPnl:-1.25000025,realizedPnl:-1};
+ const panel={visible:true,scrolledRowInView:true,receiptId:receipt.receiptId,open:true,summary:'SIM-R-29 · LIQUIDATED · KY',locale:'de-DE',rows:{
+   'ORDER ID':receipt.orderId,'POSITION ID':receipt.positionId,MARKET:receipt.market,'PRICE SOURCE':'fixture','SETTLEMENT / EXIT':'3',
+   'MARGIN BEFORE / AFTER':'1 / 0','RAW / REALIZED PNL':'-1,25 / -1'}};
+ check(panel,receipt);
+ for(const change of [{open:false},{receiptId:'SIM-R-28'},{summary:'SIM-R-29 · CLOSED · KY'},{rows:{}},
+   {rows:{...panel.rows,'RAW / REALIZED PNL':'-1 / -1'}}]){
+   assert.throws(()=>check({...panel,...change},receipt),{code:'ERR_ASSERTION'});
+ }
+ assert.match(source,/reviewSettlement\(receipt,stage\+'-close-receipt'\)/);
+ assert.match(source,/reviewSettlement\(liquidationReceipt,'liquidation'\)/);
 });
 
 

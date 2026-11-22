@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createK11520Server,BINANCE_AGGREGATE_SOURCE,BYBIT_TRADES_SOURCE} from '../backend/server.mjs';
 import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
+import {FREE_ORACLE_MAX_AGE_MS} from '../runtime/public-market-quotes.mjs';
 import {KGEN_TOKEN_ADDRESS} from '../runtime/evm-wallet-runtime.mjs';
 
 async function startBrowserTrial(prices,stale=()=>false){
@@ -632,9 +633,59 @@ async function waitForOfflineConfirmationGeometry(page,record){
   finally{record.observation=await page.evaluate(()=>globalThis.__offlineSimulationQA.confirmGeometry).catch(()=>null)}
 }
 
-function assertOfflineToastCoverage(result,profile){
-  assert.ok(result.toastLayout?.some(sample=>sample.panel==='confirm'&&sample.stage.endsWith('-preview')),'Actual visible native order-preview feedback coverage is required');
-  if(profile.width===390)assert.ok(result.toastLayout?.some(sample=>sample.panel==='sheet'&&(sample.stage.endsWith('-close-receipt')||sample.stage==='liquidation')),'Actual visible settlement/history feedback coverage is required');
+function readRenderedExchangePanel(panel,scrolledLabel){
+  const visible=element=>element?.checkVisibility({checkOpacity:true,checkVisibilityCSS:true})&&element.getClientRects().length>0;
+  const rows={};
+  let scrolledRowInView=false;
+  for(const row of panel.querySelectorAll(':scope > dl.exchangeRows > div')){
+    const label=row.querySelector('dt'),value=row.querySelector('dd');
+    if(!visible(label)||!visible(value))continue;
+    const key=label.innerText.trim();
+    rows[key]=value.innerText.trim();
+    if(key===scrolledLabel){
+      scrolledRowInView=[label,value].every(cell=>{
+        const rect=cell.getBoundingClientRect();
+        const hit=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
+        return !!hit&&cell.contains(hit);
+      });
+    }
+  }
+  const summary=panel.querySelector(':scope > summary');
+  return {
+    visible:visible(panel),rows,scrolledRowInView,readAt:Date.now(),live:panel.getAttribute('aria-live'),
+    receiptId:panel.dataset.receipt,open:panel.open,summary:visible(summary)?summary.innerText.trim():null,
+    locale:Intl.NumberFormat().resolvedOptions().locale,
+  };
+}
+
+function assertRenderedExchangeRows(panel,expected){
+  assert.ok(panel.visible,'Exchange panel must be visibly rendered');
+  assert.equal(panel.scrolledRowInView,true,'Scrolled label and value must be visible inside the viewport');
+  for(const [label,value] of Object.entries(expected)){
+    assert.equal(panel.rows[label],String(value),'Rendered '+label);
+  }
+}
+
+function assertOrderReview(panel,testCase,{source,anchor,triggerPrice}){
+  assert.equal(panel.live,'polite');
+  assertRenderedExchangeRows(panel,{
+    MARKET:testCase.market,SIDE:testCase.side,AXIS:testCase.axis,'C / LEVERAGE / LOTS':testCase.c+'C / '+Math.abs(testCase.c)+'× / 1',
+    'PRICE SOURCE':source,'CURRENT PRICE':anchor,'TRIGGER PRICE':triggerPrice,'REQUIRED MARGIN':'1 KGEN',
+  });
+  const age=panel.readAt-Date.parse(panel.rows['報價時間']);
+  assert.ok(age>=0&&age<=FREE_ORACLE_MAX_AGE_MS,'Rendered quote time must be current');
+}
+
+function assertSettlementReview(panel,receipt){
+  assert.equal(panel.open,true,'Original receipt must be expanded');
+  assert.equal(panel.receiptId,receipt.receiptId);
+  assert.equal(panel.summary,[receipt.receiptId,receipt.status,receipt.axis].join(' · '));
+  const format=new Intl.NumberFormat(panel.locale,{maximumFractionDigits:6});
+  assertRenderedExchangeRows(panel,{
+    'ORDER ID':receipt.orderId,'POSITION ID':receipt.positionId,MARKET:receipt.market,'PRICE SOURCE':receipt.priceSource,
+    'SETTLEMENT / EXIT':receipt.settlementPrice,'MARGIN BEFORE / AFTER':receipt.marginBefore+' / '+receipt.marginAfter,
+    'RAW / REALIZED PNL':format.format(receipt.rawPnl)+' / '+format.format(receipt.realizedPnl),
+  });
 }
 
 async function offlineSimulationBrowserQA({baseline=false}={}){
@@ -816,6 +867,16 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();
       await page.locator(`#dock [data-organ="${name}"]`).click();await page.locator('#sheet.open').waitFor();
     };
+    const reviewSettlement=async(receipt,label)=>{
+      await organ('history');
+      const details=page.locator('#sheet.open #sheetBody[data-sim-organ="history"] details[data-receipt="'+receipt.receiptId+'"]');
+      await details.locator(':scope > summary').click();
+      await details.getByText('RAW / REALIZED PNL',{exact:true}).locator('..').scrollIntoViewIfNeeded();
+      const panel=await details.evaluate(readRenderedExchangePanel,'RAW / REALIZED PNL');
+      assertSettlementReview(panel,receipt);
+      (result.renderedReceipts??=[]).push(panel);
+      await shot(label);
+    };
     const select=async ({plane,axis,c})=>{
       await game();for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
         const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await showRetainedControls(page);await page.locator('#joy').tap();
@@ -913,6 +974,11 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         await page.locator('#simulationTriggerPrice').fill(String(triggerPrice));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);
         evidence.preview=await state();assert.match(evidence.preview.preview,new RegExp(source));assertNoAuthority(evidence.preview);
+        const review=page.locator('#confirm.open #simulationOrderPreview');
+        await review.getByText('MARKET',{exact:true}).locator('..').scrollIntoViewIfNeeded();
+        evidence.renderedPreview=await review.evaluate(readRenderedExchangePanel,'MARKET');
+        assertOrderReview(evidence.renderedPreview,testCase,{source,anchor,triggerPrice});
+        assert.equal(evidence.preview.submitLabel,testCase.side==='LONG'?'確認做多（模擬）':'確認做空（模擬）');
         evidence.submitHit=await usable('#confirmOrder');await shot(stage+'-preview');
         const clickCount=evidence.preview.native.filter(event=>event.id==='confirmOrder'&&event.type==='click').length;
         evidence.submitActionHit=await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
@@ -943,7 +1009,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         assert.equal(receipt.entryPrice,position.entry);
         assert.ok(Math.abs(receipt.rawPnl-(receipt.settlementPrice-receipt.entryPrice)/entryUnit*testCase.c)<1e-7,'settlement receipt must preserve the opened price floor and signed C');
         assert.equal(book.receipts.filter(r=>r.positionId===position.positionId&&r.kind==='SETTLEMENT').length,1);
-        if(testCase===cases[0]){await organ('history');await page.locator(`[data-receipt="${receipt.receiptId}"] > summary`).click();assert.match(await page.locator('#sheetBody').innerText(),new RegExp(source));await shot(stage+'-close-receipt')}
+        if(testCase===cases[0])await reviewSettlement(receipt,stage+'-close-receipt');
         assertNoAuthority(evidence.closed);evidence.result='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
       }
       if(!baseline&&profile.width===390){
@@ -965,7 +1031,8 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         result.liquidation=await state();const liquidationReceipt=result.liquidation.simulation.receipts.find(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT');
         assert.equal(liquidationReceipt?.status,'LIQUIDATED');assert.equal(liquidationReceipt.priceSource,source);assert.equal(liquidationReceipt.realizedPnl,-1);assert.equal(liquidationReceipt.marginAfter,0);assert.equal(result.liquidation.simulation.wallet.lockedMargin,0);
         assert.equal(liquidationReceipt.liquidationTrigger,liquidationPosition.entry-1);
-        await organ('history');await page.locator(`[data-receipt="${liquidationReceipt.receiptId}"] > summary`).click();await shot('liquidation');await driveMarket('ETHUSDT',liquidationPosition.entry-1.5);assert.equal((await snap()).receipts.filter(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT').length,1,'Liquidation must not replay');
+        await reviewSettlement(liquidationReceipt,'liquidation');
+        await driveMarket('ETHUSDT',liquidationPosition.entry-1.5);assert.equal((await snap()).receipts.filter(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT').length,1,'Liquidation must not replay');
         stage='account-isolation';const owned=await snap();
         const other=await browser.newContext();
         try{
@@ -983,7 +1050,6 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
         result.reload=await state();assert.deepEqual(result.reload.simulation.orders,before.orders);assert.deepEqual(result.reload.simulation.receipts,before.receipts);assertNoAuthority(result.reload);await shot('reload-recovery');result.trialSource=await finishTrialSource();
       }
-      if(!baseline)assertOfflineToastCoverage(result,profile);
       await sourceProof();
       await verifyRawSource('AFTER_BROWSER');
       assert.deepEqual(result.pageErrors,[]);result.status=baseline?'BASELINE_REPRODUCED':'FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
