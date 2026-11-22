@@ -168,7 +168,6 @@ installKgenReferenceContext();
 
 let progressCache=playerLife.gameplayProfile(),progressKey='',musicHoldUntil=0,lastCombatAt=0,explorationMeters=0,lastExplorationPosition={...S.xyz};
 function showJourneyRecovery(){
-
   kgenPoolReference.pause();
   const health=playerStore.battleHealth(),free=Math.max(0,Math.floor(ledger.free));
   const amount=isTestnet()?0:Math.min(PLAYER_MAX_KAIOS_HP-health,free);
@@ -190,7 +189,7 @@ function showJourneyRecovery(){
     $('#sheet').classList.remove('open');
   };
 }
-$('#hpRecovery').onclick=showJourneyRecovery;
+
 function holdMusic(state,milliseconds=2400){getKaiosAudio().setMusicState(state);musicHoldUntil=Date.now()+milliseconds}
 function syncWorldFeedback(){const p=playerLife.activePlayer(),key=p.playerId+':'+p.events.length;world.playerLevel=p.level;world.engineLevel=p.engineLevel;
   if(key!==progressKey){progressKey=key;progressCache=playerLife.gameplayProfile();for(const [id,unlock,label] of [['skill','GOLDEN_RAIN','天罡金陣'],['tradeSword','PHANTOM_AXE','盤古幻斧']]){const b=$('#'+id);if(b){b.dataset.gameplayUnlocked=String(progressCache.unlocks[unlock]);b.setAttribute('aria-label',label+(progressCache.unlocks[unlock]?'':` · 玩家 Lv.${unlock==='GOLDEN_RAIN'?2:3} 解鎖`));b.title=b.getAttribute('aria-label')}}}
@@ -514,13 +513,16 @@ targetHud.onclick=showCombatTarget;
 function battleVitality(){
   const {fullHp,kaiosPerHp}=PLAYER_KAIOS_HEALTH,target=world.monsters.find(monster=>monster.id===world.kSpace?.targetId);
   return {
-    playerKaiosHp:Math.floor(S.hp*kaiosPerHp),playerKaiosHpMax:fullHp*kaiosPerHp,
+    playerKaiosHp:playerStore.battleHealth(),playerKaiosHpMax:fullHp*kaiosPerHp,
     monsterKaiosHp:target?Math.floor(target.hp*kaiosPerHp):null,
     monsterKaiosHpMax:target?Math.floor(target.maxHp*kaiosPerHp):null,
     activityRatio:playerActivityRatio()
   };
 }
 globalThis.__K11520_KSPACE_API__=Object.freeze({snapshot:combatSnapshot,vitality:battleVitality,simulationOnly:true});
+const hpRecoveryButton=$('#hpRecovery');
+hpRecoveryButton.onclick=showJourneyRecovery;
+hpRecoveryButton.disabled=false;
 setInterval(syncMarketKLabels,1000);
 function marketEngineSnapshot(){
   const p=playerProgressSnapshot(),market=kMarketSnapshot(world),rows=market.markets||[];

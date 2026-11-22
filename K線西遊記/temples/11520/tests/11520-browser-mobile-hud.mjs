@@ -13,9 +13,26 @@ await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stri
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 async function boot(){await page.goto(`${BASE}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1900);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});await page.waitForTimeout(900);assert.deepEqual(errors,[],'page errors: '+errors.join('\n'))}
 await boot();
+await page.waitForFunction(()=>globalThis.__K11520_KSPACE_API__?.vitality?.()?.playerKaiosHp===100_000,{},{timeout:10000});
+await page.locator('#hpRecovery').evaluate(button=>{
+  const capture=window.__vitalityQaEvents=[];
+  for(const type of ['pointerdown','pointerup','click']){
+    button.addEventListener(type,event=>capture.push({type,target:event.target.id,defaultPrevented:event.defaultPrevented}),true);
+  }
+});
 await page.locator('#hpRecovery').tap();
-await page.locator('#sheet.open #journeyRecover').waitFor({state:'visible',timeout:4000});
-assert.equal(await page.locator('#journeyRecover').isDisabled(),true,'full health must not debit local KGEN');
+try {
+  await page.locator('#sheet.open #journeyRecover').waitFor({state:'visible',timeout:4000});
+  assert.equal(await page.locator('#journeyRecover').isDisabled(),true,'full health must not debit local KGEN');
+} catch(error) {
+  const diagnostic=await page.evaluate(()=>({
+    events:window.__vitalityQaEvents,sheet:document.querySelector('#sheet')?.className,
+    title:document.querySelector('#sheetTitle')?.textContent,
+    health:globalThis.__K11520_KSPACE_API__?.vitality?.()
+  }));
+  await page.screenshot({path:`${OUT}/11520-mobile-vitality-failure.png`,fullPage:true});
+  throw new Error('Native HP tap: '+JSON.stringify({diagnostic,errors}),{cause:error});
+}
 await page.screenshot({path:`${OUT}/11520-mobile-vitality-full.png`,fullPage:true});
 await page.locator('#sheetClose').click();
 // Market quote refresh replaces card nodes. Read geometry in one page task,
