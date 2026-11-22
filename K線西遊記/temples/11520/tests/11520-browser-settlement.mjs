@@ -881,14 +881,41 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       catch(error){const observed=await state().catch(()=>null);throw new Error('SIMULATION_BOOT_NOT_READY '+JSON.stringify({adapterPresent:!!observed?.simulation,executionMode:observed?.execution?.mode,axis:observed?.axis,url:observed?.url,cause:String(error.message)}))}
     };
     const game=async()=>{
-      // A native close may already be finishing its CSS transition. Never
-      // click a second time merely because isVisible saw that earlier frame.
-      if(await page.locator('#confirm').evaluate(e=>e.classList.contains('open'))){await usable('#cancelOrder');await page.locator('#cancelOrder').click();}
-      await page.locator('#confirm').waitFor({state:'hidden',timeout:12000});
-      if(await page.locator('#sheet').evaluate(e=>e.classList.contains('open')))await page.locator('#sheetClose').click();
-      await page.locator('#sheet').waitFor({state:'hidden',timeout:12000});
-      if(await page.locator('#walletPanel').evaluate(e=>!e.inert&&!e.classList.contains('collapsed')))await page.locator('#walletToggle').click();
-      if(await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+      // A closing panel can still cover the game after its open class disappears.
+      const readPanels = () => page.evaluate(() => {
+        function phase(id) {
+          const panel = document.getElementById(id);
+          if (panel.classList.contains('open')) return 'open';
+          if (getComputedStyle(panel).visibility === 'hidden' || !panel.getClientRects().length) return 'hidden';
+          return 'closing';
+        }
+        const wallet = document.getElementById('walletPanel');
+        return {
+          confirm: phase('confirm'),
+          sheet: phase('sheet'),
+          walletOpen: !wallet.inert && !wallet.classList.contains('collapsed'),
+          utilitiesOpen: document.documentElement.classList.contains('k11520UtilitiesOpen')
+        };
+      });
+      let panels = await readPanels();
+      if (panels.confirm !== 'hidden') {
+        if (panels.confirm === 'open') {
+          await usable('#cancelOrder');
+          await page.locator('#cancelOrder').click();
+        }
+        await page.locator('#confirm').waitFor({state:'hidden',timeout:12000});
+        panels = await readPanels();
+      }
+      if (panels.sheet !== 'hidden') {
+        if (panels.sheet === 'open') await page.locator('#sheetClose').click();
+        await page.locator('#sheet').waitFor({state:'hidden',timeout:12000});
+        panels = await readPanels();
+      }
+      if (panels.walletOpen) {
+        await page.locator('#walletToggle').click();
+        panels = await readPanels();
+      }
+      if (panels.utilitiesOpen) await page.locator('#k11520UtilityMaster').click();
     };
     const organ=async name=>{
       await game();await page.locator('#k11520UtilityMaster').click();
@@ -1030,8 +1057,15 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         assert.ok(Math.abs(book.wallet.unrealizedPnl-expectedPnl)<1e-7,'PnL must follow signed C and real simulation mark');
         evidence.marked=await state();
         if(testCase===cases[0]){await organ('positions');assert.match(await page.locator('#sheetBody').innerText(),/UNREALIZED PNL/);await shot(stage+'-position-pnl')}
-        await game();await usable('#flat');await page.locator('#flat').click();
-        await page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions.find(p=>p.positionId===id)?.status==='CLOSED',position.positionId);
+        const flatTiming = createSettlementTiming();
+        try {
+          await flatTiming.measure('return-to-game', game);
+          await flatTiming.measure('flat-hit-test', () => usable('#flat'));
+          await flatTiming.measure('flat-click', () => page.locator('#flat').click());
+          await flatTiming.measure('await-closed-position', () => page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions.find(p=>p.positionId===id)?.status==='CLOSED',position.positionId));
+        } finally {
+          evidence.flatTiming = flatTiming.snapshot();
+        }
         evidence.closed=await state();book=evidence.closed.simulation;assert.equal(book.wallet.lockedMargin,0);
         const receipt=book.receipts.find(r=>r.positionId===position.positionId&&r.kind==='SETTLEMENT');
         assert.equal(receipt.status,'CLOSED');assert.equal(receipt.priceSource,source);assert.ok(Number.isFinite(receipt.realizedPnl));

@@ -817,14 +817,101 @@ test('offline acceptance waits for the actual adapter before reload assertions a
  assert.match(reload,/receipts\.length===length/,'receipt equality remains mandatory');
 });
 
-test('offline acceptance closes each open surface once and awaits its completed hidden transition',async()=>{
+test('offline acceptance observes hidden panels together and waits for visible transitions before acting',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
- const start=source.indexOf('    const game=async()=>{'),fn=source.slice(start,source.indexOf('    const organ=async name=>{',start));
- for(const open of [false,true]){
-  const clicks=[],waits=[],page={locator:selector=>({evaluate:async predicate=>predicate({classList:{contains:cls=>selector==='#walletPanel'?cls==='collapsed':['#confirm','#sheet'].includes(selector)&&cls==='open'&&open}}),click:async()=>clicks.push(selector),waitFor:async options=>{assert.deepEqual({...options},{state:'hidden',timeout:12000});waits.push(selector)},isVisible(){throw new Error('transitional visibility is not close authority')}})};
-  const context={page,usable:async selector=>assert.equal(selector,'#cancelOrder')};runInNewContext(fn+';globalThis.game=game;',context);await context.game();
-  assert.deepEqual(clicks,open?['#cancelOrder','#sheetClose']:[]);assert.deepEqual(waits,['#confirm','#sheet']);
+ const start=source.indexOf('    const game=async()=>{');
+ const fn=source.slice(start,source.indexOf('    const organ=async name=>{',start));
+ const usableStart=source.indexOf('    const usable=async selector=>',source.indexOf('async function offlineSimulationBrowserQA('));
+ const usableSource=source.slice(usableStart,source.indexOf('    const waitForSimulationBoot=',usableStart));
+ const timingStart=source.indexOf('function createSettlementTiming(');
+ const timerSource=source.slice(timingStart,source.indexOf('\n}\n',timingStart)+3);
+ const closeStart=source.indexOf('        const flatTiming = createSettlementTiming();');
+ const closeEnd=source.indexOf('          evidence.flatTiming = flatTiming.snapshot();\n        }',closeStart);
+ assert.ok(closeStart>=0 && closeEnd>closeStart);
+ const closeOrder=source.slice(closeStart,source.indexOf('}',closeEnd)+1);
+
+ async function scenario(initial, {afterHide, afterClick, stuck, covered}={}) {
+   const state={confirm:'hidden',sheet:'hidden',walletOpen:false,utilitiesOpen:false,...initial};
+   const actions=[];
+   const panels={};
+   for(const id of ['confirm','sheet']){
+     panels[id]={classList:{contains:name=>name==='open'&&state[id]==='open'},
+       getClientRects:()=>state[id]==='absent'?[]:[{}],
+       get visibility(){return state[id]==='hidden'?'hidden':'visible'}};
+   }
+   panels.walletPanel={inert:false,classList:{contains:name=>name==='collapsed'&&!state.walletOpen}};
+   function button(x){return {getBoundingClientRect:()=>({x,y:0,width:44,height:44,right:x+44,bottom:44}),contains(el){return el===this}}}
+   const flat=button(0),cancel=button(100);
+   const document={getElementById:id=>panels[id],documentElement:{classList:{contains:()=>state.utilitiesOpen}},
+     elementFromPoint:x=>x===122?cancel:(covered?panels.sheet:flat)};
+   const page={
+     evaluate: async readPanels=>{actions.push('read panels');return readPanels()},
+     waitForFunction: async()=>{actions.push('wait CLOSED')},
+     locator: selector=>({
+       click: async()=>{
+         actions.push('click '+selector);
+         if(selector==='#cancelOrder')state.confirm='closing';
+         if(selector==='#sheetClose')state.sheet='closing';
+         if(selector==='#walletToggle')state.walletOpen=false;
+         if(selector==='#k11520UtilityMaster')state.utilitiesOpen=false;
+         afterClick?.(selector,state);
+       },
+       waitFor: async options=>{
+         assert.deepEqual({...options},{state:'hidden',timeout:12000});
+         actions.push('wait '+selector);
+         if(selector===stuck)throw Error('fixture: transition stayed visible');
+         state[selector.slice(1)]='hidden';
+         afterHide?.(selector,state);
+       },
+       evaluate: async measure=>{
+         assert.ok(['#cancelOrder','#flat'].includes(selector));
+         actions.push('hit test '+selector);
+         return measure(selector==='#flat'?flat:cancel);
+       }
+     })
+   };
+   const evidence={};
+   const context={page,document,assert,performance,position:{positionId:'fixture'},evidence,getComputedStyle:panel=>panel,
+     profile:{width:390,height:844},stage:'BTCUSDT-LONG',result:{},
+     waitForOfflineConfirmationGeometry:async()=>{}};
+   const scenarioSource=timerSource+usableSource+fn+'globalThis.close=async()=>{'+closeOrder+'}';
+   runInNewContext(scenarioSource,context);
+   let error;
+   try{await context.close()}catch(e){error=e}
+   return {actions,error,timing:evidence.flatTiming};
  }
+
+ const ready=await scenario({});
+ assert.ifError(ready.error);
+ assert.deepEqual(ready.actions,['read panels','hit test #flat','click #flat','wait CLOSED']);
+ assert.deepEqual(Array.from(ready.timing.events,e=>[e.label,e.status]),[
+   ['return-to-game','COMPLETE'],['flat-hit-test','COMPLETE'],['flat-click','COMPLETE'],['await-closed-position','COMPLETE']
+ ]);
+ const absent=await scenario({confirm:'absent',sheet:'absent'});
+ assert.ifError(absent.error);
+ assert.deepEqual(absent.actions,ready.actions);
+ const sheet=await scenario({sheet:'open'});
+ assert.ifError(sheet.error);
+ assert.deepEqual(sheet.actions,['read panels','click #sheetClose','wait #sheet','read panels','hit test #flat','click #flat','wait CLOSED']);
+ const closing=await scenario({confirm:'closing',sheet:'closing'});
+ assert.ifError(closing.error);
+ assert.deepEqual(closing.actions.filter(a=>a.startsWith('wait')),['wait #confirm','wait #sheet','wait CLOSED']);
+ assert.deepEqual(closing.actions.filter(a=>a.startsWith('click')),['click #flat']);
+ const layered=await scenario({confirm:'open'},{
+   afterHide(selector,state){if(selector==='#confirm')state.sheet='open';if(selector==='#sheet')state.walletOpen=true},
+   afterClick(selector,state){if(selector==='#walletToggle')state.utilitiesOpen=true}
+ });
+ assert.ifError(layered.error);
+ assert.deepEqual(layered.actions.filter(a=>a.startsWith('click')),['click #cancelOrder','click #sheetClose','click #walletToggle','click #k11520UtilityMaster','click #flat']);
+ for(const selector of ['#confirm','#sheet']){
+   const blocked=await scenario({[selector.slice(1)]:'closing'},{stuck:selector});
+   assert.match(blocked.error?.message,/transition stayed visible/);
+   assert.ok(!blocked.actions.includes('click #flat'));
+ }
+ const covered=await scenario({},{covered:true});
+ assert.match(covered.error?.message,/pointer blocked/);
+ assert.equal(covered.timing.events.at(-1).status,'FAILED');
+ assert.ok(!covered.actions.includes('click #flat'));
 });
 
 test('camera QA reacquires only rejected native origins with a fixed budget and complete evidence',async()=>{
