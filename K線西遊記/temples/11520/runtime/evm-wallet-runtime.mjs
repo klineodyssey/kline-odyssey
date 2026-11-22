@@ -5,6 +5,8 @@ export const PUBLIC_WALLET_IDENTITY_KEY='klineodyssey.public-wallet-identity.v1'
 export const PLAYER_SESSION_KEY='k11520.player-session.v1';
 export const KGEN_TOKEN_ADDRESS='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 export const KGEN_CHAIN_ID=56;
+export const PLAYER_MAX_KAIOS_HP=100_000;
+export const PLAYER_KAIOS_RECOVERY_PER_SECOND=1000;
 const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 export const LOCAL_PRODUCT_EVENTS=Object.freeze(['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','COURIER_SETTLEMENT','COURIER_INSURANCE_PAYOUT','KAIOS_SPEND','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR']);
 // A namespace is isolation against application mix-ups, NOT authentication of
@@ -35,12 +37,13 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
   if(playerId)storage=createPlayerScopedStorage(storage,playerId);
   let owner=null,key=null,revision=0,progress=null,persistent=true,storageStatus='READY',rawPresent=false;
   const read=()=>{try{const raw=storage?.getItem(key);rawPresent=raw!=null;return JSON.parse(raw||'null')}catch{storageStatus='CORRUPT_SAVE';return null}};
-  const fresh=()=>({kaios:0,claimableKaios:0,spentKaios:0,loot:0,xp:0,engineXp:0,events:{},playedMs:0,courierReceipts:[],courierInsuranceReceipts:{}});
+  const fresh=()=>({battleHealthKaios:PLAYER_MAX_KAIOS_HP,kaios:0,claimableKaios:0,spentKaios:0,loot:0,xp:0,engineXp:0,events:{},playedMs:0,courierReceipts:[],courierInsuranceReceipts:{}});
   function check(){if(!persistent)return;if((read()?.revision??0)!==revision)throw new Error('PLAYER_SESSION_CHANGED_RELOAD_REQUIRED')}
   function save(){
-    if(storageStatus==='CORRUPT_SAVE')return;
+    if(storageStatus==='CORRUPT_SAVE')return false;
     check();const value={schema:'K11520_LOCAL_SIMULATION_V1',owner,revision:revision+1,ledger,progress};
     try{storage?.setItem(key,JSON.stringify(value));revision++;persistent=!!storage}catch{persistent=false}
+    return persistent;
   }
   function activate(address){
     const next=EVM_ADDRESS.test(address||'')?address.toLowerCase():'guest';if(owner===next)return false;
@@ -56,7 +59,10 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
       for(const k of ['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'])ledger[k]=saved.ledger[k];
       const b=saved.ledger.simulation;
       if(b&&Number.isSafeInteger(b.sequence)&&['orders','positions','receipts'].every(k=>Array.isArray(b[k]))&&b.observations&&typeof b.observations==='object')ledger.simulation=structuredClone(b);
-      if(saved.progress){for(const k of ['kaios','claimableKaios','spentKaios','loot','xp','engineXp','playedMs'])progress[k]=Math.max(0,Number(saved.progress[k])||0);for(const event of LOCAL_PRODUCT_EVENTS)progress.events[event]=Math.max(0,Number(saved.progress.events?.[event])||0);if(Array.isArray(saved.progress.courierReceipts)&&saved.progress.courierReceipts.length<=1000&&saved.progress.courierReceipts.every(value=>/^COURIER-RECEIPT-[0-9a-f]{8}$/i.test(value))&&new Set(saved.progress.courierReceipts).size===saved.progress.courierReceipts.length)progress.courierReceipts=[...saved.progress.courierReceipts];const insurance=saved.progress.courierInsuranceReceipts;if(insurance&&typeof insurance==='object'&&!Array.isArray(insurance)){const entries=Object.entries(insurance);if(entries.length<=1000&&entries.every(([id,value])=>/^COURIER-INSURANCE-[0-9a-f]{8}$/i.test(id)&&Number.isSafeInteger(value)&&value>=0&&value<=1080000))progress.courierInsuranceReceipts=Object.fromEntries(entries)}}
+      if(saved.progress){
+        const health=saved.progress.battleHealthKaios;
+        if(Number.isSafeInteger(health)&&health>=0&&health<=PLAYER_MAX_KAIOS_HP)progress.battleHealthKaios=health;
+        for(const k of ['kaios','claimableKaios','spentKaios','loot','xp','engineXp','playedMs'])progress[k]=Math.max(0,Number(saved.progress[k])||0);for(const event of LOCAL_PRODUCT_EVENTS)progress.events[event]=Math.max(0,Number(saved.progress.events?.[event])||0);if(Array.isArray(saved.progress.courierReceipts)&&saved.progress.courierReceipts.length<=1000&&saved.progress.courierReceipts.every(value=>/^COURIER-RECEIPT-[0-9a-f]{8}$/i.test(value))&&new Set(saved.progress.courierReceipts).size===saved.progress.courierReceipts.length)progress.courierReceipts=[...saved.progress.courierReceipts];const insurance=saved.progress.courierInsuranceReceipts;if(insurance&&typeof insurance==='object'&&!Array.isArray(insurance)){const entries=Object.entries(insurance);if(entries.length<=1000&&entries.every(([id,value])=>/^COURIER-INSURANCE-[0-9a-f]{8}$/i.test(id)&&Number.isSafeInteger(value)&&value>=0&&value<=1080000))progress.courierInsuranceReceipts=Object.fromEntries(entries)}}
     }
     ledger.owner=owner;
     progress.events.UNIQUE_PLAYER=1;
@@ -72,6 +78,41 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
     if(event==='TRADE_CLOSE'){progress.xp+=12;progress.engineXp+=18}
     if(event==='LIQUIDATION'){progress.xp+=2;progress.engineXp+=4}
     progress.playedMs+=Math.max(0,Math.min(10000,Number(elapsedMs)||0));save();
+  }
+  function battleHealth(){return progress.battleHealthKaios}
+  function changeBattleHealth(delta){
+    check();
+    if(!Number.isFinite(delta))return battleHealth();
+    const next=Math.max(0,Math.min(PLAYER_MAX_KAIOS_HP,battleHealth()+Math.round(delta)));
+    if(next===battleHealth())return next;
+    const before=battleHealth();
+    progress.battleHealthKaios=next;
+    try{save()}
+    catch(error){progress.battleHealthKaios=before;throw error}
+    return next;
+  }
+  function recoverBattleHealth(limit){
+    check();
+    if(!persistent||storageStatus!=='READY')return {ok:false,reason:'LOCAL_SAVE_UNAVAILABLE'};
+    if(!Number.isSafeInteger(limit)||limit<1||limit>PLAYER_KAIOS_RECOVERY_PER_SECOND)return {ok:false,reason:'INVALID_RECOVERY_LIMIT'};
+    const before=battleHealth(),free=ledger.free,total=ledger.total;
+    const recovered=Math.min(limit,PLAYER_MAX_KAIOS_HP-before,Math.floor(free));
+    if(!Number.isFinite(recovered)||recovered<=0)return {ok:false,reason:before===PLAYER_MAX_KAIOS_HP?'FULL_HEALTH':'INSUFFICIENT_FREE_KGEN'};
+    progress.battleHealthKaios+=recovered;
+    ledger.free-=recovered;
+    ledger.total=ledger.free+ledger.lockedMargin+ledger.reservedOrders;
+    // Persist the debit and new HP together; a failed write buys no HP.
+    let saved=false;
+    try{saved=save()}
+    finally{
+      if(!saved){
+        progress.battleHealthKaios=before;
+        ledger.free=free;
+        ledger.total=total;
+      }
+    }
+    if(!saved)return {ok:false,reason:'LOCAL_SAVE_UNAVAILABLE'};
+    return {ok:true,kgenSpent:recovered,kaiosRecovered:recovered,battleHealthKaios:battleHealth()};
   }
   function spendKaios(amount,{purpose='LOCAL_GAME_PURCHASE'}={}){
     check();const value=Number(amount);
@@ -104,7 +145,7 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
       nextLevelXp:level>=10?null:25*level*level,nextEngineXp:engineLevel>=10?null:20*engineLevel*engineLevel,
       kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'};
   }
-  return {activate,check,save,record,spendKaios,recordCourierSettlement,recordCourierInsurancePayout,snapshot};
+  return {activate,check,save,record,battleHealth,changeBattleHealth,recoverBattleHealth,spendKaios,recordCourierSettlement,recordCourierInsurancePayout,snapshot};
 }
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){if(typeof hex!=='string'||!/^0x[0-9a-fA-F]+$/.test(hex))throw new Error('INVALID_BALANCE_RESPONSE');return BigInt(hex);}

@@ -200,6 +200,8 @@ html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!
 ${compact}:not(.k11520ControlsOpen) #k11520RealTradePreflight{display:none!important;pointer-events:none!important}
 ${compact} #k11520BuildStamp{display:none!important}
 ${compact} .monsterHud:not(.k11520HiddenBySettings){display:flex!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;bottom:auto!important;width:110px!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;padding:4px 6px!important;gap:3px;flex-direction:column;justify-content:center;background:#071018b8!important;border:1px solid #68e4ff44!important;border-radius:9px!important;z-index:610!important;font-size:12px!important;line-height:1.2!important}
+${compact} .monsterHud #hpRecovery{pointer-events:auto!important}
+${compact} .monsterHud #hpRecovery::after{content:'';position:absolute;inset:0}
 ${compact} .monsterHud .bar{height:5px!important;margin:0!important}
 ${compact} .monsterHud details{display:none!important}
 ${compact} .monsterHud :is(#k11520MotionCombat,#k11520HpDetail,#k11520DriveHud){display:none!important}

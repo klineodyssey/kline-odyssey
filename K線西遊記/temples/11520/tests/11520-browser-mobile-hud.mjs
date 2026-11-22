@@ -13,6 +13,28 @@ await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stri
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 async function boot(){await page.goto(`${BASE}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1900);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});await page.waitForTimeout(900);assert.deepEqual(errors,[],'page errors: '+errors.join('\n'))}
 await boot();
+await page.waitForFunction(()=>globalThis.__K11520_KSPACE_API__?.vitality?.()?.playerKaiosHp===100_000,{},{timeout:10000});
+await page.locator('#hpRecovery').evaluate(button=>{
+  const capture=window.__vitalityQaEvents=[];
+  for(const type of ['pointerdown','pointerup','click']){
+    button.addEventListener(type,event=>capture.push({type,target:event.target.id,defaultPrevented:event.defaultPrevented}),true);
+  }
+});
+await page.locator('#hpRecovery').tap();
+try {
+  await page.locator('#sheet.open #journeyRecover').waitFor({state:'visible',timeout:4000});
+  assert.equal(await page.locator('#journeyRecover').isDisabled(),true,'full health must not debit local KGEN');
+} catch(error) {
+  const diagnostic=await page.evaluate(()=>({
+    events:window.__vitalityQaEvents,sheet:document.querySelector('#sheet')?.className,
+    title:document.querySelector('#sheetTitle')?.textContent,
+    health:globalThis.__K11520_KSPACE_API__?.vitality?.()
+  }));
+  await page.screenshot({path:`${OUT}/11520-mobile-vitality-failure.png`,fullPage:true});
+  throw new Error('Native HP tap: '+JSON.stringify({diagnostic,errors}),{cause:error});
+}
+await page.screenshot({path:`${OUT}/11520-mobile-vitality-full.png`,fullPage:true});
+await page.locator('#sheetClose').click();
 // Market quote refresh replaces card nodes. Read geometry in one page task,
 // rather than retaining a CDP node across the refresh and getting a null box.
 const box=async sel=>page.locator(sel).evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);if(!el.isConnected||s.display==='none'||s.visibility==='hidden'||r.width<=0||r.height<=0)throw new Error('Visible geometry missing: '+el.outerHTML.slice(0,160));return{x:r.x,y:r.y,width:r.width,height:r.height}});
@@ -82,6 +104,8 @@ const backpackButtonBefore=await box('#backpackButton');assert.equal(await page.
 const attack=await box('#attack'),order=await box('#orderFire');assert.ok(Math.abs(attack.y-order.y)<2,'attack/order must share one lower action row');assert.ok(attack.x+attack.width<order.x,'attack/order must be separated side by side');assert.ok(attack.y+attack.height<c.y-8&&order.y+order.height<lots.y-8,'attack/order row must clear the three bottom rails');
 assert.equal(await page.locator('#chatHandle').getAttribute('aria-expanded'),'false','chat must boot collapsed');await page.locator('#chatHandle').click();await page.waitForTimeout(120);assert.equal(await page.locator('#gameChat').evaluate(el=>el.classList.contains('open')),true,'chat handle must expand chat');assert.equal(await page.locator('#chatHandle').getAttribute('aria-expanded'),'true');await page.screenshot({path:`${OUT}/11520-mobile-chat-open.png`,fullPage:true});await page.locator('#chatHandle').click();await page.waitForTimeout(120);assert.equal(await page.locator('#gameChat').evaluate(el=>el.classList.contains('open')),false,'chat handle must collapse chat');
 await page.waitForFunction(()=>globalThis.__K11520_MOTION_COMBAT_API__&&globalThis.__K11520_MOTION_COMBAT__?.simulationOnly===true,null,{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_MOTION_COMBAT__?.playerKaiosHpMax===100000,null,{timeout:3000});
+assert.match(await page.locator('#k11520CombatHp').textContent(),/100,000.*活力/);
 await page.evaluate(()=>{const el=document.querySelector('#cRead');if(el)el.textContent='0C'});
 await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE__?.c===0&&globalThis.__K11520_COMBAT_DRIVE__?.cMode==='LOCAL_WALK',null,{timeout:2000});
 let combat=await page.evaluate(()=>structuredClone(globalThis.__K11520_MOTION_COMBAT__));assert.equal(combat.armed,true,'combat must boot ready without an arming step');assert.equal(combat.guard,true);assert.deepEqual(combat.relations,{x:'GUARD',y:'GUARD',z:'GUARD'});assert.equal(await visible('#k11520MotionCombat'),true);

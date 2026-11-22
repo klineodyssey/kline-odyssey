@@ -226,12 +226,32 @@ try {
     await page.evaluate(()=>{__walletFixture.chain='0x38';__walletFixture.emit('chainChanged','0x38')});
     await page.waitForFunction(()=>document.querySelector('#wKgen').textContent==='12345');
     const gapQuote=2900; // First fill 4002 at k=3 has a long liquidation mark of 3002.
-    quoteStale=true;eth=gapQuote;await page.waitForTimeout(6000);
-    assert.equal((await snap()).positions[0].status,'OPEN','stale liquidation must not mutate position');
+    const beforeStale=await snap();
+    quoteStale=true;eth=gapQuote;
+    await phaseTiming.measure('generic.stale-fixture-refresh',async()=>{
+      const fixtureResponse=page.waitForResponse(response=>{
+        const url=new URL(response.url());
+        return response.ok()&&url.origin==='https://data-api.binance.vision'&&
+          url.pathname.endsWith('/aggTrades')&&url.searchParams.get('symbol')==='ETHUSDT';
+      },{timeout:15000});
+      const [response]=await Promise.all([
+        fixtureResponse,
+        page.evaluate(()=>globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__()),
+        page.waitForFunction(()=>document.querySelector('#feed')?.textContent.includes('MARKET DATA STALE'),null,{timeout:15000}),
+      ]);
+      const [row]=await response.json();
+      assert.equal(Number(row.p),gapQuote,'exercise the fixture gap below the liquidation mark');
+      assert.ok(Date.now()-row.T>=45000,'the real quote refresh requested an expired fixture row');
+    });
+    const staleBook=await snap();
+    assert.equal(staleBook.positions[0].status,'OPEN','stale liquidation must not mutate position');
+    assert.equal(staleBook.observations.ETHUSDT.price,beforeStale.observations.ETHUSDT.price,'stale gap cannot replace the latest eligible price');
+    assert.deepEqual(staleBook.receipts,beforeStale.receipts,'stale gap cannot create a settlement receipt');
     assert.match(await page.locator('#feed').innerText(),/MARKET DATA STALE/);await shot('stale-position-preserved');
     quoteStale=false;
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='LIQUIDATED',null,{timeout:15000});
-    s=await snap();assert.equal(s.positions[0].margin,0);assert.equal(s.wallet.free,90);assert.equal(s.wallet.lockedMargin,0);
+    s=await driveQuote('generic.fresh-gap-liquidation',gapQuote);
+    assert.equal(s.positions[0].status,'LIQUIDATED');
+    assert.equal(s.positions[0].margin,0);assert.equal(s.wallet.free,90);assert.equal(s.wallet.lockedMargin,0);
     assert.equal(s.receipts.filter(r=>r.kind==='SETTLEMENT').length,1);assert.ok(s.receipts.at(-1).badDebt>0);
     const liquidation=s.receipts.at(-1);
     assert.equal(liquidation.liquidationTrigger,3002,'liquidation uses the fixed entry floor unit in USDT');
@@ -247,14 +267,16 @@ try {
     assert.equal(liquidationQuote?.price,gapQuote,'the stale-price fixture must have recovered before liquidation');
     assert.ok(liquidationQuote.source&&Number.isSafeInteger(liquidationQuote.at)&&Number.isSafeInteger(liquidationQuote.sequence),'liquidation must carry a provider source, time and sequence');
     const receiptsBeforeRecovery=s.receipts.map(receipt=>receipt.receiptId);
-    eth=4002;
+    // The Assets panel is already verified. Close it before refreshing the
+    // synthetic quote so the reserve-reference read guard remains intact.
+    await page.locator('#sheetClose').click();
+    await page.locator('#sheet').waitFor({state:'hidden'});
     // Observe the next accepted fixture quote and its committed ledger together.
-    s=await phaseTiming.measure('generic.recovery-quote',()=>waitForAcceptedFixtureQuote(page,eth,liquidationQuote));
+    s=await driveQuote('generic.recovery-quote',4002);
     assert.equal(s.positions[0].positionId,openId);
     assert.equal(s.positions[0].status,'LIQUIDATED');
     assert.equal(s.receipts.length,2);
     assert.deepEqual(s.receipts.map(receipt=>receipt.receiptId),receiptsBeforeRecovery);
-    await page.locator('#sheetClose').click();
     if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('4003');await page.locator('#confirmOrder').click();
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().orders[1]?.status==='PENDING',null,{timeout:15000});

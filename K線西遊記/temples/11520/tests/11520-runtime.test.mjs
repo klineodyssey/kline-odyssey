@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs';
-import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
+import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_MAX_KAIOS_HP,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
 import {C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL,createKgenLedger,positionRisk} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
 import {createJourneyTutorial,JOURNEY_ENCOUNTER_PROFILES,GAME_LOOT_TABLE,GA600_GAME_TRAINING,selectJourneyLoot,selectJourneyEncounter,drainJourneyEvents,serializeWorld} from '../runtime/world-runtime.mjs';
@@ -358,6 +358,126 @@ test('Boss strike range and rage cadence are local gameplay; defeat stops attack
   g.state='DEAD';g.defeatedAt=3851;assert.equal(tickWorld(world,{x:0,y:0,z:6},5000).playerDamage,0);
 });
 
+function battleTraining({boss=false,directional=true}={}){
+  const world=createWorldState(0),origin={x:0,y:0,z:0};
+  world.journeyEnabled=true;
+  createKSpaceEncounter(world);
+  const guardian=world.monsters.find(m=>m.simulationCombat);
+  if(boss)assert.equal(selectJourneyEncounter(world,origin,{profileId:'MARKET_BOSS',playerLevel:5,engineLevel:2,now:0}).ok,true);
+  updateKMarketReference(world,{BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600},1000);
+  tickWorld(world,origin,1000);
+  updateKMarketReference(world,{BTCUSDT:directional?100500:100000,ETHUSDT:4000,BNBUSDT:600},2000);
+  tickWorld(world,origin,2000);
+  assert.equal(guardian.marketLife.training.intent.direction,directional?'LONG':'NEUTRAL');
+  return {world,guardian,near:{...guardian.localPosition}};
+}
+
+test('real local simulation fill and an opposing battle siphon only actual damage up to player capacity',()=>{
+  const {world,guardian,near}=battleTraining();
+  const {adapter}=openBtcAtFill({c:-1});
+  const snapshot=adapter.snapshot(),vitality={playerHp:93,playerMaxHp:100,positions:snapshot.positions};
+  assert.equal(snapshot.positions[0].side,'SHORT');
+  assert.equal(snapshot.receipts[0].kind,'FILL');
+  const before=guardian.hp;
+  const result=attackKSpace(world,near,{plane:'XZ',c:0,now:2001,vitality});
+  assert.equal(result.hit,true);
+  assert.equal(before-guardian.hp,result.damage);
+  assert.ok(result.damage>7,'the attacker cannot collect the entire ordinary damage at this health');
+  assert.equal(result.playerHealHp,7);
+  assert.deepEqual(result.siphon,{market:'BTCUSDT',hp:7,kaios:7000});
+  const retry=attackKSpace(world,near,{plane:'XZ',c:0,now:2002,vitality});
+  assert.equal(retry.reason,'COOLDOWN');
+  assert.equal(retry.playerHealHp,0);
+  assert.equal(retry.siphon,undefined);
+  assert.deepEqual(adapter.snapshot(),snapshot,'combat leaves KGEN positions, orders and receipts intact');
+});
+
+test('only the matching market body contributes siphon damage in single-axis and multi-axis attacks',()=>{
+  const positions=openBtcAtFill({c:-1}).adapter.snapshot().positions;
+  const vitality={playerHp:20,playerMaxHp:100,positions};
+  const other=battleTraining(),otherAxis=attackKSpace(other.world,other.near,{plane:'XZ',c:-1,now:2001,vitality});
+  assert.equal(otherAxis.hit,true);
+  assert.equal(otherAxis.hits[0].body,'KY-');
+  assert.ok(otherAxis.damage>0);
+  assert.equal(otherAxis.playerHealHp,0);
+  assert.equal(otherAxis.siphon,undefined);
+  const multi=battleTraining(),axe=attackKSpace(multi.world,multi.near,{plane:'XZ',c:-1,now:2001,vitality,skill:'phantomAxe'});
+  const btc=axe.hits.find(hit=>hit.body==='KX-');
+  assert.equal(axe.hits.length,3);
+  assert.ok(btc.damage<axe.damage);
+  assert.deepEqual(axe.siphon,{market:'BTCUSDT',hp:btc.damage,kaios:btc.damage*GAME_KAIOS_PER_HP});
+  assert.equal(axe.playerHealHp,btc.damage);
+});
+
+test('battle without a verified same-market opposite fill and live intent keeps ordinary damage only',()=>{
+  const short=openBtcAtFill({c:-1}).adapter.snapshot().positions[0];
+  const long=openBtcAtFill().adapter.snapshot().positions[0];
+  const cases=[
+    {name:'same side',positions:[long]},
+    {name:'filled other market',positions:[{...short,market:'ETHUSDT'}]},
+    {name:'other axis',positions:[{...short,axis:'KY'}]},
+    {name:'no order',positions:[]},
+    {name:'pending',positions:[{...short,status:'PENDING'}]},
+    {name:'closed',positions:[{...short,status:'CLOSED'}]},
+    {name:'unverified position',positions:[{...short,positionId:null}]},
+    {name:'position from the future',positions:[{...short,openedAt:3000}]},
+    {name:'waiting quote',setUp:world=>{delete world.kSpace.receivedAt;}},
+    {name:'stale quote',now:17001},
+    {name:'future quote',now:1999},
+    {name:'neutral intent',directional:false},
+    {name:'unobserved newer quote',setUp:world=>updateKMarketReference(world,{BTCUSDT:100600,ETHUSDT:4000,BNBUSDT:600},2001)},
+    {name:'full player',playerHp:100}
+  ];
+  for(const row of cases){
+    const {world,guardian,near}=battleTraining({directional:row.directional});
+    row.setUp?.(world);
+    const before=guardian.hp,vitality={playerHp:row.playerHp??50,playerMaxHp:100,positions:row.positions??[short]};
+    const result=attackKSpace(world,near,{plane:'XZ',c:0,now:row.now??2001,vitality});
+    assert.equal(result.hit,true,row.name);
+    assert.equal(before-guardian.hp,result.damage,row.name);
+    assert.equal(result.playerHealHp,0,row.name);
+    assert.equal(result.siphon,undefined,row.name);
+  }
+});
+
+test('opposing Boss strike restores only the loss and existing wounded body capacity',()=>{
+  const positions=openBtcAtFill({c:-1}).adapter.snapshot().positions;
+  for(const {playerHp,damageBefore,credit} of [{playerHp:3.25,damageBefore:9,credit:3.25},{playerHp:90,damageBefore:1,credit:1}]){
+    const {world,guardian,near}=battleTraining({boss:true});
+    guardian.bodies['KX+'].hp-=damageBefore;
+    guardian.hp-=damageBefore;
+    const wounded=guardian.hp;
+    const strike=tickWorld(world,near,2001,{playerHp,playerMaxHp:100,positions});
+    const hit=strike.events.find(event=>event.type==='PLAYER_HIT');
+    assert.equal(hit.damage,7,'normal strike damage remains intact');
+    assert.deepEqual(hit.siphon,{market:'BTCUSDT',hp:credit,kaios:credit*1000});
+    assert.equal(guardian.hp,wounded+credit);
+    assert.equal(guardian.hp,Object.values(guardian.bodies).reduce((hp,body)=>hp+body.hp,0));
+    assert.ok(guardian.hp<=guardian.maxHp);
+    const retry=tickWorld(world,near,2002,{playerHp,playerMaxHp:100,positions});
+    assert.equal(retry.playerDamage,0);
+    assert.equal(guardian.hp,wounded+credit);
+  }
+});
+
+test('ordinary boss and source-managed hits cannot siphon from same-side or unverified legs',()=>{
+  const {world,guardian,near}=battleTraining({boss:true});
+  const long=openBtcAtFill().adapter.snapshot().positions;
+  guardian.bodies['KX+'].hp-=10;
+  guardian.hp-=10;
+  const strike=tickWorld(world,near,2001,{playerHp:90,playerMaxHp:100,positions:long});
+  assert.equal(strike.playerDamage,7);
+  assert.equal(strike.events.find(event=>event.type==='PLAYER_HIT').siphon,undefined);
+  assert.equal(guardian.hp,guardian.maxHp-10);
+  const source=createWorldState(0),player={x:0,y:0,z:0};
+  applyMarketLifeSourceEvents(source,[{type:'SPAWN',sourceId:'QA-HOSTILE',lifeId:'QA-HOSTILE-1',name:'來源怪物',species:'STONE_APE',intelligence:3,markets:['BTCUSDT'],capital:50,vitality:90,maxHp:100,attack:3,rewardKaios:0,speed:0,positions:{KX:{market:'BTCUSDT',side:1,lots:1,c:.001}},...player}]);
+  const slot=source.monsters.find(m=>m.sourceManaged),positions=openBtcAtFill({c:-1}).adapter.snapshot().positions;
+  const sourceStrike=tickWorld(source,player,2001,{playerHp:90,playerMaxHp:100,positions});
+  assert.equal(sourceStrike.playerDamage,3);
+  assert.equal(sourceStrike.events.find(event=>event.type==='PLAYER_HIT').siphon,undefined);
+  assert.equal(slot.hp,90);
+});
+
 test('seeded game loot is deterministic and covers every configured rarity without token metadata',()=>{
   const levels={playerLevel:6,engineLevel:2},found=new Set();for(let i=0;i<1000;i++){const item=selectJourneyLoot(`seed-${i}`,'MARKET_BOSS',levels);found.add(item.rarity);assert.deepEqual(item,selectJourneyLoot(`seed-${i}`,'MARKET_BOSS',levels));assert.equal(item.quantity,1);assert.equal(item.localOnly,true);assert.equal(item.tokenized,false);assert.equal(item.contract,undefined)}
   assert.deepEqual(found,new Set(GAME_LOOT_TABLE.map(i=>i.rarity)));
@@ -395,7 +515,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
   assert.equal(v1.snapshot().orders[0].status,'REJECTED');assert.equal(v1.snapshot().positions.length,0);assert.equal(v1.snapshot().wallet.free,100);
 });
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
-import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
+import {WORLD_RULES,GAME_KAIOS_PER_HP,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
 import {createDigitalAnt,createDigitalAntPersistenceEnvelope,restoreDigitalAntPersistenceEnvelope,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,acceptSimulatedAtmDeliveryReceipt,resolveCargoInsuranceAfterDelivery,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createWhiteholeEscortDemoOffer,reviewWhiteholeEscortDemoOffer,createPlayerCourierStore,WHITEHOLE_ESCORT_WORK_ID,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
@@ -1081,4 +1201,50 @@ test('order execution rejects forged C, lots, side, margin and duplicate positio
  const state={kgen:1000,pos:{KX:null},history:[]};assert.equal(executeOrder(state,base).ok,true);
  const once=structuredClone(state);assert.equal(executeOrder(state,base).reason,'POSITION_EXISTS');assert.deepEqual(state,once);
  assert.equal(previewOrder({axis:'KX',fire:-1,leverage:1,price:100,kgen:1000}).reason,'BAD_LOTS');
+});
+
+test('KAIOS recovery debits free simulation margin and saves both values atomically',()=>{
+  const data=new Map();
+  let failWrites=false,staleAfterReads=0;
+  const storage={getItem:k=>{
+    const raw=data.get(k);
+    if(staleAfterReads>0&&--staleAfterReads===0){
+      const newer=JSON.parse(raw);
+      newer.revision++;
+      return JSON.stringify(newer);
+    }
+    return raw;
+  },setItem:(k,v)=>{
+    if(failWrites)throw new Error('Storage quota');
+    data.set(k,v);
+  }};
+  const ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage});
+  store.activate(null);
+  assert.equal(store.battleHealth(),PLAYER_MAX_KAIOS_HP);
+  assert.equal(store.recoverBattleHealth(10).reason,'FULL_HEALTH');
+  store.changeBattleHealth(-1100);
+  Object.assign(ledger,{free:2200,lockedMargin:2,reservedOrders:3,total:2205,realizedPnl:10});
+  store.save();
+  assert.equal(store.recoverBattleHealth(1001).reason,'INVALID_RECOVERY_LIMIT');
+  assert.deepEqual(store.recoverBattleHealth(1000),{ok:true,kgenSpent:1000,kaiosRecovered:1000,battleHealthKaios:99900});
+  assert.deepEqual(store.recoverBattleHealth(1000),{ok:true,kgenSpent:100,kaiosRecovered:100,battleHealthKaios:100000});
+  assert.deepEqual([ledger.free,ledger.total,ledger.lockedMargin,ledger.reservedOrders,ledger.realizedPnl],[1100,1105,2,3,10]);
+  store.changeBattleHealth(-2000);
+  staleAfterReads=2;
+  assert.throws(()=>store.recoverBattleHealth(1000),/PLAYER_SESSION_CHANGED_RELOAD_REQUIRED/);
+  assert.deepEqual([ledger.free,ledger.total,store.battleHealth()],[1100,1105,98000]);
+  failWrites=true;
+  assert.equal(store.recoverBattleHealth(1000).reason,'LOCAL_SAVE_UNAVAILABLE');
+  assert.deepEqual([ledger.free,ledger.total,store.battleHealth()],[1100,1105,98000]);
+  failWrites=false;
+  const restoredLedger=createKgenLedger(),restored=createSimulationPlayerStore({ledger:restoredLedger,storage});
+  restored.activate(null);
+  assert.deepEqual([restored.battleHealth(),restoredLedger.free],[98000,1100]);
+  restored.activate('0x'+'9'.repeat(40));
+  assert.deepEqual([restored.battleHealth(),restoredLedger.free],[100000,100]);
+  restored.activate(null);
+  assert.deepEqual([restored.battleHealth(),restoredLedger.free],[98000,1100]);
+  restoredLedger.free=0;
+  assert.equal(restored.recoverBattleHealth(1000).reason,'INSUFFICIENT_FREE_KGEN');
+  assert.equal(restoredLedger.lockedMargin,2);
 });

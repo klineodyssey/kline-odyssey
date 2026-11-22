@@ -51,6 +51,7 @@ export const WORLD_RULES=Object.freeze({
   playerRadius:.45,meleeRange:2.2,monsterAggroRange:8,monsterAttackRange:1.55,
   monsterAttackCooldownMs:1200,respawnMs:8000,marketLifeDecisionMs:1600,sourceSlots:24,
 });
+export const GAME_KAIOS_PER_HP=1000;
 
 export const WORLD_OBJECTS=Object.freeze([
   {id:'HOME-11520-001',type:'BUILDING',kind:'BUILDING',name:'花果山民宅',x:-7,y:0,z:7,radius:2.2,halfX:2.2,halfZ:2.2,lifeId:'LIFE-BUILDING-11520-HOME-001'},
@@ -260,9 +261,45 @@ export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
       encounterId:target.encounterId||null,profileId:target.profileId||null,level:target.level||1,boss:!!target.boss,training:!!target.training,phase:target.phase||1,rage:!!target.rage,lowHp:!!target.lowHp},
     lastResult:space.lastResult?copy(space.lastResult):null};
 }
-export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),heading=0,powerLevel=1}={}){
+function opposingBattleStance(world,target,vitality,now){
+  const {playerHp,playerMaxHp,positions}=vitality||{};
+  if(!Number.isFinite(playerHp)||!Number.isFinite(playerMaxHp)||playerHp<=0||playerHp>playerMaxHp||!Array.isArray(positions))return null;
+  const training=target.marketLife?.training,intent=training?.intent;
+  if(!target.simulationCombat||target.sourceManaged||training?.scope!=='GAME_TRAINING_ONLY'||intent?.scope!==training.scope)return null;
+  const side=intent.sign===1?'LONG':intent.sign===-1?'SHORT':null;
+  if(!side||intent.direction!==side||!['LOCAL_MOMENTUM','LOCAL_COUNTERTREND'].includes(intent.reason)
+    ||intent.at!==training.lastAt||now<intent.at)return null;
+  const quote=kMarketSnapshot(world,now);
+  if(quote.status!=='LIVE'||intent.at!==quote.receivedAt||!quote.markets.some(row=>row.axis===intent.axis&&row.symbol===intent.market))return null;
+  const opposite=side==='LONG'?'SHORT':'LONG';
+  const match=positions.some(position=>position?.status==='OPEN'&&position.axis===intent.axis&&position.market===intent.market&&position.side===opposite
+    &&Number.isFinite(position.lots)&&position.lots>0&&Number.isFinite(position.openedAt)&&position.openedAt>=0&&position.openedAt<=now
+    &&typeof position.orderId==='string'&&/^SIM-O-\d+$/.test(position.orderId)
+    &&typeof position.positionId==='string'&&/^SIM-P-\d+$/.test(position.positionId));
+  return match?intent:null;
+}
+
+function battleSiphon(market,hp){
+  return hp>0?{market,hp,kaios:hp*GAME_KAIOS_PER_HP}:null;
+}
+
+function restoreGuardianHp(target,amount){
+  if(amount<=0)return 0;
+  const before=target.hp,bodies=Object.values(target.bodies);
+  let remaining=amount;
+  for(const body of bodies){
+    const restored=Math.min(remaining,Math.max(0,body.maxHp-body.hp));
+    body.hp+=restored;
+    remaining-=restored;
+    if(remaining<=0)break;
+  }
+  target.hp=bodies.reduce((hp,body)=>hp+body.hp,0);
+  return Math.min(amount,Math.max(0,target.hp-before));
+}
+
+export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),heading=0,powerLevel=1,vitality=null}={}){
   const snapshot=kCombatSnapshot(world,player,{plane,c}),spec=KSPACE_SKILLS[skill],space=world.kSpace;
-  const result={ok:false,hit:false,simulationOnly:true,rewardKaios:0,skill,body:snapshot?.selection?.body||null,hits:[],damage:0,events:[],rewardId:null};
+  const result={ok:false,hit:false,simulationOnly:true,rewardKaios:0,skill,body:snapshot?.selection?.body||null,hits:[],damage:0,playerHealHp:0,events:[],rewardId:null};
   const finish=reason=>{result.reason=reason;if(space)space.lastResult={...result,at:now};return result};
   if(!snapshot||!spec||!Number.isFinite(now)||!Number.isFinite(heading))return finish('INVALID_INPUT');
   if(!snapshot.target||snapshot.target.state==='DEAD')return finish('NO_TARGET');
@@ -291,6 +328,13 @@ export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),
   }
   if(!result.hits.length)return finish('BODY_DISABLED');
   target.hp=Object.values(target.bodies).reduce((sum,b)=>sum+b.hp,0);
+  const stance=opposingBattleStance(world,target,vitality,now);
+  if(stance){
+    const opposedDamage=result.hits.reduce((damage,hit)=>hit.body.startsWith(stance.axis)?damage+hit.damage:damage,0);
+    result.playerHealHp=Math.min(opposedDamage,vitality.playerMaxHp-vitality.playerHp);
+    const siphon=battleSiphon(stance.market,result.playerHealHp);
+    if(siphon)result.siphon=siphon;
+  }
   result.events.push(...advanceBoss(world,target,now));
   if(!target.hp){target.state='DEAD';target.defeatedAt=now;
     if(world.journeyEnabled&&!target.rewardSuppressed&&!target.rewardClaimed){
@@ -446,7 +490,7 @@ function tickTrainingMonsters(world,now,deltaMs){
     m.marketMovement={scope:'GAME_PRESENTATION_ONLY',axis:intent?.axis||null,direction:intent?.direction||'NEUTRAL',vector:sign?v:{x:0,y:0,z:0},destination};
   }
 }
-export function tickWorld(world,player,now=Date.now()){
+export function tickWorld(world,player,now=Date.now(),vitality=null){
   if(now&&typeof now==='object')now=Number(now.now)||Date.now();
   const previous=Number.isFinite(world.lastTick)?world.lastTick:now,deltaMs=Math.max(0,now-previous);
   const guardian=world.journeyEnabled&&world.monsters.find(m=>m.simulationCombat);
@@ -470,8 +514,17 @@ export function tickWorld(world,player,now=Date.now()){
     const distance=Math.hypot(guardian.x-player.x,guardian.y-player.y,guardian.z-player.z),cooldown=guardian.rage?850:1400;
     if(distance<=2.4&&now-guardian.lastBossAttackAt>=cooldown){
       guardian.lastBossAttackAt=now;
-      events.push({type:'PLAYER_HIT',monsterId:guardian.id,encounterId:guardian.encounterId,damage:guardian.rage?12:7,
-        phase:guardian.phase,reason:guardian.rage?'BOSS_RAGE_STRIKE':'BOSS_STRIKE',simulationOnly:true});
+      const hit={type:'PLAYER_HIT',monsterId:guardian.id,encounterId:guardian.encounterId,damage:guardian.rage?12:7,
+        phase:guardian.phase,reason:guardian.rage?'BOSS_RAGE_STRIKE':'BOSS_STRIKE',simulationOnly:true};
+      const stance=opposingBattleStance(world,guardian,vitality,now);
+      if(stance){
+        // This boss strike is the first player hit this tick. Use the HP still available to remove.
+        const room=Math.max(0,guardian.maxHp-guardian.hp);
+        const restored=restoreGuardianHp(guardian,Math.min(hit.damage,vitality.playerHp,room));
+        const siphon=battleSiphon(stance.market,restored);
+        if(siphon)hit.siphon=siphon;
+      }
+      events.push(hit);
     }
   }
   if(now-(world.lastMarketLifeTick||0)>=WORLD_RULES.marketLifeDecisionMs){const ml=tickMarketLives(world,{playerAxes,quotes,now,deltaMs,availableMarkets:['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']});events.push(...ml.events)}
@@ -480,6 +533,7 @@ export function tickWorld(world,player,now=Date.now()){
     if(!m.sourceManaged||m.state==='DEAD'||!isHostileMonster(m))continue;
     const aggression=chaseStep(m,player,{deltaMs,aggroRange:WORLD_RULES.monsterAggroRange,attackRange:WORLD_RULES.monsterAttackRange});
     if(aggression.state==='CHASE'||aggression.state==='ATTACK'){m.state=aggression.state;m.visualMode=aggression.state;events.push({type:'MONSTER_AGGRO',monsterId:m.id,lifeId:m.lifeId,state:aggression.state,distance:aggression.distance,conflictAxes:aggression.conflictAxes,simulationOnly:true})}
+    // The source slot does not expose verified fills separate from its mutable market positions.
     const hit=maybeMonsterHit(m,player,now,{cooldownMs:WORLD_RULES.monsterAttackCooldownMs,attackRange:WORLD_RULES.monsterAttackRange});if(hit)events.push(hit);
   }
   const playerDamage=events.filter(e=>e.type==='PLAYER_HIT').reduce((n,e)=>n+Math.max(0,finite(e.damage)),0);

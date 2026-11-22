@@ -14,6 +14,58 @@ const logistics=read('../runtime/digital-ant-logistics-runtime.mjs');
 const marketLayout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
 const walletRuntime=read('../runtime/evm-wallet-runtime.mjs');
 
+test('paid KAIOS recovery and HP-scaled movement preserve the signed margin position',async()=>{
+  const {createContext,runInContext}=await import('node:vm');
+  const {GAME_KAIOS_PER_HP}=await import('../runtime/world-runtime.mjs');
+  const {PLAYER_MAX_KAIOS_HP,PLAYER_KAIOS_RECOVERY_PER_SECOND,createSimulationPlayerStore}=await import('../runtime/evm-wallet-runtime.mjs');
+  const {createKgenLedger}=await import('../runtime/kgen-margin-runtime.mjs');
+  const rules=main.slice(main.indexOf('const PLAYER_KAIOS_HEALTH='),main.indexOf('const S={axis:'));
+  const health=main.slice(main.indexOf('function playerActivityRatio()'),main.indexOf('let selectedTradingAxis='));
+  const speed=main.slice(main.indexOf('function localNavigationSpeed('),main.indexOf('function moveManual('));
+  const state={hp:0,axis:'KY'},position={status:'OPEN',c:-.001,lots:3},data=new Map(),ledger=createKgenLedger();
+  const playerStore=createSimulationPlayerStore({ledger,storage:{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)}});
+  playerStore.activate(null);
+  playerStore.changeBattleHealth(-PLAYER_MAX_KAIOS_HP);
+  Object.assign(ledger,{free:2200,total:2203,lockedMargin:3});
+  const doc={visibilityState:'visible'},mode={testnet:false};
+  const ctx={S:state,axis:()=>({pos:position}),readCanonicalDriveState:()=>({available:true,c:position.c,speedKPerSecond:.001}),
+    GAME_KAIOS_PER_HP,PLAYER_MAX_KAIOS_HP,PLAYER_KAIOS_RECOVERY_PER_SECOND,gameUnitsToK:value=>value/1000,
+    playerStore,playerLifeSwitching:false,isTestnet:()=>mode.testnet,document:doc,toast(){}};
+  const scope=createContext(ctx);
+  runInContext(rules+health+speed,scope);
+  const run=code=>runInContext(code,scope);
+  assert.equal(run('localNavigationSpeed()'),0);
+  assert.equal(run('recoverPlayerVitality(10);S.hp'),0,'no debit before confirmation');
+  assert.equal(run('recoveryRemaining=1200;recoverPlayerVitality(.5);S.hp'),0);
+  assert.equal(run('recoverPlayerVitality(.5);S.hp'),1);
+  assert.equal(ledger.free,1200);
+  assert.equal(run('recoverPlayerVitality(1);S.hp'),1.2);
+  assert.equal(ledger.free,1000);
+  assert.equal(run('S.hp=50;localNavigationSpeed()'),.0005);
+  assert.equal(run('S.hp=100;localNavigationSpeed()'),.001);
+  doc.visibilityState='hidden';
+  assert.equal(run('recoveryRemaining=1000;recoverPlayerVitality(2);recoveryRemaining'),0);
+  assert.equal(ledger.free,1000);
+  assert.deepEqual(position,{status:'OPEN',c:-.001,lots:3});
+  assert.equal(ledger.lockedMargin,3);
+  assert.match(main,/recoverPlayerVitality\(localMotionClock\.elapsedSeconds\)/);
+});
+
+test('the motion observer has no HP writes when XYZ moves against a quote',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const boot=read('../runtime/game-5d-bootstrap.mjs');
+  const classify=boot.slice(boot.indexOf('const motionSign='),boot.indexOf('function readAxisQuote('));
+  const tick=boot.slice(boot.indexOf('function applyCombatTick(){'),boot.indexOf('function installMotionCombatPrototype(){'));
+  const state={lastPhysical:{x:0,y:0,z:0},monsterDelta:{x:-1,y:0,z:0},relations:{},playerKaiosHp:50000,monsterKaiosHp:42000,marketJudge:{KX:1}};
+  runInNewContext(classify+tick+'applyCombatTick();',{
+    combat:state,__K11520_WORLD_COORDS__:{physical:{x:1,y:0,z:0}},
+    updateMarketJudges(){},renderCombat(){}
+  });
+  assert.equal(state.relations.x,'CONFLICT');
+  assert.equal(state.playerKaiosHp,50000);
+  assert.equal(state.monsterKaiosHp,42000);
+});
+
 test('fresh minimal HUD collapses transient cards while saved full/off organ preferences remain authoritative',async()=>{
   const {runInNewContext}=await import('node:vm'),ui=read('../runtime/mobile-ui-settings.mjs');
   const load=ui.slice(ui.indexOf('function load(){'),ui.indexOf('function save(){'));
@@ -226,7 +278,7 @@ test('0C and draft C retain walking; only filled position C supplies movement sp
  const {runInNewContext}=await import('node:vm');
  const {gameUnitsToK}=await import('../runtime/spatial-coordinate-runtime.mjs');
  const {readCanonicalDriveState}=await import('../runtime/combat-drive-adapter.mjs');
- const current={c:1000,pos:null},context={S:{axis:'KY'},axis:()=>current,gameUnitsToK,readCanonicalDriveState};
+ const current={c:1000,pos:null},context={S:{axis:'KY'},axis:()=>current,gameUnitsToK,readCanonicalDriveState,playerActivityRatio:()=>1};
  const fn=main.slice(main.indexOf('function localNavigationSpeed('),main.indexOf('function moveManual('));
  runInNewContext(fn+'globalThis.speed=localNavigationSpeed;',context);
  assert.equal(context.speed({navigating:false}),gameUnitsToK(6),'a draft rail does not ignite the engine');
@@ -943,14 +995,15 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Prior floating-input body: 105221614e4f33cecf4ffb9302cbfb6319bdab0552e290989564555767bcc34c.
   // Fixed entry floor: prior published main body bf5c2cbaacedeba8015c9447753111437afe9f11e4758e2e20ab418a36db0539.
    // Prior published fixed-entry-floor body: e5ca793767852c87ec296bed46aa789e4b66ab04e8929a5e0cd217a48cca005a.
-   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'fc726410bcfd1bd124c7b52739234ce94772183aa1f7b909ffe10e94123ea20c'},
+   // Order confirmation body: fc726410bcfd1bd124c7b52739234ce94772183aa1f7b909ffe10e94123ea20c.
+   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'b40e0d9c3f1a65083455fea8e395e21e8ebe0246d935c89c17f7d29044317d74'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
   // Prior published order adapter body bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078.
   'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'496168804b40899cd28d6e719084501dd080fa32d5fbddf5b5b86915ff0a620f'},
   'runtime/kgen-margin-runtime.mjs':{nonMetadataSha256:'51044cbfcecd761d0d9d2f05bd86db7ed89644e497383a48e61a1d854f44c576'},
    'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'ea364a05c794f635d0c03eb267fdd5dfa390428e5c15f01eb0f31757579a51d4'},
    // Prior published game shell body: f4ae42eca3c7c68622747423bfff3981fdd2438dab2a891ca696026b153364cc.
-   'game-5d.html':{nonMetadataSha256:'66f2ec1d2aa7081f14f07f1f6338666b12e8539acb3f4d2fe3ba35334712d9da'}
+   'game-5d.html':{nonMetadataSha256:'3113b2974da67a5bc175da3d68304b29b59fdd787997fca1b8e396067b8ad018'}
  };
  for(const ancestor of assets){
   const asset={...ancestor,...current[ancestor.path]};

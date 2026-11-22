@@ -152,14 +152,28 @@ async function selectEncounterUI(page,id){
   await page.waitForFunction(expected=>__K11520_KSPACE_COMBAT__?.target?.profileId===expected,id);
 }
 async function pursueMovingEncounter(page){
-  const state=await page.evaluate(()=>__K11520_KSPACE_COMBAT__);
-  if(state.target.state==='DEAD'||state.distance<=1.2||await page.locator('#journeyRecover').isVisible())return;
-  // Roaming lives are no longer stationary. Use the existing physical joystick,
-  // not a teleport/frozen target or wider attack radius. Keep all strike limits.
+  const observation=()=>page.evaluate(()=>{
+    const {target,distance,relative}=__K11520_KSPACE_COMBAT__;
+    const recovery=document.querySelector('#sheet.open #journeyRecover');
+    return {targetState:target.state,distance,relative,recovering:!!recovery?.getBoundingClientRect().width};
+  });
+  let state=await observation();
+  if(state.targetState==='DEAD'||state.distance<=1.2||state.recovering)return;
+  // Track the moving encounter through the native joystick at the current
+  // activity speed. The original pursuit limit and hit distance still apply.
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
-  const d=Math.hypot(state.relative.x,state.relative.z)||1;
-  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+state.relative.x/d*35,y-state.relative.z/d*35,{steps:4});
-  try{await page.waitForFunction(()=>__K11520_KSPACE_COMBAT__.distance<.8||document.querySelector('#journeyRecover')?.getBoundingClientRect().width>0,null,{timeout:5000})}finally{await page.mouse.up()}
+  await page.mouse.move(x,y);await page.mouse.down();
+  const deadline=performance.now()+5000;
+  try{
+    while(performance.now()<deadline){
+      const d=Math.hypot(state.relative.x,state.relative.z)||1;
+      await page.mouse.move(x+state.relative.x/d*35,y-state.relative.z/d*35,{steps:2});
+      await page.waitForTimeout(80);
+      state=await observation();
+      if(state.distance<.8||state.targetState==='DEAD'||state.recovering)return;
+    }
+    assert.fail('Native pursuit did not reach the original combat distance: '+JSON.stringify(state));
+  }finally{await page.mouse.up()}
 }
 async function defeatUsingSlash(page,{tag,onAttack,recoveryEvidence=[],attackTrace=[]}={}){
   for(let i=0;i<55;i++){
