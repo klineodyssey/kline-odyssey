@@ -202,6 +202,115 @@
       },
       "additionalProperties": false
     },
+    "verifiedInstance": {
+      "type": "object",
+      "required": ["INSTANCE_ID", "SELF_NAME", "LIFE_ID", "WORKER_ID", "STATUS"],
+      "properties": {
+        "INSTANCE_ID": { "type": "string", "minLength": 1 },
+        "SELF_NAME": { "type": "string", "minLength": 1 },
+        "LIFE_ID": { "type": "string", "minLength": 1 },
+        "WORKER_ID": { "type": "string", "minLength": 1 },
+        "STATUS": { "const": "ACTIVE" }
+      },
+      "additionalProperties": false
+    },
+    "handoffSafetyBoundary": {
+      "type": "object",
+      "required": [
+        "MERGE", "PUSH_MAIN", "DEPLOYMENT", "PAYMENT", "TOKEN_TRANSFER",
+        "TREASURY_ACTION", "GOVERNANCE_EXECUTION", "MAINNET_TRANSACTION",
+        "CHAIN_WRITE", "PRIVATE_KEY_REQUEST", "PRIVATE_KEY_OUTPUT",
+        "PRIVATE_KEY_STORAGE", "CONTROLLER_OR_SIGNER_IMPERSONATION",
+        "SELF_REVIEW", "PUBLIC_AUTO_POST"
+      ],
+      "properties": {
+        "MERGE": { "const": false },
+        "PUSH_MAIN": { "const": false },
+        "DEPLOYMENT": { "const": false },
+        "PAYMENT": { "const": false },
+        "TOKEN_TRANSFER": { "const": false },
+        "TREASURY_ACTION": { "const": false },
+        "GOVERNANCE_EXECUTION": { "const": false },
+        "MAINNET_TRANSACTION": { "const": false },
+        "CHAIN_WRITE": { "const": false },
+        "PRIVATE_KEY_REQUEST": { "const": false },
+        "PRIVATE_KEY_OUTPUT": { "const": false },
+        "PRIVATE_KEY_STORAGE": { "const": false },
+        "CONTROLLER_OR_SIGNER_IMPERSONATION": { "const": false },
+        "SELF_REVIEW": { "const": false },
+        "PUBLIC_AUTO_POST": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "handoffChannelMessage": {
+      "type": "object",
+      "required": [
+        "MESSAGE_ID", "CORRELATION_ID", "IDEMPOTENCY_KEY",
+        "FROM_SELF_NAME", "FROM_LIFE_ID", "FROM_WORKER_ID", "FROM_INSTANCE_ID",
+        "TO_SELF_NAME", "TO_LIFE_ID", "TO_WORKER_ID", "TO_INSTANCE_ID",
+        "CREATED_AT", "REPOSITORY", "BASE_SHA", "HEAD_SHA", "PAYLOAD",
+        "PAYLOAD_SHA256", "MESSAGE_SHA256", "REPLY_TO", "ACK_STATUS",
+        "DECISION_STATUS", "DELIVERY_STATUS", "SIGNATURE_TYPE", "SAFETY_BOUNDARY"
+      ],
+      "properties": {
+        "MESSAGE_ID": { "type": "string", "minLength": 1 },
+        "CORRELATION_ID": { "type": "string", "minLength": 1 },
+        "IDEMPOTENCY_KEY": { "type": "string", "minLength": 1 },
+        "FROM_SELF_NAME": { "type": "string", "minLength": 1 },
+        "FROM_LIFE_ID": { "type": "string", "minLength": 1 },
+        "FROM_WORKER_ID": { "type": "string", "minLength": 1 },
+        "FROM_INSTANCE_ID": { "type": "string", "minLength": 1 },
+        "TO_SELF_NAME": { "type": "string", "minLength": 1 },
+        "TO_LIFE_ID": { "type": "string", "minLength": 1 },
+        "TO_WORKER_ID": { "type": "string", "minLength": 1 },
+        "TO_INSTANCE_ID": { "type": "string", "minLength": 1 },
+        "CREATED_AT": { "type": "string", "format": "date-time" },
+        "REPOSITORY": { "type": "string", "minLength": 1 },
+        "BASE_SHA": { "$ref": "#/$defs/gitSha" },
+        "HEAD_SHA": { "$ref": "#/$defs/gitSha" },
+        "PAYLOAD": { "type": "object" },
+        "PAYLOAD_SHA256": { "$ref": "#/$defs/sha256" },
+        "MESSAGE_SHA256": { "$ref": "#/$defs/sha256" },
+        "REPLY_TO": { "type": ["string", "null"] },
+        "ACK_STATUS": { "const": "NOT_ACKNOWLEDGED" },
+        "DECISION_STATUS": { "const": "PENDING" },
+        "DELIVERY_STATUS": { "const": "CREATED" },
+        "SIGNATURE_TYPE": {
+          "enum": [
+            "REPOSITORY_HASH_BOUND_OFFCHAIN",
+            "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC",
+            "UNSIGNED_CANDIDATE"
+          ]
+        },
+        "SAFETY_BOUNDARY": { "$ref": "#/$defs/handoffSafetyBoundary" }
+      },
+      "additionalProperties": false
+    },
+    "handoffChannelEvent": {
+      "type": "object",
+      "required": [
+        "EVENT_ID", "MESSAGE_ID", "CORRELATION_ID", "STATUS",
+        "ACTOR_SELF_NAME", "ACTOR_LIFE_ID", "ACTOR_WORKER_ID", "ACTOR_INSTANCE_ID",
+        "CREATED_AT", "MESSAGE_SHA256", "PREVIOUS_EVENT_SHA256", "EVENT_SHA256"
+      ],
+      "properties": {
+        "EVENT_ID": { "type": "string", "minLength": 1 },
+        "MESSAGE_ID": { "type": "string", "minLength": 1 },
+        "CORRELATION_ID": { "type": "string", "minLength": 1 },
+        "STATUS": {
+          "enum": ["CREATED", "QUEUED", "DELIVERED", "ACKNOWLEDGED", "ANSWERED", "REVIEWED", "FAILED_CLOSED"]
+        },
+        "ACTOR_SELF_NAME": { "type": "string", "minLength": 1 },
+        "ACTOR_LIFE_ID": { "type": "string", "minLength": 1 },
+        "ACTOR_WORKER_ID": { "type": "string", "minLength": 1 },
+        "ACTOR_INSTANCE_ID": { "type": "string", "minLength": 1 },
+        "CREATED_AT": { "type": "string", "format": "date-time" },
+        "MESSAGE_SHA256": { "$ref": "#/$defs/sha256" },
+        "PREVIOUS_EVENT_SHA256": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "EVENT_SHA256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
     "bootResult": {
       "type": "object",
       "required": ["company_boot_status", "life_id", "instance_id", "attestation_status", "capability_status", "revocation_status", "current_main_sha", "expected_main_sha", "main_sha_match", "current_baseline_id", "expected_baseline_id", "baseline_status", "baseline_validation_passed", "parent_handoff_status", "assigned_workorder_status", "session_lock_status", "session_lock_holder_instance_id", "state_path", "authorized_actions", "forbidden_actions", "evidence_ids", "files_read", "identity_binding", "stale", "conflicted", "booted_at", "content_sha256", "record_sha256", "result_sha256"],
