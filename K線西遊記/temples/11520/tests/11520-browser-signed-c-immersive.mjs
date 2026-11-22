@@ -6,8 +6,11 @@ function freeQuotePayload(route,rows){
   return row?[{p:String(row.price),T:Date.now(),a:Date.now()}]:[];
 }
 import fs from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {chromium} from 'playwright';
 import {C_ABS_DETENTS,signedTravelFromC,formatSignedC} from '../controls/nonlinear-controls.mjs';
+import {BINANCE_AGGREGATE_SOURCE,createK11520Server} from '../backend/server.mjs';
 
 const OUT='artifacts/11520-visual-qa';
 const BASE=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
@@ -18,7 +21,9 @@ const quoteFixtureRows=[{symbol:'BTCUSDT',price:'65000'},{symbol:'ETHUSDT',price
 let quoteFixtureReady=false;
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
-const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+let backend,ledgerDirectory;
+try{
+const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
 if(LOCAL_SIMULATION_QA)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,quoteFixtureReady?quoteFixtureRows:[]))}));
 // This suite checks FULL HUD/immersive transitions. MINIMAL's default hiding
 // is independently covered by the world-first six-viewport browser suite.
@@ -35,33 +40,73 @@ if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
   await page.route('https://raw.githubusercontent.com/**',route=>route.abort());
 }
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
-if(process.env.K11520_LOCAL_QA_ASSETS==='1')await page.addStyleTag({content:`@font-face{font-family:K11520LocalCJK;src:url('/node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}html,body,button,input,select{font-family:K11520LocalCJK,sans-serif!important}`});
-await page.waitForTimeout(1900);
-if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
-await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
-await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready===true&&globalThis.__K11520_TRADE_DIRECTION_API__,null,{timeout:5000});
-await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',null,{timeout:5000});
-await page.waitForTimeout(500);
-assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
+async function openGame(url){
+  await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
+  if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
+    const font=await fs.readFile('node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2').catch(error=>{
+      if(error.code!=='ENOENT')throw error;
+      return null;
+    });
+    if(font)await page.addStyleTag({content:`@font-face{font-family:K11520LocalCJK;src:url(data:font/woff2;base64,${font.toString('base64')}) format('woff2');font-weight:400;font-style:normal;font-display:block}html,body,button,input,select{font-family:K11520LocalCJK,sans-serif!important}`});
+  }
+  await page.waitForTimeout(1900);
+  if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
+  await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
+  await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready===true&&globalThis.__K11520_TRADE_DIRECTION_API__,null,{timeout:5000});
+  await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',null,{timeout:5000});
+  await page.waitForTimeout(500);
+  assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
+}
+await openGame(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html');
 if(LOCAL_SIMULATION_QA){
   await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='WAIT',null,{timeout:5000});
   const simulationMode=await page.evaluate(()=>globalThis.__K11520_EXECUTION__.snapshot().mode);assert.equal(simulationMode,'SIMULATION_WALLET');
-  // Public WAIT remains truthful while explicit SIMULATION can preview.
+  async function assertBlockedOrder(){
+    const before=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot());
+    await page.locator('#orderFire').click({timeout:2500});
+    await page.waitForFunction(()=>document.querySelector('#toast').textContent.includes('等候有效報價'));
+    assert.equal(await page.locator('#confirm').isVisible(),false);
+    assert.equal(await page.locator('#confirmOrder').isDisabled(),true);
+    const after=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot());
+    assert.deepEqual(after.wallet,before.wallet);assert.deepEqual(after.orders,before.orders);assert.deepEqual(after.receipts,before.receipts);
+  }
   await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
-  const before=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet);
-  await page.locator('#orderFire').click({timeout:2500});
-  await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
-  await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('K11520_DETERMINISTIC_SIMULATION'));
-  assert.equal(await page.locator('#confirmOrder').isDisabled(),false,'WAIT must allow explicit simulation preview');
-  assert.equal(await page.evaluate(()=>globalThis.__K11520_MARKET_K__.status),'WAIT','local source never becomes a fake LIVE public quote');
-  assert.deepEqual(await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet),before,'preview does not debit');
-  await page.screenshot({path:`${OUT}/signed-c-WAIT-simulation-preview-390x844.png`});
-  await page.locator('#cancelOrder').click();
-  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await assertBlockedOrder();
+  await page.screenshot({path:`${OUT}/signed-c-WAIT-order-blocked-390x844.png`});
   quoteFixtureReady=true;
   await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});
-  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'HARNESS_LOCAL_SIMULATION_QUOTES',base:BASE,realMarketValidation:false,providerCallsIntercepted:'/api/v3/aggTrades',rows:quoteFixtureRows,waitPreviewAllowed:true,simulationSource:'K11520_DETERMINISTIC_SIMULATION',firstValidBatch:'LIVE',simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
+  await assertBlockedOrder(); // Display-only market reference on the ordinary static site.
+
+  let backendQuotesReady=false;
+  const sequences=new Map(),prices=new Map(quoteFixtureRows.map(row=>[row.symbol,Number(row.price)]));
+  ledgerDirectory=await fs.mkdtemp(join(tmpdir(),'k11520-signed-c-browser-'));
+  backend=await createK11520Server({dataFile:join(ledgerDirectory,'players.json'),readMarket:async({market,now})=>{
+    if(!backendQuotesReady)return [];
+    const sequence=(sequences.get(market)??0)+1;sequences.set(market,sequence);
+    return [{market,price:prices.get(market),updatedAt:now,source:BINANCE_AGGREGATE_SOURCE,sequence}];
+  },readIndependent:async()=>null});
+  const {port}=await backend.listen({port:0});
+  await openGame('http://127.0.0.1:'+port+'/');
+  await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().wallet&&globalThis.__K11520_MARKET_K__?.status==='WAIT');
+  assert.equal(await page.locator('#walletConnect').isDisabled(),true);
+  await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
+  await assertBlockedOrder();
+  backendQuotesReady=true;await backend.poll();
+  await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});
+  await page.locator('#lotsNumericInput').fill('1');await page.locator('#lotsNumericInput').press('Enter');
+  const before=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot());
+  for(const [signedC,side] of [['1','LONG'],['-1','SHORT']]){
+    await page.locator('#cNumericInput').fill(signedC);await page.locator('#cNumericInput').press('Enter');
+    await page.locator('#orderFire').click({timeout:2500});
+    await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
+    await page.waitForFunction(source=>document.querySelector('#simulationOrderPreview')?.textContent.includes(source)&&!document.querySelector('#confirmOrder').disabled,BINANCE_AGGREGATE_SOURCE);
+    assert.equal(await page.locator(`#confirmBody [data-order-side="${side}"]`).getAttribute('aria-pressed'),'true');
+    await page.locator('#cancelOrder').click();
+  }
+  const after=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot());
+  assert.deepEqual(after.wallet,before.wallet);assert.deepEqual(after.orders,before.orders);assert.deepEqual(after.receipts,before.receipts);
+  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'LOOPBACK_CONTROLLED_MARKET_READERS',base:BASE,realMarketValidation:false,rows:quoteFixtureRows,waitPreviewAllowed:false,staticReferenceOnly:true,backendPreviewSides:['LONG','SHORT'],priceSource:BINANCE_AGGREGATE_SOURCE,simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
 }
 // Human 12:43 Market collapse applies to FULL too; explicitly disclose it
 // before measuring the full-information HUD, rather than defeating idle hide.
@@ -275,8 +320,14 @@ await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click())
 await page.waitForTimeout(120);
 if(LOCAL_SIMULATION_QA)await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:5000});
 await page.locator('#orderFire').evaluate(el=>el.click());
+if(!LOCAL_SIMULATION_QA){
+  await page.waitForFunction(()=>document.querySelector('#toast').textContent.includes('等候有效報價'));
+  assert.equal(await page.locator('#confirm').isVisible(),false,'the public static page has no trial settlement service');
+  assert.equal(await page.locator('#confirmOrder').isDisabled(),true);
+  await page.screenshot({path:`${OUT}/signed-c100-static-order-blocked-390x844.png`,fullPage:true});
+}else{
 await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
-await page.waitForTimeout(240);
+await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('V1_HIGH_SPEED_PRODUCTION_LOCKED'));
 const preview=(await page.locator('#confirmBody').innerText()).replace(/\s+/g,' ').trim();
 assert.match(preview,/V1_HIGH_SPEED_PRODUCTION_LOCKED/,'100C must stay visibly locked in the V1 product');
 assert.equal(await page.locator('#confirmOrder').isDisabled(),true);
@@ -286,11 +337,16 @@ const confirmGeometry=await page.locator('#confirm').boundingBox();
 assert.ok(confirmGeometry&&confirmGeometry.x>=0&&confirmGeometry.y>=0&&confirmGeometry.x+confirmGeometry.width<=390&&confirmGeometry.y+confirmGeometry.height<=844,`confirmation must fit 390x844: ${JSON.stringify(confirmGeometry)}`);
 await page.screenshot({path:`${OUT}/11520-c100-settlement-hardening-390x844.png`,fullPage:true});
 await page.locator('#confirmX').click();
+}
 
 const layout=await page.evaluate(()=>structuredClone(globalThis.__K11520_MOBILE_CONTROL_LAYOUT__));
 assert.equal(layout.axisRailCentered,true,JSON.stringify(layout));
 assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
-await browser.close();
-console.log('11520 signed-C immersive QA PASS: one C renderer; direct canonical side sync; 100C hard cap and index-delta preview; cross-control lot edits preserve signed C; unified invalid-lot policy; rapid sign and axis-switch regressions; centered rail/colors/immersive verified at 390x844');
+}finally{
+  await browser.close();
+  if(backend)await backend.close();
+  if(ledgerDirectory){await fs.rm(join(ledgerDirectory,'players.json'),{force:true});await fs.rmdir(ledgerDirectory)}
+}
+console.log('11520 signed-C immersive QA PASS:',LOCAL_SIMULATION_QA?'1C backend previews and 100C blocked at confirmation':'public static order blocked','; signed detents, axis switching, phone geometry and immersive controls verified');
