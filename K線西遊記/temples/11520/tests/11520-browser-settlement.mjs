@@ -585,13 +585,16 @@ async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin
     state=await snapshot();assert.equal(state.view.autopilot.state,'STOPPED');assert.equal(state.view.autopilot.submittedOrders,0);assert.deepEqual(state.view.autopilot.orderIds,[]);
     assert.equal(state.view.autopilot.signerRequested,false);assert.equal(state.view.autopilot.broadcast,false);
     assert.deepEqual(state.book.orders,beforeAutoSnapshot.book.orders);assert.deepEqual(state.book.receipts,beforeAutoSnapshot.book.receipts);report.checks.blockedAutopilot=state;
-    await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
+    const stopControl=await control('#navigationAutoStop');
+    assert.equal(await stopControl.isDisabled(),true,'a stopped read-only autopilot has no active run to stop');
+    report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
     await phaseTiming.measure('navigation.stopped-opposite-quote',async()=>{
       eth=3988;await trial.poll();
       await page.waitForFunction(()=>globalThis.__K11520_FREE_ORACLE__?.ETHUSDT?.price===3988);
     });
     await page.waitForTimeout(2200);state=await snapshot();assert.equal(orderPosts,1,'autopilot emitted no new order request');
-    assert.deepEqual(state.book.orders,beforeAutoSnapshot.book.orders);assert.deepEqual(state.book.receipts,beforeAutoSnapshot.book.receipts);assert.equal(state.view.autopilot.state,'STOPPED');report.checks.afterOppositeSignal=state;
+    assert.deepEqual(state.book.orders,beforeAutoSnapshot.book.orders);assert.deepEqual(state.book.receipts,beforeAutoSnapshot.book.receipts);assert.equal(state.view.autopilot.state,'STOPPED');
+    assert.equal(state.view.autopilot.reason,'READ_ONLY_CONTEXT');report.checks.afterOppositeSignal=state;
     const selectors=['navigationMarket','navigationX','navigationY','navigationZ','navigationGo','navigationStop','navigationTargetPrice','navigationLongAbove','navigationShortBelow','navigationAutoC','navigationAutoLots','navigationMaxLoss','navigationMaxOrders','navigationAutoStart','navigationAutoStop'].map(id=>'#'+id),batchBegan=Date.now();
     const boxes=await phaseTiming.measure('navigation.control-batch',()=>page.locator('body').evaluate(inspectNavigationControls,{selectors}));report.controlBatch={selectors,elapsedMs:Date.now()-batchBegan,count:boxes.length};assert.equal(boxes.length,selectors.length);for(const box of boxes)recordControl(box);assert.equal(report.controlChecks.length,36,'All original navigation control checks must complete');
     assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.networkAuthorityAttempts,[]);assert.ok(state.fixture.providerCalls.every(method=>['eth_accounts','eth_chainId'].includes(method)),'no wallet connect, signer, chain switch or transaction requests');
