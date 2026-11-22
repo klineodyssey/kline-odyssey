@@ -1,6 +1,6 @@
 import { requireArray, requireFields, requireId } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
-import { sha256 } from "../shared/utils.mjs";
+import { sha256, stableStringify } from "../shared/utils.mjs";
 
 export const APP_FIELDS = Object.freeze([
   "app_id", "life_id", "species_id", "developer", "name", "version", "runtime", "entrypoint", "manifest_hash",
@@ -269,4 +269,160 @@ export async function upgradeAppVersion({ appRegistry, lifeRegistry, appId, next
 
 export function createAppRegistry(store, createRegistry) {
   return createRegistry({ domain: "APP", stream: "APP", idField: "app_id", validate: validateApp, store });
+}
+
+// Local research candidate, 2026-10-06. No App/Life registration or live-page wiring.
+// The host verifies donor sources with validateSoftwareCompositionCandidate before
+// supplying these two existing pure ports. JSON never chooses executable code.
+export const CANDIDATE_APP_STATE_SCHEMA = Object.freeze({
+  type: "object", required: ["position", "clock_ms", "rolled_back"], additionalProperties: false,
+  properties: {
+    position: { type: "object", required: ["x", "y", "z"], additionalProperties: false,
+      properties: { x: { type: "number" }, y: { type: "number" }, z: { type: "number" } } },
+    clock_ms: { type: "integer", minimum: 0 }, rolled_back: { type: "boolean" }
+  }
+});
+export const CANDIDATE_APP_COMMAND_SCHEMA = Object.freeze({
+  type: "object", required: ["sequence", "clock_ms", "action", "target", "step_meters"], additionalProperties: false,
+  properties: {
+    sequence: { type: "integer", minimum: 1 }, clock_ms: { type: "integer", minimum: 0 },
+    action: { enum: ["MOVE", "ROLLBACK"] },
+    target: { oneOf: [CANDIDATE_APP_STATE_SCHEMA.properties.position, { type: "null" }] },
+    step_meters: { type: "number", minimum: 0 }
+  }
+});
+const candidatePositionSchema = CANDIDATE_APP_STATE_SCHEMA.properties.position;
+const candidatePortRecord = (properties) => ({ type: "object", required: Object.keys(properties), properties, additionalProperties: false });
+export const CANDIDATE_APP_RNA_CONTRACT = Object.freeze({
+  command_schema: CANDIDATE_APP_COMMAND_SCHEMA,
+  translations: { MOVE: ["NAVIGATION", "GAME", "AUDIO_IF_BLOCKED"], ROLLBACK: ["RESTORE_BASELINE_NO_EFFECT"] },
+  ports: {
+    NAVIGATION: {
+      input: candidatePortRecord({ from: candidatePositionSchema, target: candidatePositionSchema }),
+      output: candidatePortRecord({ vector: candidatePositionSchema, distance: { type: "number", minimum: 0 }, arrived: { type: "boolean" } })
+    },
+    GAME: {
+      input: candidatePortRecord({ position: candidatePositionSchema, next: candidatePositionSchema }),
+      // The coordinator projects the existing collision result; blocker objects
+      // are not state or authority copied into a composed candidate.
+      output: candidatePortRecord({ position: candidatePositionSchema, blocked: { type: "boolean" } })
+    },
+    AUDIO: { input: { const: "BLOCKED" }, output: { type: "boolean" } }
+  },
+  outcomes: ["MOVED", "MOVEMENT_BLOCKED", "ARRIVED", "BASELINE_RESTORED"],
+  arrival_authority: "EXISTING_NAVIGATION_AT_ACCEPTED_WORLD_POSITION",
+  coordinate_space: "LOCAL_METERS", audio_intents: [null, "BLOCKED"]
+});
+const candidateCopy = (value) => JSON.parse(JSON.stringify(value));
+const candidateFreeze = (value) => {
+  if (value && typeof value === "object") { Object.values(value).forEach(candidateFreeze); Object.freeze(value); }
+  return value;
+};
+const candidateKeys = (value, keys) => value !== null && typeof value === "object" && !Array.isArray(value)
+  && Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key));
+const candidatePosition = (value) => candidateKeys(value, ["x", "y", "z"])
+  && Object.values(value).every(Number.isFinite);
+const candidateInteger = (value) => Number.isSafeInteger(value) && value >= 0;
+candidateFreeze(CANDIDATE_APP_STATE_SCHEMA);
+candidateFreeze(CANDIDATE_APP_COMMAND_SCHEMA);
+candidateFreeze(CANDIDATE_APP_RNA_CONTRACT);
+
+export async function createCandidateAppComposition({ candidateId, contractHash, version, maxSteps, maxStepMeters, position, clockMs }) {
+  invariant(typeof candidateId === "string" && /^CANDIDATE-[A-Z0-9-]+$/.test(candidateId), "CANDIDATE_ID_REQUIRED", "Use a candidate artifact ID, never a registered Life ID");
+  invariant(typeof contractHash === "string" && /^[a-f0-9]{64}$/.test(contractHash), "CANDIDATE_CONTRACT_HASH_REQUIRED", "Bind the source-verified candidate contract");
+  invariant(typeof version === "string" && /^\d+\.\d+\.\d+$/.test(version), "CANDIDATE_VERSION_INVALID", "An explicit contract version is required");
+  invariant(candidateInteger(maxSteps) && maxSteps >= 1 && maxSteps <= 64
+    && Number.isFinite(maxStepMeters) && maxStepMeters > 0 && maxStepMeters <= 1,
+  "CANDIDATE_BUDGET_INVALID", "The local prototype is bounded to 64 events and at most one meter per move");
+  invariant(candidatePosition(position) && candidateInteger(clockMs), "CANDIDATE_STATE_INVALID", "Provide a finite local position and injected clock");
+  const state = { position: candidateCopy(position), clock_ms: clockMs, rolled_back: false };
+  const baseline = { schema_version: "1.0.0", scope: "CANDIDATE_ONLY", candidate_id: candidateId,
+    contract_hash: contractHash, version, max_steps: maxSteps, max_step_meters: maxStepMeters, initial_state: state };
+  return candidateFreeze({ ...baseline, state: candidateCopy(state), events: [], head_hash: await sha256(baseline) });
+}
+
+// Pure copy-on-write transition. Audio is a bounded intent; only the host may
+// dispatch it, after accepting a NEW event. Replay and rollback dispatch nothing.
+export async function advanceCandidateAppComposition(snapshot, command, { vectorToward, resolveMove }) {
+  // Capture caller-owned input before any await. Reconstruct the already-applied
+  // pure events before extending it, so a rehashed but edited current state is
+  // not accepted as a new baseline. Trusted ports must remain effect-free.
+  const captured = candidateCopy(snapshot), input = candidateCopy(command);
+  const expected = { candidateId: captured?.candidate_id, contractHash: captured?.contract_hash,
+    version: captured?.version, maxSteps: captured?.max_steps, maxStepMeters: captured?.max_step_meters };
+  const ports = { vectorToward, resolveMove };
+  await reconstructCandidateAppComposition(await exportCandidateAppComposition(captured), expected, ports);
+  return applyCandidateAppCommand(captured, input, ports);
+}
+
+async function applyCandidateAppCommand(snapshot, command, { vectorToward, resolveMove }) {
+  invariant(snapshot?.scope === "CANDIDATE_ONLY" && snapshot.schema_version === "1.0.0", "CANDIDATE_SNAPSHOT_INVALID", "Candidate state is required");
+  invariant(candidateKeys(command, ["sequence", "clock_ms", "action", "target", "step_meters"]), "CANDIDATE_COMMAND_INVALID", "Undeclared command fields are forbidden");
+  invariant(candidateInteger(command.sequence) && command.sequence === snapshot.events.length + 1,
+    "CANDIDATE_REPLAY_REJECTED", "Each event sequence can be applied only once to this state");
+  invariant(snapshot.events.length < snapshot.max_steps && !snapshot.state.rolled_back,
+    "CANDIDATE_STOPPED", "Budget exhaustion or rollback stops this candidate session");
+  invariant(candidateInteger(command.clock_ms) && command.clock_ms >= snapshot.state.clock_ms,
+    "CANDIDATE_CLOCK_INVALID", "The injected clock must be monotonic");
+  invariant(["MOVE", "ROLLBACK"].includes(command.action), "CANDIDATE_COMMAND_INVALID", "Only movement and baseline rollback are supported");
+  let position, outcome, audioIntent = null;
+  if (command.action === "ROLLBACK") {
+    invariant(command.target === null && command.step_meters === 0, "CANDIDATE_COMMAND_INVALID", "Rollback has no movement payload");
+    position = candidateCopy(snapshot.initial_state.position); outcome = "BASELINE_RESTORED";
+  } else {
+    invariant(candidatePosition(command.target) && Number.isFinite(command.step_meters)
+      && command.step_meters > 0 && command.step_meters <= snapshot.max_step_meters,
+    "CANDIDATE_COMMAND_INVALID", "Movement must respect the declared local-meter budget");
+    invariant(typeof vectorToward === "function" && typeof resolveMove === "function", "CANDIDATE_PORT_MISSING", "The host must inject the existing Navigation and world collision ports");
+    const current = candidateCopy(snapshot.state.position);
+    const navigation = vectorToward(candidateCopy(current), candidateCopy(command.target));
+    invariant(candidatePosition(navigation?.vector) && Number.isFinite(navigation.distance) && navigation.distance >= 0
+      && typeof navigation.arrived === "boolean",
+      "CANDIDATE_PORT_INVALID", "Navigation must return a finite vector and distance");
+    const distance = Math.min(command.step_meters, navigation.distance);
+    const next = Object.fromEntries(["x", "y", "z"].map((axis) => [axis, current[axis] + navigation.vector[axis] * distance]));
+    const resolved = resolveMove(candidateCopy(current), next);
+    position = { x: resolved?.x, y: resolved?.y, z: resolved?.z };
+    invariant(candidatePosition(position) && typeof resolved.blocked === "boolean"
+      && Math.hypot(...["x", "y", "z"].map((axis) => position[axis] - current[axis])) <= command.step_meters + 1e-9
+      && (!resolved.blocked || stableStringify(position) === stableStringify(current)),
+    "CANDIDATE_PORT_INVALID", "World collision owns bounded movement and must preserve blocked positions");
+    // The world may clamp or redirect the proposed step. Reuse Navigation's
+    // existing arrival semantics at the accepted position, not before moving
+    // or at the unaccepted proposal. A collision denial always takes priority.
+    const acceptedNavigation = vectorToward(candidateCopy(position), candidateCopy(command.target));
+    invariant(candidatePosition(acceptedNavigation?.vector) && Number.isFinite(acceptedNavigation.distance)
+      && acceptedNavigation.distance >= 0 && typeof acceptedNavigation.arrived === "boolean",
+    "CANDIDATE_PORT_INVALID", "Post-collision Navigation must return a finite arrival result");
+    outcome = resolved.blocked ? "MOVEMENT_BLOCKED" : acceptedNavigation.arrived ? "ARRIVED" : "MOVED";
+    audioIntent = resolved.blocked ? "BLOCKED" : null;
+  }
+  const state = { position, clock_ms: command.clock_ms, rolled_back: command.action === "ROLLBACK" };
+  const event = { sequence: command.sequence, command: candidateCopy(command), outcome, audio_intent: audioIntent,
+    previous_hash: snapshot.head_hash, state_hash: await sha256(state) };
+  const head = await sha256(event);
+  return candidateFreeze({ ...candidateCopy(snapshot), state, events: [...candidateCopy(snapshot.events), { ...event, event_hash: head }], head_hash: head });
+}
+
+export async function exportCandidateAppComposition(snapshot) {
+  return candidateFreeze({ payload: candidateCopy(snapshot), snapshot_hash: await sha256(snapshot) });
+}
+
+// expected is supplied from the freshly source-validated contract by the host,
+// not copied out of the imported JSON. No AudioContext or backend state is read.
+export async function reconstructCandidateAppComposition(envelope, expected, ports) {
+  envelope = candidateCopy(envelope); expected = candidateCopy(expected);
+  invariant(candidateKeys(envelope, ["payload", "snapshot_hash"]), "CANDIDATE_SNAPSHOT_INVALID", "A candidate envelope is required");
+  const value = envelope.payload;
+  invariant(await sha256(value) === envelope.snapshot_hash, "CANDIDATE_SNAPSHOT_HASH_INVALID", "Snapshot bytes changed");
+  invariant(value?.schema_version === "1.0.0" && value.scope === "CANDIDATE_ONLY"
+    && value.contract_hash === expected.contractHash && value.candidate_id === expected.candidateId
+    && value.version === expected.version && value.max_steps === expected.maxSteps && value.max_step_meters === expected.maxStepMeters,
+  "CANDIDATE_CONTRACT_MISMATCH", "The exact source-verified contract and version must match");
+  invariant(Array.isArray(value.events) && value.events.length <= expected.maxSteps,
+    "CANDIDATE_SNAPSHOT_INVALID", "The candidate event budget must be respected before replay");
+  let replay = await createCandidateAppComposition({ ...expected, position: value.initial_state?.position, clockMs: value.initial_state?.clock_ms });
+  for (const event of value.events) replay = await applyCandidateAppCommand(replay, event.command, ports);
+  invariant(stableStringify(replay) === stableStringify(value), "CANDIDATE_REPLAY_HASH_INVALID", "State and every event must reconstruct exactly");
+  return replay;
 }
