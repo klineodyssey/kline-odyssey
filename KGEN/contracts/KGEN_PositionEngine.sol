@@ -65,13 +65,32 @@ contract KGEN_PositionEngine_V1_0_0 {
     struct TradingCapability { uint256 maxCWad; uint64 validUntil; uint32 maxAge; uint32 maxTimeSkew; uint256 maxSpreadWad; bytes32 evidenceHash; }
     mapping(Market => TradingCapability) public tradingCapability;
     enum TradingState { NO_NEW_RISK, OPEN, EXIT_ONLY }
+    enum OrderSettlementModel { UNSELECTED, INDEX_DELTA, FIXED_ENTRY_FLOOR }
+    mapping(Market => OrderSettlementModel) public orderSettlementModel;
+    // A zero unit identifies an order filled under the original index model.
+    mapping(uint256 => uint256) public positionEntryFloorUnitWad;
     error AdmissionRangeExceeded(); error OracleCapabilityUnavailable(); error OracleCapabilityExceeded();
+    error OrderSettlementModelLocked();
+    error FixedEntryFloorRequiresSignedOrder();
     event TradingCapabilitySet(Market indexed market, uint256 maxCWad, uint64 validUntil, bytes32 evidenceHash);
+    event FixedEntryFloorSelected(Market indexed market);
     error Paused(); error OrderAlreadyUsed(); error OutOfOrderPrice();
 
     function setPaused(bool value) external onlyAdmin { paused = value; }
     function settlementReceipt(uint256 id) external view returns (SettlementReceipt memory) { return _receipts[id]; }
     function positionSnapshot(uint256 id) external view returns (Position memory) { return positions[id]; }
+
+    // A market selects its model before it can admit any pending orders.
+    function selectFixedEntryFloor(Market market) external onlyAdmin {
+        if (orderSettlementModel[market] != OrderSettlementModel.UNSELECTED) revert OrderSettlementModelLocked();
+        orderSettlementModel[market] = OrderSettlementModel.FIXED_ENTRY_FLOOR;
+        emit FixedEntryFloorSelected(market);
+    }
+
+    function _entryFloorForMarket(Market market, uint256 entry) internal view returns (uint256) {
+        return orderSettlementModel[market] == OrderSettlementModel.FIXED_ENTRY_FLOOR
+            ? KGEN_MarketRiskKernel_V1_0_0.entryFloorUnitWad(entry) : 0;
+    }
 
     function openCPosition(address trader, Market market, int256 cWad, uint256 lots, uint256 orderId, uint256 expectedSequence) external onlyExecutor returns (uint256 id) {
         if (orderId == 0 || usedOrderIds[orderId]) revert OrderAlreadyUsed();
@@ -84,10 +103,18 @@ contract KGEN_PositionEngine_V1_0_0 {
         id = _openPosition(trader,market,cWad < 0 ? -int256(size) : int256(size),margin,price);
         usedOrderIds[orderId] = true;
         orderTerms[id] = OrderTerms(orderId,cWad,lots,price,observedAt,sequence);
-        MarketConfig memory cfg = _config(market);
-        uint256 favorable = cWad > 0 ? cfg.maxPriceWad : cfg.minPriceWad;
-        uint256 liability = uint256(KGEN_MarketRiskKernel_V1_0_0.orderPnl(cWad,lots,price,favorable));
-        brainSettlement.reservePositionRisk(positionKey(id),liability,orderId,id);
+        _reserveOrderRisk(id);
+    }
+
+    function _reserveOrderRisk(uint256 id) internal {
+        Position storage p = positions[id];
+        OrderTerms storage terms = orderTerms[id];
+        uint256 floorUnit = _entryFloorForMarket(p.market, p.entryPriceWad);
+        if (floorUnit != 0) positionEntryFloorUnitWad[id] = floorUnit;
+        MarketConfig memory cfg = _config(p.market);
+        uint256 favorable = terms.cWad > 0 ? cfg.maxPriceWad : cfg.minPriceWad;
+        uint256 liability = uint256(KGEN_MarketRiskKernel_V1_0_0.orderPnl(terms.cWad,terms.lots,p.entryPriceWad,favorable,floorUnit));
+        brainSettlement.reservePositionRisk(positionKey(id),liability,terms.orderId,id);
     }
 
     event ExecutorSet(address indexed executor);
@@ -114,6 +141,9 @@ contract KGEN_PositionEngine_V1_0_0 {
         require(openPositionCount[market] == 0, "OPEN_POSITIONS_CONFIG_LOCKED");
         if (initialMarginBps < 100 || maintenanceMarginBps == 0 || maintenanceMarginBps >= initialMarginBps || initialMarginBps > BPS || maxOracleAge == 0 || minPriceWad == 0 || maxPriceWad <= minPriceWad || maxPriceWad > 1e36) revert InvalidRiskConfig();
         marketConfig[market] = MarketConfig(initialMarginBps,maintenanceMarginBps,maxOracleAge,minPriceWad,maxPriceWad,enabled);
+        if (enabled && orderSettlementModel[market] == OrderSettlementModel.UNSELECTED) {
+            orderSettlementModel[market] = OrderSettlementModel.INDEX_DELTA;
+        }
         delete tradingCapability[market];
         emit MarketConfigured(market,initialMarginBps,maintenanceMarginBps,maxOracleAge,minPriceWad,maxPriceWad,enabled);
     }
@@ -187,6 +217,7 @@ contract KGEN_PositionEngine_V1_0_0 {
     }
 
     function openPosition(address trader,Market market,int256 sizeWad,uint256 collateralWad) external onlyExecutor returns (uint256 positionId) {
+        if (orderSettlementModel[market] == OrderSettlementModel.FIXED_ENTRY_FLOOR) revert FixedEntryFloorRequiresSignedOrder();
         // Legacy size-based positions must remain arithmetically settleable at
         // every accepted price, not merely inside today's admission interval.
         if(_abs(sizeWad)>uint256(type(int256).max)/1e36) revert KGEN_MarketRiskKernel_V1_0_0.SignedOverflow();
@@ -238,7 +269,7 @@ contract KGEN_PositionEngine_V1_0_0 {
     function _metrics(uint256 id,uint256 mark) internal view returns (int256 raw,uint256 notional) {
         Position storage p=positions[id]; OrderTerms storage t=orderTerms[id];
         if (t.orderId==0) return (KGEN_MarketRiskKernel_V1_0_0.pnl(p.sizeWad,p.entryPriceWad,mark),KGEN_MarketRiskKernel_V1_0_0.notional(_abs(p.sizeWad),mark));
-        raw=KGEN_MarketRiskKernel_V1_0_0.orderPnl(t.cWad,t.lots,p.entryPriceWad,mark);
+        raw=KGEN_MarketRiskKernel_V1_0_0.orderPnl(t.cWad,t.lots,p.entryPriceWad,mark,positionEntryFloorUnitWad[id]);
         notional=_abs(t.cWad)*t.lots*mark/p.entryPriceWad;
     }
 
@@ -255,32 +286,35 @@ contract KGEN_PositionEngine_V1_0_0 {
         t.lastPrice=mark; t.observedAt=observedAt; t.observationSequence=sequence;
     }
 
-    // Same integer INDEX_DELTA_C_LOTS predicate used by mark and settlement.
+    // Same integer PnL and maintenance predicate used by mark and settlement.
     // Zero means no representable adverse positive-price trigger in the bounded
     // arithmetic domain, not a fabricated oracle price.
     function liquidationBoundary(uint256 id) public view returns (uint256 boundary) {
         Position storage p=positions[id]; OrderTerms storage t=orderTerms[id];
-        return previewLiquidationBoundary(p.market,t.cWad,t.lots,p.entryPriceWad);
+        return _liquidationBoundary(t.cWad,t.lots,p.entryPriceWad,_config(p.market).maintenanceMarginBps,positionEntryFloorUnitWad[id]);
     }
 
     function previewLiquidationBoundary(Market market,int256 cWad,uint256 lots,uint256 entry) public view returns (uint256) {
+        return _liquidationBoundary(cWad,lots,entry,_config(market).maintenanceMarginBps,_entryFloorForMarket(market,entry));
+    }
+
+    function _liquidationBoundary(int256 cWad,uint256 lots,uint256 entry,uint16 mm,uint256 floorUnit) internal pure returns (uint256) {
         KGEN_MarketRiskKernel_V1_0_0.validateOrder(cWad,lots);
         require(entry > 0 && entry <= 1e36, "INVALID_ENTRY");
-        uint16 mm = _config(market).maintenanceMarginBps;
         uint256 lo = cWad > 0 ? 1 : entry;
         uint256 hi = cWad > 0 ? entry : 1e36;
-        if (!_boundaryTriggers(cWad,lots,entry,cWad > 0 ? lo : hi,mm)) return 0;
+        if (!_boundaryTriggers(cWad,lots,entry,cWad > 0 ? lo : hi,mm,floorUnit)) return 0;
         while (lo < hi) {
             uint256 mid = cWad > 0 ? lo + (hi-lo+1)/2 : lo + (hi-lo)/2;
-            bool hit = _boundaryTriggers(cWad,lots,entry,mid,mm);
+            bool hit = _boundaryTriggers(cWad,lots,entry,mid,mm,floorUnit);
             if (cWad > 0) { if (hit) lo=mid; else hi=mid-1; }
             else { if (hit) hi=mid; else lo=mid+1; }
         }
         return lo;
     }
 
-    function _boundaryTriggers(int256 cWad,uint256 lots,uint256 entry,uint256 mark,uint16 mm) internal pure returns (bool) {
-        int256 raw = KGEN_MarketRiskKernel_V1_0_0.orderPnl(cWad,lots,entry,mark);
+    function _boundaryTriggers(int256 cWad,uint256 lots,uint256 entry,uint256 mark,uint16 mm,uint256 floorUnit) internal pure returns (bool) {
+        int256 raw = KGEN_MarketRiskKernel_V1_0_0.orderPnl(cWad,lots,entry,mark,floorUnit);
         uint256 notional = _abs(cWad)*lots*mark/entry;
         return KGEN_MarketRiskKernel_V1_0_0.liquidatable(lots*1e18,raw,notional,mm);
     }

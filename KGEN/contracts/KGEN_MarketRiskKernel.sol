@@ -33,11 +33,24 @@ library KGEN_MarketRiskKernel_V1_0_0 {
     }
 
     function orderPnl(int256 cWad, uint256 lots, uint256 entry, uint256 mark) internal pure returns (int256) {
+        return orderPnl(cWad, lots, entry, mark, 0);
+    }
+
+    function entryFloorUnitWad(uint256 entry) internal pure returns (uint256 unit) {
+        if (entry == 0) revert ZeroPrice();
+        if (entry > 1e36) revert SignedOverflow();
+        unit = 1;
+        // The integer's decade includes the 18 price decimals.
+        for (; entry >= 10; entry /= 10) unit *= 10;
+    }
+
+    function orderPnl(int256 cWad, uint256 lots, uint256 entry, uint256 mark, uint256 floorUnitWad) internal pure returns (int256) {
         validateOrder(cWad, lots);
         if (entry == 0 || mark == 0) revert ZeroPrice();
         // Bounds also keep signed multiplication deterministic and fail-closed.
         if (entry > 1e36 || mark > 1e36) revert SignedOverflow();
-        return (int256(mark) - int256(entry)) * cWad * int256(lots) / int256(WAD);
+        uint256 unit = floorUnitWad == 0 ? WAD : floorUnitWad;
+        return (int256(mark) - int256(entry)) * cWad * int256(lots) / int256(unit);
     }
     error ZeroPrice(); error ZeroSize(); error InvalidBps(); error InvalidOracleTime(); error StaleOraclePrice(); error OraclePriceOutOfBounds(); error SignedOverflow();
 

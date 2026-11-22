@@ -107,7 +107,8 @@ assert.ok(triggerArtifact.runtime.length / 2 <= 24_576, 'Trigger optimized runti
 
 // Oracle freshness is chain-time policy, not host scheduling latency. Explicit
 // evm_increaseTime below still drives stale/future/ordering cases deterministically.
-const eip1193 = ganache.provider({ logging: { quiet: true }, wallet: { totalAccounts: 9 }, miner: { timestampIncrement: 1 } });
+// Model BSC's signing domain on a fresh, in-process EVM (no RPC URL or fork).
+const eip1193 = ganache.provider({ chain: { chainId: 56 }, logging: { quiet: true }, wallet: { totalAccounts: 10 }, miner: { timestampIncrement: 1 } });
 let estimateRpcRequests = 0;
 // Ganache mines synchronously. Ethers' default 250ms cache also retains rejected
 // estimateGas promises, so an unfunded rejection can incorrectly survive the
@@ -710,6 +711,226 @@ assert.equal((await engine.positionSnapshot(stalePosition)).status,1n);
 assert.equal(await brain.principalOf(await trader.getAddress()),beforeStale);
 await tick(px100); await (await trigger.connect(trader).closePosition(stalePosition)).wait();
 exitOnlyChecks.push('ORACLE_FAILURE_PRESERVES_PRINCIPAL_AND_POSITION');
+
+const fixedFloorChecks = [];
+const px60k = parseEther('60000'), px70k = parseEther('70000');
+const fixedEngine = await deploy(engineArtifact, admin, [await admin.getAddress(), await executor.getAddress(), proxy.target]);
+const fixedTrigger = await deploy(triggerArtifact, admin, [fixedEngine.target, await keeper.getAddress()]);
+const fixedTrader = fixedTrigger.connect(trader);
+const fixedMarketConfig = [0, 100, 10, 60, parseEther('10000'), parseEther('200000')];
+const fixedTraderAddress = await trader.getAddress();
+const fixedOrderIdBeforeActivation = await fixedTrigger.nextOrderId();
+const fixedPrincipalBeforeActivation = await brain.principalOf(fixedTraderAddress);
+
+function expectFixedOrderGate(errorName) {
+  return assert.rejects(
+    fixedTrader.createOrder.staticCall(0, parseEther('1'), 1, px60k),
+    { code: 'CALL_EXCEPTION', data: fixedEngine.interface.getError(errorName).selector },
+    errorName,
+  );
+}
+
+async function configureFixedCapability() {
+  await (await fixedEngine.configureTradingCapability(0, [
+    parseEther('1'), (await latestTimestamp()) + 3600n, 60, 60, parseEther('1'), capabilityEvidence,
+  ])).wait();
+}
+
+await (await fixedEngine.setPaused(true)).wait();
+await (await fixedTrigger.setPaused(true)).wait();
+await (await fixedEngine.configureMarket(...fixedMarketConfig, false)).wait();
+assert.equal(await fixedEngine.orderSettlementModel(0), 0n);
+await expectRevert(fixedEngine.connect(stranger).selectFixedEntryFloor(0), 'fixed floor selection is admin only');
+await (await fixedEngine.selectFixedEntryFloor(0)).wait();
+await expectRevert(engine.selectFixedEntryFloor(0), 'already enabled legacy market cannot change its order model');
+assert.equal(await engine.orderSettlementModel(0), 1n);
+assert.equal(await engine.positionEntryFloorUnitWad(stalePosition), 0n);
+await expectRevert(
+  fixedEngine.connect(executor).openPosition(fixedTraderAddress, 0, size1, parseEther('2')),
+  'fixed market must use the signed order path',
+);
+await (await fixedEngine.setExecutor(fixedTrigger.target)).wait();
+await (await brain.grantRole(settlementRole, fixedEngine.target)).wait();
+await (await fixedEngine.configureOracle(0, [feed0.target, feed1.target, feed2.target], 2, 500)).wait();
+await configureFixedCapability();
+assert.equal(await fixedEngine.paused(), true);
+assert.equal(await fixedTrigger.paused(), true);
+assert.equal((await fixedEngine.marketConfig(0)).enabled, false);
+assert.equal(await fixedEngine.orderSettlementModel(0), 2n);
+assert.equal((await fixedEngine.tradingCapability(0)).maxCWad, parseEther('1'));
+await expectFixedOrderGate('Paused');
+
+// On the local chain, remove one gate at a time so each downstream gate is exercised.
+await (await fixedTrigger.setPaused(false)).wait();
+await expectFixedOrderGate('MarketDisabled');
+await (await fixedEngine.configureMarket(...fixedMarketConfig, true)).wait();
+assert.equal(await fixedEngine.orderSettlementModel(0), 2n);
+assert.equal((await fixedEngine.tradingCapability(0)).maxCWad, 0n, 'enabling a market clears its configured capability');
+await expectRevert(fixedEngine.selectFixedEntryFloor(0), 'selected market cannot switch again');
+await tick(px60k);
+await expectFixedOrderGate('Paused');
+await (await fixedEngine.setPaused(false)).wait();
+await expectFixedOrderGate('OracleCapabilityUnavailable');
+assert.equal(await fixedTrigger.nextOrderId(), fixedOrderIdBeforeActivation);
+assert.equal(await brain.principalOf(fixedTraderAddress), fixedPrincipalBeforeActivation);
+await configureFixedCapability();
+fixedFloorChecks.push('PAUSED_DISABLED_FIXED_MODEL_REQUIRES_SEPARATE_ENABLE_AND_FRESH_CAPABILITY');
+
+async function fillFixedOrder(c, lots, triggerPrice, fillPrice) {
+  await tick(triggerPrice - 1n);
+  const id = await fixedTrigger.nextOrderId();
+  smokeReceipts.push(receiptRecord('fixedFloorCreate', await (
+    await fixedTrigger.connect(trader).createOrder(0, parseEther(c), lots, triggerPrice)
+  ).wait()));
+  assert.equal((await fixedTrigger.order(id)).status, 1n);
+  await tick(fillPrice);
+  smokeReceipts.push(receiptRecord('fixedFloorFill', await (
+    await fixedTrigger.connect(keeper).observeOrder(id, {gasLimit:2_000_000})
+  ).wait()));
+  const order = await fixedTrigger.order(id);
+  assert.equal(order.status, 2n);
+  const receipt = await fixedTrigger.fillReceipt(id);
+  assert.equal(receipt.triggerPrice, triggerPrice);
+  assert.equal(receipt.fillPrice, fillPrice);
+  return order.positionId;
+}
+
+const floorPrincipalBefore = await brain.principalOf(await trader.getAddress());
+const longFloorId = await fillFixedOrder('1', 2, px60k, px60k);
+assert.equal(await fixedEngine.positionEntryFloorUnitWad(longFloorId), parseEther('10000'));
+assert.equal((await brain.positionRiskReservations(await fixedEngine.positionKey(longFloorId))).liabilityWei, parseEther('28'));
+const fixedBoundary = await fixedEngine.liquidationBoundary(longFloorId);
+assert.equal(fixedBoundary, await fixedEngine.previewLiquidationBoundary(0, parseEther('1'), 2, px60k));
+await tick(fixedBoundary + 1n);
+assert.equal((await fixedEngine.markPosition(longFloorId)).liquidatable, false);
+await tick(fixedBoundary);
+assert.equal((await fixedEngine.markPosition(longFloorId)).liquidatable, true);
+await tick(parseEther('175000'));
+assert.equal((await fixedEngine.markPosition(longFloorId)).unrealizedPnlWad, parseEther('23'), 'mark crossing does not change the fill scale');
+await tick(px70k);
+assert.equal((await fixedEngine.markPosition(longFloorId)).unrealizedPnlWad, parseEther('2'));
+smokeReceipts.push(receiptRecord('fixedFloorClose', await (
+  await fixedTrigger.connect(trader).closePosition(longFloorId, {gasLimit:2_000_000})
+).wait()));
+const longFloorReceipt = await fixedEngine.settlementReceipt(longFloorId);
+assert.equal(longFloorReceipt.status, 2n);
+assert.equal(longFloorReceipt.entryPrice, px60k);
+assert.equal(longFloorReceipt.settlementPrice, px70k);
+assert.equal(longFloorReceipt.liquidationTrigger, fixedBoundary);
+assert.equal(longFloorReceipt.realizedPnl, parseEther('2'));
+assert.equal(await brain.principalOf(await trader.getAddress()), floorPrincipalBefore + parseEther('2'));
+const walletBefore = await token.balanceOf(await trader.getAddress());
+smokeReceipts.push(receiptRecord('fixedFloorProfitWithdrawal', await (
+  await brain.connect(trader).withdrawMargin(parseEther('2'))
+).wait()));
+assert.equal(await token.balanceOf(await trader.getAddress()), walletBefore + parseEther('2'));
+fixedFloorChecks.push('BTC_60000_TO_70000_LONG_2_KGEN_RECEIPT_PRINCIPAL_AND_WALLET');
+
+const shortFloorId = await fillFixedOrder('-1', 2, px60k, px60k);
+await tick(px70k);
+assert.equal((await fixedEngine.markPosition(shortFloorId)).unrealizedPnlWad, parseEther('-2'));
+smokeReceipts.push(receiptRecord('fixedFloorLiquidate', await (
+  await fixedTrigger.connect(keeper).observePosition(shortFloorId, {gasLimit:2_000_000})
+).wait()));
+const shortFloorReceipt = await fixedEngine.settlementReceipt(shortFloorId);
+assert.equal(shortFloorReceipt.status, 3n);
+assert.equal(shortFloorReceipt.realizedPnl, parseEther('-2'));
+assert.equal(shortFloorReceipt.marginAfter, 0n);
+assert.equal(shortFloorReceipt.settlementPrice, px70k);
+fixedFloorChecks.push('BTC_60000_TO_70000_SHORT_KEEPER_LIQUIDATION_MINUS_2_KGEN');
+
+const gapFloorId = await fillFixedOrder('1', 1, parseEther('99999'), parseEther('100000'));
+assert.equal(await fixedEngine.positionEntryFloorUnitWad(gapFloorId), parseEther('100000'));
+await tick(parseEther('175000'));
+await (await fixedTrigger.connect(trader).closePosition(gapFloorId, {gasLimit:2_000_000})).wait();
+assert.equal((await fixedEngine.settlementReceipt(gapFloorId)).realizedPnl, parseEther('0.75'));
+fixedFloorChecks.push('GAP_FILL_SELECTS_ACTUAL_FLOOR_AT_DECIMAL_BOUNDARY');
+
+// A new player funds two lots, earns two mock KGEN, and withdraws all four.
+// Bind each transaction to its actual emitter, account and on-chain state.
+const walletPlayer = await provider.getSigner(9);
+const walletAddress = await walletPlayer.getAddress();
+const walletBrain = brain.connect(walletPlayer);
+const walletTrigger = fixedTrigger.connect(walletPlayer);
+const two = parseEther('2'), four = parseEther('4'), entry = parseEther('75000'), exit = parseEther('85000');
+const walletReceipts = [];
+function readEvent(receipt, contract, name) {
+  const topic = contract.interface.getEvent(name).topicHash;
+  const matches = receipt.logs.filter(log => log.address.toLowerCase() === contract.target.toLowerCase() && log.topics[0] === topic);
+  assert.equal(matches.length, 1, name);
+  return contract.interface.parseLog(matches[0]).args;
+}
+async function minedStep(label, transaction) {
+  const receipt = await (await transaction).wait();
+  assert.equal(receipt.status, 1, label);
+  walletReceipts.push(receiptRecord(label, receipt));
+  return receipt;
+}
+assert.equal((await provider.getNetwork()).chainId, 56n);
+assert.equal(await brain.principalOf(walletAddress), 0n);
+await (await token.mint(walletAddress, two)).wait();
+const approval = readEvent(await minedStep('approve exact', token.connect(walletPlayer).approve(proxy.target, two)), token, 'Approval');
+assert.deepEqual([approval.owner, approval.spender, approval.value], [walletAddress, proxy.target, two]);
+const deposit = await minedStep('deposit', walletBrain.depositMargin(two));
+const deposited = readEvent(deposit, brain, 'MarginDeposited');
+const depositTransfer = readEvent(deposit, token, 'Transfer');
+assert.deepEqual([deposited.user, deposited.requestedWei, deposited.receivedWei], [walletAddress, two, two]);
+assert.deepEqual([depositTransfer.from, depositTransfer.to, depositTransfer.value], [walletAddress, proxy.target, two]);
+assert.equal(await token.balanceOf(walletAddress), 0n);
+assert.equal(await brain.principalOf(walletAddress), two);
+await tick(entry - parseEther('1'));
+const created = readEvent(await minedStep('create', walletTrigger.createOrder(0, parseEther('1'), 2, entry)), fixedTrigger, 'OrderCreated');
+assert.equal(created.trader, walletAddress);
+await tick(entry);
+const fillTx = await minedStep('fill', fixedTrigger.connect(keeper).observeOrder(created.orderId, {gasLimit:2_000_000}));
+const filled = readEvent(fillTx, fixedTrigger, 'OrderFilled');
+const opened = readEvent(fillTx, fixedEngine, 'PositionOpened');
+assert.deepEqual([filled.orderId, filled.price, opened.positionId, opened.trader, opened.entryPriceWad],
+  [created.orderId, entry, filled.positionId, walletAddress, entry]);
+assert.equal(await fixedEngine.positionEntryFloorUnitWad(filled.positionId), parseEther('10000'));
+assert.equal(await brain.lockedPrincipalOf(walletAddress), two);
+await expectRevert(fixedTrigger.connect(keeper).observeOrder.staticCall(created.orderId), 'duplicate fill rejected');
+await tick(parseEther('74999'));
+const dip = await fixedEngine.markPosition(filled.positionId);
+assert.equal(dip.unrealizedPnlWad, parseEther('-0.0002'));
+assert.equal(dip.liquidatable, false);
+await tick(exit);
+const closing = await minedStep('close and settle', walletTrigger.closePosition(filled.positionId, {gasLimit:2_000_000}));
+const closed = readEvent(closing, fixedEngine, 'PositionClosed');
+const settled = readEvent(closing, brain, 'PositionCollateralSettled');
+const paid = readEvent(closing, brain, 'SettlementClaimRecorded');
+assert.deepEqual([closed.positionId, closed.exitPriceWad, closed.realizedPnlWad], [filled.positionId, exit, two]);
+assert.deepEqual([settled.positionKey, settled.user, settled.realizedPnlWei, settled.principalAfterWei],
+  [opened.positionKey, walletAddress, two, four]);
+assert.deepEqual([paid.positionKey, paid.dueWei, paid.paidWei, paid.remainingWei], [opened.positionKey, two, two, 0n]);
+assert.equal(await brain.availablePrincipal(walletAddress), four);
+assert.equal(await token.balanceOf(walletAddress), 0n, 'settlement credits margin before withdrawal');
+await expectRevert(walletTrigger.closePosition.staticCall(filled.positionId), 'duplicate settlement rejected');
+const withdrawal = await minedStep('withdraw', walletBrain.withdrawMargin(four));
+const withdrawn = readEvent(withdrawal, brain, 'MarginWithdrawn');
+const walletTransfer = readEvent(withdrawal, token, 'Transfer');
+assert.deepEqual([withdrawn.user, withdrawn.amountWei, walletTransfer.from, walletTransfer.to, walletTransfer.value],
+  [walletAddress, four, proxy.target, walletAddress, four]);
+assert.equal(await brain.principalOf(walletAddress), 0n);
+assert.equal(await token.balanceOf(walletAddress), four);
+const reconnected = new BrowserProvider(eip1193);
+try {
+  for (const step of walletReceipts) {
+    const original = await reconnected.getTransactionReceipt(step.transactionHash);
+    assert.equal(original.status, 1);
+    assert.equal(original.blockNumber, step.blockNumber);
+    assert.equal((await reconnected.getBlock(step.blockNumber)).hash, original.blockHash);
+  }
+  const originalFill = await fixedTrigger.connect(reconnected).fillReceipt(created.orderId);
+  const originalClose = await fixedEngine.connect(reconnected).settlementReceipt(filled.positionId);
+  assert.deepEqual([originalFill.trader, originalFill.positionId, originalClose.orderId, originalClose.trader, originalClose.realizedPnl],
+    [walletAddress, filled.positionId, created.orderId, walletAddress, two]);
+} finally {
+  reconnected.destroy();
+}
+fixedFloorChecks.push('LOCAL_CHAIN56_75000_TO_85000_TWO_LOTS_ERC20_DEPOSIT2_SETTLE2_WITHDRAW4_RECONNECTED');
+console.log('[fixed-entry-floor-settlement] PASS: ' + fixedFloorChecks.join(', '));
+
 // Beyond the reserved admission envelope, actual profit is owed, not clamped.
 await capability(); const claimPosition=await rangePosition('100',100);
 await tick(parseEther('200000'));
@@ -728,6 +949,9 @@ console.log('[exit-only-oracle-capability] PASS: '+exitOnlyChecks.join(', '));
 fs.mkdirSync('artifacts', { recursive: true });
 fs.writeFileSync('artifacts/settlement-local-evm.json', JSON.stringify({
   evidenceClass: 'LOCAL_GANACHE_TEST_ASSETS_NOT_TESTNET',
+  fixedFloorWallet: {environment: 'IN_PROCESS_GANACHE_NO_FORK', asset: 'MOCK_KGEN', player: walletAddress, token: token.target,
+    brain: proxy.target, trigger: fixedTrigger.target, engine: fixedEngine.target, orderId: String(created.orderId), positionId: String(filled.positionId),
+    entry: '75000', exit: '85000', lots: 2, marginDeposited: '2', realizedProfit: '2', withdrawnToWallet: '4', transactions: walletReceipts},
   status: 'PASS', timestamp: new Date().toISOString(), chainId: (await provider.getNetwork()).chainId.toString(),
   compiler: { version: solc.version(), optimizer: { enabled: true, runs: 200 }, viaIR: false },
   sourceSha256: Object.fromEntries(Object.entries(sources).map(([file, source]) => [file, createHash('sha256').update(source.content).digest('hex')])),
@@ -737,7 +961,7 @@ fs.writeFileSync('artifacts/settlement-local-evm.json', JSON.stringify({
   authorities: { admin: await admin.getAddress(), upgradeAuthority: await upgrader.getAddress(), pauser: await pauser.getAddress(),
     keeper: await keeper.getAddress(), positionExecutor: trigger.target, brainSettlementRole: engine.target, trader: await trader.getAddress() },
   configuration: { cMax: 100, lotsMax: 100, initialMarginBps: 100, maintenanceMarginBps: 10, oracleMaxAge: 60, oracleMaxDeviationBps: 500, oracleSources: 3, oracleQuorum: 2 },
-  canonicalCDetents: C_DETENTS.filter(c => c !== 0), canonicalLots: [1, 100], stressCases, realisticBoundaryCases, exitOnlyChecks,
+  canonicalCDetents: C_DETENTS.filter(c => c !== 0), canonicalLots: [1, 100], stressCases, realisticBoundaryCases, exitOnlyChecks, fixedFloorChecks,
   capitalAccounting: { fundedTestTokensOnly: true, reservedSettlementLiability: (await brain.reservedSettlementLiability()).toString(), playerClaims: (await brain.totalPlayerClaimable()).toString(), noOptimisticNetting: true, concurrentPlayers: 3, withdrawalsVerified: true }, deploymentReceipts, smokeReceipts,
   testnetDeployment: 'NOT_EXECUTED', mainnetExecution: 'NOT_AUTHORIZED_OR_EXECUTED',
   limitations: ['Mock token and feeds are local only.', 'No production oracle provenance or live-network deployment is certified.', 'Gas is measured local EVM gas, not a production gas-price estimate.']
