@@ -20,6 +20,10 @@ const PUBLIC_RPC=new URL('https://bsc-dataseed.bnbchain.org').href;
 const WALLET_SDK_URL='https://unpkg.com/@walletconnect/ethereum-provider@2.12.2/dist/index.umd.js';
 const WALLET_SDK_SRI='sha384-Fuh8lPTDFjBwwB4D6KOigvxCgDcPV9rAbE7m0OcFJ5IISKrEqq76h7EANVG5Vy6S';
 const WALLET_HINT_KEY='kaios18911.walletconnect.hint.v1';
+const CATALOG_WALLET_IDS=[
+  '971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709',
+  '8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4',
+];
 const PUBLIC_READS=new Set(['eth_chainId','eth_accounts','eth_getBlockByNumber','eth_getBlockByHash','eth_getCode','eth_call','eth_getBalance','eth_getTransactionReceipt','eth_getTransactionByHash']);
 const report={
   head:process.env.KAIOS_SOURCE_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
@@ -50,19 +54,21 @@ async function sourceFingerprint(relative){
   return createHash('sha256').update(bytes).digest('hex');
 }
 
-async function geometry(page,selector){
-  return page.locator(selector).evaluate(el=>{
+async function geometry(page,selector,{center=false}={}){
+  return page.locator(selector).evaluate((el,center)=>{
+    if(center)el.scrollIntoView({block:'center',inline:'center',behavior:'instant'});
     const rect=el.getBoundingClientRect(),style=getComputedStyle(el);
     const hit=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2);
     return {width:rect.width,height:rect.height,inView:rect.left>=0&&rect.right<=innerWidth&&rect.top>=0&&rect.bottom<=innerHeight,
-      hit:!!hit&&(hit===el||el.contains(hit)),visible:style.visibility!=='hidden'&&style.display!=='none'&&Number(style.opacity)!==0};
-  });
+      hit:!!hit&&(hit===el||el.contains(hit)),visible:style.visibility!=='hidden'&&style.display!=='none'&&Number(style.opacity)!==0,
+      hitElement:hit?.id||hit?.tagName||null,viewportTop:rect.top,viewportBottom:rect.bottom};
+  },center);
 }
 
 async function touchTarget(page,selector){
-  await page.locator(selector).evaluate(el=>el.scrollIntoView({block:'center',inline:'center',behavior:'instant'}));
-  const rect=await geometry(page,selector);
-  assert.ok(rect.visible&&rect.inView&&rect.hit,selector+' is visible and center-hit reachable');
+  // Measure the user-scrolled position before a different frame can scroll to a status message.
+  const rect=await geometry(page,selector,{center:true});
+  assert.ok(rect.visible&&rect.inView&&rect.hit,selector+' is visible and center-hit reachable '+JSON.stringify(rect));
   assert.ok(rect.width>=44&&rect.height>=44,selector+' has a 44px touch target');
   targetRecords.get(page)?.push({selector,...rect});
   return rect;
@@ -139,13 +145,13 @@ report.payload={chainId:PAYLOAD.chainId,sourceMain:PAYLOAD.sourceMain,programCom
   dependencyPins:Object.fromEntries(Object.entries(PAYLOAD.dependencies).map(([name,item])=>[name,{address:item.address,codeHash:item.codeHash}])),
   scope:'SYNTHETIC_READS_AND_EXPLICIT_QA_MINED_DEPLOYMENTS_ONLY',realVerifiedMinedDeployments:0};
 
-async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false}={}){
+async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56,switchMode='success',sendMode='pending',guest=false,walletBridge=false,lateInjection=false,activeAlchemy=false,initialAllowance='100',kaiosBalances={},binanceInjected=''}={}){
   row.rpc=[];row.sendRequests=[];
   await page.exposeFunction('__record18911SyntheticRpc',event=>{
     row.rpc.push(event);
     if(event.method==='eth_sendTransaction')row.sendRequests.push(event);
   });
-  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy})=>{
+  await context.addInitScript(({payload,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,initialAllowance,kaiosBalances,binanceInjected})=>{
     // The only application flag is a display-only notice. Authorization still
     // goes through the real client, real shared selector and real payload.
     window.__K18911_MOCK__=true;
@@ -159,7 +165,9 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
     // This QA-only chain ledger survives a real page reload. It is separate
     // from every production localStorage pending/journal/archive key.
     const transactions=new Map(storedLedger?.transactions),receipts=new Map(storedLedger?.receipts),blocks=new Map(storedLedger?.blocks),deployed=new Map(storedLedger?.deployed),proposals=new Map(storedLedger?.proposals),codeOverrides=new Map();
-    function persistLedger(){sessionStorage.setItem(qaLedgerKey,JSON.stringify({scope:'SYNTHETIC_CHAIN_ONLY',programCommit:payload.programCommit,sendCount:state.sendCount,transactions:[...transactions],receipts:[...receipts],blocks:[...blocks],deployed:[...deployed],proposals:[...proposals]}));}
+    const allowances=new Map(storedLedger?.allowances);
+    const allowanceKey=(owner,spender)=>JSON.stringify([normalized(owner),normalized(spender)]);
+    function persistLedger(){sessionStorage.setItem(qaLedgerKey,JSON.stringify({scope:'SYNTHETIC_CHAIN_ONLY',programCommit:payload.programCommit,sendCount:state.sendCount,transactions:[...transactions],receipts:[...receipts],blocks:[...blocks],deployed:[...deployed],proposals:[...proposals],allowances:[...allowances]}));}
     const counters=new Map();
     let qaVisibility='visible';
     let readFailure=null;
@@ -173,9 +181,8 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       interfaces={registry:new E.Interface(payload.registryABI),kaios:new E.Interface(payload.kaiosABI),kgen:new E.Interface(payload.kgenABI),
         ...Object.fromEntries(Object.entries(payload.contracts).map(([name,item])=>[name,new E.Interface(item.abi)]))};
       if(activeAlchemy&&!deployed.size){
-        // Only the two player-confirmation scenarios start with a synthetic
-        // active chain. The real client still verifies every payload runtime,
-        // immutable getter and route; no product journal or pending is seeded.
+        // The client still verifies each runtime, immutable getter and route
+        // on the synthetic active chain. No product journal or pending is seeded.
         for(const [nonce,name]of ['KUFO','KAIOSAlchemyFurnace','KUFOOutputJindouyun168888','KSHIP','KSHIPConverter'].entries()){
           const item={address:E.getContractAddress({from:payload.expectedOwner,nonce})};
           if(name==='KUFO')item.config={...payload.calendar,activationTime:String(Math.floor(Date.now()/1000)-86400)};
@@ -207,8 +214,11 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       if(name==='kaios'){
         if(method==='KGEN')return [payload.dependencies.kgen.address];
         if(method==='ORGAN_REGISTRY')return [payload.dependencies.registry.address];
-        if(method==='balanceOf')return [E.parseEther('100')];
-        if(method==='allowance')return [activeAlchemy&&normalized(args[0])===normalized(state.account)&&normalized(args[1])===normalized(deployed.get('KAIOSAlchemyFurnace')?.address)?E.parseEther('100'):0];
+        if(method==='balanceOf')return [E.parseEther(kaiosBalances[normalized(args[0])]??'100')];
+        if(method==='allowance'){
+          const initial=activeAlchemy&&normalized(args[0])===normalized(state.account)&&normalized(args[1])===normalized(deployed.get('KAIOSAlchemyFurnace')?.address)?E.parseEther(initialAllowance):0;
+          return [allowances.get(allowanceKey(args[0],args[1]))??initial];
+        }
         if(method==='decimals')return [18];
         if(method==='totalSupply')return [E.parseEther('10000')];
       }
@@ -252,13 +262,16 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       }
       throw Error('Unmodeled synthetic read '+name+'.'+method);
     }
-    const provider={isMetaMask:true,
+    const provider={isMetaMask:!binanceInjected,
       on(type,listener){if(!listeners.has(type))listeners.set(type,new Set());listeners.get(type).add(listener);return provider;},
       removeListener(type,listener){listeners.get(type)?.delete(listener);return provider;},
       async request({method,params=[],qaLane='wallet'}){
         abi();
         const E=window.ethers.utils,event={method,lane:qaLane,at:Date.now()};
         if(method==='wallet_switchEthereumChain')event.requestedChain=params[0]?.chainId;
+        if(method==='eth_getTransactionReceipt')event.receiptHash=params[0];
+        if(method==='eth_getBlockByNumber')event.fullTransactions=params[1]===true;
+        if(method==='eth_getTransactionCount')event.nonceTag=params[1];
         counters.set(method,(counters.get(method)||0)+1);
         if(method==='eth_sendTransaction'){
           const tx=params[0];
@@ -272,7 +285,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
           }
         }
         await window.__record18911SyntheticRpc(event);
-        if(readFailure?.remaining>0&&method===readFailure.method){readFailure.remaining--;const error=new Error('Synthetic technical read failure');error.code=-32000;throw error;}
+        if(readFailure?.remaining>0&&method===readFailure.method){readFailure.remaining--;const error=new Error('Synthetic technical read failure');error.code=readFailure.code;throw error;}
         const gate=Array.from(readGates.values()).find(item=>item.method===method&&(!item.lane||item.lane===qaLane)&&!item.waiting&&!item.settled);
         if(gate){
           gate.waiting=true;
@@ -296,16 +309,27 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         if(method==='eth_accounts')return qaLane!=='public'&&state.authorized?[state.account]:[];
         if(method==='eth_getBlockByNumber'){
           // Numeric historical reads never invent a previously unknown block.
-          if(params[0]!=='latest')return blocks.get(Number(BigInt(params[0])))||null;
-          let number=blocks.size?Math.max(...blocks.keys()):100,latest=blocks.get(number);
-          if(latest&&Number(BigInt(latest.timestamp))<Math.floor(Date.now()/1000))number++;
-          return block(number);
+          let result;
+          if(params[0]!=='latest')result=blocks.get(Number(BigInt(params[0])))||null;
+          else{
+            let number=blocks.size?Math.max(...blocks.keys()):100,latest=blocks.get(number);
+            if(latest&&Number(BigInt(latest.timestamp))<Math.floor(Date.now()/1000))number++;
+            result=block(number);
+          }
+          if(!result||params[1]!==true)return result;
+          return {...result,transactions:Array.from(transactions.values()).filter(tx=>tx.blockHash===result.hash)};
         }
         if(method==='eth_getBlockByHash')return Array.from(blocks.values()).find(item=>item.hash===params[0])||null;
         if(method==='eth_getBalance')return hex(E.parseEther('0.5').toString());
         if(method==='eth_gasPrice')return hex(50_000_000);
         if(method==='eth_estimateGas')return '0x100000';
-        if(method==='eth_getTransactionCount')return hex(state.sendCount);
+        if(method==='eth_getTransactionCount'){
+          const tag=params[1]||'latest';
+          const height=['latest','pending'].includes(tag)?BigInt(Math.max(100,...blocks.keys())):BigInt(tag);
+          const count=Array.from(transactions.values()).filter(tx=>normalized(tx.from)===normalized(params[0])&&
+            (tx.blockNumber!=null?BigInt(tx.blockNumber)<=height:tag==='pending')).length;
+          return hex(count);
+        }
         if(method==='eth_getCode'){
           if(codeOverrides.has(normalized(params[0])))return codeOverrides.get(normalized(params[0]));
           const dep=Object.values(payload.dependencies).find(item=>normalized(item.address)===normalized(params[0]));
@@ -337,11 +361,34 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         throw Error('Unmodeled EIP1193 method; network fallback forbidden: '+method);
       },
     };
-    if(guest||lateInjection){delete window.ethereum;delete window.BinanceChain;}else window.ethereum=provider;
+    if(guest||lateInjection||binanceInjected){delete window.ethereum;delete window.BinanceChain;}else window.ethereum=provider;
+    if(binanceInjected)window.binancew3w={ethereum:provider};
+    if(binanceInjected==='with-announced'){
+      let alternateAuthorized=false;
+      const alternate={async request({method,params=[]}){
+        if(method==='eth_requestAccounts'||method==='eth_accounts'){
+          await window.__record18911SyntheticRpc({method,lane:'announced-wallet',at:Date.now()});
+          if(method==='eth_requestAccounts')alternateAuthorized=true;
+          return alternateAuthorized?[payload.expectedOwner]:[];
+        }
+        if(method==='eth_sendTransaction'){
+          await window.__record18911SyntheticRpc({method,lane:'announced-wallet',at:Date.now()});
+          throw Error('No transaction is expected from the alternate wallet');
+        }
+        return provider.request({method,params,qaLane:'announced-wallet'});
+      }};
+      const announce=()=>window.dispatchEvent(new CustomEvent('eip6963:announceProvider',{detail:{
+        info:{uuid:'3b036d18-e7eb-465a-9bbb-b639757d65ae',name:'另一測試錢包',rdns:'com.example.testwallet',icon:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a3ikAAAAASUVORK5CYII='},provider:alternate,
+      }}));
+      window.ethereum=alternate;
+      window.BinanceChain=provider;
+      window.addEventListener('eip6963:requestProvider',announce);
+      announce();
+    }
     if(walletBridge){
       // Pairing is always synthetic. One dedicated scenario first evaluates
       // the actual pinned SDK; no relay or real wallet is contacted.
-      const sdkSessionKey='18911.qa.walletconnect.session',initModeKey='18911.qa.sdk-init-mode',bridge={mode:'success',initializations:[],enableCalls:0,closeCalls:0,disconnectCalls:0,waiting:false,release:null,initWaiting:false,releaseInit:null,sdkGlobalValidated:false};
+      const sdkSessionKey='18911.qa.walletconnect.session',initModeKey='18911.qa.sdk-init-mode',bridge={mode:'success',initializations:[],enableCalls:0,connectCalls:[],closeCalls:0,disconnectCalls:0,waiting:false,release:null,initWaiting:false,releaseInit:null,sdkGlobalValidated:false};
       const init=async options=>{
         bridge.initializations.push(JSON.parse(JSON.stringify(options)));
         if(sessionStorage.getItem(initModeKey)==='deferred'){
@@ -350,18 +397,28 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         provider.session=JSON.parse(sessionStorage.getItem(sdkSessionKey)||'null');
         provider.modal={closeModal(){bridge.closeCalls++;}};
         provider.disconnect=async()=>{bridge.disconnectCalls++;provider.session=null;state.authorized=false;sessionStorage.removeItem(sdkSessionKey);};
-        provider.enable=async()=>{
-          bridge.enableCalls++;
+        const approveSession=async topic=>{
           if(bridge.mode==='reject'){const error=new Error('Synthetic WalletConnect: holder rejected');error.code=4001;throw error;}
           if(bridge.mode==='deferred'){
             bridge.waiting=true;
             await new Promise(resolve=>{bridge.release=()=>{bridge.waiting=false;bridge.release=null;resolve();};});
           }
-          provider.session={topic:'synthetic-18911-walletconnect-topic',expiry:Math.floor(Date.now()/1000)+3600,
+          if(bridge.mode==='reuse-topic')return;
+          provider.session={topic,expiry:Math.floor(Date.now()/1000)+3600,
             self:{publicKey:'synthetic-dapp-public-key',metadata:JSON.parse(JSON.stringify(options.metadata))},
             namespaces:{eip155:{chains:['eip155:56'],methods:['eth_chainId','eth_accounts','eth_requestAccounts','eth_sendTransaction'],events:['accountsChanged','chainChanged'],accounts:['eip155:56:'+state.account]}}};
           sessionStorage.setItem(sdkSessionKey,JSON.stringify(provider.session));
-          state.authorized=true;sessionStorage.setItem('18911.qa.authorized','true');return [state.account];
+          state.authorized=true;sessionStorage.setItem('18911.qa.authorized','true');
+        };
+        provider.enable=async()=>{
+          bridge.enableCalls++;
+          await approveSession('synthetic-18911-walletconnect-topic');
+          return [state.account];
+        };
+        provider.connect=async()=>{
+          const previousTopic=provider.session?.topic??null;
+          bridge.connectCalls.push(previousTopic);
+          await approveSession((previousTopic||'synthetic-18911-walletconnect-topic')+'-fresh-'+bridge.connectCalls.length);
         };
         return provider;
       };
@@ -377,7 +434,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         },true);
       }else window.WalletConnectEthereumProvider={init};
       window.__18911BridgeQA={
-        setMode(value){if(!['success','reject','deferred'].includes(value))throw Error('Unknown synthetic bridge mode');bridge.mode=value;},
+        setMode(value){if(!['success','reject','deferred','reuse-topic'].includes(value))throw Error('Unknown synthetic bridge mode');bridge.mode=value;},
         release(){if(!bridge.release)throw Error('No synthetic pairing is waiting');bridge.release();},
         setInitMode(value){if(!['ready','deferred'].includes(value))throw Error('Unknown synthetic init mode');value==='ready'?sessionStorage.removeItem(initModeKey):sessionStorage.setItem(initModeKey,value);},
         releaseInit(){if(!bridge.releaseInit)throw Error('No synthetic SDK init is waiting');bridge.releaseInit();},
@@ -394,7 +451,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         },
         storedSession(){return JSON.parse(sessionStorage.getItem(sdkSessionKey)||'null');},
         installStoredSession(session){sessionStorage.setItem(sdkSessionKey,JSON.stringify(session));},
-        snapshot(){return {mode:bridge.mode,initializations:bridge.initializations,enableCalls:bridge.enableCalls,
+        snapshot(){return {mode:bridge.mode,initializations:bridge.initializations,enableCalls:bridge.enableCalls,connectCalls:bridge.connectCalls,
           closeCalls:bridge.closeCalls,disconnectCalls:bridge.disconnectCalls,waiting:bridge.waiting,initWaiting:bridge.initWaiting,sdkGlobalValidated:bridge.sdkGlobalValidated,sdkIntegrity:bridge.sdkIntegrity};},
       };
     }
@@ -431,7 +488,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
       gateWalletAuthorization(id){if(readGates.has(id))throw Error('Synthetic authorization gate must be unique');readGates.set(id,{method:'eth_requestAccounts',waiting:false,settled:false});},
       gateWalletChain(id){if(readGates.has(id))throw Error('Synthetic chain-switch gate must be unique');readGates.set(id,{method:'wallet_switchEthereumChain',lane:'wallet',waiting:false,settled:false});},
       armReloadWalletReadGate(id){sessionStorage.setItem('18911.qa.wallet-read-gate',id);},
-      failReads(count){readFailure={remaining:count,method:'eth_getBlockByNumber'};},
+      failReads(count,method='eth_getBlockByNumber',code=-32000){readFailure={remaining:count,method,code};},
       overrideDependencyCode(name,code){codeOverrides.set(normalized(payload.dependencies[name].address),code);},
       mineDeployment(hash,reverted=false){
         const tx=transactions.get(hash);if(!tx||tx.to!==null)throw Error('Synthetic mining requires an existing reviewed creation transaction');
@@ -450,6 +507,24 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         persistLedger();
         return {contract:name,address:reverted?null:address,blockNumber:b.number,status:reverted?'0x0':'0x1',scope:'SYNTHETIC_MINED_DEPLOYMENT_ONLY'};
       },
+      mineApproval(hash,reverted){
+        const tx=transactions.get(hash),kaios=payload.dependencies.kaios.address;
+        if(!tx||receipts.has(hash)||normalized(tx.to)!==normalized(kaios))throw Error('Synthetic mining requires an original unmined KAIOS approval');
+        const iface=interfaces.kaios,parsed=iface.parseTransaction({data:tx.input});
+        const [spender,value]=parsed.args;
+        if(parsed.name!=='approve'||normalized(spender)!==normalized(deployed.get('KAIOSAlchemyFurnace')?.address))throw Error('Synthetic approval must target the active furnace');
+        const amount=value.toString(),b=block(Math.max(...blocks.keys())+1),status=reverted?'0x0':'0x1';
+        Object.assign(tx,{blockNumber:b.number,blockHash:b.hash});
+        const logs=[];
+        if(!reverted){
+          allowances.set(allowanceKey(tx.from,spender),amount);
+          const event=iface.encodeEventLog(iface.getEvent('Approval'),[tx.from,spender,value]);
+          logs.push({...event,address:kaios,transactionHash:hash,blockHash:b.hash,removed:false});
+        }
+        receipts.set(hash,{transactionHash:hash,status,blockNumber:b.number,blockHash:b.hash,from:tx.from,to:kaios,logs});
+        persistLedger();
+        return {hash,status,amount,spender,scope:'SYNTHETIC_MINED_APPROVAL_ONLY'};
+      },
       setPendingOrgan(organ,remainingSeconds){
         const names={Furnace:['KAIOSAlchemyFurnace','KAIOS.ORGAN.FURNACE.18911'],Output:['KUFOOutputJindouyun168888','KAIOS.ORGAN.KUFO.OUTPUT.168888'],Converter:['KSHIPConverter','KAIOS.ORGAN.KSHIP.CONVERTER']};
         const [name,key]=names[organ]||[];if(!deployed.has(name))throw Error('Pending proposal needs the verified synthetic contract');
@@ -463,7 +538,7 @@ async function installSyntheticWallet(context,page,row,{account=OWNER,chainId=56
         else if(mode==='resolve')gate.resolve();else throw Error('Unknown synthetic gate release mode');
       },
     };
-  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy});
+  },{payload:PAYLOAD,account,chainId,switchMode,sendMode,guest,walletBridge,lateInjection,activeAlchemy,initialAllowance,kaiosBalances,binanceInjected});
 }
 
 async function phase(page,expected){
@@ -768,6 +843,7 @@ async function runProfile(browser,width,height){
     assert.equal(row.sendRequests.length,0);await capture(page,row,'wallet-chooser');
   });
   await runWalletBridgeScenarios(browser,profile);
+  await runInjectedWalletSelectionScenarios(browser,profile);
   await runScenario(browser,profile,'wrong-chain',{chainId:1},async(page,row)=>{
     await phase(page,'BLOCKED');
     await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await autoSettled(page);await phase(page,'BLOCKED');
@@ -948,15 +1024,78 @@ async function downloadEvidence(page,row,label){
   return JSON.parse(await fs.readFile(`${OUT}/${filename}`,'utf8'));
 }
 
-async function manuallyRecover(page,hash){
+async function manuallyRecover(page,hash,{settle=true}={}){
   assert.equal(typeof hash,'string','manual recovery fixture must supply the concrete original transaction hash');
   assert.match(hash,/^0x[0-9a-f]{64}$/i,'manual recovery fixture hash is a complete bytes32 value');
+  const details=page.locator('#hashRecovery');
+  if(!await details.evaluate(el=>el.open))await details.locator('summary').click();
   await touchTarget(page,'#receiptHash');await page.locator('#receiptHash').fill(hash);
   const label='label:has(#acceptRecoveryHash)';await touchTarget(page,label);
   if(!await page.locator('#acceptRecoveryHash').isChecked())await page.locator(label).click();
   assert.ok(await page.locator('#acceptRecoveryHash').isChecked());
   await touchTarget(page,'#recoverPendingHash');assert.ok(await page.locator('#recoverPendingHash').isEnabled());
-  await page.locator('#recoverPendingHash').click();await autoSettled(page);
+  await page.locator('#recoverPendingHash').click();
+  if(settle)await autoSettled(page);
+}
+
+async function recoveredStatusInView(page,selector,expectedText){
+  // Success hides the recovery form. Verify the page itself brings the result
+  // into view, with no test click or scroll after the explicit confirmation.
+  await page.waitForFunction(({selector,expectedText})=>{
+    const el=document.querySelector(selector),r=el?.getBoundingClientRect();
+    return r&&r.width>0&&r.height>0&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight&&el.textContent.includes(expectedText);
+  },{selector,expectedText});
+  const rect=await geometry(page,selector);
+  assert.ok(rect.visible&&rect.inView&&rect.hit,'the post-recovery status is fully visible without a test scroll');
+}
+
+async function runInjectedWalletSelectionScenarios(browser,profile){
+  const binanceButton='#injectedWalletOptions button:has-text("幣安 Web3 錢包")';
+  const alternateButton='#injectedWalletOptions button:has-text("另一測試錢包")';
+  const accountRequests=row=>row.rpc.filter(item=>item.method==='eth_requestAccounts').map(item=>item.lane);
+  const selectedAccount=async(page,account)=>{
+    await page.waitForFunction(expected=>document.querySelector('#walletAccount')?.textContent.toLowerCase()===expected,account.toLowerCase());
+    await phase(page,'CONNECTED');
+    await autoSettled(page);
+  };
+  const noFinancialAction=async(page,row,journal)=>{
+    assert.equal(row.sendRequests.length,0,'wallet selection cannot request a transaction');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    assert.deepEqual(await journalBytes(page),journal,'wallet selection cannot change the financial journal');
+  };
+
+  await runScenario(browser,profile,'binance-namespaced-only',{account:OTHER,activeAlchemy:true,binanceInjected:'only'},async(page,row)=>{
+    assert.equal(await page.evaluate(()=>typeof window.ethereum),'undefined');
+    const journal=await journalBytes(page);
+    await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
+    await touchTarget(page,binanceButton);
+    assert.deepEqual(accountRequests(row),[],'opening the chooser cannot request account permission');
+    await capture(page,row,'binance-wallet-option');
+    await page.locator(binanceButton).click();
+    await selectedAccount(page,OTHER);
+    assert.deepEqual(accountRequests(row),['wallet'],'only Binance handles the explicit account request');
+    assert.match(await page.locator('#alchemyReason').textContent(),/目前尚有 100 KAIOS 授權可用/);
+    await noFinancialAction(page,row,journal);
+  });
+
+  await runScenario(browser,profile,'binance-with-another-injected-wallet',{account:OTHER,activeAlchemy:true,binanceInjected:'with-announced'},async(page,row)=>{
+    const journal=await journalBytes(page);
+    await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
+    await touchTarget(page,binanceButton);
+    const choices=page.locator('#injectedWalletOptions');
+    assert.equal(await choices.getByRole('button',{name:'幣安 Web3 錢包',exact:true}).count(),1,'modern and legacy Binance aliases represent one provider');
+    assert.ok(await page.locator(alternateButton).isVisible(),'an independent EIP-6963 wallet remains selectable');
+    assert.deepEqual(accountRequests(row),[],'multiple providers require a choice before requesting an account');
+    await capture(page,row,'choose-between-wallets');
+    await page.locator(binanceButton).click();
+    await selectedAccount(page,OTHER);
+    assert.deepEqual(accountRequests(row),['wallet'],'the provider at window.ethereum cannot intercept the selected Binance account request');
+    await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
+    await touchTarget(page,alternateButton);await page.locator(alternateButton).click();
+    await selectedAccount(page,OWNER);
+    assert.deepEqual(accountRequests(row),['wallet','announced-wallet'],'a later explicit wallet choice connects the discovered EIP-6963 provider');
+    await noFinancialAction(page,row,journal);
+  });
 }
 
 async function runBscConnectionScenarios(browser,profile){
@@ -1079,6 +1218,13 @@ async function runBscConnectionScenarios(browser,profile){
   });
 }
 
+function assertBscWalletCatalog(options){
+  assert.equal(options.showQrModal,true);
+  assert.equal(options.qrModalOptions.enableExplorer,true);
+  assert.deepEqual(options.qrModalOptions.explorerRecommendedWalletIds,CATALOG_WALLET_IDS);
+  assert.deepEqual(options.chains,[56]);
+}
+
 async function runWalletBridgeScenarios(browser,profile){
   await runScenario(browser,profile,'bridge-connected',{guest:true,walletBridge:true},async(page,row)=>{
     assert.equal(await page.evaluate(()=>window.__18911BridgeQA.snapshot().enableCalls),0,'opening the page does not pair a wallet');
@@ -1091,7 +1237,7 @@ async function runWalletBridgeScenarios(browser,profile){
     assert.equal(bridge.initializations.length,1);assert.equal(bridge.enableCalls,1);
     const options=bridge.initializations[0];
     assert.deepEqual(options.chains,[56]);assert.equal(options.storageOptions.database,'kaios18911-walletconnect');
-    assert.equal(options.showQrModal,true);assert.ok(options.projectId,'the existing public WalletConnect project is configured');
+    assertBscWalletCatalog(options);assert.ok(options.projectId,'the existing public WalletConnect project is configured');
     assert.equal(options.metadata.url,ENTRY);assert.match(options.metadata.name,/18911/);
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,1,'only the explicitly selected bridge connects the real client');
     assert.equal(row.sendRequests.length,0);assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
@@ -1277,10 +1423,57 @@ async function runWalletBridgeScenarios(browser,profile){
     assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
     const restored=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
     assert.equal(restored.initializations.length,1);assert.equal(restored.enableCalls,0,'reload restores SDK-owned approved session without opening a new pairing');
+    assert.deepEqual(restored.connectCalls,[]);assertBscWalletCatalog(restored.initializations[0]);
     assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,authorizations,'passive restoration never requests account authorization');
     assert.equal(await page.evaluate(()=>Boolean(window.ethereum)),false,'the external browser restores its own bridge, not an injected-wallet claim');
     assert.equal(row.sendRequests.length,0);row.walletBridge={scope:'SYNTHETIC_SDK_SESSION_STORAGE_RESTORE',passive:true,...restored};
     await capture(page,row,'original-session-restored');
+  });
+  for(const entry of ['primary','picker'])await runScenario(browser,profile,'bridge-mobile-catalog-'+entry,{guest:true,walletBridge:true},async(page,row)=>{
+    const seedTopic='synthetic-old-walletconnect-topic';
+    await page.evaluate(({topic,account,entry})=>{
+      const origin=entry==='primary'?'https://unrelated.example/18911/':location.href;
+      window.__18911BridgeQA.installStoredSession({
+        topic,expiry:Math.floor(Date.now()/1000)+3600,
+        self:{metadata:{name:'K18911 KUFO 煉丹爐',url:origin}},
+        namespaces:{eip155:{accounts:['eip155:56:'+account]}},
+      });
+      window.__18911BridgeQA.setMode(entry==='picker'?'reuse-topic':'deferred');
+    },{topic:seedTopic,account:OWNER,entry});
+    const pending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
+    const journal=await journalBytes(page);
+    const accountRequests=()=>row.rpc.filter(item=>item.method==='eth_requestAccounts').length;
+    if(entry==='picker'){
+      await touchTarget(page,'#chooseWallet');await page.locator('#chooseWallet').click();
+      const picker=page.locator('#connectMobileWallet');
+      assert.match(await picker.textContent(),/瀏覽 BSC 錢包/);
+      await touchTarget(page,'#connectMobileWallet');await picker.click();
+      await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().connectCalls.length===1&&!document.querySelector('#connectMobileWallet').disabled);
+      assert.equal((await page.evaluate(()=>window.__18911BridgeQA.storedSession())).topic,seedTopic);
+      assert.equal(accountRequests(),0,'a reused topic must be rejected before requesting an account');
+      assert.notEqual((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+    }else{
+      await touchTarget(page,'#connectWallet');await page.locator('#connectWallet').click();
+      await page.waitForFunction(()=>window.__18911BridgeQA.snapshot().waiting);
+      assert.equal(accountRequests(),0,'the old session cannot supply an account while the fresh approval is pending');
+      assert.equal((await page.evaluate(()=>window.__18911BridgeQA.storedSession())).topic,seedTopic);
+      await page.evaluate(()=>window.__18911BridgeQA.release());
+      await phase(page,'CONNECTED');await originalConnectionInView(page,row,'fresh-catalog-approval');
+      assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OWNER.toLowerCase());
+      assert.notEqual((await page.evaluate(()=>window.__18911BridgeQA.storedSession())).topic,seedTopic);
+      assert.equal(accountRequests(),1,'only the fresh pairing authorizes the account');
+    }
+    const bridge=await page.evaluate(()=>window.__18911BridgeQA.snapshot());
+    assert.deepEqual(bridge.connectCalls,[seedTopic],'a stored session needs a fresh WalletConnect request');
+    assert.equal(bridge.enableCalls,0,'the old session must not be enabled');
+    assert.equal(bridge.disconnectCalls,0,'the picker must not disconnect the old SDK session');
+    assert.equal(bridge.initializations.length,1);
+    assertBscWalletCatalog(bridge.initializations[0]);
+    assert.equal(row.sendRequests.length,0);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending);
+    assert.deepEqual(await journalBytes(page),journal);
+    row.walletBridge={scope:'SYNTHETIC_BSC_WALLET_CATALOG',entry,reusedTopicRejected:entry==='picker',catalogOptions:bridge.initializations[0].qrModalOptions};
+    await capture(page,row,entry==='picker'?'old-topic-not-adopted':'foreign-session-replaced-after-approval');
   });
   await runScenario(browser,profile,'bridge-invalid-session-not-authority',{guest:true,walletBridge:true},async(page,row)=>{
     await page.locator('#connectWallet').click();await phase(page,'CONNECTED');
@@ -1446,17 +1639,49 @@ async function runP1RecoveryScenarios(browser,profile){
     assert.deepEqual({number:anchorAfterReload.number,hash:anchorAfterReload.hash,timestamp:BigInt(anchorAfterReload.timestamp).toString()},pending.submissionAnchor,'QA canonical submission header remains fixed across elapsed clock time and real reload');
     assert.deepEqual(await journalBytes(page),originalJournal,'real reload preserves the existing verified deployment journal');
     assert.equal(row.sendRequests.length,2,'reload does not resend an unknown transaction');
-    assert.ok(await page.locator('#receiptHash').isVisible(),'holder can paste the hash from this original wallet request');
+    assert.ok(await page.locator('#receiptHash').isHidden(),'advanced recovery is collapsed by default');
     assert.equal(await page.locator('#acceptRecoveryHash').isChecked(),false);
     assert.equal(await page.locator('#recoverPendingHash').isEnabled(),false,'recovery requires both the original hash and explicit holder acknowledgement');
     await connect(page);await autoSettled(page);
+    const findOriginal=page.locator('#playerPanel #checkAlchemyPending');
+    assert.equal(await findOriginal.textContent(),'查詢煉丹進度');
+    const originalReceiptReads=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
+    await touchTarget(page,'#checkAlchemyPending');await findOriginal.click();await autoSettled(page);
+    assert.ok(await page.locator('#hashRecovery > summary').isVisible(),'the original governance request can reach advanced recovery');
+    assert.ok(await page.locator('#receiptHash').isHidden(),'looking up a governance request does not open or focus the hash field');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'an unsupported lookup does not read receipts');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
+    assert.equal(row.sendRequests.length,2);
+    const recoveryStatus=page.locator('#receiptRecoveryStatus');
     await manuallyRecover(page,kufo.hash);await phase(page,'BLOCKED');
     assert.equal(await page.locator('#appStatus').getAttribute('data-error-code'),'HASH_ALREADY_ARCHIVED','the historical receipt is rejected as another archived intent, not an unrelated read failure');
+    assert.equal(await recoveryStatus.getAttribute('role'),'status');
+    assert.equal(await recoveryStatus.getAttribute('data-state'),'ERROR');
+    assert.match(await recoveryStatus.textContent(),/已核對過/);
+    assert.ok((await geometry(page,'#receiptRecoveryStatus')).inView,'the archived-hash explanation appears beside the recovery form');
+    assert.equal(await page.locator('#receiptHash').inputValue(),kufo.hash,'an error preserves the field so the holder can correct it');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'a historical successful KUFO hash cannot replace this Furnace intent');
     assert.deepEqual(await journalBytes(page),originalJournal);assert.equal(row.sendRequests.length,2);
     await capture(page,row,'historical-hash-rejected');
-    await manuallyRecover(page,furnaceHash);await phase(page,'BLOCKED');
+    const recoveryGate='advanced-receipt-check';
+    await page.evaluate(id=>window.__18911WalletQA.gateRead(id),recoveryGate);
+    await manuallyRecover(page,furnaceHash,{settle:false});
+    await page.waitForFunction(id=>window.__18911WalletQA.gateState(id)?.waiting,recoveryGate);
+    assert.equal(await recoveryStatus.getAttribute('data-state'),'CHECKING');
+    assert.match(await recoveryStatus.textContent(),/查核|核對/);
+    assert.ok((await geometry(page,'#receiptRecoveryStatus')).inView,'the read-in-progress feedback appears beside the clicked button');
+    assert.equal(await page.locator('#recoverPendingHash').isEnabled(),false,'the pending read cannot be started twice');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
+    assert.deepEqual(await journalBytes(page),originalJournal);assert.equal(row.sendRequests.length,2);
+    await capture(page,row,'manual-receipt-read-in-progress');
+    await page.evaluate(id=>window.__18911WalletQA.releaseRead(id,'resolve'),recoveryGate);
+    await phase(page,'BLOCKED');await autoSettled(page);
     assert.equal(await page.locator('#appStatus').getAttribute('data-error-code'),'RECOVERY_NOT_CONFIRMED','an exact but unmined hash must remain canonically unconfirmed');
+    assert.equal(await recoveryStatus.getAttribute('data-state'),'ERROR');
+    assert.match(await recoveryStatus.textContent(),/尚未取得|尚無完整/);
+    assert.ok((await geometry(page,'#receiptRecoveryStatus')).inView,'the unmined result appears beside the recovery form');
+    assert.equal(await page.locator('#receiptHash').inputValue(),furnaceHash);
+    assert.ok(await page.locator('#recoverPendingHash').isEnabled(),'an unconfirmed receipt can be deliberately checked again');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'an unmined matching transaction does not release the canonical-evidence lock');
     assert.deepEqual(await journalBytes(page),originalJournal);assert.equal(row.sendRequests.length,2);
     const mined=await page.evaluate(hash=>window.__18911WalletQA.mineDeployment(hash),furnaceHash);
@@ -1464,8 +1689,11 @@ async function runP1RecoveryScenarios(browser,profile){
     (row.syntheticMinedDeployments??=[]).push({...mined,hash:furnaceHash});
     await manuallyRecover(page,furnaceHash);
     await page.waitForFunction(()=>Array.from(document.querySelectorAll('#deploySteps .step-status')).filter(el=>el.textContent==='鏈上已核').length===2);
+    assert.ok(await recoveryStatus.isHidden(),'the finished form no longer remains open');
+    await recoveredStatusInView(page,'#appStatus','證據已保存');
+    await capture(page,row,'recovered-deployment-result');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'only a fully matched canonical Furnace receipt completes the recovered original intent');
-    assert.doesNotMatch(await page.locator('#autoVerifyStatus').textContent(),/尚無 hash/,'successful recovery clears only the obsolete hashless stop reason');
+    assert.doesNotMatch(await page.locator('#autoVerifyStatus').textContent(),/尚未取得原交易編號/,'successful recovery clears only the obsolete hashless stop reason');
     assert.equal(row.sendRequests.length,2,'read-only recovery must never issue a third transaction');
     const journalAfter=await journalBytes(page),beforeRecord=JSON.parse(Object.values(originalJournal)[0]).evidence[0],afterRecords=JSON.parse(Object.values(journalAfter)[0]).evidence;
     assert.equal(afterRecords.length,2);assert.deepEqual(afterRecords[0],beforeRecord,'recovery appends without rewriting the first verified receipt');
@@ -1522,8 +1750,268 @@ async function mineReviewedPending(page,row){
 }
 
 async function runPlayerConfirmationScenarios(browser,profile){
-  await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
+  for(const reverted of [false,true]){
+    const name=reverted?'player-reverted-approval-stops':'player-continuous-alchemy';
+    await runScenario(browser,profile,name,{account:OTHER,activeAlchemy:true,initialAllowance:'0',clock:true},async(page,row)=>{
+      await connect(page);await phase(page,'CONNECTED');
+      assert.match(await page.locator('#alchemyReason').textContent(),/輸入金額並按「煉丹」/);
+      assert.equal(await page.locator('#prepareAlchemy').textContent(),'煉丹');
+      const originalJournal=await journalBytes(page);
+      const amount='12.345',amountWei='12345000000000000000',lifeId='0x'+'12'.repeat(32);
+      await page.locator('#kaiosAmount').fill(amount);
+      await page.locator('#lifeId').fill(lifeId);
+      await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+      assert.equal(await page.locator('#reviewTitle').textContent(),'授權 KAIOS');
+      assert.equal(row.sendRequests.length,0);
+      await accept(page);
+      await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+      const pending=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),PENDING_KEY);
+      assert.equal(pending.kind,'approve');assert.equal(pending.amountWei,amountWei);
+      assert.match(pending.hash,/^0x[0-9a-f]{64}$/i);assert.equal(row.sendRequests.length,1);
+      assert.equal(row.sendRequests[0].transaction.to.toLowerCase(),PAYLOAD.dependencies.kaios.address.toLowerCase());
+      await automaticRead(page,row);await phase(page,'PENDING');
+      assert.ok(await page.locator('#reviewPanel').isHidden(),'an unmined approval cannot advance to the burn review');
+      assert.deepEqual(await journalBytes(page),originalJournal,'an unmined approval cannot create a receipt record');
+      assert.equal(row.sendRequests.length,1);
+
+      const mined=await page.evaluate(({hash,reverted})=>window.__18911WalletQA.mineApproval(hash,reverted),{hash:pending.hash,reverted});
+      assert.equal(mined.amount,amountWei);assert.equal(mined.spender.toLowerCase(),pending.spender.toLowerCase());
+      await automaticRead(page,row);
+      if(reverted){
+        await phase(page,'CONFIRMED_REVERTED');
+        assert.ok(await page.locator('#reviewPanel').isHidden(),'a reverted approval cannot advance to the burn review');
+        assert.ok(await page.locator('#confirmReview').isDisabled());
+        assert.notDeepEqual(await journalBytes(page),originalJournal,'the reverted approval remains in the journal');
+        assert.equal(row.sendRequests.length,1);
+        await capture(page,row,'reverted-approval-preserved');
+        return;
+      }
+
+      await phase(page,'REVIEW');
+      assert.equal(await page.locator('#reviewTitle').textContent(),'確認煉丹');
+      assert.ok(await page.locator('#alchemyContinuation').isVisible());
+      assert.equal(await page.locator('#alchemyContinuation').textContent(),'授權完成，請確認煉丹。');
+      const fields=await page.locator('#reviewDetails').evaluate(host=>Object.fromEntries(Array.from(host.querySelectorAll('dt'),el=>[el.textContent,el.nextElementSibling.textContent])));
+      assert.equal(fields['KAIOS 數量'],amount);assert.match(fields['預計 KUFO'],/^12345(?:\.0+)?$/);
+      assert.equal(fields.lifeId,lifeId);assert.equal(fields['本人帳戶'].toLowerCase(),OTHER.toLowerCase());
+      assert.equal(await page.locator('#kaiosAmount').inputValue(),amount);assert.equal(await page.locator('#lifeId').inputValue(),lifeId);
+      assert.equal(await page.locator('#reviewCap').inputValue(),'');
+      assert.equal(await page.locator('#acceptReview').isChecked(),false);
+      assert.ok(await page.locator('#confirmReview').isDisabled());
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'the new preview creates no pending burn');
+      assert.equal(row.sendRequests.length,1,'automatic continuation must never open the burn wallet prompt');
+      assert.ok((await geometry(page,'#reviewTitle')).inView,'the burn review is brought into view without user scrolling');
+      await capture(page,row,'automatically-advanced-burn-review');
+
+      await accept(page,'0.2');await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+      const burn=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),PENDING_KEY);
+      assert.equal(burn.kind,'burn');assert.equal(burn.amountWei,amountWei);assert.equal(burn.lifeId,lifeId);
+      assert.equal(row.sendRequests.length,2,'only another explicit confirmation requests the burn');
+      assert.equal(row.sendRequests[1].transaction.to.toLowerCase(),mined.spender.toLowerCase());
+      row.continuousAlchemy={amount,lifeId,receiptVerified:true,automaticBurnRequests:0,approvalRequests:1,explicitBurnRequests:1};
+    });
+  }
+  await runScenario(browser,profile,'player-check-saved-approval',{account:OTHER,activeAlchemy:true,initialAllowance:'0',clock:true},async(page,row)=>{
     await connect(page);await phase(page,'CONNECTED');
+    await page.locator('#kaiosAmount').fill('10');
+    await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+    assert.equal(await page.locator('#reviewTitle').textContent(),'授權 KAIOS');
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    const pendingRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending=JSON.parse(pendingRaw);
+    assert.equal(pending.kind,'approve');assert.match(pending.hash,/^0x[0-9a-f]{64}$/i);
+    const originalJournal=await journalBytes(page);
+    assert.equal(row.sendRequests.length,1);
+
+    await page.reload({waitUntil:'load'});await phase(page,'PENDING');await autoSettled(page);
+    const checkOriginal=page.locator('#playerPanel #checkAlchemyPending');
+    assert.ok(await page.locator('#prepareAlchemy').isHidden(),'pending player card does not leave an unusable burn button');
+    assert.ok(await page.locator('#prepareAlchemy').isDisabled(),'pending still blocks a new burn');
+    assert.equal(await checkOriginal.textContent(),'查詢煉丹進度');
+    await touchTarget(page,'#checkAlchemyPending');await capture(page,row,'check-original-in-player-card');
+    const beforeUnmined=row.rpc.length;
+    await checkOriginal.click();await phase(page,'PENDING');await autoSettled(page);
+    const unminedReads=row.rpc.slice(beforeUnmined).filter(item=>item.method==='eth_getTransactionReceipt');
+    assert.ok(unminedReads.length>0&&unminedReads.every(item=>item.receiptHash===pending.hash),'only the saved approval hash is queried');
+    assert.ok((await geometry(page,'#pendingTitle')).inView,'an unmined check brings the pending status into view');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'unmined or reloaded approval retains its original pending bytes');
+    assert.deepEqual(await journalBytes(page),originalJournal);
+    assert.equal(row.sendRequests.length,1);
+
+    await page.evaluate(()=>window.__18911WalletQA.disconnect());await autoSettled(page);
+    assert.equal(await checkOriginal.textContent(),'連接原交易錢包');
+    const beforeReconnectLink=row.rpc.length;
+    await touchTarget(page,'#checkAlchemyPending');await checkOriginal.click();
+    await page.waitForFunction(()=>document.activeElement?.id==='connectWallet');
+    assert.ok((await geometry(page,'#walletTitle')).inView,'the original-wallet direction leads to the existing wallet section');
+    assert.equal(row.rpc.slice(beforeReconnectLink).filter(item=>['eth_getTransactionReceipt','eth_requestAccounts'].includes(item.method)).length,0,'the wallet direction neither checks a receipt nor opens a new prompt');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
+    await connect(page);await phase(page,'PENDING');await autoSettled(page);
+
+    await page.evaluate(hash=>window.__18911WalletQA.mineApproval(hash,false),pending.hash);
+    await touchTarget(page,'#checkAlchemyPending');
+    const beforeMined=row.rpc.length;
+    await checkOriginal.click();await phase(page,'CONNECTED');await autoSettled(page);
+    const minedReads=row.rpc.slice(beforeMined).filter(item=>item.method==='eth_getTransactionReceipt');
+    assert.ok(minedReads.length>0&&minedReads.every(item=>item.receiptHash===pending.hash),'the terminal check verifies only the original approval');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    const records=Object.values(await journalBytes(page)).flatMap(raw=>JSON.parse(raw).evidence);
+    assert.equal(records.length,1);assert.equal(records[0].intent.hash,pending.hash);assert.equal(records[0].verification.status,'CONFIRMED');
+    assert.match(await page.locator('#alchemyReason').textContent(),/10 KAIOS 授權可用/);
+    assert.ok(await page.locator('#prepareAlchemy').isVisible());assert.ok(await page.locator('#prepareAlchemy').isEnabled());
+    assert.ok(await checkOriginal.isHidden());assert.ok(await page.locator('#reviewPanel').isHidden());
+    assert.equal(row.sendRequests.length,1,'checking the original receipt does not send an approval or burn again');
+    row.savedApprovalCheck={intentRetainedUntilVerified:true,receiptHash:pending.hash,availableAllowance:'10',sendRequests:1};
+  });
+  await runScenario(browser,profile,'player-hashless-receipt-lookup',{account:OTHER,activeAlchemy:true,initialAllowance:'0',sendMode:'broadcast-unknown',clock:true},async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');await autoSettled(page);
+    const idleReads=row.rpc.length;
+    await page.clock.fastForward(90_000);await autoSettled(page);
+    assert.equal(row.rpc.length,idleReads,'a connected idle player does not repeatedly poll the chain');
+    await page.locator('#kaiosAmount').fill('10');
+    await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+    assert.equal(await page.locator('#reviewTitle').textContent(),'授權 KAIOS');
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,'BLOCKED');await autoSettled(page);
+    const originalPending=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pending=JSON.parse(originalPending);
+    assert.equal(pending.kind,'approve');assert.equal(pending.hash,null);
+    const originalJournal=await journalBytes(page),hash=await page.evaluate(()=>window.__18911WalletQA.lastBroadcastHash());
+    const progress=page.locator('#playerPanel #checkAlchemyPending');
+    assert.equal(await progress.textContent(),'查詢煉丹進度');
+    assert.ok(await page.locator('#receiptHash').isHidden());
+    const beforeUnmined=row.rpc.length;
+    await touchTarget(page,'#checkAlchemyPending');await progress.click();await autoSettled(page);
+    assert.equal(await progress.textContent(),'查詢煉丹進度','an unmined transaction does not become a recovery candidate');
+    assert.ok(await page.locator('#receiptHash').isHidden(),'normal recovery keeps the advanced field collapsed');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending);
+    assert.deepEqual(await journalBytes(page),originalJournal);
+    assert.equal(row.rpc.slice(beforeUnmined).filter(item=>item.fullTransactions).length,0,'unchanged nonce does not read full blocks');
+
+    await page.evaluate(hash=>window.__18911WalletQA.mineApproval(hash,false),hash);
+    await page.evaluate(()=>window.__18911WalletQA.failReads(1,'eth_getTransactionCount',-32603));
+    await progress.click();await phase(page,'BLOCKED');await autoSettled(page);
+    assert.equal(await page.locator('#alchemyReason').textContent(),'錢包暫時無法查核交易（-32603）。請稍後再查，或用原交易編號核對。');
+    assert.ok(await progress.isEnabled(),'a failed read leaves the original lookup available for a deliberate retry');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending);
+    assert.deepEqual(await journalBytes(page),originalJournal);
+    assert.equal(row.sendRequests.length,1,'an RPC read failure never sends a replacement transaction');
+    const beforeLookup=row.rpc.length;
+    await touchTarget(page,'#checkAlchemyPending');await progress.click();await autoSettled(page);
+    assert.equal(await progress.textContent(),'確認這筆回執');
+    assert.ok(await page.locator('#receiptHash').isHidden(),'a found receipt is confirmed on the player card');
+    const lookupReads=row.rpc.slice(beforeLookup),nonceReads=lookupReads.filter(item=>item.method==='eth_getTransactionCount');
+    assert.ok(nonceReads.length>=2&&nonceReads.length<=16&&nonceReads.every(item=>/^0x[0-9a-f]+$/i.test(item.nonceTag)),'lookup uses bounded canonical nonce tags');
+    assert.equal(lookupReads.filter(item=>item.fullTransactions).length,1,'only the identified block is opened');
+    assert.ok(lookupReads.filter(item=>item.method==='eth_getTransactionReceipt').some(item=>item.receiptHash===hash));
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalPending,'a candidate does not rewrite the original pending intent');
+    assert.deepEqual(await journalBytes(page),originalJournal,'a candidate is not archived before holder confirmation');
+    assert.equal(row.sendRequests.length,1);
+    await touchTarget(page,'#checkAlchemyPending');await capture(page,row,'confirm-found-receipt-in-player-card');
+    await progress.click();await phase(page,'CONNECTED');await autoSettled(page);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    const records=Object.values(await journalBytes(page)).flatMap(raw=>JSON.parse(raw).evidence);
+    assert.equal(records.length,1);assert.equal(records[0].intent.hash,hash);assert.equal(records[0].verification.status,'CONFIRMED');
+    assert.equal(records[0].intent.recovery.holderAttested,true);assert.equal(records[0].intent.recovery.uniqueRequestProven,false);
+    assert.match(await page.locator('#alchemyReason').textContent(),/10 KAIOS 授權可用/);
+    assert.ok(await page.locator('#prepareAlchemy').isEnabled());
+    assert.equal(row.sendRequests.length,1,'finding and confirming the original receipt never requests another wallet send');
+    row.hashlessReceiptLookup={idlePollingRequests:0,nonceReads:nonceReads.length,fullBlocks:1,recoveredHash:hash,recoverySends:0};
+  });
+  await runScenario(browser,profile,'player-manual-approval-recovery',{account:OTHER,activeAlchemy:true,initialAllowance:'0',sendMode:'broadcast-unknown',clock:true},async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');
+    await page.locator('#kaiosAmount').fill('10');
+    await touchTarget(page,'#prepareAlchemy');await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+    assert.equal(await page.locator('#reviewTitle').textContent(),'授權 KAIOS');
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,'BLOCKED');await autoSettled(page);
+    const pending=JSON.parse(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY));
+    assert.equal(pending.kind,'approve');assert.equal(pending.hash,null);
+    const hash=await page.evaluate(()=>window.__18911WalletQA.lastBroadcastHash());
+    await page.evaluate(id=>window.__18911WalletQA.mineApproval(id,false),hash);
+    await page.locator('#openReceiptFallback').click();
+    await page.locator('#receiptHash').waitFor({state:'visible'});
+    await manuallyRecover(page,hash);
+    assert.ok(await page.locator('#receiptRecoveryStatus').isHidden());
+    await recoveredStatusInView(page,'#alchemyReason','原授權已核實。按「煉丹」後會重新核對目前可用額度。');
+    assert.ok(await page.locator('#prepareAlchemy').isEnabled(),'the player can explicitly check the burn and current allowance');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null);
+    const records=Object.values(await journalBytes(page)).flatMap(raw=>JSON.parse(raw).evidence);
+    assert.equal(records.length,1);
+    assert.equal(records[0].intent.hash,hash);
+    assert.equal(records[0].verification.status,'CONFIRMED');
+    assert.equal(row.sendRequests.length,1,'manual confirmation of the original approval does not submit a burn');
+    await capture(page,row,'manual-approval-result');
+  });
+  const secondPlayer='0x2222222222222222222222222222222222222222';
+  await runScenario(browser,profile,'player-pending-account-isolation',{
+    account:OTHER,activeAlchemy:true,kaiosBalances:{[secondPlayer]:'182'},clock:true,
+  },async(page,row)=>{
+    await connect(page);await phase(page,'CONNECTED');
+    await playerBurnReview(page,row);await accept(page);
+    await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    const originalRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
+    const original=JSON.parse(originalRaw);
+    assert.equal(original.schemaVersion,1,'the first pending transaction uses the legacy singleton format');
+    assert.equal(original.account.toLowerCase(),OTHER.toLowerCase());
+    assert.match(original.hash,/^0x[0-9a-f]{64}$/i);
+    assert.equal(row.sendRequests.length,1);
+    const originalJournal=await journalBytes(page);
+
+    const beforeSecondAccount=row.rpc.length;
+    await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),secondPlayer);
+    await phase(page,'CONNECTED');await autoSettled(page);
+    assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),secondPlayer);
+    assert.equal(await page.locator('#playerBalance').textContent(),'182.0 KAIOS');
+    assert.ok(await page.locator('#playerPanel #checkAlchemyPending').isHidden(),'the second player has no previous transaction to check');
+    assert.ok(await page.locator('#pendingPanel').isHidden(),'the first player pending receipt is not exposed on switch');
+    assert.ok(await page.locator('#prepareAlchemy').isEnabled());
+    await touchTarget(page,'#prepareAlchemy');await capture(page,row,'second-player-ready-with-first-pending');
+
+    await page.locator('#kaiosAmount').fill('70');
+    await page.locator('#prepareAlchemy').click();await phase(page,'REVIEW');
+    const fields=await page.locator('#reviewDetails').evaluate(host=>Object.fromEntries(
+      Array.from(host.querySelectorAll('dt'),term=>[term.textContent,term.nextElementSibling.textContent])));
+    assert.equal(fields['本人帳戶'].toLowerCase(),secondPlayer);
+    assert.equal(fields['操作'],'煉丹：銷毀 KAIOS 並取得 KUFO');
+    assert.match(fields['KGEN 持有量門檻'],/^0\.070*$/);
+    assert.match(fields['預計 KUFO'],/^70000(?:\.0+)?$/);
+    assert.equal(row.sendRequests.length,1,'the account switch and second player preview are read-only');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),originalRaw,'connecting and previewing preserve the first legacy bytes');
+    assert.ok(!row.rpc.slice(beforeSecondAccount).some(item=>item.receiptHash===original.hash),'the second player never checks the first player receipt');
+
+    await accept(page);await page.locator('#confirmReview').click();await phase(page,['SUBMITTED','PENDING']);await autoSettled(page);
+    assert.equal(row.sendRequests.length,2);
+    assert.equal(row.sendRequests[1].transaction.from.toLowerCase(),secondPlayer);
+    const scopedRaw=await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY);
+    const scoped=JSON.parse(scopedRaw);
+    assert.equal(scoped.schemaVersion,2);
+    assert.equal(JSON.stringify(scoped.records[OTHER.toLowerCase()]),originalRaw,'promotion retains every first player field and byte');
+    const second=scoped.records[secondPlayer];
+    assert.equal(second.account.toLowerCase(),secondPlayer);
+    assert.equal(second.amountWei,'70000000000000000000');
+    assert.notEqual(second.hash,original.hash);
+    assert.ok(await page.locator('#playerPanel #checkAlchemyPending').isVisible());
+    assert.deepEqual(await journalBytes(page),originalJournal,'unmined intentions do not change receipts');
+
+    const beforeFirstAccount=row.rpc.length;
+    await page.evaluate(address=>window.__18911WalletQA.changeAccount(address),OTHER);
+    await phase(page,'PENDING');await autoSettled(page);
+    assert.equal((await page.locator('#walletAccount').textContent()).toLowerCase(),OTHER.toLowerCase());
+    assert.ok(await page.locator('#playerPanel #checkAlchemyPending').isVisible());
+    assert.equal(await page.locator('#prepareAlchemy').isEnabled(),false,'the first player still cannot send a duplicate');
+    await page.locator('#playerPanel #checkAlchemyPending').click();await phase(page,'PENDING');await autoSettled(page);
+    assert.ok(row.rpc.slice(beforeFirstAccount).some(item=>item.receiptHash===original.hash),'the first player still checks the original hash');
+    assert.ok(!row.rpc.slice(beforeFirstAccount).some(item=>item.receiptHash===second.hash),'the first player never checks the second player receipt');
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),scopedRaw);
+    assert.deepEqual(await journalBytes(page),originalJournal);
+    assert.equal(row.sendRequests.length,2,'switching accounts and verifying never resubmit either transaction');
+  });
+  await runScenario(browser,profile,'player-burn-confirm-feedback',{account:OTHER,activeAlchemy:true,clock:true},async(page,row)=>{
+    const alchemyNotice=page.locator('#alchemyReason');
+    assert.match(await alchemyNotice.textContent(),/連接本人 BSC 錢包後/);
+    await connect(page);await phase(page,'CONNECTED');
+    assert.match(await alchemyNotice.textContent(),/目前尚有 100 KAIOS 授權可用。完成煉丹須另由本人錢包確認/);
+    assert.equal(await alchemyNotice.getAttribute('role'),'status');
+    assert.equal(row.sendRequests.length,0,'reading the existing allowance must not open a wallet transaction');
+    await alchemyNotice.scrollIntoViewIfNeeded();
+    await capture(page,row,'verified-allowance-before-preview');
     assert.equal(await page.locator('#prepareDeploy').isEnabled(),false,'the player is not granted the Owner deployment role');
     const originalJournal=await journalBytes(page);
     await playerBurnReview(page,row);await accept(page,'0.6');
@@ -1632,26 +2120,39 @@ async function runAutomaticScenarios(browser,profile){
     assert.equal(await page.locator('#walletAccount').textContent(),'尚未連接');
     assert.equal((await page.locator('#ownerAddress').textContent()).toLowerCase(),OWNER.toLowerCase());
     assert.match(await page.locator('#autoVerifyStatus').textContent(),/自動唯讀查核.*上次/);
-    const firstRead=row.rpc.find(item=>item.method==='eth_getBlockByNumber').at;
-    await automaticRead(page,row);
-    const latestRead=row.rpc.filter(item=>item.method==='eth_getBlockByNumber').at(-1).at;
-    assert.ok(latestRead-firstRead>=30_000,'visible automatic reads follow the thirty-second schedule');
+    await autoSettled(page);
+    const idleReads=row.rpc.length;
+    await page.clock.fastForward(90_000);await autoSettled(page);
+    assert.equal(row.rpc.length,idleReads,'an idle visible guest does not repeatedly poll the chain');
     await page.evaluate(()=>window.__18911WalletQA.setVisibility('hidden'));
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'HIDDEN');
     const hiddenReads=row.rpc.length;
     await page.clock.fastForward(90_000);assert.equal(row.rpc.length,hiddenReads,'synthetic hidden page does not poll');
+    const beforeReturnBlocks=row.rpc.filter(item=>item.method==='eth_getBlockByNumber').length;
     await page.evaluate(()=>window.__18911WalletQA.setVisibility('visible'));
     await autoSettled(page);await phase(page,'PUBLIC_VERIFIED');
-    assert.ok(row.rpc.length>hiddenReads,'returning visible verifies immediately without a wallet prompt');
+    assert.equal(row.rpc.filter(item=>item.method==='eth_getBlockByNumber').length,beforeReturnBlocks+1,'returning visible runs one status check without a wallet prompt');
+    const returnedReads=row.rpc.length;
+    await page.clock.fastForward(90_000);await autoSettled(page);
+    assert.equal(row.rpc.length,returnedReads,'returning visible does not restart the recurring guest timer');
     assert.equal(row.rpc.filter(item=>['eth_requestAccounts','eth_estimateGas','eth_sendTransaction'].includes(item.method)).length,0);
-    row.automatic={publicNoWallet:true,visibility:'SYNTHETIC_DOCUMENT_VISIBILITY_EVENT',physicalBackground:'NOT_TESTED',intervalMilliseconds:30_000};
+    row.automatic={publicNoWallet:true,visibility:'SYNTHETIC_DOCUMENT_VISIBILITY_EVENT',physicalBackground:'NOT_TESTED',guestIdleRecurringReads:0,foregroundReturnChecks:1};
     await capture(page,row,'visible-resumed');
   });
   await runScenario(browser,profile,'auto-two-failure-stop',{guest:true,clock:true},async(page,row)=>{
+    async function readOnVisibilityReturn(){
+      const before=row.rpc.filter(item=>item.method==='eth_getBlockByNumber').length;
+      await page.evaluate(()=>{
+        window.__18911WalletQA.setVisibility('hidden');
+        window.__18911WalletQA.setVisibility('visible');
+      });
+      await page.waitForFunction(count=>window.__18911RpcQA.count('eth_getBlockByNumber')>count,before);
+      await autoSettled(page);
+    }
     await page.evaluate(()=>window.__18911WalletQA.failReads(2));
-    await automaticRead(page,row);
+    await readOnVisibilityReturn();
     assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','first ordinary transport failure leaves one remaining attempt');
-    await automaticRead(page,row);
+    await readOnVisibilityReturn();
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
     assert.match(await page.locator('#autoVerifyStatus').textContent(),/兩次/);
     const stoppedReads=row.rpc.length;
@@ -1661,9 +2162,9 @@ async function runAutomaticScenarios(browser,profile){
     await autoSettled(page);assert.equal(row.rpc.length,stoppedReads,'visibility return does not reset the failed-attempt counter');
     await capture(page,row,'technical-stopped');
     await touchTarget(page,'#refreshStatus');await page.locator('#refreshStatus').click();await phase(page,'PUBLIC_VERIFIED');
-    await automaticRead(page,row);assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','manual query explicitly reopens automatic reads');
+    await readOnVisibilityReturn();assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','manual query explicitly reopens visibility-return checks');
     await page.evaluate(()=>window.__18911WalletQA.overrideDependencyCode('kgen','0x00'));
-    await automaticRead(page,row);assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','a dependency identity mismatch stops on its first occurrence');
+    await readOnVisibilityReturn();assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','a dependency identity mismatch stops on its first occurrence');
     const policyReads=row.rpc.length;await page.clock.fastForward(90_000);assert.equal(row.rpc.length,policyReads);
     assert.equal(row.sendRequests.length,0);assert.equal(row.rpc.filter(item=>item.method==='eth_requestAccounts').length,0);
     row.automatic={technicalAttemptsBeforeStop:2,policyAttemptsBeforeStop:1,visibilityDoesNotReset:true,manualQueryResets:true};
@@ -1692,11 +2193,11 @@ async function runAutomaticScenarios(browser,profile){
     assert.match(pending.hash,/^0x[0-9a-f]{64}$/i);
     const originalReceiptReads=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
     await page.evaluate(other=>window.__18911WalletQA.changeAccount(other),OTHER);
-    await page.clock.fastForward(31_000);await autoSettled(page);
-    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
+    await phase(page,'CONNECTED');await autoSettled(page);
+    assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'READY');
     assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,originalReceiptReads,'another account cannot automatically resume the original financial hash');
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw);
-    await capture(page,row,'original-account-required');
+    await capture(page,row,'second-account-original-retained');
     await page.evaluate(()=>{
       window.__18911WalletQA.removeInjectedWallet();
       window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));
@@ -1712,12 +2213,35 @@ async function runAutomaticScenarios(browser,profile){
     await connect(page);await autoSettled(page);await phase(page,'PENDING');
     assert.equal(row.sendRequests.length,1,'explicit original-account reconnection only reads the saved hash');
     const mined=await mineReviewedPending(page,row);
+    const receiptReadsBeforeLock=row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length;
+    await page.evaluate(()=>new Promise(resolve=>{
+      window.__18911TestReceiptLock=navigator.locks.request('kaios18911:financial',()=>new Promise(release=>{
+        window.__18911ReleaseTestReceiptLock=release;
+        resolve();
+      }));
+    }));
+    try{
+      await automaticRead(page,row);
+      await phase(page,'BLOCKED');
+      assert.notEqual(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED','contention leaves the read-only schedule active');
+      assert.match(await page.locator('#appStatus').textContent(),/另一分頁正在處理錢包操作/);
+      assert.equal(row.rpc.filter(item=>item.method==='eth_getTransactionReceipt').length,receiptReadsBeforeLock,'the original lock blocks receipt reconciliation');
+      assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),pendingRaw,'contention preserves the original pending bytes');
+      assert.equal(row.sendRequests.length,1,'contention never issues another wallet request');
+    }finally{
+      await page.evaluate(async()=>{
+        window.__18911ReleaseTestReceiptLock();
+        await window.__18911TestReceiptLock;
+        delete window.__18911ReleaseTestReceiptLock;
+        delete window.__18911TestReceiptLock;
+      });
+    }
     await automaticRead(page,row);
     await page.waitForFunction(address=>document.querySelector('#deploySteps .step-address')?.textContent.toLowerCase()===address.toLowerCase(),mined.address);
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),null,'complete automatic receipt verification clears only the original verified pending intent');
     assert.equal(await page.locator('#deploySteps .step-status').filter({hasText:'鏈上已核'}).count(),1);
     assert.equal(row.sendRequests.length,1,'a verified synthetic deployment never auto-submits its successor');
-    row.automatic={reviewPaused:true,walletBusyPaused:true,foreignAndGuestPendingStopped:true,originalAccountRequired:true,verifiedSyntheticDeploymentCount:1,automaticSendRequests:0};
+    row.automatic={reviewPaused:true,walletBusyPaused:true,foreignAccountReady:true,guestPendingStopped:true,originalAccountRequired:true,verifiedSyntheticDeploymentCount:1,automaticSendRequests:0};
     await capture(page,row,'receipt-verified-no-successor-send');
   });
   await runScenario(browser,profile,'auto-timelock',{clock:true},async(page,row)=>{
@@ -1751,7 +2275,7 @@ async function runAutomaticScenarios(browser,profile){
     const reads=row.rpc.length;
     await page.clock.fastForward(31_000);await autoSettled(page);
     assert.equal(await page.locator('#autoVerifyStatus').getAttribute('data-state'),'STOPPED');
-    assert.match(await page.locator('#autoVerifyStatus').textContent(),/尚無 hash/);
+    assert.match(await page.locator('#autoVerifyStatus').textContent(),/尚未取得原交易編號/);
     assert.equal(row.rpc.length,reads,'hashless unknown submission stops before any automatic RPC');
     await page.clock.fastForward(90_000);assert.equal(row.rpc.length,reads);assert.equal(row.sendRequests.length,1);
     assert.equal(await page.evaluate(key=>localStorage.getItem(key),PENDING_KEY),saved);
@@ -1771,14 +2295,20 @@ try{
   for(const [width,height]of [[390,844],[1280,900]])await runProfile(browser,width,height);
   report.checks.push('Actual 18911 HTML, panel, client, shared wallet selector and ethers5. Original unmined scenarios stay pending; new explicit QA-mined creation receipts exercise the unchanged complete verifier. No real RPC, wallet, mined deployment or transaction.');
   report.checks.push('Guest, wrong chain, non-owner, owner preview/cancel, wallet rejection, durable pending/resume/reload, disconnect and account switch at both viewports.');
+  report.checks.push('A Binance namespaced provider connects without a window.ethereum global. With two providers the chooser waits for an explicit selection, deduplicates Binance aliases, and connects the selected Binance or EIP-6963 provider without a transaction request. Both viewports inspect synthetic wallets only.');
   report.checks.push('Passive wrong-chain verification never switches or authorizes. Explicit injected, native-return and WalletConnect connections request only BSC0x38, tolerate a synchronous chainChanged event, re-read network56 before account permission, and never send funds. Rejected/unknown/unsupported/unverified switches stop with specific messages. Original sixty-second timeout, late result, changed account and same-raw WalletConnect reselect locks preserve pending/journal and cannot revive authorization or resubmit. All chain switching is synthetic; real wallet acceptance remains NOT_TESTED.');
   report.checks.push('Constructor preview shows actual Registry/KAIOS/version/timestamp/UTC+8/month IDs. Synthetic persisted pagehide/pageshow handler smoke only; actual BFCache and physical phone restoration remain NOT_TESTED.');
   report.checks.push('Keyboard skip link is reachable when focused and clipped when unfocused; each state includes an actual viewport shot and full-page shot, with bounding-rectangle evidence.');
   report.checks.push('Unresolved synthetic refresh survives persisted lifecycle reconstruction; old late resolve/reject cannot override a new in-flight operation or alter an existing financial pending intent.');
-  report.checks.push('Official Playwright Clock drives visible-only thirty-second reads; synthetic visibility, review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal stop. No automatic financial request.');
+  report.checks.push('Official Playwright Clock checks visible owner and known-pending timers. Guests and idle ordinary players only check on entry, visibility return or request. Review/wallet busy, passive original-account reload, same-account pending guards, two technical failures and first HTTP403/429 or identity refusal still stop. No automatic financial request.');
   report.checks.push('Two added scenarios per viewport discover synthetic active routes with the real payload and an existing exact100 KAIOS allowance. A100 KAIOS→100000 KUFO review with an explicit0.6 BNB cap shows confirmation preflight without a test scroll, requests only one burn, keeps the genuine wallet-response wait beyond the read deadline, then preserves its unmined hash without claiming minted KUFO. Review expiry and the original15-second preflight read timeout remain zero-send, clear consent, preserve the holder cap and pending/journal, and cannot overwrite a newer review when the provider replies late. Existing rejection and hashless unknown-intent scenarios also require visible confirmation feedback. These are synthetic-provider and viewport checks, not physical-wallet, mainnet-burn or mint acceptance.');
+  report.checks.push('A synthetic zero-allowance player starts alchemy once. Only a verified original approval advances to a burn review for the same amount and lifeId, with fresh consent and a fresh fee cap. Pending and reverted approvals never advance. Only a separate explicit confirmation opens the synthetic burn request.');
+  report.checks.push('The original pending approval has an action in the player card after reload. It preserves unmined intent bytes and restores the verified allowance after mining. Hashless lookup reads one full identified block, preserves pending until holder confirmation, and never requests another wallet send. Advanced recovery stays collapsed and idle guests and ordinary players do not run recurring reads.');
+  report.checks.push('On the same origin a second player reads their own KAIOS, opens a distinct burn preview and submits only their own synthetic transaction. Adding it preserves the legacy first-player record byte for byte, and switching back restores the original receipt check and prevents duplicate sends. A temporary -32603 during receipt discovery keeps the original record and allows a deliberate retry.');
   report.checks.push('P1 real UI recovery keeps an unknown Furnace intent and original KUFO journal across reload; rejects archived and unmined hashes with exact codes; only a canonical later receipt plus holder acknowledgement recovers it without another send. Recovery is anchored holder attestation, not proof of a unique wallet request.');
+  report.checks.push('Manual recovery displays a live busy state and the archived/unmined error beside the pressed button while preserving the original record. It moves to the visible verified result after restoring a synthetic deployment or player approval and sends no new transaction.');
   report.checks.push('P1 first canonical status0 creation remains in cumulative downloaded evidence; an explicit later activation change permits only a fresh preview, with no retry transaction and no history rewrite.');
+  report.checks.push('Both viewports check the BSC WalletConnect directory configuration and a fresh pairing when an SDK session already exists. A repeated topic cannot authorize an account, foreign sessions are not disconnected, and financial pending and history remain untouched. Wallet catalog and pairing are simulated.');
   report.checks.push('Both viewports retain the original bridge rejection/cancellation/late reply and financial-pending guards. One dedicated case independently reads the exact pinned WalletConnect2.12.2 script, verifies SHA384/SRI and its actual browser global, then replaces only init/pairing before any SDK relay operation; every other pairing/session fixture is synthetic. This is loader acceptance, not real relay or wallet acceptance.');
   report.checks.push('Without an injected provider, one explicit primary Connect click starts the existing WalletConnect pairing for this original page, with one enable/account authorization and no financial request. Synthetic hidden approval plus pending-enable pagehide/pageshow returns to the original page without a duplicate pairing; its explicit original-page connection label is checked. A sixty-second first-pairing timeout retains the unresolved request and rejects late authority. Native-only navigation remains under Choose wallet and cannot replace or mutate the original page topic, account, pending or journal. These synthetic events do not prove automatic OS return, a ChatGPT browser handoff, real BFCache or a physical wallet.');
   report.checks.push('Native URL targets resolve to the complete original18911 page. Delayed injection, bounded discovery, account cancellation/timeout, unresolved SDK restore init/read, original sixty-second deadlines, late replies and passive SDK-session reload are exercised without automatic financial requests. An untrusted restoration hint alone never provides account authority.');

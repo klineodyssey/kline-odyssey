@@ -32,7 +32,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   portal:
-    # The pinned Playwright 1.51.1 browser has no Ubuntu 26.04 build.
+    # Keep the existing Ubuntu 22.04 acceptance baseline for the pinned browser.
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
@@ -71,7 +71,7 @@ jobs:
           node --test --test-concurrency=1 KGEN-KAIOS/tests/token-surface.security.test.mjs 'K線西遊記/temples/11520/tests/11520-pwa-bgm.test.mjs'
       - name: Install Chromium
         run: |
-          npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0 ethers@6.15.0
+          npm install --no-save --package-lock=false playwright@1.62.1 three@0.180.0 ethers@6.15.0
           # Keep signed Ubuntu packages on the official archive when Azure DNS fails.
           test -f /etc/apt/apt-mirrors.txt
           sudo sed -i 's#http://azure\.archive\.ubuntu\.com/ubuntu#https://archive.ubuntu.com/ubuntu#g' /etc/apt/apt-mirrors.txt

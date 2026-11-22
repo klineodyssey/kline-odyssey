@@ -183,7 +183,7 @@
       "verified_by": "Codex",
       "source": "Human-confirmed official entry; independent public desktop and mobile verification",
       "notes": "Official KLINE Odyssey Facebook fan page.",
-      "label": "Facebook Page"
+      "label": "Facebook 花果山官方粉專"
     },
     "facebook_community": {
       "url": "https://www.facebook.com/le.tian.di.2025",
@@ -215,18 +215,22 @@
       "verified_at": "2026-07-12",
       "verified_by": "Codex",
       "source": "User-confirmed official entry; README/archive",
-      "notes": "Official LINE entry.",
-      "label": "LINE Official"
+      "notes": "Official LINE redirect entry is retained; the destination has not been fully verified for this candidate.",
+      "label": "LINE（目的端待確認）",
+      "availability": "DESTINATION_NOT_FULLY_VERIFIED"
     },
     "x": {
       "url": "https://x.com/klineodyssey",
-      "label": "X",
+      "label": "X（帳號停權）",
       "account": "@klineodyssey",
       "status": "VERIFIED",
       "verified_at": "2026-07-12",
       "verified_by": "Human / Codex",
       "source": "User-confirmed canonical official entry",
-      "notes": "Official X / Twitter account."
+      "notes": "Official account identity is retained. The Human owner reports the account is suspended; do not describe it as active or available.",
+      "availability": "SUSPENDED",
+      "availability_reported_at": "2026-11-19",
+      "availability_source": "Human-confirmed suspension; no account access or HTTP availability claim."
     },
     "telegram": {
       "url": "https://t.me/KLINEODYSSEY",

@@ -1,0 +1,25 @@
+.kgen-import-guide{box-sizing:border-box;min-width:0;max-width:100%;margin:28px 0;padding:clamp(16px,3vw,24px);border:1px solid rgba(243,199,102,.35);border-radius:12px;background:rgba(16,14,11,.92);color:#fff7df;line-height:1.65;scroll-margin-top:20px}
+.kgen-import-guide *{box-sizing:border-box;min-width:0}
+.kgen-import-guide h2{margin:0 0 12px;color:#f3c766;font-size:clamp(1.5rem,5vw,2rem);line-height:1.25;overflow-wrap:anywhere}
+.kgen-import-guide h3{margin:0 0 10px;color:#ffe59a;font-size:1.15rem;line-height:1.4;overflow-wrap:anywhere}
+.kgen-import-guide p{margin:10px 0;overflow-wrap:anywhere}
+.kgen-import-guide a{display:inline-flex;align-items:center;min-height:44px;max-width:100%;padding:6px 2px;color:#ffe59a;text-underline-offset:3px;overflow-wrap:anywhere}
+.kgen-import-guide a:focus-visible,.kgen-import-guide button:focus-visible{outline:3px solid #65f5ff;outline-offset:3px}
+.kgen-import-guide .kgen-import-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin:18px 0}
+.kgen-import-guide .kgen-import-fields>div{padding:12px;border:1px solid rgba(243,199,102,.25);border-radius:8px;background:rgba(255,255,255,.03)}
+.kgen-import-guide dt{font-weight:800;color:#f3c766}
+.kgen-import-guide dd{margin:4px 0 0;overflow-wrap:anywhere}
+.kgen-import-guide .kgen-import-address{grid-column:1/-1}
+.kgen-import-guide code{display:block;max-width:100%;padding:10px 0;color:#fff7df;font:inherit;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:normal;overflow-wrap:anywhere;word-break:normal;user-select:all}
+.kgen-import-guide .kgen-import-copy-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.kgen-import-guide button{min-height:44px;max-width:100%;padding:10px 16px;border:1px solid #f3c766;border-radius:8px;background:#f3c766;color:#170d02;font:inherit;font-weight:800;line-height:1.4;cursor:pointer;overflow-wrap:anywhere}
+.kgen-import-guide button[hidden]{display:none}
+.kgen-import-guide button:disabled{opacity:.65;cursor:wait}
+.kgen-import-guide .kgen-import-copy-status{flex:1 1 220px;margin:0;color:#d8cfb7}
+.kgen-import-guide .kgen-import-note{padding:12px;border-left:3px solid #f3c766;background:rgba(243,199,102,.06);color:#e7dcc1}
+.kgen-import-guide .kgen-import-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;margin:18px 0}
+.kgen-import-guide .kgen-import-wallet{padding:16px;border:1px solid rgba(243,199,102,.25);border-radius:8px;background:rgba(255,255,255,.03)}
+.kgen-import-guide ol,.kgen-import-guide ul{margin:10px 0;padding-left:1.35em}
+.kgen-import-guide li{margin:7px 0;overflow-wrap:anywhere}
+.kgen-import-guide .kgen-import-links{display:flex;flex-wrap:wrap;gap:8px 18px}
+.kgen-import-guide .kgen-import-sources{padding-top:14px;border-top:1px solid rgba(243,199,102,.25)}

@@ -33,6 +33,8 @@ await page.addInitScript(()=>{
   localStorage.setItem('k11520.player-session.v1',JSON.stringify({version:1,world:'K11520',xyz:{x:4,y:2,z:-3},intentXYZ:{x:4,y:2,z:-3},savedAt:new Date().toISOString()}));
   localStorage.setItem('klineodyssey.public-wallet-identity.v1',JSON.stringify({version:1,address:'0x1234567890123456789012345678901234567890',chainId:56,sourceWorld:'K12345',updatedAt:new Date().toISOString()}));
 });
+let deployedGameRelease='a'.repeat(64);
+await page.route('**/KGEN-KAIOS/dashboard/build-info.json',route=>route.fulfill({json:{game_release_id:deployedGameRelease}}));
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(1500);
@@ -44,6 +46,50 @@ if(await page.locator('#intro11520').count()){
   assert.equal(await page.locator('#intro11520').isVisible().catch(()=>false),false,'intro must dismiss by tap or automatic fail-open');
   await page.waitForTimeout(250)
 }
+
+const assertNoticeClear=async notice=>{
+ const bounds=await notice.boundingBox();
+ assert.ok(bounds && bounds.x>=0 && bounds.y>=0 &&
+  bounds.x+bounds.width<=390 && bounds.y+bounds.height<=844,'PWA notice must stay inside the mobile viewport');
+ for(const selector of ['.minimapWrap','#yControl','#attack','#orderFire']){
+  const control=await page.locator(selector).boundingBox();
+  if(!control)continue;
+  const disjoint=bounds.x+bounds.width<=control.x||control.x+control.width<=bounds.x||
+   bounds.y+bounds.height<=control.y||control.y+control.height<=bounds.y;
+  assert.ok(disjoint,`PWA notice overlaps ${selector}`);
+ }
+};
+const installOffer=page.locator('#k11520InstallOffer');
+assert.equal(await installOffer.isVisible(),false,'hide installation before browser eligibility');
+const nativePromptDeferred=await page.evaluate(()=>{
+ const event=new Event('beforeinstallprompt',{cancelable:true});
+ event.prompt=async()=>{
+  window.__k11520InstallCalls=(window.__k11520InstallCalls||0)+1;
+  window.__k11520InstallActivated=navigator.userActivation.isActive;
+  return {outcome:'dismissed'};
+ };
+ return !window.dispatchEvent(event);
+});
+assert.equal(nativePromptDeferred,true,'the game defers the fixture prompt until a tap');
+const installGame=page.getByRole('button',{name:'安裝遊戲'});
+await installGame.waitFor({state:'visible',timeout:2000});
+const installBox=await installGame.boundingBox();
+assert.ok(installBox && installBox.height>=44 && installBox.x>=0 && installBox.y+installBox.height<=844,'install button remains on screen and touch-sized');
+await assertNoticeClear(installOffer);
+await page.screenshot({path:ARTIFACT_DIR+'/11520-mobile-install-offer.png'});
+await installGame.tap({timeout:2000});
+await installOffer.waitFor({state:'hidden',timeout:2000});
+assert.deepEqual(await page.evaluate(()=>[window.__k11520InstallCalls,window.__k11520InstallActivated]),[1,true]);
+const updateNotice=page.locator('#k11520UpdateNotice');
+assert.equal(await updateNotice.isVisible(),false,'first release read establishes the baseline');
+deployedGameRelease='b'.repeat(64);
+await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+await updateNotice.waitFor({state:'visible',timeout:2500});
+await assertNoticeClear(updateNotice);
+await page.screenshot({path:ARTIFACT_DIR+'/11520-mobile-update-notice.png'});
+await updateNotice.getByRole('button',{name:'知道了'}).tap({timeout:2000});
+await updateNotice.waitFor({state:'hidden',timeout:2000});
+assert.equal(await page.evaluate(()=>window.__k11520InstallCalls),1,'update acknowledgement keeps the current game document');
 
 const assertVisible=async selector=>{const loc=page.locator(selector);const d=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{display:s.display,visibility:s.visibility,pointer:s.pointerEvents,w:r.width,h:r.height,x:r.x,y:r.y,right:r.right,bottom:r.bottom,text:(el.textContent||'').trim()}});assert.ok(d.w>0&&d.h>0&&d.display!=='none'&&d.visibility!=='hidden',`${selector} not visible: ${JSON.stringify(d)}`);return d};
 const xyz=async()=>{assert.match(await page.locator('#xyz').textContent(),/LOCAL X .*K.*Y .*K.*Z .*K/);return page.evaluate(()=>({...globalThis.__K11520_WORLD_COORDS__.physical}))};

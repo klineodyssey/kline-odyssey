@@ -125,6 +125,7 @@ a:focus-visible, button:focus-visible, select:focus-visible {
 .workspace {
   min-width: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(300px, 42vh) auto auto 1fr;
 }
 
