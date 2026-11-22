@@ -922,6 +922,69 @@ test('toast visual assertions cannot prevent the existing failure screenshot cap
 });
 
 
+test('offline simulation reuses only committed controls on the selected axis', async () => {
+  const {runInNewContext} = await import('node:vm');
+  const source = read('./11520-browser-settlement.mjs');
+  const start = source.indexOf('async function setOfflineOrderInputs(');
+  const end = source.indexOf('async function offlineSimulationBrowserQA(', start);
+  const selection = {plane: 'YZ', axis: 'KX', c: 1};
+  const state = {activeAxis: 'KX', signedC: 1, canonicalSideSynced: true, lots: 1};
+  const cInput = {dataset: {k11520NumericBound: '1'}, value: '+1'};
+  const lotsInput = {dataset: {k11520NumericBound: '1'}, value: '1'};
+  const lotsRead = {textContent: '1'};
+  const elements = {'#cNumericInput': cInput, '#lotsNumericInput': lotsInput, '#lotsRead': lotsRead};
+  const document = {activeElement: null, querySelector: selector => elements[selector]};
+  const context = {document, __K11520_SIGNED_C_IMMERSIVE__: state, __K11520_3D_CONTROL__: {mode: 'YZ'}};
+  const setInputs = runInNewContext(source.slice(start, end) + 'setOfflineOrderInputs', context);
+  const applied = [];
+  let afterEnter;
+  const page = {
+    evaluate: (readState, args) => readState(args),
+    locator: selector => ({
+      fill: value => { elements[selector].value = value; },
+      press: key => {
+        assert.equal(key, 'Enter');
+        applied.push([selector, elements[selector].value]);
+        afterEnter?.(selector);
+      }
+    })
+  };
+  async function check(expected, enterBoth = false) {
+    applied.length = 0;
+    await setInputs(page, selection, enterBoth);
+    assert.deepEqual(applied, expected);
+  }
+
+  const editC = ['#cNumericInput', '1'], editLots = ['#lotsNumericInput', '1'];
+  await check([]);
+  await check([editC, editLots], true);
+  cInput.value = '+1';
+  state.lots = 2;
+  await check([editLots]);
+  state.lots = 1;
+  state.canonicalSideSynced = false;
+  // A C commit can change the state observed by the following lots check.
+  afterEnter = selector => { if (selector === '#cNumericInput') lotsInput.value = '2'; };
+  await check([editC, editLots]);
+  afterEnter = undefined;
+  state.canonicalSideSynced = true;
+  selection.c = state.signedC = -1;
+  cInput.value = '-1';
+  await check([]);
+  selection.c = state.signedC = 0;
+  cInput.value = '';
+  await check([['#cNumericInput', '0']]);
+  document.activeElement = lotsInput;
+  await check([editLots]);
+  document.activeElement = null;
+  lotsRead.textContent = '';
+  await check([editLots]);
+  lotsRead.textContent = '1';
+  state.activeAxis = 'KY';
+  await check([['#cNumericInput', '0'], editLots]);
+  assert.match(source, /baseline \|\| controlsUrl !== previousControlsUrl/);
+});
+
 test('order review scrolls and reads the current rendered row before the next quote replaces it',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
  const start=source.indexOf('function readRenderedExchangePanel(');

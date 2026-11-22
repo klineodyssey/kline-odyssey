@@ -693,6 +693,29 @@ function assertSettlementReview(panel,receipt){
   });
 }
 
+async function setOfflineOrderInputs(page, {plane, axis, c}, enterBoth) {
+  for (const [selector, value] of [['#cNumericInput', String(c)], ['#lotsNumericInput', '1']]) {
+    if (!enterBoth) {
+      const alreadyApplied = await page.evaluate(({plane, axis, c, selector}) => {
+        const input = document.querySelector(selector);
+        const state = globalThis.__K11520_SIGNED_C_IMMERSIVE__;
+        if (!input || input.dataset.k11520NumericBound !== '1' || document.activeElement === input) return false;
+        if (globalThis.__K11520_3D_CONTROL__?.mode !== plane || state?.activeAxis !== axis) return false;
+        if (selector === '#lotsNumericInput') {
+          return state.lots === 1 && input.value === '1' &&
+            Number.parseInt(document.querySelector('#lotsRead')?.textContent, 10) === 1;
+        }
+        const displayedC = c > 0 ? '+' + c : String(c);
+        return state.signedC === c && state.canonicalSideSynced === true && input.value === displayedC;
+      }, {plane, axis, c, selector});
+      if (alreadyApplied) continue;
+    }
+    const input = page.locator(selector);
+    await input.fill(value);
+    await input.press('Enter');
+  }
+}
+
 async function offlineSimulationBrowserQA({baseline=false}={}){
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   const {createHash}=await import('node:crypto');
@@ -881,14 +904,18 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       (result.renderedReceipts??=[]).push(panel);
       await shot(label);
     };
+    let previousControlsUrl;
     const select=async ({plane,axis,c})=>{
       await game();for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
         const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await showRetainedControls(page);await page.locator('#joy').tap();
         await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
       }
       await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
-      await showRetainedControls(page);await page.locator('#cNumericInput').fill(String(c));await page.locator('#cNumericInput').press('Enter');
-      await page.locator('#lotsNumericInput').fill('1');await page.locator('#lotsNumericInput').press('Enter');
+      await showRetainedControls(page);
+      const controlsUrl = page.url();
+      // Exercise both editors on each trial page and on every historical baseline case.
+      await setOfflineOrderInputs(page, {plane, axis, c}, baseline || controlsUrl !== previousControlsUrl);
+      previousControlsUrl = controlsUrl;
       await page.waitForFunction(({axis,c})=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis&&__K11520_SIGNED_C_IMMERSIVE__.signedC===c&&__K11520_SIGNED_C_IMMERSIVE__.lots===1,{axis,c});
     };
     const assertNoAuthority=s=>{
