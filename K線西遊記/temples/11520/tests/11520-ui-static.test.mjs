@@ -922,6 +922,39 @@ test('toast visual assertions cannot prevent the existing failure screenshot cap
 });
 
 
+test('order review scrolls and reads the current rendered row before the next quote replaces it',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('function readRenderedExchangePanel(');
+ const fn=source.slice(start,source.indexOf('function assertRenderedExchangeRows(',start));
+ let market='BTCUSDT',scrolled=false,coverValue=false,marketAfterScroll;
+ const visible={checkVisibility:()=>true,getClientRects:()=>[{}]};
+ function cell(text,left){
+   return {...visible,innerText:text,getBoundingClientRect(){
+     assert.ok(scrolled,'geometry must follow scrolling the current row');
+     assert.equal(market,marketAfterScroll,'row changed before its hit test');
+     return {left,top:20,width:10,height:10};
+   },contains(other){return other===this}};
+ }
+ const label=cell('MARKET',10);
+ let value=cell(market,50);
+ const row={querySelector:tag=>tag==='dt'?label:value,scrollIntoView(options){
+   assert.equal(options.behavior,'instant');
+   scrolled=true;marketAfterScroll=market;
+   queueMicrotask(()=>{market='ETHUSDT';value=cell(market,50);scrolled=false});
+ }};
+ const selector='#confirm.open #simulationOrderPreview';
+ const panel={...visible,dataset:{},getAttribute:()=>'polite',querySelectorAll:()=>[row],querySelector:()=>null};
+ const document={querySelector:s=>s===selector?panel:null,elementFromPoint:x=>x===15?label:coverValue?null:value};
+ const readPanel=runInNewContext(fn+'readRenderedExchangePanel',{document});
+ const first=readPanel({selector,scrolledLabel:'MARKET'});
+ assert.equal(first.rows.MARKET,'BTCUSDT');assert.equal(first.scrolledRowInView,true);
+ await Promise.resolve();
+ coverValue=true;
+ const next=readPanel({selector,scrolledLabel:'MARKET'});
+ assert.equal(next.rows.MARKET,'ETHUSDT');assert.equal(next.scrolledRowInView,false);
+ assert.throws(()=>readPanel({selector:'#closed',scrolledLabel:'MARKET'}),/Missing rendered exchange panel/);
+});
+
 test('offline order review requires the visible quote and terms for the selected side',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
  const checks=source.slice(source.indexOf('function assertRenderedExchangeRows('),source.indexOf('async function offlineSimulationBrowserQA('));
@@ -938,7 +971,7 @@ test('offline order review requires the visible quote and terms for the selected
  for(const [label,value] of Object.entries(rows)){
    assert.throws(()=>check({...panel,rows:{...rows,[label]:value+' INVALID'}},trade,quote),{code:'ERR_ASSERTION'});
  }
- assert.match(source,/review\.evaluate\(readRenderedExchangePanel,'MARKET'\)/);
+ assert.match(source,/page\.evaluate\(readRenderedExchangePanel,\{selector:'#confirm\.open #simulationOrderPreview',scrolledLabel:'MARKET'\}\)/);
  assert.match(source,/assertOrderReview\(evidence\.renderedPreview,testCase,/);
 });
 

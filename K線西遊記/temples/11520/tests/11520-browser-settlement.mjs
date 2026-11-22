@@ -633,7 +633,9 @@ async function waitForOfflineConfirmationGeometry(page,record){
   finally{record.observation=await page.evaluate(()=>globalThis.__offlineSimulationQA.confirmGeometry).catch(()=>null)}
 }
 
-function readRenderedExchangePanel(panel,scrolledLabel){
+function readRenderedExchangePanel({selector,scrolledLabel}){
+  const panel=document.querySelector(selector);
+  if(!panel)throw new Error('Missing rendered exchange panel: '+selector);
   const visible=element=>element?.checkVisibility({checkOpacity:true,checkVisibilityCSS:true})&&element.getClientRects().length>0;
   const rows={};
   let scrolledRowInView=false;
@@ -643,6 +645,9 @@ function readRenderedExchangePanel(panel,scrolledLabel){
     const key=label.innerText.trim();
     rows[key]=value.innerText.trim();
     if(key===scrolledLabel){
+      // Quote refreshes replace these rows. Scroll and hit-test the current
+      // row in one browser task, while its label and value still belong to it.
+      row.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});
       scrolledRowInView=[label,value].every(cell=>{
         const rect=cell.getBoundingClientRect();
         const hit=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
@@ -869,10 +874,9 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     };
     const reviewSettlement=async(receipt,label)=>{
       await organ('history');
-      const details=page.locator('#sheet.open #sheetBody[data-sim-organ="history"] details[data-receipt="'+receipt.receiptId+'"]');
-      await details.locator(':scope > summary').click();
-      await details.getByText('RAW / REALIZED PNL',{exact:true}).locator('..').scrollIntoViewIfNeeded();
-      const panel=await details.evaluate(readRenderedExchangePanel,'RAW / REALIZED PNL');
+      const selector='#sheet.open #sheetBody[data-sim-organ="history"] details[data-receipt="'+receipt.receiptId+'"]';
+      await page.locator(selector).locator(':scope > summary').click();
+      const panel=await page.evaluate(readRenderedExchangePanel,{selector,scrolledLabel:'RAW / REALIZED PNL'});
       assertSettlementReview(panel,receipt);
       (result.renderedReceipts??=[]).push(panel);
       await shot(label);
@@ -974,9 +978,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         await page.locator('#simulationTriggerPrice').fill(String(triggerPrice));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);
         evidence.preview=await state();assert.match(evidence.preview.preview,new RegExp(source));assertNoAuthority(evidence.preview);
-        const review=page.locator('#confirm.open #simulationOrderPreview');
-        await review.getByText('MARKET',{exact:true}).locator('..').scrollIntoViewIfNeeded();
-        evidence.renderedPreview=await review.evaluate(readRenderedExchangePanel,'MARKET');
+        evidence.renderedPreview=await page.evaluate(readRenderedExchangePanel,{selector:'#confirm.open #simulationOrderPreview',scrolledLabel:'MARKET'});
         assertOrderReview(evidence.renderedPreview,testCase,{source,anchor,triggerPrice});
         assert.equal(evidence.preview.submitLabel,testCase.side==='LONG'?'確認做多（模擬）':'確認做空（模擬）');
         evidence.submitHit=await usable('#confirmOrder');await shot(stage+'-preview');
