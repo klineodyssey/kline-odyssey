@@ -21,7 +21,7 @@ import {C_PNL_MODEL,LEGACY_SIMULATION_PNL_MODEL,createKgenLedger,positionRisk,sn
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
 import {createExecutionAdapter,createSimulationAutopilot,createPreviewSimulationExecutionAdapter,
   createK11520PreviewRequestId,k11520ServerPreviewType} from './real-trading-order-intent.mjs';
-import {bindWithdrawalLookup,getWalletSession11520} from './wallet-game-bridge.mjs';
+import {bindTradingReceiptLookup,getWalletSession11520} from './wallet-game-bridge.mjs';
 import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimulationPlayerStore,createPlayerScopedStorage} from './evm-wallet-runtime.mjs';
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK,formatUniverseAddress,gameUnitsToK,advanceLocalMotionClock,integrateLocalMotion} from './spatial-coordinate-runtime.mjs';
 import {readCanonicalDriveState} from './combat-drive-adapter.mjs';
@@ -951,7 +951,7 @@ if(!lanPreview)walletSession.subscribe(value=>{
   renderWallet(value);if(isTestnet()){syncSimulationPositions();refreshSimulationSheet();void refreshTestnet()}
 });
 if(!lanPreview){
-  bindWithdrawalLookup({session:walletSession,input:$('#k11520WithdrawalHash'),button:$('#k11520ReadWithdrawal'),status:$('#k11520WithdrawalStatus')});
+  bindTradingReceiptLookup({session:walletSession,kind:$('#k11520ReceiptKind'),hashLabel:$('#k11520ReceiptHashLabel'),input:$('#k11520WithdrawalHash'),button:$('#k11520ReadWithdrawal'),status:$('#k11520WithdrawalStatus')});
   renderWallet();void walletSession.refresh();void loadTestnetManifest();
   $('#walletM1ReadOnly').onclick=selectReadOnlyWalletView;
   $('#walletConnect').onclick=()=>{$('#walletPanel').classList.remove('collapsed');return walletSession.connect()};

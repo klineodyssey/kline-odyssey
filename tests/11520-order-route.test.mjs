@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import {createRequire} from 'node:module';
-import {createWalletSession, KGEN_TOKEN_ADDRESS, readK11520WithdrawalReceipt} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
+import {createWalletSession, KGEN_TOKEN_ADDRESS, readK11520WithdrawalReceipt, readK11520TradingReceipt} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {classify11520OrderRoute} from '../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs';
 
 function withdrawalFixture({taxed = false} = {}) {
@@ -189,6 +189,215 @@ test('BSC56 withdrawal session pins the connected provider and discards an in-fl
   assert.equal(result.receivedWei, undefined);
   assert.ok(!requests.some(method => /sign|send|requestAccounts/i.test(method)));
   session.dispose();
+});
+
+function tradingReceiptFixture({liquidation = false, paid = null, short = false} = {}) {
+  const {utils} = createRequire(import.meta.url)('../assets/ethers-5.7.2.umd.min.js');
+  const {wallet, manifest, brain} = withdrawalFixture();
+  const trigger = '0x' + '50'.repeat(20), position = '0x' + '51'.repeat(20), keeper = '0x' + '52'.repeat(20);
+  Object.assign(manifest, {ORDER_TRIGGER_ENGINE: trigger, POSITION_ENGINE: position});
+  Object.assign(manifest.codeHashes, {positionEngine: utils.id('position bytecode'), orderTriggerEngine: utils.id('trigger bytecode')});
+  const abi = new utils.Interface([
+    'function createOrder(uint8,int256,uint256,uint256)', 'function observeOrder(uint256)',
+    'function closePosition(uint256)', 'function observePosition(uint256)',
+    'function kgen() view returns(address)', 'function keeper() view returns(address)',
+    'function brain() view returns(address)', 'function engine() view returns(address)',
+    'function executor() view returns(address)', 'function brainSettlement() view returns(address)',
+    'event OrderCreated(uint256 indexed id,address indexed trader)',
+    'event OrderFilled(uint256 indexed id,uint256 indexed positionId,uint256 price)',
+    'event PositionOpened(uint256 indexed id,address indexed trader,uint8 indexed market,int256 size,uint256 collateral,uint256 entry,bytes32 key)',
+    'event PositionClosed(uint256 indexed id,uint256 exit,int256 raw,int256 realized,uint256 debt)',
+    'event PositionLiquidated(uint256 indexed id,uint256 exit,int256 raw,int256 realized,uint256 debt)',
+    'event PositionCollateralSettled(bytes32 indexed key,address indexed trader,uint256 locked,int256 realized,uint256 debt,uint256 insurance,uint256 principalAfter)',
+    'event SettlementClaimRecorded(bytes32 indexed key,address indexed trader,uint256 due,uint256 paid,uint256 remaining)',
+    'event OrderTerminated(uint256 indexed id,uint8 status)',
+    'function cancelOrder(uint256)', 'function rejectUnfundedOrder(uint256)',
+  ]);
+  const id = 2n ** 150n + 1n, pid = id + 57n, wad = 10n ** 18n;
+  const c = short ? -wad : wad;
+  const positionKey = utils.solidityKeccak256(['address','uint256'], [position, pid]);
+  const transactions = [], receipts = [], blocks = new Map();
+  const rpcHex = number => '0x' + number.toString(16);
+  function addStage(height, from, method, args, events) {
+    const blockNumber = rpcHex(height), blockHash = utils.id('block' + height), hash = utils.id(method);
+    const tx = {hash, blockHash, blockNumber, transactionIndex:'0x0', from, to:trigger, chainId:'0x38', value:'0x0',
+      input:abi.encodeFunctionData(method, args)};
+    const receipt = {...tx, transactionHash:hash, status:'0x1', logs:events.map(([address,name,values],index) => ({
+      ...abi.encodeEventLog(abi.getEvent(name), values), address, blockHash, blockNumber,
+      transactionHash:hash, transactionIndex:'0x0', logIndex:rpcHex(index), removed:false,
+    }))};
+    transactions.push(tx); receipts.push(receipt); blocks.set(blockNumber, {number:blockNumber, hash:blockHash, transactions:[hash]});
+  }
+  addStage(32,wallet,'createOrder',[0,c,2n,75000n * wad],[[trigger,'OrderCreated',[id,wallet]]]);
+  addStage(33,keeper,'observeOrder',[id],[
+    [position,'PositionOpened',[pid,wallet,0,2n*c/75000n,2n*wad,75000n*wad,positionKey]],
+    [trigger,'OrderFilled',[id,pid,75000n*wad]],
+  ]);
+  const pnl = (liquidation ? -2n : 2n) * wad, exit = 75000n*wad + (liquidation ? -15000n : 10000n)*c;
+  const raw = liquidation ? -3n * wad : pnl, debt = liquidation ? wad : 0n;
+  addStage(34,liquidation ? keeper : wallet,liquidation ? 'observePosition' : 'closePosition',[pid],[
+    ...(paid===null?[]:[[brain,'SettlementClaimRecorded',[positionKey,wallet,pnl,paid,pnl-paid]]]),
+    [brain,'PositionCollateralSettled',[positionKey,wallet,2n*wad,pnl,debt,debt,10n*wad+(paid??pnl)]],
+    [position,liquidation ? 'PositionLiquidated' : 'PositionClosed',[pid,exit,raw,pnl,debt]],
+  ]);
+  const code = new Map([[KGEN_TOKEN_ADDRESS,manifest.codeHashes.kgenToken],[brain,manifest.codeHashes.brainProxy],
+    [manifest.BRAIN_IMPLEMENTATION, manifest.codeHashes.brainImplementation],[position,manifest.codeHashes.positionEngine],
+    [trigger,manifest.codeHashes.orderTriggerEngine]]);
+  const routes = {kgen: [brain,KGEN_TOKEN_ADDRESS], engine:[trigger,position], brain:[trigger,brain],
+    executor:[position,trigger], brainSettlement:[position,brain], keeper:[trigger,keeper]};
+  const selectors = new Map(Object.entries(routes).map(([name, pair]) => [abi.getSighash(name),pair]));
+  let height = 34n;
+  const calls = [];
+  const rpc = {
+    eth_chainId: () => '0x38', eth_accounts: () => [wallet], eth_getBalance: ()=>'0x0',
+    eth_getTransactionByHash: ([hash]) => transactions.find(tx=>tx.hash===hash)??null,
+    eth_getTransactionReceipt: ([hash]) => receipts.find(r=>r.transactionHash===hash)??null,
+    eth_getBlockByNumber: ([n]) => {
+      const number = n === 'latest' ? rpcHex(height) : n;
+      if (BigInt(number) > height) return null;
+      return blocks.get(number) ?? {number, hash:utils.id('block'+BigInt(number)), transactions:[]};
+    },
+    eth_getStorageAt: ([a,,n]) => {assert.equal(a,brain);assert.ok(blocks.has(n)); return utils.hexZeroPad(manifest.BRAIN_IMPLEMENTATION,32);},
+    eth_call: ([call,n]) => {
+      if(call.to===KGEN_TOKEN_ADDRESS && n==='latest') return utils.hexZeroPad('0x00',32);
+      const method=call.data.slice(0,10);
+      if(method==='0x21603f43'||method==='0xa227aebb'){
+        const isOrder=method==='0x21603f43';
+        assert.equal(call.to,isOrder?trigger:position);assert.equal(BigInt('0x'+call.data.slice(10)),isOrder?id:pid);
+        const words=Array(isOrder?15:12).fill(0n);
+        words[isOrder?1:0]=BigInt(wallet);
+        if(isOrder){words[0]=id;words[3]=BigInt.asUintN(256,c);words[4]=2n;words[5]=75000n*wad;}
+        words[11]=BigInt(n)<BigInt(transactions[isOrder?1:2].blockNumber)?1n:2n;
+        return utils.defaultAbiCoder.encode(words.map(()=>'uint256'),words);
+      }
+      const [from,result]=selectors.get(call.data);assert.equal(call.to,from);assert.ok(blocks.has(n));return utils.hexZeroPad(result,32);
+    },
+    eth_getProof: ([address,,n]) => {assert.ok(blocks.has(n)); return {address,codeHash:code.get(address)};},
+    eth_getLogs: ([filter]) => receipts.flatMap(r=>r.logs).filter(log=>log.address===filter.address &&
+      filter.topics[0].includes(log.topics[0]) && log.topics[1]===filter.topics[1] &&
+      BigInt(log.blockNumber)>=BigInt(filter.fromBlock) && BigInt(log.blockNumber)<=BigInt(filter.toBlock)),
+  };
+  const provider = {request: async({method,params})=>{calls.push(method);assert.ok(Object.hasOwn(rpc,method),method);return rpc[method](params);}};
+  const read = (overrides={})=>readK11520TradingReceipt({provider,manifest,account:wallet,txHash:transactions[0].hash,...overrides});
+  return {rpc, provider, read, transactions, receipts, blocks, calls, id, pid, wallet, manifest, abi,
+    terminate(cancel) {
+      transactions.splice(1);receipts.splice(1);blocks.delete('0x21');blocks.delete('0x22');
+      addStage(33,cancel?wallet:keeper,cancel?'cancelOrder':'rejectUnfundedOrder',[id],
+        [[trigger,'OrderTerminated',[id,cancel?3:4]]]);
+      height=33n;
+    },
+    moveStage(index, height) {
+      const tx=transactions[index], receipt=receipts[index], number=rpcHex(BigInt(height)), hash=utils.id('block'+height);
+      blocks.delete(tx.blockNumber);
+      for(const record of [tx,receipt,...receipt.logs])Object.assign(record,{blockNumber:number,blockHash:hash});
+      blocks.set(number,{number,hash,transactions:[tx.hash]});
+    },
+    setHeight(n) {
+      height=BigInt(n); const number=rpcHex(height);
+      if(!blocks.has(number))blocks.set(number,{number,hash:utils.id('block'+n),transactions:[]});
+    }};
+}
+
+test('BSC56 trading receipt follows the original order hash through a keeper fill and the linked Brain settlement', async()=>{
+  for(const liquidation of [false,true])for(const short of [false,true]){
+    const f=tradingReceiptFixture({liquidation,short});
+    f.setHeight(32); const pending=await f.read();
+    assert.equal(pending.status,'ORDER_CREATED');assert.equal(pending.orderId,f.id.toString());
+    f.setHeight(33);const fill=await f.read();
+    assert.equal(fill.status,'ORDER_FILLED');assert.equal(fill.positionId,f.pid.toString());
+    f.setHeight(34);
+    const result=await f.read();
+    assert.equal(result.status,liquidation?'POSITION_LIQUIDATED':'POSITION_CLOSED');
+    assert.equal(result.cWad,(short?-(10n**18n):10n**18n).toString());
+    assert.equal(result.creationTxHash,f.transactions[0].hash);assert.equal(result.fillTxHash,f.transactions[1].hash);
+    assert.equal(result.closeTxHash,f.transactions[2].hash);
+    assert.equal(result.realizedPnlWei,(liquidation?-2n*10n**18n:2n*10n**18n).toString());
+    assert.equal(result.principalAfterWei,(liquidation?8n*10n**18n:12n*10n**18n).toString());
+    assert.equal(result.balanceScope,'BRAIN_PRINCIPAL_ONLY_NO_WALLET_TRANSFER_EVIDENCE');
+    assert.equal(result.claimStatus,liquidation?'NO_PROFIT_CLAIM':'CLAIM_EVENT_UNAVAILABLE');
+    assert.equal(result.paidWei,undefined);
+    const freshPage=createWalletSession({ethereum:f.provider});
+    assert.equal((await freshPage.refresh()).status,'CONNECTED');
+    assert.deepEqual(await freshPage.readTradingReceipt({manifest:f.manifest,txHash:result.txHash}),result);
+    freshPage.dispose();
+    assert.ok(!f.calls.some(method=>/send|sign|requestAccounts/i.test(method)));
+  }
+});
+
+test('BSC56 trading receipt distinguishes custody profit paid at close from outstanding profit without inferring a wallet credit', async()=>{
+  const due=2n*10n**18n;
+  for(const paid of [0n,due/2n,due]){
+    const f=tradingReceiptFixture({paid}), settled=await f.read();
+    assert.equal(settled.status,'POSITION_CLOSED');assert.equal(settled.claimStatus,'VERIFIED_AT_CLOSE');
+    assert.equal(settled.dueWei,due.toString());assert.equal(settled.paidWei,paid.toString());
+    assert.equal(settled.remainingClaimWei,(due-paid).toString());
+    assert.equal(settled.principalAfterWei,(10n*10n**18n+paid).toString());
+    assert.equal(settled.receivedWei,undefined);
+    const claim=f.receipts[2].logs[0];claim.topics[2]=claim.topics[1];
+    assert.equal((await f.read()).reason,'PROFIT_CLAIM_MISMATCH');
+  }
+});
+
+test('BSC56 trading receipt verifies direct holder cancellation and keeper rejection without a fill', async()=>{
+  for(const cancel of [true,false]){
+    const f=tradingReceiptFixture();f.terminate(cancel);const ended=await f.read();
+    assert.equal(ended.status,cancel?'ORDER_CANCELLED':'ORDER_REJECTED');
+    assert.equal(ended.terminationTxHash,f.transactions[1].hash);assert.equal(ended.fillTxHash,undefined);
+  }
+});
+
+test('BSC56 trading receipt rejects mismatched keeper, trader, order, position, event data and deployment routing', async()=>{
+  const cases=[
+    f=>{f.transactions[0].from=f.manifest.BRAIN_PROXY;},
+    f=>{f.receipts[0].logs[0].topics[2]=f.receipts[0].logs[0].topics[1];},
+    f=>{f.transactions[1].from=f.wallet;f.receipts[1].from=f.wallet;},
+    f=>{f.transactions[1].input=f.abi.encodeFunctionData('observeOrder',[f.id+1n]);},
+    f=>{f.receipts[1].logs[0].topics[1]=f.receipts[0].logs[0].topics[1];},
+    f=>{f.transactions[2].input=f.abi.encodeFunctionData('closePosition',[f.pid+1n]);},
+    f=>{f.receipts[2].logs[0].topics[2]=f.receipts[0].logs[0].topics[1];},
+    f=>{f.receipts[2].logs[0].data='0x'+'00'.repeat(160);},
+    f=>{f.receipts[2].logs[1].removed=true;},
+    f=>{const lookup=f.rpc.eth_getLogs;f.rpc.eth_getLogs=params=>lookup(params).map(log=>({...log,logIndex:'0xff'}));},
+    f=>{const read=f.rpc.eth_call;f.rpc.eth_call=params=>params[0].data===f.abi.getSighash('engine')?'0x'+'00'.repeat(32):read(params);},
+  ];
+  for(const alter of cases){const f=tradingReceiptFixture();alter(f);const result=await f.read();assert.equal(result.status,'UNKNOWN');assert.equal(result.principalAfterWei,undefined);}
+});
+
+test('BSC56 trading receipt holds partial evidence across outages, incomplete log windows and canonical reorgs', async()=>{
+  const f=tradingReceiptFixture();const logs=f.rpc.eth_getLogs;
+  f.rpc.eth_getLogs=params=>{if(params[0].address===f.manifest.POSITION_ENGINE)throw new Error('source disconnected');return logs(params);};
+  const offline=await f.read();assert.equal(offline.status,'UNKNOWN');assert.equal(offline.lastKnown.status,'ORDER_FILLED');
+  f.rpc.eth_getLogs=logs;assert.equal((await f.read()).status,'POSITION_CLOSED');
+  f.setHeight(5000);let queries=0;f.rpc.eth_getLogs=([filter])=>{
+    assert.ok(BigInt(filter.toBlock)-BigInt(filter.fromBlock)<512n);queries++;return [];
+  };
+  const limit=await f.read();assert.equal(limit.reason,'SEARCH_WINDOW_INCOMPLETE');assert.equal(limit.lastKnown.status,'ORDER_CREATED');assert.equal(queries,8);
+  const byNumber=f.rpc.eth_getBlockByNumber;f.rpc.eth_getBlockByNumber=params=>{
+    const actual=byNumber(params);return params[0]==='0x1388'?{...actual,hash:f.transactions[0].hash}:actual;
+  };
+  const reorg=await f.read();assert.equal(reorg.reason,'CANONICAL_BLOCK_UNCONFIRMED');assert.equal(reorg.lastKnown,undefined);
+  const wrong=tradingReceiptFixture();wrong.rpc.eth_chainId=()=> '0x61';
+  assert.equal((await wrong.read()).status,'WRONG_CHAIN');
+  const noBinding=tradingReceiptFixture();delete noBinding.manifest.ORDER_TRIGGER_ENGINE;
+  assert.equal((await noBinding.read()).status,'BINDING_UNAVAILABLE');assert.deepEqual(noBinding.calls,[]);
+});
+
+test('BSC56 trading receipt resumes across two bounded windows and distrusts skipped history and changed cursor blocks', async()=>{
+  const f=tradingReceiptFixture();f.moveStage(1,4500);f.moveStage(2,9500);f.setHeight(9600);
+  const first=await f.read();
+  assert.equal(first.reason,'SEARCH_WINDOW_INCOMPLETE');assert.equal(first.nextCursor.phase,'ORDER');
+  const second=await f.read({cursor:JSON.parse(JSON.stringify(first.nextCursor))});
+  assert.equal(second.reason,'SEARCH_WINDOW_INCOMPLETE');assert.equal(second.lastKnown.status,'ORDER_FILLED');
+  assert.equal(second.nextCursor.phase,'POSITION');
+  const final=await f.read({cursor:JSON.parse(JSON.stringify(second.nextCursor))});
+  assert.equal(final.status,'POSITION_CLOSED');assert.equal(final.positionId,f.pid.toString());
+  assert.equal((await f.read({cursor:{...first.nextCursor,throughBlockHash:f.transactions[2].hash}})).reason,'CURSOR_BLOCK_CHANGED');
+  const afterFill=f.blocks.get(f.transactions[1].blockNumber);
+  const forged={...first.nextCursor,throughBlock:afterFill.number,throughBlockHash:afterFill.hash};
+  assert.equal((await f.read({cursor:forged})).reason,'OPEN_STATE_NOT_CONFIRMED');
+  const afterClose=f.blocks.get(f.transactions[2].blockNumber);
+  assert.equal((await f.read({cursor:{...second.nextCursor,throughBlock:afterClose.number,throughBlockHash:afterClose.hash}})).reason,'OPEN_STATE_NOT_CONFIRMED');
+  assert.equal((await f.read({cursor:{...second.nextCursor,fillTxHash:f.transactions[2].hash}})).status,'UNKNOWN');
 });
 
 test('slow order preview is not starved by polling and newer input invalidates stale results',async()=>{

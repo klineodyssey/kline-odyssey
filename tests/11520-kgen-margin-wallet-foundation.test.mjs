@@ -1006,7 +1006,7 @@ test('K11520 LAN preview pairs the device and shares only the authenticated simu
 });
 
 test('BSC56 wallet panel reads one withdrawal without replay and clears stale account results', async () => {
-  const {bindWithdrawalLookup} = await import('../K線西遊記/temples/11520/runtime/wallet-game-bridge.mjs');
+  const {bindTradingReceiptLookup} = await import('../K線西遊記/temples/11520/runtime/wallet-game-bridge.mjs');
   const input = new EventTarget(), button = new EventTarget(), status = {};
   input.value = '0x' + 'ab'.repeat(32);
   let walletListener, pendingRead, signalStarted;
@@ -1022,7 +1022,7 @@ test('BSC56 wallet panel reads one withdrawal without replay and clears stale ac
       return new Promise(resolve => { pendingRead = resolve; });
     }
   };
-  const dispose = bindWithdrawalLookup({session, input, button, status, fetchManifest:async (url, options) => {
+  const dispose = bindTradingReceiptLookup({session, input, button, status, fetchManifest:async (url, options) => {
     assert.ok(url.pathname.endsWith('/docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json'));
     assert.equal(options.redirect, 'error');
     return {ok:true,json:async () => ({fixture:true})};
@@ -1048,4 +1048,42 @@ test('BSC56 wallet panel reads one withdrawal without replay and clears stale ac
   assert.equal(status.textContent, '');
   assert.equal(button.disabled, true);
   dispose();
+});
+
+test('BSC56 reopens the original order by account and validates each receipt page again', async () => {
+  const {bindTradingReceiptLookup} = await import('../K線西遊記/temples/11520/runtime/wallet-game-bridge.mjs');
+  const account='0x'+'11'.repeat(20), other='0x'+'22'.repeat(20), txHash='0x'+'ef'.repeat(32);
+  const records=new Map(), storage={getItem:key=>records.get(key),setItem:(key,value)=>records.set(key,value)};
+  const checked=[], cursor={nextBlock:'0x42'};
+  const session={
+    subscribe(fn){fn({status:'CONNECTED',chainId:56,account:this.account});return ()=>{};},account,
+    async readTradingReceipt(options){
+      checked.push(options);
+      if(checked.length===1)return {status:'UNKNOWN',reason:'SEARCH_WINDOW_INCOMPLETE',lastKnown:{status:'ORDER_CREATED',orderId:'2'},nextCursor:cursor};
+      return {status:'POSITION_CLOSED',orderId:'2',positionId:'5',realizedPnlWei:'-100000000000000',fillTxHash:txHash,closeTxHash:txHash};
+    }
+  };
+  const mount=()=>{
+    const input=new EventTarget(),button=new EventTarget(),kind=new EventTarget(),status={},hashLabel={};
+    input.value=''; kind.value='withdrawal';
+    const dispose=bindTradingReceiptLookup({session,input,button,kind,status,hashLabel,storage,
+      fetchManifest:async()=>({ok:true,json:async()=>({})})});
+    return {input,kind,button,status,hashLabel,dispose};
+  };
+  const first=mount();first.input.value=txHash;first.kind.value='order';first.kind.dispatchEvent(new Event('change'));
+  first.button.dispatchEvent(new Event('click'));await new Promise(resolve=>setImmediate(resolve));
+  assert.match(first.status.textContent,/已建立委託.*後續狀態尚未核實/);
+  assert.match(first.button.textContent,/繼續查/);first.dispose();
+  session.account=other;const different=mount();assert.equal(different.input.value,'');different.dispose();
+  session.account=account;const reopened=mount();
+  assert.equal(reopened.input.value,txHash);assert.equal(reopened.kind.value,'order');
+  assert.equal(reopened.status.textContent,'');assert.equal(checked.length,1);
+  reopened.button.dispatchEvent(new Event('click'));await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(checked[1].txHash,txHash);assert.deepEqual(checked[1].cursor,cursor);
+  assert.match(reopened.status.textContent,/已平倉.*合約實現損益 −0\.0001 KGEN/);
+  checked.length=0;
+  session.readTradingReceipt=async()=>({status:'POSITION_CLOSED',orderId:'2',realizedPnlWei:'2000000000000000000',claimStatus:'VERIFIED_AT_CLOSE',paidWei:'500000000000000000',remainingClaimWei:'1500000000000000000'});
+  reopened.button.dispatchEvent(new Event('click'));await new Promise(resolve=>setImmediate(resolve));
+  assert.match(reopened.status.textContent,/本筆撥入合約本金 0.5 KGEN.*平倉時仍待清償 1.5 KGEN/);
+  reopened.dispose();
 });
