@@ -19,12 +19,12 @@ export function bindTradingReceiptLookup({session, kind, hashLabel, input, butto
   const manifestUrl = new URL('../../../../docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json', import.meta.url);
   const messages = {
     BINDING_UNAVAILABLE: '尚無已核實的 BSC 56 合約及部署紀錄。',
-    PENDING: '這筆提款仍在等待區塊確認。',
-    REVERTED: '這筆提款執行失敗。',
-    EVIDENCE_MISMATCH: '交易、合約或代幣轉帳紀錄與這個帳戶的提款條件不符。',
+    PENDING: '這筆交易仍在等待區塊確認。',
+    REVERTED: '這筆交易執行失敗。',
+    EVIDENCE_MISMATCH: '交易、合約或代幣轉帳紀錄與原帳戶或操作不符。',
     ACCOUNT_MISMATCH: '錢包帳戶已變更，請用原帳戶查詢。',
     WRONG_CHAIN: '請連接 BNB Smart Chain（56）。',
-    INVALID_INPUT: '請核對錢包帳戶及完整提款交易雜湊。',
+    INVALID_INPUT: '請核對錢包帳戶及完整的原交易雜湊。',
     UNKNOWN: '目前無法核實這筆交易，稍後可再查原回執。'
   };
 
