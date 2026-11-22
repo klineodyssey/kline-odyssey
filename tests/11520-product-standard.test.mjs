@@ -48,7 +48,9 @@ assert.ok(main.includes("joy.addEventListener('pointerdown'"));assert.ok(main.in
 for(const runtime of [main,signedC,shell,fixesV23])assert.ok(!runtime.includes('[0,.000001,.00001,.0001,.001,.01,.1,1,10,100,1000]'),'interactive C ladder must stop at 100C');
 for(const runtime of [legacyRuntime,nonlinearControls,backend])assert.ok(!runtime.includes('max:1000')&&!runtime.includes('<=1000'),'all executable 11520 C/leverage surfaces must stop at 100');
 assert.ok(!backend.includes('lots / leverage'),'off-chain backend must not discount principal by leverage');
-assert.ok(backend.includes('deltaIndex*signedC*lots'),'off-chain backend metadata must disclose canonical index-delta PnL');
+for(const action of ['placeSimulationOrder','observeSimulationPrice','closeSimulationPosition'])
+  assert.ok(backend.includes(action+'(player.ledger'),'backend must use shared player ledger for '+action);
+assert.equal(pnlForMove({entry:75000,mark:85000,side:'多',lots:2,c:1}),2,'shared PnL uses the actual fill floor');
 assert.ok(legacyRuntime.includes("import {clampPositionPnl,pnlForMove,requiredMargin,LEGACY_SIMULATION_PNL_MODEL}"),'legacy UI runtime must reuse the canonical bounded margin engine');
 assert.ok(signedC.includes('cRange:[-100,100]'),'signed C numeric range must be capped at ±100C');
 assert.ok(signedC.includes("invalidCPolicy:'REJECT_OUTSIDE_100C_AND_KEEP_PREVIOUS'"),'out-of-range numeric C must fail closed');
