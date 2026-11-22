@@ -4,6 +4,7 @@ import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activat
 import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY,bindTempleReturnWalletContinuity} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot,touchedOrCrossed} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
+import {createPreviewSimulationExecutionAdapter} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 import {createDigitalAnt,createDeliveryMission,assignDelivery,loadCargo,planCargoHedge,createDigitalAntPersistenceEnvelope,restoreDigitalAntPersistenceEnvelope,tickDigitalAntDelivery,acceptSimulatedAtmDeliveryReceipt} from '../K線西遊記/temples/11520/runtime/digital-ant-logistics-runtime.mjs';
 
 assert.equal(MAX_C_LEVERAGE,100);
@@ -496,7 +497,7 @@ async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPrevi
     await rmdir(directory);
   });
 
-  async function start() {
+  async function start(requestedPort = 0) {
     assert.equal(service, null);
     service = await createK11520Server({
       dataFile,
@@ -511,7 +512,7 @@ async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPrevi
       pollIntervalMs,
       lanPreview,
     });
-    const {port} = await service.listen({port: 0});
+    const {port} = await service.listen({port: requestedPort});
     origin = 'http://127.0.0.1:' + port;
   }
 
@@ -558,9 +559,14 @@ async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPrevi
   return {
     request, login, book, prime, quote, unavailable,
     get origin() { return origin; },
+    now: () => currentTime,
     poll: () => service.poll(),
     advance: (ms = 1000) => currentTime += ms,
-    restart: async () => { await stop(); await start(); },
+    restart: async () => {
+      const port = Number(new URL(origin).port);
+      await stop();
+      await start(port);
+    },
     readDatabase: () => readFile(dataFile, 'utf8').then(JSON.parse),
   };
 }
@@ -724,6 +730,83 @@ test('K11520 server persists idempotent orders and isolated settlement across cl
   assert.equal(replayAfterRestart.body.replayed, true);
   assert.equal(replayAfterRestart.body.order.orderId, orderId);
   assert.equal((await f.book(token)).receipts.filter(r => r.orderId === orderId).length, 2);
+});
+
+test('K11520 reopened page recovers an accepted order and a manual close exactly once after a feed outage and restart', async t => {
+  const f = await makeK11520BackendFixture(t);
+  const saved = new Map();
+  const storage = {getItem: key => saved.get(key) ?? null, setItem: (key, value) => saved.set(key, value)};
+  const origin = f.origin;
+  function openPage(fetchImpl = fetch) {
+    return createPreviewSimulationExecutionAdapter({origin, storage, fetchImpl, now: f.now});
+  }
+  const beforeReload = openPage(async (url, options) => {
+    const response = await fetch(url, options);
+    if (new URL(url).pathname === '/api/v1/order' && options.method === 'POST') {
+      assert.equal(response.status, 200);
+      await response.arrayBuffer();
+      throw new Error('Fixture dropped the accepted order response');
+    }
+    return response;
+  });
+
+  f.prime();
+  await f.poll();
+  assert.equal((await beforeReload.refresh()).ok, true);
+  const startingWallet = beforeReload.snapshot().wallet;
+  const draft = {axis: 'KX', market: 'BTCUSDT', c: 1, lots: 2, triggerPrice: 65100, clientRequestId: 'manual-reopen-01'};
+  assert.equal(beforeReload.preview(draft).ok, true);
+  assert.equal((await beforeReload.submit(draft)).reason, 'PREVIEW_ORDER_UNRESOLVED');
+
+  f.unavailable.add('BTCUSDT');
+  f.advance();
+  await f.poll();
+  const reopened = openPage();
+  assert.equal((await reopened.refresh()).ok, true);
+  assert.equal(reopened.marketSnapshot().statuses.BTCUSDT.available, false);
+  assert.equal(reopened.pendingOrder().clientRequestId, draft.clientRequestId);
+  const replay = await reopened.retryPendingOrder();
+  assert.equal(replay.replayed, true);
+  assert.equal(reopened.snapshot().orders.length, 1);
+  assert.equal(reopened.snapshot().receipts.length, 0);
+
+  // No page requests occur while the source returns and the backend fills the order.
+  await f.restart();
+  assert.equal(f.origin, origin);
+  f.unavailable.delete('BTCUSDT');
+  const filledAt = f.advance();
+  f.quote('BTCUSDT', 65100, 2);
+  await f.poll();
+  const closeAt = f.advance();
+  f.quote('BTCUSDT', 75100, 3, {corroborates: 75100});
+  await f.poll();
+
+  const returning = openPage();
+  assert.equal((await returning.refresh()).ok, true);
+  const {positions, receipts: [fill]} = returning.snapshot();
+  assert.equal(positions.length, 1);
+  assert.equal(fill.orderId, replay.order.orderId);
+  assert.equal(fill.triggeredAt, filledAt);
+  const closed = await returning.close(positions[0].positionId);
+  assert.equal(closed.ok, true, closed.reason);
+  const settled = returning.snapshot();
+  assert.deepEqual(settled.receipts.map(row => row.kind), ['FILL', 'SETTLEMENT']);
+  const settlement = settled.receipts[1];
+  assert.equal(settlement.status, 'CLOSED');
+  assert.equal(settlement.orderId, fill.orderId);
+  assert.equal(settlement.settlementPrice, 75100);
+  assert.equal(settlement.settledAt, closeAt);
+  assert.equal(settlement.realizedPnl, 2);
+  assert.equal(settled.wallet.free, startingWallet.free + 2);
+  assert.equal(settled.wallet.lockedMargin, 0);
+
+  assert.equal((await returning.close(positions[0].positionId)).reason, 'POSITION_NOT_OPEN');
+  await f.restart();
+  const finalPage = openPage();
+  assert.equal((await finalPage.refresh()).ok, true);
+  assert.deepEqual(finalPage.snapshot().receipts, settled.receipts);
+  assert.deepEqual(finalPage.snapshot().wallet, settled.wallet);
+  assert.deepEqual(finalPage.snapshot().orders, settled.orders);
 });
 
 test('K11520 server keeps legacy records private and preserves their historical balance', async t => {
