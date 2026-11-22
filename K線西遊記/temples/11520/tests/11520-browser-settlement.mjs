@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {createK11520Server,BINANCE_AGGREGATE_SOURCE,BYBIT_TRADES_SOURCE} from '../backend/server.mjs';
 import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
 
 // Host-only relative timings in the existing reports. No timer, browser read,
@@ -54,7 +57,7 @@ async function driveSettlementFixtureQuote(page,phaseTiming,label,price,setPrice
     const previous=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().observations.ETHUSDT);
     assert.ok(previous?.source&&Number.isSafeInteger(previous.at)&&Number.isSafeInteger(previous.sequence),
       'Fixture transition requires an existing provider observation');
-    setPrice(price);
+    await setPrice(price);
     const [book]=await Promise.all([
       waitForAcceptedFixtureQuote(page,price,previous),
       page.evaluate(()=>{
@@ -100,17 +103,19 @@ if(process.argv.includes('--testnet97')){
 // Real Chromium, deterministic read-only quote fixtures. Never a live-funds oracle.
 const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 const out='artifacts/11520-settlement-qa';
+const receiptReviewOnly=process.argv.includes('--wallet-receipt-review');
 await fs.mkdir(out,{recursive:true});
 const settlementStarted=performance.now();
 const browser=await chromium.launch({headless:true});
+let backend, ledgerDirectory;
 try {
   for(const [width,height] of [[390,844],[844,390]]) {
     const phaseTiming=createSettlementTiming(()=>performance.now(),settlementStarted),generalPhase=phaseTiming.begin('generic');
     let eth=4000;
-    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
+    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true,serviceWorkers:'block'});
     page.setDefaultTimeout(20000);
     await page.addInitScript(captureSettlementQuoteRefresh);
-    const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,value=>{eth=value});
+    const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,async value=>{eth=value;await backend.poll()});
     const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE_ERROR',String(e))});
     // Ordinary simulation QA must remain independent of a public rehearsal.
     // An unverified manifest may not silently activate wallet transactions.
@@ -148,7 +153,9 @@ try {
       await route.fulfill({status:200,contentType:'text/javascript',body});
     });
     await page.goto(`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT,{timeout:15000});
+    await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets.some(m=>m.symbol==='ETHUSDT'&&m.status==='LIVE'&&m.price===4000),null,{timeout:15000});
+    const displayBook=await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot());
+    assert.equal(displayBook.observations.ETHUSDT,undefined,'the static page must not settle from a displayed public quote');
     await page.screenshot({path:`${out}/${width}x${height}-late-ui-boot.png`});
     assert.equal(await page.locator('#intro11520 .introSkip').count(),0,'late legacy UI must not recreate an intro over the live game');
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
@@ -184,13 +191,13 @@ try {
     assert.match(await page.locator('#wChain').innerText(),/BNB Smart Chain.*56/);
     await shot('wallet-connected');
     const mainnetReview = page.locator('#k11520Bsc56UnsignedReview');
-    await mainnetReview.locator('summary').click();
+    await mainnetReview.locator(':scope > summary').click();
     await mainnetReview.locator('#bsc56ReviewAction').selectOption('createOrder');
     await mainnetReview.getByLabel('交易市場').selectOption('KX');
     await mainnetReview.getByLabel(/USD 觸發價/).fill('75000');
     await mainnetReview.getByLabel(/口數/).fill('2');
     await mainnetReview.getByRole('button',{name:'更新審核資訊'}).click();
-    await page.waitForFunction(()=>document.querySelector('#k11520Bsc56UnsignedReview [role="status"]').textContent.includes('DEPLOYED_BINDING_AND_READBACK_REQUIRED'));
+    await page.waitForFunction(()=>document.querySelector('#k11520Bsc56UnsignedReview [role="status"]').textContent.includes('尚缺正式部署綁定與鏈上讀回'));
     assert.equal(await mainnetReview.getAttribute('data-execution-ready'),'false');
     assert.match(await mainnetReview.locator('[data-bsc56-review-field="AMOUNT"]').innerText(),/75000/);
     assert.equal(await mainnetReview.locator('[data-bsc56-review-field]').count(),8);
@@ -198,13 +205,27 @@ try {
     await mainnetReview.locator('#bsc56ReviewAction').selectOption('closePosition');
     await mainnetReview.getByLabel('原持倉 ID').fill('3');
     assert.equal(await mainnetReview.getByLabel(/USD 觸發價/).isVisible(),false);
-    await mainnetReview.locator('summary').click();
+    await mainnetReview.locator(':scope > summary').click();
     const lookup = page.locator('#k11520WithdrawalLookup');
     await lookup.locator('summary').click();
     await lookup.locator('#k11520WithdrawalHash').fill('0x'+'aa'.repeat(32));
     await lookup.locator('#k11520ReadWithdrawal').click();
     await page.waitForFunction(()=>document.querySelector('#k11520WithdrawalStatus').textContent.includes('尚無已核實'));
     await shot('bsc56-receipt');
+    await lookup.locator('#k11520ReceiptKind').selectOption('order');
+    assert.equal(await lookup.locator('#k11520ReceiptHashLabel').textContent(),'原建立委託交易雜湊');
+    await lookup.locator('#k11520WithdrawalHash').fill('0x'+'bb'.repeat(32));
+    await lookup.locator('#k11520ReadWithdrawal').click();
+    await page.waitForFunction(()=>document.querySelector('#k11520WithdrawalStatus').textContent.includes('尚無已核實'));
+    await shot('bsc56-order-receipt');
+    await page.evaluate(()=>{__walletFixture.account='0x2222222222222222222222222222222222222222';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
+    await page.waitForFunction(()=>document.querySelector('#wAddr').textContent==='0x2222222222222222222222222222222222222222');
+    assert.equal(await lookup.locator('#k11520WithdrawalHash').inputValue(),'','another wallet must not inherit an original transaction');
+    await page.evaluate(()=>{__walletFixture.chain='0x1';__walletFixture.emit('chainChanged','0x1')});
+    await page.waitForFunction(()=>document.querySelector('#walletMsg').textContent.includes('WRONG_CHAIN'));
+    assert.equal(await page.locator('#wKgen').innerText(),'--');
+    await page.evaluate(()=>{__walletFixture.chain='0x38';__walletFixture.account='0x1111111111111111111111111111111111111111';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
+    await page.waitForFunction(()=>document.querySelector('#k11520WithdrawalHash').value==='0x'+'bb'.repeat(32));
     await lookup.locator('summary').click();
     assert.equal(await page.evaluate(()=>__walletFixture.calls.some(m=>/send|sign|switch|addChain|personal_/i.test(m))),false);
 
@@ -212,6 +233,35 @@ try {
     await shot('wallet-metrics');
     await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});
     await page.locator('#walletToggle').click();
+    await page.locator('#k11520UtilityMaster').click();
+    await page.locator('#orderFire').click();
+    await page.waitForFunction(()=>document.querySelector('#toast').textContent.includes('等候有效報價'));
+    assert.equal(await page.locator('#confirmOrder').isDisabled(),true);
+    assert.equal(await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length),displayBook.orders.length);
+    if(receiptReviewOnly){await page.close();continue;}
+
+    // Exercise the anonymous trial through the original server and its own
+    // persistent ledger. Only the two upstream market readers are fixtures.
+    ledgerDirectory=await fs.mkdtemp(join(tmpdir(),'k11520-settlement-browser-'));
+    const sequence=new Map();
+    const marketPrice=market=>({BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600})[market];
+    backend=await createK11520Server({dataFile:join(ledgerDirectory,'players.json'),pollIntervalMs:800,
+      readMarket:async({market,now})=>{
+        const n=(sequence.get(market)??0)+1;sequence.set(market,n);
+        return [{market,price:marketPrice(market),updatedAt:now-(quoteStale?60000:0),sequence:n,source:BINANCE_AGGREGATE_SOURCE}];
+      },
+      readIndependent:async({market,now})=>({market,price:marketPrice(market),updatedAt:now,source:BYBIT_TRADES_SOURCE}),
+    });
+    const {port}=await backend.listen({port:0}),trialOrigin='http://127.0.0.1:'+port;
+    await page.goto(trialOrigin,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets.some(m=>m.symbol==='ETHUSDT'&&m.status==='LIVE')&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().wallet);
+    await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
+    await page.locator('#intro11520').waitFor({state:'hidden',timeout:10000});
+    assert.equal(await page.locator('#walletConnect').isDisabled(),true);
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
+    // Each new backend guest has 10 KGEN. Leave enough principal for the
+    // second order after testing the first position's full isolated loss.
+    await page.locator('#lotsNumericInput').fill('2');await page.locator('#lotsNumericInput').press('Enter');
     await organ('trade');await page.locator('#sheetClose').click();await page.locator('#k11520UtilityMaster').click();await page.locator('#orderFire').click();
     await page.locator('#simulationTriggerPrice').fill('4001');
     const orderDirection=side=>page.locator(`#confirmBody [data-order-side="${side}"]`);
@@ -235,37 +285,34 @@ try {
     await organ('orders');await shot('pending');
     const filledQuote=await driveQuote('generic.pending-fill-quote',4002);
     assert.equal(filledQuote.orders[0]?.status,'FILLED');
-    s=await snap();assert.equal(s.positions.length,1);assert.equal(s.wallet.lockedMargin,10);assert.equal(s.wallet.free,90);
+    s=await snap();assert.equal(s.positions.length,1);assert.equal(s.wallet.lockedMargin,2);assert.equal(s.wallet.free,8);
     assert.equal(s.receipts.filter(r=>r.kind==='FILL').length,1);
     await organ('positions');await shot('filled');
     const openId=s.positions[0].positionId;
-    await page.evaluate(()=>{__walletFixture.account='0x2222222222222222222222222222222222222222';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
-    await page.waitForFunction(()=>document.querySelector('#wAddr').textContent==='0x2222222222222222222222222222222222222222');
-    await page.evaluate(()=>{__walletFixture.chain='0x1';__walletFixture.emit('chainChanged','0x1')});
-    await page.waitForFunction(()=>document.querySelector('#walletMsg').textContent.includes('WRONG_CHAIN'));
-    assert.equal(await page.locator('#wKgen').innerText(),'--');
-    assert.equal((await snap()).positions.length,0,'address B must not see A positions');
-    await page.evaluate(()=>{__walletFixture.account='0x1111111111111111111111111111111111111111';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
-    await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions.length===1);
-    assert.equal((await snap()).positions[0].positionId,openId,'address A restores its own position');
-    await page.evaluate(()=>{__walletFixture.chain='0x38';__walletFixture.emit('chainChanged','0x38')});
-    await page.waitForFunction(()=>document.querySelector('#wKgen').textContent==='12345');
+    const other=await browser.newContext();
+    try{
+      const login=await other.request.post(trialOrigin+'/api/v1/login',{data:{},headers:{Origin:trialOrigin}});
+      assert.ok(login.ok());const player=await login.json();
+      const book=await other.request.get(trialOrigin+'/api/v1/orders',{headers:{Authorization:'Bearer '+player.token}});
+      assert.ok(book.ok());assert.deepEqual((await book.json()).positions,[],'another anonymous player has a separate book');
+      assert.equal((await snap()).positions[0].positionId,openId,'the original player still owns the same position');
+    }finally{await other.close()}
     const gapQuote=2900; // First fill 4002 at k=3 has a long liquidation mark of 3002.
     quoteStale=true;eth=gapQuote;await page.waitForTimeout(6000);
     assert.equal((await snap()).positions[0].status,'OPEN','stale liquidation must not mutate position');
-    assert.match(await page.locator('#feed').innerText(),/MARKET DATA STALE/);await shot('stale-position-preserved');
+    assert.match(await page.locator('#feed').innerText(),/等候有效報價/);await shot('stale-position-preserved');
     quoteStale=false;
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='LIQUIDATED',null,{timeout:15000});
-    s=await snap();assert.equal(s.positions[0].margin,0);assert.equal(s.wallet.free,90);assert.equal(s.wallet.lockedMargin,0);
+    s=await snap();assert.equal(s.positions[0].margin,0);assert.equal(s.wallet.free,8);assert.equal(s.wallet.lockedMargin,0);
     assert.equal(s.receipts.filter(r=>r.kind==='SETTLEMENT').length,1);assert.ok(s.receipts.at(-1).badDebt>0);
     const liquidation=s.receipts.at(-1);
     assert.equal(liquidation.liquidationTrigger,3002,'liquidation uses the fixed entry floor unit in USDT');
     assert.equal(liquidation.settlementPrice,gapQuote,'receipt retains the observed raw USDT price');
-    assert.equal(liquidation.realizedPnl,-10,'liquidation loss is limited to the position margin');
+    assert.equal(liquidation.realizedPnl,-2,'liquidation loss is limited to the position margin');
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('liquidation-receipt');
     await organ('assets');await shot('wallet');
     const walletText=await page.locator('#sheetBody').innerText();
-    assert.match(walletText,/SIMULATION WALLET/);
+    assert.match(walletText,/後端模擬/);
     for(const label of ['AVAILABLE','LOCKED MARGIN','EQUITY','UNREALIZED PNL','REALIZED PNL'])assert.match(walletText,new RegExp(label));
 
     const liquidationQuote=s.observations.ETHUSDT;
@@ -274,7 +321,11 @@ try {
     const receiptsBeforeRecovery=s.receipts.map(receipt=>receipt.receiptId);
     eth=4002;
     // Observe the next accepted fixture quote and its committed ledger together.
-    s=await phaseTiming.measure('generic.recovery-quote',()=>waitForAcceptedFixtureQuote(page,eth,liquidationQuote));
+    await phaseTiming.measure('generic.recovery-quote',()=>page.waitForFunction(previous=>{
+      const q=globalThis.__K11520_FREE_ORACLE__?.ETHUSDT;
+      return q?.price===4002&&q.source===previous.source&&q.sequence>previous.sequence;
+    },liquidationQuote,{timeout:15000,polling:100}));
+    s=await snap();
     assert.equal(s.positions[0].positionId,openId);
     assert.equal(s.positions[0].status,'LIQUIDATED');
     assert.equal(s.receipts.length,2);
@@ -287,20 +338,17 @@ try {
     assert.equal(secondFillQuote.positions[1]?.status,'OPEN');
     assert.equal(secondFillQuote.positions[1].entry,4004,'the indexed PnL model keeps the raw fill price');
     const markQuote=await driveQuote('generic.profitable-mark-quote',4008);
-    assert.ok(Math.abs(markQuote.wallet.unrealizedPnl-.04)<1e-8,'four USDT at k=3 across ten lots gives 0.04 KGEN');
+    assert.ok(Math.abs(markQuote.wallet.unrealizedPnl-.008)<1e-8,'four USDT at k=3 across two lots gives 0.008 KGEN');
     await organ('positions');await shot('pnl');
     await page.locator('[data-sim-close]').click();
-    s=await snap();assert.equal(s.positions[1].status,'CLOSED');assert.equal(s.wallet.lockedMargin,0);assert.ok(s.wallet.free>90);
+    await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[1]?.status==='CLOSED');
+    s=await snap();assert.equal(s.positions[1].status,'CLOSED');assert.equal(s.wallet.lockedMargin,0);assert.ok(s.wallet.free>8);
     assert.equal(s.receipts.length,4);assert.equal(s.receipts.at(-1).status,'CLOSED');
-    assert.ok(Math.abs(s.receipts.at(-1).realizedPnl-.04)<1e-8,'close settles the normalized PnL from the same mark');
+    assert.ok(Math.abs(s.receipts.at(-1).realizedPnl-.008)<1e-8,'close settles the normalized PnL from the same mark');
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('close-receipt');
     await page.evaluate(()=>__walletFixture.emit('disconnect',{}));
-    await page.waitForFunction(()=>document.querySelector('#wAddr').textContent==='DISCONNECTED');
-    assert.equal((await snap()).receipts.length,0,'disconnect switches to guest, not A receipts');
-    await page.locator('#sheetClose').click();
-    if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
-    await page.locator('#walletToggle').click();await page.locator('#walletConnect').click();
-    await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===4);
+    assert.equal((await snap()).receipts.length,4,'a wallet event cannot switch the anonymous backend ledger');
+    assert.deepEqual(await page.evaluate(()=>__walletFixture.calls),[],'the private trial must not call the wallet');
     await page.reload({waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===4,null,{timeout:15000});
     assert.equal((await snap()).positions[1].status,'CLOSED','reload recovers exact account ledger');
@@ -363,10 +411,19 @@ try {
     const hit=await page.locator('#attack').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(hit,true,'attack pointer path');
     assert.deepEqual(errors,[]);phaseTiming.finish(generalPhase,'COMPLETE');await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'DETERMINISTIC_SIMULATION_FIXTURES',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:s,timing:phaseTiming.snapshot()},null,2));
     await page.close();
-    await navigationConsoleBrowserQA({browser,width,height,base,out,timingOrigin:settlementStarted});
+    await backend.close();backend=null;
+    await fs.rm(join(ledgerDirectory,'players.json'),{force:true});await fs.rmdir(ledgerDirectory);ledgerDirectory=null;
   }
-  console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
-} finally {await browser.close()}
+  if(receiptReviewOnly)console.log('PASS: static order block and both chain56 lookup forms at 390x844 and 844x390');
+  else{
+    for(const [width,height] of [[390,844],[844,390]])await navigationConsoleBrowserQA({browser,width,height,base,out,timingOrigin:settlementStarted});
+    console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
+  }
+} finally {
+  await browser.close();
+  if(backend)await backend.close();
+  if(ledgerDirectory){await fs.rm(join(ledgerDirectory,'players.json'),{force:true});await fs.rmdir(ledgerDirectory)}
+}
 
 // The same two existing CI viewports get a separate guest context and ledger.
 // Only external read-only quote responses are fixtures; every decision uses the
