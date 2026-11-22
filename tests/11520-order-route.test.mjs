@@ -694,6 +694,36 @@ test('actual order UI catches corrupt-source and rollback quote failures and cle
  }
 });
 
+test('the deferred simulation route preserves the visible missing-quote reason from the order button',async()=>{
+  const runtime=new URL('../K線西遊記/temples/11520/runtime/',import.meta.url);
+  const [game,preflight]=await Promise.all([
+    readFile(new URL('game-5d-main.mjs',runtime),'utf8'),
+    readFile(new URL('real-trading-preflight-ui.mjs',runtime),'utf8'),
+  ]);
+  const classes=new Set(['open']);
+  const toast={textContent:'',classList:new Set()};
+  const elements={'#toast':toast,'#confirmOrder':{disabled:false},'#confirm':{classList:{remove:name=>classes.delete(name)}}};
+  const execution={mode:'SIMULATION',quote:()=>null,snapshot:()=>({mode:'SIMULATION'})};
+  const context=vm.createContext({execution,executionBusy:false,previewExecution:null,pending:{},reviewedOrder:{},
+    syncTradeAxisFromPlane(){},axis:()=>({market:'BTCUSDT'}),$:selector=>elements[selector],
+    toast:message=>{toast.textContent=message;toast.classList.add('show')},
+    classify11520OrderRoute,renderPreflight:()=>({ready:false,blockers:['ORACLE_STALE']}),
+    __K11520_EXECUTION__:execution,setTimeout:()=>{},
+  });
+  vm.runInContext(game.slice(game.indexOf('function executionQuote('),game.indexOf('function orderInput(')),context);
+  vm.runInContext(game.slice(game.indexOf('function openOrder(){'),game.indexOf("$('#cancelOrder').onclick")),context);
+  vm.runInContext(preflight.slice(preflight.indexOf('function notifyOrderRoute(){'),preflight.indexOf('\nexport function install11520RealTradingPreflightUi')),context);
+  context.openOrder();
+  assert.equal(toast.textContent,'等候有效報價');
+  await new Promise(resolve=>setTimeout(()=>resolve(context.notifyOrderRoute()),0));
+  assert.equal(toast.textContent,'等候有效報價');
+  assert.ok(toast.classList.has('show'));
+  assert.equal(classes.has('open'),false);
+  assert.equal(elements['#confirmOrder'].disabled,true);
+  assert.equal(context.__K11520_ORDER_ROUTE__.route,'LOCAL_SIMULATION_REAL_BLOCKED');
+  assert.equal(context.__K11520_ORDER_ROUTE__.broadcast,false);
+});
+
 test('order presentation distinguishes creation provenance from current pending/fill source and SIM time',async()=>{
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
  const {createExecutionAdapter}=await import('../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs');
