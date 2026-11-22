@@ -263,7 +263,11 @@ test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('
 
 test('public reference quotes use the browser-safe market-data origin without credentials',()=>{
   assert.match(main,/import \{[^}]*\bfetchPublicMarketObservations\b[^}]*\bpublicObservationStatus\b[^}]*\} from '\.\/public-market-quotes\.mjs'/);
-  assert.ok(main.includes('observedAt:r.updatedAt'),'execution must use provider time, never fetch time');
+  const previewServer=read('../backend/server.mjs');
+  assert.match(previewServer,/observedAt: observation\.updatedAt, now: observation\.receivedAt/,
+    'settlement uses provider time, with receipt time checked separately');
+  assert.match(main,/assertVerifiedPublicMarketObservation\(row,\{market:row\.market,now\}\)/);
+  assert.match(main,/statuses\[market\]\?\.available&&observations\[market\]/);
   assert.ok(publicMarketQuotes.includes("origin:'https://data-api.binance.vision'"));
   assert.ok(publicMarketQuotes.includes("credentials:'omit'"));
   assert.equal(main.includes('https://api.binance.com'),false,'CORS-hostile general API origin returned');
@@ -943,14 +947,14 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Prior floating-input body: 105221614e4f33cecf4ffb9302cbfb6319bdab0552e290989564555767bcc34c.
   // Fixed entry floor: prior published main body bf5c2cbaacedeba8015c9447753111437afe9f11e4758e2e20ab418a36db0539.
    // Prior published fixed-entry-floor body: e5ca793767852c87ec296bed46aa789e4b66ab04e8929a5e0cd217a48cca005a.
-   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'fc726410bcfd1bd124c7b52739234ce94772183aa1f7b909ffe10e94123ea20c'},
-  'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
+   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'9ee1db9748e79f779ded945fe02ba83620ffe1af76441d2aaff923b6a9955e36'},
+  'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'f3eee0ef282b388496d9b5c485304899aa7f4d608d14f5b8f854273ee409b1a1'},
   // Prior published order adapter body bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078.
-  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'496168804b40899cd28d6e719084501dd080fa32d5fbddf5b5b86915ff0a620f'},
-  'runtime/kgen-margin-runtime.mjs':{nonMetadataSha256:'51044cbfcecd761d0d9d2f05bd86db7ed89644e497383a48e61a1d854f44c576'},
+  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'8723fdeecbbb04442798aa2bd908adea89fe2efc7c3527b42f83c7341df415e3'},
+  'runtime/kgen-margin-runtime.mjs':{nonMetadataSha256:'d52d6cf29d78f5b81dce1b34359bb31382c2976d5656ffcc97b2303f545d6dbd'},
    'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'ea364a05c794f635d0c03eb267fdd5dfa390428e5c15f01eb0f31757579a51d4'},
    // Prior published game shell body: f4ae42eca3c7c68622747423bfff3981fdd2438dab2a891ca696026b153364cc.
-   'game-5d.html':{nonMetadataSha256:'66f2ec1d2aa7081f14f07f1f6338666b12e8539acb3f4d2fe3ba35334712d9da'}
+   'game-5d.html':{nonMetadataSha256:'c3ac8f28e9d784b9508920f5028285491ecc4aa11bd00b48eec3151f4c82678d'}
  };
  for(const ancestor of assets){
   const asset={...ancestor,...current[ancestor.path]};

@@ -206,7 +206,7 @@ body:has(#k11520UpdateNotice:not([hidden])) #k11520InstallOffer{display:none}
 }
 </script>
 <script>
-if('serviceWorker' in navigator){
+if('serviceWorker' in navigator&&!(['127.0.0.1','localhost'].includes(location.hostname)&&new URLSearchParams(location.search).get('preview')==='server')){
  addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).then(registration=>{
   let checking=false;
   const checkForUpdate=async()=>{

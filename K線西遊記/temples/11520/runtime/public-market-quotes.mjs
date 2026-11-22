@@ -96,6 +96,21 @@ export function publicObservationStatus(observation,now=Date.now()){
     sourceStatus:stale?'MARKET DATA STALE':'REFERENCE_FRESH',fallbackStatus:'NONE_FAIL_CLOSED',
     settlementAuthority:false,quoteCurrency:'USDT',subSecond:false};
 }
+// This validates the simulation's public reference boundary. It does not
+// authenticate an on-chain settlement oracle or accept browser clock prices.
+export function assertVerifiedPublicMarketObservation(observation,{market=observation?.market,now=Date.now()}={}){
+  if(!['BTCUSDT','ETHUSDT','BNBUSDT'].includes(market))throw new Error('MARKET_NOT_SUPPORTED');
+  if(!observation)throw new Error('STALE_PRICE');
+  if(observation.market!==market)throw new Error('PUBLIC_QUOTE_MARKET_MISMATCH');
+  if(observation.source!==PUBLIC_MARKET_QUOTE_SOURCE.id||observation.settlementAuthority===true||
+    (observation.quoteCurrency!==undefined&&observation.quoteCurrency!=='USDT'))throw new Error('PUBLIC_QUOTE_SOURCE_REQUIRED');
+  if(!Number.isFinite(observation.price)||observation.price<=0||
+    !Number.isSafeInteger(observation.sequence)||observation.sequence<0)throw new Error('INVALID_PROVIDER_OBSERVATION');
+  const at=observation.updatedAt??observation.observedAt;
+  if(observation.observedAt!==undefined&&observation.observedAt!==at)throw new Error('INVALID_PROVIDER_OBSERVATION');
+  if(!Number.isSafeInteger(at)||at<=0||!Number.isSafeInteger(now)||at>now||now-at>FREE_ORACLE_MAX_AGE_MS)throw new Error('STALE_PRICE');
+  return observation;
+}
 export async function fetchPublicMarketObservations({symbols,fetchImpl=globalThis.fetch,now=Date.now,timeoutMs=8000}={}){
   const expected=normalizeSymbols(symbols),controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
@@ -105,8 +120,12 @@ export async function fetchPublicMarketObservations({symbols,fetchImpl=globalThi
     const response=await fetchImpl(url.href,{method:'GET',mode:'cors',cache:'no-store',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal});
     if(!response?.ok)throw new Error('PUBLIC_REFERENCE_UNAVAILABLE');
     const rows=await response.json(),row=Array.isArray(rows)&&rows.length===1?rows[0]:null;
-    if(!row||!Number.isFinite(Number(row.p))||Number(row.p)<=0||!Number.isSafeInteger(row.T)||row.T<=0||!Number.isSafeInteger(row.a)||row.a<0)throw new Error('INVALID_PROVIDER_OBSERVATION');
-    return [market,publicObservationStatus({market,price:Number(row.p),updatedAt:row.T,sequence:row.a,receivedAt:now(),source:PUBLIC_MARKET_QUOTE_SOURCE.id},now())];
+    if(!row||(typeof row.p!=='string'&&typeof row.p!=='number')||
+      !Number.isFinite(Number(row.p))||Number(row.p)<=0||!Number.isSafeInteger(row.T)||row.T<=0||
+      !Number.isSafeInteger(row.a)||row.a<0||(row.s!==undefined&&row.s!==market)||
+      (row.symbol!==undefined&&row.symbol!==market))throw new Error('INVALID_PROVIDER_OBSERVATION');
+    const receivedAt=now();
+    return [market,publicObservationStatus({market,price:Number(row.p),updatedAt:row.T,sequence:row.a,receivedAt,source:PUBLIC_MARKET_QUOTE_SOURCE.id},receivedAt)];
   })))}finally{controller.abort();clearTimeout(timer)}
 }
 

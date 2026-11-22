@@ -15,14 +15,15 @@ PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fix
 CURRENT_ADDITION: 2026-11-18 / Codex Hengyao / K11520-SIMULATION-AUTOPILOT-20261118-01. Explicitly armed simulation controller only; original financial owner and protected UI remain unchanged.
 */
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
-import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
+import {assertVerifiedPublicMarketObservation,deterministicSimulationObservation,FREE_ORACLE_MAX_AGE_MS,
+  PUBLIC_MARKET_QUOTE_SOURCE,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {C_PNL_MODEL,normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
   observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot,positionRisk} from './kgen-margin-runtime.mjs';
 
 const simulationExecutionAdapters=new WeakSet();
 const simulationAutopilotMutationGuards=new WeakMap();
-const SIMULATION_QUOTE_MAX_AGE_MS=15000;
+const SIMULATION_QUOTE_MAX_AGE_MS=FREE_ORACLE_MAX_AGE_MS;
 
 function finitePositive(value,label){const n=Number(value);if(!Number.isFinite(n)||n<=0)throw new Error(`${label}_MUST_BE_POSITIVE`);return n}
 function integerRange(value,label,min,max){const n=Number(value);if(!Number.isInteger(n)||n<min||n>max)throw new Error(`${label}_OUT_OF_RANGE`);return n}
@@ -59,10 +60,10 @@ export function normalizeExecutionError(error){
   if(EXECUTION_FAILURE_STATES.includes(reason))return reason;
   if(Number(rawCode)===4001||rawCode==='ACTION_REJECTED')return 'USER_REJECTED';
   if(Number(rawCode)===4901||/CHAIN_MISMATCH|WRONG_CHAIN/.test(reason))return 'WRONG_CHAIN';
-  if(Number(rawCode)===4900||/DISCONNECTED|WALLET_NOT_CONNECTED/.test(reason))return 'DISCONNECTED';
+  if(Number(rawCode)===4900||/DISCONNECTED|WALLET_NOT_CONNECTED|PREVIEW_SESSION_UNAUTHORIZED/.test(reason))return 'DISCONNECTED';
   if(/INSUFFICIENT_FREE_KGEN|INSUFFICIENT_MARGIN/.test(reason))return 'INSUFFICIENT_MARGIN';
   if(rawCode==='INSUFFICIENT_FUNDS'||/INSUFFICIENT_BALANCE/.test(reason))return 'INSUFFICIENT_BALANCE';
-  if(/STALE_PRICE|OUT_OF_ORDER_PRICE|ORACLE_STALE/.test(reason))return 'ORACLE_STALE';
+  if(/STALE_PRICE|OUT_OF_ORDER_PRICE|ORACLE_STALE|WAITING_VALID_QUOTE/.test(reason))return 'ORACLE_STALE';
   if(rawCode==='CALL_EXCEPTION'||/TX_REVERTED/.test(reason))return 'TX_REVERTED';
   if(rawCode==='TRANSACTION_REPLACED'||/TX_DROPPED/.test(reason))return 'TX_DROPPED';
   if(rawCode==='TIMEOUT'||/RECEIPT_TIMEOUT/.test(reason))return 'RECEIPT_TIMEOUT';
@@ -95,10 +96,31 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     const result=fn();if(result.ok&&mutating)options.afterMutation?.();
     return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result);
   }catch(error){return executionFailure(error)}};
-  const fallback=options.simulationFallback===true;
+  const verifiedPublic=options.verifiedPublicQuotes===true;
+  const fallback=!verifiedPublic&&options.simulationFallback===true;
+  const publicSource=PUBLIC_MARKET_QUOTE_SOURCE.id;
+  const hasPublicObservationIdentity=quote=>quote?.source===publicSource&&Number.isSafeInteger(quote.sequence)&&
+    quote.sequence>=0&&Number.isSafeInteger(quote.at)&&quote.at>0&&Number.isFinite(quote.price)&&quote.price>0;
+  function assertVerifiedMarketScope(market,book){
+    const pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING');
+    const open=book.positions.filter(p=>p.market===market&&p.status==='OPEN');
+    if(!pending.length&&!open.length)return;
+    if(!hasPublicObservationIdentity(book.observations[market])||
+      pending.some(o=>o.priceSource!==publicSource||(o.executionPriceSource!=null&&o.executionPriceSource!==publicSource))||
+      open.some(p=>p.priceSource!==publicSource||(p.markPriceSource!=null&&p.markPriceSource!==publicSource))){
+      throw new Error('SIMULATION_RECOVERY_REQUIRED');
+    }
+  }
   const quote=(market,{now=Date.now(),book=simulationSnapshot(ledger)}={})=>{
-    const previous=book.observations[market],pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING'),open=book.positions.filter(p=>p.market===market&&p.status==='OPEN'),active=pending.length>0||open.length>0;
-    const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE);
+    const previous=book.observations[market];
+    if(verifiedPublic){
+      assertVerifiedMarketScope(market,book);
+      assertVerifiedPublicMarketObservation(previous&&{...previous,market,updatedAt:previous.at},{market,now});
+      return previous;
+    }
+    const pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING'),open=book.positions.filter(p=>p.market===market&&p.status==='OPEN'),active=pending.length>0||open.length>0;
+    const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||
+      open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE||p.markPriceSource===SIMULATION_PRICE_SOURCE);
     if((!previous&&active)||(pinned&&previous?.source!==SIMULATION_PRICE_SOURCE))throw new Error('SIMULATION_RECOVERY_REQUIRED');
     if(previous&&(!Number.isFinite(previous.price)||previous.price<=0||!Number.isSafeInteger(previous.at)||previous.at<0))throw new Error(active?'SIMULATION_RECOVERY_REQUIRED':'INVALID_SIMULATION_SOURCE');
     if(fallback&&(previous?.source===SIMULATION_PRICE_SOURCE||!previous||now-previous.at>SIMULATION_QUOTE_MAX_AGE_MS)){
@@ -113,7 +135,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   };
   const preview=(input,{now=Date.now()}={})=>run(()=>{
     if(options.productV1)requireV1TradingC(input.c);
-    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
+    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback||verifiedPublic?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
     if(!selected||now<selected.at||now-selected.at>SIMULATION_QUOTE_MAX_AGE_MS)throw new Error('STALE_PRICE');
     if(book.orders.some(o=>o.axis===intent.axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===intent.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
     const margin=requiredMargin(intent),available=book.wallet.free;
@@ -132,6 +154,23 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       return result.ok?{...result,status:'PENDING_TRIGGER'}:result;
     },true),
     observe:(observation)=>run(()=>{
+      if(verifiedPublic){
+        const {market,observedAt,now=Date.now()}=observation;
+        if(observedAt===undefined)throw new Error('STALE_PRICE');
+        assertVerifiedPublicMarketObservation(observation,{market,now});
+        const book=simulationSnapshot(ledger);
+        assertVerifiedMarketScope(market,book);
+        const previous=book.observations[market];
+        if(previous&&!hasPublicObservationIdentity(previous)){
+          // An idle market may establish a new public baseline. Historical
+          // orders and receipts remain intact, and no trigger uses the old price.
+          const draft=structuredClone(ledger);
+          delete draft.simulation.observations[market];
+          const result=observeSimulationPrice(draft,{...observation,now,productV1:options.productV1===true});
+          if(result.ok)Object.assign(ledger,draft);
+          return result;
+        }
+      }
       // Once local fallback is selected, public recovery cannot jump a pending
       // order/open position to another source, including after wallet reload.
       if(fallback){
@@ -146,7 +185,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       const draft=structuredClone(ledger),events=[];
       for(const market of ['BTCUSDT','ETHUSDT','BNBUSDT']){const r=applyQuote(draft,market,now);if(!r.ok)return r;events.push(...r.events)}
       Object.assign(ledger,draft);return {ok:true,events};
-    },true),
+    },!verifiedPublic),
     close:(positionId,{now=Date.now()}={})=>run(()=>{
       const draft=structuredClone(ledger),position=simulationSnapshot(draft).positions.find(p=>p.positionId===positionId);
       if(position?.status==='OPEN'){const advanced=applyQuote(draft,position.market,now);if(!advanced.ok)return advanced;
@@ -155,6 +194,200 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     },true),
     cancel:(orderId)=>run(()=>cancelSimulationOrder(ledger,orderId),true),
     snapshot:()=>simulationSnapshot(ledger)});
+  simulationExecutionAdapters.add(adapter);
+  return adapter;
+}
+
+const PREVIEW_SESSION_KEY='k11520.server-preview.session.v1';
+const PREVIEW_TOKEN_PATTERN=/^[a-f0-9]{48}$/;
+const PREVIEW_REQUEST_PATTERN=/^[a-zA-Z0-9_.:-]{1,128}$/;
+
+export function createPreviewSimulationExecutionAdapter({
+  origin=globalThis.location?.origin,fetchImpl=globalThis.fetch,storage,now=Date.now,
+}={}){
+  let base;
+  try{base=new URL(origin)}catch{throw new Error('LOCAL_PREVIEW_ORIGIN_REQUIRED')}
+  if(!['http:','https:'].includes(base.protocol)||!['127.0.0.1','localhost'].includes(base.hostname)||
+    base.origin!==origin||typeof fetchImpl!=='function')throw new Error('LOCAL_PREVIEW_ORIGIN_REQUIRED');
+  if(storage===undefined)try{storage=globalThis.localStorage}catch{storage=null}
+  let marketState={observations:{},statuses:{}};
+  let book={mode:'SIMULATION_WALLET',wallet:null,orders:[],positions:[],receipts:[],observations:{}};
+  let status='WAITING_PREVIEW',bookToken=null,sessionFlight=null,refreshFlight=null,writeBusy=false,bookRead=0,appliedBookRead=0;
+  const marketSnapshot=()=>structuredClone(marketState);
+  const snapshot=()=>structuredClone({...book,status,source:'SAME_ORIGIN_PREVIEW',simulationOnly:true});
+
+  function readSession(){
+    if(typeof storage?.getItem!=='function'||typeof storage?.setItem!=='function')throw new Error('PREVIEW_STORAGE_UNAVAILABLE');
+    let value;
+    try{value=JSON.parse(storage.getItem(PREVIEW_SESSION_KEY)??'null')}catch{throw new Error('PREVIEW_SESSION_INVALID')}
+    if(value!==null&&(!PREVIEW_TOKEN_PATTERN.test(value?.token??'')||typeof value.playerId!=='string'||!value.playerId||
+      (value.pendingOrder&&(!PREVIEW_REQUEST_PATTERN.test(value.pendingOrder.requestId??'')||
+        typeof value.pendingOrder.fingerprint!=='string'))))throw new Error('PREVIEW_SESSION_INVALID');
+    return value;
+  }
+  function saveSession(value){
+    try{storage.setItem(PREVIEW_SESSION_KEY,JSON.stringify(value))}
+    catch{throw new Error('PREVIEW_STORAGE_UNAVAILABLE')}
+  }
+  async function request(path,{method='GET',body,token,signal}={}){
+    const headers={accept:'application/json'};
+    if(token)headers.authorization='Bearer '+token;
+    if(body!==undefined)headers['content-type']='application/json';
+    const response=await fetchImpl(new URL(path,base).href,{
+      method,mode:'same-origin',credentials:'omit',redirect:'error',cache:'no-store',headers,signal,
+      ...(body===undefined?{}:{body:JSON.stringify(body)}),
+    });
+    const data=await response.json();
+    if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('PREVIEW_RESPONSE_INVALID');
+    if(response.status===401)throw new Error('PREVIEW_SESSION_UNAUTHORIZED');
+    return {status:response.status,ok:response.ok,data};
+  }
+  async function ensureSession(signal,name){
+    const existing=readSession();
+    if(existing)return existing;
+    if(!sessionFlight)sessionFlight=(async()=>{
+      const {ok,data}=await request('/api/v1/login',{method:'POST',body:name?{name}:{},signal});
+      if(!ok||data.ok!==true||!PREVIEW_TOKEN_PATTERN.test(data.token??'')||
+        typeof data.player?.id!=='string'||!data.player.id)throw new Error('PREVIEW_LOGIN_FAILED');
+      const concurrent=readSession();
+      if(concurrent)return concurrent;
+      const session={token:data.token,playerId:data.player.id,pendingOrder:null};
+      saveSession(session);return session;
+    })().finally(()=>{sessionFlight=null});
+    return sessionFlight;
+  }
+  async function loadBook(session,signal){
+    const sequence=++bookRead;
+    const {ok,data}=await request('/api/v1/orders',{token:session.token,signal});
+    if(!ok||data.ok!==true||data.mode!=='SIMULATION_WALLET'||!data.wallet||
+      !['orders','positions','receipts'].every(key=>Array.isArray(data[key]))||!data.observations){
+      throw new Error('PREVIEW_BOOK_UNAVAILABLE');
+    }
+    if(readSession()?.token!==session.token)throw new Error('PREVIEW_SESSION_CHANGED');
+    if(sequence>=appliedBookRead){appliedBookRead=sequence;book=data;bookToken=session.token;status='READY'}
+  }
+  function refresh({signal}={}){
+    if(refreshFlight)return refreshFlight;
+    refreshFlight=(async()=>{
+      const markets=request('/api/v1/markets',{signal}).then(({ok,data})=>{
+        if(!ok||!data.observations||!data.statuses)throw new Error('PREVIEW_MARKETS_UNAVAILABLE');
+        marketState={observations:data.observations,statuses:data.statuses};
+      }).catch(error=>{marketState={observations:{},statuses:{}};throw error});
+      const account=ensureSession(signal).then(session=>loadBook(session,signal)).catch(error=>{
+        status=error?.message==='PREVIEW_SESSION_UNAUTHORIZED'?'PREVIEW_SESSION_UNAUTHORIZED':'PREVIEW_BOOK_UNAVAILABLE';
+        if(status==='PREVIEW_SESSION_UNAUTHORIZED'){
+          bookToken=null;
+          book={mode:'SIMULATION_WALLET',wallet:null,orders:[],positions:[],receipts:[],observations:{}};
+        }
+        throw error;
+      });
+      const results=await Promise.allSettled([markets,account]);
+      const failure=results.find(result=>result.status==='rejected');
+      return failure?executionFailure(failure.reason):{ok:true,...snapshot()};
+    })().finally(()=>{refreshFlight=null});
+    return refreshFlight;
+  }
+  function quote(market,{now:time=now()}={}){
+    if(marketState.statuses[market]?.available!==true)throw new Error('WAITING_VALID_QUOTE');
+    const row=assertVerifiedPublicMarketObservation(marketState.observations[market],{market,now:time});
+    return {...row,at:row.updatedAt};
+  }
+  function preview(input,{now:time=now()}={}){
+    try{
+      if(status!=='READY'||readSession()?.token!==bookToken)throw new Error('PREVIEW_BOOK_UNAVAILABLE');
+      requireV1TradingC(input.c);
+      const observation=quote(input.market,{now:time});
+      const intent=buildExecutionOrderIntent({...input,currentPrice:observation.price,
+        triggerPrice:input.triggerPrice??observation.price,now:time});
+      if(book.orders.some(o=>o.axis===intent.axis&&o.status==='PENDING')||
+        book.positions.some(p=>p.axis===intent.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
+      const margin=requiredMargin(intent),available=book.wallet.free;
+      if(!Number.isFinite(available)||available<margin)throw new Error('INSUFFICIENT_FREE_KGEN');
+      return {ok:true,...intent,intent,requiredMargin:margin,available,
+        estimatedLiquidationPrice:Math.max(0,liquidationMark({entry:intent.triggerPrice,c:intent.c,side:intent.side})),
+        pnlModel:C_PNL_MODEL,liquidationModel:'SIMULATION_ISOLATED_ZERO_MAINTENANCE_NO_FEES',
+        priceObservedAt:observation.at,priceSource:observation.source,simulationOnly:true,executionMode:'SIMULATION'};
+    }catch(error){return executionFailure(error)}
+  }
+  function orderTerms(input){
+    const {axis,market}=assertRealTradingAxisMarket({axis:input.axis,market:input.market});
+    requireV1TradingC(input.c);
+    const c=normalizeSignedC(input.c),side=signedPositionSide(c,input.side);
+    const lots=integerRange(input.lots,'LOTS',1,100);
+    const triggerPrice=input.triggerPrice==null?null:finitePositive(input.triggerPrice,'TRIGGER_PRICE');
+    const stopPrice=input.stopPrice==null?null:finitePositive(input.stopPrice,'STOP_PRICE');
+    const takeProfitPrice=input.takeProfitPrice==null?null:finitePositive(input.takeProfitPrice,'TAKE_PROFIT_PRICE');
+    return {axis,market,c,side,lots,triggerPrice,stopPrice,takeProfitPrice};
+  }
+  function pendingOrder(){
+    try{
+      const pending=readSession()?.pendingOrder;
+      if(!pending)return null;
+      const terms=orderTerms(JSON.parse(pending.fingerprint));
+      if(JSON.stringify(terms)!==pending.fingerprint)return null;
+      return {...terms,clientRequestId:pending.requestId};
+    }catch{return null}
+  }
+  async function mutate(path,input){
+    if(writeBusy)return executionFailure(new Error('TRANSACTION_IN_PROGRESS'));
+    writeBusy=true;
+    try{
+      const session=readSession();
+      if(!session||(path!=='/api/v1/order'&&session.token!==bookToken))throw new Error('PREVIEW_BOOK_UNAVAILABLE');
+      let body=input,requestId=null;
+      if(path==='/api/v1/order'){
+        const terms=orderTerms(input),fingerprint=JSON.stringify(terms),pending=session.pendingOrder;
+        if(pending&&pending.fingerprint!==fingerprint)throw new Error('PREVIEW_ORDER_UNRESOLVED');
+        if(!pending){
+          const checked=preview(terms);
+          if(!checked.ok)return checked;
+        }
+        requestId=pending?.requestId??input.clientRequestId??globalThis.crypto?.randomUUID?.();
+        if(typeof requestId!=='string'||!PREVIEW_REQUEST_PATTERN.test(requestId))throw new Error('INVALID_REQUEST_ID');
+        body={...terms,requestId};
+        if(!pending)saveSession({...session,pendingOrder:{requestId,fingerprint}});
+      }
+      let reply;
+      try{reply=await request(path,{method:'POST',body,token:session.token})}
+      catch(error){
+        if(error?.message==='PREVIEW_SESSION_UNAUTHORIZED'){status='PREVIEW_SESSION_UNAUTHORIZED';throw error}
+        throw new Error(requestId?'PREVIEW_ORDER_UNRESOLVED':'PREVIEW_ACTION_UNRESOLVED');
+      }
+      const {data}=reply,accepted=reply.ok&&data.ok===true&&(!requestId||typeof data.order?.orderId==='string');
+      const rejected=data.ok===false&&data.reason!=='REQUEST_CONFLICT'&&
+        (reply.status===400||reply.status===409||(reply.status===503&&data.reason==='WAITING_VALID_QUOTE'));
+      if(!accepted&&!rejected)throw new Error(requestId?'PREVIEW_ORDER_UNRESOLVED':'PREVIEW_ACTION_UNRESOLVED');
+      if(requestId){
+        const latest=readSession();
+        if(latest?.token===session.token&&latest.pendingOrder?.requestId===requestId){
+          // Failure to clear leaves the already-known request safely replayable.
+          try{saveSession({...latest,pendingOrder:null})}catch{}
+        }
+      }
+      if(!accepted)return executionFailure(data);
+      if(readSession()?.token!==session.token)throw new Error('PREVIEW_SESSION_CHANGED');
+      try{await loadBook(session)}catch{status='PREVIEW_BOOK_UNAVAILABLE'}
+      return {...data,...(requestId?{status:'PENDING_TRIGGER'}:{}),executionMode:'SIMULATION'};
+    }catch(error){return executionFailure(error)}
+    finally{writeBusy=false}
+  }
+
+  const adapter=Object.freeze({
+    name:'PREVIEW_SIMULATION_ADAPTER',mode:'SIMULATION',source:'SAME_ORIGIN_PREVIEW',enabled:true,
+    snapshot,marketSnapshot,quote,preview,refresh,pendingOrder,
+    retryPendingOrder:()=>{const pending=pendingOrder();return pending?mutate('/api/v1/order',pending):
+      Promise.resolve(executionFailure(new Error('NO_UNRESOLVED_PREVIEW_ORDER')))},
+    login:async({name}={})=>{try{
+      const session=await ensureSession(undefined,typeof name==='string'?name.slice(0,40):undefined);
+      await loadBook(session);
+      return {ok:true,playerId:session.playerId};
+    }catch(error){return executionFailure(error)}},
+    submit:input=>mutate('/api/v1/order',input),
+    cancel:orderId=>mutate('/api/v1/order/cancel',{orderId}),
+    close:positionId=>mutate('/api/v1/order/close',{positionId}),
+    observe:()=>executionFailure(new Error('SERVER_OWNS_EXECUTION_QUOTE')),
+    tick:()=>({ok:true,events:[]}),
+  });
   simulationExecutionAdapters.add(adapter);
   return adapter;
 }

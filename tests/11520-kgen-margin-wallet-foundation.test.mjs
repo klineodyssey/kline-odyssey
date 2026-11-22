@@ -456,3 +456,346 @@ test('three-market cargo hedge rejects missing market, reserve and stale order d
     assert.deepEqual(book,before);
   }
 });
+
+const K11520_TEST_EPOCH = 1790000000000;
+const K11520_TEST_MARKETS = Object.freeze({
+  BTCUSDT: {axis:'KX', price:65000},
+  ETHUSDT: {axis:'KY', price:3400},
+  BNBUSDT: {axis:'KZ', price:620},
+});
+
+async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0} = {}) {
+  const {mkdtemp, readFile, writeFile, unlink, rmdir} = await import('node:fs/promises');
+  const {join} = await import('node:path');
+  const {tmpdir} = await import('node:os');
+  const {createK11520Server, BINANCE_AGGREGATE_SOURCE, BYBIT_TRADES_SOURCE} =
+    await import('../K線西遊記/temples/11520/backend/server.mjs');
+  const directory = await mkdtemp(join(tmpdir(), 'k11520-offline-api-test-'));
+  const dataFile = join(directory, 'players.json');
+  const nextBatches = new Map();
+  const unavailable = new Set();
+  const independent = new Map();
+  let currentTime = K11520_TEST_EPOCH;
+  let service = null;
+  let origin;
+
+  async function stop() {
+    if (!service) return;
+    const previous = service;
+    service = null;
+    origin = null;
+    await previous.close();
+  }
+  t.after(async () => {
+    await stop();
+    try {
+      await unlink(dataFile);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    await rmdir(directory);
+  });
+
+  async function start() {
+    assert.equal(service, null);
+    service = await createK11520Server({
+      dataFile,
+      now: () => currentTime,
+      readMarket: async ({market}) => {
+        if (unavailable.has(market)) throw new Error('FIXTURE_SOURCE_UNAVAILABLE');
+        const observations = nextBatches.get(market) ?? [];
+        nextBatches.delete(market);
+        return observations;
+      },
+      readIndependent: async ({market}) => independent.get(market) ?? null,
+      pollIntervalMs,
+    });
+    const {port} = await service.listen({port: 0});
+    origin = 'http://127.0.0.1:' + port;
+  }
+
+  async function request(path, {method = 'GET', token, body} = {}) {
+    assert.ok(origin);
+    const response = await fetch(origin + path, {
+      method,
+      headers: {
+        ...(token ? {authorization: 'Bearer ' + token} : {}),
+        ...(body !== undefined ? {'content-type': 'application/json'} : {}),
+      },
+      ...(body !== undefined ? {body: JSON.stringify(body)} : {}),
+      signal: AbortSignal.timeout(5000),
+    });
+    return {status: response.status, body: await response.json()};
+  }
+
+  function quote(market, price, sequence, {age = 0, corroborates = null, quoteSource} = {}) {
+    const updatedAt = currentTime - age;
+    nextBatches.set(market, [{market, price, updatedAt, sequence, source: quoteSource ?? BINANCE_AGGREGATE_SOURCE}]);
+    if (corroborates === null) independent.delete(market);
+    else independent.set(market, {market, price: corroborates, updatedAt, sequence, source: BYBIT_TRADES_SOURCE});
+  }
+  function prime() {
+    for (const [market, {price}] of Object.entries(K11520_TEST_MARKETS)) quote(market, price, 1);
+  }
+  async function login(body = {}) {
+    const response = await request('/api/v1/login', {method: 'POST', body});
+    assert.equal(response.status, 200, JSON.stringify(response.body));
+    assert.equal(response.body.ok, true);
+    assert.equal(typeof response.body.token, 'string');
+    assert.ok(response.body.player?.id);
+    return response.body;
+  }
+  async function book(token) {
+    const response = await request('/api/v1/orders', {token});
+    assert.equal(response.status, 200, JSON.stringify(response.body));
+    assert.equal(response.body.ok, true);
+    return response.body;
+  }
+
+  if (legacy) await writeFile(dataFile, JSON.stringify(legacy), 'utf8');
+  await start();
+  return {
+    request, login, book, prime, quote, unavailable,
+    poll: () => service.poll(),
+    advance: (ms = 1000) => currentTime += ms,
+    restart: async () => { await stop(); await start(); },
+    readDatabase: () => readFile(dataFile, 'utf8').then(JSON.parse),
+  };
+}
+
+function k11520OrderRequest(market, requestId, extra = {}) {
+  return {
+    requestId,
+    market,
+    axis: K11520_TEST_MARKETS[market].axis,
+    c: 1,
+    side: 'LONG',
+    lots: 2,
+    ...extra,
+  };
+}
+
+test('K11520 server admits only fresh verified quotes for the selected market', async t => {
+  const f = await makeK11520BackendFixture(t);
+  const {token} = await f.login({name: '報價驗收'});
+  const post = body => f.request('/api/v1/order', {method: 'POST', token, body});
+  const draft = k11520OrderRequest('BTCUSDT', 'quote-test-cold-btc-001', {triggerPrice: 65000});
+  const cold = await post({...draft, price: 100000});
+  assert.ok(cold.status >= 400, 'caller price cannot bypass missing server quote');
+  assert.equal((await f.book(token)).orders.length, 0);
+
+  f.prime();
+  await f.poll();
+  const ready = (await f.request('/api/v1/markets')).body;
+  for (const [market, {price}] of Object.entries(K11520_TEST_MARKETS)) {
+    assert.equal(ready.statuses[market].status, 'READY');
+    assert.equal(ready.observations[market].price, price);
+  }
+  f.unavailable.add('BTCUSDT');
+  f.advance();
+  f.quote('ETHUSDT', 3401, 2);
+  f.quote('BNBUSDT', 621, 2, {quoteSource: 'UNRECOGNIZED_FIXTURE_SOURCE'});
+  await f.poll();
+  const split = (await f.request('/api/v1/markets')).body;
+  assert.notEqual(split.statuses.BTCUSDT.status, 'READY');
+  assert.equal(split.statuses.ETHUSDT.status, 'READY');
+  assert.equal(split.observations.ETHUSDT.price, 3401);
+  assert.equal(split.statuses.BNBUSDT.reason, 'INVALID_OBSERVATION');
+  assert.ok((await post(k11520OrderRequest('BNBUSDT', 'quote-test-invalid-bnb-001', {triggerPrice: 625}))).status >= 400);
+  assert.ok((await post(draft)).status >= 400, 'fresh-looking prior quote cannot bypass known disconnection');
+  const selected = await post(k11520OrderRequest('ETHUSDT', 'quote-test-healthy-eth-001'));
+  assert.equal(selected.body.ok, true, JSON.stringify(selected.body));
+  assert.equal(selected.body.order.triggerPrice, 3401, 'default comes from the selected ready market');
+  assert.equal((await f.book(token)).orders.length, 1);
+
+  f.advance(61000);
+  f.quote('BNBUSDT', 621, 2, {age: 61000});
+  await f.poll();
+  const aged = (await f.request('/api/v1/markets')).body;
+  assert.notEqual(aged.statuses.ETHUSDT.status, 'READY', 'empty feed expires the accepted observation');
+  assert.equal(aged.statuses.BNBUSDT.reason, 'STALE_PRICE', 'receiving an old response does not refresh the price');
+  assert.ok((await post(k11520OrderRequest('BNBUSDT', 'quote-test-stale-bnb-001', {triggerPrice: 625}))).status >= 400);
+  const book = await f.book(token);
+  assert.equal(book.orders.length, 1);
+  assert.equal(book.orders[0].status, 'PENDING');
+  assert.equal(book.receipts.length, 0);
+});
+
+test('K11520 server persists idempotent orders and isolated settlement across client absence and service restart', async t => {
+  const f = await makeK11520BackendFixture(t);
+  f.prime();
+  await f.poll();
+  const {token, player} = await f.login({name: '離線委託驗收'});
+  const post = body => f.request('/api/v1/order', {method: 'POST', token, body});
+  const before = await f.book(token);
+  const btc = k11520OrderRequest('BTCUSDT', 'order-test-offline-btc-001', {triggerPrice: 65100});
+  const placed = await post(btc);
+  assert.equal(placed.body.ok, true, JSON.stringify(placed.body));
+  const {orderId} = placed.body.order;
+  assert.ok(orderId);
+  assert.equal(placed.body.order.status, 'PENDING');
+  const duplicate = await post(btc);
+  assert.equal(duplicate.body.ok, true, JSON.stringify(duplicate.body));
+  assert.equal(duplicate.body.replayed, true);
+  assert.equal(duplicate.body.order.orderId, orderId);
+  assert.ok((await post({...btc, triggerPrice: 65101})).status >= 400);
+  const eth = k11520OrderRequest('ETHUSDT', 'order-test-offline-eth-001', {triggerPrice: 3410, stopPrice: 3390});
+  assert.equal((await post(eth)).body.ok, true);
+
+  // No API consumer is attached while these polls feed the owner ledger.
+  const unconfirmedAt = f.advance();
+  f.quote('BTCUSDT', 130000, 2);
+  f.quote('ETHUSDT', 3410, 2);
+  await f.poll();
+  const whilePaused = await f.book(token);
+  const evidence = (await f.request('/api/v1/markets')).body;
+  assert.notEqual(evidence.statuses.BTCUSDT.status, 'READY');
+  assert.equal(whilePaused.orders.find(o => o.orderId === orderId).status, 'PENDING');
+  assert.equal(whilePaused.receipts.some(r => r.market === 'BTCUSDT'), false);
+  assert.equal(whilePaused.receipts.find(r => r.market === 'ETHUSDT').triggeredAt, unconfirmedAt);
+
+  f.advance();
+  f.quote('BTCUSDT', 65200, 3);
+  await f.poll();
+  assert.equal((await f.book(token)).orders.find(o => o.orderId === orderId).status, 'PENDING',
+    'a reconnect price beyond the trigger cannot establish a crossing through the source gap');
+
+  const touchAt = f.advance();
+  f.quote('BTCUSDT', 65100, 4);
+  await f.poll();
+  const withFill = await f.book(token);
+  const fill = withFill.receipts.find(r => r.kind === 'FILL' && r.orderId === orderId);
+  assert.ok(fill, JSON.stringify(withFill.receipts));
+  assert.equal(fill.fillPrice, 65100);
+  assert.equal(fill.triggeredAt, touchAt);
+  assert.equal(fill.pnlModel, C_PNL_MODEL);
+  assert.equal(fill.entryFloorUnit, 10000);
+  assert.equal(fill.walletBefore - fill.walletAfter, btc.lots);
+  assert.equal(fill.priceSource, evidence.observations.ETHUSDT.source);
+  assert.equal(fill.priceObservedAt, touchAt);
+  assert.equal(fill.priceSequence, 4);
+  const fillSnapshot = structuredClone(fill);
+
+  f.advance();
+  f.quote('BTCUSDT', 65100, 4, {age: 1000});
+  await f.poll();
+  assert.equal((await f.book(token)).receipts.filter(r => r.orderId === orderId).length, 1);
+  const liquidationAt = f.advance();
+  f.quote('BTCUSDT', 51000, 5, {corroborates: 51001});
+  await f.poll();
+  const settled = await f.book(token);
+  const liquidation = settled.receipts.find(r => r.orderId === orderId && r.kind === 'SETTLEMENT');
+  assert.ok(liquidation, JSON.stringify(settled.receipts));
+  assert.equal(liquidation.status, 'LIQUIDATED');
+  assert.equal(liquidation.settlementPrice, 51000);
+  assert.equal(liquidation.settledAt, liquidationAt);
+  assert.equal(liquidation.realizedPnl, -btc.lots);
+  assert.ok(liquidation.badDebt > 0);
+  assert.equal(settled.wallet.free, before.wallet.free - btc.lots - eth.lots);
+  assert.ok(settled.wallet.free >= 0);
+  assert.equal(settled.wallet.lockedMargin, eth.lots);
+  assert.equal(settled.positions.find(p => p.market === 'ETHUSDT').status, 'OPEN');
+  assert.deepEqual(settled.receipts.find(r => r.receiptId === fill.receiptId), fillSnapshot);
+
+  const stopAt = f.advance();
+  f.quote('ETHUSDT', 3390, 3);
+  await f.poll();
+  const afterStops = await f.book(token);
+  const stop = afterStops.receipts.find(r => r.market === 'ETHUSDT' && r.kind === 'SETTLEMENT');
+  assert.ok(stop, JSON.stringify(afterStops.receipts));
+  assert.equal(stop.status, 'STOPPED');
+  assert.equal(stop.settlementPrice, 3390);
+  assert.equal(stop.settledAt, stopAt);
+  assert.equal(stop.realizedPnl, -0.04);
+  assert.equal(afterStops.wallet.lockedMargin, 0);
+  assert.deepEqual(afterStops.receipts.find(r => r.receiptId === liquidation.receiptId), liquidation);
+
+  await f.restart();
+  const resumed = await f.login({token});
+  assert.equal(resumed.player.id, player.id);
+  assert.equal(resumed.token, token);
+  const readback = await f.book(token);
+  assert.deepEqual(readback.receipts, afterStops.receipts);
+  assert.deepEqual(readback.wallet, afterStops.wallet);
+  const replayAfterRestart = await post(btc);
+  assert.equal(replayAfterRestart.body.ok, true, JSON.stringify(replayAfterRestart.body));
+  assert.equal(replayAfterRestart.body.replayed, true);
+  assert.equal(replayAfterRestart.body.order.orderId, orderId);
+  assert.equal((await f.book(token)).receipts.filter(r => r.orderId === orderId).length, 2);
+});
+
+test('K11520 server keeps legacy records private and preserves their historical balance', async t => {
+  const legacyPlayer = {
+    id: 'legacy-fixture-id',
+    name: '舊帳戶',
+    xyz: {x: 1, y: 2, z: 3},
+    kgen: 4.5,
+    kaios: 80,
+    kufo: 1,
+    hp: 70,
+    home: null,
+    updatedAt: '2026-11-01T00:00:00.000Z',
+    orders: [{id: 'old-order-1', price: 100000, priceSource: 'HISTORICAL', status: 'CLOSED'}],
+  };
+  const legacy = {[legacyPlayer.id]: legacyPlayer};
+  const f = await makeK11520BackendFixture(t, {legacy});
+  const attempted = await f.request('/api/v1/login', {method: 'POST', body: {playerId: legacyPlayer.id}});
+  assert.ok(attempted.status >= 400);
+  const unauthorized = await f.request('/api/v1/orders');
+  assert.equal(unauthorized.status, 401);
+  const {token, player} = await f.login({name: '新帳戶'});
+  assert.notEqual(player.id, legacyPlayer.id);
+  const fresh = await f.book(token);
+  assert.equal(fresh.orders.length, 0);
+  assert.equal(fresh.receipts.length, 0);
+  function findLegacy(value) {
+    if (value === null || typeof value !== 'object') return undefined;
+    if (value.id === legacyPlayer.id) return value;
+    return Object.values(value).map(findLegacy).find(Boolean);
+  }
+  assert.deepEqual(findLegacy(await f.readDatabase()), legacyPlayer);
+  await f.restart();
+  assert.deepEqual(findLegacy(await f.readDatabase()), legacyPlayer);
+});
+
+test('K11520 background poll persists a single touch without a connected player page', async t => {
+  const {setTimeout: wait} = await import('node:timers/promises');
+  const f = await makeK11520BackendFixture(t, {pollIntervalMs: 20});
+  const {token, player} = await f.login({name: '排程驗收'});
+  async function eventuallyRead(read, label) {
+    const expires = performance.now() + 5000;
+    do {
+      const result = await read();
+      if (result) return result;
+      await wait(20);
+    } while (performance.now() < expires);
+    const {body: marketState} = await f.request('/api/v1/markets');
+    const orderBook = await f.book(token);
+    assert.fail(label + ' ' + JSON.stringify({marketState, orders: orderBook.orders, receipts: orderBook.receipts}));
+  }
+  f.prime();
+  await eventuallyRead(async () => {
+    const {body} = await f.request('/api/v1/markets');
+    return body.statuses.BNBUSDT.status === 'READY';
+  }, 'background polling should warm the public quote');
+  const response = await f.request('/api/v1/order', {
+    method: 'POST', token,
+    body: k11520OrderRequest('BNBUSDT', 'order-test-background-bnb-001', {triggerPrice: 621}),
+  });
+  assert.equal(response.body.ok, true, JSON.stringify(response.body));
+  const {orderId} = response.body.order;
+
+  // After submission, no HTTP request occurs until the scheduler has committed the receipt.
+  const touchedAt = f.advance();
+  f.quote('BNBUSDT', 621, 2);
+  const persisted = await eventuallyRead(async () => {
+    const state = await f.readDatabase();
+    return state.players[player.id]?.ledger?.simulation?.receipts?.find(r => r.orderId === orderId);
+  }, 'background polling should commit a fill without a browser page');
+  assert.equal(persisted.kind, 'FILL');
+  assert.equal(persisted.fillPrice, 621);
+  assert.equal(persisted.triggeredAt, touchedAt);
+
+  await f.restart();
+  assert.deepEqual((await f.book(token)).receipts, [persisted]);
+});

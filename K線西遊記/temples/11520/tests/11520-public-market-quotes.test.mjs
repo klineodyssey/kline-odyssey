@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {fetchPublicMarketObservations,publicObservationStatus,buildAtrLampReference,lampScanPoint,LAMP_DAY_MS,fetchAtrLampReference} from '../runtime/public-market-quotes.mjs';
+import {assertVerifiedPublicMarketObservation,fetchPublicMarketObservations,publicObservationStatus,buildAtrLampReference,lampScanPoint,LAMP_DAY_MS,fetchAtrLampReference} from '../runtime/public-market-quotes.mjs';
 
 function lampFixture(){
   const now=40*LAMP_DAY_MS+1000;
@@ -50,6 +50,37 @@ test('free oracle uses provider event timestamp, not fetch time; stale/future/mi
   assert.equal(publicObservationStatus(null).stale,true);
   await assert.rejects(fetchPublicMarketObservations({symbols:['BTCUSDT'],fetchImpl:async()=>({ok:true,json:async()=>[{p:'100',a:1}]})}),/INVALID_PROVIDER/);
 });
+test('execution reference needs the same market, actual provider time, sequence and public source',()=>{
+  const quote={market:'BTCUSDT',price:75000,updatedAt:1000,sequence:7,source:PUBLIC_MARKET_QUOTE_SOURCE.id,
+    quoteCurrency:'USDT',settlementAuthority:false};
+  const verify=observation=>assertVerifiedPublicMarketObservation(observation,{market:'BTCUSDT',now:16000});
+  assert.equal(verify(quote),quote);
+  const {updatedAt,...adapterFields}=quote;
+  assert.doesNotThrow(()=>verify({...adapterFields,observedAt:updatedAt}));
+  assert.throws(()=>verify(null),/STALE_PRICE/);
+  for(const [changes,reason] of [
+    [{updatedAt:999},/STALE_PRICE/],
+    [{updatedAt:16001},/STALE_PRICE/],
+    [{updatedAt:undefined,receivedAt:16000},/STALE_PRICE/],
+    [{observedAt:1001},/INVALID_PROVIDER_OBSERVATION/],
+    [{sequence:'7'},/INVALID_PROVIDER_OBSERVATION/],
+    [{sequence:-1},/INVALID_PROVIDER_OBSERVATION/],
+    [{price:NaN},/INVALID_PROVIDER_OBSERVATION/],
+    [{market:'ETHUSDT'},/PUBLIC_QUOTE_MARKET_MISMATCH/],
+    [{source:'K11520_DETERMINISTIC_SIMULATION'},/PUBLIC_QUOTE_SOURCE_REQUIRED/],
+    [{quoteCurrency:'USD'},/PUBLIC_QUOTE_SOURCE_REQUIRED/],
+    [{settlementAuthority:true},/PUBLIC_QUOTE_SOURCE_REQUIRED/],
+  ])assert.throws(()=>verify({...quote,...changes}),reason);
+});
+
+test('aggregate-trade payload rejects substituted symbols and non-numeric price types',async()=>{
+  const baseline={p:'75000',T:1000,a:7};
+  for(const invalid of [{s:'ETHUSDT'},{symbol:'ETHUSDT'},{p:true},{p:['75000']},{a:'7'}]){
+    const fetchImpl=async()=>({ok:true,json:async()=>[{...baseline,...invalid}]});
+    await assert.rejects(fetchPublicMarketObservations({symbols:['BTCUSDT'],fetchImpl,now:()=>1000}),/INVALID_PROVIDER_OBSERVATION/);
+  }
+});
+
 import {PUBLIC_MARKET_QUOTE_SOURCE,buildPublicMarketQuoteUrl,parsePublicMarketQuotes,fetchPublicMarketQuotes} from '../runtime/public-market-quotes.mjs';
 
 const SYMBOLS=['BTCUSDT','ETHUSDT','BNBUSDT'];

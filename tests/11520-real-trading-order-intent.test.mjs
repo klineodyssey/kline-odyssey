@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
+import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createPreviewSimulationExecutionAdapter,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 import {createKgenLedger,C_PNL_MODEL} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
+import {PUBLIC_MARKET_QUOTE_SOURCE,SIMULATION_PRICE_SOURCE} from '../K線西遊記/temples/11520/runtime/public-market-quotes.mjs';
 import {createRequire} from 'node:module';
 import {TESTNET_EXECUTION_ABI,CAPITAL_EXECUTION_ABI} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 
@@ -665,6 +666,195 @@ for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']])
  adapter.tick({now:now+(c>0?4000:68000)});book=adapter.snapshot();assert.ok(ledger.unrealizedPnl>0);assert.equal(book.positions[0].status,'OPEN');
  const closed=adapter.close(book.positions[0].positionId,{now:now+(c>0?5000:69000)});assert.equal(closed.ok,true);assert.equal(closed.receipt.status,'CLOSED');assert.equal(closed.receipt.priceSource,'K11520_DETERMINISTIC_SIMULATION');assert.ok(ledger.realizedPnl>0);assert.equal(ledger.lockedMargin,0);
  assert.equal(adapter.snapshot().receipts.length,2);assert.ok(adapter.snapshot().receipts.every(r=>r.simulationOnly&&r.priceSource==='K11520_DETERMINISTIC_SIMULATION'));
+});
+
+test('verified public simulation freezes offline and resumes only on accepted provider observations',()=>{
+ const ledger=createKgenLedger(100);
+ let saves=0;
+ const adapter=createExecutionAdapter({ledger,productV1:true,verifiedPublicQuotes:true,simulationFallback:true,afterMutation:()=>saves++});
+ const input={axis:'KX',market:'BTCUSDT',c:1,lots:2,currentPrice:99999,triggerPrice:75000};
+ const publicQuote=(price,observedAt,sequence,changes={})=>({
+   market:'BTCUSDT',price,observedAt,sequence,source:PUBLIC_MARKET_QUOTE_SOURCE.id,now:observedAt,...changes,
+ });
+ const initial=structuredClone(ledger);
+ assert.equal(adapter.preview(input,{now:1000}).code,'ORACLE_STALE');
+ assert.equal(adapter.submit(input,{now:1000}).code,'ORACLE_STALE');
+ assert.deepEqual(adapter.tick({now:1000}).events,[]);
+ assert.deepEqual(ledger,initial);
+ assert.equal(saves,0);
+ for(const changes of [
+   {source:SIMULATION_PRICE_SOURCE},
+   {source:undefined},
+   {sequence:undefined},
+   {sequence:'4'},
+   {observedAt:1001},
+   {observedAt:undefined},
+   {price:'75000'},
+ ])assert.equal(adapter.observe(publicQuote(75000,1000,4,changes)).ok,false);
+ assert.deepEqual(ledger,initial);
+ assert.equal(saves,0);
+
+ assert.equal(adapter.observe(publicQuote(75000,1000,4)).ok,true);
+ const review=adapter.preview(input,{now:1000});
+ assert.equal(review.currentPrice,75000);
+ assert.equal(review.intent.currentPrice,75000);
+ assert.equal(review.priceObservedAt,1000);
+ assert.equal(adapter.submit(input,{now:1000}).status,'PENDING_TRIGGER');
+ const beforeFill=structuredClone(ledger);
+ assert.equal(adapter.observe(publicQuote(75001,999,5,{now:1000})).code,'ORACLE_STALE');
+ assert.equal(adapter.observe(publicQuote(75001,1000,4)).code,'ORACLE_STALE');
+ assert.deepEqual(ledger,beforeFill);
+ const fill=adapter.observe(publicQuote(75000,1000,5));
+ assert.equal(fill.ok,true,fill.reason);
+ assert.equal(fill.events[0].fillPrice,75000);
+ const positionId=fill.events[0].positionId;
+ const beforeOffline=structuredClone(ledger),beforeOfflineSaves=saves;
+ assert.equal(adapter.close(positionId,{now:16001}).code,'ORACLE_STALE');
+ assert.deepEqual(adapter.tick({now:16001}).events,[]);
+ assert.deepEqual(ledger,beforeOffline);
+ assert.equal(saves,beforeOfflineSaves);
+ assert.equal(adapter.observe(publicQuote(85000,16002,6)).ok,true);
+ const close=adapter.close(positionId,{now:16002});
+ assert.equal(close.ok,true,close.reason);
+ assert.equal(close.receipt.realizedPnl,2);
+ assert.equal(close.receipt.priceSource,PUBLIC_MARKET_QUOTE_SOURCE.id);
+ assert.equal(ledger.free,102);
+});
+
+test('verified public simulation holds historical synthetic risk and preserves cancellation and independent markets',()=>{
+ const ledger=createKgenLedger(100);
+ const adapter=createExecutionAdapter({ledger,productV1:true,verifiedPublicQuotes:true});
+ const source=PUBLIC_MARKET_QUOTE_SOURCE.id;
+ const btc={market:'BTCUSDT',price:75000,observedAt:1000,sequence:1,source,now:1000};
+ const input={axis:'KX',market:'BTCUSDT',c:1,lots:1,currentPrice:75000,triggerPrice:75000};
+ assert.equal(adapter.observe(btc).ok,true);
+ const first=adapter.submit(input,{now:1000});
+ assert.equal(first.ok,true,first.reason);
+ ledger.simulation.orders[0].executionPriceSource=SIMULATION_PRICE_SOURCE;
+ const held=structuredClone(ledger);
+ const later={...btc,price:85000,observedAt:1100,sequence:2,now:1100};
+ assert.throws(()=>adapter.quote('BTCUSDT',{now:1100}),/SIMULATION_RECOVERY_REQUIRED/);
+ assert.equal(adapter.observe(later).reason,'SIMULATION_RECOVERY_REQUIRED');
+ assert.deepEqual(ledger,held);
+ assert.equal(adapter.observe({...later,market:'ETHUSDT',price:4000}).ok,true);
+ assert.equal(adapter.cancel(first.order.orderId).ok,true);
+ assert.equal(adapter.observe(later).ok,true);
+
+ const second=adapter.submit({...input,triggerPrice:85000},{now:1100});
+ assert.equal(second.ok,true,second.reason);
+ const filled=adapter.observe({...later,observedAt:1200,sequence:3,now:1200});
+ assert.equal(filled.ok,true,filled.reason);
+ const positionId=filled.events[0].positionId;
+ const position=ledger.simulation.positions[0];
+ for(const key of ['priceSource','markPriceSource']){
+   const provenance=position[key];
+   position[key]=SIMULATION_PRICE_SOURCE;
+   const before=structuredClone(ledger);
+   assert.equal(adapter.observe({...later,observedAt:1300,sequence:4,now:1300}).reason,'SIMULATION_RECOVERY_REQUIRED');
+   assert.equal(adapter.close(positionId,{now:1300}).reason,'SIMULATION_RECOVERY_REQUIRED');
+   assert.deepEqual(ledger,before);
+   position[key]=provenance;
+ }
+});
+
+test('verified public simulation can replace an idle synthetic observation without using it to cross an order',()=>{
+ const ledger=createKgenLedger(100);
+ const legacy=createExecutionAdapter({ledger,simulationFallback:true});
+ assert.equal(legacy.tick({now:100000}).ok,true);
+ const adapter=createExecutionAdapter({ledger,verifiedPublicQuotes:true});
+ assert.throws(()=>adapter.quote('BTCUSDT',{now:100000}),/PUBLIC_QUOTE_SOURCE_REQUIRED/);
+ const result=adapter.observe({market:'BTCUSDT',price:75000,observedAt:99990,now:100000,sequence:1,
+   source:PUBLIC_MARKET_QUOTE_SOURCE.id});
+ assert.equal(result.ok,true,result.reason);
+ assert.deepEqual(result.events,[]);
+ const snapshot=adapter.snapshot();
+ assert.equal(snapshot.observations.BTCUSDT.price,75000);
+ assert.equal(snapshot.observations.ETHUSDT.source,SIMULATION_PRICE_SOURCE);
+ assert.deepEqual(snapshot.orders,[]);
+ assert.deepEqual(snapshot.receipts,[]);
+});
+
+test('local preview restores one server identity and replays the exact reviewed order after a lost response',async()=>{
+ const origin='http://127.0.0.1:11520',stored=new Map(),token='a'.repeat(48),serverOrders=[],requests=[];
+ let loseResponse=true,loginCount=0,time=1000,expire=false;
+ const expected={BTCUSDT:{market:'BTCUSDT',price:75000,updatedAt:1000,sequence:7,source:PUBLIC_MARKET_QUOTE_SOURCE.id}};
+ const storage={getItem:key=>stored.get(key)??null,setItem:(key,value)=>stored.set(key,value)};
+ const respond=(status,data)=>({status,ok:status>=200&&status<300,json:async()=>structuredClone(data)});
+ const fetchImpl=async(url,options)=>{
+   const u=new URL(url),body=options.body&&JSON.parse(options.body);
+   assert.equal(u.origin,origin);
+   assert.equal(options.mode,'same-origin');
+   assert.equal(options.credentials,'omit');
+   assert.equal(options.redirect,'error');
+   requests.push({url:u.pathname,body});
+   if(u.pathname==='/api/v1/markets'){
+     assert.equal(options.headers.authorization,undefined);
+     return respond(200,{observations:expected,statuses:{BTCUSDT:{available:time<=16000}}});
+   }
+   if(u.pathname==='/api/v1/login'){
+     loginCount++;
+     assert.equal(options.headers.authorization,undefined);
+     return respond(200,{ok:true,token,player:{id:'local-player'}});
+   }
+   assert.equal(options.headers.authorization,'Bearer '+token);
+   if(expire)return respond(401,{ok:false,reason:'UNAUTHORIZED'});
+   if(u.pathname==='/api/v1/orders')return respond(200,{ok:true,mode:'SIMULATION_WALLET',
+     wallet:{free:10},orders:serverOrders,positions:[],receipts:[],observations:{}});
+   if(u.pathname==='/api/v1/order'){
+     const found=serverOrders.find(o=>o.requestId===body.requestId);
+     if(found)return respond(200,{ok:true,order:found,replayed:true});
+     const order={...body,orderId:'SIM-O-1',status:'PENDING'};
+     serverOrders.push(order);
+     if(loseResponse){loseResponse=false;throw new Error('network response lost')}
+     return respond(200,{ok:true,order,replayed:false});
+   }
+   if(u.pathname==='/api/v1/order/cancel'){
+     assert.deepEqual(body,{orderId:'SIM-O-1'});
+     serverOrders[0].status='CANCELLED';
+     return respond(200,{ok:true,order:serverOrders[0]});
+   }
+   assert.fail('unexpected route '+u.pathname);
+ };
+ const construct=()=>createPreviewSimulationExecutionAdapter({origin,storage,fetchImpl,now:()=>time});
+ assert.throws(()=>createPreviewSimulationExecutionAdapter({origin:'https://public.example'}),/LOCAL_PREVIEW_ORIGIN_REQUIRED/);
+ const adapter=construct();
+ assert.equal(requests.length,0,'constructing never provisions a guest');
+ assert.equal((await adapter.refresh()).ok,true);
+ assert.equal(loginCount,1);
+ assert.equal(adapter.marketSnapshot().observations.BTCUSDT.price,75000);
+ assert.equal(adapter.quote('BTCUSDT').at,1000);
+ const input={axis:'KX',market:'BTCUSDT',c:1,lots:2,triggerPrice:75000,currentPrice:90000,clientRequestId:'reviewed-click'};
+ assert.equal(adapter.preview(input).intent.currentPrice,75000);
+ assert.equal(adapter.observe(expected.BTCUSDT).reason,'SERVER_OWNS_EXECUTION_QUOTE');
+ assert.equal((await adapter.submit(input)).reason,'PREVIEW_ORDER_UNRESOLVED');
+ assert.equal(serverOrders.length,1);
+ assert.equal(adapter.pendingOrder().clientRequestId,'reviewed-click');
+ const firstPost=requests.find(r=>r.url==='/api/v1/order').body;
+ assert.deepEqual(firstPost,{axis:'KX',market:'BTCUSDT',c:1,side:'LONG',lots:2,triggerPrice:75000,
+   stopPrice:null,takeProfitPrice:null,requestId:'reviewed-click'});
+
+ const reopened=construct();
+ time=17000;
+ assert.equal((await reopened.refresh()).ok,true);
+ assert.equal(loginCount,1);
+ assert.equal(reopened.snapshot().orders.length,1);
+ assert.equal(reopened.preview(input).code,'ORACLE_STALE');
+ assert.equal((await reopened.submit({...input,lots:3})).reason,'PREVIEW_ORDER_UNRESOLVED');
+ assert.equal(requests.filter(r=>r.url==='/api/v1/order').length,1);
+ const recovered=await reopened.retryPendingOrder();
+ assert.equal(recovered.ok,true,recovered.reason);
+ assert.equal(recovered.replayed,true);
+ assert.equal(serverOrders.length,1);
+ assert.deepEqual(requests.filter(r=>r.url==='/api/v1/order')[1].body,firstPost);
+ assert.equal(reopened.pendingOrder(),null);
+ assert.equal(JSON.stringify(reopened.snapshot()).includes(token),false);
+ assert.equal((await reopened.cancel('SIM-O-1')).ok,true,'cancellation does not need a fresh quote');
+ assert.equal(reopened.snapshot().orders[0].status,'CANCELLED');
+
+ expire=true;
+ const expired=await construct().refresh();
+ assert.equal(expired.reason,'PREVIEW_SESSION_UNAUTHORIZED');
+ assert.equal(loginCount,1,'an expired preview account does not create a replacement');
 });
 
 test('fallback source stays pinned through pending, position, public recovery and adapter reload',()=>{

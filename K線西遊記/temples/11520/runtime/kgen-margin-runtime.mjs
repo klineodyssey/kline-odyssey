@@ -199,7 +199,7 @@ export function placeSimulationOrder(ledger,{axis,market,c,side,lots,triggerPric
     if(!quote||createdAt<quote.at||createdAt-quote.at>SIM_MAX_AGE)throw new RangeError('STALE_PRICE');
     if(book.orders.some(o=>o.axis===axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===axis&&p.status==='OPEN'))throw new RangeError('AXIS_ALREADY_ACTIVE');
     if(!Number.isFinite(draft.free)||draft.free<margin)throw new RangeError('INSUFFICIENT_FREE_KGEN');
-    const order={orderId:`SIM-O-${++book.sequence}`,trader:ledger.owner||'SIMULATION_LOCAL_PLAYER',axis,market,priceSource:quote.source||'SIMULATION_OBSERVATION',side:direction,c:signedC,lots:Number(lots),triggerPrice:trigger,stopPrice:stop,takeProfitPrice:takeProfit,createdAt,triggeredAt:null,observedPrice:null,fillPrice:null,positionId:null,status:'PENDING'};
+    const order={orderId:`SIM-O-${++book.sequence}`,trader:ledger.owner||'SIMULATION_LOCAL_PLAYER',axis,market,priceSource:quote.source||'SIMULATION_OBSERVATION',quoteAt:quote.at,quoteSequence:quote.sequence??null,quotePrice:quote.price,side:direction,c:signedC,lots:Number(lots),triggerPrice:trigger,stopPrice:stop,takeProfitPrice:takeProfit,createdAt,triggeredAt:null,observedPrice:null,fillPrice:null,positionId:null,status:'PENDING'};
     book.orders.push(order);commitSimulation(ledger,draft,book);return {ok:true,order:{...order}};
   }catch(e){return {ok:false,reason:e.message}}
 }
@@ -208,28 +208,28 @@ export function cancelSimulationOrder(ledger,orderId){
   if(!order||order.status!=='PENDING')return {ok:false,reason:'ORDER_NOT_PENDING'};
   order.status='CANCELLED';commitSimulation(ledger,draft,book);return {ok:true,order:{...order}};
 }
-function settleSimulationPosition(draft,book,position,{previousPrice,observedPrice,at,status}){
+function settleSimulationPosition(draft,book,position,{previousPrice,observedPrice,at,status,quote}){
   const risk=simulationPositionRisk(position,observedPrice),marginBefore=position.margin;
   if(draft.lockedMargin<marginBefore)throw new RangeError('COLLATERAL_INVARIANT');
   const realizedPnl=status==='LIQUIDATED'?-marginBefore:risk.pnl;
   closeMargin(draft,{margin:marginBefore,pnl:realizedPnl});
   position.status=status;position.margin=0;position.mark=observedPrice;position.settledAt=at;
-  const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'SETTLEMENT',simulationOnly:true,trader:position.trader,positionId:position.positionId,orderId:position.orderId,market:position.market,priceSource:position.priceSource||'SIMULATION_OBSERVATION',axis:position.axis,side:position.side,c:position.c,lots:position.lots,entryPrice:position.entry,pnlModel:risk.pnlModel,entryFloorUnit:risk.entryFloorUnit,liquidationTrigger:risk.liquidationMark,previousPrice,observedPrice,settlementPrice:observedPrice,triggeredAt:at,settledAt:at,marginBefore,marginAfter:0,rawPnl:risk.rawPnl,realizedPnl,badDebt:Math.max(0,-marginBefore-risk.rawPnl),status};
+  const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'SETTLEMENT',simulationOnly:true,trader:position.trader,positionId:position.positionId,orderId:position.orderId,market:position.market,priceSource:quote?.source||position.priceSource||'SIMULATION_OBSERVATION',entryPriceSource:position.priceSource??null,priceObservedAt:quote?.at??null,priceSequence:quote?.sequence??null,axis:position.axis,side:position.side,c:position.c,lots:position.lots,entryPrice:position.entry,pnlModel:risk.pnlModel,entryFloorUnit:risk.entryFloorUnit,liquidationTrigger:risk.liquidationMark,previousPrice,observedPrice,settlementPrice:observedPrice,triggeredAt:at,settledAt:at,marginBefore,marginAfter:0,rawPnl:risk.rawPnl,realizedPnl,badDebt:Math.max(0,-marginBefore-risk.rawPnl),status};
   book.receipts.push(receipt);return receipt;
 }
-export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(),now=Date.now(),sequence=null,productV1=false,source='SIMULATION_OBSERVATION',simulationAnchorPrice,simulationAnchorAt}={}){
+export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(),now=Date.now(),sequence=null,productV1=false,source='SIMULATION_OBSERVATION',simulationAnchorPrice,simulationAnchorAt,resumeBoundary=false}={}){
   try{
     if(!Object.values(SIM_MARKETS).includes(market))throw new RangeError('MARKET_NOT_SUPPORTED');
     const observedPrice=positivePrice(price),at=timestamp(observedAt),receivedAt=timestamp(now);
     if(at>receivedAt||receivedAt-at>SIM_MAX_AGE)throw new RangeError('STALE_PRICE');
     const {draft,book}=simulationDraft(ledger),previous=book.observations[market];
-    if(previous&&at<=previous.at)throw new RangeError('OUT_OF_ORDER_PRICE');
+    if(previous&&(at<previous.at||(at===previous.at&&(source!==previous.source||sequence===null||previous.sequence==null))))throw new RangeError('OUT_OF_ORDER_PRICE');
     if(sequence!==null&&(!Number.isSafeInteger(sequence)||sequence<0||(previous?.sequence!=null&&sequence<=previous.sequence)))throw new RangeError('OUT_OF_ORDER_PRICE');
-    const previousPrice=previous?.price??observedPrice,events=[];
-    book.observations[market]={price:observedPrice,at,source,simulationOnly:true,...(sequence!==null?{sequence}:{}),...(source==='K11520_DETERMINISTIC_SIMULATION'?{simulationAnchorPrice,simulationAnchorAt}: {})};
+    const previousPrice=resumeBoundary?observedPrice:(previous?.price??observedPrice),events=[];
+    const quote=book.observations[market]={price:observedPrice,at,receivedAt,source,simulationOnly:true,...(sequence!==null?{sequence}:{}),...(source==='K11520_DETERMINISTIC_SIMULATION'?{simulationAnchorPrice,simulationAnchorAt}: {})};
     for(const order of book.orders){
       if(order.market!==market||order.status!=='PENDING')continue;
-      order.executionPriceSource=source;
+      if(source==='K11520_DETERMINISTIC_SIMULATION')order.executionPriceSource=source;
       if(at<order.createdAt||!touchedOrCrossed(previousPrice,order.triggerPrice,observedPrice))continue;
       // Revalidate persisted/injected pending records before any reserve or receipt.
       if(productV1&&!resolveCMode(order.c).canTrade){order.status='REJECTED';order.reason='V1_HIGH_SPEED_PRODUCTION_LOCKED';events.push({kind:'REJECTED',orderId:order.orderId});continue}
@@ -242,17 +242,17 @@ export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(
       const positionId=`SIM-P-${++book.sequence}`;
       const entryFloorUnit=settlementPriceUnit(observedPrice,C_PNL_MODEL);
       const position={trader:order.trader,positionId,orderId:order.orderId,axis:order.axis,market,priceSource:source,side:order.side,c:order.c,signedC:order.c,lots:order.lots,entry:observedPrice,mark:observedPrice,pnlModel:C_PNL_MODEL,principal:margin,margin,stopPrice:order.stopPrice,takeProfitPrice:order.takeProfitPrice,status:'OPEN',openedAt:at};
-      book.positions.push(position);Object.assign(order,{status:'FILLED',triggeredAt:at,observedPrice,fillPrice:observedPrice,positionId});
-      const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'FILL',simulationOnly:true,trader:order.trader,orderId:order.orderId,positionId,market,priceSource:source,axis:order.axis,side:order.side,c:order.c,lots:order.lots,createdAt:order.createdAt,triggeredAt:at,previousPrice,triggerPrice:order.triggerPrice,observedPrice,fillPrice:observedPrice,pnlModel:C_PNL_MODEL,entryFloorUnit,walletBefore,marginLocked:margin,walletAfter:draft.free,status:'FILLED'};
+      book.positions.push(position);Object.assign(order,{status:'FILLED',executionPriceSource:source,triggeredAt:at,observedPrice,fillPrice:observedPrice,positionId});
+      const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'FILL',simulationOnly:true,trader:order.trader,orderId:order.orderId,positionId,market,priceSource:source,priceObservedAt:at,priceSequence:sequence,axis:order.axis,side:order.side,c:order.c,lots:order.lots,createdAt:order.createdAt,triggeredAt:at,previousPrice,triggerPrice:order.triggerPrice,observedPrice,fillPrice:observedPrice,pnlModel:C_PNL_MODEL,entryFloorUnit,walletBefore,marginLocked:margin,walletAfter:draft.free,status:'FILLED'};
       book.receipts.push(receipt);events.push({...receipt});
     }
     for(const position of book.positions){
       if(position.market!==market||position.status!=='OPEN')continue;
-      const risk=simulationPositionRisk(position,observedPrice);position.priceSource=source;position.mark=observedPrice;position.observedAt=at;position.observationSequence=sequence;position.deltaIndex=observedPrice-position.entry;position.equity=position.margin+risk.pnl;
+      const risk=simulationPositionRisk(position,observedPrice);position.markPriceSource=source;position.mark=observedPrice;position.observedAt=at;position.observationSequence=sequence;position.deltaIndex=observedPrice-position.entry;position.equity=position.margin+risk.pnl;
       const long=position.c>0,liquidated=risk.liquidated;
       const stopped=position.stopPrice!==null&&(long?observedPrice<=position.stopPrice:observedPrice>=position.stopPrice);
       const takeProfit=position.takeProfitPrice!==null&&(long?observedPrice>=position.takeProfitPrice:observedPrice<=position.takeProfitPrice);
-      if(liquidated||stopped||takeProfit)events.push({...settleSimulationPosition(draft,book,position,{previousPrice,observedPrice,at,status:liquidated?'LIQUIDATED':stopped?'STOPPED':'TAKE_PROFIT'})});
+      if(liquidated||stopped||takeProfit)events.push({...settleSimulationPosition(draft,book,position,{previousPrice,observedPrice,at,quote,status:liquidated?'LIQUIDATED':stopped?'STOPPED':'TAKE_PROFIT'})});
     }
     updateSimulationEquity(draft,book);commitSimulation(ledger,draft,book);return {ok:true,events};
   }catch(e){return {ok:false,reason:e.message}}
@@ -263,7 +263,7 @@ export function closeSimulationPosition(ledger,positionId,{now=Date.now()}={}){
     if(!position||position.status!=='OPEN')throw new RangeError('POSITION_NOT_OPEN');
     const quote=book.observations[position.market],at=timestamp(now);
     if(!quote||at<quote.at||at-quote.at>SIM_MAX_AGE)throw new RangeError('STALE_PRICE');
-    const receipt=settleSimulationPosition(draft,book,position,{previousPrice:quote.price,observedPrice:quote.price,at,status:'CLOSED'});
+    const receipt=settleSimulationPosition(draft,book,position,{previousPrice:quote.price,observedPrice:quote.price,at,quote,status:'CLOSED'});
     updateSimulationEquity(draft,book);commitSimulation(ledger,draft,book);return {ok:true,receipt:{...receipt}};
   }catch(e){return {ok:false,reason:e.message}}
 }

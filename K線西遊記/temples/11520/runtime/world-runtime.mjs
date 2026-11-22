@@ -18,6 +18,7 @@ import {chaseStep,maybeMonsterHit,isHostileMonster} from './monster-aggression-r
 import {gameUnitsToK,localPositionToK,composePhysicalK,signedUniverseAddress} from './spatial-coordinate-runtime.mjs';
 import {resolveCMode} from '../controls/nonlinear-controls.mjs';
 import {GAMEPLAY_UNLOCKS} from './player-life-runtime.mjs';
+import {assertVerifiedPublicMarketObservation,FREE_ORACLE_MAX_AGE_MS,PUBLIC_MARKET_QUOTE_SOURCE} from './public-market-quotes.mjs';
 
 // Browser-local teaching state only: never grants XP, loot, orders or wallet authority.
 export function createJourneyTutorial({storage,returning=false}={}){
@@ -193,18 +194,58 @@ export function updateKMarketReference(world,quotes,receivedAt=Date.now()){
   for(const a of K_AXES){const {market,anchor}=KSPACE_REFERENCE[a];reference[a]={market,anchor,price:quotes?.[market]}}
   const next=kPositionFromReference(reference); // validate all three before mutating anything
   if(world.kSpace?.receivedAt>receivedAt)return false;
+  applyKMarketReference(world,reference,next,receivedAt);
+  delete world.kSpace.marketObservations;
+  return true;
+}
+function applyKMarketReference(world,reference,next,receivedAt){
   if(!world.kSpace)createKSpaceEncounter(world,reference);
   const space=world.kSpace,previous=space.playerK;
   // Translate the shared market frame; preserve each entity's relative K and local XYZ.
   for(const m of world.monsters.filter(m=>m.simulationCombat&&m.kPosition))
     m.kPosition=Object.fromEntries(K_AXES.map(a=>[a,next[a]+(m.kPosition[a]-previous[a])]));
   space.reference=copy(reference);space.playerK=next;space.receivedAt=receivedAt;space.quoteFailed=false;
+}
+// Only accepted public observations populate the market-address output.
+// Unobserved combat anchors remain internal and cannot act as live quotes.
+export function updateKMarketObservations(world,observations,now=Date.now()){
+  const reference=copy(world.kSpace?.reference||KSPACE_REFERENCE);
+  const markets={...world.kSpace?.marketObservations};
+  let receivedAt=world.kSpace?.receivedAt??null;
+  for(const axis of K_AXES){
+    const market=KSPACE_REFERENCE[axis].market,observation=observations?.[market];
+    let at;
+    try{
+      assertVerifiedPublicMarketObservation(observation,{market,now});
+      at=observation.updatedAt??observation.observedAt;
+    }catch{}
+    const prior=markets[axis];
+    if(at===undefined||(prior&&(observation.sequence<prior.sequence||at<prior.at||
+      (observation.sequence===prior.sequence&&(at!==prior.at||observation.price!==reference[axis].price))))){
+      if(prior)markets[axis]={...prior,available:false};
+      continue;
+    }
+    reference[axis]={...reference[axis],price:observation.price};
+    markets[axis]={at,sequence:observation.sequence,available:true};
+    receivedAt=Math.max(receivedAt??0,at);
+  }
+  if(receivedAt===null)return false;
+  reference.source=PUBLIC_MARKET_QUOTE_SOURCE.id;
+  applyKMarketReference(world,reference,kPositionFromReference(reference),receivedAt);
+  world.kSpace.marketObservations=markets;
   return true;
 }
 export function kMarketSnapshot(world,now=Date.now()){
   const s=world.kSpace;if(!s||!Number.isFinite(s.receivedAt))return {status:'WAIT',receivedAt:null,markets:[]};
-  const status=s.quoteFailed||now-s.receivedAt>15000?'STALE':'LIVE';
-  const markets=K_AXES.map(axis=>{const v=s.reference[axis],k=s.playerK[axis];return {axis,symbol:v.market,price:v.price,anchor:v.anchor,k,
+  const marketStatus=axis=>{
+    const entry=s.marketObservations?.[axis];
+    const valid=s.marketObservations?
+      entry?.available&&entry.at<=now&&now-entry.at<=FREE_ORACLE_MAX_AGE_MS:
+      !s.quoteFailed&&now-s.receivedAt<=FREE_ORACLE_MAX_AGE_MS;
+    return valid?'LIVE':'STALE';
+  };
+  const status=K_AXES.some(axis=>marketStatus(axis)==='LIVE')?'LIVE':'STALE';
+  const markets=K_AXES.filter(axis=>!s.marketObservations||s.marketObservations[axis]).map(axis=>{const v=s.reference[axis],k=s.playerK[axis];return {axis,symbol:v.market,price:v.price,anchor:v.anchor,k,status:marketStatus(axis),observedAt:s.marketObservations?.[axis]?.at??s.receivedAt,
     universe:signedUniverseAddress(v.price),quoteUnit:'USDT',relativePercent:k,
     relativeIndicatorAuthority:'SIMULATION_REFERENCE_NOT_CANONICAL_COORDINATE',
     // A scalar market has one axis intercept, not three invented independent coordinates.
