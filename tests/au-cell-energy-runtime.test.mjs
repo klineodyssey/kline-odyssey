@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {recordCellRun,aggregateRuns,simulateOfflineCultivation,calculatePhysicalWork} from '../core/au/au-cell-energy-runtime.mjs';
+const base={cellId:'digital-ant',runId:'run1',poolId:'pool-A',wakeAtUtc:'2026-10-12T00:00:00Z',sleepAtUtc:'2026-10-12T01:00:00Z',sourceKind:'OFFICIAL_UI',sevenDayBeforePct:96,sevenDayAfterPct:94,resetBeforeUtc:'2026-10-18T00:00:00Z',resetAfterUtc:'2026-10-18T00:00:00Z'};
+test('run measures duration, not personal percent',()=>{const v=recordCellRun(base);assert.equal(v.durationSeconds,3600);assert.equal(v.poolDeltaPct,2);assert.equal(v.individualUsagePct,null);assert.equal(v.kufoConsumed,null)});
+test('cross-reset delta is unknown',()=>assert.equal(recordCellRun({...base,resetAfterUtc:'2026-10-25T00:00:00Z'}).poolDeltaPct,null));
+test('rising percent does not imply negative use',()=>assert.equal(recordCellRun({...base,sevenDayAfterPct:100}).poolDeltaPct,null));
+test('unsourced numbers rejected',()=>assert.throws(()=>recordCellRun({...base,sourceKind:'NOT_AVAILABLE'}),/UNSOURCED_USAGE/));
+test('clock rollback rejected',()=>assert.throws(()=>recordCellRun({...base,sleepAtUtc:'2026-10-11T23:00:00Z'}),/TIME_REVERSED/));
+test('invalid percentages rejected',()=>assert.throws(()=>recordCellRun({...base,sevenDayBeforePct:101}),/BAD_PERCENT/));
+test('duplicate runs rejected',()=>{const v=recordCellRun(base);assert.throws(()=>aggregateRuns([v,v]),/DUPLICATE_RUN/);assert.equal(aggregateRuns([v])[0].activeSeconds,3600)});
+test('XP separate from KUFO decay',()=>{const v=simulateOfflineCultivation({elapsedSeconds:86400,xpPerHour:10,initialKufo:1,halfLifeSeconds:86400});assert.equal(v.xp,240);assert.ok(Math.abs(v.generatedKship-500)<1e-8);assert.equal(v.fertilizer,0);assert.equal(v.realKgenTransfer,0)});
+test('offline cap',()=>assert.equal(simulateOfflineCultivation({elapsedSeconds:72*3600,halfLifeSeconds:86400}).effectiveSeconds,86400));
+test('settlement replay rejects',()=>assert.throws(()=>simulateOfflineCultivation({elapsedSeconds:1,halfLifeSeconds:86400,claimed:true}),/ALREADY_SETTLED/));
+test('work is F d cos theta',()=>assert.equal(calculatePhysicalWork({forceNewtons:10,distanceMeters:2}).joules,20));
