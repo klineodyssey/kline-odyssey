@@ -826,7 +826,7 @@ export function buildBsc56UnsignedOrderReview(input={}, {ethers,expectedBindingD
   if(!Number.isInteger(q.minimumSources)||!Number.isInteger(q.validSources)||q.minimumSources<2||q.validSources<q.minimumSources||q.validSources>3)throw new Error('SETTLEMENT_SOURCE_QUORUM_REQUIRED');
   const price=uint(q.priceWad,'ORACLE_PRICE_WAD',{max:maxPriceWad});
   const lower=uint(q.minPriceWad,'PRICE_FLOOR',{max:maxPriceWad}),upper=uint(q.maxPriceWad,'PRICE_CEILING',{max:maxPriceWad});
-  if(lower>=upper||price<lower||price>upper||(creating&&(trigger<lower||trigger>upper)))throw new Error('ORDER_PRICE_OUT_OF_MARKET_BOUNDS');
+  if(lower>=upper||(creating&&(price<lower||price>upper||trigger<lower||trigger>upper)))throw new Error('ORDER_PRICE_OUT_OF_MARKET_BOUNDS');
   uint(q.sequence,'ORACLE_SEQUENCE');
   review.OBSERVATION={priceWad:q.priceWad,unit:q.unit,source:q.source,observedAtMs:q.observedAtMs,blockHash:d.blockHash,sequence:q.sequence};
   if(creating){

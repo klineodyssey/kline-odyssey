@@ -1539,6 +1539,8 @@ test('BSC56 constrains new isolated risk to available principal, exact signed de
 test('BSC56 exit-only owner close preserves exit in frozen admissions and refuses wrong owner, ID or market',()=>{
   for(const [patch,reason] of [
     [i=>delete i.deployment.admission,null],
+    [i=>i.deployment.quote.priceWad=(175000n*10n**18n).toString(),null],
+    [i=>i.deployment.quote.observedAtMs-=15000,/STALE_OR_FUTURE/],
     [i=>i.deployment.position.trader=BRAIN,/POSITION_OWNER_AND_MARKET/],
     [i=>i.positionId='4',/POSITION_OWNER_AND_MARKET/],
     [i=>i.deployment.position.status='CLOSED',/POSITION_OWNER_AND_MARKET/],
