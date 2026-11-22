@@ -160,6 +160,41 @@ function formatUnits(value, decimals = 18) {
   return fraction ? `${whole}.${fraction}` : whole.toString();
 }
 
+export function createK18921KgenWbnbObservation(snapshot, receivedAt, config = KGEN_SWAP_CONFIG, maxAgeMs = 120_000) {
+  invariant(snapshot?.status === "CHAIN_READ_VERIFIED" && snapshot.mode === "DRY_RUN_ONLY" && snapshot.broadcast_capability === "ABSENT", "K18921_READ_ONLY_SNAPSHOT_REQUIRED", "K18921 market observation requires a verified read-only KGEN snapshot");
+  invariant(snapshot.chain_id === config.chain_id && sameAddress(snapshot.pair_address, config.pair_address), "K18921_PAIR_EVIDENCE_INVALID", "K18921 market observation requires the canonical KGEN/WBNB pair on BSC56");
+  invariant(/^\d+$/.test(String(snapshot.reserves?.kgen_wei)) && /^\d+$/.test(String(snapshot.reserves?.wbnb_wei)), "K18921_RESERVE_EVIDENCE_INVALID", "K18921 market observation requires raw KGEN and WBNB reserves");
+  const reserveKgen = BigInt(snapshot.reserves.kgen_wei);
+  const reserveWbnb = BigInt(snapshot.reserves.wbnb_wei);
+  invariant(reserveKgen > 0n && reserveWbnb > 0n, "K18921_RESERVE_EVIDENCE_INVALID", "K18921 reserves must both be non-zero");
+  const sourceMs = Date.parse(snapshot.observed_at);
+  const receivedMs = Date.parse(receivedAt);
+  const strictTimestamp = (value, milliseconds) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value ?? "")
+    && Number.isFinite(milliseconds)
+    && new Date(milliseconds).toISOString() === (value.includes(".") ? value : value.replace("Z", ".000Z"));
+  invariant(strictTimestamp(snapshot.observed_at, sourceMs) && strictTimestamp(receivedAt, receivedMs), "K18921_OBSERVATION_TIME_INVALID", "K18921 observation timestamps must be strict UTC ISO timestamps");
+  invariant(Number.isInteger(maxAgeMs) && maxAgeMs > 0 && sourceMs <= receivedMs && receivedMs - sourceMs <= maxAgeMs, "K18921_OBSERVATION_STALE", "K18921 observation must preserve sequence and remain within the declared freshness window");
+  const scale = 10n ** 18n;
+  const scaledPrice = reserveWbnb * scale / reserveKgen;
+  const price = Number(formatUnits(scaledPrice));
+  invariant(Number.isFinite(price) && price > 0, "K18921_MARKET_PRICE_INVALID", "K18921 KGEN/WBNB reserve ratio must be positive and finite");
+  return Object.freeze({
+    source: "BSC56_PANCAKESWAP_V2_RESERVES",
+    symbol: "KGEN/WBNB",
+    price,
+    source_timestamp: snapshot.observed_at,
+    received_timestamp: receivedAt,
+    freshness: "FRESH",
+    status: "AVAILABLE",
+    chain_id: snapshot.chain_id,
+    block_number: snapshot.block_number,
+    pair_address: snapshot.pair_address,
+    reserve_kgen_wei: snapshot.reserves.kgen_wei,
+    reserve_wbnb_wei: snapshot.reserves.wbnb_wei,
+    mode: "READ_ONLY_NO_BROADCAST"
+  });
+}
+
 export async function createDigitalAntKgenDryRunQuote({ ethers, provider, walletAddress, amountInWei, slippageBps = KGEN_SWAP_CONFIG.default_slippage_bps, config = KGEN_SWAP_CONFIG }) {
   invariant(provider && ethers?.Contract, "READ_PROVIDER_REQUIRED", "KGEN dry-run quote requires a read-only provider");
   invariant(/^0x[0-9a-fA-F]{40}$/.test(walletAddress), "INVALID_WALLET_ADDRESS", "KGEN dry-run quote requires the verified public wallet");
