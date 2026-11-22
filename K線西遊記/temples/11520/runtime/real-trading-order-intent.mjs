@@ -25,6 +25,12 @@ import {C_PNL_MODEL,normalizeSignedC,signedPositionSide,requiredMargin,liquidati
 const simulationExecutionAdapters=new WeakSet();
 const simulationAutopilotMutationGuards=new WeakMap();
 const SIMULATION_QUOTE_MAX_AGE_MS=FREE_ORACLE_MAX_AGE_MS;
+const BSC56_REVIEW_BLOCKERS=Object.freeze([
+  'FRESH_CHAIN_CODE_ACCOUNT_NONCE_AND_STATE_READBACK_REQUIRED','HUMAN_WALLET_OWNER_CONFIRMATION_REQUIRED'
+]);
+const BSC56_EXECUTION_BLOCKERS=Object.freeze([
+  'BSC56_DEPLOYED_BINDING_REQUIRED','HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED',...BSC56_REVIEW_BLOCKERS
+]);
 
 function finitePositive(value,label){const n=Number(value);if(!Number.isFinite(n)||n<=0)throw new Error(`${label}_MUST_BE_POSITIVE`);return n}
 function integerRange(value,label,min,max){const n=Number(value);if(!Number.isInteger(n)||n<min||n>max)throw new Error(`${label}_OUT_OF_RANGE`);return n}
@@ -81,14 +87,20 @@ function executionFailure(error){
 // authorized deployment/receipt adapter exists. Flags or injected callbacks in
 // page storage must never turn this release into a signer/broadcast path.
 export function createExecutionAdapter({ledger,deployment=null,wallet=null,ethereum=null,ethers=null,...options}={}){
-  if(deployment?.mode==='BSC_TESTNET')return createTestnetExecutionAdapter({deployment,ethereum:ethereum??wallet?.provider,ethers,...options});
+  const chainIds=[deployment?.CHAIN_ID,deployment?.chainId].filter(id=>id!=null);
+  const mainnet=chainIds.some(id=>id===56||id==='56'||typeof id==='string'&&/^0x0*38$/i.test(id));
+  if(!mainnet&&deployment?.mode==='BSC_TESTNET')return createTestnetExecutionAdapter({deployment,ethereum:ethereum??wallet?.provider,ethers,...options});
   void wallet; // Connecting a read-only wallet does not switch execution mode.
-  const requestedMode=deployment?.mode??'SIMULATION';
-  if(requestedMode!=='SIMULATION'){
-    const blocked=()=>executionFailure(new Error('EVM_ADAPTER_NOT_DEPLOYED_OR_AUTHORIZED'));
+  // The official mainnet manifest has CHAIN_ID and no mode. Only a local
+  // simulation may default to the paper ledger.
+  if(deployment!=null&&(deployment.mode!=='SIMULATION'||chainIds.length>0)){
+    const details=mainnet?{chainId:56,blockers:BSC56_EXECUTION_BLOCKERS}:{};
+    const blocked=()=>({...executionFailure(new Error('EVM_ADAPTER_NOT_DEPLOYED_OR_AUTHORIZED')),
+      ...details,executionReady:false,signerRequested:false,broadcast:false});
     return Object.freeze({name:'EVM_ADAPTER',mode:'ON_CHAIN',enabled:false,
       preview:blocked,submit:blocked,observe:blocked,close:blocked,cancel:blocked,
-      snapshot:()=>({mode:'ON_CHAIN',status:'NOT_DEPLOYED_OR_AUTHORIZED',wallet:null,
+      approve:blocked,deposit:blocked,withdraw:blocked,claim:blocked,
+      snapshot:()=>({mode:'ON_CHAIN',status:'NOT_DEPLOYED_OR_AUTHORIZED',wallet:null,executionReady:false,...details,
         orders:[],positions:[],receipts:[],observations:{}})});
   }
   if(!ledger||typeof ledger!=='object')throw new Error('EXISTING_LEDGER_REQUIRED');
@@ -575,8 +587,8 @@ export function buildRealTradingOrderIntent({
     observedPrice,
     brainAddress:normalizeAddress(brainAddress,'BRAIN_ADDRESS'),
     positionEngineAddress:normalizeAddress(positionEngineAddress,'POSITION_ENGINE_ADDRESS'),
-    transactionPayload:null,calldata:null,signerRequested:false,broadcast:false,
-    status:'READY_FOR_EXPLICIT_WALLET_ACTION_NOT_SUBMITTED'
+    transactionPayload:null,calldata:null,executionReady:false,signerRequested:false,broadcast:false,
+    status:'UNSIGNED_ORDER_INTENT_ONLY',blockers:BSC56_EXECUTION_BLOCKERS
   });
 }
 
@@ -712,7 +724,7 @@ export function buildBsc56UnsignedCustodyReview(input={}, {ethers,expectedBindin
   const {nonce,gasLimit,gasPrice,gasCap,gasExposure}=readBsc56Fees(input,uint);
   const effects={approve:'Set exact KGEN allowance for the bound Brain; zero revokes. No token transfer occurs in this call.',depositMargin:'Request KGEN transfer into Brain; credit only the actual received token delta.',withdrawMargin:'Request withdrawal of available Brain principal to this wallet; receipt determines actual token delivery.',claimSettlement:'Request repayment of this position claim to its recorded trader principal, limited by funded capital. This is not a wallet withdrawal.'};
   const proposal={CHAIN:{name:'BNB Smart Chain Mainnet',chainId:KGEN_CHAIN_ID},WALLET:wallet,CONTRACT:null,FUNCTION:input.action,TOKEN:{symbol:'KGEN',address:token,decimals:18},AMOUNT:amount===null?{kind:'CONTRACT_RECORDED_CLAIM',positionKey}:{baseUnits:amount.toString(),decimals:18},EXPECTED_EFFECT:effects[input.action],MAXIMUM_EXPOSURE:{nativeGasFeeWei:gasExposure.toString(),approvedGasFeeCapWei:gasCap.toString(),walletTokenDebitWei:input.action==='depositMargin'?amount.toString():'0',allowanceAfterWei:input.action==='approve'?amount.toString():null,principalDebitWei:input.action==='withdrawMargin'?amount.toString():'0'}};
-  const blocked=['FRESH_CHAIN_CODE_ACCOUNT_NONCE_AND_STATE_READBACK_REQUIRED','HUMAN_WALLET_OWNER_CONFIRMATION_REQUIRED'];
+  const blocked=BSC56_REVIEW_BLOCKERS;
   const deployment=input.deployment;
   if(!deployment||deployment.status!=='DEPLOYED_CONFIG_VERIFIED')return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',transactionFormat:'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC',bindingVerification:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',status:'PROPOSAL_MISSING_DEPLOYED_BINDING',review:proposal,transaction:null,bindingDigest:null,intentDigest:null,blockers:['BSC56_DEPLOYED_BINDING_REQUIRED',...blocked],executionReady:false,signerRequested:false,broadcast:false});
   const digest=ethers.keccak256(ethers.toUtf8Bytes(canonical(deployment)));
@@ -788,7 +800,7 @@ export function buildBsc56UnsignedOrderReview(input={}, {ethers,expectedBindingD
     EXPECTED_EFFECT:creating?'Create a pending order. A later fill may lock isolated KGEN principal.':'Settle this open position to Brain principal or a recorded settlement claim. The wallet balance changes only on withdrawal.'};
   const base={schema:'K11520_BSC56_UNSIGNED_ORDER_REVIEW_V1',transactionFormat:'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC',
     bindingVerification:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',review,executionReady:false,signerRequested:false,broadcast:false};
-  const blockers=['FRESH_CHAIN_CODE_ACCOUNT_NONCE_AND_STATE_READBACK_REQUIRED','HUMAN_WALLET_OWNER_CONFIRMATION_REQUIRED'];
+  const blockers=BSC56_REVIEW_BLOCKERS;
   const d=input.deployment;
   if(!d||d.status!=='DEPLOYED_CONFIG_VERIFIED'){
     return freeze({...base,status:'PROPOSAL_MISSING_DEPLOYED_BINDING',transaction:null,bindingDigest:null,intentDigest:null,

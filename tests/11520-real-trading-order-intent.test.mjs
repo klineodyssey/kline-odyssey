@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {buildBsc56UnsignedOrderReview,buildBsc56UnsignedCustodyReview,buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createPreviewSimulationExecutionAdapter,createK11520PreviewRequestId,k11520ServerPreviewType,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 import {createKgenLedger,C_PNL_MODEL} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
@@ -23,7 +24,9 @@ test('V1 unsigned intent has 1C ceiling after all protected gates; 100C simulati
  for(const c of [5,-5,100,-100])assert.throws(()=>buildRealTradingOrderIntent({...base,c}),/V1_HIGH_SPEED_PRODUCTION_LOCKED/);
  assert.equal(intent.lots,2);assert.equal(intent.transactionPayload,null);assert.equal(intent.calldata,null);
  assert.equal(intent.signerRequested,false);assert.equal(intent.broadcast,false);
- assert.equal(intent.status,'READY_FOR_EXPLICIT_WALLET_ACTION_NOT_SUBMITTED');
+ assert.equal(intent.status,'UNSIGNED_ORDER_INTENT_ONLY');assert.equal(intent.executionReady,false);
+ assert.ok(intent.blockers.includes('HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED'));
+ assert.ok(Object.isFrozen(intent.blockers));
 });
 test('rejects wrong axis market, chain and missing protected authorization',()=>{
  assert.throws(()=>buildRealTradingOrderIntent({...base,market:'ETHUSDT'}),/REAL_TRADING_AXIS_MARKET_MISMATCH/);
@@ -142,6 +145,32 @@ test('EVM seam stays disabled despite flags; no provider calls and no fallback o
   const result=action();assert.equal(result.ok,false);assert.equal(result.code,'ORDER_REJECTED');assert.match(result.reason,/NOT_DEPLOYED_OR_AUTHORIZED/);
  }
  assert.equal(walletCalls,0);assert.deepEqual(ledger,before);assert.equal(adapter.snapshot().wallet,null);
+});
+test('chain56 official manifest and metadata cannot open a wallet or enter the paper ledger across tabs and reload',()=>{
+ const manifest=JSON.parse(readFileSync(new URL('../docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json',import.meta.url),'utf8'));
+ assert.equal(manifest.CHAIN_ID,56);
+ const {input,options}=bsc56OrderFixture(),review=buildBsc56UnsignedOrderReview(input,options);
+ assert.ok(review.transaction&&review.intentDigest);
+ const calls=[];
+ const provider={request({method}){calls.push(method);throw new Error('UNEXPECTED_WALLET_RPC')}};
+ const {ledger}=fixture(),before=structuredClone(ledger);
+ const pendingRecord=JSON.stringify({phase:'WAITING_WALLET',account:input.walletAddress,nonce:input.nonce});
+ const storage={getItem:()=>pendingRecord,setItem(){assert.fail('must preserve existing wallet requests')}};
+ for(const deployment of [manifest,{...manifest,mode:'SIMULATION'},
+   {...manifest,mode:'BSC_TESTNET',chainId:97},{...input.deployment,mode:'SIMULATION',chainId:'0x38'},
+   {...input.deployment,executionReady:true,humanMainnetAuthorization:true,expectedBindingDigest:options.expectedBindingDigest}]){
+  for(let session=0;session<2;session++){
+   const adapter=createExecutionAdapter({ledger,deployment,ethereum:provider,storage});
+   assert.equal(adapter.enabled,false);
+   assert.equal(adapter.snapshot().chainId,56);assert.equal(adapter.snapshot().executionReady,false);
+   for(const name of ['submit','close','approve','deposit','withdraw','claim']){
+    const result=adapter[name](review);
+    assert.equal(result.ok,false);assert.equal(result.signerRequested,false);assert.equal(result.broadcast,false);
+    assert.ok(result.blockers.includes('BSC56_DEPLOYED_BINDING_REQUIRED'));
+   }
+  }
+ }
+ assert.deepEqual(calls,[]);assert.deepEqual(ledger,before);
 });
 test('stable wallet/transaction failure states are bounded and do not leak provider details',()=>{
  for(const state of EXECUTION_FAILURE_STATES)assert.equal(normalizeExecutionError({code:state}),state);
