@@ -23,7 +23,9 @@ async function verifyWideTouchPortrait(){
     await game.waitForFunction(()=>globalThis.__K11520_WORLD_COORDS__?.physical&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&document.documentElement.classList.contains('k11520InfoOpen'));
     const settled=await game.waitForFunction(()=>{
       const sample=selector=>{
-        const el=document.querySelector(selector),r=el.getBoundingClientRect(),style=getComputedStyle(el),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+        const el=document.querySelector(selector);
+        if(!el)return null;
+        const r=el.getBoundingClientRect(),style=getComputedStyle(el),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
         return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,font:parseFloat(style.fontSize),visible:style.display!=='none'&&style.visibility==='visible'&&Number(style.opacity)>0,hit:el===hit||el.contains(hit)};
       };
       const result={width:innerWidth,height:innerHeight,scale:visualViewport.scale,touch:matchMedia('(any-pointer: coarse)').matches,
@@ -31,9 +33,12 @@ async function verifyWideTouchPortrait(){
         hp:sample('#k11520HpDetail'),price:sample('.axis .q'),
         cards:[...document.querySelectorAll('.axis')].map(el=>sample('[data-axis="'+el.dataset.axis+'"]')),
         rails:['#yControl','#cControl','#lotsControl'].map(sample)};
-      return result.market.height>0&&result.world.visible&&result.life.visible&&result.world.y>=result.market.bottom+8&&result.life.y>=result.market.bottom+8?result:false;
-    },null,{timeout:5000});
+      const required=[result.header,result.brand,result.market,result.world,result.life,result.hp,result.price,...result.rails];
+      const ready=required.every(Boolean)&&result.cards.length===3&&result.cards.every(Boolean);
+      return ready&&result.market.height>0&&result.world.visible&&result.life.visible&&result.world.y>=result.market.bottom+8&&result.life.y>=result.market.bottom+8?result:false;
+    },null,{timeout:15000});
     const geometry=await settled.jsonValue();await settled.dispose();
+    await fs.writeFile(OUT+'/11520-wide-touch-portrait-geometry.json',JSON.stringify({head:process.env.K11520_SOURCE_SHA||null,geometry},null,2));
     assert.equal(geometry.touch,true);
     assert.equal(geometry.width,viewport.width);
     assert.equal(geometry.cards.length,3);
@@ -72,6 +77,7 @@ async function verifyWideTouchPortrait(){
     await entry.locator('#k11520MarketRow').tap();
     await entry.locator('#k11520HudProfile').selectOption('MINIMAL');
     await entry.locator('#k11520UiSettingsClose').tap();
+    await game.waitForFunction(()=>document.documentElement.dataset.k11520HudProfile==='MINIMAL'&&!document.documentElement.classList.contains('k11520SettingsOpen')&&document.querySelector('.axis.active .q')?.getBoundingClientRect().height>0);
     const compact=await game.evaluate(()=>{
       const box=selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,font:parseFloat(getComputedStyle(e).fontSize),clipped:e.scrollHeight>e.clientHeight+1}};
       return {hp:box('.monsterHud'),market:box('.axes'),quote:box('.axis.active .q'),xyz:box('.tele #xyz')};
