@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {tmpdir} from 'node:os';
+import {randomUUID} from 'node:crypto';
 import {join} from 'node:path';
 import {createK11520Server,BINANCE_AGGREGATE_SOURCE,BYBIT_TRADES_SOURCE} from '../backend/server.mjs';
 import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
@@ -609,13 +610,26 @@ async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin
 // submit/observe API, replaces runtime code, connects a wallet, or signs a TX.
 // Baseline mode records the same native attempt against an explicitly pinned
 // pre-repair server; BASELINE_REPRODUCED is not a product/browser PASS.
+function readOfflineControlHit(element, probeId) {
+  const rect = element.getBoundingClientRect();
+  const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  const box = {x:rect.x,y:rect.y,width:rect.width,height:rect.height,right:rect.right,bottom:rect.bottom,
+    hit:hit===element || element.contains(hit),blocker:hit?.id || hit?.tagName};
+  const probes = globalThis.__offlineSimulationQA?.confirmGeometryChecks;
+  const observation = probes?.[probeId] ?? null;
+  if (observation) delete probes[probeId];
+  return {box,observation};
+}
+
 // Read-only readiness before native input: observe real rendered frames, never
 // finish animations, mutate styles, scroll controls, or retry submitted actions.
 async function waitForOfflineConfirmationGeometry(page,record){
-  await page.evaluate(selector=>{globalThis.__offlineSimulationQA.confirmGeometry={selector,frames:[],stableFrames:0}},record.selector);
+  const probeId = randomUUID();
   try{
-    await page.waitForFunction(()=>{
-      const evidence=globalThis.__offlineSimulationQA.confirmGeometry,element=document.querySelector(evidence.selector),surface=document.querySelector('#confirm');
+    const ready = await page.waitForFunction(({id,selector})=>{
+      const probes = globalThis.__offlineSimulationQA.confirmGeometryChecks ??= {};
+      const evidence = probes[id] ??= {selector,frames:[],stableFrames:0};
+      const element=document.querySelector(selector),surface=document.querySelector('#confirm');
       const rect=element?.getBoundingClientRect(),box=rect?{x:rect.x,y:rect.y,width:rect.width,height:rect.height,right:rect.right,bottom:rect.bottom}:null;
       const ancestors=[];for(let node=element;node;node=node.parentElement){
         const css=getComputedStyle(node);ancestors.push({id:node.id||node.tagName,display:css.display,visibility:css.visibility,opacity:css.opacity,transform:css.transform,
@@ -627,10 +641,26 @@ async function waitForOfflineConfirmationGeometry(page,record){
       evidence.stableFrames=visible&&!moving?(same?evidence.stableFrames+1:1):0;
       evidence.frames.push({at:Date.now(),monotonicAt:performance.now(),box,visible,moving,stableFrames:evidence.stableFrames,ancestors});
       return evidence.stableFrames>=3;
-    },null,{polling:'raf',timeout:1200});
-    record.status='STABLE_RENDERED_GEOMETRY';
-  }catch(error){record.status='NOT_STABLE';throw new Error('CONFIRM_GEOMETRY_NOT_STABLE '+String(error.message))}
-  finally{record.observation=await page.evaluate(()=>globalThis.__offlineSimulationQA.confirmGeometry).catch(()=>null)}
+    },{id:probeId,selector:record.selector},{polling:'raf',timeout:1200});
+    // The boolean handle owns no trace. Release it while reading the live button.
+    const [sample] = await Promise.all([
+      page.locator(record.selector).evaluate(readOfflineControlHit, probeId),
+      ready.dispose().catch(error => { record.handleReleaseError = String(error.message); })
+    ]);
+    if (!sample.observation) throw new Error('confirmation observation unavailable');
+    record.observation = sample.observation;
+    record.status = 'STABLE_RENDERED_GEOMETRY';
+    return sample;
+  } catch (error) {
+    record.status = 'NOT_STABLE';
+    record.observation = await page.evaluate(id => {
+      const probes = globalThis.__offlineSimulationQA?.confirmGeometryChecks;
+      const trace = probes?.[id] ?? null;
+      if (trace) delete probes[id];
+      return trace;
+    },probeId).catch(()=>null);
+    throw new Error('CONFIRM_GEOMETRY_NOT_STABLE '+String(error.message));
+  }
 }
 
 function readRenderedExchangePanel({selector,scrolledLabel}){
@@ -871,8 +901,10 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       if(validationError)throw validationError;
     };
     const usable=async selector=>{
-      if(['#confirmOrder','#cancelOrder'].includes(selector)){const record={stage,selector};(result.controlReadiness??=[]).push(record);await waitForOfflineConfirmationGeometry(page,record)}
-      const box=await page.locator(selector).evaluate(element=>{const r=element.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,hit:hit===element||element.contains(hit),blocker:hit?.id||hit?.tagName}});
+      const record = ['#confirmOrder','#cancelOrder'].includes(selector) ? {stage,selector} : null;
+      if (record) (result.controlReadiness ??= []).push(record);
+      const {box} = record ? await waitForOfflineConfirmationGeometry(page,record)
+        : await page.locator(selector).evaluate(readOfflineControlHit);
       assert.ok(box.width>0&&box.height>0&&box.x>=0&&box.y>=0&&box.right<=profile.width+1&&box.bottom<=profile.height+1,`${selector} clipped: ${JSON.stringify(box)}`);
       assert.ok(box.hit,`${selector} pointer blocked: ${JSON.stringify(box)}`);return box;
     };
