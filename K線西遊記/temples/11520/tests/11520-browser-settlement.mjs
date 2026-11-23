@@ -787,6 +787,11 @@ async function setOfflineOrderInputs(page, {plane, axis, c}, enterBoth) {
   }
 }
 
+function offlineOrderCasesFromPlane(cases, plane) {
+  const first = cases.findIndex(testCase => testCase.plane === plane);
+  return first > 0 ? [...cases.slice(first), ...cases.slice(0, first)] : cases;
+}
+
 async function offlineSimulationBrowserQA(options){
   const {baseline,profiles,requestedProfile}=options;
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
@@ -1062,8 +1067,7 @@ async function offlineSimulationBrowserQA(options){
         result.blockedOrderTimings=[];
         for(const market of Object.keys(prices))assert.ok(result.referenceResponses.some(row=>row.market===market&&row.state===profile.quote),'missing unavailable quote fixture for '+market);
         // Start with the market already on screen, then keep the native axis cycle.
-        const initialMarket=cases.findIndex(testCase=>testCase.plane===result.boot.plane);
-        const blockedCases=initialMarket>0?[...cases.slice(initialMarket),...cases.slice(0,initialMarket)]:cases;
+        const blockedCases=offlineOrderCasesFromPlane(cases,result.boot.plane);
         for(const testCase of blockedCases){
           const evidence={market:testCase.market,side:testCase.side};
           const timing=createSettlementTiming();
@@ -1113,7 +1117,9 @@ async function offlineSimulationBrowserQA(options){
         await page.waitForFunction(()=>document.querySelector('#confirmOrder').disabled&&/TRIGGER_PRICE_MUST_BE_POSITIVE/.test(document.querySelector('#simulationOrderPreview').textContent));
         result.validation={neutral,highC,invalidTrigger:await state()};await shot('invalid-trigger');await game();
       }
-      for(const testCase of cases){
+      // The 390px input checks already selected BTC. Keep the pinned baseline sequence too.
+      const validCases=baseline||profile.width===390?cases:offlineOrderCasesFromPlane(cases,result.trialBoot.plane);
+      for(const testCase of validCases){
         stage=`${testCase.market}-${testCase.side}`;const evidence={...testCase};result.cases.push(evidence);
         await select(testCase);evidence.before=await state();evidence.orderHit=await usable('#orderFire');
         const count=evidence.before.simulation.orders.length;
