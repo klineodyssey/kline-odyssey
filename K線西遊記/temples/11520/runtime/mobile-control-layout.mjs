@@ -22,6 +22,7 @@ const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
 const wideTouchPortrait=()=>innerWidth>MOBILE_MAX&&globalThis.matchMedia?.(K11520_TOUCH_PORTRAIT_QUERY).matches;
 const mobileWidth=()=>innerWidth<=MOBILE_MAX||wideTouchPortrait();
+const railLayoutProperties=['position','left','right','top','bottom','width','height','display','transform','margin','z-index','opacity','visibility','pointer-events'];
 let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const thumbObservers=new WeakMap();
 const flowObserved=new WeakSet();
@@ -247,25 +248,56 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
     --k11520-hud-label:clamp(11px,2.65vw,26px);
     --k11520-hud-value:clamp(14px,3.6vw,36px);
   }
+  html[data-k11520-layout-owner] .top{height:auto!important;min-height:58px!important;padding-top:22px!important}
+  html[data-k11520-layout-owner][data-k11520-hud-mode="ON_DEMAND"] .top .brand{transform:none!important}
+  html[data-k11520-layout-owner] :is(#k11520MarketRow,#k11520ControlsClose){top:var(--k11520-portrait-disclosure-top,68px)!important}
   html[data-k11520-layout-owner] .brand .hqLine{font-size:clamp(13px,3vw,29px)!important}
   html[data-k11520-layout-owner] .brand .brandMetaV250,html[data-k11520-layout-owner] .top .pill small{font-size:var(--k11520-hud-label)!important}
   html[data-k11520-layout-owner] .top .pill b{font-size:var(--k11520-hud-value)!important}
   html[data-k11520-layout-owner] .axis .marketName,html[data-k11520-layout-owner] .axis .q{font-size:var(--k11520-hud-value)!important;line-height:1.2!important}
   html[data-k11520-layout-owner] .axis .marketKValue,html[data-k11520-layout-owner] .axis .pos,html[data-k11520-layout-owner] .axisHead :is(b,span){font-size:var(--k11520-hud-label)!important}
   html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud){font-size:var(--k11520-hud-label)!important;line-height:1.25!important;overflow-wrap:anywhere}
-  html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud) small{font-size:inherit!important}
+  html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud) :is(small,#k11520HpDetail,#k11520DriveHud,#k11520MotionCombat){font-size:inherit!important;line-height:inherit!important}
   html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{font-size:var(--k11520-hud-label)!important;height:auto!important;white-space:normal!important;overflow-wrap:anywhere}
-  html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) label,
+  html.k11520UtilitiesOpen[data-k11520-layout-owner] :is(.tele,.monsterHud){width:calc((100% - 163px)/2)!important}
+  html.k11520UtilitiesOpen[data-k11520-layout-owner] :is(.monsterHud,#k11520MonsterGuide){right:149px!important}
+  html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) label{
+    font-size:9px!important;white-space:normal!important;overflow-wrap:anywhere;max-width:100%;
+  }
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) .read{font-size:9px!important}
 }
-@media ${K11520_TOUCH_PORTRAIT_QUERY} and (min-width:601px){
+@media ${K11520_TOUCH_PORTRAIT_QUERY} and (width > 600px){
   html[data-k11520-layout-owner]{
     --k11520-wide-rail-width:clamp(54px,8vw,88px);
     --k11520-wide-rail-height:clamp(148px,20vw,220px);
     --k11520-wide-thumb:clamp(42px,6vw,60px);
   }
-  html[data-k11520-layout-owner] .top{height:90px!important}
-  html[data-k11520-layout-owner] :is(#k11520MarketRow,#k11520ControlsClose){top:98px!important}
+  ${compact}{
+    --k11520-summary-row:clamp(64px,8.7vw,88px);
+    --k11520-summary-life:clamp(144px,24vw,232px);
+    --k11520-summary-world-top:calc(30px + var(--k11520-summary-row));
+    --k11520-summary-world-height:clamp(38px,5vw,50px);
+  }
+  ${compact} :is(.monsterHud:not(.k11520HiddenBySettings),.axes:not(.k11520HiddenBySettings),.axes .axis.active){
+    height:var(--k11520-summary-row)!important;min-height:var(--k11520-summary-row)!important;
+  }
+  ${compact} .monsterHud:not(.k11520HiddenBySettings){width:var(--k11520-summary-life)!important;font-size:var(--k11520-hud-value)!important}
+  ${compact} .axes:not(.k11520HiddenBySettings){
+    left:calc(max(6px,env(safe-area-inset-left)) + var(--k11520-summary-life) + 8px)!important;
+    width:min(440px,calc(100vw - var(--k11520-summary-life) - 80px))!important;
+  }
+  ${compact} .axis .marketName,${compact} .axis .axisHead>b{font-size:var(--k11520-hud-label)!important}
+  ${compact} .axis .q{font-size:var(--k11520-hud-value)!important}
+  ${compact} .tele:not(.k11520HiddenBySettings){
+    top:var(--k11520-summary-world-top)!important;height:var(--k11520-summary-world-height)!important;
+  }
+  ${compact} .tele #xyz{font-size:var(--k11520-hud-label)!important;line-height:1.15!important}
+  ${compact} #k11520MarketRow{top:24px!important}
+  ${compact} #k11520MonsterGuide[style*="display: block"]:not(.k11520HiddenBySettings){
+    top:calc(var(--k11520-summary-world-top) + var(--k11520-summary-world-height) + 8px)!important;
+    font-size:var(--k11520-hud-label)!important;width:min(560px,calc(100vw - 70px))!important;
+  }
+  html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) .track{top:42px!important}
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) :is(label,.read){font-size:clamp(11px,1.5vw,16px)!important}
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) .thumb{
     width:var(--k11520-wide-thumb)!important;height:var(--k11520-wide-thumb)!important;
@@ -282,7 +314,13 @@ html:is(.k11520SettingsOpen,.k11520UtilitiesOpen,.k11520HudCollapsed) #joy[data-
 function setImportant(el,key,value){if(el&&(el.style.getPropertyValue(key)!==value||el.style.getPropertyPriority(key)!=='important'))el.style.setProperty(key,value,'important')}
 function applyRail(){
   const landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches;
-  if(!mobileWidth()&&!landscape)return;
+  if(!mobileWidth()&&!landscape){
+    for(const el of document.querySelectorAll('[data-k11520-mobile-layout="center-normal-rail"]')){
+      for(const property of railLayoutProperties)el.style.removeProperty(property);
+      delete el.dataset.k11520MobileLayout;
+    }
+    return;
+  }
   globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();
   const specs=landscape?[['#yControl','max(182px, calc(env(safe-area-inset-left) + 168px))'],['#cControl','max(232px, calc(env(safe-area-inset-left) + 218px))'],['#lotsControl','max(282px, calc(env(safe-area-inset-left) + 268px))']]:[['#yControl','calc(50% - 21px)'],['#cControl','calc(50% + 29px)'],['#lotsControl','calc(50% + 79px)']];
   if(wideTouchPortrait()){
@@ -385,10 +423,15 @@ function syncHeaderFlow(){
   const box=el=>{if(!el||el.hidden)return null;const style=getComputedStyle(el);if(style.display==='none'||style.visibility==='hidden')return null;const r=el.getBoundingClientRect();return Number.isFinite(r.top)&&Number.isFinite(r.bottom)&&r.height>0?r:null};
   const stamp=box($('#k11520BuildStamp')),brand=$('.brand'),title=$('.brand .hqLine')||brand,at=box(title);if(!stamp||!box(brand)||!at)return;
   const put=(key,n)=>{const value=n+'px';if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value)};
-  const previous=parseFloat(root.style.getPropertyValue('--k11520-brand-offset'))||0,baseTop=at.top-previous;
-  put('--k11520-brand-offset',Math.max(0,Math.ceil(stamp.bottom+4-baseTop)));
-  const disclosureBottom=wideTouchPortrait()?Math.max(box($('#k11520ControlsClose'))?.bottom||0,box($('#k11520MarketRow'))?.bottom||0):0;
-  const contentBottom=Math.max(box($('.top'))?.bottom||0,box(brand)?.bottom||0,box(title)?.bottom||0,disclosureBottom);
+  const portrait=globalThis.matchMedia?.('(orientation: portrait)').matches;
+  if(!portrait){
+    const previous=parseFloat(root.style.getPropertyValue('--k11520-brand-offset'))||0,baseTop=at.top-previous;
+    put('--k11520-brand-offset',Math.max(0,Math.ceil(stamp.bottom+4-baseTop)));
+  }
+  const headerBottom=box($('.top'))?.bottom||0;
+  if(portrait)put('--k11520-portrait-disclosure-top',Math.max(68,Math.ceil(headerBottom+6)));
+  const disclosureBottom=portrait?Math.max(box($('#k11520ControlsClose'))?.bottom||0,box($('#k11520MarketRow'))?.bottom||0):0;
+  const contentBottom=Math.max(headerBottom,box(brand)?.bottom||0,box(title)?.bottom||0,disclosureBottom);
   put('--k11520-market-top',Math.max(landscape?54:116,Math.ceil(contentBottom+8)));
 }
 // Only the compact landscape presentation follows the actual guide bounds.
