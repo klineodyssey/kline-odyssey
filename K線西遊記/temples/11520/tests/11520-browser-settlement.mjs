@@ -952,15 +952,27 @@ async function offlineSimulationBrowserQA(options){
         providerCalls:globalThis.__offlineSimulationQA.calls,native:globalThis.__offlineSimulationQA.native,feedback:globalThis.__offlineSimulationQA.feedback};
     });
     const shot=async label=>{
-      let validationError=null;
+      let validationError=null,fullPage=true;
       try{if(!baseline){
-        const feedback=await page.evaluate(()=>{
-          const toast=document.getElementById('toast'),confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),body=document.getElementById('sheetBody');
-          const panel=confirm.classList.contains('open')?confirm:sheet.classList.contains('open')&&['orders','positions','history'].includes(body.dataset.simOrgan)?sheet:null;
-          if(!panel||!toast.classList.contains('show'))return null;
+        const frame=await page.evaluate(({width,height})=>{
+          const root=document.documentElement,body=document.body,viewport=window.visualViewport;
+          const documentWidth=Math.max(root.scrollWidth,root.offsetWidth,root.clientWidth,body.scrollWidth,body.offsetWidth,body.clientWidth);
+          const documentHeight=Math.max(root.scrollHeight,root.offsetHeight,root.clientHeight,body.scrollHeight,body.offsetHeight,body.clientHeight);
+          // The configured viewport may stand in for the whole document only
+          // when it covers that document at the same origin and scale.
+          const fitsViewport=window.devicePixelRatio===1&&window.scrollX===0&&window.scrollY===0&&
+            viewport?.scale===1&&viewport.offsetLeft===0&&viewport.offsetTop===0&&
+            viewport.width===width&&viewport.height===height&&
+            documentWidth===width&&documentHeight===height;
+          const toast=document.getElementById('toast'),confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),sheetBody=document.getElementById('sheetBody');
+          const panel=confirm.classList.contains('open')?confirm:sheet.classList.contains('open')&&['orders','positions','history'].includes(sheetBody.dataset.simOrgan)?sheet:null;
+          if(!panel||!toast.classList.contains('show'))return {fitsViewport,feedback:null};
           const header=panel.querySelector('.sheetHead'),rect=element=>{const r=element.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
-          return {panel:panel.id,text:toast.textContent,context:toast.dataset.panelContext,inHeader:toast.parentElement===header,role:toast.getAttribute('role'),live:toast.getAttribute('aria-live'),position:getComputedStyle(toast).position,toast:rect(toast),header:rect(header),title:rect(header.querySelector('h2')),close:rect(header.querySelector('.close'))};
-        });
+          const feedback={panel:panel.id,text:toast.textContent,context:toast.dataset.panelContext,inHeader:toast.parentElement===header,role:toast.getAttribute('role'),live:toast.getAttribute('aria-live'),position:getComputedStyle(toast).position,toast:rect(toast),header:rect(header),title:rect(header.querySelector('h2')),close:rect(header.querySelector('.close'))};
+          return {fitsViewport,feedback};
+        },{width:profile.width,height:profile.height});
+        const {feedback}=frame;
+        fullPage=!frame.fitsViewport;
         if(feedback){
           (result.toastLayout??=[]).push({stage:label,...feedback});assert.equal(feedback.context,feedback.panel);assert.equal(feedback.inHeader,true);assert.equal(feedback.position,'static');assert.equal(feedback.role,'status');assert.equal(feedback.live,'polite');
           assert.ok(feedback.toast.width>0&&feedback.toast.height>0&&feedback.toast.x>=0&&feedback.toast.right<=profile.width+1&&feedback.toast.y>=0&&feedback.toast.bottom<=profile.height+1,'Visible panel feedback must remain inside the viewport');
@@ -968,8 +980,16 @@ async function offlineSimulationBrowserQA(options){
         }
       }}catch(error){validationError=error}
       const file=`${name}-${label}.png`;
-      try{await page.screenshot({path:`${out}/${file}`,fullPage:true});result.screenshots.push(file)}
-      catch(error){(result.screenshotErrors??=[]).push({file,error:String(error)});if(!validationError)throw error}
+      const started=performance.now();
+      try{
+        const png=await page.screenshot({path:`${out}/${file}`,fullPage});
+        result.screenshots.push(file);
+        if(!baseline){
+          const width=png.readUInt32BE(16),height=png.readUInt32BE(20);
+          (result.screenshotTimings??=[]).push({file,fullPage,width,height,durationMs:performance.now()-started});
+          if(!fullPage)assert.deepEqual([width,height],[profile.width,profile.height],'viewport PNG must cover the full document');
+        }
+      }catch(error){(result.screenshotErrors??=[]).push({file,error:String(error)});if(!validationError)throw error}
       if(validationError)throw validationError;
     };
     const usable=async selector=>{
