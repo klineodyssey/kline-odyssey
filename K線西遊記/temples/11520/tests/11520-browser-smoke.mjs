@@ -204,7 +204,12 @@ assert.equal(boxes.wallet,null,'collapsed wallet panel must not remain as a dupl
  assert.ok(escortGuide.reachable&&escortGuide.button.width>=44&&escortGuide.button.height>=44,'escort shortcut remains a native touch target');
  assert.equal(overlap(escortGuide.button,escortGuide.hint),0,'escort shortcut cannot cover the monster guide');
 
-await page.locator('#aiChatButton').click({timeout:3000});await page.waitForTimeout(30);assert.equal(await page.locator('#aiChatPanel').evaluate(el=>el.classList.contains('open')),true,'AI did not open');await page.locator('#aiClose').click({timeout:3000});await page.waitForTimeout(30);assert.equal(await page.locator('#aiChatPanel').evaluate(el=>el.classList.contains('open')),false,'AI did not close');
+await page.locator('#aiChatButton').click({timeout:3000});
+ await page.locator('#aiChatPanel.open').waitFor({state:'visible',timeout:3000});
+ await page.locator('#whiteholeEscortButton').waitFor({state:'hidden',timeout:3000});
+ await page.locator('#aiClose').click({timeout:3000});
+ await page.locator('#aiChatPanel').waitFor({state:'hidden',timeout:3000});
+ await page.locator('#whiteholeEscortButton').waitFor({state:'visible',timeout:3000});
 const toggleBefore=await page.locator('#walletToggle').boundingBox();assert.ok(toggleBefore);await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(240);assert.equal(await page.locator('#walletPanel').evaluate(el=>el.classList.contains('collapsed')),false,'wallet did not expand');await assertVisible('#walletConnect');await page.locator('#walletConnect').click({timeout:3000});await page.waitForTimeout(50);assert.ok((await page.locator('#walletMsg').textContent()).length>0,'wallet message missing');assert.equal(await page.locator('#walletLaunchSheet').evaluate(el=>el.classList.contains('open')),true,'wallet launcher fallback did not open');await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(240);assert.equal(await page.locator('#walletPanel').evaluate(el=>el.classList.contains('collapsed')),true,'wallet did not collapse');assert.equal(await page.locator('#walletLaunchSheet').evaluate(el=>el.classList.contains('open')),false,'wallet launcher fallback must close with its parent wallet');const toggleAfter=await page.locator('#walletToggle').boundingBox();assert.ok(toggleAfter);assert.ok(Math.abs(toggleAfter.x-toggleBefore.x)<16&&Math.abs(toggleAfter.y-toggleBefore.y)<16,'wallet toggle moved after collapse');
 assert.equal(await page.locator('#walletPanel').isVisible(),false,'collapsed wallet panel must disappear while its viewport-pinned toggle remains available');await assertVisible('#walletToggle');
 
