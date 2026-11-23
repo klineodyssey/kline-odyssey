@@ -71,7 +71,7 @@ function pinMobileUtilityStack(){
   const landscapeClosed=[['#k11520UtilityMaster',18,5,9993],['#cargoInterceptionButton',66,5,9991],['#homeDeliveryButton',114,5,9991]];
   // FULL portrait uses the existing rail as a compact 3-column tray below the
   // World/Life row. This keeps 44px targets without reaching into market cards.
-  const portraitOpen=[['#dock',294,101,9980],['#gameModeToggle',294,53,9979],['#walletToggle',294,5,9990],['#aiChatButton',342,101,9976],['#bgmButton',342,53,9977],['#chatHandle',342,5,9978],['#kaiosPortalButton',390,101,9974],['#k11520HudCollapseAll',390,53,9992],['#backpackButton',390,5,9975],['#whiteholeEscortButton',438,101,9973],['#k11520UtilityMaster',MOBILE.utilityBottom,5,9993],['#cargoInterceptionButton',MOBILE.raidBottom,5,9991],['#homeDeliveryButton',MOBILE.deliveryBottom,5,9991]];
+  const portraitOpen=[['#dock',294,101,9980],['#gameModeToggle',294,53,9979],['#walletToggle',294,5,9990],['#aiChatButton',342,101,9976],['#bgmButton',342,53,9977],['#chatHandle',342,5,9978],['#kaiosPortalButton',390,101,9974],['#k11520HudCollapseAll',390,53,9992],['#backpackButton',390,5,9975],['#whiteholeEscortButton',MOBILE.deliveryBottom,53,9973],['#k11520UtilityMaster',MOBILE.utilityBottom,5,9993],['#cargoInterceptionButton',MOBILE.raidBottom,5,9991],['#homeDeliveryButton',MOBILE.deliveryBottom,5,9991]];
   const portraitClosed=[['#k11520UtilityMaster',MOBILE.utilityBottom,5,9993],['#cargoInterceptionButton',MOBILE.raidBottom,5,9991],['#homeDeliveryButton',MOBILE.deliveryBottom,5,9991]];
   const specs=landscape?(open?landscapeOpen:landscapeClosed):(open?portraitOpen:portraitClosed),hudCollapsed=document.documentElement.classList.contains('k11520HudCollapsed');
   for(const [selector,bottom,right,zIndex]of specs){
