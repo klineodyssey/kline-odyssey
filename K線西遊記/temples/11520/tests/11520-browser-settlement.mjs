@@ -79,8 +79,49 @@ async function showRetainedControls(page){
   if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
 }
 
-if(process.argv.includes('--simulation-offline')||process.argv.includes('--simulation-offline-baseline')){
-  await offlineSimulationBrowserQA({baseline:process.argv.includes('--simulation-offline-baseline')});process.exit(0);
+function readOfflineSimulationRun(args){
+  const baseline=args.includes('--simulation-offline-baseline');
+  const candidate=args.includes('--simulation-offline');
+  const overrides=args.filter(arg=>arg==='--offline-profile'||arg.startsWith('--offline-profile='));
+  if(!baseline&&!candidate&&!overrides.length)return null;
+
+  const profiles=[
+    {width:360,height:740,quote:'WAIT',account:null,chain:'0x38'},
+    {width:390,height:844,quote:'STALE',account:'0x1111111111111111111111111111111111111111',chain:'0x38'},
+    {width:412,height:772,quote:'INVALID',account:'0x1111111111111111111111111111111111111111',chain:'0x1'},
+    {width:432,height:856,quote:'WAIT',account:null,chain:'0x38'},
+    {width:480,height:900,quote:'STALE',account:null,chain:'0x38'},
+    {width:844,height:390,quote:'INVALID',account:null,chain:'0x38'},
+  ];
+  if(!overrides.length)return {baseline,profiles,totalProfiles:profiles.length};
+  assert.ok(candidate&&args.length===2&&overrides.length===1,
+    'Use --offline-profile=WIDTHxHEIGHT with --simulation-offline only');
+  const requestedProfile=overrides[0].slice('--offline-profile='.length);
+  const selected=profiles.find(({width,height})=>requestedProfile===width+'x'+height);
+  assert.ok(selected,'Unknown offline profile. Select one of '+profiles.map(({width,height})=>width+'x'+height).join(', '));
+  return {baseline:false,profiles:[selected],totalProfiles:profiles.length,requestedProfile};
+}
+
+function offlineSimulationOutcome({baseline,profiles,totalProfiles,requestedProfile},results,failures,ordersPerProfile){
+  if(!requestedProfile)return {functional:failures.length?'FAIL':baseline?'BASELINE_REPRODUCED':'PASS'};
+  const diagnostics={
+    requestedProfile,
+    selectedProfiles:profiles.length,
+    totalProfiles,
+    completedOrders:results.flatMap(result=>result.cases).filter(item=>item.result==='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED').length,
+    expectedOrders:profiles.length*ordersPerProfile,
+    totalOrders:totalProfiles*ordersPerProfile,
+  };
+  const verified=results.length===profiles.length&&
+    results.every(result=>result.status==='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED')&&
+    diagnostics.completedOrders===diagnostics.expectedOrders;
+  return {diagnostics,functional:!failures.length&&verified?'PARTIAL_PROFILE_PASS':'FAIL'};
+}
+
+const offlineRun=readOfflineSimulationRun(process.argv.slice(2));
+if(offlineRun){
+  await offlineSimulationBrowserQA(offlineRun);
+  process.exit(0);
 }
 
 if(process.argv.includes('--m1-read-only')){
@@ -746,7 +787,8 @@ async function setOfflineOrderInputs(page, {plane, axis, c}, enterBoth) {
   }
 }
 
-async function offlineSimulationBrowserQA({baseline=false}={}){
+async function offlineSimulationBrowserQA(options){
+  const {baseline,profiles,requestedProfile}=options;
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   const {createHash}=await import('node:crypto');
   const {execFileSync}=await import('node:child_process');
@@ -765,20 +807,19 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       ...(path===route&&hasLeadingUtf8Bom?{bomStrippedSha256:hash(bytes.subarray(3)),bomStrippedByteLength:bytes.length-3}:{})};
   });
   const expected=Object.fromEntries(assets.map(asset=>[asset.path,asset.sha256]));
-  const out=`artifacts/11520-settlement-qa/${baseline?'offline-baseline':'offline-simulation'}`;
+  const artifactFolder=requestedProfile?`offline-simulation-diagnostic/${requestedProfile}`:baseline?'offline-baseline':'offline-simulation';
+  const out=`artifacts/11520-settlement-qa/${artifactFolder}`;
   await fs.mkdir(out,{recursive:true});
   const source=BINANCE_AGGREGATE_SOURCE,results=[],failures=[];
-  const profiles=[
-    {width:360,height:740,quote:'WAIT',account:null,chain:'0x38'},
-    {width:390,height:844,quote:'STALE',account:'0x1111111111111111111111111111111111111111',chain:'0x38'},
-    {width:412,height:772,quote:'INVALID',account:'0x1111111111111111111111111111111111111111',chain:'0x1'},
-    {width:432,height:856,quote:'WAIT',account:null,chain:'0x38'},
-    {width:480,height:900,quote:'STALE',account:null,chain:'0x38'},
-    {width:844,height:390,quote:'INVALID',account:null,chain:'0x38'},
-  ];
+  let outcome,browser;
   const cases=[['YZ','KX','BTCUSDT'],['XZ','KY','ETHUSDT'],['XY','KZ','BNBUSDT']].flatMap(([plane,axis,market])=>[1,-1].map(c=>({plane,axis,market,c,side:c>0?'LONG':'SHORT'})));
-  const browser=await chromium.launch({headless:true});
-  try{for(const profile of profiles){
+  try{
+    if(requestedProfile){
+      const startedAt=new Date().toISOString();
+      await fs.writeFile(`${out}/report.json`,JSON.stringify({head,requestedProfile,startedAt,functional:'RUNNING'},null,2));
+    }
+    browser=await chromium.launch({headless:true});
+    for(const profile of profiles){
     const name=`${profile.width}x${profile.height}-${profile.quote.toLowerCase()}`;
     const result={profile,head,baseline,simulatedBrowserClock:baseline,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};results.push(result);
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage();
@@ -1088,7 +1129,16 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         const expectedPnl=(marked.mark-position.entry)/entryUnit*marked.c*marked.lots;
         assert.ok(Math.abs(book.wallet.unrealizedPnl-expectedPnl)<1e-7,'PnL must follow signed C and real simulation mark');
         evidence.marked=await state();
-        if(testCase===cases[0]){await organ('positions');assert.match(await page.locator('#sheetBody').innerText(),/UNREALIZED PNL/);await shot(stage+'-position-pnl')}
+        if(testCase===cases[0]){
+          const panelTiming=createSettlementTiming();
+          try {
+            await panelTiming.measure('open-positions',()=>organ('positions'));
+            assert.match(await page.locator('#sheetBody').innerText(),/UNREALIZED PNL/);
+            await shot(stage+'-position-pnl');
+          } finally {
+            evidence.positionPanelTiming=panelTiming.snapshot();
+          }
+        }
         const flatTiming = createSettlementTiming();
         try {
           await flatTiming.measure('return-to-game', game);
@@ -1152,17 +1202,34 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     finally{
       result.browserSourceObservedAtExit={...finishBrowserSource.snapshot(),coverageScope:'EXPLICIT_OFFLINE_SIMULATION_ENTRY_AND_EXECUTION_ASSETS_ONLY'};
       result.lastState=await state().catch(()=>null);await page.evaluate(()=>globalThis.__offlineSimulationQA?.feedbackObserver?.disconnect()).catch(()=>{});
-      try{await fs.writeFile(`${out}/${name}-result.json`,JSON.stringify(result,null,2))}finally{await context.close();if(trial)await trial.close()}
+      try{
+        await fs.writeFile(`${out}/${name}-result.json`,JSON.stringify(result,null,2));
+      }finally{
+        try{await context.close()}
+        finally{if(trial)await trial.close()}
+      }
     }
-  }}finally{
-    await browser.close();await fs.writeFile(`${out}/report.json`,JSON.stringify({head,base,baseline,harnessSha256:hash(await fs.readFile(new URL(import.meta.url))),capturedAt:new Date().toISOString(),expectedSourceHashes:expected,expectedSourceAssets:assets,
+  }}catch(error){
+    failures.push('Browser run: '+error.message);
+    throw error;
+  }finally{
+    if(browser)await browser.close().catch(error=>failures.push('Browser cleanup: '+error.message));
+    outcome=offlineSimulationOutcome(options,results,failures,cases.length);
+    await fs.writeFile(`${out}/report.json`,JSON.stringify({head,base,baseline,harnessSha256:hash(await fs.readFile(new URL(import.meta.url))),capturedAt:new Date().toISOString(),expectedSourceHashes:expected,expectedSourceAssets:assets,
+      ...outcome,
       simulatedBrowserClock:baseline,clockEvidence:baseline?'PLAYWRIGHT_VIRTUAL_BROWSER_TIME':'WALL_CLOCK_WITH_SEQUENCED_UPSTREAM_FIXTURES',
       fixtureScope:baseline?'STATIC_BASELINE_WITH_UNAVAILABLE_MARKET':'STATIC_UNAVAILABLE_QUOTES_AND_LOOPBACK_BACKEND_WITH_UPSTREAM_QUOTE_FIXTURES',
       callChain:baseline?'historical native order attempt':'native order review and Submit → same-origin backend order → price observation → settlement receipt',
-      functional:failures.length?'FAIL':baseline?'BASELINE_REPRODUCED':'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',results,failures},null,2));
+      visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',results,failures},null,2));
   }
   assert.deepEqual(failures,[],'Offline simulation real-entry failures; inspect source-bound JSON and screenshots');
-  console.log(baseline?'BASELINE_REPRODUCED: offline native Submit blocked; this is not browser product PASS':'FUNCTIONAL_PASS: offline six-market/direction Submit at six sizes; VISUAL_QA requires direct screenshot inspection');
+  if(requestedProfile){
+    assert.equal(outcome.functional,'PARTIAL_PROFILE_PASS','The selected size did not complete its six orders and reload check');
+    const {completedOrders,totalOrders}=outcome.diagnostics;
+    console.log(`PARTIAL_PROFILE_PASS: ${requestedProfile} only, ${completedOrders}/${totalOrders} orders; VISUAL_QA requires direct screenshot inspection`);
+  }else{
+    console.log(baseline?'BASELINE_REPRODUCED: offline native Submit blocked; this is not browser product PASS':'FUNCTIONAL_PASS: offline six-market/direction Submit at six sizes; VISUAL_QA requires direct screenshot inspection');
+  }
 }
 
 // Actual candidate contracts in a disposable local EVM. No configured keys,

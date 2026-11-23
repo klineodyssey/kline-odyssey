@@ -1476,3 +1476,42 @@ test('layout reentry observes late guide nodes through its original single Resiz
   nodes.set('.brand',brand);context.install();context.install();assert.deepEqual(instances[0].nodes,[market,telemetry,guide,brand],'each real node is observed once even after repeated install');assert.equal(guards,1);assert.deepEqual(subscriptions,['resize']);assert.equal(applied,4,'every original install still applies the current layout');
   instances[0].callback();assert.equal(flows,1);assert.equal(context.__K11520_MOBILE_CONTROL_LAYOUT__.generation,1,'a late guide resize runs the existing flow and measured report');
 });
+
+test('offline browser diagnostics select one known size and preserve the full default matrix',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const source=read('./11520-browser-settlement.mjs');
+  const context={assert};
+  runInNewContext(source.slice(source.indexOf('function readOfflineSimulationRun('),source.indexOf('const offlineRun=')),context);
+  const readRun=(...args)=>JSON.parse(JSON.stringify(context.readOfflineSimulationRun(args)));
+  const sizes=['360x740','390x844','412x772','432x856','480x900','844x390'];
+  for(const flag of ['--simulation-offline','--simulation-offline-baseline']){
+    const run=readRun(flag);
+    assert.equal(run.baseline,flag==='--simulation-offline-baseline');
+    assert.equal(run.totalProfiles,sizes.length);
+    assert.deepEqual(run.profiles.map(({width,height})=>width+'x'+height),sizes);
+  }
+  assert.equal(readRun('--local-candidate'),null);
+  const diagnostic=readRun('--simulation-offline','--offline-profile=844x390');
+  assert.equal(diagnostic.requestedProfile,'844x390');
+  assert.equal(diagnostic.totalProfiles,sizes.length);
+  assert.deepEqual(diagnostic.profiles,[{width:844,height:390,quote:'INVALID',account:null,chain:'0x38'}]);
+  for(const flags of [
+    ['--offline-profile=844x390'],
+    ['--simulation-offline-baseline','--offline-profile=844x390'],
+    ['--simulation-offline','--testnet97','--offline-profile=844x390'],
+    ['--simulation-offline','--offline-profile=844x390','--offline-profile=390x844'],
+  ])assert.throws(()=>readRun(...flags),/with --simulation-offline only/);
+  assert.throws(()=>readRun('--simulation-offline','--offline-profile'),/Unknown offline profile/);
+  assert.throws(()=>readRun('--simulation-offline','--offline-profile=999x390'),/Unknown offline profile/);
+  const report=(results,failures=[])=>JSON.parse(JSON.stringify(context.offlineSimulationOutcome(diagnostic,results,failures,6)));
+  const pass='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
+  const allOrders=Array.from({length:6},()=>({result:pass}));
+  assert.equal(report([]).functional,'FAIL');
+  assert.equal(report([{status:pass,cases:allOrders.slice(0,5)}]).functional,'FAIL');
+  assert.equal(report([{status:'FAIL',cases:allOrders}]).functional,'FAIL');
+  assert.equal(report([{status:pass,cases:allOrders}],['cleanup failed']).functional,'FAIL');
+  assert.deepEqual(report([{status:pass,cases:allOrders}]),{
+    functional:'PARTIAL_PROFILE_PASS',
+    diagnostics:{requestedProfile:'844x390',selectedProfiles:1,totalProfiles:6,completedOrders:6,expectedOrders:6,totalOrders:36},
+  });
+});
