@@ -1146,6 +1146,25 @@ async function verifyFeedbackFade(page,report){
   for(const f of visible)for(const key of ['x','y','width','height'])assert(Math.abs(f[key]-first[key])<1,`toast ${key} moved during visible fade: ${JSON.stringify(f)}`);
   assert.equal(report.feedbackFade.at(-1).opacity,0,'toast must finish fading');
 }
+async function verifyStaticOrderGuard(page,screenshotName){
+  // Static entry quotes show the market. A server-preview session owns execution quotes.
+  const readBook=()=>page.evaluate(()=>{
+    const {orders,positions,receipts}=globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot();
+    return {orders,positions,receipts};
+  });
+  const before=await readBook();
+  await page.locator('#orderFire').click({timeout:2500});
+  const feedback=page.locator('#toast.show').filter({hasText:'等候有效報價'});
+  await feedback.waitFor({state:'visible',timeout:2500});
+  const message=await feedback.textContent();
+  assert.equal(await page.locator('#confirm.open').count(),0,'Static entry must keep the order confirmation closed');
+  assert.equal(await page.locator('#confirmOrder').isDisabled(),true,'Static entry must keep Submit disabled');
+  const after=await readBook();
+  assert.deepEqual(after,before,'Static entry must not change the simulation orders, positions or receipts');
+  await page.screenshot({path:OUT+'/'+screenshotName,fullPage:true});
+  return {state:'BLOCKED_NO_SETTLEMENT_SERVICE',message,orders:after.orders.length,positions:after.positions.length,receipts:after.receipts.length};
+}
+
 async function finalizeLandscape(page,report){
   await page.locator('#confirm').waitFor({state:'hidden'});
   await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
@@ -1189,7 +1208,7 @@ async function finalizeLandscape(page,report){
   const world=()=>page.evaluate(()=>structuredClone(__K11520_WORLD_COORDS__));
   const drag=async(s,x,y)=>{const b=await page.locator(s).boundingBox();await page.mouse.move(b.x+b.width/2,b.y+b.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width*x,b.y+b.height*y,{steps:8});await page.waitForTimeout(320);await page.mouse.up();await page.waitForTimeout(160)};
   let before=await world();await drag('#joy',.85,.5);assert.ok((await world()).physical.x>before.physical.x,'joystick X+ did not move avatar');before=await world();await drag('#yControl',.5,.15);assert.ok((await world()).physical.y>before.physical.y,'Y+ did not move avatar');await drag('#yControl',.5,.85);
-  await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();assert.ok((await page.locator('#confirmBody').textContent()).includes('KY'));await page.screenshot({path:`${OUT}/landscape-direct-order.png`});await page.locator('#cancelOrder').click();
+  report.landscapeOrderGuard=await verifyStaticOrderGuard(page,'landscape-order-blocked.png');
   await page.locator('#attack').click();await page.waitForTimeout(420);await page.locator('#attack').click();assert.equal(await page.evaluate(()=>__K11520_COMBAT_FX__.variant),'slash');await page.waitForTimeout(1200);
   before=await world();await page.locator('#dodge').click();assert.notDeepEqual((await world()).physical,before.physical,'dodge did not move');
   await page.screenshot({path:`${OUT}/landscape-final-844x390.png`});
@@ -1290,11 +1309,15 @@ try{
         }
         report.states.closedAgain=await snapshot(page);check(profile.name+' after cycles',report.states.closedAgain,{landscape:!!profile.landscape});await page.screenshot({path:`${OUT}/${profile.name}-closed-again.png`,fullPage:true});
       }
-      // Open a simulation preview directly; neither order nor combat needs arming.
+      // The unmodified static entry may show market data, but cannot take an order.
       const quotePresent=await page.locator('[data-axis="KX"] .q').textContent().then(s=>Number(String(s).replace(/[$,]/g,''))>0);
       if(PRODUCTION)assert.equal(quotePresent,true,'Public Pages market-data-only quote source must be LIVE');
-      if(report.states.cold.boxes['#orderFire']?.hit){await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm.open').waitFor({timeout:2500});await page.screenshot({path:`${OUT}/${profile.name}-order-preview.png`,fullPage:true});await page.locator('#cancelOrder').click({timeout:2500});report.orderPreview='OPENED_AND_CANCELLED'}
-      // The preceding cancelled-order feedback is transient, not map content.
+      if(report.states.cold.boxes['#orderFire']?.hit){
+        await page.locator('#cNumericInput').fill('1');
+        await page.locator('#cNumericInput').press('Enter');
+        report.orderGuard=await verifyStaticOrderGuard(page,profile.name+'-order-blocked.png');
+      }
+      // Wait for the guard feedback to fade before capturing the map.
       await page.waitForFunction(()=>{const el=document.getElementById('toast');return !el||(!el.classList.contains('show')&&Number(getComputedStyle(el).opacity)===0)},null,{timeout:5000});
       await page.locator('#kspaceViewK').click();await page.locator('#kspaceMarketMap').waitFor();
       assert.match(await page.locator('#kspaceMapValues').textContent(),/WORLD 11520.*KX\/BTC.*KY\/ETH.*KZ\/BNB.*LOCAL XYZ/s);
