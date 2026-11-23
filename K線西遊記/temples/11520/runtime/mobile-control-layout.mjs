@@ -5,7 +5,7 @@
 // controls OR explicit trade context. Compact overlays fit the existing world;
 // no financial state, world coordinate or gesture admission rule is changed.
 // LOCAL_CANDIDATE_REVISION: HUD-FLOW2-TAP-J1; latestHumanretainfaintoutlineandremoveoutervisualsquareonly; actualauthorCodex originaltechnicalexecutor01a189ef-ecbc-7699-b87b-a4538d57c029.
-import './market-origin-wallet-layout-runtime.mjs';
+import {K11520_MOBILE_WIDTH_QUERY,K11520_TOUCH_PORTRAIT_QUERY} from './market-origin-wallet-layout-runtime.mjs';
 import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
@@ -20,6 +20,8 @@ PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-a
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
+const wideTouchPortrait=()=>innerWidth>MOBILE_MAX&&globalThis.matchMedia?.(K11520_TOUCH_PORTRAIT_QUERY).matches;
+const mobileWidth=()=>innerWidth<=MOBILE_MAX||wideTouchPortrait();
 let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const thumbObservers=new WeakMap();
 const flowObserved=new WeakSet();
@@ -33,7 +35,7 @@ function installStyle(){
   if(!s){s=document.createElement('style');s.id='k11520MobileControlLayout';document.head.appendChild(s)}
   const compact='html[data-k11520-hud-mode="ON_DEMAND"][data-k11520-hud-profile="MINIMAL"]:not(.k11520InfoOpen):not(.k11520TradeOpen):not(.k11520SettingsOpen):not(.k11520UtilitiesOpen):not(.k11520HudCollapsed)';
   const css=`
-@media(max-width:${MOBILE_MAX}px){
+@media ${K11520_MOBILE_WIDTH_QUERY}{
   .hud-drawer-toggle,#yJoyV250{display:none!important;visibility:hidden!important;pointer-events:none!important}
   .top{left:6px!important;right:6px!important;height:58px!important;padding:7px 8px!important;gap:5px!important}
   .brand{min-width:0!important}.brand b{font-size:12px!important}
@@ -190,7 +192,7 @@ html[data-k11520-hud-mode="ON_DEMAND"] .top .brand{transform:translateY(var(--k1
 html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!important}
 @media(orientation:landscape) and (max-height:600px){html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,54px)!important}}
 #k11520BuildStamp::after{content:' · L:FLOW2/TAP-J1'}
-@media(max-width:600px) and (orientation:portrait){
+@media (max-width:600px) and (orientation:portrait), ${K11520_TOUCH_PORTRAIT_QUERY}{
   /* FULL and compact modes share one compact guide. Full story/details remain
      on its original explicit activation, not a centred world-blocking card. */
   html[data-k11520-hud-profile] #k11520MonsterGuide{left:6px!important;right:6px!important;width:auto!important;max-width:none!important;transform:none!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
@@ -239,6 +241,39 @@ html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] *{p
 html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] #k11520PlaneLabel{display:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) #joy:not([data-k11520-floating-active="1"]){visibility:visible!important;pointer-events:auto!important}
 #k11520MovePlane{position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;width:70px!important;height:44px!important;min-width:70px!important;min-height:44px!important;box-sizing:border-box!important;display:grid!important;place-items:center!important;padding:4px!important;border:1px solid #68e4ff66!important;border-radius:10px!important;background:#071018d9!important;color:#dffaff!important;font:700 12px system-ui!important;z-index:590!important;touch-action:manipulation!important}
+/* Keep reading sizes useful on touch displays that report a wide layout viewport. */
+@media (orientation:portrait) and (max-width:600px), ${K11520_TOUCH_PORTRAIT_QUERY}{
+  html[data-k11520-layout-owner]{
+    --k11520-hud-label:clamp(11px,2.65vw,26px);
+    --k11520-hud-value:clamp(14px,3.6vw,36px);
+  }
+  html[data-k11520-layout-owner] .brand .hqLine{font-size:clamp(13px,3vw,29px)!important}
+  html[data-k11520-layout-owner] .brand .brandMetaV250,html[data-k11520-layout-owner] .top .pill small{font-size:var(--k11520-hud-label)!important}
+  html[data-k11520-layout-owner] .top .pill b{font-size:var(--k11520-hud-value)!important}
+  html[data-k11520-layout-owner] .axis .marketName,html[data-k11520-layout-owner] .axis .q{font-size:var(--k11520-hud-value)!important;line-height:1.2!important}
+  html[data-k11520-layout-owner] .axis .marketKValue,html[data-k11520-layout-owner] .axis .pos,html[data-k11520-layout-owner] .axisHead :is(b,span){font-size:var(--k11520-hud-label)!important}
+  html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud){font-size:var(--k11520-hud-label)!important;line-height:1.25!important;overflow-wrap:anywhere}
+  html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud) small{font-size:inherit!important}
+  html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{font-size:var(--k11520-hud-label)!important;height:auto!important;white-space:normal!important;overflow-wrap:anywhere}
+  html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) label,
+  html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) .read{font-size:9px!important}
+}
+@media ${K11520_TOUCH_PORTRAIT_QUERY} and (min-width:601px){
+  html[data-k11520-layout-owner]{
+    --k11520-wide-rail-width:clamp(54px,8vw,88px);
+    --k11520-wide-rail-height:clamp(148px,20vw,220px);
+    --k11520-wide-thumb:clamp(42px,6vw,60px);
+  }
+  html[data-k11520-layout-owner] .top{height:90px!important}
+  html[data-k11520-layout-owner] :is(#k11520MarketRow,#k11520ControlsClose){top:98px!important}
+  html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) :is(label,.read){font-size:clamp(11px,1.5vw,16px)!important}
+  html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) .thumb{
+    width:var(--k11520-wide-thumb)!important;height:var(--k11520-wide-thumb)!important;
+    min-width:var(--k11520-wide-thumb)!important;min-height:var(--k11520-wide-thumb)!important;
+    max-width:var(--k11520-wide-thumb)!important;max-height:var(--k11520-wide-thumb)!important;
+    top:calc(58px + var(--k11520-thumb-ratio,.5)*(100% - 116px))!important;
+  }
+}
 #k11520MovePlane[hidden],html:is(.k11520ControlsOpen,.k11520TradeOpen,.k11520SettingsOpen,.k11520UtilitiesOpen,.k11520HudCollapsed) #k11520MovePlane,html.k11520WorldInputBlocked #k11520MovePlane{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html:is(.k11520SettingsOpen,.k11520UtilitiesOpen,.k11520HudCollapsed) #joy[data-k11520-floating-active="1"],html.k11520WorldInputBlocked #joy[data-k11520-floating-active="1"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 `;
@@ -247,10 +282,16 @@ html:is(.k11520SettingsOpen,.k11520UtilitiesOpen,.k11520HudCollapsed) #joy[data-
 function setImportant(el,key,value){if(el&&(el.style.getPropertyValue(key)!==value||el.style.getPropertyPriority(key)!=='important'))el.style.setProperty(key,value,'important')}
 function applyRail(){
   const landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches;
-  if(innerWidth>MOBILE_MAX&&!landscape)return;
+  if(!mobileWidth()&&!landscape)return;
   globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();
   const specs=landscape?[['#yControl','max(182px, calc(env(safe-area-inset-left) + 168px))'],['#cControl','max(232px, calc(env(safe-area-inset-left) + 218px))'],['#lotsControl','max(282px, calc(env(safe-area-inset-left) + 268px))']]:[['#yControl','calc(50% - 21px)'],['#cControl','calc(50% + 29px)'],['#lotsControl','calc(50% + 79px)']];
-  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()||paramsHidden()||document.documentElement.classList.contains('k11520SettingsOpen')){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity',railDisclosed(sel)?'1':'0'],['visibility',railDisclosed(sel)?'visible':'hidden'],['pointer-events',railDisclosed(sel)?'auto':'none']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
+  if(wideTouchPortrait()){
+    const width='var(--k11520-wide-rail-width)';
+    specs[0][1]=`calc(50% - ${width}/2)`;
+    specs[1][1]=`calc(50% + ${width}/2 + 8px)`;
+    specs[2][1]=`calc(50% + ${width}*1.5 + 16px)`;
+  }
+  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()||paramsHidden()||document.documentElement.classList.contains('k11520SettingsOpen')){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width',wideTouchPortrait()?'var(--k11520-wide-rail-width)':'42px'],['height',wideTouchPortrait()?'var(--k11520-wide-rail-height)':'132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity',railDisclosed(sel)?'1':'0'],['visibility',railDisclosed(sel)?'visible':'hidden'],['pointer-events',railDisclosed(sel)?'auto':'none']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
   if(landscape)for(const [sel] of specs){const el=$(sel);setImportant(el,'bottom','max(58px, calc(env(safe-area-inset-bottom) + 50px))');setImportant(el,'height','108px');setImportant(el,'width','44px')}
 }
 function installThumbBounds(){
@@ -311,13 +352,13 @@ function measure(){
   const isVisible=sel=>{const el=$(sel);if(!el)return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&r.width>0&&r.height>0};
   const statusVisible=isVisible('.tele')||isVisible('.monsterHud'),marketVisible=isVisible('.axes');
   const report={version:'1.3.14',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),axisTrack:rect('#yControl .track'),axisThumb:rect('#yThumb'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
-  report.axisRailCentered=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&Math.abs((report.axisRail.left+report.axisRail.width/2)-innerWidth/2)<2);
-  report.axisEnergyGeometryAligned=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&report.axisTrack&&report.axisThumb&&Math.abs((report.axisTrack.left+report.axisTrack.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&Math.abs((report.axisThumb.left+report.axisThumb.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&report.axisTrack.left>=report.axisRail.left&&report.axisTrack.right<=report.axisRail.right);
-  report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.axisRail.right<=report.warp.left&&report.warp.right<=report.lots.left);
+  report.axisRailCentered=!mobileWidth()||Boolean(report.axisRail&&Math.abs((report.axisRail.left+report.axisRail.width/2)-innerWidth/2)<2);
+  report.axisEnergyGeometryAligned=!mobileWidth()||Boolean(report.axisRail&&report.axisTrack&&report.axisThumb&&Math.abs((report.axisTrack.left+report.axisTrack.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&Math.abs((report.axisThumb.left+report.axisThumb.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&report.axisTrack.left>=report.axisRail.left&&report.axisTrack.right<=report.axisRail.right);
+  report.threeRailAligned=!mobileWidth()||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.axisRail.right<=report.warp.left&&report.warp.right<=report.lots.left);
   report.hudProfile=document.documentElement.dataset.k11520HudProfile||'FULL';report.statusVisible=statusVisible;report.marketVisible=marketVisible;
-  report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
-  report.statusBelowMarket=innerWidth>MOBILE_MAX||!statusVisible||!marketVisible||Boolean(report.marketHud&&report.worldHud&&report.lifeHud&&report.worldHud.top>=report.marketHud.bottom+8&&report.lifeHud.top>=report.marketHud.bottom+8);
-  report.mapBelowStatus=innerWidth>MOBILE_MAX||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
+  report.equalWorldLifeWidth=!mobileWidth()||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
+  report.statusBelowMarket=!mobileWidth()||!statusVisible||!marketVisible||Boolean(report.marketHud&&report.worldHud&&report.lifeHud&&report.worldHud.top>=report.marketHud.bottom+8&&report.lifeHud.top>=report.marketHud.bottom+8);
+  report.mapBelowStatus=!mobileWidth()||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
   report.overlaps={joyRail:overlap(report.joy,report.axisRail),warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketHud,report.worldHud),marketLife:overlap(report.marketHud,report.lifeHud),worldMap:overlap(report.worldHud,report.minimap),lifeMap:overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();report.paramsHidden=paramsHidden();report.settingsOpen=document.documentElement.classList.contains('k11520SettingsOpen');
   report.compact=compactHud();report.floatingActive=$('#joy')?.dataset.k11520FloatingActive==='1';
@@ -328,25 +369,26 @@ function measure(){
   report.compactContained=compactBoxes.every(({rect:r})=>r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight);
   report.compactOverlaps=[];for(let i=0;i<compactBoxes.length;i++)for(let j=i+1;j<compactBoxes.length;j++)if(overlap(compactBoxes[i].rect,compactBoxes[j].rect))report.compactOverlaps.push([compactBoxes[i].selector,compactBoxes[j].selector]);
   report.compactTouchTargets=compactBoxes.filter(({selector})=>!['.axes','.tele','.monsterHud','#k11520MonsterGuide','#yControl','#cControl','#lotsControl'].includes(selector)).every(({rect:r})=>r.width>=44&&r.height>=44);
-  const fullGeometry=innerWidth>MOBILE_MAX||(report.paramsHidden||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned)&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v);
+  const fullGeometry=!mobileWidth()||(report.paramsHidden||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned)&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v);
   report.ok=report.collapsed||report.settingsOpen||(report.compact?report.compactContained&&report.compactTouchTargets&&report.compactOverlaps.length===0:fullGeometry);
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
   return report;
 }
 function installGuard(){
   try{guard?.disconnect()}catch{}
-  const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#chatHandle'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();applyRightOrgans();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
+  const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#chatHandle'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||!mobileWidth())return;busy=true;applyRail();applyRightOrgans();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
   timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay));
 }
 function syncHeaderFlow(){
   const root=document.documentElement,landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches;
-  if(hudCollapsed()||root.classList.contains('k11520SettingsOpen')||(innerWidth>MOBILE_MAX&&!landscape))return;
+  if(hudCollapsed()||root.classList.contains('k11520SettingsOpen')||(!mobileWidth()&&!landscape))return;
   const box=el=>{if(!el||el.hidden)return null;const style=getComputedStyle(el);if(style.display==='none'||style.visibility==='hidden')return null;const r=el.getBoundingClientRect();return Number.isFinite(r.top)&&Number.isFinite(r.bottom)&&r.height>0?r:null};
   const stamp=box($('#k11520BuildStamp')),brand=$('.brand'),title=$('.brand .hqLine')||brand,at=box(title);if(!stamp||!box(brand)||!at)return;
   const put=(key,n)=>{const value=n+'px';if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value)};
   const previous=parseFloat(root.style.getPropertyValue('--k11520-brand-offset'))||0,baseTop=at.top-previous;
   put('--k11520-brand-offset',Math.max(0,Math.ceil(stamp.bottom+4-baseTop)));
-  const contentBottom=Math.max(box($('.top'))?.bottom||0,box(brand)?.bottom||0,box(title)?.bottom||0);
+  const disclosureBottom=wideTouchPortrait()?Math.max(box($('#k11520ControlsClose'))?.bottom||0,box($('#k11520MarketRow'))?.bottom||0):0;
+  const contentBottom=Math.max(box($('.top'))?.bottom||0,box(brand)?.bottom||0,box(title)?.bottom||0,disclosureBottom);
   put('--k11520-market-top',Math.max(landscape?54:116,Math.ceil(contentBottom+8)));
 }
 // Only the compact landscape presentation follows the actual guide bounds.
@@ -372,7 +414,7 @@ function syncStatusFlow(){
   if(hudCollapsed()||root.classList.contains('k11520SettingsOpen'))return;
   if(onDemand()&&!root.classList.contains('k11520InfoOpen')&&!root.classList.contains('k11520TradeOpen'))return;
   const landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches;
-  if(innerWidth>MOBILE_MAX&&!landscape)return;
+  if(!mobileWidth()&&!landscape)return;
   const visibleRect=el=>{if(!el||el.hidden)return null;const s=getComputedStyle(el);if(s.display==='none'||s.visibility==='hidden')return null;const r=el.getBoundingClientRect();return Number.isFinite(r.bottom)&&r.height>0?r:null};
   const put=(key,n)=>{const value=`${n}px`;if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value)};
   const market=visibleRect($('.axes')),hud=[$('.tele'),$('.monsterHud')].filter(el=>visibleRect(el));

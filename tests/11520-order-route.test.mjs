@@ -599,7 +599,8 @@ test('existing utility owner gives expanded wallet an unobstructed view and rest
  const context=vm.createContext({walletWasOpen:false,put:(el,k,v)=>el.style.setProperty(k,v),installUtilityMaster:()=>toggle,document:{documentElement:{classList:{contains:name=>(name==='k11520UtilitiesOpen'&&utilitiesOpen)||(name==='k11520HudCollapsed'&&hudHidden)}},querySelectorAll:s=>nodes[s.slice(1)]?[nodes[s.slice(1)]]:[]},$:s=>nodes[s.slice(1)],OPTIONAL_UTILITIES:selectors,matchMedia:()=>({matches:false})});
  // The existing owner now composes with Settings; evaluate its real dependency
  // rather than bypassing that guard in this Wallet-only fixture.
- vm.runInContext(source.slice(source.indexOf('const settingsOpen='),source.indexOf('function put(')),context);
+ const media=source.slice(source.indexOf('export const K11520_TOUCH_PORTRAIT_QUERY'),source.indexOf('const LEGACY_MARKET_ORIGIN_KEY')).replaceAll('export const ','const ');
+ vm.runInContext(media+source.slice(source.indexOf('const settingsOpen='),source.indexOf('function put(')),context);
  vm.runInContext(source.slice(source.indexOf('function pinMobileUtilityStack(){'),source.indexOf('function installUtilityMaster(){')),context);vm.runInContext(fn,context);vm.runInContext('syncUtilityMaster()',context);
  for(const id of ['dock','aiChatButton','chatHandle','bgmButton','backpackButton'])assert.equal(nodes[id].style.values.display,'none');
  assert.notEqual(nodes.walletPanel.style.values.display,'none');assert.notEqual(nodes.walletToggle.style.values.display,'none');

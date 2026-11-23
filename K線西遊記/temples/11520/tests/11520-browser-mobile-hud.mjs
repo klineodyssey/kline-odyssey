@@ -6,6 +6,76 @@ const OUT='artifacts/11520-visual-qa';
 const BASE=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
+async function verifyWideTouchPortrait(){
+  const viewport={width:980,height:2100};
+  const host=await browser.newPage({viewport,isMobile:true,hasTouch:true});
+  await host.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
+  try{
+    // A desktop-sized logical viewport on a portrait touch display originally
+    // skipped the mobile rail and status layout, including in the 88888 host.
+    await host.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/88888/index.html',{waitUntil:'domcontentloaded'});
+    const entry=host.frameLocator('#sharedGameFrame');
+    const intro=entry.locator('#enter11520');
+    await entry.locator('html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]').waitFor({timeout:30000});
+    if(await intro.isVisible())await intro.click();
+    const game=host.frame({url:/\/game-5d\.html/});
+    assert(game,'88888 must load the shared game frame');
+    await game.waitForFunction(()=>globalThis.__K11520_WORLD_COORDS__?.physical&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&document.documentElement.classList.contains('k11520InfoOpen'));
+    await game.waitForFunction(()=>{
+      const {marketHud,worldHud,lifeHud}=globalThis.__K11520_MOBILE_CONTROL_LAYOUT__??{};
+      return marketHud?.height>0&&worldHud?.height>0&&lifeHud?.height>0&&worldHud.top>=marketHud.bottom+8&&lifeHud.top>=marketHud.bottom+8;
+    });
+    const geometry=await game.evaluate(()=>{
+      const sample=selector=>{
+        const el=document.querySelector(selector),r=el.getBoundingClientRect(),style=getComputedStyle(el),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+        return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,font:parseFloat(style.fontSize),visible:style.display!=='none'&&style.visibility==='visible'&&Number(style.opacity)>0,hit:el===hit||el.contains(hit)};
+      };
+      return {width:innerWidth,height:innerHeight,scale:visualViewport.scale,touch:matchMedia('(any-pointer: coarse)').matches,
+        header:sample('.top'),market:sample('.axes'),world:sample('.tele'),life:sample('.monsterHud'),price:sample('.axis .q'),
+        cards:[...document.querySelectorAll('.axis')].map(el=>sample('[data-axis="'+el.dataset.axis+'"]')),
+        rails:['#yControl','#cControl','#lotsControl'].map(sample)};
+    });
+    assert.equal(geometry.touch,true);
+    assert.equal(geometry.width,viewport.width);
+    assert.equal(geometry.cards.length,3);
+    assert.ok(geometry.market.y>=geometry.header.bottom+8);
+    assert.ok(geometry.world.y>=geometry.market.bottom+8&&geometry.life.y>=geometry.market.bottom+8);
+    assert.ok(geometry.world.right+6<=geometry.life.x);
+    assert.ok(geometry.world.font>=24&&geometry.life.font>=24&&geometry.price.font>=30);
+    assert.ok(geometry.cards[0].right<=geometry.cards[1].x&&geometry.cards[1].right<=geometry.cards[2].x);
+    for(let i=0;i<geometry.rails.length;i++){
+      const rail=geometry.rails[i];
+      assert.ok(rail.visible&&rail.hit&&rail.x>=0&&rail.right<=geometry.width&&rail.bottom<=geometry.height,JSON.stringify({i,rail}));
+      if(i>0)assert.ok(geometry.rails[i-1].right+5<=rail.x);
+    }
+    await host.screenshot({path:OUT+'/11520-wide-touch-portrait-88888.png'});
+    const input=await host.context().newCDPSession(host);
+    async function dragUp(selector,changed,before){
+      const control=await entry.locator(selector).boundingBox();
+      assert(control,selector+' must be pointer reachable');
+      const point={x:control.x+control.width/2,y:control.y+control.height/2};
+      await input.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point]});
+      try{
+        await input.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:point.x,y:control.y+control.height*.17}]});
+        await game.waitForFunction(changed,before,{timeout:4500});
+      }finally{await input.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})}
+    }
+    try{
+      const before=await game.evaluate(()=>({y:globalThis.__K11520_WORLD_COORDS__.physical.y,c:globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC,lots:globalThis.__K11520_SIGNED_C_IMMERSIVE__.lots}));
+      await dragUp('#yControl',y=>globalThis.__K11520_WORLD_COORDS__.physical.y>y,before.y);
+      await dragUp('#cControl',c=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC>c,before.c);
+      await dragUp('#lotsControl',lots=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.lots>lots,before.lots);
+    }finally{await input.detach()}
+    await entry.locator('#k11520ControlsClose').tap();
+    for(const id of ['#yControl','#cControl','#lotsControl'])await entry.locator(id).waitFor({state:'hidden'});
+    await fs.writeFile(OUT+'/11520-wide-touch-portrait-88888.json',JSON.stringify({head:process.env.K11520_SOURCE_SHA||null,geometry,yMovement:'PASS',cChange:'PASS',lotsChange:'PASS',collapse:'PASS'},null,2));
+  }catch(error){
+    await host.screenshot({path:OUT+'/11520-wide-touch-portrait-failure.png',timeout:5000}).catch(()=>{});
+    throw error;
+  }finally{await host.close()}
+}
+
+await verifyWideTouchPortrait();
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 // This suite verifies the optional full-information layout. Default world-first
 // visibility and touch gestures have their own six-profile responsive coverage.
@@ -24,6 +94,7 @@ const hq=(await page.locator('.brand .hqLine').textContent()||'').trim(),meta=(a
 assert.equal(await visible('#k11520UtilityMaster'),true,'single utility master must boot visible');for(const sel of ['#dockToggle','#walletToggle','#chatHandle','#aiChatButton','#bgmButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll'])assert.equal(await visible(sel),false,`${sel} must boot collapsed behind the utility master`);await page.screenshot({path:`${OUT}/11520-mobile-utility-collapsed.png`,fullPage:true});
 await page.waitForTimeout(1800);const walletMutationAudit=await page.locator('#walletToggle').evaluate(async el=>{const glyphs=[];const observer=new MutationObserver(records=>{for(const record of records)if(record.type==='childList'||record.type==='characterData')glyphs.push((el.textContent||'').trim())});observer.observe(el,{childList:true,subtree:true,characterData:true});await new Promise(resolve=>setTimeout(resolve,1000));observer.disconnect();return glyphs});assert.deepEqual(walletMutationAudit,[],'stable wallet pinning must not self-trigger continuous DOM mutations');
 if(!await page.locator('#axes').isVisible()){await page.locator('#k11520MarketRow').click();await page.evaluate(async()=>{for(let i=0;i<3;i++)await new Promise(requestAnimationFrame)})}
+const readability=await page.locator('.tele').evaluate(el=>({status:parseFloat(getComputedStyle(el).fontSize),market:parseFloat(getComputedStyle(document.querySelector('.axis .q')).fontSize)}));assert.ok(readability.status>=11&&readability.market>=14,JSON.stringify(readability));
 const axes=await box('.axes'),worldHud=await box('.tele'),lifeHud=await box('.monsterHud'),minimap=await box('.minimapWrap');assert.equal(await page.locator('#k11520StatusFlow').count(),0,'layout repair must not reparent status HUD into a new wrapper');assert.ok(worldHud.y>=axes.y+axes.height+8);assert.ok(lifeHud.y>=axes.y+axes.height+8);assert.ok(Math.abs(worldHud.width-lifeHud.width)<2);assert.ok(Math.min(worldHud.y,lifeHud.y)>=axes.y+axes.height+8,'World/Life status must clear all K market cards');assert.ok(Math.max(worldHud.y+worldHud.height,lifeHud.y+lifeHud.height)+8<=minimap.y,'minimap must clear the stable World/Life status row');for(const sel of ['.tele','.monsterHud']){const content=await page.locator(sel).evaluate(el=>({scrollHeight:el.scrollHeight,clientHeight:el.clientHeight}));assert.ok(content.scrollHeight<=content.clientHeight+1,`${sel} content must not be clipped: ${JSON.stringify(content)}`)}
 const c=await box('#cControl'),lots=await box('#lotsControl'),rail=await box('#yControl');assert.ok(Math.abs(c.y-lots.y)<2&&Math.abs(lots.y-rail.y)<2);const viewportWidth=await page.evaluate(()=>innerWidth),railCenter=rail.x+rail.width/2;assert.ok(Math.abs(railCenter-viewportWidth/2)<=2,`normal-axis energy rail must be centered: ${JSON.stringify({viewportWidth,rail,c,lots})}`);assert.ok(rail.x+rail.width+5<=c.x,`normal-axis energy rail must sit left of C rail: ${JSON.stringify({rail,c,lots})}`);assert.ok(c.x+c.width+5<=lots.x,`C rail must sit left of positive lot rail: ${JSON.stringify({rail,c,lots})}`);assert.ok(lots.x+lots.width<=viewportWidth+1,`positive lot rail must remain inside viewport: ${JSON.stringify({viewportWidth,rail,c,lots})}`);assert.ok(rail.y+rail.height<=844);for(const thumb of ['#cThumb','#lotsThumb','#yThumb'])assert.equal(await viewportContained(thumb),true,`${thumb} must remain fully inside 390x844 viewport`);assert.match(await page.locator('#yControl .track').evaluate(el=>getComputedStyle(el).backgroundImage),/linear-gradient/i);
 const yThumbArt=await page.locator('#yThumb').evaluate(el=>{const s=getComputedStyle(el);return{image:s.backgroundImage,position:s.backgroundPosition,size:s.backgroundSize,repeat:s.backgroundRepeat}});assert.match(yThumbArt.image,/wukong-y-control\.jpg/i,'remaining-axis thumb must show approved Wukong poster artwork');assert.equal(yThumbArt.position,'31.5% 46.3%','remaining-axis artwork focal point drifted away from Wukong');assert.equal(yThumbArt.size,'426.5%','remaining-axis artwork must stay zoomed to the upright Wukong portrait');assert.equal(yThumbArt.repeat,'no-repeat');for(const thumb of ['#cThumb','#lotsThumb','#yThumb']){const shape=await page.locator(thumb).evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{w:r.width,h:r.height,ratio:s.aspectRatio,radius:s.borderRadius,shrink:s.flexShrink}});assert.ok(Math.abs(shape.w-shape.h)<.5,`${thumb} must be a true circle: ${JSON.stringify(shape)}`);assert.equal(shape.ratio,'1 / 1');assert.equal(shape.shrink,'0');assert.ok(parseFloat(shape.radius)>=shape.w/2-1)}
