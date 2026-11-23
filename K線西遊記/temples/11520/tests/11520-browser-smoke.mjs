@@ -194,15 +194,23 @@ assert.equal(boxes.wallet,null,'collapsed wallet panel must not remain as a dupl
 
  const escortGuide=await page.evaluate(()=>{
    const entry=document.querySelector('#whiteholeEscortButton'),guide=document.querySelector('#k11520MonsterGuide');
+   const tradeStatus=document.querySelector('#k11520RealTradePreflight .state');
+   const tradeMode=document.querySelector('#k11520RealTradePreflightBtn'),tradeModeBox=tradeMode.getBoundingClientRect();
+   const tradeModeTarget=document.elementFromPoint(tradeModeBox.x+tradeModeBox.width/2,tradeModeBox.y+tradeModeBox.height/2);
    const button=entry.getBoundingClientRect(),hint=guide.getBoundingClientRect();
    const target=document.elementFromPoint(button.x+button.width/2,button.y+button.height/2);
    return {button:button.toJSON(),hint:hint.toJSON(),hintText:guide.textContent.trim(),
+     tradeStatus:tradeStatus.getBoundingClientRect().toJSON(),tradeStatusText:tradeStatus.textContent.trim(),
+     tradeModeVisible:tradeModeBox.width>0&&tradeModeBox.height>0,tradeModeReachable:tradeMode.contains(tradeModeTarget),
      reachable:entry===target||entry.contains(target),utilitiesOpen:document.documentElement.classList.contains('k11520UtilitiesOpen')};
  });
  await page.screenshot({path:`${ARTIFACT_DIR}/11520-mobile-390x844.png`,fullPage:true});await fs.writeFile(`${ARTIFACT_DIR}/11520-mobile-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),...visual,centerHit,walletAnchor,zeroControls:{lots:lotsMin,c:cZero},yPointer,yHit,escortGuide},null,2));
  assert.ok(escortGuide.utilitiesOpen&&escortGuide.hintText&&escortGuide.hint.height>0,'expanded utilities and monster guide must coexist');
  assert.ok(escortGuide.reachable&&escortGuide.button.width>=44&&escortGuide.button.height>=44,'escort shortcut remains a native touch target');
  assert.equal(overlap(escortGuide.button,escortGuide.hint),0,'escort shortcut cannot cover the monster guide');
+ assert.ok(escortGuide.tradeStatus.width>0&&escortGuide.tradeStatus.height>0&&escortGuide.tradeStatusText.includes('SIMULATION'),'trading mode remains visible');
+ assert.equal(overlap(escortGuide.button,escortGuide.tradeStatus),0,'escort shortcut cannot cover the trading mode');
+ assert.ok(!escortGuide.tradeModeVisible||escortGuide.tradeModeReachable,'visible trade mode action must remain reachable');
 
 await page.locator('#aiChatButton').click({timeout:3000});
  await page.locator('#aiChatPanel.open').waitFor({state:'visible',timeout:3000});

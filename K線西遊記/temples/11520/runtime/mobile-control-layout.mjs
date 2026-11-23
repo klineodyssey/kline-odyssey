@@ -50,6 +50,11 @@ function installStyle(){
   #cControl .track,#lotsControl .track{left:8px!important;right:8px!important;top:27px!important;bottom:24px!important;min-width:0!important}
   #yControl .track{left:50%!important;right:auto!important;top:27px!important;bottom:24px!important;width:26px!important;min-width:0!important;transform:translateX(-50%)!important;background:linear-gradient(to bottom,#123f32 0%,#123f32 49.5%,#2b343b 49.5%,#2b343b 50.5%,#4b2029 50.5%,#4b2029 100%)!important;box-shadow:inset 0 0 0 1px #ffffff0c!important}
   #k11520RealTradePreflight{right:58px!important;bottom:264px!important;max-width:190px!important}
+  @media(orientation:portrait){
+    /* Leave one grid gap before the escort shortcut in the expanded tray. */
+    html.k11520UtilitiesOpen #k11520RealTradePreflight{right:101px!important}
+    html.k11520UtilitiesOpen #k11520RealTradePreflightBtn{justify-self:start}
+  }
   #cControl::after,#lotsControl::after{display:none!important}
   .tele,.monsterHud{top:var(--k11520-status-top,190px)!important;height:var(--k11520-status-height,108px)!important;padding:7px!important;font-size:7px!important}
   .tele{left:6px!important;width:calc(50% - 9px)!important}
