@@ -1008,8 +1008,11 @@ async function offlineSimulationBrowserQA(options){
     const select=async ({plane,axis,c}, measure=(_label,operation)=>operation())=>{
       await measure('return-to-game',game);
       await measure('select-axis',async()=>{
-        for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
-          const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await showRetainedControls(page);await page.locator('#joy').tap();
+        for(let attempt=0;attempt<3;attempt++){
+          const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);
+          if(previous===plane)break;
+          await showRetainedControls(page);
+          await page.locator('#joy').tap();
           await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
         }
         await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
@@ -1058,7 +1061,10 @@ async function offlineSimulationBrowserQA(options){
         result.blockedOrders=[];
         result.blockedOrderTimings=[];
         for(const market of Object.keys(prices))assert.ok(result.referenceResponses.some(row=>row.market===market&&row.state===profile.quote),'missing unavailable quote fixture for '+market);
-        for(const testCase of cases){
+        // Start with the market already on screen, then keep the native axis cycle.
+        const initialMarket=cases.findIndex(testCase=>testCase.plane===result.boot.plane);
+        const blockedCases=initialMarket>0?[...cases.slice(initialMarket),...cases.slice(0,initialMarket)]:cases;
+        for(const testCase of blockedCases){
           const evidence={market:testCase.market,side:testCase.side};
           const timing=createSettlementTiming();
           const attempt=timing.begin('blocked-order-attempt');
