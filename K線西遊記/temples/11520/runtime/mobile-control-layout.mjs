@@ -260,10 +260,20 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
   html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud) :is(small,#k11520HpDetail,#k11520DriveHud,#k11520MotionCombat){font-size:inherit!important;line-height:inherit!important}
   html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{font-size:var(--k11520-hud-label)!important;height:auto!important;white-space:normal!important;overflow-wrap:anywhere}
   html.k11520UtilitiesOpen[data-k11520-layout-owner] :is(.tele,.monsterHud){width:calc((100% - 163px)/2)!important}
-  html.k11520UtilitiesOpen[data-k11520-layout-owner] :is(.monsterHud,#k11520MonsterGuide){right:149px!important}
+  html.k11520UtilitiesOpen[data-k11520-layout-owner] .monsterHud{right:149px!important}
+  html.k11520UtilitiesOpen[data-k11520-layout-owner] #k11520MonsterGuide{
+    right:auto!important;width:calc(100% - 163px)!important;
+  }
+  @media(max-width:480px){
+    /* The guide gets its own left lane while the utility and trading buttons
+       are visible. Its text wraps without owning the adjacent controls. */
+    html.k11520UtilitiesOpen[data-k11520-layout-owner] #k11520RealTradePreflight{max-width:158px!important}
+    html.k11520UtilitiesOpen[data-k11520-layout-owner] #k11520MonsterGuide{width:calc(100% - 271px)!important}
+  }
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) label{
     font-size:9px!important;white-space:normal!important;overflow-wrap:anywhere;max-width:100%;
   }
+  html[data-k11520-layout-owner] #cControl label{letter-spacing:-.045em;overflow-wrap:normal}
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) .read{font-size:9px!important}
 }
 @media ${K11520_TOUCH_PORTRAIT_QUERY} and (width > 600px){
