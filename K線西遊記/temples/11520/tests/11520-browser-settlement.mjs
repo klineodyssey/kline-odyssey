@@ -1005,18 +1005,23 @@ async function offlineSimulationBrowserQA(options){
       await shot(label);
     };
     let previousControlsUrl;
-    const select=async ({plane,axis,c})=>{
-      await game();for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
-        const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await showRetainedControls(page);await page.locator('#joy').tap();
-        await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
-      }
-      await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
-      await showRetainedControls(page);
-      const controlsUrl = page.url();
-      // Exercise both editors on each trial page and on every historical baseline case.
-      await setOfflineOrderInputs(page, {plane, axis, c}, baseline || controlsUrl !== previousControlsUrl);
-      previousControlsUrl = controlsUrl;
-      await page.waitForFunction(({axis,c})=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis&&__K11520_SIGNED_C_IMMERSIVE__.signedC===c&&__K11520_SIGNED_C_IMMERSIVE__.lots===1,{axis,c});
+    const select=async ({plane,axis,c}, measure=(_label,operation)=>operation())=>{
+      await measure('return-to-game',game);
+      await measure('select-axis',async()=>{
+        for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
+          const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await showRetainedControls(page);await page.locator('#joy').tap();
+          await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
+        }
+        await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
+      });
+      await measure('apply-order-inputs',async()=>{
+        await showRetainedControls(page);
+        const controlsUrl = page.url();
+        // Exercise both editors on each trial page and on every historical baseline case.
+        await setOfflineOrderInputs(page, {plane, axis, c}, baseline || controlsUrl !== previousControlsUrl);
+        previousControlsUrl = controlsUrl;
+        await page.waitForFunction(({axis,c})=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis&&__K11520_SIGNED_C_IMMERSIVE__.signedC===c&&__K11520_SIGNED_C_IMMERSIVE__.lots===1,{axis,c});
+      });
     };
     const assertNoAuthority=s=>{
       assert.equal(s.execution.mode,'SIMULATION_WALLET','Offline simulation must not switch execution authority');
@@ -1049,16 +1054,33 @@ async function offlineSimulationBrowserQA(options){
       await sourceProof();
       await shot('boot');result.boot=await state();assertNoAuthority(result.boot);
       if(!baseline){
-        stage='unavailable-quotes';result.blockedOrders=[];
+        stage='unavailable-quotes';
+        result.blockedOrders=[];
+        result.blockedOrderTimings=[];
         for(const market of Object.keys(prices))assert.ok(result.referenceResponses.some(row=>row.market===market&&row.state===profile.quote),'missing unavailable quote fixture for '+market);
         for(const testCase of cases){
-          await select(testCase);
-          const before=await state();await usable('#orderFire');await page.locator('#orderFire').click();
-          await page.waitForFunction(count=>__offlineSimulationQA.feedback.slice(count).some(event=>event.text.includes('等候有效報價'))||document.querySelector('#toast').textContent.includes('等候有效報價'),before.feedback.length);
-          const after=await state();assert.equal(after.confirmOpen,false);assert.equal(after.submitDisabled,true);
-          assert.deepEqual(after.simulation.orders,before.simulation.orders);assert.deepEqual(after.simulation.receipts,before.simulation.receipts);
-          assert.equal(after.native.filter(e=>e.isTrusted&&e.type==='click'&&e.id==='orderFire').length,before.native.filter(e=>e.isTrusted&&e.type==='click'&&e.id==='orderFire').length+1);
-          result.blockedOrders.push({market:testCase.market,side:testCase.side,feedback:after.toast});
+          const evidence={market:testCase.market,side:testCase.side};
+          const timing=createSettlementTiming();
+          const attempt=timing.begin('blocked-order-attempt');
+          result.blockedOrderTimings.push(evidence);
+          try{
+            await select(testCase,timing.measure);
+            const before=await timing.measure('before-state',state);
+            await timing.measure('order-button-hit',()=>usable('#orderFire'));
+            await timing.measure('native-click',()=>page.locator('#orderFire').click());
+            await timing.measure('wait-feedback',()=>page.waitForFunction(count=>__offlineSimulationQA.feedback.slice(count).some(event=>event.text.includes('等候有效報價'))||document.querySelector('#toast').textContent.includes('等候有效報價'),before.feedback.length));
+            const after=await timing.measure('after-state',state);
+            assert.equal(after.confirmOpen,false);assert.equal(after.submitDisabled,true);
+            assert.deepEqual(after.simulation.orders,before.simulation.orders);assert.deepEqual(after.simulation.receipts,before.simulation.receipts);
+            assert.equal(after.native.filter(e=>e.isTrusted&&e.type==='click'&&e.id==='orderFire').length,before.native.filter(e=>e.isTrusted&&e.type==='click'&&e.id==='orderFire').length+1);
+            result.blockedOrders.push({market:testCase.market,side:testCase.side,feedback:after.toast});
+            timing.finish(attempt,'COMPLETE');
+          }catch(error){
+            timing.finish(attempt,'FAILED');
+            throw error;
+          }finally{
+            evidence.timing=timing.snapshot();
+          }
         }
         await shot('no-effective-quote');stage='backend-boot';
         trial=await startBrowserTrial(market=>prices[market]);finishTrialSource=attachM1PageSourceProof(page,{base:trial.origin,sourceSha:head,assets,createHash});
