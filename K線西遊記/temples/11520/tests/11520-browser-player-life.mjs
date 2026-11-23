@@ -295,10 +295,36 @@ try{
       if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
       await page.locator('#backpackButton').click();await page.locator('#backpackPanel').waitFor({state:'hidden'});profile.checks.push('LEGACY_CLEANUP_PRESERVES_PROFILE_AND_CONTEXTUAL_BACKPACK');
       const progressed=await killFirstMonster(page);await shot(page,`${width}x${height}-progression`);profile.checks.push('REAL_COMBAT_XP_INVENTORY');
-      await openLife(page);await reachable(page,'#playerLifeBuild');await page.locator('#playerLifeBuild').click();
+      await openLife(page);await reachable(page,'#playerLifeBuild');
+      const [homeToast]=await Promise.all([
+        page.waitForFunction(()=>{
+          const toast=document.querySelector('#toast.show[data-world-event="HOME_BUILD"]');
+          if(!toast||Number(getComputedStyle(toast).opacity)<0.9)return false;
+          const header=document.querySelector('#sheet.open > .sheetHead');
+          const body=document.querySelector('#sheetBody');
+          const title=header.querySelector('h2'),close=header.querySelector('.close');
+          const bounds=node=>node.getBoundingClientRect().toJSON();
+          const closeRect=bounds(close);
+          const closeHit=document.elementFromPoint(closeRect.x+closeRect.width/2,closeRect.y+closeRect.height/2);
+          return {text:toast.textContent,count:document.querySelectorAll('#toast').length,inHeader:toast.parentElement===header,
+            context:toast.dataset.panelContext,position:getComputedStyle(toast).position,role:toast.getAttribute('role'),live:toast.getAttribute('aria-live'),
+            toast:bounds(toast),title:bounds(title),close:closeRect,header:bounds(header),body:bounds(body),closeReachable:close.contains(closeHit)};
+        }),
+        page.locator('#playerLifeBuild').click(),
+      ]);
+      let feedback;
+      try{feedback=await homeToast.jsonValue();}finally{await homeToast.dispose();}
+      profile.homeToast=feedback;
+      assert.equal(feedback.text,'第一間草屋落成');assert.equal(feedback.count,1);
+      assert.equal(feedback.inHeader,true);assert.equal(feedback.context,'sheet');assert.equal(feedback.position,'static');
+      assert.equal(feedback.role,'status');assert.equal(feedback.live,'polite');assert.equal(feedback.closeReachable,true);
+      assert.ok(feedback.toast.y>=Math.max(feedback.title.bottom,feedback.close.bottom)-1,'home feedback has its own header row');
+      assert.ok(feedback.toast.bottom<=feedback.header.bottom+1&&feedback.toast.bottom<=feedback.body.y+1,'home feedback cannot cover the Player Life body');
+      assert.ok(feedback.toast.width>0&&feedback.toast.height>0&&feedback.toast.x>=0&&feedback.toast.y>=0&&feedback.toast.right<=width+1&&feedback.toast.bottom<=height+1,'home feedback is fully visible');
+      await shot(page,`${width}x${height}-home-built`);profile.checks.push('HOME_BUILD_TOAST_CLEAR_OF_PANEL');
       await page.waitForFunction(()=>__K11520_PLAYER_LIFE__.snapshot().home.houseLevel===1);
       let current=await snap(page);assert.equal(current.home.ownerPlayerId,initial.player.playerId);assert.equal(current.home.stage,'HUT');
-      await shot(page,`${width}x${height}-home-built`);profile.checks.push('HOME_OWNERSHIP_BUILD');
+      profile.checks.push('HOME_OWNERSHIP_BUILD');
       await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_PLAYER_LIFE__?.snapshot?.().player);
       const restored=await snap(page);assert.equal(restored.player.playerId,initial.player.playerId);assert.equal(restored.player.displayName,'取經測試員');assert.equal(restored.player.xp,progressed.player.xp);assert.equal(restored.player.level,progressed.player.level);assert.equal(restored.home.houseLevel,1);profile.checks.push('RETURNING_GUEST_RELOAD_XP_HOME');
       // Connect is not binding. A forged signature cannot add a wallet link.

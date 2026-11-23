@@ -2,7 +2,403 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+import {createRequire} from 'node:module';
+import {createWalletSession, KGEN_TOKEN_ADDRESS, readK11520WithdrawalReceipt, readK11520TradingReceipt} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {classify11520OrderRoute} from '../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs';
+
+function withdrawalFixture({taxed = false} = {}) {
+  const {utils} = createRequire(import.meta.url)('../assets/ethers-5.7.2.umd.min.js');
+  const brain = '0x' + '11'.repeat(20), implementation = '0x' + '22'.repeat(20);
+  const wallet = '0x' + '33'.repeat(20), feeWallet = '0x' + '44'.repeat(20);
+  const txHash = utils.id('withdrawal fixture'), blockHash = utils.id('receipt block fixture');
+  const manifest = {documentType: 'K11520_MAINNET_DEPLOYMENT_MANIFEST', CHAIN_ID: 56,
+    status: 'DEPLOYED_CONFIG_VERIFIED', KGEN_TOKEN: KGEN_TOKEN_ADDRESS,
+    BRAIN_PROXY: brain, BRAIN_IMPLEMENTATION: implementation,
+    codeHashes: {brainProxy: utils.id('proxy code'), brainImplementation: utils.id('brain code'), kgenToken: utils.id('token code')}};
+  const brainAbi = new utils.Interface(['function withdrawMargin(uint256)', 'function kgen() view returns(address)',
+    'event MarginWithdrawn(address indexed user,uint256 amountWei)']);
+  const tokenAbi = new utils.Interface(['event Transfer(address indexed from,address indexed to,uint256 value)']);
+  const tx = {hash: txHash, blockHash, blockNumber: '0x20', transactionIndex: '0x0', from: wallet,
+    to: brain, chainId: '0x38', value: '0x0', input: brainAbi.encodeFunctionData('withdrawMargin', [1000])};
+  const receipt = {transactionHash: txHash, blockHash, blockNumber: '0x20', transactionIndex: '0x0',
+    from: wallet, to: brain, status: '0x1', logs: []};
+  function addEvent(address, abi, name, args) {
+    const event = abi.encodeEventLog(abi.getEvent(name), args);
+    receipt.logs.push({address, ...event, removed: false, blockHash, blockNumber: tx.blockNumber,
+      transactionHash: txHash, transactionIndex: tx.transactionIndex, logIndex: '0x' + receipt.logs.length.toString(16)});
+  }
+  addEvent(KGEN_TOKEN_ADDRESS, tokenAbi, 'Transfer', [brain, wallet, taxed ? 997 : 1000]);
+  if (taxed) addEvent(KGEN_TOKEN_ADDRESS, tokenAbi, 'Transfer', [brain, feeWallet, 3]);
+  addEvent(brain, brainAbi, 'MarginWithdrawn', [wallet, 1000]);
+  const block = {hash: blockHash, number: tx.blockNumber, transactions: [txHash]};
+  const proofHashes = new Map([[brain,manifest.codeHashes.brainProxy],[implementation,manifest.codeHashes.brainImplementation],
+    [KGEN_TOKEN_ADDRESS,manifest.codeHashes.kgenToken]]);
+  const replies = {
+    eth_chainId: () => '0x38', eth_accounts: () => [wallet],
+    eth_getTransactionByHash: ([hash]) => { assert.equal(hash, txHash); return tx; },
+    eth_getTransactionReceipt: ([hash]) => { assert.equal(hash, txHash); return receipt; },
+    eth_getBlockByNumber: params => { assert.deepEqual(params, ['0x20',false]); return block; },
+    eth_getStorageAt: ([address,slot,tag]) => {
+      assert.equal(address, brain); assert.equal(tag, '0x20');
+      assert.equal(slot, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc');
+      return utils.hexZeroPad(implementation, 32);
+    },
+    eth_call: ([call,tag]) => {
+      assert.deepEqual(call, {to: brain, data: brainAbi.getSighash('kgen')}); assert.equal(tag, '0x20');
+      return utils.hexZeroPad(KGEN_TOKEN_ADDRESS, 32);
+    },
+    eth_getProof: ([address,slots,tag]) => {
+      assert.deepEqual(slots, []); assert.equal(tag, '0x20'); assert.ok(proofHashes.has(address));
+      return {address, codeHash: proofHashes.get(address)};
+    },
+  };
+  const calls = [];
+  const input = {manifest, account: wallet, txHash};
+  function read(overrides = {}) {
+    const provider = {request: async ({method, params}) => {
+      calls.push(method); assert.ok(Object.hasOwn(replies, method), 'unexpected RPC method ' + method);
+      return replies[method](params);
+    }};
+    return readK11520WithdrawalReceipt({...input, provider, ...overrides});
+  }
+  return {read, replies, calls, tx, receipt, block, manifest, wallet, brain, feeWallet};
+}
+
+test('BSC56 KGEN withdrawal reads gross and taxed or untaxed wallet credit from the same canonical transaction', async () => {
+  for (const taxed of [false, true]) {
+    const f = withdrawalFixture({taxed});
+    const first = await f.read({amountWei: '1000'});
+    assert.equal(first.status, 'CREDIT_CONFIRMED'); assert.equal(first.ok, true);
+    assert.equal(first.requestedWei, '1000'); assert.equal(first.receivedWei, taxed ? '997' : '1000');
+    assert.equal(first.feeWei, taxed ? '3' : '0'); assert.equal(first.account, f.wallet);
+    assert.equal(first.blockHash, f.block.hash); assert.equal(first.brainAddress, f.brain);
+    assert.deepEqual(await f.read(), first, 'a newly opened reader returns the original tx receipt without local state');
+  }
+});
+
+test('BSC56 withdrawal distinguishes a pending transaction, revert, disconnect and canonical block replacement', async () => {
+  const pending = withdrawalFixture();
+  Object.assign(pending.tx, {blockHash: null, blockNumber: null, transactionIndex: null});
+  pending.replies.eth_getTransactionReceipt = () => null;
+  assert.equal((await pending.read()).status, 'PENDING');
+  pending.replies.eth_getTransactionByHash = () => null;
+  assert.equal((await pending.read()).status, 'UNKNOWN');
+  const f = withdrawalFixture();
+  f.receipt.status = '0x0';
+  assert.equal((await f.read()).status, 'REVERTED');
+  f.receipt.status = '0x1';
+  const original = f.replies.eth_getTransactionReceipt;
+  f.replies.eth_getTransactionReceipt = () => {throw new Error('fixture offline');};
+  assert.equal((await f.read()).status, 'UNKNOWN');
+  f.replies.eth_getTransactionReceipt = original;
+  assert.equal((await f.read()).status, 'CREDIT_CONFIRMED');
+  let count = 0;
+  f.replies.eth_getBlockByNumber = () => ++count === 1 ? f.block : {...f.block, transactions: []};
+  assert.equal((await f.read()).reason, 'CANONICAL_BLOCK_UNCONFIRMED');
+  assert.ok(!f.calls.some(method => /sign|send|requestAccounts/i.test(method)));
+});
+
+test('BSC56 withdrawal requires the official deployment and the original caller, calldata and amount', async () => {
+  const original = JSON.parse(await readFile(new URL('../docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json', import.meta.url), 'utf8'));
+  const f = withdrawalFixture();
+  assert.equal((await f.read({manifest: {...original, status: 'BLOCKED_NOT_EXECUTABLE', BRAIN_PROXY: null}})).status, 'BINDING_UNAVAILABLE');
+  assert.equal((await f.read({manifest: {...f.manifest, codeHashes: {}}})).status, 'BINDING_UNAVAILABLE');
+  assert.equal(f.calls.length, 0);
+  f.replies.eth_chainId = () => '0x61';
+  assert.equal((await f.read()).status, 'WRONG_CHAIN');
+  f.replies.eth_chainId = () => '0x38';
+  f.replies.eth_accounts = () => [f.feeWallet, f.wallet];
+  assert.equal((await f.read()).status, 'ACCOUNT_MISMATCH');
+  let accountReads = 0;
+  f.replies.eth_accounts = () => [++accountReads === 1 ? f.wallet : f.feeWallet];
+  assert.equal((await f.read()).status, 'ACCOUNT_MISMATCH');
+  f.replies.eth_accounts = () => [f.wallet];
+  assert.equal((await f.read({amountWei: '1001'})).reason, 'WITHDRAWAL_AMOUNT');
+  const originalTx = {...f.tx};
+  delete f.tx.chainId;
+  assert.equal((await f.read()).status, 'UNKNOWN');
+  f.tx.v = '0x93'; // 35 + 2 * chainId + parity
+  assert.equal((await f.read()).status, 'CREDIT_CONFIRMED');
+  for (const change of [{from: f.feeWallet}, {to: f.feeWallet}, {input: f.tx.input + '00'}, {value: '0x1'}, {chainId: '0x61'}]) {
+    Object.assign(f.tx, originalTx, change);
+    assert.equal((await f.read()).reason, 'TRANSACTION_TERMS');
+  }
+  Object.assign(f.tx, originalTx);
+  const getStorage = f.replies.eth_getStorageAt, getToken = f.replies.eth_call;
+  f.replies.eth_getStorageAt = () => '0x' + f.feeWallet.slice(2).padStart(64, '0');
+  assert.equal((await f.read()).reason, 'DEPLOYMENT_CODE_OR_ROUTING');
+  f.replies.eth_getStorageAt = getStorage;
+  f.replies.eth_call = () => '0x' + f.feeWallet.slice(2).padStart(64, '0');
+  assert.equal((await f.read()).reason, 'DEPLOYMENT_CODE_OR_ROUTING');
+  f.replies.eth_call = getToken;
+  f.replies.eth_getProof = ([address]) => ({address, codeHash: '0x' + 'ab'.repeat(32)});
+  assert.equal((await f.read()).reason, 'DEPLOYMENT_CODE_OR_ROUTING');
+});
+
+test('BSC56 withdrawal excludes unrelated payment, missing or duplicated evidence and mismatched receipts', async () => {
+  const cases = [
+    f => { f.receipt.logs[0].address = f.feeWallet; },
+    f => { f.receipt.logs[0].topics[1] = '0x' + f.feeWallet.slice(2).padStart(64, '0'); },
+    f => { f.receipt.logs[0].transactionHash = '0x' + '00'.repeat(32); },
+    f => { f.receipt.logs[0].removed = true; },
+    f => { f.receipt.logs[1].data = '0x' + '0'.repeat(64); },
+    f => { f.receipt.logs[1].topics[2] = f.receipt.logs[0].topics[2]; },
+    f => { f.receipt.logs[2].address = f.feeWallet; },
+    f => { f.receipt.logs[2].topics[1] = f.receipt.logs[1].topics[2]; },
+    f => { f.receipt.logs[2].data = '0x' + '1'.padStart(64,'0'); },
+    f => { f.receipt.logs.push({...f.receipt.logs[2], logIndex: '0x3'}); },
+    f => { f.receipt.from = f.feeWallet; },
+    f => { f.receipt.to = f.feeWallet; },
+    f => { f.receipt.blockHash = '0x' + '12'.repeat(32); },
+  ];
+  for (const change of cases) {
+    const f = withdrawalFixture({taxed: true}); change(f);
+    const result = await f.read();
+    assert.equal(result.status, 'EVIDENCE_MISMATCH');
+    assert.equal(result.receivedWei, undefined);
+  }
+});
+
+test('BSC56 withdrawal session pins the connected provider and discards an in-flight result on disconnect', async () => {
+  const f = withdrawalFixture();
+  const baseCall = f.replies.eth_call;
+  const zero = '0x' + '0'.repeat(64);
+  const requests = [];
+  const session = createWalletSession({ethereum: {request({method, params}) {
+    requests.push(method);
+    if (method === 'eth_getBalance') return Promise.resolve('0x0');
+    if (method === 'eth_call' && params[0].to === KGEN_TOKEN_ADDRESS) return Promise.resolve(zero);
+    return Promise.resolve(f.replies[method](params));
+  }}});
+  const input = {manifest: f.manifest, txHash: f.tx.hash, account: f.feeWallet,
+    provider: {request() {throw new Error('wrong provider');}}};
+  assert.equal((await session.readWithdrawalReceipt(input)).reason, 'WALLET_NOT_CONNECTED');
+  assert.equal(requests.length, 0);
+  assert.equal((await session.refresh()).status, 'CONNECTED');
+  assert.equal((await session.readWithdrawalReceipt(input)).account, f.wallet);
+  let entered, resolve;
+  const started = new Promise(ok => {entered = ok;});
+  f.replies.eth_call = args => new Promise(ok => {resolve = () => ok(baseCall(args)); entered();});
+  const pending = session.readWithdrawalReceipt(input);
+  await started;
+  session.disconnect();
+  resolve();
+  const result = await pending;
+  assert.equal(result.status, 'UNKNOWN');
+  assert.equal(result.reason, 'WALLET_SESSION_CHANGED');
+  assert.equal(result.receivedWei, undefined);
+  assert.ok(!requests.some(method => /sign|send|requestAccounts/i.test(method)));
+  session.dispose();
+});
+
+function tradingReceiptFixture({liquidation = false, paid = null, short = false} = {}) {
+  const {utils} = createRequire(import.meta.url)('../assets/ethers-5.7.2.umd.min.js');
+  const {wallet, manifest, brain} = withdrawalFixture();
+  const trigger = '0x' + '50'.repeat(20), position = '0x' + '51'.repeat(20), keeper = '0x' + '52'.repeat(20);
+  Object.assign(manifest, {ORDER_TRIGGER_ENGINE: trigger, POSITION_ENGINE: position});
+  Object.assign(manifest.codeHashes, {positionEngine: utils.id('position bytecode'), orderTriggerEngine: utils.id('trigger bytecode')});
+  const abi = new utils.Interface([
+    'function createOrder(uint8,int256,uint256,uint256)', 'function observeOrder(uint256)',
+    'function closePosition(uint256)', 'function observePosition(uint256)',
+    'function kgen() view returns(address)', 'function keeper() view returns(address)',
+    'function brain() view returns(address)', 'function engine() view returns(address)',
+    'function executor() view returns(address)', 'function brainSettlement() view returns(address)',
+    'event OrderCreated(uint256 indexed id,address indexed trader)',
+    'event OrderFilled(uint256 indexed id,uint256 indexed positionId,uint256 price)',
+    'event PositionOpened(uint256 indexed id,address indexed trader,uint8 indexed market,int256 size,uint256 collateral,uint256 entry,bytes32 key)',
+    'event PositionClosed(uint256 indexed id,uint256 exit,int256 raw,int256 realized,uint256 debt)',
+    'event PositionLiquidated(uint256 indexed id,uint256 exit,int256 raw,int256 realized,uint256 debt)',
+    'event PositionCollateralSettled(bytes32 indexed key,address indexed trader,uint256 locked,int256 realized,uint256 debt,uint256 insurance,uint256 principalAfter)',
+    'event SettlementClaimRecorded(bytes32 indexed key,address indexed trader,uint256 due,uint256 paid,uint256 remaining)',
+    'event OrderTerminated(uint256 indexed id,uint8 status)',
+    'function cancelOrder(uint256)', 'function rejectUnfundedOrder(uint256)',
+  ]);
+  const id = 2n ** 150n + 1n, pid = id + 57n, wad = 10n ** 18n;
+  const c = short ? -wad : wad;
+  const positionKey = utils.solidityKeccak256(['address','uint256'], [position, pid]);
+  const transactions = [], receipts = [], blocks = new Map();
+  const rpcHex = number => '0x' + number.toString(16);
+  function addStage(height, from, method, args, events) {
+    const blockNumber = rpcHex(height), blockHash = utils.id('block' + height), hash = utils.id(method);
+    const tx = {hash, blockHash, blockNumber, transactionIndex:'0x0', from, to:trigger, chainId:'0x38', value:'0x0',
+      input:abi.encodeFunctionData(method, args)};
+    const receipt = {...tx, transactionHash:hash, status:'0x1', logs:events.map(([address,name,values],index) => ({
+      ...abi.encodeEventLog(abi.getEvent(name), values), address, blockHash, blockNumber,
+      transactionHash:hash, transactionIndex:'0x0', logIndex:rpcHex(index), removed:false,
+    }))};
+    transactions.push(tx); receipts.push(receipt); blocks.set(blockNumber, {number:blockNumber, hash:blockHash, transactions:[hash]});
+  }
+  addStage(32,wallet,'createOrder',[0,c,2n,75000n * wad],[[trigger,'OrderCreated',[id,wallet]]]);
+  addStage(33,keeper,'observeOrder',[id],[
+    [position,'PositionOpened',[pid,wallet,0,2n*c/75000n,2n*wad,75000n*wad,positionKey]],
+    [trigger,'OrderFilled',[id,pid,75000n*wad]],
+  ]);
+  const pnl = (liquidation ? -2n : 2n) * wad, exit = 75000n*wad + (liquidation ? -15000n : 10000n)*c;
+  const raw = liquidation ? -3n * wad : pnl, debt = liquidation ? wad : 0n;
+  addStage(34,liquidation ? keeper : wallet,liquidation ? 'observePosition' : 'closePosition',[pid],[
+    ...(paid===null?[]:[[brain,'SettlementClaimRecorded',[positionKey,wallet,pnl,paid,pnl-paid]]]),
+    [brain,'PositionCollateralSettled',[positionKey,wallet,2n*wad,pnl,debt,debt,10n*wad+(paid??pnl)]],
+    [position,liquidation ? 'PositionLiquidated' : 'PositionClosed',[pid,exit,raw,pnl,debt]],
+  ]);
+  const code = new Map([[KGEN_TOKEN_ADDRESS,manifest.codeHashes.kgenToken],[brain,manifest.codeHashes.brainProxy],
+    [manifest.BRAIN_IMPLEMENTATION, manifest.codeHashes.brainImplementation],[position,manifest.codeHashes.positionEngine],
+    [trigger,manifest.codeHashes.orderTriggerEngine]]);
+  const routes = {kgen: [brain,KGEN_TOKEN_ADDRESS], engine:[trigger,position], brain:[trigger,brain],
+    executor:[position,trigger], brainSettlement:[position,brain], keeper:[trigger,keeper]};
+  const selectors = new Map(Object.entries(routes).map(([name, pair]) => [abi.getSighash(name),pair]));
+  let height = 34n;
+  const calls = [];
+  const rpc = {
+    eth_chainId: () => '0x38', eth_accounts: () => [wallet], eth_getBalance: ()=>'0x0',
+    eth_getTransactionByHash: ([hash]) => transactions.find(tx=>tx.hash===hash)??null,
+    eth_getTransactionReceipt: ([hash]) => receipts.find(r=>r.transactionHash===hash)??null,
+    eth_getBlockByNumber: ([n]) => {
+      const number = n === 'latest' ? rpcHex(height) : n;
+      if (BigInt(number) > height) return null;
+      return blocks.get(number) ?? {number, hash:utils.id('block'+BigInt(number)), transactions:[]};
+    },
+    eth_getStorageAt: ([a,,n]) => {assert.equal(a,brain);assert.ok(blocks.has(n)); return utils.hexZeroPad(manifest.BRAIN_IMPLEMENTATION,32);},
+    eth_call: ([call,n]) => {
+      if(call.to===KGEN_TOKEN_ADDRESS && n==='latest') return utils.hexZeroPad('0x00',32);
+      const method=call.data.slice(0,10);
+      if(method==='0x21603f43'||method==='0xa227aebb'){
+        const isOrder=method==='0x21603f43';
+        assert.equal(call.to,isOrder?trigger:position);assert.equal(BigInt('0x'+call.data.slice(10)),isOrder?id:pid);
+        const words=Array(isOrder?15:12).fill(0n);
+        words[isOrder?1:0]=BigInt(wallet);
+        if(isOrder){words[0]=id;words[3]=BigInt.asUintN(256,c);words[4]=2n;words[5]=75000n*wad;}
+        words[11]=BigInt(n)<BigInt(transactions[isOrder?1:2].blockNumber)?1n:2n;
+        return utils.defaultAbiCoder.encode(words.map(()=>'uint256'),words);
+      }
+      const [from,result]=selectors.get(call.data);assert.equal(call.to,from);assert.ok(blocks.has(n));return utils.hexZeroPad(result,32);
+    },
+    eth_getProof: ([address,,n]) => {assert.ok(blocks.has(n)); return {address,codeHash:code.get(address)};},
+    eth_getLogs: ([filter]) => receipts.flatMap(r=>r.logs).filter(log=>log.address===filter.address &&
+      filter.topics[0].includes(log.topics[0]) && log.topics[1]===filter.topics[1] &&
+      BigInt(log.blockNumber)>=BigInt(filter.fromBlock) && BigInt(log.blockNumber)<=BigInt(filter.toBlock)),
+  };
+  const provider = {request: async({method,params})=>{calls.push(method);assert.ok(Object.hasOwn(rpc,method),method);return rpc[method](params);}};
+  const read = (overrides={})=>readK11520TradingReceipt({provider,manifest,account:wallet,txHash:transactions[0].hash,...overrides});
+  return {rpc, provider, read, transactions, receipts, blocks, calls, id, pid, wallet, manifest, abi,
+    terminate(cancel) {
+      transactions.splice(1);receipts.splice(1);blocks.delete('0x21');blocks.delete('0x22');
+      addStage(33,cancel?wallet:keeper,cancel?'cancelOrder':'rejectUnfundedOrder',[id],
+        [[trigger,'OrderTerminated',[id,cancel?3:4]]]);
+      height=33n;
+    },
+    moveStage(index, height) {
+      const tx=transactions[index], receipt=receipts[index], number=rpcHex(BigInt(height)), hash=utils.id('block'+height);
+      blocks.delete(tx.blockNumber);
+      for(const record of [tx,receipt,...receipt.logs])Object.assign(record,{blockNumber:number,blockHash:hash});
+      blocks.set(number,{number,hash,transactions:[tx.hash]});
+    },
+    setHeight(n) {
+      height=BigInt(n); const number=rpcHex(height);
+      if(!blocks.has(number))blocks.set(number,{number,hash:utils.id('block'+n),transactions:[]});
+    }};
+}
+
+test('BSC56 trading receipt follows the original order hash through a keeper fill and the linked Brain settlement', async()=>{
+  for(const liquidation of [false,true])for(const short of [false,true]){
+    const f=tradingReceiptFixture({liquidation,short});
+    f.setHeight(32); const pending=await f.read();
+    assert.equal(pending.status,'ORDER_CREATED');assert.equal(pending.orderId,f.id.toString());
+    f.setHeight(33);const fill=await f.read();
+    assert.equal(fill.status,'ORDER_FILLED');assert.equal(fill.positionId,f.pid.toString());
+    f.setHeight(34);
+    const result=await f.read();
+    assert.equal(result.status,liquidation?'POSITION_LIQUIDATED':'POSITION_CLOSED');
+    assert.equal(result.cWad,(short?-(10n**18n):10n**18n).toString());
+    assert.equal(result.creationTxHash,f.transactions[0].hash);assert.equal(result.fillTxHash,f.transactions[1].hash);
+    assert.equal(result.closeTxHash,f.transactions[2].hash);
+    assert.equal(result.realizedPnlWei,(liquidation?-2n*10n**18n:2n*10n**18n).toString());
+    assert.equal(result.principalAfterWei,(liquidation?8n*10n**18n:12n*10n**18n).toString());
+    assert.equal(result.balanceScope,'BRAIN_PRINCIPAL_ONLY_NO_WALLET_TRANSFER_EVIDENCE');
+    assert.equal(result.claimStatus,liquidation?'NO_PROFIT_CLAIM':'CLAIM_EVENT_UNAVAILABLE');
+    assert.equal(result.paidWei,undefined);
+    const freshPage=createWalletSession({ethereum:f.provider});
+    assert.equal((await freshPage.refresh()).status,'CONNECTED');
+    assert.deepEqual(await freshPage.readTradingReceipt({manifest:f.manifest,txHash:result.txHash}),result);
+    freshPage.dispose();
+    assert.ok(!f.calls.some(method=>/send|sign|requestAccounts/i.test(method)));
+  }
+});
+
+test('BSC56 trading receipt distinguishes custody profit paid at close from outstanding profit without inferring a wallet credit', async()=>{
+  const due=2n*10n**18n;
+  for(const paid of [0n,due/2n,due]){
+    const f=tradingReceiptFixture({paid}), settled=await f.read();
+    assert.equal(settled.status,'POSITION_CLOSED');assert.equal(settled.claimStatus,'VERIFIED_AT_CLOSE');
+    assert.equal(settled.dueWei,due.toString());assert.equal(settled.paidWei,paid.toString());
+    assert.equal(settled.remainingClaimWei,(due-paid).toString());
+    assert.equal(settled.principalAfterWei,(10n*10n**18n+paid).toString());
+    assert.equal(settled.receivedWei,undefined);
+    const claim=f.receipts[2].logs[0];claim.topics[2]=claim.topics[1];
+    assert.equal((await f.read()).reason,'PROFIT_CLAIM_MISMATCH');
+  }
+});
+
+test('BSC56 trading receipt verifies direct holder cancellation and keeper rejection without a fill', async()=>{
+  for(const cancel of [true,false]){
+    const f=tradingReceiptFixture();f.terminate(cancel);const ended=await f.read();
+    assert.equal(ended.status,cancel?'ORDER_CANCELLED':'ORDER_REJECTED');
+    assert.equal(ended.terminationTxHash,f.transactions[1].hash);assert.equal(ended.fillTxHash,undefined);
+  }
+});
+
+test('BSC56 trading receipt rejects mismatched keeper, trader, order, position, event data and deployment routing', async()=>{
+  const cases=[
+    f=>{f.transactions[0].from=f.manifest.BRAIN_PROXY;},
+    f=>{f.receipts[0].logs[0].topics[2]=f.receipts[0].logs[0].topics[1];},
+    f=>{f.transactions[1].from=f.wallet;f.receipts[1].from=f.wallet;},
+    f=>{f.transactions[1].input=f.abi.encodeFunctionData('observeOrder',[f.id+1n]);},
+    f=>{f.receipts[1].logs[0].topics[1]=f.receipts[0].logs[0].topics[1];},
+    f=>{f.transactions[2].input=f.abi.encodeFunctionData('closePosition',[f.pid+1n]);},
+    f=>{f.receipts[2].logs[0].topics[2]=f.receipts[0].logs[0].topics[1];},
+    f=>{f.receipts[2].logs[0].data='0x'+'00'.repeat(160);},
+    f=>{f.receipts[2].logs[1].removed=true;},
+    f=>{const lookup=f.rpc.eth_getLogs;f.rpc.eth_getLogs=params=>lookup(params).map(log=>({...log,logIndex:'0xff'}));},
+    f=>{const read=f.rpc.eth_call;f.rpc.eth_call=params=>params[0].data===f.abi.getSighash('engine')?'0x'+'00'.repeat(32):read(params);},
+  ];
+  for(const alter of cases){const f=tradingReceiptFixture();alter(f);const result=await f.read();assert.equal(result.status,'UNKNOWN');assert.equal(result.principalAfterWei,undefined);}
+});
+
+test('BSC56 trading receipt holds partial evidence across outages, incomplete log windows and canonical reorgs', async()=>{
+  const f=tradingReceiptFixture();const logs=f.rpc.eth_getLogs;
+  f.rpc.eth_getLogs=params=>{if(params[0].address===f.manifest.POSITION_ENGINE)throw new Error('source disconnected');return logs(params);};
+  const offline=await f.read();assert.equal(offline.status,'UNKNOWN');assert.equal(offline.lastKnown.status,'ORDER_FILLED');
+  f.rpc.eth_getLogs=logs;assert.equal((await f.read()).status,'POSITION_CLOSED');
+  f.setHeight(5000);let queries=0;f.rpc.eth_getLogs=([filter])=>{
+    assert.ok(BigInt(filter.toBlock)-BigInt(filter.fromBlock)<512n);queries++;return [];
+  };
+  const limit=await f.read();assert.equal(limit.reason,'SEARCH_WINDOW_INCOMPLETE');assert.equal(limit.lastKnown.status,'ORDER_CREATED');assert.equal(queries,8);
+  const byNumber=f.rpc.eth_getBlockByNumber;f.rpc.eth_getBlockByNumber=params=>{
+    const actual=byNumber(params);return params[0]==='0x1388'?{...actual,hash:f.transactions[0].hash}:actual;
+  };
+  const reorg=await f.read();assert.equal(reorg.reason,'CANONICAL_BLOCK_UNCONFIRMED');assert.equal(reorg.lastKnown,undefined);
+  const wrong=tradingReceiptFixture();wrong.rpc.eth_chainId=()=> '0x61';
+  assert.equal((await wrong.read()).status,'WRONG_CHAIN');
+  const noBinding=tradingReceiptFixture();delete noBinding.manifest.ORDER_TRIGGER_ENGINE;
+  assert.equal((await noBinding.read()).status,'BINDING_UNAVAILABLE');assert.deepEqual(noBinding.calls,[]);
+});
+
+test('BSC56 trading receipt resumes across two bounded windows and distrusts skipped history and changed cursor blocks', async()=>{
+  const f=tradingReceiptFixture();f.moveStage(1,4500);f.moveStage(2,9500);f.setHeight(9600);
+  const first=await f.read();
+  assert.equal(first.reason,'SEARCH_WINDOW_INCOMPLETE');assert.equal(first.nextCursor.phase,'ORDER');
+  const second=await f.read({cursor:JSON.parse(JSON.stringify(first.nextCursor))});
+  assert.equal(second.reason,'SEARCH_WINDOW_INCOMPLETE');assert.equal(second.lastKnown.status,'ORDER_FILLED');
+  assert.equal(second.nextCursor.phase,'POSITION');
+  const final=await f.read({cursor:JSON.parse(JSON.stringify(second.nextCursor))});
+  assert.equal(final.status,'POSITION_CLOSED');assert.equal(final.positionId,f.pid.toString());
+  assert.equal((await f.read({cursor:{...first.nextCursor,throughBlockHash:f.transactions[2].hash}})).reason,'CURSOR_BLOCK_CHANGED');
+  const afterFill=f.blocks.get(f.transactions[1].blockNumber);
+  const forged={...first.nextCursor,throughBlock:afterFill.number,throughBlockHash:afterFill.hash};
+  assert.equal((await f.read({cursor:forged})).reason,'OPEN_STATE_NOT_CONFIRMED');
+  const afterClose=f.blocks.get(f.transactions[2].blockNumber);
+  assert.equal((await f.read({cursor:{...second.nextCursor,throughBlock:afterClose.number,throughBlockHash:afterClose.hash}})).reason,'OPEN_STATE_NOT_CONFIRMED');
+  assert.equal((await f.read({cursor:{...second.nextCursor,fillTxHash:f.transactions[2].hash}})).status,'UNKNOWN');
+});
 
 test('slow order preview is not starved by polling and newer input invalidates stale results',async()=>{
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
@@ -14,7 +410,7 @@ test('slow order preview is not starved by polling and newer input invalidates s
  assert.equal(resolvers.length,1,'background polling must not supersede in-flight preview');
  const newer=context.paintOrderPreview();assert.equal(resolvers.length,2,'changed input still requests a fresh preview');
  resolvers[0]({ok:false,code:'OLD',reason:'old'});await first;assert.equal(panel.textContent,'');
- resolvers[1]({ok:false,code:'NEW',reason:'latest input'});await newer;assert.match(panel.textContent,/NEW/);assert.equal(context.previewRequests,0);
+ resolvers[1]({ok:false,code:'NEW',reason:'latest input'});await newer;assert.match(panel.textContent,/latest input/);assert.equal(context.previewRequests,0);
  const disconnected=context.paintOrderPreview();context.pending=null;resolvers[2]({ok:true});await disconnected;assert.equal(button.disabled,true,'closed or disconnected preview cannot re-enable confirm');
 });
 
@@ -105,9 +501,9 @@ test('deferred Testnet routing observer preserves execution errors and receipt f
  }
 });
 
-test('routes to explicit wallet action only when preflight is ready',()=>{
+test('a bare ready flag cannot enable an executable mainnet wallet route',()=>{
   const route=classify11520OrderRoute({preflight:{ready:true,blockers:[]},localSimulationAvailable:true});
-  assert.equal(route.route,'REAL_READY_FOR_EXPLICIT_WALLET_ACTION');
+  assert.equal(route.route,'LOCAL_SIMULATION_REAL_BLOCKED');
   assert.equal(route.signerRequested,false);
   assert.equal(route.broadcast,false);
 });
@@ -143,7 +539,8 @@ test('M1 wallet view never pairs another account or wrong network with recovered
 
 test('M1 wallet-session READING clears cached financial surfaces before adapter recovery',async()=>{
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
- const start=source.indexOf('walletSession.subscribe(value=>{'),end=source.indexOf('});renderWallet();',start),fn=source.slice(start,end+3);
+ const start=source.indexOf('walletSession.subscribe(value=>{'),end=source.indexOf('\n});',start);
+ assert.ok(start>=0&&end>start);const fn=source.slice(start,end+4);
  const calls=[];let callback;
  const context=vm.createContext({navAutoWalletKey:null,walletSession:{subscribe:fn=>{callback=fn}},execution:{readOnly:true},readOnlyViewRequested:()=>true,playerStore:{activate:()=>false},renderWallet:()=>calls.push('wallet'),isTestnet:()=>true,syncSimulationPositions:()=>calls.push('positions'),refreshSimulationSheet:()=>calls.push('sheet'),refreshTestnet:()=>calls.push('recover')});
  vm.runInContext(fn,context);callback({account:null,status:'READING'});
@@ -272,29 +669,59 @@ test('execution owner initializes before startup world feedback can synchronousl
  vm.runInContext('execution={readOnly:true};renderAxes()',context);for(const card of cards.values()){assert.match(card.querySelector('.pos').textContent,/NOT_REQUESTED/);assert.doesNotMatch(card.querySelector('.pos').textContent,/空倉/)}
 });
 
-for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']])for(const c of [1,-1])test(`actual openOrder owner opens ${market} ${c>0?'LONG':'SHORT'} while public quote is WAIT`,async()=>{
+for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']])for(const c of [1,-1])test(`actual openOrder owner blocks ${market} ${c>0?'LONG':'SHORT'} while public quote is WAIT`,async()=>{
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
  const {createExecutionAdapter}=await import('../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs');
  const {createKgenLedger,normalizeSignedC,signedCFromLegacyMagnitude}=await import('../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs');
- const ledger=createKgenLedger(100),execution=createExecutionAdapter({ledger,productV1:true,simulationFallback:true}),before=structuredClone(ledger);
- const nodes={'#confirmOrder':{},'#confirmBody':{},'#confirm':{classList:{add:v=>{nodes.open=v}}}},toasts=[];
+ const ledger=createKgenLedger(100),execution=createExecutionAdapter({ledger,productV1:true,verifiedPublicQuotes:true}),before=structuredClone(ledger);
+ const nodes={'#confirmOrder':{},'#confirmBody':{},'#confirm':{classList:{remove:v=>{nodes.closed=v}}}},toasts=[];
  const state={axis,quotes:{},axes:{[axis]:{market,c,lots:1}}};let previews=0;
-  const context=vm.createContext({S:state,execution,executionBusy:false,pending:null,reviewedOrder:null,axis:()=>state.axes[axis],syncTradeAxisFromPlane(){},isTestnet:()=>false,price:()=>0,toast:x=>toasts.push(x),normalizeSignedC,signedCFromLegacyMagnitude,$:id=>nodes[id],$$:()=>[],paintOrderPreview:()=>previews++,journey:{event:()=>false},__K11520_SIGNED_C_IMMERSIVE__:{signedByAxis:{[axis]:c}}});
+  const context=vm.createContext({S:state,execution,previewExecution:null,executionBusy:false,pending:null,reviewedOrder:null,axis:()=>state.axes[axis],syncTradeAxisFromPlane(){},isTestnet:()=>false,price:()=>0,toast:x=>toasts.push(x),normalizeSignedC,signedCFromLegacyMagnitude,$:id=>nodes[id],$$:()=>[],paintOrderPreview:()=>previews++,journey:{event:()=>false},__K11520_SIGNED_C_IMMERSIVE__:{signedByAxis:{[axis]:c}}});
  vm.runInContext(source.slice(source.indexOf('function executionQuote('),source.indexOf('function orderInput(')),context);
   vm.runInContext(source.slice(source.indexOf('function renderOrderDirection(){'),source.indexOf("$('#cancelOrder').onclick")),context);context.openOrder();
- assert.equal(nodes.open,'open');assert.equal(previews,1);assert.equal(context.pending.market,market);assert.equal(context.pending.c,c);assert.deepEqual(toasts,[]);assert.deepEqual(ledger,before,'opening preview must not debit or mutate simulation');assert.deepEqual(state.quotes,{},'never relabel fallback as LIVE public data');
+ assert.equal(nodes.closed,'open');assert.equal(nodes['#confirmOrder'].disabled,true);assert.equal(previews,0);assert.equal(context.pending,null);assert.match(toasts[0],/^等候有效報價/);assert.deepEqual(ledger,before);assert.deepEqual(state.quotes,{});
 });
 
 test('actual order UI catches corrupt-source and rollback quote failures and clears stale confirmation',async()=>{
  const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
  for(const message of ['INVALID_SIMULATION_SOURCE','provider payload with private content']){
   const nodes={'#confirmOrder':{disabled:false},'#confirm':{classList:{remove:value=>{nodes.removed=value}}}},toasts=[];
-   const context=vm.createContext({execution:{mode:'SIMULATION',quote(){throw new Error(message)}},executionBusy:false,reviewedOrder:null,pending:{axis:'KY'},axis:()=>({market:'ETHUSDT'}),syncTradeAxisFromPlane(){},$:id=>nodes[id],toast:value=>toasts.push(value)});
+   const context=vm.createContext({execution:{mode:'SIMULATION',quote(){throw new Error(message)}},previewExecution:null,executionBusy:false,reviewedOrder:null,pending:{axis:'KY'},axis:()=>({market:'ETHUSDT'}),syncTradeAxisFromPlane(){},$:id=>nodes[id],toast:value=>toasts.push(value)});
   vm.runInContext(source.slice(source.indexOf('function executionQuote('),source.indexOf('function orderInput(')),context);
   vm.runInContext(source.slice(source.indexOf('function openOrder(){'),source.indexOf("$('#cancelOrder').onclick")),context);
   assert.doesNotThrow(()=>context.openOrder());assert.equal(context.pending,null);assert.equal(nodes['#confirmOrder'].disabled,true);assert.equal(nodes.removed,'open');
-  assert.equal(toasts[0],message==='INVALID_SIMULATION_SOURCE'?'ORDER_REJECTED · INVALID_SIMULATION_SOURCE':'ORDER_REJECTED · INVALID_EXECUTION_QUOTE');
+  assert.equal(toasts[0],message==='INVALID_SIMULATION_SOURCE'?'等候有效報價 · INVALID_SIMULATION_SOURCE':'等候有效報價 · INVALID_EXECUTION_QUOTE');
  }
+});
+
+test('the deferred simulation route preserves the visible missing-quote reason from the order button',async()=>{
+  const runtime=new URL('../K線西遊記/temples/11520/runtime/',import.meta.url);
+  const [game,preflight]=await Promise.all([
+    readFile(new URL('game-5d-main.mjs',runtime),'utf8'),
+    readFile(new URL('real-trading-preflight-ui.mjs',runtime),'utf8'),
+  ]);
+  const classes=new Set(['open']);
+  const toast={textContent:'',classList:new Set()};
+  const elements={'#toast':toast,'#confirmOrder':{disabled:false},'#confirm':{classList:{remove:name=>classes.delete(name)}}};
+  const execution={mode:'SIMULATION',quote:()=>null,snapshot:()=>({mode:'SIMULATION'})};
+  const context=vm.createContext({execution,executionBusy:false,previewExecution:null,pending:{},reviewedOrder:{},
+    syncTradeAxisFromPlane(){},axis:()=>({market:'BTCUSDT'}),$:selector=>elements[selector],
+    toast:message=>{toast.textContent=message;toast.classList.add('show')},
+    classify11520OrderRoute,renderPreflight:()=>({ready:false,blockers:['ORACLE_STALE']}),
+    __K11520_EXECUTION__:execution,setTimeout:()=>{},
+  });
+  vm.runInContext(game.slice(game.indexOf('function executionQuote('),game.indexOf('function orderInput(')),context);
+  vm.runInContext(game.slice(game.indexOf('function openOrder(){'),game.indexOf("$('#cancelOrder').onclick")),context);
+  vm.runInContext(preflight.slice(preflight.indexOf('function notifyOrderRoute(){'),preflight.indexOf('\nexport function install11520RealTradingPreflightUi')),context);
+  context.openOrder();
+  assert.equal(toast.textContent,'等候有效報價');
+  await new Promise(resolve=>setTimeout(()=>resolve(context.notifyOrderRoute()),0));
+  assert.equal(toast.textContent,'等候有效報價');
+  assert.ok(toast.classList.has('show'));
+  assert.equal(classes.has('open'),false);
+  assert.equal(elements['#confirmOrder'].disabled,true);
+  assert.equal(context.__K11520_ORDER_ROUTE__.route,'LOCAL_SIMULATION_REAL_BLOCKED');
+  assert.equal(context.__K11520_ORDER_ROUTE__.broadcast,false);
 });
 
 test('order presentation distinguishes creation provenance from current pending/fill source and SIM time',async()=>{
@@ -305,7 +732,7 @@ test('order presentation distinguishes creation provenance from current pending/
  adapter.observe({market:'ETHUSDT',price:4000,observedAt:1000,now:1000,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY'});
  adapter.submit({axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4001},{now:1001});
  adapter.tick({now:17000});
- const context=vm.createContext({execution:{readOnly:false},walletExecutionView:()=>adapter.snapshot(),isTestnet:()=>false,receiptRows:rows=>JSON.stringify(rows),receiptTime:x=>x,executionLabel:()=>'SIMULATION'});
+ const context=vm.createContext({execution:{readOnly:false},previewExecution:null,walletExecutionView:()=>adapter.snapshot(),isTestnet:()=>false,receiptRows:rows=>JSON.stringify(rows),receiptTime:x=>x,executionLabel:()=>'SIMULATION'});
  vm.runInContext(source.slice(source.indexOf('function isPrincipalExitOnlyView('),source.indexOf('function normalizeTradeSide(')),context);
  vm.runInContext(source.slice(source.indexOf('function simulationOrganHTML(id){'),source.indexOf('function bindSimulationSheet(')),context);
  for(const time of [17000,33000]){

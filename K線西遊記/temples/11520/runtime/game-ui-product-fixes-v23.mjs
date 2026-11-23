@@ -1,15 +1,15 @@
 /* KGEN_META
 VERSION: 2.4.0
-REVISION: 2026-10-06.TOAST-DISMISSAL-PLACEMENT
+REVISION: 2026-11-24.PLAYER-LIFE-TOAST-HEADER
 PRODUCT_CONTEXT: V2.9.5
 STATUS: ACTIVE
-LAST_UPDATED: 2026-10-06
-UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9
-TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Preserve visible toast placement at dismissal while retaining next-message and trading-panel context updates.
-ANCESTOR: K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs @ de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9
+LAST_UPDATED: 2026-11-24
+UPDATED_BY: Codex / 衡曜 / Human-authorized
+REVIEWED_BY: Player Life placement source review complete; exact-head and release acceptance pending
+SOURCE_COMMIT: bab36c546c2643c2462d987d59ee70e0b1552896
+TASK_ID: K11520-FINAL-SIMULATION-20261123-01
+CHANGE_REASON: Place the existing toast in the open Player Life header to keep profile and home text clear.
+ANCESTOR: K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs @ bab36c546c2643c2462d987d59ee70e0b1552896
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Playable 11520 product behavior: mobile clearance, center-Y, fixed Y/C/Lots controls, canonical floors, compass, local AI help, BGM and intro.
 */
@@ -43,14 +43,16 @@ export function createWorldFeedbackObserver(emit){
 }
 const feedbackHistory=[];
 let toastContextObserver=null;
-// Reuse the one toast inside the active trading/navigation panel's existing header. Direct
+// Reuse the one toast inside the active trading, navigation or Player Life header. Direct
 // route/joystick writers still address #toast; context changes do not reset time.
 function place11520Toast(toast){
   const confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),body=document.getElementById('sheetBody');
   const organ=body?.dataset.simOrgan,title=['orders','positions','history','worldmap'].includes(organ)?document.querySelector('#rail [data-organ="'+organ+'"]')?.getAttribute('title'):null;
   const navigationTitle=body?.querySelector('#navigationConsole')?document.querySelector('#rail [data-organ="worldmap"]')?.getAttribute('title'):null;
-  const sheetTitle=document.getElementById('sheetTitle')?.textContent,matchingTitle=(title&&sheetTitle===title)||(navigationTitle&&sheetTitle===navigationTitle);
-  const panel=confirm?.classList.contains('open')?confirm:sheet?.classList.contains('open')&&matchingTitle?sheet:null;
+  const sheetTitle=document.getElementById('sheetTitle')?.textContent;
+  const playerLife=sheetTitle==='Player Life · 玩家與起家地'&&body?.querySelector('#playerLifePanel');
+  const matchingPanel=(title&&sheetTitle===title)||(navigationTitle&&sheetTitle===navigationTitle)||playerLife;
+  const panel=confirm?.classList.contains('open')?confirm:sheet?.classList.contains('open')&&matchingPanel?sheet:null;
   const header=panel?.querySelector('.sheetHead');
   if(header){
     if(toast.parentElement!==header)header.appendChild(toast);

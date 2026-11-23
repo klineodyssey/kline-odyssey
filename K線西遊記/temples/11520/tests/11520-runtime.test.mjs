@@ -400,7 +400,7 @@ import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelM
 import {createDigitalAnt,createDigitalAntPersistenceEnvelope,restoreDigitalAntPersistenceEnvelope,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,acceptSimulatedAtmDeliveryReceipt,resolveCargoInsuranceAfterDelivery,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createWhiteholeEscortDemoOffer,reviewWhiteholeEscortDemoOffer,createPlayerCourierStore,WHITEHOLE_ESCORT_WORK_ID,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
-import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
+import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,updateKMarketObservations,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
 
 test('Human local meter calibration uses the CURRENT Moon K anchor without market tick coercion',()=>{
   assert.equal(gameUnitsToMeters(1),1);assert.equal(metersToGameUnits(1),1);
@@ -444,8 +444,22 @@ test('public market K waits, validates atomically, rejects old batches and disti
   assert.throws(()=>updateKMarketReference(w,{...prices,BNBUSDT:Infinity},200));assert.deepEqual(w.kSpace,before);
   assert.equal(updateKMarketReference(w,{...prices,BTCUSDT:90000},99),false);assert.deepEqual(w.kSpace,before);
   assert.equal(kMarketSnapshot(w,15101).status,'STALE');w.kSpace.quoteFailed=true;
-  assert.equal(kMarketSnapshot(w,101).status,'STALE');assert.deepEqual(kMarketSnapshot(w,101).markets,m.markets);
+  assert.equal(kMarketSnapshot(w,101).status,'STALE');assert.deepEqual(kMarketSnapshot(w,101).markets,m.markets.map(row=>({...row,status:'STALE'})));
   updateKMarketReference(w,prices,201);assert.equal(kMarketSnapshot(w,202).status,'LIVE');
+});
+
+test('verified markets map separately to signed universe addresses without substituting missing prices',()=>{
+  const w=createWorldState(0),now=20000;
+  const quote=(market,price,sequence,updatedAt=now)=>({market,price,sequence,updatedAt,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY'});
+  const btc=quote('BTCUSDT',75000,3),eth=quote('ETHUSDT',3210,4);
+  assert.equal(updateKMarketObservations(w,{},now),false);
+  updateKMarketObservations(w,{BTCUSDT:btc},now);
+  assert.deepEqual(kMarketSnapshot(w,now).markets.map(({axis,universe,status})=>[axis,universe.k,universe.alpha,universe.theta,status]),
+    [['KX',4,7.5,0,'LIVE']]);
+  updateKMarketObservations(w,{BTCUSDT:quote('BTCUSDT',95000,2),ETHUSDT:eth,BNBUSDT:quote('BNBUSDT',600,1,now-15001)},now);
+  assert.deepEqual(kMarketSnapshot(w,now).markets.map(({axis,price,status})=>[axis,price,status]),
+    [['KX',75000,'STALE'],['KY',3210,'LIVE']]);
+  assert.equal(kMarketSnapshot(w,now+15001).status,'STALE');
 });
 
 test('market-frame translation preserves local position, rendered guardian, relative K/range, HP and cooldown',()=>{

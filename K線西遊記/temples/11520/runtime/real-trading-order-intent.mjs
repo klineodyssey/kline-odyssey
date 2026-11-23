@@ -15,14 +15,22 @@ PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fix
 CURRENT_ADDITION: 2026-11-18 / Codex Hengyao / K11520-SIMULATION-AUTOPILOT-20261118-01. Explicitly armed simulation controller only; original financial owner and protected UI remain unchanged.
 */
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
-import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
+import {assertVerifiedPublicMarketObservation,deterministicSimulationObservation,FREE_ORACLE_MAX_AGE_MS,
+  PUBLIC_MARKET_QUOTE_SOURCE,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
+import {KGEN_TOKEN_ADDRESS,KGEN_CHAIN_ID} from './evm-wallet-runtime.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {C_PNL_MODEL,normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
   observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot,positionRisk} from './kgen-margin-runtime.mjs';
 
 const simulationExecutionAdapters=new WeakSet();
 const simulationAutopilotMutationGuards=new WeakMap();
-const SIMULATION_QUOTE_MAX_AGE_MS=15000;
+const SIMULATION_QUOTE_MAX_AGE_MS=FREE_ORACLE_MAX_AGE_MS;
+const BSC56_REVIEW_BLOCKERS=Object.freeze([
+  'FRESH_CHAIN_CODE_ACCOUNT_NONCE_AND_STATE_READBACK_REQUIRED','HUMAN_WALLET_OWNER_CONFIRMATION_REQUIRED'
+]);
+const BSC56_EXECUTION_BLOCKERS=Object.freeze([
+  'BSC56_DEPLOYED_BINDING_REQUIRED','HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED',...BSC56_REVIEW_BLOCKERS
+]);
 
 function finitePositive(value,label){const n=Number(value);if(!Number.isFinite(n)||n<=0)throw new Error(`${label}_MUST_BE_POSITIVE`);return n}
 function integerRange(value,label,min,max){const n=Number(value);if(!Number.isInteger(n)||n<min||n>max)throw new Error(`${label}_OUT_OF_RANGE`);return n}
@@ -59,10 +67,10 @@ export function normalizeExecutionError(error){
   if(EXECUTION_FAILURE_STATES.includes(reason))return reason;
   if(Number(rawCode)===4001||rawCode==='ACTION_REJECTED')return 'USER_REJECTED';
   if(Number(rawCode)===4901||/CHAIN_MISMATCH|WRONG_CHAIN/.test(reason))return 'WRONG_CHAIN';
-  if(Number(rawCode)===4900||/DISCONNECTED|WALLET_NOT_CONNECTED/.test(reason))return 'DISCONNECTED';
+  if(Number(rawCode)===4900||/DISCONNECTED|WALLET_NOT_CONNECTED|PREVIEW_SESSION_UNAUTHORIZED/.test(reason))return 'DISCONNECTED';
   if(/INSUFFICIENT_FREE_KGEN|INSUFFICIENT_MARGIN/.test(reason))return 'INSUFFICIENT_MARGIN';
   if(rawCode==='INSUFFICIENT_FUNDS'||/INSUFFICIENT_BALANCE/.test(reason))return 'INSUFFICIENT_BALANCE';
-  if(/STALE_PRICE|OUT_OF_ORDER_PRICE|ORACLE_STALE/.test(reason))return 'ORACLE_STALE';
+  if(/STALE_PRICE|OUT_OF_ORDER_PRICE|ORACLE_STALE|WAITING_VALID_QUOTE/.test(reason))return 'ORACLE_STALE';
   if(rawCode==='CALL_EXCEPTION'||/TX_REVERTED/.test(reason))return 'TX_REVERTED';
   if(rawCode==='TRANSACTION_REPLACED'||/TX_DROPPED/.test(reason))return 'TX_DROPPED';
   if(rawCode==='TIMEOUT'||/RECEIPT_TIMEOUT/.test(reason))return 'RECEIPT_TIMEOUT';
@@ -79,14 +87,20 @@ function executionFailure(error){
 // authorized deployment/receipt adapter exists. Flags or injected callbacks in
 // page storage must never turn this release into a signer/broadcast path.
 export function createExecutionAdapter({ledger,deployment=null,wallet=null,ethereum=null,ethers=null,...options}={}){
-  if(deployment?.mode==='BSC_TESTNET')return createTestnetExecutionAdapter({deployment,ethereum:ethereum??wallet?.provider,ethers,...options});
+  const chainIds=[deployment?.CHAIN_ID,deployment?.chainId].filter(id=>id!=null);
+  const mainnet=chainIds.some(id=>id===56||id==='56'||typeof id==='string'&&/^0x0*38$/i.test(id));
+  if(!mainnet&&deployment?.mode==='BSC_TESTNET')return createTestnetExecutionAdapter({deployment,ethereum:ethereum??wallet?.provider,ethers,...options});
   void wallet; // Connecting a read-only wallet does not switch execution mode.
-  const requestedMode=deployment?.mode??'SIMULATION';
-  if(requestedMode!=='SIMULATION'){
-    const blocked=()=>executionFailure(new Error('EVM_ADAPTER_NOT_DEPLOYED_OR_AUTHORIZED'));
+  // The official mainnet manifest has CHAIN_ID and no mode. Only a local
+  // simulation may default to the paper ledger.
+  if(deployment!=null&&(deployment.mode!=='SIMULATION'||chainIds.length>0)){
+    const details=mainnet?{chainId:56,blockers:BSC56_EXECUTION_BLOCKERS}:{};
+    const blocked=()=>({...executionFailure(new Error('EVM_ADAPTER_NOT_DEPLOYED_OR_AUTHORIZED')),
+      ...details,executionReady:false,signerRequested:false,broadcast:false});
     return Object.freeze({name:'EVM_ADAPTER',mode:'ON_CHAIN',enabled:false,
       preview:blocked,submit:blocked,observe:blocked,close:blocked,cancel:blocked,
-      snapshot:()=>({mode:'ON_CHAIN',status:'NOT_DEPLOYED_OR_AUTHORIZED',wallet:null,
+      approve:blocked,deposit:blocked,withdraw:blocked,claim:blocked,
+      snapshot:()=>({mode:'ON_CHAIN',status:'NOT_DEPLOYED_OR_AUTHORIZED',wallet:null,executionReady:false,...details,
         orders:[],positions:[],receipts:[],observations:{}})});
   }
   if(!ledger||typeof ledger!=='object')throw new Error('EXISTING_LEDGER_REQUIRED');
@@ -95,10 +109,31 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     const result=fn();if(result.ok&&mutating)options.afterMutation?.();
     return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result);
   }catch(error){return executionFailure(error)}};
-  const fallback=options.simulationFallback===true;
+  const verifiedPublic=options.verifiedPublicQuotes===true;
+  const fallback=!verifiedPublic&&options.simulationFallback===true;
+  const publicSource=PUBLIC_MARKET_QUOTE_SOURCE.id;
+  const hasPublicObservationIdentity=quote=>quote?.source===publicSource&&Number.isSafeInteger(quote.sequence)&&
+    quote.sequence>=0&&Number.isSafeInteger(quote.at)&&quote.at>0&&Number.isFinite(quote.price)&&quote.price>0;
+  function assertVerifiedMarketScope(market,book){
+    const pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING');
+    const open=book.positions.filter(p=>p.market===market&&p.status==='OPEN');
+    if(!pending.length&&!open.length)return;
+    if(!hasPublicObservationIdentity(book.observations[market])||
+      pending.some(o=>o.priceSource!==publicSource||(o.executionPriceSource!=null&&o.executionPriceSource!==publicSource))||
+      open.some(p=>p.priceSource!==publicSource||(p.markPriceSource!=null&&p.markPriceSource!==publicSource))){
+      throw new Error('SIMULATION_RECOVERY_REQUIRED');
+    }
+  }
   const quote=(market,{now=Date.now(),book=simulationSnapshot(ledger)}={})=>{
-    const previous=book.observations[market],pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING'),open=book.positions.filter(p=>p.market===market&&p.status==='OPEN'),active=pending.length>0||open.length>0;
-    const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE);
+    const previous=book.observations[market];
+    if(verifiedPublic){
+      assertVerifiedMarketScope(market,book);
+      assertVerifiedPublicMarketObservation(previous&&{...previous,market,updatedAt:previous.at},{market,now});
+      return previous;
+    }
+    const pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING'),open=book.positions.filter(p=>p.market===market&&p.status==='OPEN'),active=pending.length>0||open.length>0;
+    const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||
+      open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE||p.markPriceSource===SIMULATION_PRICE_SOURCE);
     if((!previous&&active)||(pinned&&previous?.source!==SIMULATION_PRICE_SOURCE))throw new Error('SIMULATION_RECOVERY_REQUIRED');
     if(previous&&(!Number.isFinite(previous.price)||previous.price<=0||!Number.isSafeInteger(previous.at)||previous.at<0))throw new Error(active?'SIMULATION_RECOVERY_REQUIRED':'INVALID_SIMULATION_SOURCE');
     if(fallback&&(previous?.source===SIMULATION_PRICE_SOURCE||!previous||now-previous.at>SIMULATION_QUOTE_MAX_AGE_MS)){
@@ -113,7 +148,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   };
   const preview=(input,{now=Date.now()}={})=>run(()=>{
     if(options.productV1)requireV1TradingC(input.c);
-    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
+    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback||verifiedPublic?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
     if(!selected||now<selected.at||now-selected.at>SIMULATION_QUOTE_MAX_AGE_MS)throw new Error('STALE_PRICE');
     if(book.orders.some(o=>o.axis===intent.axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===intent.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
     const margin=requiredMargin(intent),available=book.wallet.free;
@@ -132,6 +167,23 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       return result.ok?{...result,status:'PENDING_TRIGGER'}:result;
     },true),
     observe:(observation)=>run(()=>{
+      if(verifiedPublic){
+        const {market,observedAt,now=Date.now()}=observation;
+        if(observedAt===undefined)throw new Error('STALE_PRICE');
+        assertVerifiedPublicMarketObservation(observation,{market,now});
+        const book=simulationSnapshot(ledger);
+        assertVerifiedMarketScope(market,book);
+        const previous=book.observations[market];
+        if(previous&&!hasPublicObservationIdentity(previous)){
+          // An idle market may establish a new public baseline. Historical
+          // orders and receipts remain intact, and no trigger uses the old price.
+          const draft=structuredClone(ledger);
+          delete draft.simulation.observations[market];
+          const result=observeSimulationPrice(draft,{...observation,now,productV1:options.productV1===true});
+          if(result.ok)Object.assign(ledger,draft);
+          return result;
+        }
+      }
       // Once local fallback is selected, public recovery cannot jump a pending
       // order/open position to another source, including after wallet reload.
       if(fallback){
@@ -146,7 +198,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       const draft=structuredClone(ledger),events=[];
       for(const market of ['BTCUSDT','ETHUSDT','BNBUSDT']){const r=applyQuote(draft,market,now);if(!r.ok)return r;events.push(...r.events)}
       Object.assign(ledger,draft);return {ok:true,events};
-    },true),
+    },!verifiedPublic),
     close:(positionId,{now=Date.now()}={})=>run(()=>{
       const draft=structuredClone(ledger),position=simulationSnapshot(draft).positions.find(p=>p.positionId===positionId);
       if(position?.status==='OPEN'){const advanced=applyQuote(draft,position.market,now);if(!advanced.ok)return advanced;
@@ -155,6 +207,225 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     },true),
     cancel:(orderId)=>run(()=>cancelSimulationOrder(ledger,orderId),true),
     snapshot:()=>simulationSnapshot(ledger)});
+  simulationExecutionAdapters.add(adapter);
+  return adapter;
+}
+
+const LOOPBACK_PREVIEW_HOSTS=Object.freeze(['127.0.0.1','localhost']);
+
+export function isK11520PrivatePreviewHost(hostname){
+  if(typeof hostname!=='string'||!/^(?:0|[1-9][0-9]{0,2})(?:\.(?:0|[1-9][0-9]{0,2})){3}$/.test(hostname))return false;
+  const octets=hostname.split('.').map(Number),[first,second]=octets;
+  if(octets.some(octet=>octet>255))return false;
+  return first===10||(first===172&&second>=16&&second<=31)||(first===192&&second===168);
+}
+
+export function k11520ServerPreviewType(location,document){
+  if(new URLSearchParams(location?.search).get('preview')!=='server')return null;
+  if(LOOPBACK_PREVIEW_HOSTS.includes(location?.hostname))return 'loopback';
+  if(location?.protocol==='http:'&&isK11520PrivatePreviewHost(location.hostname)&&
+    document?.querySelector('meta[name="k11520-private-preview"]')?.content==='lan')return 'lan';
+  return null;
+}
+
+export function createK11520PreviewRequestId(crypto=globalThis.crypto){
+  if(typeof crypto?.getRandomValues!=='function')throw new Error('SECURE_RANDOM_UNAVAILABLE');
+  const bytes=new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes,byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+
+const PREVIEW_SESSION_KEY='k11520.server-preview.session.v1';
+const PREVIEW_TOKEN_PATTERN=/^[a-f0-9]{48}$/;
+const PREVIEW_REQUEST_PATTERN=/^[a-zA-Z0-9_.:-]{1,128}$/;
+
+export function createPreviewSimulationExecutionAdapter({
+  origin=globalThis.location?.origin,fetchImpl=globalThis.fetch,storage,now=Date.now,lanPreview=false,
+}={}){
+  let base;
+  try{base=new URL(origin)}catch{throw new Error('LOCAL_PREVIEW_ORIGIN_REQUIRED')}
+  const loopback=LOOPBACK_PREVIEW_HOSTS.includes(base.hostname)&&['http:','https:'].includes(base.protocol);
+  const privateLan=lanPreview===true&&base.protocol==='http:'&&isK11520PrivatePreviewHost(base.hostname);
+  if((!loopback&&!privateLan)||base.origin!==origin||typeof fetchImpl!=='function')throw new Error('LOCAL_PREVIEW_ORIGIN_REQUIRED');
+  if(storage===undefined)try{storage=globalThis.localStorage}catch{storage=null}
+  let marketState={observations:{},statuses:{}};
+  let book={mode:'SIMULATION_WALLET',wallet:null,orders:[],positions:[],receipts:[],observations:{}};
+  let status='WAITING_PREVIEW',bookToken=null,sessionFlight=null,refreshFlight=null,writeBusy=false,bookRead=0,appliedBookRead=0;
+  const marketSnapshot=()=>structuredClone(marketState);
+  const snapshot=()=>structuredClone({...book,status,source:'SAME_ORIGIN_PREVIEW',simulationOnly:true});
+
+  function readSession(){
+    if(typeof storage?.getItem!=='function'||typeof storage?.setItem!=='function')throw new Error('PREVIEW_STORAGE_UNAVAILABLE');
+    let value;
+    try{value=JSON.parse(storage.getItem(PREVIEW_SESSION_KEY)??'null')}catch{throw new Error('PREVIEW_SESSION_INVALID')}
+    if(value!==null&&(!PREVIEW_TOKEN_PATTERN.test(value?.token??'')||typeof value.playerId!=='string'||!value.playerId||
+      (value.pendingOrder&&(!PREVIEW_REQUEST_PATTERN.test(value.pendingOrder.requestId??'')||
+        typeof value.pendingOrder.fingerprint!=='string'))))throw new Error('PREVIEW_SESSION_INVALID');
+    return value;
+  }
+  function saveSession(value){
+    try{storage.setItem(PREVIEW_SESSION_KEY,JSON.stringify(value))}
+    catch{throw new Error('PREVIEW_STORAGE_UNAVAILABLE')}
+  }
+  async function request(path,{method='GET',body,token,signal}={}){
+    const headers={accept:'application/json'};
+    if(token)headers.authorization='Bearer '+token;
+    if(body!==undefined)headers['content-type']='application/json';
+    const response=await fetchImpl(new URL(path,base).href,{
+      method,mode:'same-origin',credentials:privateLan?'same-origin':'omit',redirect:'error',cache:'no-store',headers,signal,
+      ...(body===undefined?{}:{body:JSON.stringify(body)}),
+    });
+    const data=await response.json();
+    if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('PREVIEW_RESPONSE_INVALID');
+    if(response.status===401)throw new Error('PREVIEW_SESSION_UNAUTHORIZED');
+    return {status:response.status,ok:response.ok,data};
+  }
+  async function ensureSession(signal,name){
+    const existing=readSession();
+    if(existing)return existing;
+    if(!sessionFlight)sessionFlight=(async()=>{
+      const {ok,data}=await request('/api/v1/login',{method:'POST',body:name?{name}:{},signal});
+      if(!ok||data.ok!==true||!PREVIEW_TOKEN_PATTERN.test(data.token??'')||
+        typeof data.player?.id!=='string'||!data.player.id)throw new Error('PREVIEW_LOGIN_FAILED');
+      const concurrent=readSession();
+      if(concurrent)return concurrent;
+      const session={token:data.token,playerId:data.player.id,pendingOrder:null};
+      saveSession(session);return session;
+    })().finally(()=>{sessionFlight=null});
+    return sessionFlight;
+  }
+  async function loadBook(session,signal){
+    const sequence=++bookRead;
+    const {ok,data}=await request('/api/v1/orders',{token:session.token,signal});
+    if(!ok||data.ok!==true||data.mode!=='SIMULATION_WALLET'||!data.wallet||
+      !['orders','positions','receipts'].every(key=>Array.isArray(data[key]))||!data.observations){
+      throw new Error('PREVIEW_BOOK_UNAVAILABLE');
+    }
+    if(readSession()?.token!==session.token)throw new Error('PREVIEW_SESSION_CHANGED');
+    if(sequence>=appliedBookRead){appliedBookRead=sequence;book=data;bookToken=session.token;status='READY'}
+  }
+  function refresh({signal}={}){
+    if(refreshFlight)return refreshFlight;
+    refreshFlight=(async()=>{
+      const markets=request('/api/v1/markets',{signal}).then(({ok,data})=>{
+        if(!ok||!data.observations||!data.statuses)throw new Error('PREVIEW_MARKETS_UNAVAILABLE');
+        marketState={observations:data.observations,statuses:data.statuses};
+      }).catch(error=>{marketState={observations:{},statuses:{}};throw error});
+      const account=ensureSession(signal).then(session=>loadBook(session,signal)).catch(error=>{
+        status=error?.message==='PREVIEW_SESSION_UNAUTHORIZED'?'PREVIEW_SESSION_UNAUTHORIZED':'PREVIEW_BOOK_UNAVAILABLE';
+        if(status==='PREVIEW_SESSION_UNAUTHORIZED'){
+          bookToken=null;
+          book={mode:'SIMULATION_WALLET',wallet:null,orders:[],positions:[],receipts:[],observations:{}};
+        }
+        throw error;
+      });
+      const results=await Promise.allSettled([markets,account]);
+      const failure=results.find(result=>result.status==='rejected');
+      return failure?executionFailure(failure.reason):{ok:true,...snapshot()};
+    })().finally(()=>{refreshFlight=null});
+    return refreshFlight;
+  }
+  function quote(market,{now:time=now()}={}){
+    if(marketState.statuses[market]?.available!==true)throw new Error('WAITING_VALID_QUOTE');
+    const row=assertVerifiedPublicMarketObservation(marketState.observations[market],{market,now:time});
+    return {...row,at:row.updatedAt};
+  }
+  function preview(input,{now:time=now()}={}){
+    try{
+      if(status!=='READY'||readSession()?.token!==bookToken)throw new Error('PREVIEW_BOOK_UNAVAILABLE');
+      requireV1TradingC(input.c);
+      const observation=quote(input.market,{now:time});
+      const intent=buildExecutionOrderIntent({...input,currentPrice:observation.price,
+        triggerPrice:input.triggerPrice??observation.price,now:time});
+      if(book.orders.some(o=>o.axis===intent.axis&&o.status==='PENDING')||
+        book.positions.some(p=>p.axis===intent.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
+      const margin=requiredMargin(intent),available=book.wallet.free;
+      if(!Number.isFinite(available)||available<margin)throw new Error('INSUFFICIENT_FREE_KGEN');
+      return {ok:true,...intent,intent,requiredMargin:margin,available,
+        estimatedLiquidationPrice:Math.max(0,liquidationMark({entry:intent.triggerPrice,c:intent.c,side:intent.side})),
+        pnlModel:C_PNL_MODEL,liquidationModel:'SIMULATION_ISOLATED_ZERO_MAINTENANCE_NO_FEES',
+        priceObservedAt:observation.at,priceSource:observation.source,simulationOnly:true,executionMode:'SIMULATION'};
+    }catch(error){return executionFailure(error)}
+  }
+  function orderTerms(input){
+    const {axis,market}=assertRealTradingAxisMarket({axis:input.axis,market:input.market});
+    requireV1TradingC(input.c);
+    const c=normalizeSignedC(input.c),side=signedPositionSide(c,input.side);
+    const lots=integerRange(input.lots,'LOTS',1,100);
+    const triggerPrice=input.triggerPrice==null?null:finitePositive(input.triggerPrice,'TRIGGER_PRICE');
+    const stopPrice=input.stopPrice==null?null:finitePositive(input.stopPrice,'STOP_PRICE');
+    const takeProfitPrice=input.takeProfitPrice==null?null:finitePositive(input.takeProfitPrice,'TAKE_PROFIT_PRICE');
+    return {axis,market,c,side,lots,triggerPrice,stopPrice,takeProfitPrice};
+  }
+  function pendingOrder(){
+    try{
+      const pending=readSession()?.pendingOrder;
+      if(!pending)return null;
+      const terms=orderTerms(JSON.parse(pending.fingerprint));
+      if(JSON.stringify(terms)!==pending.fingerprint)return null;
+      return {...terms,clientRequestId:pending.requestId};
+    }catch{return null}
+  }
+  async function mutate(path,input){
+    if(writeBusy)return executionFailure(new Error('TRANSACTION_IN_PROGRESS'));
+    writeBusy=true;
+    try{
+      const session=readSession();
+      if(!session||(path!=='/api/v1/order'&&session.token!==bookToken))throw new Error('PREVIEW_BOOK_UNAVAILABLE');
+      let body=input,requestId=null;
+      if(path==='/api/v1/order'){
+        const terms=orderTerms(input),fingerprint=JSON.stringify(terms),pending=session.pendingOrder;
+        if(pending&&pending.fingerprint!==fingerprint)throw new Error('PREVIEW_ORDER_UNRESOLVED');
+        if(!pending){
+          const checked=preview(terms);
+          if(!checked.ok)return checked;
+        }
+        requestId=pending?.requestId??input.clientRequestId??createK11520PreviewRequestId();
+        if(typeof requestId!=='string'||!PREVIEW_REQUEST_PATTERN.test(requestId))throw new Error('INVALID_REQUEST_ID');
+        body={...terms,requestId};
+        if(!pending)saveSession({...session,pendingOrder:{requestId,fingerprint}});
+      }
+      let reply;
+      try{reply=await request(path,{method:'POST',body,token:session.token})}
+      catch(error){
+        if(error?.message==='PREVIEW_SESSION_UNAUTHORIZED'){status='PREVIEW_SESSION_UNAUTHORIZED';throw error}
+        throw new Error(requestId?'PREVIEW_ORDER_UNRESOLVED':'PREVIEW_ACTION_UNRESOLVED');
+      }
+      const {data}=reply,accepted=reply.ok&&data.ok===true&&(!requestId||typeof data.order?.orderId==='string');
+      const rejected=data.ok===false&&data.reason!=='REQUEST_CONFLICT'&&
+        (reply.status===400||reply.status===409||(reply.status===503&&data.reason==='WAITING_VALID_QUOTE'));
+      if(!accepted&&!rejected)throw new Error(requestId?'PREVIEW_ORDER_UNRESOLVED':'PREVIEW_ACTION_UNRESOLVED');
+      if(requestId){
+        const latest=readSession();
+        if(latest?.token===session.token&&latest.pendingOrder?.requestId===requestId){
+          // Failure to clear leaves the already-known request safely replayable.
+          try{saveSession({...latest,pendingOrder:null})}catch{}
+        }
+      }
+      if(!accepted)return executionFailure(data);
+      if(readSession()?.token!==session.token)throw new Error('PREVIEW_SESSION_CHANGED');
+      try{await loadBook(session)}catch{status='PREVIEW_BOOK_UNAVAILABLE'}
+      return {...data,...(requestId?{status:'PENDING_TRIGGER'}:{}),executionMode:'SIMULATION'};
+    }catch(error){return executionFailure(error)}
+    finally{writeBusy=false}
+  }
+
+  const adapter=Object.freeze({
+    name:'PREVIEW_SIMULATION_ADAPTER',mode:'SIMULATION',source:'SAME_ORIGIN_PREVIEW',enabled:true,
+    snapshot,marketSnapshot,quote,preview,refresh,pendingOrder,
+    retryPendingOrder:()=>{const pending=pendingOrder();return pending?mutate('/api/v1/order',pending):
+      Promise.resolve(executionFailure(new Error('NO_UNRESOLVED_PREVIEW_ORDER')))},
+    login:async({name}={})=>{try{
+      const session=await ensureSession(undefined,typeof name==='string'?name.slice(0,40):undefined);
+      await loadBook(session);
+      return {ok:true,playerId:session.playerId};
+    }catch(error){return executionFailure(error)}},
+    submit:input=>mutate('/api/v1/order',input),
+    cancel:orderId=>mutate('/api/v1/order/cancel',{orderId}),
+    close:positionId=>mutate('/api/v1/order/close',{positionId}),
+    observe:()=>executionFailure(new Error('SERVER_OWNS_EXECUTION_QUOTE')),
+    tick:()=>({ok:true,events:[]}),
+  });
   simulationExecutionAdapters.add(adapter);
   return adapter;
 }
@@ -316,8 +587,8 @@ export function buildRealTradingOrderIntent({
     observedPrice,
     brainAddress:normalizeAddress(brainAddress,'BRAIN_ADDRESS'),
     positionEngineAddress:normalizeAddress(positionEngineAddress,'POSITION_ENGINE_ADDRESS'),
-    transactionPayload:null,calldata:null,signerRequested:false,broadcast:false,
-    status:'READY_FOR_EXPLICIT_WALLET_ACTION_NOT_SUBMITTED'
+    transactionPayload:null,calldata:null,executionReady:false,signerRequested:false,broadcast:false,
+    status:'UNSIGNED_ORDER_INTENT_ONLY',blockers:BSC56_EXECUTION_BLOCKERS
   });
 }
 
@@ -364,6 +635,231 @@ export const CAPITAL_EXECUTION_ABI=Object.freeze({
     'event SettlementClaimPaid(bytes32 indexed positionKey,address indexed user,uint256 paidWei,uint256 remainingWei)'],
   positionEngine:['function previewLiquidationBoundary(uint8,int256,uint256,uint256) view returns(uint256)','function positionKey(uint256) view returns(bytes32)']
 });
+
+const REVIEW_COMMON_FIELDS=['chainId','action','walletAddress','nonce','gasLimit','gasPriceWei','maximumGasFeeWei','deployment','contractAddress'];
+
+function snapshotBsc56ReviewInput(input,fields){
+  // Read only data descriptors once. Hashing and construction share this bounded
+  // snapshot, so a getter/mutation cannot swap the reviewed target or amount.
+  // Browser JS cannot reliably detect every Proxy; no original property is read
+  // after snapshotting. No getter or toJSON hook is intentionally evaluated.
+  let nodes=0,bytes=0;const active=new WeakSet(),encoder=new TextEncoder();
+  const accountBytes=text=>{bytes+=encoder.encode(text).length;if(bytes>16384)throw new Error('REVIEW_JSON_BYTE_BUDGET_EXCEEDED')};
+  const snapshot=(value,depth=0)=>{
+    if(++nodes>256||depth>8)throw new Error('REVIEW_JSON_STRUCTURE_BUDGET_EXCEEDED');
+    if(value===null||typeof value==='boolean'||typeof value==='number'&&Number.isFinite(value)){accountBytes(String(value));return value}
+    if(typeof value==='string'){if(value.length>1024)throw new Error('REVIEW_JSON_STRING_BUDGET_EXCEEDED');accountBytes(JSON.stringify(value));return value}
+    if(!value||typeof value!=='object'||(!Array.isArray(value)&&Object.getPrototypeOf(value)!==Object.prototype))throw new Error('REVIEW_JSON_PLAIN_DATA_REQUIRED');
+    if(active.has(value))throw new Error('REVIEW_JSON_CYCLE');active.add(value);
+    const descriptors=Object.getOwnPropertyDescriptors(value),keys=Reflect.ownKeys(descriptors);
+    if(keys.some(k=>typeof k!=='string'))throw new Error('REVIEW_JSON_PLAIN_DATA_REQUIRED');
+    for(const key of keys)if(!Object.hasOwn(descriptors[key],'value'))throw new Error('REVIEW_JSON_ACCESSOR_FORBIDDEN');
+    let result;
+    if(Array.isArray(value)){
+      const length=descriptors.length.value;
+      if(length>64||keys.length!==length+1)throw new Error('REVIEW_JSON_ARRAY_BUDGET_OR_SHAPE');
+      result=[];for(let i=0;i<length;i++){if(!Object.hasOwn(descriptors,String(i)))throw new Error('REVIEW_JSON_ARRAY_BUDGET_OR_SHAPE');result.push(snapshot(descriptors[i].value,depth+1))}
+    }else{
+      if(keys.length>32)throw new Error('REVIEW_JSON_STRUCTURE_BUDGET_EXCEEDED');result={};
+      for(const key of keys){if(key.length>128)throw new Error('REVIEW_JSON_STRING_BUDGET_EXCEEDED');accountBytes(JSON.stringify(key));Object.defineProperty(result,key,{value:snapshot(descriptors[key].value,depth+1),enumerable:true,writable:true,configurable:true})}
+    }
+    accountBytes('[]'+',:'.repeat(keys.length));active.delete(value);return result;
+  };
+  if(!input||Object.getPrototypeOf(input)!==Object.prototype)throw new Error('REVIEW_INPUT_PLAIN_DATA_REQUIRED');
+  const descriptors=Object.getOwnPropertyDescriptors(input);
+  if(Reflect.ownKeys(descriptors).length>32)throw new Error('REVIEW_JSON_STRUCTURE_BUDGET_EXCEEDED');
+  const selected={};
+  for(const key of fields){
+    if(!Object.hasOwn(descriptors,key))continue;
+    if(!Object.hasOwn(descriptors[key],'value'))throw new Error('REVIEW_JSON_ACCESSOR_FORBIDDEN');
+    selected[key]=snapshot(descriptors[key].value);
+  }
+  return selected;
+}
+
+function bsc56ReviewTools(ethers){
+  if(typeof ethers?.Interface!=='function'||typeof ethers?.getAddress!=='function'||typeof ethers?.keccak256!=='function'||typeof ethers?.toUtf8Bytes!=='function')throw new Error('REVIEWED_ABI_CODEC_REQUIRED');
+  const uint=(value,label,{zero=false,max=(1n<<256n)-1n}={})=>{
+    if(typeof value!=='string'||value.length>78||!/^(0|[1-9][0-9]*)$/.test(value))throw new Error(label+'_EXACT_UINT_STRING_REQUIRED');
+    const n=BigInt(value);if((!zero&&n===0n)||n>max)throw new Error(label+'_OUT_OF_RANGE');return n;
+  };
+  const address=(value,label)=>{
+    try{const result=ethers.getAddress(value);if(/^0x0{40}$/i.test(result))throw new Error();return result}
+    catch{throw new Error(label+'_INVALID')}
+  };
+  const hash=(value,label)=>{if(typeof value!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(value)||/^0x0{64}$/i.test(value))throw new Error(label+'_INVALID');return value.toLowerCase()};
+  const canonical=value=>{
+    if(value===null||typeof value==='string'||typeof value==='boolean')return JSON.stringify(value);
+    if(typeof value==='number'&&Number.isSafeInteger(value))return JSON.stringify(value);
+    if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';
+    if(value&&Object.getPrototypeOf(value)===Object.prototype)return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}';
+    throw new Error('BINDING_JSON_REQUIRED');
+  };
+  const freeze=value=>{if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value)}return value};
+  return {uint,address,hash,canonical,freeze};
+}
+
+function readBsc56Fees(input,uint){
+  const nonce=uint(input.nonce,'NONCE',{zero:true,max:(1n<<64n)-1n});
+  const gasLimit=uint(input.gasLimit,'GAS_LIMIT',{max:(1n<<64n)-1n}),gasPrice=uint(input.gasPriceWei,'GAS_PRICE');
+  const gasCap=uint(input.maximumGasFeeWei,'GAS_FEE_CAP');
+  const gasExposure=gasLimit*gasPrice;if(gasExposure>gasCap)throw new Error('GAS_FEE_CAP_EXCEEDED');
+  return {nonce,gasLimit,gasPrice,gasCap,gasExposure};
+}
+
+// Pure build/review seam for the existing custody organ. This never creates a
+// provider, asks a wallet, signs, submits, mutates a ledger, or claims readiness.
+// The expected digest must come from the reviewed deployment registry, never
+// from the same untrusted page-storage object as the proposed binding.
+export function buildBsc56UnsignedCustodyReview(input={}, {ethers,expectedBindingDigest}={}){
+  input=snapshotBsc56ReviewInput(input,[...REVIEW_COMMON_FIELDS,'amountWei','positionKey','spenderAddress']);
+  if(input.chainId!==KGEN_CHAIN_ID)throw new Error('BSC56_CHAIN_REQUIRED');
+  if(!['approve','depositMargin','withdrawMargin','claimSettlement'].includes(input.action))throw new Error('BSC56_CUSTODY_ACTION_NOT_SUPPORTED');
+  const {uint,address,hash,canonical,freeze}=bsc56ReviewTools(ethers);
+  const wallet=address(input.walletAddress,'WALLET'),token=KGEN_TOKEN_ADDRESS;
+  const amount=input.action==='claimSettlement'?null:uint(input.amountWei,'AMOUNT',{zero:input.action==='approve'});
+  if(amount===(1n<<256n)-1n)throw new Error('UNLIMITED_APPROVAL_OR_AMOUNT_FORBIDDEN');
+  const positionKey=input.action==='claimSettlement'?hash(input.positionKey,'POSITION_KEY'):null;
+  if(input.action==='claimSettlement'&&input.amountWei!==undefined)throw new Error('CLAIM_AMOUNT_IS_CONTRACT_STATE');
+  const {nonce,gasLimit,gasPrice,gasCap,gasExposure}=readBsc56Fees(input,uint);
+  const effects={approve:'Set exact KGEN allowance for the bound Brain; zero revokes. No token transfer occurs in this call.',depositMargin:'Request KGEN transfer into Brain; credit only the actual received token delta.',withdrawMargin:'Request withdrawal of available Brain principal to this wallet; receipt determines actual token delivery.',claimSettlement:'Request repayment of this position claim to its recorded trader principal, limited by funded capital. This is not a wallet withdrawal.'};
+  const proposal={CHAIN:{name:'BNB Smart Chain Mainnet',chainId:KGEN_CHAIN_ID},WALLET:wallet,CONTRACT:null,FUNCTION:input.action,TOKEN:{symbol:'KGEN',address:token,decimals:18},AMOUNT:amount===null?{kind:'CONTRACT_RECORDED_CLAIM',positionKey}:{baseUnits:amount.toString(),decimals:18},EXPECTED_EFFECT:effects[input.action],MAXIMUM_EXPOSURE:{nativeGasFeeWei:gasExposure.toString(),approvedGasFeeCapWei:gasCap.toString(),walletTokenDebitWei:input.action==='depositMargin'?amount.toString():'0',allowanceAfterWei:input.action==='approve'?amount.toString():null,principalDebitWei:input.action==='withdrawMargin'?amount.toString():'0'}};
+  const blocked=BSC56_REVIEW_BLOCKERS;
+  const deployment=input.deployment;
+  if(!deployment||deployment.status!=='DEPLOYED_CONFIG_VERIFIED')return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',transactionFormat:'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC',bindingVerification:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',status:'PROPOSAL_MISSING_DEPLOYED_BINDING',review:proposal,transaction:null,bindingDigest:null,intentDigest:null,blockers:['BSC56_DEPLOYED_BINDING_REQUIRED',...blocked],executionReady:false,signerRequested:false,broadcast:false});
+  const digest=ethers.keccak256(ethers.toUtf8Bytes(canonical(deployment)));
+  if(digest!==hash(expectedBindingDigest,'EXPECTED_BINDING_DIGEST'))throw new Error('DEPLOYMENT_BINDING_DIGEST_MISMATCH');
+  if(deployment.schema!=='K11520_BSC56_DEPLOYMENT_BINDING_V1'||deployment.chainId!==KGEN_CHAIN_ID||deployment.testOnly!==false)throw new Error('BSC56_PRODUCTION_BINDING_REQUIRED');
+  if(address(deployment.tokenAddress,'TOKEN')!==token)throw new Error('CANONICAL_KGEN_TOKEN_REQUIRED');
+  const brain=address(deployment.brainAddress,'BRAIN'),implementation=address(deployment.brainImplementation,'BRAIN_IMPLEMENTATION');
+  if(new Set([wallet,token,brain,implementation].map(a=>a.toLowerCase())).size!==4)throw new Error('CUSTODY_ROLE_ADDRESS_COLLISION');
+  if(address(deployment.walletAddress,'BOUND_WALLET')!==wallet||uint(deployment.pendingNonce,'BOUND_NONCE',{zero:true,max:(1n<<64n)-1n})!==nonce)throw new Error('WALLET_NONCE_BINDING_MISMATCH');
+  for(const key of ['tokenCodeHash','brainCodeHash','implementationCodeHash','brainSourceHash','abiHash','blockHash'])hash(deployment[key],key.toUpperCase());
+  if(typeof deployment.reviewedCommit!=='string'||! /^[0-9a-f]{40}$/.test(deployment.reviewedCommit))throw new Error('REVIEWED_COMMIT_REQUIRED');
+  uint(deployment.blockNumber,'READBACK_BLOCK');
+  if(deployment.accountingModel!=='ISOLATED_SETTLEMENT_CAPITAL_V1')throw new Error('CAPITAL_ABI_CAPABILITY_REQUIRED');
+  if(input.action==='approve'){
+    const oldAllowance=uint(deployment.allowanceWei,'BOUND_ALLOWANCE',{zero:true});
+    if(oldAllowance>0n&&amount>0n)throw new Error('ALLOWANCE_RESET_CONFIRMATION_REQUIRED');
+    proposal.MAXIMUM_EXPOSURE.allowanceAtReadbackWei=oldAllowance.toString();
+    proposal.MAXIMUM_EXPOSURE.allowanceTransitionUpperBoundWei=(oldAllowance+amount).toString();
+    if(oldAllowance>0n)proposal.EXPECTED_EFFECT+=' Existing allowance may be consumed before revocation mines; re-read allowance after confirmation.';
+  }
+  const fragments=[TESTNET_EXECUTION_ABI.testToken.find(f=>f.startsWith('function approve(')),...TESTNET_EXECUTION_ABI.brainProxy.filter(f=>/^function (depositMargin|withdrawMargin)\(/.test(f)),CAPITAL_EXECUTION_ABI.brainProxy.find(f=>f.startsWith('function claimSettlement('))];
+  const abiHash=ethers.keccak256(ethers.toUtf8Bytes(canonical(fragments)));
+  if(deployment.abiHash.toLowerCase()!==abiHash)throw new Error('CUSTODY_ABI_HASH_MISMATCH');
+  const args=input.action==='approve'?[brain,amount.toString()]:input.action==='claimSettlement'?[positionKey]:[amount.toString()];
+  const data=new ethers.Interface(fragments).encodeFunctionData(input.action,args);
+  const target=input.action==='approve'?token:brain;
+  if(input.spenderAddress!==undefined&&address(input.spenderAddress,'SPENDER')!==brain)throw new Error('BRAIN_SPENDER_MISMATCH');
+  if(input.contractAddress!==undefined&&address(input.contractAddress,'CONTRACT')!==target)throw new Error('CUSTODY_TARGET_MISMATCH');
+  proposal.CONTRACT=target;if(input.action==='approve')proposal.SPENDER=brain;
+  const transaction={chainId:KGEN_CHAIN_ID,type:0,from:wallet,to:target,nonce:nonce.toString(),data,value:'0',gasLimit:gasLimit.toString(),gasPrice:gasPrice.toString()};
+  const intentDigest=ethers.keccak256(ethers.toUtf8Bytes(canonical({bindingDigest:digest,transaction})));
+  return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',transactionFormat:'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC',bindingVerification:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',status:'UNSIGNED_REVIEW_ONLY',review:proposal,transaction,bindingDigest:digest,intentDigest,blockers:blocked,replayProtection:'FRESH_WALLET_NONCE_REQUIRED_AT_CONFIRMATION',executionReady:false,signerRequested:false,broadcast:false});
+}
+
+// Build a review for the existing OrderTrigger ABI. The separate digest commits
+// to a reviewed chain readback, including its market, observation and account.
+// The caller must obtain that digest independently of the proposed input.
+export function buildBsc56UnsignedOrderReview(input={}, {ethers,expectedBindingDigest,nowMs=Date.now()}={}){
+  input=snapshotBsc56ReviewInput(input,[...REVIEW_COMMON_FIELDS,'axis','market','cWad','lots','triggerPriceWad','triggerUnit','maximumMarginWei','positionId']);
+  const {uint,address,hash,canonical,freeze}=bsc56ReviewTools(ethers);
+  if(input.chainId!==KGEN_CHAIN_ID)throw new Error('BSC56_CHAIN_REQUIRED');
+  const creating=input.action==='createOrder';
+  if(!creating&&input.action!=='closePosition')throw new Error('BSC56_ORDER_ACTION_NOT_SUPPORTED');
+  const market=assertRealTradingAxisMarket(input);
+  const wallet=address(input.walletAddress,'WALLET');
+  const fee=readBsc56Fees(input,uint);
+  const amount={market:market.market,axis:market.axis};
+  const exposure={nativeGasFeeWei:fee.gasExposure.toString(),approvedGasFeeCapWei:fee.gasCap.toString(),walletTokenDebitWei:'0'};
+  const wad=10n**18n;
+  const maxPriceWad=10n**36n;
+  let args, margin=0n, magnitude=0n, trigger=0n;
+  if(creating){
+    if(input.positionId!==undefined)throw new Error('UNEXPECTED_POSITION_ID');
+    if(typeof input.cWad!=='string'||!/^[-]?[1-9][0-9]{0,18}$/.test(input.cWad))throw new Error('INVALID_SIGNED_C_WAD');
+    magnitude=BigInt(input.cWad.replace('-',''));
+    if(magnitude>wad||magnitude%(10n**15n)!==0n)throw new Error('INVALID_SIGNED_C_WAD');
+    requireV1TradingC(Number(magnitude/(10n**15n))/1000);
+    const lots=uint(input.lots,'LOTS',{max:100n});
+    trigger=uint(input.triggerPriceWad,'TRIGGER_PRICE_WAD',{max:maxPriceWad});
+    margin=lots*wad;
+    const limit=uint(input.maximumMarginWei,'MAXIMUM_MARGIN');
+    if(margin>limit)throw new Error('ORDER_MARGIN_CAP_EXCEEDED');
+    Object.assign(amount,{cWad:input.cWad,lots:input.lots,triggerPriceWad:input.triggerPriceWad,triggerUnit:input.triggerUnit??'UNCONFIRMED'});
+    Object.assign(exposure,{marginAtFillWei:margin.toString(),approvedMarginCapWei:limit.toString()});
+    args=[market.contractMarket,input.cWad,input.lots,input.triggerPriceWad];
+  }else{
+    if(['lots','cWad','triggerPriceWad','triggerUnit','maximumMarginWei'].some(key=>input[key]!==undefined))throw new Error('CLOSE_AMOUNT_IS_POSITION_STATE');
+    amount.positionId=uint(input.positionId,'POSITION_ID').toString();
+    args=[amount.positionId];
+  }
+  const review={CHAIN:{chainId:KGEN_CHAIN_ID,name:'BNB Smart Chain Mainnet'},WALLET:wallet,CONTRACT:null,FUNCTION:input.action,
+    TOKEN:{address:KGEN_TOKEN_ADDRESS,symbol:'KGEN',decimals:18},AMOUNT:amount,MAXIMUM_EXPOSURE:exposure,
+    EXPECTED_EFFECT:creating?'Create a pending order. A later fill may lock isolated KGEN principal.':'Settle this open position to Brain principal or a recorded settlement claim. The wallet balance changes only on withdrawal.'};
+  const base={schema:'K11520_BSC56_UNSIGNED_ORDER_REVIEW_V1',transactionFormat:'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC',
+    bindingVerification:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',review,executionReady:false,signerRequested:false,broadcast:false};
+  const blockers=BSC56_REVIEW_BLOCKERS;
+  const d=input.deployment;
+  if(!d||d.status!=='DEPLOYED_CONFIG_VERIFIED'){
+    return freeze({...base,status:'PROPOSAL_MISSING_DEPLOYED_BINDING',transaction:null,bindingDigest:null,intentDigest:null,
+      blockers:['BSC56_DEPLOYED_BINDING_REQUIRED',...blockers]});
+  }
+  const digest=ethers.keccak256(ethers.toUtf8Bytes(canonical(d)));
+  if(digest!==hash(expectedBindingDigest,'EXPECTED_BINDING_DIGEST'))throw new Error('DEPLOYMENT_BINDING_DIGEST_MISMATCH');
+  if(d.schema!=='K11520_BSC56_ORDER_BINDING_V1'||d.chainId!==56||d.testOnly!==false)throw new Error('BSC56_PRODUCTION_BINDING_REQUIRED');
+  if(address(d.walletAddress,'BOUND_WALLET')!==wallet||uint(d.pendingNonce,'BOUND_NONCE',{zero:true})!==fee.nonce)throw new Error('WALLET_NONCE_BINDING_MISMATCH');
+  if(address(d.tokenAddress,'TOKEN')!==KGEN_TOKEN_ADDRESS)throw new Error('CANONICAL_KGEN_TOKEN_REQUIRED');
+  const brain=address(d.brainAddress,'BRAIN'),engine=address(d.positionEngineAddress,'POSITION_ENGINE'),target=address(d.orderTriggerAddress,'ORDER_TRIGGER');
+  if(new Set([wallet,KGEN_TOKEN_ADDRESS,brain,engine,target]).size!==5)throw new Error('ORDER_ROLE_ADDRESS_COLLISION');
+  if(input.contractAddress!==undefined&&address(input.contractAddress,'CONTRACT')!==target)throw new Error('ORDER_TARGET_MISMATCH');
+  const identity=d.identity;
+  if(!identity||address(identity.triggerBrain,'TRIGGER_BRAIN')!==brain||address(identity.triggerPosition,'TRIGGER_POSITION')!==engine||
+      address(identity.positionExecutor,'POSITION_EXECUTOR')!==target||address(identity.positionBrain,'POSITION_BRAIN')!==brain||
+      address(identity.brainToken,'BRAIN_TOKEN')!==KGEN_TOKEN_ADDRESS||identity.positionHasSettlementRole!==true)throw new Error('ORDER_CONTRACT_ROUTING_MISMATCH');
+  if(typeof d.reviewedCommit!=='string'||!/^[0-9a-f]{40}$/.test(d.reviewedCommit))throw new Error('REVIEWED_COMMIT_REQUIRED');
+  for(const key of ['tokenCodeHash','brainCodeHash','implementationCodeHash','engineCodeHash','triggerCodeHash','sourceBundleHash'])hash(identity[key],key);
+  const impl=address(identity.brainImplementation,'BRAIN_IMPLEMENTATION');
+  if([wallet,KGEN_TOKEN_ADDRESS,brain,engine,target].includes(impl))throw new Error('ORDER_ROLE_ADDRESS_COLLISION');
+  uint(d.blockNumber,'READBACK_BLOCK');
+  hash(d.blockHash,'READBACK_BLOCK_HASH');
+  const fragments=TESTNET_EXECUTION_ABI.orderTriggerEngine.filter(f=>/^function (createOrder|closePosition)\(/.test(f));
+  if(hash(identity.abiHash,'ORDER_ABI_HASH')!==ethers.keccak256(ethers.toUtf8Bytes(canonical(fragments))))throw new Error('ORDER_ABI_HASH_MISMATCH');
+  if(creating&&input.triggerUnit!=='USD')throw new Error('EXPLICIT_SETTLEMENT_TRIGGER_UNIT_REQUIRED');
+  const q=d.quote;
+  if(!q||q.axis!==market.axis||q.market!==market.market||q.contractMarket!==market.contractMarket||
+      q.source!=='ONCHAIN_USD_SETTLEMENT_ORACLE'||q.unit!=='USD'||q.validated!==true)throw new Error('BOUND_USD_SETTLEMENT_QUOTE_REQUIRED');
+  hash(q.feedSetEvidenceHash,'FEED_SET_EVIDENCE');
+  hash(q.usdUsdtBasisEvidenceHash,'USD_USDT_BASIS_EVIDENCE');
+  const timestamp=n=>Number.isSafeInteger(n)&&n>0;
+  if(!timestamp(nowMs)||!timestamp(d.blockTimeMs)||!timestamp(q.observedAtMs)||!timestamp(q.maxAgeMs)||
+      q.observedAtMs>d.blockTimeMs||d.blockTimeMs>nowMs||nowMs-q.observedAtMs>q.maxAgeMs)throw new Error('STALE_OR_FUTURE_SETTLEMENT_OBSERVATION');
+  if(!Number.isInteger(q.minimumSources)||!Number.isInteger(q.validSources)||q.minimumSources<2||q.validSources<q.minimumSources||q.validSources>3)throw new Error('SETTLEMENT_SOURCE_QUORUM_REQUIRED');
+  const price=uint(q.priceWad,'ORACLE_PRICE_WAD',{max:maxPriceWad});
+  const lower=uint(q.minPriceWad,'PRICE_FLOOR',{max:maxPriceWad}),upper=uint(q.maxPriceWad,'PRICE_CEILING',{max:maxPriceWad});
+  if(lower>=upper||(creating&&(price<lower||price>upper||trigger<lower||trigger>upper)))throw new Error('ORDER_PRICE_OUT_OF_MARKET_BOUNDS');
+  uint(q.sequence,'ORACLE_SEQUENCE');
+  review.OBSERVATION={priceWad:q.priceWad,unit:q.unit,source:q.source,observedAtMs:q.observedAtMs,blockHash:d.blockHash,sequence:q.sequence};
+  if(creating){
+    const risk=d.admission;
+    if(!risk||risk.state!=='OPEN'||risk.settlementModel!=='FIXED_ENTRY_FLOOR'||risk.custodyEnabled!==true||risk.ordersEnabled!==true||
+        !timestamp(risk.capabilityValidUntilMs)||risk.capabilityValidUntilMs<=nowMs)throw new Error('ORDER_ADMISSION_UNAVAILABLE');
+    hash(risk.capabilityEvidenceHash,'CAPABILITY_EVIDENCE');
+    if(magnitude>uint(risk.maximumCWad,'MARKET_MAX_C'))throw new Error('ORDER_MARKET_C_CAP_EXCEEDED');
+    if(margin>uint(risk.availablePrincipalWei,'AVAILABLE_PRINCIPAL',{zero:true}))throw new Error('INSUFFICIENT_MARGIN');
+  }else{
+    const p=d.position;
+    if(!p||p.positionId!==amount.positionId||p.contractMarket!==market.contractMarket||
+        address(p.trader,'POSITION_TRADER')!==wallet||p.status!=='OPEN')throw new Error('OPEN_POSITION_OWNER_AND_MARKET_REQUIRED');
+    exposure.isolatedPrincipalAtRiskWei=uint(p.collateralWad,'POSITION_COLLATERAL',{zero:true}).toString();
+  }
+  review.CONTRACT=target;
+  const data=new ethers.Interface(fragments).encodeFunctionData(input.action,args);
+  const transaction={chainId:56,type:0,from:wallet,to:target,nonce:fee.nonce.toString(),data,value:'0',gasLimit:fee.gasLimit.toString(),gasPrice:fee.gasPrice.toString()};
+  const intentDigest=ethers.keccak256(ethers.toUtf8Bytes(canonical({bindingDigest:digest,transaction})));
+  return freeze({...base,status:'UNSIGNED_REVIEW_ONLY',transaction,bindingDigest:digest,intentDigest,blockers});
+}
 
 // A timed-out wallet prompt cannot be cancelled by JavaScript. Keep its write
 // lease across adapter recreation until rejection or mined-receipt reconciliation.

@@ -263,7 +263,11 @@ test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('
 
 test('public reference quotes use the browser-safe market-data origin without credentials',()=>{
   assert.match(main,/import \{[^}]*\bfetchPublicMarketObservations\b[^}]*\bpublicObservationStatus\b[^}]*\} from '\.\/public-market-quotes\.mjs'/);
-  assert.ok(main.includes('observedAt:r.updatedAt'),'execution must use provider time, never fetch time');
+  const previewServer=read('../backend/server.mjs');
+  assert.match(previewServer,/observedAt: observation\.updatedAt, now: observation\.receivedAt/,
+    'settlement uses provider time, with receipt time checked separately');
+  assert.match(main,/assertVerifiedPublicMarketObservation\(row,\{market:row\.market,now\}\)/);
+  assert.match(main,/statuses\[market\]\?\.available&&observations\[market\]/);
   assert.ok(publicMarketQuotes.includes("origin:'https://data-api.binance.vision'"));
   assert.ok(publicMarketQuotes.includes("credentials:'omit'"));
   assert.equal(main.includes('https://api.binance.com'),false,'CORS-hostile general API origin returned');
@@ -597,7 +601,7 @@ test('wrapped Wallet help links require ownership of every rendered fragment wit
   await inspect();await inspect(0);await inspect(1);await inspect(0,'paragraph');await inspect(1,'paragraph');
 });
 
-test('signed-C quote fixture is loopback-only and separates SIMULATION WAIT preview from public LIVE and 100C no-chain guards',async()=>{
+test('signed-C quote fixtures stay on loopback and preserve the 100C confirmation guard',async()=>{
   const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-signed-c-immersive.mjs');
   const config=source.slice(source.indexOf('const BASE='),source.indexOf('await fs.mkdir'));
   const payload=source.slice(source.indexOf('function freeQuotePayload('),source.indexOf("import fs from 'node:fs/promises'"));
@@ -609,18 +613,24 @@ test('signed-C quote fixture is loopback-only and separates SIMULATION WAIT prev
     assert.equal(context.payload(route,[]).length,0);const row=context.payload(route,context.result.rows)[0];assert.equal(row.p,'3500');assert.equal(row.T,40000);assert.equal(row.a,40000);
   }
   assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.route('https://data-api.binance.vision/api/v3/aggTrades*'"));
-  assert.ok(source.includes("status==='WAIT'"));assert.ok(source.includes("K11520_DETERMINISTIC_SIMULATION"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
+  assert.ok(source.includes("status==='WAIT'"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
   assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:5000})"),'final fixture readiness is local-only');
   for(const guard of ['V1_HIGH_SPEED_PRODUCTION_LOCKED',"'#confirmOrder').isDisabled(),true",'PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈'])assert.ok(source.includes(guard),guard);
   assert.ok(source.includes("page.locator('#confirm').waitFor({state:'visible',timeout:2500})"),'confirmation timeout remains unchanged');
 });
 
-test('signed-C WAIT preview checks source, public status, no debit and native cancellation',()=>{
+test('signed-C browser QA blocks WAIT and displayed-only quotes before exercising signed previews on the shared backend',()=>{
   const source=read('./11520-browser-signed-c-immersive.mjs');
   const block=source.slice(source.indexOf('if(LOCAL_SIMULATION_QA){'),source.indexOf('// Human 12:43'));
-  for(const guard of ["'#cNumericInput').fill('1')", "'#orderFire').click", "'#confirmOrder').isDisabled(),false", 'K11520_DETERMINISTIC_SIMULATION', "snapshot().wallet),before", "'#cancelOrder').click()", "waitPreviewAllowed:true"])assert.ok(block.includes(guard),guard);
-  assert.ok(block.indexOf("'#cancelOrder').click()")<block.indexOf('quoteFixtureReady=true'));
-  assert.doesNotMatch(block,/waitRejected:true|__SIGNED_C_WAIT_EVIDENCE__/);
+  for(const guard of ['createK11520Server(', "'#confirm').isVisible(),false", "'#confirmOrder').isDisabled(),true",
+    'after.wallet,before.wallet','after.orders,before.orders','after.receipts,before.receipts',
+    "['1','LONG'],['-1','SHORT']", "'#cancelOrder').click()", 'BINANCE_AGGREGATE_SOURCE','waitPreviewAllowed:false']){
+    assert.ok(block.includes(guard),guard);
+  }
+  const [cold,display,trial]=block.split('await assertBlockedOrder();');
+  assert.ok(cold.includes("status==='WAIT'"));assert.ok(display.includes('quoteFixtureReady=true'));
+  assert.ok(trial.includes('createK11520Server('));assert.ok(block.indexOf('backendQuotesReady=true')<block.indexOf("'#cancelOrder').click()"));
+  assert.doesNotMatch(block,/K11520_DETERMINISTIC_SIMULATION/);
 });
 
 test('responsive event routing retains standalone mobile-HUD coverage and references only its required exact-tree Game owner',async()=>{
@@ -807,14 +817,103 @@ test('offline acceptance waits for the actual adapter before reload assertions a
  assert.match(reload,/receipts\.length===length/,'receipt equality remains mandatory');
 });
 
-test('offline acceptance closes each open surface once and awaits its completed hidden transition',async()=>{
+test('offline acceptance observes hidden panels together and waits for visible transitions before acting',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
- const start=source.indexOf('    const game=async()=>{'),fn=source.slice(start,source.indexOf('    const organ=async name=>{',start));
- for(const open of [false,true]){
-  const clicks=[],waits=[],page={locator:selector=>({evaluate:async predicate=>predicate({classList:{contains:cls=>selector==='#walletPanel'?cls==='collapsed':['#confirm','#sheet'].includes(selector)&&cls==='open'&&open}}),click:async()=>clicks.push(selector),waitFor:async options=>{assert.deepEqual({...options},{state:'hidden',timeout:12000});waits.push(selector)},isVisible(){throw new Error('transitional visibility is not close authority')}})};
-  const context={page,usable:async selector=>assert.equal(selector,'#cancelOrder')};runInNewContext(fn+';globalThis.game=game;',context);await context.game();
-  assert.deepEqual(clicks,open?['#cancelOrder','#sheetClose']:[]);assert.deepEqual(waits,['#confirm','#sheet']);
+ const start=source.indexOf('    const game=async()=>{');
+ const fn=source.slice(start,source.indexOf('    const organ=async name=>{',start));
+ const usableStart=source.indexOf('    const usable=async selector=>',source.indexOf('async function offlineSimulationBrowserQA('));
+ const usableSource=source.slice(usableStart,source.indexOf('    const waitForSimulationBoot=',usableStart));
+ const timingStart=source.indexOf('function createSettlementTiming(');
+ const timerSource=source.slice(timingStart,source.indexOf('\n}\n',timingStart)+3);
+ const closeStart=source.indexOf('        const flatTiming = createSettlementTiming();');
+ const closeEnd=source.indexOf('          evidence.flatTiming = flatTiming.snapshot();\n        }',closeStart);
+ assert.ok(closeStart>=0 && closeEnd>closeStart);
+ const closeOrder=source.slice(closeStart,source.indexOf('}',closeEnd)+1);
+
+ async function scenario(initial, {afterHide, afterClick, stuck, covered}={}) {
+   const state={confirm:'hidden',sheet:'hidden',walletOpen:false,utilitiesOpen:false,...initial};
+   const actions=[];
+   const panels={};
+   for(const id of ['confirm','sheet']){
+     panels[id]={classList:{contains:name=>name==='open'&&state[id]==='open'},
+       getClientRects:()=>state[id]==='absent'?[]:[{}],
+       get visibility(){return state[id]==='hidden'?'hidden':'visible'}};
+   }
+   panels.walletPanel={inert:false,classList:{contains:name=>name==='collapsed'&&!state.walletOpen}};
+   function button(x){return {getBoundingClientRect:()=>({x,y:0,width:44,height:44,right:x+44,bottom:44}),contains(el){return el===this}}}
+   const flat=button(0),cancel=button(100);
+   const document={getElementById:id=>panels[id],documentElement:{classList:{contains:()=>state.utilitiesOpen}},
+     elementFromPoint:x=>x===122?cancel:(covered?panels.sheet:flat)};
+   const page={
+     evaluate: async readPanels=>{actions.push('read panels');return readPanels()},
+     waitForFunction: async()=>{actions.push('wait CLOSED')},
+     locator: selector=>({
+       click: async()=>{
+         actions.push('click '+selector);
+         if(selector==='#cancelOrder')state.confirm='closing';
+         if(selector==='#sheetClose')state.sheet='closing';
+         if(selector==='#walletToggle')state.walletOpen=false;
+         if(selector==='#k11520UtilityMaster')state.utilitiesOpen=false;
+         afterClick?.(selector,state);
+       },
+       waitFor: async options=>{
+         assert.deepEqual({...options},{state:'hidden',timeout:12000});
+         actions.push('wait '+selector);
+         if(selector===stuck)throw Error('fixture: transition stayed visible');
+         state[selector.slice(1)]='hidden';
+         afterHide?.(selector,state);
+       },
+       evaluate: async measure=>{
+         assert.ok(['#cancelOrder','#flat'].includes(selector));
+         actions.push('hit test '+selector);
+         return measure(selector==='#flat'?flat:cancel);
+       }
+     })
+   };
+   const evidence={};
+   const context={page,document,assert,performance,position:{positionId:'fixture'},evidence,getComputedStyle:panel=>panel,
+     profile:{width:390,height:844},stage:'BTCUSDT-LONG',result:{}};
+     const hitStart=source.indexOf('function readOfflineControlHit(');
+   const hitSource=source.slice(hitStart,source.indexOf('\n}\n',hitStart)+3);
+   context.waitForOfflineConfirmationGeometry=(page,record)=>page.locator(record.selector).evaluate(context.hit);
+   const scenarioSource=hitSource+'globalThis.hit=readOfflineControlHit;'+timerSource+usableSource+fn+'globalThis.close=async()=>{'+closeOrder+'}';
+   runInNewContext(scenarioSource,context);
+   let error;
+   try{await context.close()}catch(e){error=e}
+   return {actions,error,timing:evidence.flatTiming};
  }
+
+ const ready=await scenario({});
+ assert.ifError(ready.error);
+ assert.deepEqual(ready.actions,['read panels','hit test #flat','click #flat','wait CLOSED']);
+ assert.deepEqual(Array.from(ready.timing.events,e=>[e.label,e.status]),[
+   ['return-to-game','COMPLETE'],['flat-hit-test','COMPLETE'],['flat-click','COMPLETE'],['await-closed-position','COMPLETE']
+ ]);
+ const absent=await scenario({confirm:'absent',sheet:'absent'});
+ assert.ifError(absent.error);
+ assert.deepEqual(absent.actions,ready.actions);
+ const sheet=await scenario({sheet:'open'});
+ assert.ifError(sheet.error);
+ assert.deepEqual(sheet.actions,['read panels','click #sheetClose','wait #sheet','read panels','hit test #flat','click #flat','wait CLOSED']);
+ const closing=await scenario({confirm:'closing',sheet:'closing'});
+ assert.ifError(closing.error);
+ assert.deepEqual(closing.actions.filter(a=>a.startsWith('wait')),['wait #confirm','wait #sheet','wait CLOSED']);
+ assert.deepEqual(closing.actions.filter(a=>a.startsWith('click')),['click #flat']);
+ const layered=await scenario({confirm:'open'},{
+   afterHide(selector,state){if(selector==='#confirm')state.sheet='open';if(selector==='#sheet')state.walletOpen=true},
+   afterClick(selector,state){if(selector==='#walletToggle')state.utilitiesOpen=true}
+ });
+ assert.ifError(layered.error);
+ assert.deepEqual(layered.actions.filter(a=>a.startsWith('click')),['click #cancelOrder','click #sheetClose','click #walletToggle','click #k11520UtilityMaster','click #flat']);
+ for(const selector of ['#confirm','#sheet']){
+   const blocked=await scenario({[selector.slice(1)]:'closing'},{stuck:selector});
+   assert.match(blocked.error?.message,/transition stayed visible/);
+   assert.ok(!blocked.actions.includes('click #flat'));
+ }
+ const covered=await scenario({},{covered:true});
+ assert.match(covered.error?.message,/pointer blocked/);
+ assert.equal(covered.timing.events.at(-1).status,'FAILED');
+ assert.ok(!covered.actions.includes('click #flat'));
 });
 
 test('camera QA reacquires only rejected native origins with a fixed budget and complete evidence',async()=>{
@@ -837,18 +936,77 @@ test('camera QA reacquires only rejected native origins with a fixed budget and 
 
 test('offline confirmation readiness observes rendered animation and geometry with a bounded fail-closed wait',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
- const start=source.indexOf('async function waitForOfflineConfirmationGeometry('),fn=source.slice(start,source.indexOf('async function offlineSimulationBrowserQA(',start));
- async function scenario(kind){
-  let frame=0;const record={selector:'#confirmOrder'},qa={};
+ const start=source.indexOf('function readOfflineControlHit(');
+ const waitStart=source.indexOf('async function waitForOfflineConfirmationGeometry(',start);
+ const fn=source.slice(start,source.indexOf('\n}',start)+2)+'\n'+source.slice(waitStart,source.indexOf('\n}',waitStart)+2);
+ async function scenario(kind, selector='#confirmOrder', repeats=1){
+  let frame=0,sequence=0;
+  const records=[],samples=[],calls=[];
+  const previous={selector:'#cancelOrder',frames:[]},qa={confirmGeometryChecks:{unrelated:previous}};
   const surface={id:'confirm',tagName:'DIV',classList:{contains:()=>kind!=='hidden'},parentElement:null,getAnimations:()=>kind==='forever'||(kind==='animation'&&frame<3)?[{playState:'running',pending:frame===1,currentTime:frame*16,effect:{getComputedTiming:()=>({progress:.25})}}]:[]};
-  const element={id:'confirmOrder',tagName:'BUTTON',parentElement:surface,getAnimations:()=>[],getBoundingClientRect:()=>({x:20,y:kind==='clipped'?900:(kind==='moving'&&frame<3?frame*20:100),width:150,height:44,right:170,bottom:kind==='clipped'?944:(kind==='moving'&&frame<3?frame*20+44:144)})};
-  const context={__offlineSimulationQA:qa,Date:{now:()=>frame*16},performance:{now:()=>frame*16},document:{querySelector:selector=>selector==='#confirm'?surface:element},getComputedStyle:node=>({display:'block',visibility:'visible',opacity:'1',transform:node===surface&&frame<3?'matrix(1,0,0,1,-180,100)':'matrix(1,0,0,1,-180,0)'})};
-  const page={evaluate:async(callback,arg)=>{context.arg=arg;return runInNewContext('('+callback.toString()+')(arg)',context)},waitForFunction:async(predicate,arg,options)=>{assert.deepEqual({...options},{polling:'raf',timeout:1200});for(frame=1;frame<=8;frame++){if(await runInNewContext('('+predicate.toString()+')()',context))return}throw new Error('fixture timeout')}};
-  context.page=page;context.record=record;runInNewContext(fn+'globalThis.wait=waitForOfflineConfirmationGeometry;',context);
-  let error;try{await context.wait(page,record)}catch(caught){error=caught}return{record,error,frame};
+  const element={id:selector.slice(1),tagName:'BUTTON',parentElement:surface,contains(node){return node===this},getAnimations:()=>[],getBoundingClientRect:()=>({x:20,y:kind==='clipped'?900:(kind==='moving'&&frame<3?frame*20:100),width:150,height:44,right:170,bottom:kind==='clipped'?944:(kind==='moving'&&frame<3?frame*20+44:144)})};
+  const context={__offlineSimulationQA:qa,randomUUID:()=>String(++sequence),Date:{now:()=>frame*16},performance:{now:()=>frame*16},
+    document:{querySelector:s=>s==='#confirm'?surface:element,elementFromPoint:()=>kind==='covered'?surface:element},
+    getComputedStyle:node=>({display:'block',visibility:'visible',opacity:'1',transform:node===surface&&frame<3?'matrix(1,0,0,1,-180,100)':'matrix(1,0,0,1,-180,0)'})};
+  function evaluate(callback,...args){
+    context.args=args;
+    return runInNewContext('('+callback.toString()+')(...args)',context);
+  }
+  const page={
+    evaluate:async(callback,arg)=>{calls.push('trace');return evaluate(callback,arg)},
+    locator:s=>({evaluate:async(callback,arg)=>{
+      assert.equal(s,selector);calls.push('hit');
+      if(kind==='detached')throw new Error('button detached');
+      return evaluate(callback,element,arg);
+    }}),
+    waitForFunction:async(predicate,arg,options)=>{
+      calls.push('wait');
+      assert.deepEqual({...options},{polling:'raf',timeout:1200});
+      if(kind!=='no-frame'){
+        for(frame=1;frame<=8;frame++){
+          if(evaluate(predicate,arg))return {dispose:async()=>{
+            calls.push('dispose');
+            if(kind==='release-error')throw new Error('fixture release failed');
+          }};
+        }
+      }
+      throw new Error('fixture timeout');
+    }
+  };
+  runInNewContext(fn+'globalThis.wait=waitForOfflineConfirmationGeometry;',context);
+  let error;
+  for(let i=0;i<repeats;i++){
+    const record={selector};records.push(record);
+    try{samples.push(await context.wait(page,record))}catch(caught){error=caught;break}
+  }
+  assert.deepEqual(qa.confirmGeometryChecks,{unrelated:previous},'each check releases only its own trace');
+  return {records,samples,error,calls};
  }
- for(const kind of ['still','animation','moving','clipped']){const result=await scenario(kind);assert.equal(result.error,undefined,kind);assert.equal(result.record.status,'STABLE_RENDERED_GEOMETRY');assert.equal(result.frame,kind==='animation'||kind==='moving'?5:3);assert.equal(result.record.observation.frames.length,result.frame);assert.equal(result.record.observation.frames.at(-1).stableFrames,3)}
- for(const kind of ['forever','hidden']){const result=await scenario(kind);assert.match(String(result.error),/CONFIRM_GEOMETRY_NOT_STABLE.*fixture timeout/);assert.equal(result.record.status,'NOT_STABLE');assert.equal(result.record.observation.frames.length,8)}
+ for(const kind of ['still','animation','moving','clipped','covered','release-error']){
+   const {records:[record],samples:[sample],calls,error}=await scenario(kind);
+   assert.ifError(error);
+   assert.equal(record.status,'STABLE_RENDERED_GEOMETRY');
+   assert.equal(record.observation.frames.length,kind==='animation'||kind==='moving'?5:3);
+   assert.equal(record.observation.frames.at(-1).stableFrames,3);
+   assert.equal(sample.box.hit,kind!=='covered');
+   assert.equal(record.handleReleaseError,kind==='release-error'?'fixture release failed':undefined);
+   if(kind==='clipped')assert.equal(sample.box.bottom,944);
+   assert.deepEqual(calls,['wait','hit','dispose']);
+ }
+ for(const kind of ['hidden','forever','no-frame','detached']){
+   const {records:[record],error,calls}=await scenario(kind);
+   assert.match(String(error),/CONFIRM_GEOMETRY_NOT_STABLE/);
+   assert.equal(record.status,'NOT_STABLE');
+   if(kind==='no-frame')assert.equal(record.observation,null);
+   else assert.equal(record.observation.frames.length,kind==='detached'?3:8);
+   assert.deepEqual(calls,kind==='detached'?['wait','hit','dispose','trace']:['wait','trace']);
+ }
+ for(const selector of ['#confirmOrder','#cancelOrder']){
+   const {records,error}=await scenario('still',selector,2);
+   assert.ifError(error);
+   assert.deepEqual(records.map(r=>[r.observation.selector,r.observation.frames.length]),[[selector,3],[selector,3]]);
+   assert.notEqual(records[0].observation,records[1].observation);
+ }
  const offline=source.slice(source.indexOf('async function offlineSimulationBrowserQA('),source.indexOf('async function localCandidateBrowserQA('));
  assert.match(offline,/box\.right<=profile\.width\+1&&box\.bottom<=profile\.height\+1/,'stable clipped geometry still fails the unchanged viewport assertion');
  assert.match(offline,/assert\.ok\(box\.hit/,'own-hit remains mandatory');
@@ -857,13 +1015,19 @@ test('offline confirmation readiness observes rendered animation and geometry wi
 });
 
 
-test('one existing toast follows trading-panel context without replacing text, timers or accessibility',async()=>{
+test('one existing toast follows trading and Player Life panels while retaining text, timers and accessibility',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('../runtime/game-ui-product-fixes-v23.mjs');
  const start=source.indexOf('let toastContextObserver=null;'),fn=source.slice(start,source.indexOf('export function emit11520WorldFeedback(',start)).replace('export function show11520Toast','function show11520Toast');
  const nodes={},timers=[],cleared=[],observers=[],listeners={};let moves=0;
  const element=id=>{const classes=new Set(),styleValues={};return nodes[id]={id,dataset:{},attrs:{},parentElement:null,children:[],style:{setProperty:(k,v)=>styleValues[k]=v,removeProperty:k=>delete styleValues[k]},styleValues,classList:{contains:k=>classes.has(k),add:k=>classes.add(k),remove:k=>classes.delete(k)},setAttribute(k,v){this.attrs[k]=v},appendChild(node){if(node.parentElement)node.parentElement.children=node.parentElement.children.filter(x=>x!==node);this.children.push(node);node.parentElement=this;moves++},querySelector:()=>null,getBoundingClientRect:()=>({left:6,top:160,bottom:200,width:360,height:24})}};
  const body=element('body'),toast=element('toast'),confirm=element('confirm'),sheet=element('sheet'),sheetBody=element('sheetBody'),sheetTitle=element('sheetTitle'),confirmHeader=element('confirmHeader'),sheetHeader=element('sheetHeader');element('k11520MonsterGuide');body.appendChild(toast);confirm.querySelector=()=>confirmHeader;sheet.querySelector=()=>sheetHeader;
- let navigationVisible=false;const navigation=element('navigationConsole');sheetBody.querySelector=selector=>selector==='#navigationConsole'&&navigationVisible?navigation:null;
+ let navigationVisible=false,playerLifeVisible=false;
+ const navigation=element('navigationConsole'),playerLife=element('playerLifePanel');
+ sheetBody.querySelector=selector=>{
+   if(selector==='#navigationConsole'&&navigationVisible)return navigation;
+   if(selector==='#playerLifePanel'&&playerLifeVisible)return playerLife;
+   return null;
+ };
  const context={isGame:true,innerHeight:844,document:{body,getElementById:id=>nodes[id],querySelector:selector=>({getAttribute:()=>({orders:'委託',positions:'持倉',history:'歷史',worldmap:'導航／自駕地圖'})[selector.match(/data-organ="(.*?)"/)[1]]})},MutationObserver:class{constructor(callback){this.callback=callback;this.observed=[];observers.push(this)}observe(node,options){this.observed.push({node,options})}disconnect(){this.disconnected=true}},setTimeout:(callback,ms)=>{timers.push({callback,ms});return timers.length},clearTimeout:id=>cleared.push(id),addEventListener:(name,callback)=>listeners[name]=callback};
  runInNewContext(fn+'globalThis.api={install:install11520ToastContext,show:show11520Toast,dispose:dispose11520ToastContext};',context);
  context.api.install();assert.equal(observers.length,1);assert.equal(toast.parentElement,body);assert.equal(toast.attrs.role,'status');assert.equal(toast.attrs['aria-live'],'polite');
@@ -888,6 +1052,18 @@ test('one existing toast follows trading-panel context without replacing text, t
   sheetBody.dataset.simOrgan='';navigationVisible=true;observers[0].callback([{target:sheetBody,attributeName:'data-sim-organ'}]);assert.equal(toast.parentElement,sheetHeader);
   sheet.classList.remove('open');observers[0].callback([{target:sheet,attributeName:'class'}]);assert.equal(toast.parentElement,body,'closing navigation restores the same world toast');
   assert.equal(toast.textContent,'SIMULATION FILLED｜KY1C');assert.equal(toast.classList.contains('show'),true);assert.equal(toast.attrs.role,'status');assert.equal(toast.attrs['aria-live'],'polite');assert.equal(nodes.toast,toast);assert.equal(body.children.filter(node=>node.id==='toast').length,1);assert.equal(observers.length,1);assert.equal(timers.length,navigationTimers);assert.equal(timers.at(-1).ms,1700);assert.equal(cleared.length,navigationClears,'navigation context must not restart or clear feedback timers');
+  navigationVisible=false;sheet.classList.add('open');sheetTitle.textContent='Player Life · 玩家與起家地';
+  context.api.show('第一間草屋落成',{event:'HOME_BUILD',duration:2000});
+  assert.equal(toast.parentElement,body,'a Player Life title alone cannot claim toast placement');
+  const homeTimers=timers.length;
+  playerLifeVisible=true;observers[0].callback([{target:sheetTitle,type:'childList'}]);
+  assert.equal(toast.parentElement,sheetHeader);assert.equal(toast.dataset.panelContext,'sheet');assert.equal(toast.textContent,'第一間草屋落成');
+  confirm.classList.add('open');observers[0].callback([{target:confirm,attributeName:'class'}]);
+  assert.equal(toast.parentElement,confirmHeader,'confirmation still takes priority over Player Life');
+  confirm.classList.remove('open');sheetTitle.textContent='市場卡';observers[0].callback([{target:sheetTitle,type:'childList'}]);
+  assert.equal(toast.parentElement,body,'stale Player Life content cannot claim a different sheet');
+  assert.equal(timers.length,homeTimers,'Player Life placement preserves the original timer');
+  sheet.classList.remove('open');
  const guideRect={left:132,top:355,bottom:434.75,width:220,height:79.75};nodes.k11520MonsterGuide.getBoundingClientRect=()=>guideRect;
  context.api.show('DISMISS_IN_PLACE',{combat:true,duration:450});assert.equal(toast.styleValues.top,'440.75px');const fadePlacement={...toast.styleValues},timerCount=timers.length;
  guideRect.top-=8;guideRect.bottom-=8;timers.at(-1).callback();observers[0].callback([{target:toast,attributeName:'class'}]);
@@ -906,21 +1082,144 @@ test('toast visual assertions cannot prevent the existing failure screenshot cap
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
  const start=source.indexOf('    const shot=async label=>{'),fn=source.slice(start,source.indexOf('    const usable=async selector=>{',start));
  for(const evaluationThrows of [false,true])for(const captureThrows of [false,true]){
-  const originalError=new Error('fixture DOM unavailable'),result={screenshots:[]},captured=[],context={assert,baseline:false,name:'390x844',out:'artifacts',profile:{width:390,height:844},result,page:{evaluate:async()=>{if(evaluationThrows)throw originalError;return{panel:'confirm',context:'wrong',inHeader:false}},screenshot:async options=>{captured.push(options.path);if(captureThrows)throw new Error('fixture capture unavailable')}}};
+  const originalError=new Error('fixture DOM unavailable'),result={screenshots:[]},captured=[],context={assert,performance,baseline:false,name:'390x844',out:'artifacts',profile:{width:390,height:844},result,page:{evaluate:async()=>{if(evaluationThrows)throw originalError;return{fitsViewport:false,feedback:{panel:'confirm',context:'wrong',inHeader:false}}},screenshot:async options=>{captured.push(options.path);if(captureThrows)throw new Error('fixture capture unavailable');const png=Buffer.alloc(24);png.writeUInt32BE(390,16);png.writeUInt32BE(844,20);return png}}};
   runInNewContext(fn+'globalThis.shot=shot;',context);await assert.rejects(context.shot('failure'),error=>{if(evaluationThrows)assert.equal(error,originalError);else assert.equal(error.code,'ERR_ASSERTION');return true});assert.deepEqual(captured,['artifacts/390x844-failure.png']);assert.deepEqual(result.screenshots,captureThrows?[]:['390x844-failure.png']);if(captureThrows)assert.match(result.screenshotErrors[0].error,/capture unavailable/);
  }
 });
 
 
-test('offline toast visual gate cannot pass without actual preview and history observations',async()=>{
+test('offline simulation reuses only committed controls on the selected axis', async () => {
+  const {runInNewContext} = await import('node:vm');
+  const source = read('./11520-browser-settlement.mjs');
+  const start = source.indexOf('async function setOfflineOrderInputs(');
+  const end = source.indexOf('async function offlineSimulationBrowserQA(', start);
+  const selection = {plane: 'YZ', axis: 'KX', c: 1};
+  const state = {activeAxis: 'KX', signedC: 1, canonicalSideSynced: true, lots: 1};
+  const cInput = {dataset: {k11520NumericBound: '1'}, value: '+1'};
+  const lotsInput = {dataset: {k11520NumericBound: '1'}, value: '1'};
+  const lotsRead = {textContent: '1'};
+  const elements = {'#cNumericInput': cInput, '#lotsNumericInput': lotsInput, '#lotsRead': lotsRead};
+  const document = {activeElement: null, querySelector: selector => elements[selector]};
+  const context = {document, __K11520_SIGNED_C_IMMERSIVE__: state, __K11520_3D_CONTROL__: {mode: 'YZ'}};
+  const setInputs = runInNewContext(source.slice(start, end) + 'setOfflineOrderInputs', context);
+  const applied = [];
+  let afterEnter;
+  const page = {
+    evaluate: (readState, args) => readState(args),
+    locator: selector => ({
+      fill: value => { elements[selector].value = value; },
+      press: key => {
+        assert.equal(key, 'Enter');
+        applied.push([selector, elements[selector].value]);
+        afterEnter?.(selector);
+      }
+    })
+  };
+  async function check(expected, enterBoth = false) {
+    applied.length = 0;
+    await setInputs(page, selection, enterBoth);
+    assert.deepEqual(applied, expected);
+  }
+
+  const editC = ['#cNumericInput', '1'], editLots = ['#lotsNumericInput', '1'];
+  await check([]);
+  await check([editC, editLots], true);
+  cInput.value = '+1';
+  state.lots = 2;
+  await check([editLots]);
+  state.lots = 1;
+  state.canonicalSideSynced = false;
+  // A C commit can change the state observed by the following lots check.
+  afterEnter = selector => { if (selector === '#cNumericInput') lotsInput.value = '2'; };
+  await check([editC, editLots]);
+  afterEnter = undefined;
+  state.canonicalSideSynced = true;
+  selection.c = state.signedC = -1;
+  cInput.value = '-1';
+  await check([]);
+  selection.c = state.signedC = 0;
+  cInput.value = '';
+  await check([['#cNumericInput', '0']]);
+  document.activeElement = lotsInput;
+  await check([editLots]);
+  document.activeElement = null;
+  lotsRead.textContent = '';
+  await check([editLots]);
+  lotsRead.textContent = '1';
+  state.activeAxis = 'KY';
+  await check([['#cNumericInput', '0'], editLots]);
+  assert.match(source, /baseline \|\| controlsUrl !== previousControlsUrl/);
+});
+
+test('order review scrolls and reads the current rendered row before the next quote replaces it',async()=>{
  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
- const start=source.indexOf('function assertOfflineToastCoverage('),fn=source.slice(start,source.indexOf('async function offlineSimulationBrowserQA(',start)),context={assert};
- runInNewContext(fn+'globalThis.check=assertOfflineToastCoverage;',context);
- assert.throws(()=>context.check({}, {width:390}),/order-preview feedback coverage/);
- const preview={panel:'confirm',stage:'BTCUSDT-LONG-preview'},history={panel:'sheet',stage:'BTCUSDT-LONG-close-receipt'};
- assert.throws(()=>context.check({toastLayout:[preview]}, {width:390}),/history feedback coverage/);
- assert.doesNotThrow(()=>context.check({toastLayout:[preview,history]}, {width:390}));assert.doesNotThrow(()=>context.check({toastLayout:[preview]}, {width:360}));
- assert.match(source,/if\(!baseline\)assertOfflineToastCoverage\(result,profile\);/,'immutable baseline stays a reproduction lane');
+ const start=source.indexOf('function readRenderedExchangePanel(');
+ const fn=source.slice(start,source.indexOf('function assertRenderedExchangeRows(',start));
+ let market='BTCUSDT',scrolled=false,coverValue=false,marketAfterScroll;
+ const visible={checkVisibility:()=>true,getClientRects:()=>[{}]};
+ function cell(text,left){
+   return {...visible,innerText:text,getBoundingClientRect(){
+     assert.ok(scrolled,'geometry must follow scrolling the current row');
+     assert.equal(market,marketAfterScroll,'row changed before its hit test');
+     return {left,top:20,width:10,height:10};
+   },contains(other){return other===this}};
+ }
+ const label=cell('MARKET',10);
+ let value=cell(market,50);
+ const row={querySelector:tag=>tag==='dt'?label:value,scrollIntoView(options){
+   assert.equal(options.behavior,'instant');
+   scrolled=true;marketAfterScroll=market;
+   queueMicrotask(()=>{market='ETHUSDT';value=cell(market,50);scrolled=false});
+ }};
+ const selector='#confirm.open #simulationOrderPreview';
+ const panel={...visible,dataset:{},getAttribute:()=>'polite',querySelectorAll:()=>[row],querySelector:()=>null};
+ const document={querySelector:s=>s===selector?panel:null,elementFromPoint:x=>x===15?label:coverValue?null:value};
+ const readPanel=runInNewContext(fn+'readRenderedExchangePanel',{document});
+ const first=readPanel({selector,scrolledLabel:'MARKET'});
+ assert.equal(first.rows.MARKET,'BTCUSDT');assert.equal(first.scrolledRowInView,true);
+ await Promise.resolve();
+ coverValue=true;
+ const next=readPanel({selector,scrolledLabel:'MARKET'});
+ assert.equal(next.rows.MARKET,'ETHUSDT');assert.equal(next.scrolledRowInView,false);
+ assert.throws(()=>readPanel({selector:'#closed',scrolledLabel:'MARKET'}),/Missing rendered exchange panel/);
+});
+
+test('offline order review requires the visible quote and terms for the selected side',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const checks=source.slice(source.indexOf('function assertRenderedExchangeRows('),source.indexOf('async function offlineSimulationBrowserQA('));
+ const {FREE_ORACLE_MAX_AGE_MS}=await import('../runtime/public-market-quotes.mjs');
+ const check=runInNewContext(checks+'assertOrderReview',{assert,FREE_ORACLE_MAX_AGE_MS});
+ const trade={market:'BTCUSDT',axis:'KX',side:'SHORT',c:-1},quote={source:'fixture',anchor:100000,triggerPrice:100000.125};
+ const rows={MARKET:'BTCUSDT',SIDE:'SHORT',AXIS:'KX','C / LEVERAGE / LOTS':'-1C / 1× / 1','PRICE SOURCE':'fixture',
+   'CURRENT PRICE':'100000','TRIGGER PRICE':'100000.125','REQUIRED MARGIN':'1 KGEN','報價時間':'2026-11-22T17:03:13Z'};
+ const panel={visible:true,scrolledRowInView:true,readAt:Date.parse(rows['報價時間']),rows,live:'polite'};
+ check(panel,trade,quote);
+ assert.throws(()=>check({...panel,visible:false},trade,quote),/visibly rendered/);
+ assert.throws(()=>check({...panel,scrolledRowInView:false},trade,quote),/inside the viewport/);
+ assert.throws(()=>check({...panel,readAt:panel.readAt+FREE_ORACLE_MAX_AGE_MS+1},trade,quote),/must be current/);
+ for(const [label,value] of Object.entries(rows)){
+   assert.throws(()=>check({...panel,rows:{...rows,[label]:value+' INVALID'}},trade,quote),{code:'ERR_ASSERTION'});
+ }
+ assert.match(source,/page\.evaluate\(readRenderedExchangePanel,\{selector:'#confirm\.open #simulationOrderPreview',scrolledLabel:'MARKET'\}\)/);
+ assert.match(source,/assertOrderReview\(evidence\.renderedPreview,testCase,/);
+});
+
+test('expanded settlement review binds the displayed receipt and locale-rounded profit to the ledger',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const checks=source.slice(source.indexOf('function assertRenderedExchangeRows('),source.indexOf('async function offlineSimulationBrowserQA('));
+ const check=runInNewContext(checks+'assertSettlementReview',{assert});
+ const receipt={receiptId:'SIM-R-29',axis:'KY',status:'LIQUIDATED',orderId:'SIM-O-26',positionId:'SIM-P-27',market:'ETHUSDT',
+   priceSource:'fixture',settlementPrice:3,marginBefore:1,marginAfter:0,rawPnl:-1.25000025,realizedPnl:-1};
+ const panel={visible:true,scrolledRowInView:true,receiptId:receipt.receiptId,open:true,summary:'SIM-R-29 · LIQUIDATED · KY',locale:'de-DE',rows:{
+   'ORDER ID':receipt.orderId,'POSITION ID':receipt.positionId,MARKET:receipt.market,'PRICE SOURCE':'fixture','SETTLEMENT / EXIT':'3',
+   'MARGIN BEFORE / AFTER':'1 / 0','RAW / REALIZED PNL':'-1,25 / -1'}};
+ check(panel,receipt);
+ for(const change of [{open:false},{receiptId:'SIM-R-28'},{summary:'SIM-R-29 · CLOSED · KY'},{rows:{}},
+   {rows:{...panel.rows,'RAW / REALIZED PNL':'-1 / -1'}}]){
+   assert.throws(()=>check({...panel,...change},receipt),{code:'ERR_ASSERTION'});
+ }
+ assert.match(source,/reviewSettlement\(receipt,stage\+'-close-receipt'\)/);
+ assert.match(source,/reviewSettlement\(liquidationReceipt,'liquidation'\)/);
 });
 
 
@@ -943,14 +1242,18 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Prior floating-input body: 105221614e4f33cecf4ffb9302cbfb6319bdab0552e290989564555767bcc34c.
   // Fixed entry floor: prior published main body bf5c2cbaacedeba8015c9447753111437afe9f11e4758e2e20ab418a36db0539.
    // Prior published fixed-entry-floor body: e5ca793767852c87ec296bed46aa789e4b66ab04e8929a5e0cd217a48cca005a.
-   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'fc726410bcfd1bd124c7b52739234ce94772183aa1f7b909ffe10e94123ea20c'},
-  'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'3f75529827bb9d0db91251d2fc80710d97fd206f2a5cacca21e9ee1798fc2809'},
+  // runtime/game-5d-main.mjs at the private-preview baseline a673c89b: fbd9dddecdb1c7f2cf439d727dfa1c7361ee820f9d7616de9316badcd34e8881.
+   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'c0a7147a3a851affddda31a21091f54b3447aa111c4c8b02b420e1a58f5be125'},
+  'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'f3eee0ef282b388496d9b5c485304899aa7f4d608d14f5b8f854273ee409b1a1'},
   // Prior published order adapter body bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078.
-  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'496168804b40899cd28d6e719084501dd080fa32d5fbddf5b5b86915ff0a620f'},
-  'runtime/kgen-margin-runtime.mjs':{nonMetadataSha256:'51044cbfcecd761d0d9d2f05bd86db7ed89644e497383a48e61a1d854f44c576'},
-   'runtime/game-ui-product-fixes-v23.mjs':{nonMetadataSha256:'ea364a05c794f635d0c03eb267fdd5dfa390428e5c15f01eb0f31757579a51d4'},
+  // runtime/real-trading-order-intent.mjs at the private-preview baseline a673c89b: e39454c964545311404b98efaad8449e74a0d07d7369602eec28bb401c76465d.
+  'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'a6ecc3e072822f2acccbe2b7a83bb4c04c8e9d4584cc03155a015108fe37917b'},
+  'runtime/kgen-margin-runtime.mjs':{nonMetadataSha256:'d52d6cf29d78f5b81dce1b34359bb31382c2976d5656ffcc97b2303f545d6dbd'},
+   // Player Life toast header derives from bab36c54, whose body hash was ea364a05c794f635d0c03eb267fdd5dfa390428e5c15f01eb0f31757579a51d4.
+   'runtime/game-ui-product-fixes-v23.mjs':{"revision":"2026-11-24.PLAYER-LIFE-TOAST-HEADER","sourceCommit":"bab36c546c2643c2462d987d59ee70e0b1552896","ancestorCommit":"bab36c546c2643c2462d987d59ee70e0b1552896","lastUpdated":"2026-11-24","updatedBy":"Codex / 衡曜 / Human-authorized","reviewedBy":"Player Life placement source review complete; exact-head and release acceptance pending","taskId":"K11520-FINAL-SIMULATION-20261123-01","nonMetadataSha256":"183c07a5c40b6d2bc8ba448bf407dcbfb15c924d393fc874cdfe1b8d1762e594"},
    // Prior published game shell body: f4ae42eca3c7c68622747423bfff3981fdd2438dab2a891ca696026b153364cc.
-   'game-5d.html':{nonMetadataSha256:'66f2ec1d2aa7081f14f07f1f6338666b12e8539acb3f4d2fe3ba35334712d9da'}
+  // game-5d.html at the private-preview baseline a673c89b: f2988732b4ccecf5bd2d6cca07586cb251a61c79bff43d0ee8b05f0d1c42c999.
+   'game-5d.html':{nonMetadataSha256:'a728791f8a4e23edf3cf0ea71018bcb8ed136d6677e3c0e01982104924b11c46'}
  };
  for(const ancestor of assets){
   const asset={...ancestor,...current[ancestor.path]};
@@ -1191,4 +1494,43 @@ test('layout reentry observes late guide nodes through its original single Resiz
   nodes.set('#k11520MonsterGuide',guide);context.install();assert.equal(instances.length,1,'late main-owned guide cannot create another observer');assert.deepEqual(instances[0].nodes,[market,telemetry,guide]);
   nodes.set('.brand',brand);context.install();context.install();assert.deepEqual(instances[0].nodes,[market,telemetry,guide,brand],'each real node is observed once even after repeated install');assert.equal(guards,1);assert.deepEqual(subscriptions,['resize']);assert.equal(applied,4,'every original install still applies the current layout');
   instances[0].callback();assert.equal(flows,1);assert.equal(context.__K11520_MOBILE_CONTROL_LAYOUT__.generation,1,'a late guide resize runs the existing flow and measured report');
+});
+
+test('offline browser diagnostics select one known size and preserve the full default matrix',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const source=read('./11520-browser-settlement.mjs');
+  const context={assert};
+  runInNewContext(source.slice(source.indexOf('function readOfflineSimulationRun('),source.indexOf('const offlineRun=')),context);
+  const readRun=(...args)=>JSON.parse(JSON.stringify(context.readOfflineSimulationRun(args)));
+  const sizes=['360x740','390x844','412x772','432x856','480x900','844x390'];
+  for(const flag of ['--simulation-offline','--simulation-offline-baseline']){
+    const run=readRun(flag);
+    assert.equal(run.baseline,flag==='--simulation-offline-baseline');
+    assert.equal(run.totalProfiles,sizes.length);
+    assert.deepEqual(run.profiles.map(({width,height})=>width+'x'+height),sizes);
+  }
+  assert.equal(readRun('--local-candidate'),null);
+  const diagnostic=readRun('--simulation-offline','--offline-profile=844x390');
+  assert.equal(diagnostic.requestedProfile,'844x390');
+  assert.equal(diagnostic.totalProfiles,sizes.length);
+  assert.deepEqual(diagnostic.profiles,[{width:844,height:390,quote:'INVALID',account:null,chain:'0x38'}]);
+  for(const flags of [
+    ['--offline-profile=844x390'],
+    ['--simulation-offline-baseline','--offline-profile=844x390'],
+    ['--simulation-offline','--testnet97','--offline-profile=844x390'],
+    ['--simulation-offline','--offline-profile=844x390','--offline-profile=390x844'],
+  ])assert.throws(()=>readRun(...flags),/with --simulation-offline only/);
+  assert.throws(()=>readRun('--simulation-offline','--offline-profile'),/Unknown offline profile/);
+  assert.throws(()=>readRun('--simulation-offline','--offline-profile=999x390'),/Unknown offline profile/);
+  const report=(results,failures=[])=>JSON.parse(JSON.stringify(context.offlineSimulationOutcome(diagnostic,results,failures,6)));
+  const pass='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
+  const allOrders=Array.from({length:6},()=>({result:pass}));
+  assert.equal(report([]).functional,'FAIL');
+  assert.equal(report([{status:pass,cases:allOrders.slice(0,5)}]).functional,'FAIL');
+  assert.equal(report([{status:'FAIL',cases:allOrders}]).functional,'FAIL');
+  assert.equal(report([{status:pass,cases:allOrders}],['cleanup failed']).functional,'FAIL');
+  assert.deepEqual(report([{status:pass,cases:allOrders}]),{
+    functional:'PARTIAL_PROFILE_PASS',
+    diagnostics:{requestedProfile:'844x390',selectedProfiles:1,totalProfiles:6,completedOrders:6,expectedOrders:6,totalOrders:36},
+  });
 });

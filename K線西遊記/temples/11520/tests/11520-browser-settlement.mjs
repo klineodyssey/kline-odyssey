@@ -1,7 +1,34 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {tmpdir} from 'node:os';
+import {randomUUID} from 'node:crypto';
+import {join} from 'node:path';
+import {createK11520Server,BINANCE_AGGREGATE_SOURCE,BYBIT_TRADES_SOURCE} from '../backend/server.mjs';
 import {positionRisk} from '../runtime/kgen-margin-runtime.mjs';
+import {FREE_ORACLE_MAX_AGE_MS} from '../runtime/public-market-quotes.mjs';
+import {KGEN_TOKEN_ADDRESS} from '../runtime/evm-wallet-runtime.mjs';
+
+async function startBrowserTrial(prices,stale=()=>false){
+  const directory=await fs.mkdtemp(join(tmpdir(),'k11520-settlement-browser-'));
+  const dataFile=join(directory,'players.json'),sequence=new Map();
+  let backend;
+  async function close(){
+    if(backend)await backend.close();
+    await fs.rm(dataFile,{force:true});await fs.rmdir(directory);
+  }
+  try{
+    backend=await createK11520Server({dataFile,pollIntervalMs:800,
+      readMarket:async({market,now})=>{
+        const next=(sequence.get(market)??0)+1;sequence.set(market,next);
+        return [{market,price:prices(market),updatedAt:now-(stale()?60000:0),sequence:next,source:BINANCE_AGGREGATE_SOURCE}];
+      },
+      readIndependent:async({market,now})=>({market,price:prices(market),updatedAt:now,source:BYBIT_TRADES_SOURCE}),
+    });
+    const {port}=await backend.listen({port:0});
+    return {origin:'http://127.0.0.1:'+port,poll:()=>backend.poll(),close};
+  }catch(error){await close();throw error}
+}
 
 // Host-only relative timings in the existing reports. No timer, browser read,
 // retry or budget change; each original operation still runs exactly once.
@@ -15,26 +42,6 @@ function createSettlementTiming(now=()=>performance.now(),origin=now()){
     catch(error){finish(event,'FAILED');throw error}
   };
   return{begin,finish,measure,snapshot:()=>({clock:'NODE_MONOTONIC_RELATIVE_MS',elapsedMs:now()-origin,events:events.map(event=>({...event}))})};
-}
-
-// Keep the application's normal quote poll. For fixture transitions whose
-// assertions concern the accepted price rather than wall-clock latency, ask
-// that same callback to consume one new routed response immediately.
-function captureSettlementQuoteRefresh(){
-  const nativeSetInterval=globalThis.setInterval;
-  globalThis.setInterval=function register(callback,delay,...args){
-    const interval=Reflect.apply(nativeSetInterval,globalThis,[callback,delay,...args]);
-    if(typeof callback==='function'&&callback.name==='quotes'&&delay===5000){
-      globalThis.setInterval=nativeSetInterval;
-      globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__=()=>{
-        if(document.querySelector('#sheet.open [data-kgen-pool-reference]')){
-          throw new Error('Fixture quote refresh cannot request a reserve reference');
-        }
-        return callback(...args);
-      };
-    }
-    return interval;
-  };
 }
 
 async function waitForAcceptedFixtureQuote(page,price,previous){
@@ -54,16 +61,8 @@ async function driveSettlementFixtureQuote(page,phaseTiming,label,price,setPrice
     const previous=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().observations.ETHUSDT);
     assert.ok(previous?.source&&Number.isSafeInteger(previous.at)&&Number.isSafeInteger(previous.sequence),
       'Fixture transition requires an existing provider observation');
-    setPrice(price);
-    const [book]=await Promise.all([
-      waitForAcceptedFixtureQuote(page,price,previous),
-      page.evaluate(()=>{
-        const refresh=globalThis.__K11520_QA_REFRESH_FIXTURE_QUOTES__;
-        if(typeof refresh!=='function')throw new Error('Expected the original game quote interval');
-        return refresh();
-      }),
-    ]);
-    return book;
+    await setPrice(price);
+    return waitForAcceptedFixtureQuote(page,price,previous);
   });
 }
 
@@ -80,8 +79,49 @@ async function showRetainedControls(page){
   if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
 }
 
-if(process.argv.includes('--simulation-offline')||process.argv.includes('--simulation-offline-baseline')){
-  await offlineSimulationBrowserQA({baseline:process.argv.includes('--simulation-offline-baseline')});process.exit(0);
+function readOfflineSimulationRun(args){
+  const baseline=args.includes('--simulation-offline-baseline');
+  const candidate=args.includes('--simulation-offline');
+  const overrides=args.filter(arg=>arg==='--offline-profile'||arg.startsWith('--offline-profile='));
+  if(!baseline&&!candidate&&!overrides.length)return null;
+
+  const profiles=[
+    {width:360,height:740,quote:'WAIT',account:null,chain:'0x38'},
+    {width:390,height:844,quote:'STALE',account:'0x1111111111111111111111111111111111111111',chain:'0x38'},
+    {width:412,height:772,quote:'INVALID',account:'0x1111111111111111111111111111111111111111',chain:'0x1'},
+    {width:432,height:856,quote:'WAIT',account:null,chain:'0x38'},
+    {width:480,height:900,quote:'STALE',account:null,chain:'0x38'},
+    {width:844,height:390,quote:'INVALID',account:null,chain:'0x38'},
+  ];
+  if(!overrides.length)return {baseline,profiles,totalProfiles:profiles.length};
+  assert.ok(candidate&&args.length===2&&overrides.length===1,
+    'Use --offline-profile=WIDTHxHEIGHT with --simulation-offline only');
+  const requestedProfile=overrides[0].slice('--offline-profile='.length);
+  const selected=profiles.find(({width,height})=>requestedProfile===width+'x'+height);
+  assert.ok(selected,'Unknown offline profile. Select one of '+profiles.map(({width,height})=>width+'x'+height).join(', '));
+  return {baseline:false,profiles:[selected],totalProfiles:profiles.length,requestedProfile};
+}
+
+function offlineSimulationOutcome({baseline,profiles,totalProfiles,requestedProfile},results,failures,ordersPerProfile){
+  if(!requestedProfile)return {functional:failures.length?'FAIL':baseline?'BASELINE_REPRODUCED':'PASS'};
+  const diagnostics={
+    requestedProfile,
+    selectedProfiles:profiles.length,
+    totalProfiles,
+    completedOrders:results.flatMap(result=>result.cases).filter(item=>item.result==='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED').length,
+    expectedOrders:profiles.length*ordersPerProfile,
+    totalOrders:totalProfiles*ordersPerProfile,
+  };
+  const verified=results.length===profiles.length&&
+    results.every(result=>result.status==='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED')&&
+    diagnostics.completedOrders===diagnostics.expectedOrders;
+  return {diagnostics,functional:!failures.length&&verified?'PARTIAL_PROFILE_PASS':'FAIL'};
+}
+
+const offlineRun=readOfflineSimulationRun(process.argv.slice(2));
+if(offlineRun){
+  await offlineSimulationBrowserQA(offlineRun);
+  process.exit(0);
 }
 
 if(process.argv.includes('--m1-read-only')){
@@ -100,26 +140,32 @@ if(process.argv.includes('--testnet97')){
 // Real Chromium, deterministic read-only quote fixtures. Never a live-funds oracle.
 const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 const out='artifacts/11520-settlement-qa';
+const receiptReviewOnly=process.argv.includes('--wallet-receipt-review');
 await fs.mkdir(out,{recursive:true});
 const settlementStarted=performance.now();
 const browser=await chromium.launch({headless:true});
+let backend;
 try {
   for(const [width,height] of [[390,844],[844,390]]) {
     const phaseTiming=createSettlementTiming(()=>performance.now(),settlementStarted),generalPhase=phaseTiming.begin('generic');
     let eth=4000;
-    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
+    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true,serviceWorkers:'block'});
     page.setDefaultTimeout(20000);
-    await page.addInitScript(captureSettlementQuoteRefresh);
-    const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,value=>{eth=value});
+    const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,async value=>{eth=value;await backend.poll()});
     const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE_ERROR',String(e))});
     // Ordinary simulation QA must remain independent of a public rehearsal.
     // An unverified manifest may not silently activate wallet transactions.
     await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
-    // Exercise late optional UI delivery after the authoritative bootstrap has
-    // already dismissed its intro. It must not create a second pointer blocker.
-    await page.route('**/runtime/game-ui-product-fixes-v23.mjs',async route=>{
-      await new Promise(resolve=>setTimeout(resolve,3500));await route.continue();
-    });
+    const gameUrl=`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`;
+    const lateUiUrl=new URL('./runtime/game-ui-product-fixes-v23.mjs',gameUrl).href;
+    let lateUiRequests=0;
+    // Inject late UI only for the first static boot of each viewport.
+    const delayLateUi=async route=>{
+      lateUiRequests++;
+      await new Promise(resolve=>setTimeout(resolve,3500));
+      await route.continue();
+    };
+    await page.route(lateUiUrl,delayLateUi);
     // Synthetic EIP-1193 provider, not a connected Human wallet or live balance.
     await page.addInitScript(()=>{
       const listeners=new Map();
@@ -147,10 +193,17 @@ try {
       body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);
       await route.fulfill({status:200,contentType:'text/javascript',body});
     });
-    await page.goto(`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
-    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT,{timeout:15000});
+    const [lateUiResponse]=await phaseTiming.measure('generic.first-static-boot',()=>Promise.all([
+      page.waitForResponse(lateUiUrl),
+      page.goto(gameUrl,{waitUntil:'domcontentloaded'}),
+    ]));
+    assert.ok(lateUiResponse.ok()&&lateUiRequests>0,'initial static boot must load the delayed UI module');
+    await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets.some(m=>m.symbol==='ETHUSDT'&&m.status==='LIVE'&&m.price===4000),null,{timeout:15000});
+    const displayBook=await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot());
+    assert.equal(displayBook.observations.ETHUSDT,undefined,'the static page must not settle from a displayed public quote');
     await page.screenshot({path:`${out}/${width}x${height}-late-ui-boot.png`});
     assert.equal(await page.locator('#intro11520 .introSkip').count(),0,'late legacy UI must not recreate an intro over the live game');
+    await page.unroute(lateUiUrl,delayLateUi);
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
     // Character readiness is independent of the MINIMAL telemetry visibility.
@@ -183,10 +236,70 @@ try {
     assert.equal(await page.evaluate(()=>__K11520_EXECUTION__.snapshot().mode),'SIMULATION_WALLET');
     assert.match(await page.locator('#wChain').innerText(),/BNB Smart Chain.*56/);
     await shot('wallet-connected');
+    const mainnetReview = page.locator('#k11520Bsc56UnsignedReview');
+    await mainnetReview.locator(':scope > summary').click();
+    await mainnetReview.locator('#bsc56ReviewAction').selectOption('createOrder');
+    await mainnetReview.getByLabel('交易市場').selectOption('KX');
+    await mainnetReview.getByLabel(/USD 觸發價/).fill('75000');
+    await mainnetReview.getByLabel(/口數/).fill('2');
+    await mainnetReview.getByRole('button',{name:'更新審核資訊'}).click();
+    await page.waitForFunction(()=>document.querySelector('#k11520Bsc56UnsignedReview [role="status"]').textContent.includes('尚缺正式部署綁定與鏈上讀回'));
+    assert.equal(await mainnetReview.getAttribute('data-execution-ready'),'false');
+    assert.match(await mainnetReview.locator('[data-bsc56-review-field="AMOUNT"]').innerText(),/75000/);
+    assert.equal(await mainnetReview.locator('[data-bsc56-review-field]').count(),8);
+    await shot('bsc56-order-review');
+    await mainnetReview.locator('#bsc56ReviewAction').selectOption('closePosition');
+    await mainnetReview.getByLabel('原持倉 ID').fill('3');
+    assert.equal(await mainnetReview.getByLabel(/USD 觸發價/).isVisible(),false);
+    await mainnetReview.locator(':scope > summary').click();
+    const lookup = page.locator('#k11520WithdrawalLookup');
+    await lookup.locator('summary').click();
+    await lookup.locator('#k11520WithdrawalHash').fill('0x'+'aa'.repeat(32));
+    await lookup.locator('#k11520ReadWithdrawal').click();
+    await page.waitForFunction(()=>document.querySelector('#k11520WithdrawalStatus').textContent.includes('尚無已核實'));
+    await shot('bsc56-receipt');
+    await lookup.locator('#k11520ReceiptKind').selectOption('order');
+    assert.equal(await lookup.locator('#k11520ReceiptHashLabel').textContent(),'原建立委託交易雜湊');
+    await lookup.locator('#k11520WithdrawalHash').fill('0x'+'bb'.repeat(32));
+    await lookup.locator('#k11520ReadWithdrawal').click();
+    await page.waitForFunction(()=>document.querySelector('#k11520WithdrawalStatus').textContent.includes('尚無已核實'));
+    await shot('bsc56-order-receipt');
+    await page.evaluate(()=>{__walletFixture.account='0x2222222222222222222222222222222222222222';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
+    await page.waitForFunction(()=>document.querySelector('#wAddr').textContent==='0x2222222222222222222222222222222222222222');
+    assert.equal(await lookup.locator('#k11520WithdrawalHash').inputValue(),'','another wallet must not inherit an original transaction');
+    await page.evaluate(()=>{__walletFixture.chain='0x1';__walletFixture.emit('chainChanged','0x1')});
+    await page.waitForFunction(()=>document.querySelector('#walletMsg').textContent.includes('WRONG_CHAIN'));
+    assert.equal(await page.locator('#wKgen').innerText(),'--');
+    await page.evaluate(()=>{__walletFixture.chain='0x38';__walletFixture.account='0x1111111111111111111111111111111111111111';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
+    await page.waitForFunction(()=>document.querySelector('#k11520WithdrawalHash').value==='0x'+'bb'.repeat(32));
+    await lookup.locator('summary').click();
+    assert.equal(await page.evaluate(()=>__walletFixture.calls.some(m=>/send|sign|switch|addChain|personal_/i.test(m))),false);
+
     await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});
     await shot('wallet-metrics');
     await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});
     await page.locator('#walletToggle').click();
+    await page.locator('#k11520UtilityMaster').click();
+    await page.locator('#orderFire').click();
+    await page.waitForFunction(()=>document.querySelector('#toast').textContent.includes('等候有效報價'));
+    assert.equal(await page.locator('#confirmOrder').isDisabled(),true);
+    assert.equal(await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length),displayBook.orders.length);
+    if(receiptReviewOnly){await page.close();continue;}
+
+    // Exercise the anonymous trial through the original server and its own
+    // persistent ledger. Only the two upstream market readers are fixtures.
+    const marketPrice=market=>({BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600})[market];
+    backend=await startBrowserTrial(marketPrice,()=>quoteStale);
+    const trialOrigin=backend.origin;
+    await phaseTiming.measure('generic.trial-navigation',()=>page.goto(trialOrigin,{waitUntil:'domcontentloaded'}));
+    await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets.some(m=>m.symbol==='ETHUSDT'&&m.status==='LIVE')&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().wallet);
+    await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
+    await page.locator('#intro11520').waitFor({state:'hidden',timeout:10000});
+    assert.equal(await page.locator('#walletConnect').isDisabled(),true);
+    await showRetainedControls(page);await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
+    // Each new backend guest has 10 KGEN. Leave enough principal for the
+    // second order after testing the first position's full isolated loss.
+    await page.locator('#lotsNumericInput').fill('2');await page.locator('#lotsNumericInput').press('Enter');
     await organ('trade');await page.locator('#sheetClose').click();await page.locator('#k11520UtilityMaster').click();await page.locator('#orderFire').click();
     await page.locator('#simulationTriggerPrice').fill('4001');
     const orderDirection=side=>page.locator(`#confirmBody [data-order-side="${side}"]`);
@@ -210,37 +323,50 @@ try {
     await organ('orders');await shot('pending');
     const filledQuote=await driveQuote('generic.pending-fill-quote',4002);
     assert.equal(filledQuote.orders[0]?.status,'FILLED');
-    s=await snap();assert.equal(s.positions.length,1);assert.equal(s.wallet.lockedMargin,10);assert.equal(s.wallet.free,90);
+    s=await snap();assert.equal(s.positions.length,1);assert.equal(s.wallet.lockedMargin,2);assert.equal(s.wallet.free,8);
     assert.equal(s.receipts.filter(r=>r.kind==='FILL').length,1);
     await organ('positions');await shot('filled');
     const openId=s.positions[0].positionId;
-    await page.evaluate(()=>{__walletFixture.account='0x2222222222222222222222222222222222222222';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
-    await page.waitForFunction(()=>document.querySelector('#wAddr').textContent==='0x2222222222222222222222222222222222222222');
-    await page.evaluate(()=>{__walletFixture.chain='0x1';__walletFixture.emit('chainChanged','0x1')});
-    await page.waitForFunction(()=>document.querySelector('#walletMsg').textContent.includes('WRONG_CHAIN'));
-    assert.equal(await page.locator('#wKgen').innerText(),'--');
-    assert.equal((await snap()).positions.length,0,'address B must not see A positions');
-    await page.evaluate(()=>{__walletFixture.account='0x1111111111111111111111111111111111111111';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
-    await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions.length===1);
-    assert.equal((await snap()).positions[0].positionId,openId,'address A restores its own position');
-    await page.evaluate(()=>{__walletFixture.chain='0x38';__walletFixture.emit('chainChanged','0x38')});
-    await page.waitForFunction(()=>document.querySelector('#wKgen').textContent==='12345');
+    const other=await browser.newContext();
+    try{
+      const login=await other.request.post(trialOrigin+'/api/v1/login',{data:{},headers:{Origin:trialOrigin}});
+      assert.ok(login.ok());const player=await login.json();
+      const book=await other.request.get(trialOrigin+'/api/v1/orders',{headers:{Authorization:'Bearer '+player.token}});
+      assert.ok(book.ok());assert.deepEqual((await book.json()).positions,[],'another anonymous player has a separate book');
+      assert.equal((await snap()).positions[0].positionId,openId,'the original player still owns the same position');
+    }finally{await other.close()}
     const gapQuote=2900; // First fill 4002 at k=3 has a long liquidation mark of 3002.
-    quoteStale=true;eth=gapQuote;await page.waitForTimeout(6000);
-    assert.equal((await snap()).positions[0].status,'OPEN','stale liquidation must not mutate position');
-    assert.match(await page.locator('#feed').innerText(),/MARKET DATA STALE/);await shot('stale-position-preserved');
+    await phaseTiming.measure('generic.stale-gap-rejected',async()=>{
+      const rejected=page.waitForResponse(async response=>{
+        if(response.url()!==trialOrigin+'/api/v1/markets'||!response.ok())return false;
+        const {statuses,observations}=await response.json();
+        const ethStatus=statuses?.ETHUSDT;
+        return ethStatus?.status==='WAITING'&&ethStatus.reason==='STALE_PRICE'&&
+          observations?.ETHUSDT?.price===filledQuote.observations.ETHUSDT.price;
+      },{timeout:6000});
+      const waiting=page.waitForFunction(()=>document.querySelector('#feed')?.textContent.includes('等候有效報價'),null,{timeout:6000});
+      quoteStale=true;
+      eth=gapQuote;
+      const [,waitingHandle]=await Promise.all([rejected,waiting]);
+      await waitingHandle.dispose();
+    });
+    const staleBook=await snap();
+    assert.equal(staleBook.positions[0].positionId,openId);
+    assert.equal(staleBook.positions[0].status,'OPEN','stale liquidation must not mutate position');
+    assert.equal(staleBook.receipts.filter(r=>r.kind==='SETTLEMENT').length,0);
+    assert.match(await page.locator('#feed').innerText(),/等候有效報價/);await shot('stale-position-preserved');
     quoteStale=false;
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='LIQUIDATED',null,{timeout:15000});
-    s=await snap();assert.equal(s.positions[0].margin,0);assert.equal(s.wallet.free,90);assert.equal(s.wallet.lockedMargin,0);
+    s=await snap();assert.equal(s.positions[0].margin,0);assert.equal(s.wallet.free,8);assert.equal(s.wallet.lockedMargin,0);
     assert.equal(s.receipts.filter(r=>r.kind==='SETTLEMENT').length,1);assert.ok(s.receipts.at(-1).badDebt>0);
     const liquidation=s.receipts.at(-1);
     assert.equal(liquidation.liquidationTrigger,3002,'liquidation uses the fixed entry floor unit in USDT');
     assert.equal(liquidation.settlementPrice,gapQuote,'receipt retains the observed raw USDT price');
-    assert.equal(liquidation.realizedPnl,-10,'liquidation loss is limited to the position margin');
+    assert.equal(liquidation.realizedPnl,-2,'liquidation loss is limited to the position margin');
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('liquidation-receipt');
     await organ('assets');await shot('wallet');
     const walletText=await page.locator('#sheetBody').innerText();
-    assert.match(walletText,/SIMULATION WALLET/);
+    assert.match(walletText,/後端模擬/);
     for(const label of ['AVAILABLE','LOCKED MARGIN','EQUITY','UNREALIZED PNL','REALIZED PNL'])assert.match(walletText,new RegExp(label));
 
     const liquidationQuote=s.observations.ETHUSDT;
@@ -249,7 +375,11 @@ try {
     const receiptsBeforeRecovery=s.receipts.map(receipt=>receipt.receiptId);
     eth=4002;
     // Observe the next accepted fixture quote and its committed ledger together.
-    s=await phaseTiming.measure('generic.recovery-quote',()=>waitForAcceptedFixtureQuote(page,eth,liquidationQuote));
+    await phaseTiming.measure('generic.recovery-quote',()=>page.waitForFunction(previous=>{
+      const q=globalThis.__K11520_FREE_ORACLE__?.ETHUSDT;
+      return q?.price===4002&&q.source===previous.source&&q.sequence>previous.sequence;
+    },liquidationQuote,{timeout:15000,polling:100}));
+    s=await snap();
     assert.equal(s.positions[0].positionId,openId);
     assert.equal(s.positions[0].status,'LIQUIDATED');
     assert.equal(s.receipts.length,2);
@@ -262,21 +392,18 @@ try {
     assert.equal(secondFillQuote.positions[1]?.status,'OPEN');
     assert.equal(secondFillQuote.positions[1].entry,4004,'the indexed PnL model keeps the raw fill price');
     const markQuote=await driveQuote('generic.profitable-mark-quote',4008);
-    assert.ok(Math.abs(markQuote.wallet.unrealizedPnl-.04)<1e-8,'four USDT at k=3 across ten lots gives 0.04 KGEN');
+    assert.ok(Math.abs(markQuote.wallet.unrealizedPnl-.008)<1e-8,'four USDT at k=3 across two lots gives 0.008 KGEN');
     await organ('positions');await shot('pnl');
     await page.locator('[data-sim-close]').click();
-    s=await snap();assert.equal(s.positions[1].status,'CLOSED');assert.equal(s.wallet.lockedMargin,0);assert.ok(s.wallet.free>90);
+    await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[1]?.status==='CLOSED');
+    s=await snap();assert.equal(s.positions[1].status,'CLOSED');assert.equal(s.wallet.lockedMargin,0);assert.ok(s.wallet.free>8);
     assert.equal(s.receipts.length,4);assert.equal(s.receipts.at(-1).status,'CLOSED');
-    assert.ok(Math.abs(s.receipts.at(-1).realizedPnl-.04)<1e-8,'close settles the normalized PnL from the same mark');
+    assert.ok(Math.abs(s.receipts.at(-1).realizedPnl-.008)<1e-8,'close settles the normalized PnL from the same mark');
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('close-receipt');
     await page.evaluate(()=>__walletFixture.emit('disconnect',{}));
-    await page.waitForFunction(()=>document.querySelector('#wAddr').textContent==='DISCONNECTED');
-    assert.equal((await snap()).receipts.length,0,'disconnect switches to guest, not A receipts');
-    await page.locator('#sheetClose').click();
-    if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
-    await page.locator('#walletToggle').click();await page.locator('#walletConnect').click();
-    await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===4);
-    await page.reload({waitUntil:'domcontentloaded'});
+    assert.equal((await snap()).receipts.length,4,'a wallet event cannot switch the anonymous backend ledger');
+    assert.deepEqual(await page.evaluate(()=>__walletFixture.calls),[],'the private trial must not call the wallet');
+    await phaseTiming.measure('generic.reload-navigation',()=>page.reload({waitUntil:'domcontentloaded'}));
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===4,null,{timeout:15000});
     assert.equal((await snap()).positions[1].status,'CLOSED','reload recovers exact account ledger');
     await shot('reload-recovery');
@@ -338,21 +465,28 @@ try {
     const hit=await page.locator('#attack').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(hit,true,'attack pointer path');
     assert.deepEqual(errors,[]);phaseTiming.finish(generalPhase,'COMPLETE');await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'DETERMINISTIC_SIMULATION_FIXTURES',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:s,timing:phaseTiming.snapshot()},null,2));
     await page.close();
-    await navigationConsoleBrowserQA({browser,width,height,base,out,timingOrigin:settlementStarted});
+    await backend.close();backend=null;
   }
-  console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
-} finally {await browser.close()}
+  if(receiptReviewOnly)console.log('PASS: static order block and both chain56 lookup forms at 390x844 and 844x390');
+  else{
+    for(const [width,height] of [[390,844],[844,390]])await navigationConsoleBrowserQA({browser,width,height,out,timingOrigin:settlementStarted});
+    console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
+  }
+} finally {
+  await browser.close();
+  if(backend)await backend.close();
+}
 
 // The same two existing CI viewports get a separate guest context and ledger.
 // Only external read-only quote responses are fixtures; every decision uses the
 // real rendered controls, original adapter and original actor/collision clock.
-async function navigationConsoleBrowserQA({browser,width,height,base,out,timingOrigin}){
+async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin}){
   const phaseTiming=createSettlementTiming(()=>performance.now(),timingOrigin),navigationPhase=phaseTiming.begin('navigation');
   const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
   const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],controlChecks:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
-  let eth=4000,sequence=0;
-  await page.addInitScript(captureSettlementQuoteRefresh);
-  const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,value=>{eth=value});
+  let eth=4000,trial,orderPosts=0;
+  const marketPrice=market=>({BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600})[market];
+  const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,async value=>{eth=value;await trial.poll()});
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   page.on('pageerror',error=>report.pageErrors.push(String(error)));
   page.on('websocket',socket=>report.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
@@ -369,11 +503,6 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
       if(element)__navigationQA.native.push({type,id:element.id||element.dataset.simClose,isTrusted:event.isTrusted});
     },true);
   });
-  await page.route('https://data-api.binance.vision/**',route=>{
-    const url=new URL(route.request().url()),prices={BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600};
-    const payload=url.pathname.endsWith('/aggTrades')?[{p:String(prices[url.searchParams.get('symbol')]),T:Date.now(),a:++sequence}]:Object.entries(prices).map(([symbol,price])=>({symbol,price:String(price)}));
-    return route.fulfill({contentType:'application/json',body:JSON.stringify(payload)});
-  });
   await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
   await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{
     const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile('node_modules/three/'+route.request().url().slice(prefix.length),'utf8');
@@ -381,7 +510,11 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     await route.fulfill({contentType:'text/javascript',body});
   });
   await page.route('**/*',async route=>{
-    const request=route.request(),url=new URL(request.url()),external=url.origin!==new URL(base).origin;
+    const request=route.request(),url=new URL(request.url()),external=url.origin!==trial.origin;
+    if(!external&&['POST /api/v1/login','POST /api/v1/order','POST /api/v1/order/close','PUT /api/v1/player'].includes(request.method()+' '+url.pathname)){
+      if(url.pathname==='/api/v1/order')orderPosts++;
+      return route.continue();
+    }
     if(request.url()===new URL(KGEN_POOL_REFERENCE_SOURCE.rpc).href&&request.method()==='POST'){
       let payload;try{payload=request.postDataJSON()}catch{}
       if(payload?.jsonrpc==='2.0'&&payload.method==='eth_chainId'&&Array.isArray(payload.params)&&payload.params.length===0){
@@ -478,8 +611,9 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     report.checks[label]={planned:planned.view,moved:{view:moved.view,motion:moved.motion},stopped:stopped.view};await shot(label,'#navigationStop');return moved;
   };
   try{
-    await page.goto(`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
-    await page.waitForFunction(()=>globalThis.__K11520_NAVIGATION_CONSOLE__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT,null,{timeout:15000});
+    trial=await startBrowserTrial(marketPrice);
+    await page.goto(trial.origin,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>globalThis.__K11520_NAVIGATION_CONSOLE__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&globalThis.__K11520_FREE_ORACLE__?.ETHUSDT?.price===4000&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().wallet,null,{timeout:15000});
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();await page.locator('#intro11520').waitFor({state:'hidden'});
     await organ('worldmap');const initial=await snapshot();report.checks.markets=[];
     for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']]){
@@ -508,39 +642,61 @@ async function navigationConsoleBrowserQA({browser,width,height,base,out,timingO
     await (await control('#navigationManagePositions')).click();await page.locator('[data-sim-close]').click();await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='CLOSED');
     await organ('worldmap');await page.locator('#navigationAutopilotSettings summary').click();const beforeAutoSnapshot=await snapshot(),beforeAuto=beforeAutoSnapshot.book.orders.length,beforeAutoState=beforeAutoSnapshot.view.autopilot.state;assert.ok(['DISARMED','STOPPED'].includes(beforeAutoState));
     await (await control('#navigationAutoStart')).click();const missingAck=await snapshot();assert.equal(missingAck.view.autopilot.state,beforeAutoState);assert.equal(missingAck.book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/請先確認/);
+    assert.equal(orderPosts,1,'the single manual order went through the same-origin backend');
     await page.locator('#navigationAutopilotAck').check();const invalidStart=await control('#navigationAutoStart',{expectedToast:'請先確認模擬自駕設定'});
     const feedbackFile=`${width}x${height}-navigation-autopilot-ack-feedback-SYNTHETIC-header.png`,feedbackBegan=Date.now();await page.locator('#sheet .sheetHead').screenshot({path:`${out}/${feedbackFile}`});report.toastEvidence=[{file:feedbackFile,controlIndex:report.controlChecks.length-1,captureElapsedMs:Date.now()-feedbackBegan}];
-    await invalidStart.click();assert.equal((await snapshot()).view.autopilot.state,beforeAutoState);assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/設定未通過/);
+    await invalidStart.click();assert.equal((await snapshot()).view.autopilot.state,'STOPPED');assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/設定未通過/);
     for(const [id,value] of Object.entries({navigationLongAbove:4001,navigationShortBelow:3990,navigationAutoC:1,navigationAutoLots:1,navigationMaxLoss:2,navigationMaxOrders:2}))await page.locator('#'+id).fill(String(value));
     // Staying at the current physical position prevents arrival from being a
     // second reason to stop; this explicit checkbox authorizes continued SIM.
     await setTarget((await snapshot()).view.playerXYZ);await page.locator('#navigationContinue').check();await (await control('#navigationAutoStart')).click();
-    await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.submittedOrders===1);state=await snapshot();assert.equal(state.view.autopilot.config.market,'ETHUSDT');assert.equal(state.view.autopilot.config.axis,'KY');assert.equal(state.view.autopilot.signerRequested,false);assert.equal(state.view.autopilot.broadcast,false);assert.equal(state.book.orders.length,beforeAuto+1);
-    const autoOrderId=state.view.autopilot.orderIds[0];assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.armed=state;
-    await (await control('#navigationAutoStop')).click();await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.state==='STOPPED');state=await snapshot();assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId),'stop cannot cancel an already-created order');report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
-    const oppositeQuote=await driveQuote('navigation.stopped-opposite-quote',3988);
-    assert.equal(oppositeQuote.observations.ETHUSDT?.price,3988);
-    await page.waitForTimeout(2200);state=await snapshot();assert.equal(state.book.orders.length,beforeAuto+1,'stopped decisions cannot reverse on a later opposite signal');assert.equal(state.view.autopilot.state,'STOPPED');assert.ok(state.book.orders.some(order=>order.orderId===autoOrderId));report.checks.afterOppositeSignal=state;
+    await page.waitForFunction(()=>__K11520_NAVIGATION_CONSOLE__.snapshot().autopilot.reason==='READ_ONLY_CONTEXT');
+    state=await snapshot();assert.equal(state.view.autopilot.state,'STOPPED');assert.equal(state.view.autopilot.submittedOrders,0);assert.deepEqual(state.view.autopilot.orderIds,[]);
+    assert.equal(state.view.autopilot.signerRequested,false);assert.equal(state.view.autopilot.broadcast,false);
+    assert.deepEqual(state.book.orders,beforeAutoSnapshot.book.orders);assert.deepEqual(state.book.receipts,beforeAutoSnapshot.book.receipts);report.checks.blockedAutopilot=state;
+    const stopControl=await control('#navigationAutoStop');
+    assert.equal(await stopControl.isDisabled(),true,'a stopped read-only autopilot has no active run to stop');
+    report.checks.stopped=state;await shot('autopilot-stopped','#navigationAutoStop');
+    await phaseTiming.measure('navigation.stopped-opposite-quote',async()=>{
+      eth=3988;await trial.poll();
+      await page.waitForFunction(()=>globalThis.__K11520_FREE_ORACLE__?.ETHUSDT?.price===3988);
+    });
+    await page.waitForTimeout(2200);state=await snapshot();assert.equal(orderPosts,1,'autopilot emitted no new order request');
+    assert.deepEqual(state.book.orders,beforeAutoSnapshot.book.orders);assert.deepEqual(state.book.receipts,beforeAutoSnapshot.book.receipts);assert.equal(state.view.autopilot.state,'STOPPED');
+    assert.equal(state.view.autopilot.reason,'READ_ONLY_CONTEXT');report.checks.afterOppositeSignal=state;
     const selectors=['navigationMarket','navigationX','navigationY','navigationZ','navigationGo','navigationStop','navigationTargetPrice','navigationLongAbove','navigationShortBelow','navigationAutoC','navigationAutoLots','navigationMaxLoss','navigationMaxOrders','navigationAutoStart','navigationAutoStop'].map(id=>'#'+id),batchBegan=Date.now();
     const boxes=await phaseTiming.measure('navigation.control-batch',()=>page.locator('body').evaluate(inspectNavigationControls,{selectors}));report.controlBatch={selectors,elapsedMs:Date.now()-batchBegan,count:boxes.length};assert.equal(boxes.length,selectors.length);for(const box of boxes)recordControl(box);assert.equal(report.controlChecks.length,36,'All original navigation control checks must complete');
     assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.networkAuthorityAttempts,[]);assert.ok(state.fixture.providerCalls.every(method=>['eth_accounts','eth_chainId'].includes(method)),'no wallet connect, signer, chain switch or transaction requests');
     assert.ok(state.fixture.native.some(event=>event.id==='navigationGo'&&event.isTrusted));assert.ok(state.fixture.native.some(event=>event.id==='navigationAutoStart'&&event.isTrusted));assert.ok(state.fixture.native.filter(event=>event.type==='click').every(event=>event.isTrusted),'navigation actions use native rendered controls');
     report.functional='PASS';
   }catch(error){report.functional='FAIL';report.error=String(error?.stack||error);try{await shot('failure')}catch{}throw error}
-  finally{try{report.final=await snapshot()}catch{}phaseTiming.finish(navigationPhase,report.functional==='PASS'?'COMPLETE':'FAILED');report.timing=phaseTiming.snapshot();await fs.writeFile(`${out}/${width}x${height}-navigation-result.json`,JSON.stringify(report,null,2));await page.close()}
+  finally{try{report.final=await snapshot()}catch{}phaseTiming.finish(navigationPhase,report.functional==='PASS'?'COMPLETE':'FAILED');report.timing=phaseTiming.snapshot();try{await fs.writeFile(`${out}/${width}x${height}-navigation-result.json`,JSON.stringify(report,null,2))}finally{await page.close();if(trial)await trial.close()}}
 }
 
 // Opt-in P0 acceptance at the actual game entry. This lane never calls a model
 // submit/observe API, replaces runtime code, connects a wallet, or signs a TX.
 // Baseline mode records the same native attempt against an explicitly pinned
 // pre-repair server; BASELINE_REPRODUCED is not a product/browser PASS.
+function readOfflineControlHit(element, probeId) {
+  const rect = element.getBoundingClientRect();
+  const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  const box = {x:rect.x,y:rect.y,width:rect.width,height:rect.height,right:rect.right,bottom:rect.bottom,
+    hit:hit===element || element.contains(hit),blocker:hit?.id || hit?.tagName};
+  const probes = globalThis.__offlineSimulationQA?.confirmGeometryChecks;
+  const observation = probes?.[probeId] ?? null;
+  if (observation) delete probes[probeId];
+  return {box,observation};
+}
+
 // Read-only readiness before native input: observe real rendered frames, never
 // finish animations, mutate styles, scroll controls, or retry submitted actions.
 async function waitForOfflineConfirmationGeometry(page,record){
-  await page.evaluate(selector=>{globalThis.__offlineSimulationQA.confirmGeometry={selector,frames:[],stableFrames:0}},record.selector);
+  const probeId = randomUUID();
   try{
-    await page.waitForFunction(()=>{
-      const evidence=globalThis.__offlineSimulationQA.confirmGeometry,element=document.querySelector(evidence.selector),surface=document.querySelector('#confirm');
+    const ready = await page.waitForFunction(({id,selector})=>{
+      const probes = globalThis.__offlineSimulationQA.confirmGeometryChecks ??= {};
+      const evidence = probes[id] ??= {selector,frames:[],stableFrames:0};
+      const element=document.querySelector(selector),surface=document.querySelector('#confirm');
       const rect=element?.getBoundingClientRect(),box=rect?{x:rect.x,y:rect.y,width:rect.width,height:rect.height,right:rect.right,bottom:rect.bottom}:null;
       const ancestors=[];for(let node=element;node;node=node.parentElement){
         const css=getComputedStyle(node);ancestors.push({id:node.id||node.tagName,display:css.display,visibility:css.visibility,opacity:css.opacity,transform:css.transform,
@@ -552,18 +708,118 @@ async function waitForOfflineConfirmationGeometry(page,record){
       evidence.stableFrames=visible&&!moving?(same?evidence.stableFrames+1:1):0;
       evidence.frames.push({at:Date.now(),monotonicAt:performance.now(),box,visible,moving,stableFrames:evidence.stableFrames,ancestors});
       return evidence.stableFrames>=3;
-    },null,{polling:'raf',timeout:1200});
-    record.status='STABLE_RENDERED_GEOMETRY';
-  }catch(error){record.status='NOT_STABLE';throw new Error('CONFIRM_GEOMETRY_NOT_STABLE '+String(error.message))}
-  finally{record.observation=await page.evaluate(()=>globalThis.__offlineSimulationQA.confirmGeometry).catch(()=>null)}
+    },{id:probeId,selector:record.selector},{polling:'raf',timeout:1200});
+    // The boolean handle owns no trace. Release it while reading the live button.
+    const [sample] = await Promise.all([
+      page.locator(record.selector).evaluate(readOfflineControlHit, probeId),
+      ready.dispose().catch(error => { record.handleReleaseError = String(error.message); })
+    ]);
+    if (!sample.observation) throw new Error('confirmation observation unavailable');
+    record.observation = sample.observation;
+    record.status = 'STABLE_RENDERED_GEOMETRY';
+    return sample;
+  } catch (error) {
+    record.status = 'NOT_STABLE';
+    record.observation = await page.evaluate(id => {
+      const probes = globalThis.__offlineSimulationQA?.confirmGeometryChecks;
+      const trace = probes?.[id] ?? null;
+      if (trace) delete probes[id];
+      return trace;
+    },probeId).catch(()=>null);
+    throw new Error('CONFIRM_GEOMETRY_NOT_STABLE '+String(error.message));
+  }
 }
 
-function assertOfflineToastCoverage(result,profile){
-  assert.ok(result.toastLayout?.some(sample=>sample.panel==='confirm'&&sample.stage.endsWith('-preview')),'Actual visible native order-preview feedback coverage is required');
-  if(profile.width===390)assert.ok(result.toastLayout?.some(sample=>sample.panel==='sheet'&&(sample.stage.endsWith('-close-receipt')||sample.stage==='liquidation')),'Actual visible settlement/history feedback coverage is required');
+function readRenderedExchangePanel({selector,scrolledLabel}){
+  const panel=document.querySelector(selector);
+  if(!panel)throw new Error('Missing rendered exchange panel: '+selector);
+  const visible=element=>element?.checkVisibility({checkOpacity:true,checkVisibilityCSS:true})&&element.getClientRects().length>0;
+  const rows={};
+  let scrolledRowInView=false;
+  for(const row of panel.querySelectorAll(':scope > dl.exchangeRows > div')){
+    const label=row.querySelector('dt'),value=row.querySelector('dd');
+    if(!visible(label)||!visible(value))continue;
+    const key=label.innerText.trim();
+    rows[key]=value.innerText.trim();
+    if(key===scrolledLabel){
+      // Quote refreshes replace these rows. Scroll and hit-test the current
+      // row in one browser task, while its label and value still belong to it.
+      row.scrollIntoView({behavior:'instant',block:'center',inline:'nearest'});
+      scrolledRowInView=[label,value].every(cell=>{
+        const rect=cell.getBoundingClientRect();
+        const hit=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
+        return !!hit&&cell.contains(hit);
+      });
+    }
+  }
+  const summary=panel.querySelector(':scope > summary');
+  return {
+    visible:visible(panel),rows,scrolledRowInView,readAt:Date.now(),live:panel.getAttribute('aria-live'),
+    receiptId:panel.dataset.receipt,open:panel.open,summary:visible(summary)?summary.innerText.trim():null,
+    locale:Intl.NumberFormat().resolvedOptions().locale,
+  };
 }
 
-async function offlineSimulationBrowserQA({baseline=false}={}){
+function assertRenderedExchangeRows(panel,expected){
+  assert.ok(panel.visible,'Exchange panel must be visibly rendered');
+  assert.equal(panel.scrolledRowInView,true,'Scrolled label and value must be visible inside the viewport');
+  for(const [label,value] of Object.entries(expected)){
+    assert.equal(panel.rows[label],String(value),'Rendered '+label);
+  }
+}
+
+function assertOrderReview(panel,testCase,{source,anchor,triggerPrice}){
+  assert.equal(panel.live,'polite');
+  assertRenderedExchangeRows(panel,{
+    MARKET:testCase.market,SIDE:testCase.side,AXIS:testCase.axis,'C / LEVERAGE / LOTS':testCase.c+'C / '+Math.abs(testCase.c)+'× / 1',
+    'PRICE SOURCE':source,'CURRENT PRICE':anchor,'TRIGGER PRICE':triggerPrice,'REQUIRED MARGIN':'1 KGEN',
+  });
+  const age=panel.readAt-Date.parse(panel.rows['報價時間']);
+  assert.ok(age>=0&&age<=FREE_ORACLE_MAX_AGE_MS,'Rendered quote time must be current');
+}
+
+function assertSettlementReview(panel,receipt){
+  assert.equal(panel.open,true,'Original receipt must be expanded');
+  assert.equal(panel.receiptId,receipt.receiptId);
+  assert.equal(panel.summary,[receipt.receiptId,receipt.status,receipt.axis].join(' · '));
+  const format=new Intl.NumberFormat(panel.locale,{maximumFractionDigits:6});
+  assertRenderedExchangeRows(panel,{
+    'ORDER ID':receipt.orderId,'POSITION ID':receipt.positionId,MARKET:receipt.market,'PRICE SOURCE':receipt.priceSource,
+    'SETTLEMENT / EXIT':receipt.settlementPrice,'MARGIN BEFORE / AFTER':receipt.marginBefore+' / '+receipt.marginAfter,
+    'RAW / REALIZED PNL':format.format(receipt.rawPnl)+' / '+format.format(receipt.realizedPnl),
+  });
+}
+
+async function setOfflineOrderInputs(page, {plane, axis, c}, enterBoth) {
+  for (const [selector, value] of [['#cNumericInput', String(c)], ['#lotsNumericInput', '1']]) {
+    if (!enterBoth) {
+      const alreadyApplied = await page.evaluate(({plane, axis, c, selector}) => {
+        const input = document.querySelector(selector);
+        const state = globalThis.__K11520_SIGNED_C_IMMERSIVE__;
+        if (!input || input.dataset.k11520NumericBound !== '1' || document.activeElement === input) return false;
+        if (globalThis.__K11520_3D_CONTROL__?.mode !== plane || state?.activeAxis !== axis) return false;
+        if (selector === '#lotsNumericInput') {
+          return state.lots === 1 && input.value === '1' &&
+            Number.parseInt(document.querySelector('#lotsRead')?.textContent, 10) === 1;
+        }
+        const displayedC = c > 0 ? '+' + c : String(c);
+        return state.signedC === c && state.canonicalSideSynced === true && input.value === displayedC;
+      }, {plane, axis, c, selector});
+      if (alreadyApplied) continue;
+    }
+    const input = page.locator(selector);
+    await input.fill(value);
+    await input.press('Enter');
+  }
+}
+
+function offlineOrderCasesFromPlane(cases, plane) {
+  const first = cases.findIndex(testCase => testCase.plane === plane);
+  return first > 0 ? [...cases.slice(first), ...cases.slice(0, first)] : cases;
+}
+
+async function offlineSimulationBrowserQA(options){
+  const {baseline,profiles,requestedProfile}=options;
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   const {createHash}=await import('node:crypto');
   const {execFileSync}=await import('node:child_process');
@@ -582,25 +838,25 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       ...(path===route&&hasLeadingUtf8Bom?{bomStrippedSha256:hash(bytes.subarray(3)),bomStrippedByteLength:bytes.length-3}:{})};
   });
   const expected=Object.fromEntries(assets.map(asset=>[asset.path,asset.sha256]));
-  const out=`artifacts/11520-settlement-qa/${baseline?'offline-baseline':'offline-simulation'}`;
+  const artifactFolder=requestedProfile?`offline-simulation-diagnostic/${requestedProfile}`:baseline?'offline-baseline':'offline-simulation';
+  const out=`artifacts/11520-settlement-qa/${artifactFolder}`;
   await fs.mkdir(out,{recursive:true});
-  const source='K11520_DETERMINISTIC_SIMULATION',results=[],failures=[];
-  const profiles=[
-    {width:360,height:740,quote:'WAIT',account:null,chain:'0x38'},
-    {width:390,height:844,quote:'STALE',account:'0x1111111111111111111111111111111111111111',chain:'0x38'},
-    {width:412,height:772,quote:'INVALID',account:'0x1111111111111111111111111111111111111111',chain:'0x1'},
-    {width:432,height:856,quote:'WAIT',account:null,chain:'0x38'},
-    {width:480,height:900,quote:'STALE',account:null,chain:'0x38'},
-    {width:844,height:390,quote:'INVALID',account:null,chain:'0x38'},
-  ];
+  const source=BINANCE_AGGREGATE_SOURCE,results=[],failures=[];
+  let outcome,browser;
   const cases=[['YZ','KX','BTCUSDT'],['XZ','KY','ETHUSDT'],['XY','KZ','BNBUSDT']].flatMap(([plane,axis,market])=>[1,-1].map(c=>({plane,axis,market,c,side:c>0?'LONG':'SHORT'})));
-  const browser=await chromium.launch({headless:true});
-  try{for(const profile of profiles){
+  try{
+    if(requestedProfile){
+      const startedAt=new Date().toISOString();
+      await fs.writeFile(`${out}/report.json`,JSON.stringify({head,requestedProfile,startedAt,functional:'RUNNING'},null,2));
+    }
+    browser=await chromium.launch({headless:true});
+    for(const profile of profiles){
     const name=`${profile.width}x${profile.height}-${profile.quote.toLowerCase()}`;
-    const result={profile,head,baseline,simulatedBrowserClock:true,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};results.push(result);
+    const result={profile,head,baseline,simulatedBrowserClock:baseline,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};results.push(result);
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage();
     page.setDefaultTimeout(12000);let stage='raw-source-proof',networkSequence=0;
-    let seedLiquidationAnchor=!baseline&&profile.width===390;
+    let trial,finishTrialSource;
+    const prices={BTCUSDT:100000,ETHUSDT:profile.width===390?4:4000,BNBUSDT:600};
     page.on('pageerror',error=>result.pageErrors.push(String(error)));
     page.on('requestfailed',request=>result.requestFailures.push({url:request.url(),error:request.failure()?.errorText}));
     const finishBrowserSource=attachM1PageSourceProof(page,{base,sourceSha:head,assets,createHash});
@@ -629,14 +885,12 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         if(target)fixture.native.push({type,id:target.id||target.dataset.simClose||target.dataset.simCancel,isTrusted:event.isTrusted,at:Date.now()});
       },true);
     },profile);
-    // Only routed read-only fixtures are served. A single warm profile starts
-    // below 10 USDT so its real deterministic fallback can cross a 1C adverse
-    // distance of one USDT before proving the same receipt and account lifecycle.
+    // The static site sees the specified failure; the separate trial receives
+    // sequenced upstream observations through the real backend's market readers.
     await page.route('https://data-api.binance.vision/**',request=>{
       const url=new URL(request.request().url()),market=url.searchParams.get('symbol');
-      const prices={BTCUSDT:100000,ETHUSDT:seedLiquidationAnchor?4:4000,BNBUSDT:600};
-      const fixtureState=seedLiquidationAnchor?'WARM_LIQUIDATION_ANCHOR':profile.quote;
-      const age=seedLiquidationAnchor?500:fixtureState==='INVALID'?0:60000;
+      const fixtureState=profile.quote;
+      const age=fixtureState==='INVALID'?0:60000;
       const at=Date.now()-age;
       const payload=[{p:fixtureState==='INVALID'?'not-a-price':String(prices[market]),T:at,a:++networkSequence}];
       result.referenceResponses.push({market,state:fixtureState,status:fixtureState==='WAIT'?503:200,payload});
@@ -670,6 +924,22 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     });
     page.on('websocket',socket=>result.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
     const snap=()=>page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot());
+    const driveMarket=async(market,price)=>{
+      const previous=await page.evaluate(market=>{
+        const book=__K11520_SIMULATION_EXCHANGE__.snapshot();
+        const active=book.orders.some(order=>order.market===market&&order.status==='PENDING')||
+          book.positions.some(position=>position.market===market&&position.status==='OPEN');
+        return {marketSequence:__K11520_FREE_ORACLE__[market].sequence,active,bookSequence:book.observations[market]?.sequence};
+      },market);
+      prices[market]=price;await trial.poll();
+      await page.waitForFunction(({market,price,previous,source})=>{
+        const observation=globalThis.__K11520_FREE_ORACLE__?.[market];
+        if(observation?.price!==price||observation.source!==source||observation.sequence<=previous.marketSequence)return false;
+        if(!previous.active)return true;
+        const settled=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations[market];
+        return settled?.price===price&&settled.source===source&&settled.sequence>previous.bookSequence;
+      },{market,price,previous,source});
+    };
     const state=()=>page.evaluate(()=>{
       const text=selector=>document.querySelector(selector)?.textContent||'',s=globalThis.__K11520_SIGNED_C_IMMERSIVE__,button=document.querySelector('#confirmOrder');
       return {at:Date.now(),url:location.href,plane:globalThis.__K11520_3D_CONTROL__?.mode,axis:s?.activeAxis,c:s?.signedC,lots:s?.lots,canonicalSide:s?.canonicalSide,
@@ -682,15 +952,27 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         providerCalls:globalThis.__offlineSimulationQA.calls,native:globalThis.__offlineSimulationQA.native,feedback:globalThis.__offlineSimulationQA.feedback};
     });
     const shot=async label=>{
-      let validationError=null;
+      let validationError=null,fullPage=true;
       try{if(!baseline){
-        const feedback=await page.evaluate(()=>{
-          const toast=document.getElementById('toast'),confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),body=document.getElementById('sheetBody');
-          const panel=confirm.classList.contains('open')?confirm:sheet.classList.contains('open')&&['orders','positions','history'].includes(body.dataset.simOrgan)?sheet:null;
-          if(!panel||!toast.classList.contains('show'))return null;
+        const frame=await page.evaluate(({width,height})=>{
+          const root=document.documentElement,body=document.body,viewport=window.visualViewport;
+          const documentWidth=Math.max(root.scrollWidth,root.offsetWidth,root.clientWidth,body.scrollWidth,body.offsetWidth,body.clientWidth);
+          const documentHeight=Math.max(root.scrollHeight,root.offsetHeight,root.clientHeight,body.scrollHeight,body.offsetHeight,body.clientHeight);
+          // The configured viewport may stand in for the whole document only
+          // when it covers that document at the same origin and scale.
+          const fitsViewport=window.devicePixelRatio===1&&window.scrollX===0&&window.scrollY===0&&
+            viewport?.scale===1&&viewport.offsetLeft===0&&viewport.offsetTop===0&&
+            viewport.width===width&&viewport.height===height&&
+            documentWidth===width&&documentHeight===height;
+          const toast=document.getElementById('toast'),confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),sheetBody=document.getElementById('sheetBody');
+          const panel=confirm.classList.contains('open')?confirm:sheet.classList.contains('open')&&['orders','positions','history'].includes(sheetBody.dataset.simOrgan)?sheet:null;
+          if(!panel||!toast.classList.contains('show'))return {fitsViewport,feedback:null};
           const header=panel.querySelector('.sheetHead'),rect=element=>{const r=element.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
-          return {panel:panel.id,text:toast.textContent,context:toast.dataset.panelContext,inHeader:toast.parentElement===header,role:toast.getAttribute('role'),live:toast.getAttribute('aria-live'),position:getComputedStyle(toast).position,toast:rect(toast),header:rect(header),title:rect(header.querySelector('h2')),close:rect(header.querySelector('.close'))};
-        });
+          const feedback={panel:panel.id,text:toast.textContent,context:toast.dataset.panelContext,inHeader:toast.parentElement===header,role:toast.getAttribute('role'),live:toast.getAttribute('aria-live'),position:getComputedStyle(toast).position,toast:rect(toast),header:rect(header),title:rect(header.querySelector('h2')),close:rect(header.querySelector('.close'))};
+          return {fitsViewport,feedback};
+        },{width:profile.width,height:profile.height});
+        const {feedback}=frame;
+        fullPage=!frame.fitsViewport;
         if(feedback){
           (result.toastLayout??=[]).push({stage:label,...feedback});assert.equal(feedback.context,feedback.panel);assert.equal(feedback.inHeader,true);assert.equal(feedback.position,'static');assert.equal(feedback.role,'status');assert.equal(feedback.live,'polite');
           assert.ok(feedback.toast.width>0&&feedback.toast.height>0&&feedback.toast.x>=0&&feedback.toast.right<=profile.width+1&&feedback.toast.y>=0&&feedback.toast.bottom<=profile.height+1,'Visible panel feedback must remain inside the viewport');
@@ -698,13 +980,23 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         }
       }}catch(error){validationError=error}
       const file=`${name}-${label}.png`;
-      try{await page.screenshot({path:`${out}/${file}`,fullPage:true});result.screenshots.push(file)}
-      catch(error){(result.screenshotErrors??=[]).push({file,error:String(error)});if(!validationError)throw error}
+      const started=performance.now();
+      try{
+        const png=await page.screenshot({path:`${out}/${file}`,fullPage});
+        result.screenshots.push(file);
+        if(!baseline){
+          const width=png.readUInt32BE(16),height=png.readUInt32BE(20);
+          (result.screenshotTimings??=[]).push({file,fullPage,width,height,durationMs:performance.now()-started});
+          if(!fullPage)assert.deepEqual([width,height],[profile.width,profile.height],'viewport PNG must cover the full document');
+        }
+      }catch(error){(result.screenshotErrors??=[]).push({file,error:String(error)});if(!validationError)throw error}
       if(validationError)throw validationError;
     };
     const usable=async selector=>{
-      if(['#confirmOrder','#cancelOrder'].includes(selector)){const record={stage,selector};(result.controlReadiness??=[]).push(record);await waitForOfflineConfirmationGeometry(page,record)}
-      const box=await page.locator(selector).evaluate(element=>{const r=element.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,hit:hit===element||element.contains(hit),blocker:hit?.id||hit?.tagName}});
+      const record = ['#confirmOrder','#cancelOrder'].includes(selector) ? {stage,selector} : null;
+      if (record) (result.controlReadiness ??= []).push(record);
+      const {box} = record ? await waitForOfflineConfirmationGeometry(page,record)
+        : await page.locator(selector).evaluate(readOfflineControlHit);
       assert.ok(box.width>0&&box.height>0&&box.x>=0&&box.y>=0&&box.right<=profile.width+1&&box.bottom<=profile.height+1,`${selector} clipped: ${JSON.stringify(box)}`);
       assert.ok(box.hit,`${selector} pointer blocked: ${JSON.stringify(box)}`);return box;
     };
@@ -713,29 +1005,77 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       catch(error){const observed=await state().catch(()=>null);throw new Error('SIMULATION_BOOT_NOT_READY '+JSON.stringify({adapterPresent:!!observed?.simulation,executionMode:observed?.execution?.mode,axis:observed?.axis,url:observed?.url,cause:String(error.message)}))}
     };
     const game=async()=>{
-      // A native close may already be finishing its CSS transition. Never
-      // click a second time merely because isVisible saw that earlier frame.
-      if(await page.locator('#confirm').evaluate(e=>e.classList.contains('open'))){await usable('#cancelOrder');await page.locator('#cancelOrder').click();}
-      await page.locator('#confirm').waitFor({state:'hidden',timeout:12000});
-      if(await page.locator('#sheet').evaluate(e=>e.classList.contains('open')))await page.locator('#sheetClose').click();
-      await page.locator('#sheet').waitFor({state:'hidden',timeout:12000});
-      if(!await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click();
-      if(await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+      // A closing panel can still cover the game after its open class disappears.
+      const readPanels = () => page.evaluate(() => {
+        function phase(id) {
+          const panel = document.getElementById(id);
+          if (panel.classList.contains('open')) return 'open';
+          if (getComputedStyle(panel).visibility === 'hidden' || !panel.getClientRects().length) return 'hidden';
+          return 'closing';
+        }
+        const wallet = document.getElementById('walletPanel');
+        return {
+          confirm: phase('confirm'),
+          sheet: phase('sheet'),
+          walletOpen: !wallet.inert && !wallet.classList.contains('collapsed'),
+          utilitiesOpen: document.documentElement.classList.contains('k11520UtilitiesOpen')
+        };
+      });
+      let panels = await readPanels();
+      if (panels.confirm !== 'hidden') {
+        if (panels.confirm === 'open') {
+          await usable('#cancelOrder');
+          await page.locator('#cancelOrder').click();
+        }
+        await page.locator('#confirm').waitFor({state:'hidden',timeout:12000});
+        panels = await readPanels();
+      }
+      if (panels.sheet !== 'hidden') {
+        if (panels.sheet === 'open') await page.locator('#sheetClose').click();
+        await page.locator('#sheet').waitFor({state:'hidden',timeout:12000});
+        panels = await readPanels();
+      }
+      if (panels.walletOpen) {
+        await page.locator('#walletToggle').click();
+        panels = await readPanels();
+      }
+      if (panels.utilitiesOpen) await page.locator('#k11520UtilityMaster').click();
     };
     const organ=async name=>{
       await game();await page.locator('#k11520UtilityMaster').click();
       if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();
       await page.locator(`#dock [data-organ="${name}"]`).click();await page.locator('#sheet.open').waitFor();
     };
-    const select=async ({plane,axis,c})=>{
-      await game();for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
-        const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await showRetainedControls(page);await page.locator('#joy').tap();
-        await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
-      }
-      await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
-      await showRetainedControls(page);await page.locator('#cNumericInput').fill(String(c));await page.locator('#cNumericInput').press('Enter');
-      await page.locator('#lotsNumericInput').fill('1');await page.locator('#lotsNumericInput').press('Enter');
-      await page.waitForFunction(({axis,c})=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis&&__K11520_SIGNED_C_IMMERSIVE__.signedC===c&&__K11520_SIGNED_C_IMMERSIVE__.lots===1,{axis,c});
+    const reviewSettlement=async(receipt,label)=>{
+      await organ('history');
+      const selector='#sheet.open #sheetBody[data-sim-organ="history"] details[data-receipt="'+receipt.receiptId+'"]';
+      await page.locator(selector).locator(':scope > summary').click();
+      const panel=await page.evaluate(readRenderedExchangePanel,{selector,scrolledLabel:'RAW / REALIZED PNL'});
+      assertSettlementReview(panel,receipt);
+      (result.renderedReceipts??=[]).push(panel);
+      await shot(label);
+    };
+    let previousControlsUrl;
+    const select=async ({plane,axis,c}, measure=(_label,operation)=>operation())=>{
+      await measure('return-to-game',game);
+      await measure('select-axis',async()=>{
+        for(let attempt=0;attempt<3;attempt++){
+          const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);
+          if(previous===plane)break;
+          await showRetainedControls(page);
+          await page.locator('#joy').tap();
+          await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
+        }
+        await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
+      });
+      await measure('apply-order-inputs',async()=>{
+        await showRetainedControls(page);
+        const controlsUrl = page.url();
+        // Exercise both editors on each trial page and on every historical baseline case.
+        await setOfflineOrderInputs(page, {plane, axis, c}, baseline || controlsUrl !== previousControlsUrl);
+        previousControlsUrl = controlsUrl;
+        await page.waitForFunction(({axis,c})=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis&&__K11520_SIGNED_C_IMMERSIVE__.signedC===c&&__K11520_SIGNED_C_IMMERSIVE__.lots===1,{axis,c});
+      });
     };
     const assertNoAuthority=s=>{
       assert.equal(s.execution.mode,'SIMULATION_WALLET','Offline simulation must not switch execution authority');
@@ -743,7 +1083,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       assert.ok(s.providerCalls.every(call=>['eth_accounts','eth_chainId','eth_getBalance','eth_call'].includes(call.method)),'No connect, signer, chain switch or TX request is permitted');
       assert.deepEqual(result.networkAuthorityAttempts,[],'No unmocked RPC, network write or wallet websocket may be attempted');
       assert.ok(result.blockedReadOnlyReferences.every(row=>row.url===new URL(KGEN_POOL_REFERENCE_SOURCE.rpc).href&&row.method==='eth_chainId'&&row.forwarded===false),'only the exact original public-reference first read is failed locally; no real RPC or synthetic price');
-      for(const observation of Object.values(s.publicReference))assert.notEqual(observation.source,source,'Simulation must never become public/REAL provenance');
+      for(const observation of Object.values(s.publicReference))assert.notEqual(observation.source,'K11520_DETERMINISTIC_SIMULATION','Simulation must never become public/REAL provenance');
     };
     const verifyRawSource=async phase=>{
       // APIRequestContext returns raw HTTP bytes. This mandatory exact gate
@@ -759,29 +1099,58 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     try{
       await verifyRawSource('BEFORE_BROWSER');
       stage='boot';
-      await page.clock.install({time:new Date()});
+      if(baseline)await page.clock.install({time:new Date()});
       await page.goto(base+'/'+encodeURI(route),{waitUntil:'domcontentloaded'});
       await waitForSimulationBoot();
       if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();
       await page.locator('#intro11520').waitFor({state:'hidden'});
       await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
-      if(seedLiquidationAnchor){
-        stage='warm-liquidation-anchor';
-        await page.waitForFunction(account=>{
-          const quote=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT;
-          return document.querySelector('#wAddr')?.textContent===account&&quote?.price===4&&quote.source==='BINANCE_PUBLIC_MARKET_DATA_ONLY';
-        },profile.account);
-        result.liquidationSeed=(await snap()).observations.ETHUSDT;
-        seedLiquidationAnchor=false;
-        await page.clock.fastForward(16000);
-        await page.waitForFunction(source=>{
-          const quote=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT;
-          return quote?.source===source&&quote.simulationAnchorPrice===4;
-        },source);
-      }
-      if(!baseline)await page.waitForFunction(source=>['BTCUSDT','ETHUSDT','BNBUSDT'].every(market=>__K11520_SIMULATION_EXCHANGE__.snapshot().observations[market]?.source===source),source);
       await sourceProof();
       await shot('boot');result.boot=await state();assertNoAuthority(result.boot);
+      if(!baseline){
+        stage='unavailable-quotes';
+        result.blockedOrders=[];
+        result.blockedOrderTimings=[];
+        for(const market of Object.keys(prices))assert.ok(result.referenceResponses.some(row=>row.market===market&&row.state===profile.quote),'missing unavailable quote fixture for '+market);
+        // Start with the market already on screen, then keep the native axis cycle.
+        const blockedCases=offlineOrderCasesFromPlane(cases,result.boot.plane);
+        for(const testCase of blockedCases){
+          const evidence={market:testCase.market,side:testCase.side};
+          const timing=createSettlementTiming();
+          const attempt=timing.begin('blocked-order-attempt');
+          result.blockedOrderTimings.push(evidence);
+          try{
+            await select(testCase,timing.measure);
+            const before=await timing.measure('before-state',state);
+            await timing.measure('order-button-hit',()=>usable('#orderFire'));
+            await timing.measure('native-click',()=>page.locator('#orderFire').click());
+            await timing.measure('wait-feedback',()=>page.waitForFunction(count=>__offlineSimulationQA.feedback.slice(count).some(event=>event.text.includes('等候有效報價'))||document.querySelector('#toast').textContent.includes('等候有效報價'),before.feedback.length));
+            const after=await timing.measure('after-state',state);
+            assert.equal(after.confirmOpen,false);assert.equal(after.submitDisabled,true);
+            assert.deepEqual(after.simulation.orders,before.simulation.orders);assert.deepEqual(after.simulation.receipts,before.simulation.receipts);
+            assert.equal(after.native.filter(e=>e.isTrusted&&e.type==='click'&&e.id==='orderFire').length,before.native.filter(e=>e.isTrusted&&e.type==='click'&&e.id==='orderFire').length+1);
+            result.blockedOrders.push({market:testCase.market,side:testCase.side,feedback:after.toast});
+            timing.finish(attempt,'COMPLETE');
+          }catch(error){
+            timing.finish(attempt,'FAILED');
+            throw error;
+          }finally{
+            evidence.timing=timing.snapshot();
+          }
+        }
+        await shot('no-effective-quote');stage='backend-boot';
+        trial=await startBrowserTrial(market=>prices[market]);finishTrialSource=attachM1PageSourceProof(page,{base:trial.origin,sourceSha:head,assets,createHash});
+        await page.route(trial.origin+'/api/v1/**',request=>{
+          const req=request.request(),path=new URL(req.url()).pathname;
+          if(['POST /api/v1/login','POST /api/v1/order','POST /api/v1/order/cancel','POST /api/v1/order/close','PUT /api/v1/player'].includes(req.method()+' '+path))return request.continue();
+          return request.fallback();
+        });
+        await page.goto(trial.origin,{waitUntil:'domcontentloaded'});await waitForSimulationBoot();
+        await page.waitForFunction(source=>__K11520_SIMULATION_EXCHANGE__.snapshot().wallet&&['BTCUSDT','ETHUSDT','BNBUSDT'].every(market=>globalThis.__K11520_FREE_ORACLE__?.[market]?.source===source),source);
+        await page.locator('#intro11520').waitFor({state:'hidden'});
+        await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
+        result.trialSource=await finishTrialSource();result.trialBoot=await state();assertNoAuthority(result.trialBoot);
+      }
       if(!baseline&&profile.width===390){
         stage='input-validation';await select({...cases[0],c:0});const count=(await snap()).orders.length;await page.locator('#orderFire').click();
         await page.waitForTimeout(150);const neutral=await state();assert.ok(!neutral.confirmOpen||neutral.submitDisabled,'0C must remain blocked');assert.equal(neutral.simulation.orders.length,count);
@@ -794,7 +1163,9 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         await page.waitForFunction(()=>document.querySelector('#confirmOrder').disabled&&/TRIGGER_PRICE_MUST_BE_POSITIVE/.test(document.querySelector('#simulationOrderPreview').textContent));
         result.validation={neutral,highC,invalidTrigger:await state()};await shot('invalid-trigger');await game();
       }
-      for(const testCase of cases){
+      // The 390px input checks already selected BTC. Keep the pinned baseline sequence too.
+      const validCases=baseline||profile.width===390?cases:offlineOrderCasesFromPlane(cases,result.trialBoot.plane);
+      for(const testCase of validCases){
         stage=`${testCase.market}-${testCase.side}`;const evidence={...testCase};result.cases.push(evidence);
         await select(testCase);evidence.before=await state();evidence.orderHit=await usable('#orderFire');
         const count=evidence.before.simulation.orders.length;
@@ -808,12 +1179,15 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
           evidence.result='BASELINE_REPRODUCED';assertNoAuthority(evidence.after);continue;
         }
         await page.locator('#confirm.open').waitFor();
-        const anchor=(await snap()).observations[testCase.market]?.simulationAnchorPrice;
-        assert.ok(Number.isFinite(anchor)&&anchor>0,'The observed simulation source must expose its deterministic anchor');
+        const anchor=await page.evaluate(market=>__K11520_FREE_ORACLE__[market].price,testCase.market);
+        assert.ok(Number.isFinite(anchor)&&anchor>0,'The backend must expose a valid raw quote before submission');
         const triggerPrice=anchor+.125;
         await page.locator('#simulationTriggerPrice').fill(String(triggerPrice));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);
         evidence.preview=await state();assert.match(evidence.preview.preview,new RegExp(source));assertNoAuthority(evidence.preview);
+        evidence.renderedPreview=await page.evaluate(readRenderedExchangePanel,{selector:'#confirm.open #simulationOrderPreview',scrolledLabel:'MARKET'});
+        assertOrderReview(evidence.renderedPreview,testCase,{source,anchor,triggerPrice});
+        assert.equal(evidence.preview.submitLabel,testCase.side==='LONG'?'確認做多（模擬）':'確認做空（模擬）');
         evidence.submitHit=await usable('#confirmOrder');await shot(stage+'-preview');
         const clickCount=evidence.preview.native.filter(event=>event.id==='confirmOrder'&&event.type==='click').length;
         evidence.submitActionHit=await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
@@ -822,81 +1196,124 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         assert.equal(order.market,testCase.market);assert.equal(order.axis,testCase.axis);assert.equal(order.c,testCase.c);assert.equal(order.lots,1);
         assert.equal(order.side,testCase.side);assert.equal(order.priceSource,source);assert.equal(order.triggerPrice,triggerPrice);
         assert.equal(evidence.submitted.native.filter(event=>event.id==='confirmOrder'&&event.type==='click'&&event.isTrusted).length,clickCount+1,'One trusted native Submit must reach the application');
-        assert.ok(['PENDING','FILLED'].includes(order.status),'Submission must create an actual lifecycle record');
-        // One full 128-second source cycle is the domain bound, rather than an
-        // arbitrary retry count. Advance only the browser clock; the app's own
-        // timer, observe guard, trigger crossing and settlement remain in use.
-        for(let elapsed=0;elapsed<=128000&&(await snap()).orders.find(o=>o.orderId===order.orderId)?.status==='PENDING';elapsed+=4000)await page.clock.fastForward(4000);
-        let book=await snap(),filled=book.orders.find(o=>o.orderId===order.orderId);
-        assert.equal(filled.status,'FILLED','The actual deterministic source tick must fill the submitted trigger');
+        assert.equal(order.status,'PENDING','The unchanged quote must not fill the order');
+        await driveMarket(testCase.market,triggerPrice+.125);
+        evidence.filled=await state();
+        let book=evidence.filled.simulation;
+        const filled=book.orders.find(o=>o.orderId===order.orderId);
+        assert.equal(filled.status,'FILLED','The first accepted quote across the trigger must fill the submitted order');
         const position=book.positions.find(p=>p.positionId===filled.positionId);assert.equal(position.status,'OPEN');
         assert.equal(book.receipts.filter(r=>r.orderId===order.orderId&&r.kind==='FILL').length,1,'Fill is exactly once');
-        assert.equal(book.wallet.lockedMargin,1);evidence.filled=await state();await shot(stage+'-filled');
-        await page.clock.fastForward(4000);book=await snap();const marked=book.positions.find(p=>p.positionId===position.positionId);
+        assert.equal(book.wallet.lockedMargin,1);await shot(stage+'-filled');
+        await driveMarket(testCase.market,position.entry+.125);
+        evidence.marked=await state();
+        book=evidence.marked.simulation;
+        const marked=book.positions.find(p=>p.positionId===position.positionId);
         assert.equal(marked.status,'OPEN');
         const entryUnit=10**Number(position.entry.toExponential().split('e')[1]);
         const expectedPnl=(marked.mark-position.entry)/entryUnit*marked.c*marked.lots;
         assert.ok(Math.abs(book.wallet.unrealizedPnl-expectedPnl)<1e-7,'PnL must follow signed C and real simulation mark');
-        evidence.marked=await state();
-        if(testCase===cases[0]){await organ('positions');assert.match(await page.locator('#sheetBody').innerText(),/UNREALIZED PNL/);await shot(stage+'-position-pnl')}
-        await game();await usable('#flat');await page.locator('#flat').click();
-        await page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions.find(p=>p.positionId===id)?.status==='CLOSED',position.positionId);
+        if(testCase===cases[0]){
+          const panelTiming=createSettlementTiming();
+          try {
+            await panelTiming.measure('open-positions',()=>organ('positions'));
+            assert.match(await page.locator('#sheetBody').innerText(),/UNREALIZED PNL/);
+            await shot(stage+'-position-pnl');
+          } finally {
+            evidence.positionPanelTiming=panelTiming.snapshot();
+          }
+        }
+        const flatTiming = createSettlementTiming();
+        try {
+          await flatTiming.measure('return-to-game', game);
+          await flatTiming.measure('flat-hit-test', () => usable('#flat'));
+          await flatTiming.measure('flat-click', () => page.locator('#flat').click());
+          await flatTiming.measure('await-closed-position', () => page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions.find(p=>p.positionId===id)?.status==='CLOSED',position.positionId));
+        } finally {
+          evidence.flatTiming = flatTiming.snapshot();
+        }
         evidence.closed=await state();book=evidence.closed.simulation;assert.equal(book.wallet.lockedMargin,0);
         const receipt=book.receipts.find(r=>r.positionId===position.positionId&&r.kind==='SETTLEMENT');
         assert.equal(receipt.status,'CLOSED');assert.equal(receipt.priceSource,source);assert.ok(Number.isFinite(receipt.realizedPnl));
         assert.equal(receipt.entryPrice,position.entry);
         assert.ok(Math.abs(receipt.rawPnl-(receipt.settlementPrice-receipt.entryPrice)/entryUnit*testCase.c)<1e-7,'settlement receipt must preserve the opened price floor and signed C');
         assert.equal(book.receipts.filter(r=>r.positionId===position.positionId&&r.kind==='SETTLEMENT').length,1);
-        if(testCase===cases[0]){await organ('history');await page.locator(`[data-receipt="${receipt.receiptId}"] > summary`).click();assert.match(await page.locator('#sheetBody').innerText(),new RegExp(source));await shot(stage+'-close-receipt')}
+        if(testCase===cases[0])await reviewSettlement(receipt,stage+'-close-receipt');
         assertNoAuthority(evidence.closed);evidence.result='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
       }
       if(!baseline&&profile.width===390){
         stage='pending-cancel';await select(cases[0]);await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
-        const anchor=(await snap()).observations.BTCUSDT.simulationAnchorPrice;await page.locator('#simulationTriggerPrice').fill(String(anchor+10));
+        const anchor=await page.evaluate(()=>__K11520_FREE_ORACLE__.BTCUSDT.price);await page.locator('#simulationTriggerPrice').fill(String(anchor+10));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
-        const pending=(await snap()).orders.at(-1);await page.clock.fastForward(4000);assert.equal((await snap()).orders.at(-1).status,'PENDING');
+        const pending=(await snap()).orders.at(-1);await driveMarket('BTCUSDT',anchor+1);assert.equal((await snap()).orders.at(-1).status,'PENDING');
         await page.locator(`[data-sim-cancel="${pending.orderId}"]`).click();await page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.find(o=>o.orderId===id)?.status==='CANCELLED',pending.orderId);
         result.cancel=await state();assert.equal(result.cancel.simulation.receipts.filter(r=>r.orderId===pending.orderId).length,0);await shot('pending-cancelled');
         stage='liquidation';await select(cases.find(c=>c.market==='ETHUSDT'&&c.c===1));await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
-        const ethAnchor=(await snap()).observations.ETHUSDT.simulationAnchorPrice;
-        assert.equal(ethAnchor,4,'the warmed deterministic price can reach the 1C liquidation threshold');
+        const ethAnchor=await page.evaluate(()=>__K11520_FREE_ORACLE__.ETHUSDT.price);
+        assert.ok(ethAnchor>1&&ethAnchor<9,'The fixture remains on floor zero to exercise a one-USDT 1C liquidation distance');
         await page.locator('#simulationTriggerPrice').fill(String(ethAnchor+.125));
         await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
         const liquidationOrder=(await snap()).orders.at(-1);
-        for(let elapsed=0;elapsed<=128000&&(await snap()).orders.find(o=>o.orderId===liquidationOrder.orderId).status==='PENDING';elapsed+=4000)await page.clock.fastForward(4000);
+        await driveMarket('ETHUSDT',ethAnchor+.25);
         const liquidationPosition=(await snap()).positions.find(p=>p.orderId===liquidationOrder.orderId);assert.equal(liquidationPosition.status,'OPEN');result.beforeLiquidation=await state();
-        for(let elapsed=0;elapsed<=128000&&(await snap()).positions.find(p=>p.positionId===liquidationPosition.positionId).status==='OPEN';elapsed+=4000)await page.clock.fastForward(4000);
+        await driveMarket('ETHUSDT',liquidationPosition.entry-1.25);
         result.liquidation=await state();const liquidationReceipt=result.liquidation.simulation.receipts.find(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT');
         assert.equal(liquidationReceipt?.status,'LIQUIDATED');assert.equal(liquidationReceipt.priceSource,source);assert.equal(liquidationReceipt.realizedPnl,-1);assert.equal(liquidationReceipt.marginAfter,0);assert.equal(result.liquidation.simulation.wallet.lockedMargin,0);
         assert.equal(liquidationReceipt.liquidationTrigger,liquidationPosition.entry-1);
-        await organ('history');await page.locator(`[data-receipt="${liquidationReceipt.receiptId}"] > summary`).click();await shot('liquidation');await page.clock.fastForward(8000);assert.equal((await snap()).receipts.filter(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT').length,1,'Liquidation must not replay');
+        await reviewSettlement(liquidationReceipt,'liquidation');
+        await driveMarket('ETHUSDT',liquidationPosition.entry-1.5);assert.equal((await snap()).receipts.filter(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT').length,1,'Liquidation must not replay');
         stage='account-isolation';const owned=await snap();
-        await page.evaluate(()=>{__offlineSimulationQA.account='0x2222222222222222222222222222222222222222';__offlineSimulationQA.emit('accountsChanged',[__offlineSimulationQA.account])});
-        await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===0);result.otherAccount=await state();assert.equal(result.otherAccount.simulation.orders.length,0);assertNoAuthority(result.otherAccount);
-        await page.evaluate(()=>{__offlineSimulationQA.account='0x1111111111111111111111111111111111111111';__offlineSimulationQA.emit('accountsChanged',[__offlineSimulationQA.account])});
-        await page.waitForFunction(length=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===length,owned.receipts.length);result.ownerRestored=await state();assert.deepEqual(result.ownerRestored.simulation.receipts,owned.receipts);await shot('owner-restored');
+        const other=await browser.newContext();
+        try{
+          const login=await other.request.post(trial.origin+'/api/v1/login',{data:{},headers:{Origin:trial.origin}});assert.ok(login.ok());
+          const guest=await login.json(),response=await other.request.get(trial.origin+'/api/v1/orders',{headers:{Authorization:'Bearer '+guest.token}});assert.ok(response.ok());
+          const separate=await response.json();assert.deepEqual(separate.orders,[]);assert.deepEqual(separate.positions,[]);assert.deepEqual(separate.receipts,[]);
+          result.otherAccount={orders:separate.orders,positions:separate.positions,receipts:separate.receipts};
+        }finally{await other.close()}
+        result.ownerRestored=await state();assert.deepEqual(result.ownerRestored.simulation.receipts,owned.receipts);assertNoAuthority(result.ownerRestored);await shot('owner-restored');
       }
       if(!baseline){
         stage='reload-recovery';const before=await snap();await page.reload({waitUntil:'domcontentloaded'});
         await waitForSimulationBoot();
         await page.waitForFunction(length=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===length,before.receipts.length,{timeout:12000});
         await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
-        result.reload=await state();assert.deepEqual(result.reload.simulation.orders,before.orders);assert.deepEqual(result.reload.simulation.receipts,before.receipts);assertNoAuthority(result.reload);await shot('reload-recovery');
+        result.reload=await state();assert.deepEqual(result.reload.simulation.orders,before.orders);assert.deepEqual(result.reload.simulation.receipts,before.receipts);assertNoAuthority(result.reload);await shot('reload-recovery');result.trialSource=await finishTrialSource();
       }
-      if(!baseline)assertOfflineToastCoverage(result,profile);
       await sourceProof();
       await verifyRawSource('AFTER_BROWSER');
       assert.deepEqual(result.pageErrors,[]);result.status=baseline?'BASELINE_REPRODUCED':'FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
     }catch(error){result.status='FAIL';result.stage=stage;result.error=String(error);result.stack=error.stack;failures.push(`${name}/${stage}: ${error.message}`);result.failureState=await state().catch(()=>null);await shot('failure').catch(()=>{})}
-    finally{result.browserSourceObservedAtExit={...finishBrowserSource.snapshot(),coverageScope:'EXPLICIT_OFFLINE_SIMULATION_ENTRY_AND_EXECUTION_ASSETS_ONLY'};result.lastState=await state().catch(()=>null);await page.evaluate(()=>globalThis.__offlineSimulationQA?.feedbackObserver?.disconnect()).catch(()=>{});await fs.writeFile(`${out}/${name}-result.json`,JSON.stringify(result,null,2));await context.close()}
-  }}finally{
-    await browser.close();await fs.writeFile(`${out}/report.json`,JSON.stringify({head,base,baseline,harnessSha256:hash(await fs.readFile(new URL(import.meta.url))),capturedAt:new Date().toISOString(),expectedSourceHashes:expected,expectedSourceAssets:assets,
-      simulatedBrowserClock:true,clockEvidence:'PLAYWRIGHT_VIRTUAL_BROWSER_TIME_ADVANCES_REAL_APPLICATION_TIMERS; NOT_REAL_ELAPSED_MOVEMENT_OR_MARKET_TIME',
-      fixtureScope:'EXTERNAL_READ_ONLY_REFERENCE_AND_SYNTHETIC_EIP1193_ONLY',callChain:'native #orderFire → openOrder → orderInput → simulation adapter preview → native #confirmOrder → executionAction → adapter.submit → placeSimulationOrder → real app tick → observeSimulationPrice',
-      functional:failures.length?'FAIL':baseline?'BASELINE_REPRODUCED':'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',results,failures},null,2));
+    finally{
+      result.browserSourceObservedAtExit={...finishBrowserSource.snapshot(),coverageScope:'EXPLICIT_OFFLINE_SIMULATION_ENTRY_AND_EXECUTION_ASSETS_ONLY'};
+      result.lastState=await state().catch(()=>null);await page.evaluate(()=>globalThis.__offlineSimulationQA?.feedbackObserver?.disconnect()).catch(()=>{});
+      try{
+        await fs.writeFile(`${out}/${name}-result.json`,JSON.stringify(result,null,2));
+      }finally{
+        try{await context.close()}
+        finally{if(trial)await trial.close()}
+      }
+    }
+  }}catch(error){
+    failures.push('Browser run: '+error.message);
+    throw error;
+  }finally{
+    if(browser)await browser.close().catch(error=>failures.push('Browser cleanup: '+error.message));
+    outcome=offlineSimulationOutcome(options,results,failures,cases.length);
+    await fs.writeFile(`${out}/report.json`,JSON.stringify({head,base,baseline,harnessSha256:hash(await fs.readFile(new URL(import.meta.url))),capturedAt:new Date().toISOString(),expectedSourceHashes:expected,expectedSourceAssets:assets,
+      ...outcome,
+      simulatedBrowserClock:baseline,clockEvidence:baseline?'PLAYWRIGHT_VIRTUAL_BROWSER_TIME':'WALL_CLOCK_WITH_SEQUENCED_UPSTREAM_FIXTURES',
+      fixtureScope:baseline?'STATIC_BASELINE_WITH_UNAVAILABLE_MARKET':'STATIC_UNAVAILABLE_QUOTES_AND_LOOPBACK_BACKEND_WITH_UPSTREAM_QUOTE_FIXTURES',
+      callChain:baseline?'historical native order attempt':'native order review and Submit → same-origin backend order → price observation → settlement receipt',
+      visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',results,failures},null,2));
   }
   assert.deepEqual(failures,[],'Offline simulation real-entry failures; inspect source-bound JSON and screenshots');
-  console.log(baseline?'BASELINE_REPRODUCED: offline native Submit blocked; this is not browser product PASS':'FUNCTIONAL_PASS: offline six-market/direction Submit at six sizes; VISUAL_QA requires direct screenshot inspection');
+  if(requestedProfile){
+    assert.equal(outcome.functional,'PARTIAL_PROFILE_PASS','The selected size did not complete its six orders and reload check');
+    const {completedOrders,totalOrders}=outcome.diagnostics;
+    console.log(`PARTIAL_PROFILE_PASS: ${requestedProfile} only, ${completedOrders}/${totalOrders} orders; VISUAL_QA requires direct screenshot inspection`);
+  }else{
+    console.log(baseline?'BASELINE_REPRODUCED: offline native Submit blocked; this is not browser product PASS':'FUNCTIONAL_PASS: offline six-market/direction Submit at six sizes; VISUAL_QA requires direct screenshot inspection');
+  }
 }
 
 // Actual candidate contracts in a disposable local EVM. No configured keys,
@@ -973,7 +1390,10 @@ async function localCandidateBrowserQA(){
     const organ=async name=>{await wallet();await page.locator('#walletToggle').click();if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();await page.locator(`#dock [data-organ="${name}"]`).click()};
     try{
       await page.goto(`${process.env.K11520_BASE_URL||'http://127.0.0.1:4182'}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
-      await wait(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT);await page.locator('#intro11520').waitFor({state:'hidden'});
+      // The static candidate displays public market data. Settlement switches
+      // to the candidate EVM's own feed after the player selects its route.
+      await wait(()=>globalThis.__K11520_MARKET_K__?.markets.some(row=>row.symbol==='ETHUSDT'&&row.status==='LIVE'&&row.price===4000)&&globalThis.__K11520_FREE_ORACLE__?.ETHUSDT?.source==='BINANCE_PUBLIC_MARKET_DATA_ONLY');
+      await page.locator('#intro11520').waitFor({state:'hidden'});
       stage='wallet';await wallet();const before=writes;await page.locator('#walletConnect').click();await page.locator('#executionMode').click();await wait(()=>__K11520_EXECUTION__.snapshot().status==='READY');assert.equal(writes,before,'connect and mode read only');
       if((await snap()).exitOnly){
         stage='legacy-exit-only-fixture';
@@ -1315,6 +1735,27 @@ function attachM1PageSourceProof(page,{base,sourceSha,assets,createHash}){
   finish.snapshot=snapshot;return finish;
 }
 
+async function verifyM1AddressLabels(page,account){
+  const tokenSelector='#k11520Bsc56UnsignedReview dd[data-bsc56-review-field="TOKEN"]';
+  const walletSelector='#k11520Bsc56UnsignedReview dd[data-bsc56-review-field="WALLET"]';
+  assert.equal(await page.locator(tokenSelector).textContent(),'KGEN · '+KGEN_TOKEN_ADDRESS+' · 18 decimals');
+  const wallet=(await page.locator(walletSelector).textContent()).toLowerCase();
+  assert.equal(wallet,account?account.toLowerCase():'未連線 / unknown');
+  const playerAddresses=await page.evaluate(tokenSelector=>{
+    const token=document.querySelector(tokenSelector);
+    return [...document.querySelectorAll('body *')]
+      .filter(el=>el!==token&&el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden')
+      .flatMap(el=>el.textContent.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]);
+  },tokenSelector);
+  if(!account){
+    assert.deepEqual(playerAddresses,[],'disconnect must clear all visible player address labels');
+    return;
+  }
+  const full=account.toLowerCase(),short=full.slice(0,6)+'…'+full.slice(-4);
+  assert.ok(playerAddresses.length>0);
+  for(const label of playerAddresses)assert.ok([full,short].includes(label.toLowerCase()),'every player address must match the active account: '+label);
+}
+
 // M1 uses real public chain97 reads through a synthetic injected EIP-1193
 // transport. No Wallet/signer is constructed; this is not Human MetaMask QA.
 async function m1ReadOnlyBrowserQA(){
@@ -1409,9 +1850,7 @@ async function m1ReadOnlyBrowserQA(){
         await page.waitForFunction(a=>document.querySelector('#k11520RealTradePreflight')?.dataset.walletAddress?.toLowerCase()===a.toLowerCase(),expected);
         assert.equal(await preflight.getAttribute('data-wallet-identity-scope'),'ACTIVE_SESSION');
         assert.equal((await preflight.getAttribute('data-wallet-address')).toLowerCase(),expected.toLowerCase());
-        const addressLabels=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden').map(el=>el.textContent).flatMap(text=>text.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]));
-        const expectedShort=expected.slice(0,6)+'…'+expected.slice(-4);assert.ok(addressLabels.length>0);
-        for(const label of addressLabels)assert.ok([expected.toLowerCase(),expectedShort.toLowerCase()].includes(label.toLowerCase()),'every visible address label belongs to active account: '+label);
+        await verifyM1AddressLabels(page,expected);
         assert.equal(await page.locator('#wBnb').textContent(),s.wallet.testBnbBalance);assert.equal(await page.locator('#wKgen').textContent(),String(s.wallet.testTokenBalance));
         assert.equal(await page.locator('#testnetFinancialControls').isVisible(),false);assert.equal(await page.locator('#executionMode').isVisible(),false);assert.equal(s.writeBlocked,true);
         // Observe two real canonical-owner timer ticks; no sleep or forced UI success.
@@ -1435,7 +1874,7 @@ async function m1ReadOnlyBrowserQA(){
         state.connected=false;await page.evaluate(()=>__m1WalletEvents.emit('disconnect',{}));await page.waitForFunction(()=>!__K11520_EXECUTION__.snapshot().wallet);await page.waitForFunction(()=>document.querySelector('#wBnb').textContent==='UNVERIFIED');assert.equal((await page.locator('#walletMsg').textContent()).includes('WRONG NETWORK'),false,'unknown network is not a confirmed wrong network');
         assert.equal(await page.locator('#k11520RealTradePreflight').getAttribute('data-wallet-identity-scope'),'DISCONNECTED');
         assert.equal(await page.locator('#k11520RealTradePreflight').getAttribute('data-wallet-address'),'');
-        const disconnectedAddresses=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden').flatMap(el=>el.textContent.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]));assert.deepEqual(disconnectedAddresses,[],'disconnect must clear all visible current-address labels');await shot('disconnected');stage='RECONNECT';
+        await verifyM1AddressLabels(page,null);await shot('disconnected');stage='RECONNECT';
         state.connected=true;await page.locator('#walletConnect').click();evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reconnected');stage='RETURN_LEGACY';
         assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);
         phase='LEGACY';await page.locator('#walletM1ReadOnly').click();assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);await page.locator('#executionMode').click();await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.exitOnly&&s.wallet&&s.account?.toLowerCase()===a.toLowerCase()},state.account,{timeout:150000});

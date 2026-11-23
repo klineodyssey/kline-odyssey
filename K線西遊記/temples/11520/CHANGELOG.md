@@ -397,3 +397,8 @@ passed. Chrome desktop 1440x1000 and mobile emulation 390x844 fetched real publi
 BTC data, changed CT+8 and index +500, rendered without horizontal overflow;
 screenshots inspected. Physical mobile and full 3D game remain NOT_TESTED / not
 accepted respectively. No commit, push, deployment or financial transaction.
+
+## 2026-11-24 · Player Life build feedback placement
+
+- The open Player Life panel uses its existing header row for the shared build notification. The previous runtime body from bab36c546c2643c2462d987d59ee70e0b1552896 is pinned as ea364a05c794f635d0c03eb267fdd5dfa390428e5c15f01eb0f31757579a51d4.
+- The existing Player Life browser checks capture the actual build notice on both viewports and check header placement, close-control reachability, and restored home ownership.

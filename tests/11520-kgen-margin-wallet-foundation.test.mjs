@@ -4,6 +4,7 @@ import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activat
 import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY,bindTempleReturnWalletContinuity} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot,touchedOrCrossed} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
+import {createPreviewSimulationExecutionAdapter} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 import {createDigitalAnt,createDeliveryMission,assignDelivery,loadCargo,planCargoHedge,createDigitalAntPersistenceEnvelope,restoreDigitalAntPersistenceEnvelope,tickDigitalAntDelivery,acceptSimulatedAtmDeliveryReceipt} from '../K線西遊記/temples/11520/runtime/digital-ant-logistics-runtime.mjs';
 
 assert.equal(MAX_C_LEVERAGE,100);
@@ -455,4 +456,634 @@ test('three-market cargo hedge rejects missing market, reserve and stale order d
     assert.equal(placeSimulationOrder(book,{axis,market,c:1,lots:3,triggerPrice:100,now:1001}).reason,'INSUFFICIENT_FREE_KGEN');
     assert.deepEqual(book,before);
   }
+});
+
+const K11520_TEST_EPOCH = 1790000000000;
+const K11520_TEST_MARKETS = Object.freeze({
+  BTCUSDT: {axis:'KX', price:65000},
+  ETHUSDT: {axis:'KY', price:3400},
+  BNBUSDT: {axis:'KZ', price:620},
+});
+
+async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPreview} = {}) {
+  const {mkdtemp, readFile, writeFile, unlink, rmdir} = await import('node:fs/promises');
+  const {join} = await import('node:path');
+  const {tmpdir} = await import('node:os');
+  const {createK11520Server, BINANCE_AGGREGATE_SOURCE, BYBIT_TRADES_SOURCE} =
+    await import('../K線西遊記/temples/11520/backend/server.mjs');
+  const directory = await mkdtemp(join(tmpdir(), 'k11520-offline-api-test-'));
+  const dataFile = join(directory, 'players.json');
+  const nextBatches = new Map();
+  const unavailable = new Set();
+  const independent = new Map();
+  let currentTime = K11520_TEST_EPOCH;
+  let service = null;
+  let origin;
+
+  async function stop() {
+    if (!service) return;
+    const previous = service;
+    service = null;
+    origin = null;
+    await previous.close();
+  }
+  t.after(async () => {
+    await stop();
+    try {
+      await unlink(dataFile);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    await rmdir(directory);
+  });
+
+  async function start(requestedPort = 0) {
+    assert.equal(service, null);
+    service = await createK11520Server({
+      dataFile,
+      now: () => currentTime,
+      readMarket: async ({market}) => {
+        if (unavailable.has(market)) throw new Error('FIXTURE_SOURCE_UNAVAILABLE');
+        const observations = nextBatches.get(market) ?? [];
+        nextBatches.delete(market);
+        return observations;
+      },
+      readIndependent: async ({market}) => independent.get(market) ?? null,
+      pollIntervalMs,
+      lanPreview,
+    });
+    const {port} = await service.listen({port: requestedPort});
+    origin = 'http://127.0.0.1:' + port;
+  }
+
+  async function request(path, {method = 'GET', token, body} = {}) {
+    assert.ok(origin);
+    const response = await fetch(origin + path, {
+      method,
+      headers: {
+        ...(token ? {authorization: 'Bearer ' + token} : {}),
+        ...(body !== undefined ? {'content-type': 'application/json'} : {}),
+      },
+      ...(body !== undefined ? {body: JSON.stringify(body)} : {}),
+      signal: AbortSignal.timeout(5000),
+    });
+    return {status: response.status, body: await response.json()};
+  }
+
+  function quote(market, price, sequence, {age = 0, corroborates = null, quoteSource} = {}) {
+    const updatedAt = currentTime - age;
+    nextBatches.set(market, [{market, price, updatedAt, sequence, source: quoteSource ?? BINANCE_AGGREGATE_SOURCE}]);
+    if (corroborates === null) independent.delete(market);
+    else independent.set(market, {market, price: corroborates, updatedAt, sequence, source: BYBIT_TRADES_SOURCE});
+  }
+  function prime() {
+    for (const [market, {price}] of Object.entries(K11520_TEST_MARKETS)) quote(market, price, 1);
+  }
+  async function login(body = {}) {
+    const response = await request('/api/v1/login', {method: 'POST', body});
+    assert.equal(response.status, 200, JSON.stringify(response.body));
+    assert.equal(response.body.ok, true);
+    assert.equal(typeof response.body.token, 'string');
+    assert.ok(response.body.player?.id);
+    return response.body;
+  }
+  async function book(token) {
+    const response = await request('/api/v1/orders', {token});
+    assert.equal(response.status, 200, JSON.stringify(response.body));
+    assert.equal(response.body.ok, true);
+    return response.body;
+  }
+
+  if (legacy) await writeFile(dataFile, JSON.stringify(legacy), 'utf8');
+  await start();
+  return {
+    request, login, book, prime, quote, unavailable,
+    get origin() { return origin; },
+    now: () => currentTime,
+    poll: () => service.poll(),
+    advance: (ms = 1000) => currentTime += ms,
+    restart: async () => {
+      const port = Number(new URL(origin).port);
+      await stop();
+      await start(port);
+    },
+    readDatabase: () => readFile(dataFile, 'utf8').then(JSON.parse),
+  };
+}
+
+function k11520OrderRequest(market, requestId, extra = {}) {
+  return {
+    requestId,
+    market,
+    axis: K11520_TEST_MARKETS[market].axis,
+    c: 1,
+    side: 'LONG',
+    lots: 2,
+    ...extra,
+  };
+}
+
+test('K11520 server admits only fresh verified quotes for the selected market', async t => {
+  const f = await makeK11520BackendFixture(t);
+  const {token} = await f.login({name: '報價驗收'});
+  const post = body => f.request('/api/v1/order', {method: 'POST', token, body});
+  const draft = k11520OrderRequest('BTCUSDT', 'quote-test-cold-btc-001', {triggerPrice: 65000});
+  const cold = await post({...draft, price: 100000});
+  assert.ok(cold.status >= 400, 'caller price cannot bypass missing server quote');
+  assert.equal((await f.book(token)).orders.length, 0);
+
+  f.prime();
+  await f.poll();
+  const ready = (await f.request('/api/v1/markets')).body;
+  for (const [market, {price}] of Object.entries(K11520_TEST_MARKETS)) {
+    assert.equal(ready.statuses[market].status, 'READY');
+    assert.equal(ready.observations[market].price, price);
+  }
+  f.unavailable.add('BTCUSDT');
+  f.advance();
+  f.quote('ETHUSDT', 3401, 2);
+  f.quote('BNBUSDT', 621, 2, {quoteSource: 'UNRECOGNIZED_FIXTURE_SOURCE'});
+  await f.poll();
+  const split = (await f.request('/api/v1/markets')).body;
+  assert.notEqual(split.statuses.BTCUSDT.status, 'READY');
+  assert.equal(split.statuses.ETHUSDT.status, 'READY');
+  assert.equal(split.observations.ETHUSDT.price, 3401);
+  assert.equal(split.statuses.BNBUSDT.reason, 'INVALID_OBSERVATION');
+  assert.ok((await post(k11520OrderRequest('BNBUSDT', 'quote-test-invalid-bnb-001', {triggerPrice: 625}))).status >= 400);
+  assert.ok((await post(draft)).status >= 400, 'fresh-looking prior quote cannot bypass known disconnection');
+  const selected = await post(k11520OrderRequest('ETHUSDT', 'quote-test-healthy-eth-001'));
+  assert.equal(selected.body.ok, true, JSON.stringify(selected.body));
+  assert.equal(selected.body.order.triggerPrice, 3401, 'default comes from the selected ready market');
+  assert.equal((await f.book(token)).orders.length, 1);
+
+  f.advance(61000);
+  f.quote('BNBUSDT', 621, 2, {age: 61000});
+  await f.poll();
+  const aged = (await f.request('/api/v1/markets')).body;
+  assert.notEqual(aged.statuses.ETHUSDT.status, 'READY', 'empty feed expires the accepted observation');
+  assert.equal(aged.statuses.BNBUSDT.reason, 'STALE_PRICE', 'receiving an old response does not refresh the price');
+  assert.ok((await post(k11520OrderRequest('BNBUSDT', 'quote-test-stale-bnb-001', {triggerPrice: 625}))).status >= 400);
+  const book = await f.book(token);
+  assert.equal(book.orders.length, 1);
+  assert.equal(book.orders[0].status, 'PENDING');
+  assert.equal(book.receipts.length, 0);
+});
+
+test('K11520 server persists idempotent orders and isolated settlement across client absence and service restart', async t => {
+  const f = await makeK11520BackendFixture(t);
+  f.prime();
+  await f.poll();
+  const {token, player} = await f.login({name: '離線委託驗收'});
+  const post = body => f.request('/api/v1/order', {method: 'POST', token, body});
+  const before = await f.book(token);
+  const btc = k11520OrderRequest('BTCUSDT', 'order-test-offline-btc-001', {triggerPrice: 65100});
+  const placed = await post(btc);
+  assert.equal(placed.body.ok, true, JSON.stringify(placed.body));
+  const {orderId} = placed.body.order;
+  assert.ok(orderId);
+  assert.equal(placed.body.order.status, 'PENDING');
+  const duplicate = await post(btc);
+  assert.equal(duplicate.body.ok, true, JSON.stringify(duplicate.body));
+  assert.equal(duplicate.body.replayed, true);
+  assert.equal(duplicate.body.order.orderId, orderId);
+  assert.ok((await post({...btc, triggerPrice: 65101})).status >= 400);
+  const eth = k11520OrderRequest('ETHUSDT', 'order-test-offline-eth-001', {triggerPrice: 3410, stopPrice: 3390});
+  assert.equal((await post(eth)).body.ok, true);
+
+  // No API consumer is attached while these polls feed the owner ledger.
+  const unconfirmedAt = f.advance();
+  f.quote('BTCUSDT', 130000, 2);
+  f.quote('ETHUSDT', 3410, 2);
+  await f.poll();
+  const whilePaused = await f.book(token);
+  const evidence = (await f.request('/api/v1/markets')).body;
+  assert.notEqual(evidence.statuses.BTCUSDT.status, 'READY');
+  assert.equal(whilePaused.orders.find(o => o.orderId === orderId).status, 'PENDING');
+  assert.equal(whilePaused.receipts.some(r => r.market === 'BTCUSDT'), false);
+  assert.equal(whilePaused.receipts.find(r => r.market === 'ETHUSDT').triggeredAt, unconfirmedAt);
+
+  f.advance();
+  f.quote('BTCUSDT', 65200, 3);
+  await f.poll();
+  assert.equal((await f.book(token)).orders.find(o => o.orderId === orderId).status, 'PENDING',
+    'a reconnect price beyond the trigger cannot establish a crossing through the source gap');
+
+  const touchAt = f.advance();
+  f.quote('BTCUSDT', 65100, 4);
+  await f.poll();
+  const withFill = await f.book(token);
+  const fill = withFill.receipts.find(r => r.kind === 'FILL' && r.orderId === orderId);
+  assert.ok(fill, JSON.stringify(withFill.receipts));
+  assert.equal(fill.fillPrice, 65100);
+  assert.equal(fill.triggeredAt, touchAt);
+  assert.equal(fill.pnlModel, C_PNL_MODEL);
+  assert.equal(fill.entryFloorUnit, 10000);
+  assert.equal(fill.walletBefore - fill.walletAfter, btc.lots);
+  assert.equal(fill.priceSource, evidence.observations.ETHUSDT.source);
+  assert.equal(fill.priceObservedAt, touchAt);
+  assert.equal(fill.priceSequence, 4);
+  const fillSnapshot = structuredClone(fill);
+
+  f.advance();
+  f.quote('BTCUSDT', 65100, 4, {age: 1000});
+  await f.poll();
+  assert.equal((await f.book(token)).receipts.filter(r => r.orderId === orderId).length, 1);
+  const liquidationAt = f.advance();
+  f.quote('BTCUSDT', 51000, 5, {corroborates: 51001});
+  await f.poll();
+  const settled = await f.book(token);
+  const liquidation = settled.receipts.find(r => r.orderId === orderId && r.kind === 'SETTLEMENT');
+  assert.ok(liquidation, JSON.stringify(settled.receipts));
+  assert.equal(liquidation.status, 'LIQUIDATED');
+  assert.equal(liquidation.settlementPrice, 51000);
+  assert.equal(liquidation.settledAt, liquidationAt);
+  assert.equal(liquidation.realizedPnl, -btc.lots);
+  assert.ok(liquidation.badDebt > 0);
+  assert.equal(settled.wallet.free, before.wallet.free - btc.lots - eth.lots);
+  assert.ok(settled.wallet.free >= 0);
+  assert.equal(settled.wallet.lockedMargin, eth.lots);
+  assert.equal(settled.positions.find(p => p.market === 'ETHUSDT').status, 'OPEN');
+  assert.deepEqual(settled.receipts.find(r => r.receiptId === fill.receiptId), fillSnapshot);
+
+  const stopAt = f.advance();
+  f.quote('ETHUSDT', 3390, 3);
+  await f.poll();
+  const afterStops = await f.book(token);
+  const stop = afterStops.receipts.find(r => r.market === 'ETHUSDT' && r.kind === 'SETTLEMENT');
+  assert.ok(stop, JSON.stringify(afterStops.receipts));
+  assert.equal(stop.status, 'STOPPED');
+  assert.equal(stop.settlementPrice, 3390);
+  assert.equal(stop.settledAt, stopAt);
+  assert.equal(stop.realizedPnl, -0.04);
+  assert.equal(afterStops.wallet.lockedMargin, 0);
+  assert.deepEqual(afterStops.receipts.find(r => r.receiptId === liquidation.receiptId), liquidation);
+
+  await f.restart();
+  const resumed = await f.login({token});
+  assert.equal(resumed.player.id, player.id);
+  assert.equal(resumed.token, token);
+  const readback = await f.book(token);
+  assert.deepEqual(readback.receipts, afterStops.receipts);
+  assert.deepEqual(readback.wallet, afterStops.wallet);
+  const replayAfterRestart = await post(btc);
+  assert.equal(replayAfterRestart.body.ok, true, JSON.stringify(replayAfterRestart.body));
+  assert.equal(replayAfterRestart.body.replayed, true);
+  assert.equal(replayAfterRestart.body.order.orderId, orderId);
+  assert.equal((await f.book(token)).receipts.filter(r => r.orderId === orderId).length, 2);
+});
+
+test('K11520 reopened page recovers an accepted order and a manual close exactly once after a feed outage and restart', async t => {
+  const f = await makeK11520BackendFixture(t);
+  const saved = new Map();
+  const storage = {getItem: key => saved.get(key) ?? null, setItem: (key, value) => saved.set(key, value)};
+  const origin = f.origin;
+  function openPage(fetchImpl = fetch) {
+    return createPreviewSimulationExecutionAdapter({origin, storage, fetchImpl, now: f.now});
+  }
+  const beforeReload = openPage(async (url, options) => {
+    const response = await fetch(url, options);
+    if (new URL(url).pathname === '/api/v1/order' && options.method === 'POST') {
+      assert.equal(response.status, 200);
+      await response.arrayBuffer();
+      throw new Error('Fixture dropped the accepted order response');
+    }
+    return response;
+  });
+
+  f.prime();
+  await f.poll();
+  assert.equal((await beforeReload.refresh()).ok, true);
+  const startingWallet = beforeReload.snapshot().wallet;
+  const draft = {axis: 'KX', market: 'BTCUSDT', c: 1, lots: 2, triggerPrice: 65100, clientRequestId: 'manual-reopen-01'};
+  assert.equal(beforeReload.preview(draft).ok, true);
+  assert.equal((await beforeReload.submit(draft)).reason, 'PREVIEW_ORDER_UNRESOLVED');
+
+  f.unavailable.add('BTCUSDT');
+  f.advance();
+  await f.poll();
+  const reopened = openPage();
+  assert.equal((await reopened.refresh()).ok, true);
+  assert.equal(reopened.marketSnapshot().statuses.BTCUSDT.available, false);
+  assert.equal(reopened.pendingOrder().clientRequestId, draft.clientRequestId);
+  const replay = await reopened.retryPendingOrder();
+  assert.equal(replay.replayed, true);
+  assert.equal(reopened.snapshot().orders.length, 1);
+  assert.equal(reopened.snapshot().receipts.length, 0);
+
+  // No page requests occur while the source returns and the backend fills the order.
+  await f.restart();
+  assert.equal(f.origin, origin);
+  f.unavailable.delete('BTCUSDT');
+  const filledAt = f.advance();
+  f.quote('BTCUSDT', 65100, 2);
+  await f.poll();
+  const closeAt = f.advance();
+  f.quote('BTCUSDT', 75100, 3, {corroborates: 75100});
+  await f.poll();
+
+  const returning = openPage();
+  assert.equal((await returning.refresh()).ok, true);
+  const {positions, receipts: [fill]} = returning.snapshot();
+  assert.equal(positions.length, 1);
+  assert.equal(fill.orderId, replay.order.orderId);
+  assert.equal(fill.triggeredAt, filledAt);
+  const closed = await returning.close(positions[0].positionId);
+  assert.equal(closed.ok, true, closed.reason);
+  const settled = returning.snapshot();
+  assert.deepEqual(settled.receipts.map(row => row.kind), ['FILL', 'SETTLEMENT']);
+  const settlement = settled.receipts[1];
+  assert.equal(settlement.status, 'CLOSED');
+  assert.equal(settlement.orderId, fill.orderId);
+  assert.equal(settlement.settlementPrice, 75100);
+  assert.equal(settlement.settledAt, closeAt);
+  assert.equal(settlement.realizedPnl, 2);
+  assert.equal(settled.wallet.free, startingWallet.free + 2);
+  assert.equal(settled.wallet.lockedMargin, 0);
+
+  assert.equal((await returning.close(positions[0].positionId)).reason, 'POSITION_NOT_OPEN');
+  await f.restart();
+  const finalPage = openPage();
+  assert.equal((await finalPage.refresh()).ok, true);
+  assert.deepEqual(finalPage.snapshot().receipts, settled.receipts);
+  assert.deepEqual(finalPage.snapshot().wallet, settled.wallet);
+  assert.deepEqual(finalPage.snapshot().orders, settled.orders);
+});
+
+test('K11520 server keeps legacy records private and preserves their historical balance', async t => {
+  const legacyPlayer = {
+    id: 'legacy-fixture-id',
+    name: '舊帳戶',
+    xyz: {x: 1, y: 2, z: 3},
+    kgen: 4.5,
+    kaios: 80,
+    kufo: 1,
+    hp: 70,
+    home: null,
+    updatedAt: '2026-11-01T00:00:00.000Z',
+    orders: [{id: 'old-order-1', price: 100000, priceSource: 'HISTORICAL', status: 'CLOSED'}],
+  };
+  const legacy = {[legacyPlayer.id]: legacyPlayer};
+  const f = await makeK11520BackendFixture(t, {legacy});
+  const attempted = await f.request('/api/v1/login', {method: 'POST', body: {playerId: legacyPlayer.id}});
+  assert.ok(attempted.status >= 400);
+  const unauthorized = await f.request('/api/v1/orders');
+  assert.equal(unauthorized.status, 401);
+  const {token, player} = await f.login({name: '新帳戶'});
+  assert.notEqual(player.id, legacyPlayer.id);
+  const fresh = await f.book(token);
+  assert.equal(fresh.orders.length, 0);
+  assert.equal(fresh.receipts.length, 0);
+  function findLegacy(value) {
+    if (value === null || typeof value !== 'object') return undefined;
+    if (value.id === legacyPlayer.id) return value;
+    return Object.values(value).map(findLegacy).find(Boolean);
+  }
+  assert.deepEqual(findLegacy(await f.readDatabase()), legacyPlayer);
+  await f.restart();
+  assert.deepEqual(findLegacy(await f.readDatabase()), legacyPlayer);
+});
+
+test('K11520 background poll persists a single touch without a connected player page', async t => {
+  const {setTimeout: wait} = await import('node:timers/promises');
+  const f = await makeK11520BackendFixture(t, {pollIntervalMs: 20});
+  const {token, player} = await f.login({name: '排程驗收'});
+  async function eventuallyRead(read, label) {
+    const expires = performance.now() + 5000;
+    do {
+      const result = await read();
+      if (result) return result;
+      await wait(20);
+    } while (performance.now() < expires);
+    const {body: marketState} = await f.request('/api/v1/markets');
+    const orderBook = await f.book(token);
+    assert.fail(label + ' ' + JSON.stringify({marketState, orders: orderBook.orders, receipts: orderBook.receipts}));
+  }
+  f.prime();
+  await eventuallyRead(async () => {
+    const {body} = await f.request('/api/v1/markets');
+    return body.statuses.BNBUSDT.status === 'READY';
+  }, 'background polling should warm the public quote');
+  const response = await f.request('/api/v1/order', {
+    method: 'POST', token,
+    body: k11520OrderRequest('BNBUSDT', 'order-test-background-bnb-001', {triggerPrice: 621}),
+  });
+  assert.equal(response.body.ok, true, JSON.stringify(response.body));
+  const {orderId} = response.body.order;
+
+  // After submission, no HTTP request occurs until the scheduler has committed the receipt.
+  const touchedAt = f.advance();
+  f.quote('BNBUSDT', 621, 2);
+  const persisted = await eventuallyRead(async () => {
+    const state = await f.readDatabase();
+    return state.players[player.id]?.ledger?.simulation?.receipts?.find(r => r.orderId === orderId);
+  }, 'background polling should commit a fill without a browser page');
+  assert.equal(persisted.kind, 'FILL');
+  assert.equal(persisted.fillPrice, 621);
+  assert.equal(persisted.triggeredAt, touchedAt);
+
+  await f.restart();
+  assert.deepEqual((await f.book(token)).receipts, [persisted]);
+});
+
+test('K11520 LAN preview pairs the device and shares only the authenticated simulation book', async t => {
+  const {randomBytes} = await import('node:crypto');
+  const {request} = await import('node:http');
+  const {networkInterfaces} = await import('node:os');
+  const address = Object.values(networkInterfaces()).flat().find(entry =>
+    entry?.family === 'IPv4' && !entry.internal &&
+    /^(?:10\.|172\.(?:1[6-9]|2[0-9]|3[01])\.|192\.168\.)/.test(entry.address)
+  )?.address;
+  if (!address) {
+    t.skip('No assigned private IPv4 interface');
+    return;
+  }
+
+  const accessCode = randomBytes(24).toString('hex');
+  const f = await makeK11520BackendFixture(t, {lanPreview: {address, accessCode}});
+  const lanOrigin = 'http://' + address + ':' + new URL(f.origin).port;
+  const gamePath = encodeURI('/K線西遊記/temples/11520/game-5d.html');
+  const gameUrl = gamePath + '?world=88888&preview=server';
+  const previewMarker = '<meta name="k11520-private-preview" content="lan">';
+
+  function send(path, {method = 'GET', headers, body} = {}) {
+    return new Promise((resolve, reject) => {
+      const req = request(new URL(path, lanOrigin), {
+        method, headers, signal: AbortSignal.timeout(5000),
+      }, res => {
+        let text = '';
+        res.setEncoding('utf8');
+        res.on('data', chunk => { text += chunk; });
+        res.on('error', reject);
+        res.on('end', () => resolve({status: res.statusCode, headers: res.headers, text}));
+      });
+      req.on('error', reject);
+      req.end(body);
+    });
+  }
+
+  function pair(code, origin = lanOrigin) {
+    return send('/preview/access', {
+      method: 'POST',
+      headers: {origin, 'content-type': 'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({code, world: '88888'}).toString(),
+    });
+  }
+
+  const unpaired = await send(gameUrl);
+  assert.equal(unpaired.status, 401);
+  assert.match(unpaired.headers['content-type'], /^text\/html\b/);
+  assert.match(unpaired.text, /action="\/preview\/access"/);
+  assert.match(unpaired.text, /name="world" value="88888"/);
+  assert.equal(unpaired.text.includes(previewMarker), false);
+  assert.equal(unpaired.text.includes(accessCode), false);
+  assert.equal((await send('/api/v1/markets')).status, 401);
+
+  const wrongCode = await pair('0'.repeat(accessCode.length));
+  assert.equal(wrongCode.status, 401);
+  assert.equal(wrongCode.headers['set-cookie'], undefined);
+  const wrongOrigin = await pair(accessCode, f.origin);
+  assert.equal(wrongOrigin.status, 403);
+  assert.equal(wrongOrigin.headers['set-cookie'], undefined);
+
+  const paired = await pair(accessCode);
+  assert.equal(paired.status, 303);
+  assert.equal(paired.headers.location, gameUrl);
+  assert.equal(paired.headers['set-cookie']?.length, 1);
+  const [setCookie] = paired.headers['set-cookie'];
+  assert.match(setCookie, /;\s*HttpOnly(?:;|$)/i);
+  assert.match(setCookie, /;\s*SameSite=Strict(?:;|$)/i);
+  assert.equal(setCookie.includes(accessCode), false);
+  const [cookie] = setCookie.split(';', 1);
+
+  const shell = await send(gameUrl, {headers: {cookie}});
+  assert.equal(shell.status, 200);
+  assert.ok(shell.text.includes(previewMarker));
+  const localShell = await fetch(f.origin + gameUrl, {signal: AbortSignal.timeout(5000)});
+  assert.equal(localShell.status, 200);
+  assert.equal((await localShell.text()).includes(previewMarker), false);
+  assert.equal((await send(gameUrl, {headers: {cookie, host: 'unrelated.invalid'}})).status, 403);
+  assert.equal((await send('/api/v1/markets', {headers: {cookie, origin: f.origin}})).status, 403);
+  assert.equal((await send('/api/v1/orders', {headers: {cookie}})).status, 401);
+
+  const jsonHeaders = {cookie, origin: lanOrigin, 'content-type': 'application/json'};
+  const login = await send('/api/v1/login', {
+    method: 'POST', headers: jsonHeaders, body: JSON.stringify({name: '區網試玩'}),
+  });
+  assert.equal(login.status, 200);
+  const {ok, token} = JSON.parse(login.text);
+  assert.equal(ok, true);
+  assert.equal(typeof token, 'string');
+  assert.ok(token.length > 0);
+  const authorization = 'Bearer ' + token;
+  assert.equal((await send('/api/v1/orders', {headers: {authorization}})).status, 401);
+
+  f.prime();
+  await f.poll();
+  const posted = await send('/api/v1/order', {
+    method: 'POST', headers: {...jsonHeaders, authorization},
+    body: JSON.stringify(k11520OrderRequest('BTCUSDT', 'lan-preview-btc-order-001', {triggerPrice: 65100})),
+  });
+  assert.equal(posted.status, 200, posted.text);
+  const {order} = JSON.parse(posted.text);
+  assert.equal(order.status, 'PENDING');
+  assert.deepEqual((await f.book(token)).orders, [order]);
+
+  const touchedAt = f.advance();
+  f.quote('BTCUSDT', 65100, 2);
+  await f.poll();
+  const filled = await send('/api/v1/orders', {headers: {cookie, authorization}});
+  assert.equal(filled.status, 200);
+  const {receipts} = JSON.parse(filled.text);
+  assert.equal(receipts.length, 1);
+  assert.equal(receipts[0].kind, 'FILL');
+  assert.equal(receipts[0].orderId, order.orderId);
+  assert.equal(receipts[0].fillPrice, 65100);
+  assert.equal(receipts[0].triggeredAt, touchedAt);
+  assert.deepEqual((await f.book(token)).receipts, receipts);
+
+  await f.restart();
+  assert.deepEqual((await f.book(token)).receipts, receipts);
+});
+
+test('BSC56 wallet panel reads one withdrawal without replay and clears stale account results', async () => {
+  const {bindTradingReceiptLookup} = await import('../K線西遊記/temples/11520/runtime/wallet-game-bridge.mjs');
+  const input = new EventTarget(), button = new EventTarget(), status = {};
+  input.value = '0x' + 'ab'.repeat(32);
+  let walletListener, pendingRead, signalStarted;
+  let started = new Promise(resolve => { signalStarted = resolve; });
+  const evidence = {status:'CREDIT_CONFIRMED', requestedWei:'1000000000000000000', receivedWei:'997000000000000000', feeWei:'3000000000000000', blockNumber:'0x12'};
+  const checked = [];
+  const session = {
+    subscribe(fn) { walletListener = fn; fn({status:'CONNECTED',chainId:56}); return () => {}; },
+    async readWithdrawalReceipt({manifest, txHash}) {
+      assert.equal(manifest.fixture, true);
+      checked.push(txHash);
+      signalStarted();
+      return new Promise(resolve => { pendingRead = resolve; });
+    }
+  };
+  const dispose = bindTradingReceiptLookup({session, input, button, status, fetchManifest:async (url, options) => {
+    assert.ok(url.pathname.endsWith('/docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json'));
+    assert.equal(options.redirect, 'error');
+    return {ok:true,json:async () => ({fixture:true})};
+  }});
+  button.dispatchEvent(new Event('click'));
+  button.dispatchEvent(new Event('click'));
+  await started;
+  walletListener({status:'DISCONNECTED',chainId:null});
+  pendingRead(evidence);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.match(status.textContent, /請連接/);
+  assert.equal(button.disabled, true);
+  walletListener({status:'CONNECTED',chainId:56});
+  started = new Promise(resolve => { signalStarted = resolve; });
+  button.dispatchEvent(new Event('click'));
+  await started;
+  pendingRead(evidence);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.deepEqual(checked, [input.value,input.value]);
+  assert.match(status.textContent, /錢包實收 0\.997 KGEN。提款 1 KGEN，費用 0\.003 KGEN。區塊 18/);
+  input.value = '';
+  input.dispatchEvent(new Event('input'));
+  assert.equal(status.textContent, '');
+  assert.equal(button.disabled, true);
+  dispose();
+});
+
+test('BSC56 reopens the original order by account and validates each receipt page again', async () => {
+  const {bindTradingReceiptLookup} = await import('../K線西遊記/temples/11520/runtime/wallet-game-bridge.mjs');
+  const account='0x'+'11'.repeat(20), other='0x'+'22'.repeat(20), txHash='0x'+'ef'.repeat(32);
+  const records=new Map(), storage={getItem:key=>records.get(key),setItem:(key,value)=>records.set(key,value)};
+  const checked=[], cursor={nextBlock:'0x42'};
+  const session={
+    subscribe(fn){fn({status:'CONNECTED',chainId:56,account:this.account});return ()=>{};},account,
+    async readTradingReceipt(options){
+      checked.push(options);
+      if(checked.length===1)return {status:'UNKNOWN',reason:'SEARCH_WINDOW_INCOMPLETE',lastKnown:{status:'ORDER_CREATED',orderId:'2'},nextCursor:cursor};
+      return {status:'POSITION_CLOSED',orderId:'2',positionId:'5',realizedPnlWei:'-100000000000000',fillTxHash:txHash,closeTxHash:txHash};
+    }
+  };
+  const mount=()=>{
+    const input=new EventTarget(),button=new EventTarget(),kind=new EventTarget(),status={},hashLabel={};
+    input.value=''; kind.value='withdrawal';
+    const dispose=bindTradingReceiptLookup({session,input,button,kind,status,hashLabel,storage,
+      fetchManifest:async()=>({ok:true,json:async()=>({})})});
+    return {input,kind,button,status,hashLabel,dispose};
+  };
+  const first=mount();first.input.value=txHash;first.kind.value='order';first.kind.dispatchEvent(new Event('change'));
+  first.button.dispatchEvent(new Event('click'));await new Promise(resolve=>setImmediate(resolve));
+  assert.match(first.status.textContent,/已建立委託.*後續狀態尚未核實/);
+  assert.match(first.button.textContent,/繼續查/);first.dispose();
+  session.account=other;const different=mount();assert.equal(different.input.value,'');different.dispose();
+  session.account=account;const reopened=mount();
+  assert.equal(reopened.input.value,txHash);assert.equal(reopened.kind.value,'order');
+  assert.equal(reopened.status.textContent,'');assert.equal(checked.length,1);
+  reopened.button.dispatchEvent(new Event('click'));await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(checked[1].txHash,txHash);assert.deepEqual(checked[1].cursor,cursor);
+  assert.match(reopened.status.textContent,/已平倉.*合約實現損益 −0\.0001 KGEN/);
+  checked.length=0;
+  session.readTradingReceipt=async()=>({status:'POSITION_CLOSED',orderId:'2',realizedPnlWei:'2000000000000000000',claimStatus:'VERIFIED_AT_CLOSE',paidWei:'500000000000000000',remainingClaimWei:'1500000000000000000'});
+  reopened.button.dispatchEvent(new Event('click'));await new Promise(resolve=>setImmediate(resolve));
+  assert.match(reopened.status.textContent,/本筆撥入合約本金 0.5 KGEN.*平倉時仍待清償 1.5 KGEN/);
+  reopened.dispose();
 });

@@ -1,6 +1,6 @@
-const CACHE='k11520-shell-20261103-revalidate';
+const CACHE='k11520-shell-20261122-wallet-receipts';
 const SHARED=['../../../assets/kaios-audio.mjs','../../../assets/kaios-audio-ui.mjs','../../../assets/kaios-audio.css','../../../assets/kaios-world-registry.mjs'];
-const SHELL=['./game-5d.html','./manifest.webmanifest','./runtime/game-5d-bootstrap.mjs','./runtime/game-5d-main.mjs','./runtime/combat-fx-runtime.mjs','./assets/ui/k11520-pwa-192.png','./assets/ui/k11520-pwa-512.png',...SHARED];
+const SHELL=['./game-5d.html','./manifest.webmanifest','./runtime/game-5d-bootstrap.mjs','./runtime/game-5d-main.mjs','./runtime/wallet-game-bridge.mjs','./runtime/evm-wallet-runtime.mjs','./runtime/real-trading-preflight-ui.mjs','./runtime/real-trading-order-intent.mjs','./runtime/combat-fx-runtime.mjs','./assets/ui/k11520-pwa-192.png','./assets/ui/k11520-pwa-512.png',...SHARED];
 // Revalidate the published shell; an HTTP-cache hit must not seed an old release.
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(path=>new Request(new URL(path,self.location.href),{cache:'reload'})))).then(()=>self.skipWaiting())));
 // Only this worker's named asset caches are retired. Player/wallet stores are untouched.

@@ -43,17 +43,26 @@ test('offline fallback uses only this release cache and never returns HTML for m
 test('worker installs a fresh shell before activation and only retires its own named caches',async()=>{
  const h=await workerHarness();await h.event('install');assert.equal(h.state.skipped,1);
  assert.ok(h.state.precache.length>0);for(const request of h.state.precache){assert.equal(request.cache,'reload');assert.equal(new URL(request.url).origin,'https://example.test');assert.equal(request.method,'GET')}
+ const precached=new Set(h.state.precache.map(req=>new URL(req.url).pathname));
+ for(const file of ['wallet-game-bridge','evm-wallet-runtime','real-trading-preflight-ui','real-trading-order-intent']){
+  assert.ok(precached.has('/temples/11520/runtime/'+file+'.mjs'),file+' must be in the installed shell');
+ }
  await h.event('activate');assert.deepEqual(h.deleted,['k11520-shell-old']);assert.equal(h.state.claimed,1);
  const failed=await workerHarness();failed.state.installFailure=true;await assert.rejects(failed.event('install'),/install failed/);assert.equal(failed.state.skipped,0);assert.equal(failed.state.claimed,0);
  assert.doesNotMatch(read('sw.js'),/localStorage|indexedDB|deleteDatabase|\.clear\s*\(/,'worker must never clear player or wallet storage');
 });
+function workerRegistrationScript(){
+ const source=[...read('game-5d.html').matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).find(code=>code.includes('serviceWorker.register'));
+ assert.ok(source);
+ return source;
+}
 test('PWA checks updates at startup and online resume without reloading or clearing player state',async()=>{
- const {runInNewContext}=await import('node:vm'),html=read('game-5d.html');
- const source=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).find(code=>code.includes('serviceWorker.register'));
- assert.ok(source);const windowEvents={},documentEvents={},calls=[];let updates=0,releaseUpdate;
+ const {runInNewContext}=await import('node:vm'),source=workerRegistrationScript();
+ const windowEvents={},documentEvents={},calls=[];let updates=0,releaseUpdate;
  const navigator={onLine:true,serviceWorker:{register:async(url,options)=>{calls.push({url,options});return{update:()=>{updates++;return new Promise(resolve=>releaseUpdate=resolve)}}}}};
- const document={visibilityState:'visible',addEventListener:(name,fn)=>documentEvents[name]=fn};
- runInNewContext(source,{navigator,document,addEventListener:(name,fn)=>windowEvents[name]=fn});
+ const document={visibilityState:'visible',querySelector:()=>null,documentElement:{dataset:{}},addEventListener:(name,fn)=>documentEvents[name]=fn};
+ const location=new URL('https://example.test/temples/11520/game-5d.html');
+ runInNewContext(source,{navigator,document,location,URLSearchParams,addEventListener:(name,fn)=>windowEvents[name]=fn});
  windowEvents.load();await new Promise(resolve=>setImmediate(resolve));
  assert.equal(calls[0].url,'./sw.js');assert.equal(calls[0].options.scope,'./');assert.equal(calls[0].options.updateViaCache,'none');assert.equal(updates,1);
  windowEvents.online();documentEvents.visibilitychange();assert.equal(updates,1,'only one update check can be in flight');releaseUpdate();await new Promise(resolve=>setImmediate(resolve));
@@ -61,7 +70,33 @@ test('PWA checks updates at startup and online resume without reloading or clear
  navigator.onLine=true;windowEvents.online();assert.equal(updates,2);releaseUpdate();await new Promise(resolve=>setImmediate(resolve));
  document.visibilityState='hidden';documentEvents.visibilitychange();assert.equal(updates,2);
  document.visibilityState='visible';documentEvents.visibilitychange();assert.equal(updates,3);releaseUpdate();await new Promise(resolve=>setImmediate(resolve));
- assert.doesNotMatch(source,/\blocation\s*\.|\breload\s*\(|localStorage|indexedDB|deleteDatabase|\.clear\s*\(/);
+ // The only allowed location accesses identify a preview. Keep the original
+ // prohibition on navigation, forced reloads and writes to the player's saves.
+ const withoutPreviewReads=source.replace('new URLSearchParams(location.search)','new URLSearchParams()')
+  .replace("location.protocol==='http:'",'true').replace('.includes(location.hostname)','.includes("")');
+ assert.doesNotMatch(withoutPreviewReads,/\blocation\b|\breload\s*\(|\bhistory\s*\.|\bopen\s*\(|localStorage|indexedDB|deleteDatabase|\.clear\s*\(/);
+ assert.equal(location.href,'https://example.test/temples/11520/game-5d.html');
+});
+test('private LAN and loopback previews skip worker registration; the public game still registers',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=workerRegistrationScript();
+ for(const [url,marker,shouldRegister,privateLan] of [
+  ['http://192.168.1.42/game-5d.html?preview=server','lan',false,true],
+  ['http://localhost/game-5d.html?preview=server',null,false,false],
+  ['http://127.0.0.1/game-5d.html?preview=server',null,false,false],
+  ['http://localhost/game-5d.html',null,true,false],
+  ['https://example.test/game-5d.html?preview=server','lan',true,false],
+ ]){
+  const dataset={},events={},registered=[];
+  const navigator={onLine:true,serviceWorker:{register:async path=>{
+   registered.push(path);return {update:async()=>{}};
+  }}};
+  const document={documentElement:{dataset},visibilityState:'visible',addEventListener(){},
+   querySelector(selector){assert.equal(selector,'meta[name="k11520-private-preview"]');return marker?{content:marker}:null}};
+  runInNewContext(source,{navigator,document,URLSearchParams,location:new URL(url),addEventListener:(name,fn)=>events[name]=fn});
+  if(events.load)await events.load();
+  assert.deepEqual(registered,shouldRegister?['./sw.js']:[],url);
+  assert.equal(dataset.k11520PrivatePreview,privateLan?'lan':undefined,url);
+ }
 });
 test('K11520 offers installation only after browser eligibility and consumes the prompt on the install tap',async()=>{
  const h=await installOfferHarness();

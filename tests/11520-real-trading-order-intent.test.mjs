@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
+import {readFileSync} from 'node:fs';
+import {buildBsc56UnsignedOrderReview,buildBsc56UnsignedCustodyReview,buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,createPreviewSimulationExecutionAdapter,createK11520PreviewRequestId,k11520ServerPreviewType,createSimulationAutopilot,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 import {createKgenLedger,C_PNL_MODEL} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
+import {PUBLIC_MARKET_QUOTE_SOURCE,SIMULATION_PRICE_SOURCE} from '../K線西遊記/temples/11520/runtime/public-market-quotes.mjs';
 import {createRequire} from 'node:module';
 import {TESTNET_EXECUTION_ABI,CAPITAL_EXECUTION_ABI} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 
@@ -22,7 +24,9 @@ test('V1 unsigned intent has 1C ceiling after all protected gates; 100C simulati
  for(const c of [5,-5,100,-100])assert.throws(()=>buildRealTradingOrderIntent({...base,c}),/V1_HIGH_SPEED_PRODUCTION_LOCKED/);
  assert.equal(intent.lots,2);assert.equal(intent.transactionPayload,null);assert.equal(intent.calldata,null);
  assert.equal(intent.signerRequested,false);assert.equal(intent.broadcast,false);
- assert.equal(intent.status,'READY_FOR_EXPLICIT_WALLET_ACTION_NOT_SUBMITTED');
+ assert.equal(intent.status,'UNSIGNED_ORDER_INTENT_ONLY');assert.equal(intent.executionReady,false);
+ assert.ok(intent.blockers.includes('HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED'));
+ assert.ok(Object.isFrozen(intent.blockers));
 });
 test('rejects wrong axis market, chain and missing protected authorization',()=>{
  assert.throws(()=>buildRealTradingOrderIntent({...base,market:'ETHUSDT'}),/REAL_TRADING_AXIS_MARKET_MISMATCH/);
@@ -141,6 +145,32 @@ test('EVM seam stays disabled despite flags; no provider calls and no fallback o
   const result=action();assert.equal(result.ok,false);assert.equal(result.code,'ORDER_REJECTED');assert.match(result.reason,/NOT_DEPLOYED_OR_AUTHORIZED/);
  }
  assert.equal(walletCalls,0);assert.deepEqual(ledger,before);assert.equal(adapter.snapshot().wallet,null);
+});
+test('chain56 official manifest and metadata cannot open a wallet or enter the paper ledger across tabs and reload',()=>{
+ const manifest=JSON.parse(readFileSync(new URL('../docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json',import.meta.url),'utf8'));
+ assert.equal(manifest.CHAIN_ID,56);
+ const {input,options}=bsc56OrderFixture(),review=buildBsc56UnsignedOrderReview(input,options);
+ assert.ok(review.transaction&&review.intentDigest);
+ const calls=[];
+ const provider={request({method}){calls.push(method);throw new Error('UNEXPECTED_WALLET_RPC')}};
+ const {ledger}=fixture(),before=structuredClone(ledger);
+ const pendingRecord=JSON.stringify({phase:'WAITING_WALLET',account:input.walletAddress,nonce:input.nonce});
+ const storage={getItem:()=>pendingRecord,setItem(){assert.fail('must preserve existing wallet requests')}};
+ for(const deployment of [manifest,{...manifest,mode:'SIMULATION'},
+   {...manifest,mode:'BSC_TESTNET',chainId:97},{...input.deployment,mode:'SIMULATION',chainId:'0x38'},
+   {...input.deployment,executionReady:true,humanMainnetAuthorization:true,expectedBindingDigest:options.expectedBindingDigest}]){
+  for(let session=0;session<2;session++){
+   const adapter=createExecutionAdapter({ledger,deployment,ethereum:provider,storage});
+   assert.equal(adapter.enabled,false);
+   assert.equal(adapter.snapshot().chainId,56);assert.equal(adapter.snapshot().executionReady,false);
+   for(const name of ['submit','close','approve','deposit','withdraw','claim']){
+    const result=adapter[name](review);
+    assert.equal(result.ok,false);assert.equal(result.signerRequested,false);assert.equal(result.broadcast,false);
+    assert.ok(result.blockers.includes('BSC56_DEPLOYED_BINDING_REQUIRED'));
+   }
+  }
+ }
+ assert.deepEqual(calls,[]);assert.deepEqual(ledger,before);
 });
 test('stable wallet/transaction failure states are bounded and do not leak provider details',()=>{
  for(const state of EXECUTION_FAILURE_STATES)assert.equal(normalizeExecutionError({code:state}),state);
@@ -667,6 +697,233 @@ for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']])
  assert.equal(adapter.snapshot().receipts.length,2);assert.ok(adapter.snapshot().receipts.every(r=>r.simulationOnly&&r.priceSource==='K11520_DETERMINISTIC_SIMULATION'));
 });
 
+test('verified public simulation freezes offline and resumes only on accepted provider observations',()=>{
+ const ledger=createKgenLedger(100);
+ let saves=0;
+ const adapter=createExecutionAdapter({ledger,productV1:true,verifiedPublicQuotes:true,simulationFallback:true,afterMutation:()=>saves++});
+ const input={axis:'KX',market:'BTCUSDT',c:1,lots:2,currentPrice:99999,triggerPrice:75000};
+ const publicQuote=(price,observedAt,sequence,changes={})=>({
+   market:'BTCUSDT',price,observedAt,sequence,source:PUBLIC_MARKET_QUOTE_SOURCE.id,now:observedAt,...changes,
+ });
+ const initial=structuredClone(ledger);
+ assert.equal(adapter.preview(input,{now:1000}).code,'ORACLE_STALE');
+ assert.equal(adapter.submit(input,{now:1000}).code,'ORACLE_STALE');
+ assert.deepEqual(adapter.tick({now:1000}).events,[]);
+ assert.deepEqual(ledger,initial);
+ assert.equal(saves,0);
+ for(const changes of [
+   {source:SIMULATION_PRICE_SOURCE},
+   {source:undefined},
+   {sequence:undefined},
+   {sequence:'4'},
+   {observedAt:1001},
+   {observedAt:undefined},
+   {price:'75000'},
+ ])assert.equal(adapter.observe(publicQuote(75000,1000,4,changes)).ok,false);
+ assert.deepEqual(ledger,initial);
+ assert.equal(saves,0);
+
+ assert.equal(adapter.observe(publicQuote(75000,1000,4)).ok,true);
+ const review=adapter.preview(input,{now:1000});
+ assert.equal(review.currentPrice,75000);
+ assert.equal(review.intent.currentPrice,75000);
+ assert.equal(review.priceObservedAt,1000);
+ assert.equal(adapter.submit(input,{now:1000}).status,'PENDING_TRIGGER');
+ const beforeFill=structuredClone(ledger);
+ assert.equal(adapter.observe(publicQuote(75001,999,5,{now:1000})).code,'ORACLE_STALE');
+ assert.equal(adapter.observe(publicQuote(75001,1000,4)).code,'ORACLE_STALE');
+ assert.deepEqual(ledger,beforeFill);
+ const fill=adapter.observe(publicQuote(75000,1000,5));
+ assert.equal(fill.ok,true,fill.reason);
+ assert.equal(fill.events[0].fillPrice,75000);
+ const positionId=fill.events[0].positionId;
+ const beforeOffline=structuredClone(ledger),beforeOfflineSaves=saves;
+ assert.equal(adapter.close(positionId,{now:16001}).code,'ORACLE_STALE');
+ assert.deepEqual(adapter.tick({now:16001}).events,[]);
+ assert.deepEqual(ledger,beforeOffline);
+ assert.equal(saves,beforeOfflineSaves);
+ assert.equal(adapter.observe(publicQuote(85000,16002,6)).ok,true);
+ const close=adapter.close(positionId,{now:16002});
+ assert.equal(close.ok,true,close.reason);
+ assert.equal(close.receipt.realizedPnl,2);
+ assert.equal(close.receipt.priceSource,PUBLIC_MARKET_QUOTE_SOURCE.id);
+ assert.equal(ledger.free,102);
+});
+
+test('verified public simulation holds historical synthetic risk and preserves cancellation and independent markets',()=>{
+ const ledger=createKgenLedger(100);
+ const adapter=createExecutionAdapter({ledger,productV1:true,verifiedPublicQuotes:true});
+ const source=PUBLIC_MARKET_QUOTE_SOURCE.id;
+ const btc={market:'BTCUSDT',price:75000,observedAt:1000,sequence:1,source,now:1000};
+ const input={axis:'KX',market:'BTCUSDT',c:1,lots:1,currentPrice:75000,triggerPrice:75000};
+ assert.equal(adapter.observe(btc).ok,true);
+ const first=adapter.submit(input,{now:1000});
+ assert.equal(first.ok,true,first.reason);
+ ledger.simulation.orders[0].executionPriceSource=SIMULATION_PRICE_SOURCE;
+ const held=structuredClone(ledger);
+ const later={...btc,price:85000,observedAt:1100,sequence:2,now:1100};
+ assert.throws(()=>adapter.quote('BTCUSDT',{now:1100}),/SIMULATION_RECOVERY_REQUIRED/);
+ assert.equal(adapter.observe(later).reason,'SIMULATION_RECOVERY_REQUIRED');
+ assert.deepEqual(ledger,held);
+ assert.equal(adapter.observe({...later,market:'ETHUSDT',price:4000}).ok,true);
+ assert.equal(adapter.cancel(first.order.orderId).ok,true);
+ assert.equal(adapter.observe(later).ok,true);
+
+ const second=adapter.submit({...input,triggerPrice:85000},{now:1100});
+ assert.equal(second.ok,true,second.reason);
+ const filled=adapter.observe({...later,observedAt:1200,sequence:3,now:1200});
+ assert.equal(filled.ok,true,filled.reason);
+ const positionId=filled.events[0].positionId;
+ const position=ledger.simulation.positions[0];
+ for(const key of ['priceSource','markPriceSource']){
+   const provenance=position[key];
+   position[key]=SIMULATION_PRICE_SOURCE;
+   const before=structuredClone(ledger);
+   assert.equal(adapter.observe({...later,observedAt:1300,sequence:4,now:1300}).reason,'SIMULATION_RECOVERY_REQUIRED');
+   assert.equal(adapter.close(positionId,{now:1300}).reason,'SIMULATION_RECOVERY_REQUIRED');
+   assert.deepEqual(ledger,before);
+   position[key]=provenance;
+ }
+});
+
+test('verified public simulation can replace an idle synthetic observation without using it to cross an order',()=>{
+ const ledger=createKgenLedger(100);
+ const legacy=createExecutionAdapter({ledger,simulationFallback:true});
+ assert.equal(legacy.tick({now:100000}).ok,true);
+ const adapter=createExecutionAdapter({ledger,verifiedPublicQuotes:true});
+ assert.throws(()=>adapter.quote('BTCUSDT',{now:100000}),/PUBLIC_QUOTE_SOURCE_REQUIRED/);
+ const result=adapter.observe({market:'BTCUSDT',price:75000,observedAt:99990,now:100000,sequence:1,
+   source:PUBLIC_MARKET_QUOTE_SOURCE.id});
+ assert.equal(result.ok,true,result.reason);
+ assert.deepEqual(result.events,[]);
+ const snapshot=adapter.snapshot();
+ assert.equal(snapshot.observations.BTCUSDT.price,75000);
+ assert.equal(snapshot.observations.ETHUSDT.source,SIMULATION_PRICE_SOURCE);
+ assert.deepEqual(snapshot.orders,[]);
+ assert.deepEqual(snapshot.receipts,[]);
+});
+
+test('Android HTTP preview requires the server marker on a private host and uses same-origin admission',async()=>{
+ const origin='http://192.168.1.108:11520';
+ const location=new URL(origin+'/?preview=server&world=12682');
+ const shell={querySelector:selector=>selector==='meta[name="k11520-private-preview"]'?{content:'lan'}:null};
+ assert.equal(k11520ServerPreviewType(location,shell),'lan');
+ assert.equal(k11520ServerPreviewType(location,{querySelector:()=>null}),null);
+ assert.equal(k11520ServerPreviewType(new URL(origin+'/?world=12682'),shell),null);
+ assert.equal(k11520ServerPreviewType(new URL('http://172.32.0.42:11520/?preview=server'),shell),null);
+ assert.equal(k11520ServerPreviewType(new URL('http://127.0.0.1:11520/?preview=server')),'loopback');
+ const webCrypto={getRandomValues:bytes=>bytes.fill(0xc7)};
+ assert.equal(createK11520PreviewRequestId(webCrypto),'c7'.repeat(16));
+ assert.throws(()=>createK11520PreviewRequestId({}),/SECURE_RANDOM_UNAVAILABLE/);
+ assert.throws(()=>createPreviewSimulationExecutionAdapter({origin}),/LOCAL_PREVIEW_ORIGIN_REQUIRED/);
+ assert.throws(()=>createPreviewSimulationExecutionAdapter({origin:'http://203.0.113.1:11520',lanPreview:true}),/LOCAL_PREVIEW_ORIGIN_REQUIRED/);
+
+ const saved=new Map(),requests=[];
+ const adapter=createPreviewSimulationExecutionAdapter({
+   origin,lanPreview:true,
+   storage:{getItem:key=>saved.get(key)??null,setItem:(key,value)=>saved.set(key,value)},
+   fetchImpl:async(url,options)=>{
+     assert.equal(new URL(url).origin,origin);
+     assert.equal(options.credentials,'same-origin');
+     assert.equal(options.mode,'same-origin');
+     const path=new URL(url).pathname;
+     requests.push(path);
+     const replies={
+       '/api/v1/markets':{observations:{},statuses:{}},
+       '/api/v1/login':{ok:true,token:'a'.repeat(48),player:{id:'wifi-demo'}},
+       '/api/v1/orders':{ok:true,mode:'SIMULATION_WALLET',wallet:{free:10},orders:[],positions:[],receipts:[],observations:{}},
+     };
+     assert.ok(Object.hasOwn(replies,path));
+     return {status:200,ok:true,json:async()=>replies[path]};
+   },
+ });
+ assert.equal((await adapter.refresh()).ok,true);
+ assert.deepEqual(requests.sort(),['/api/v1/login','/api/v1/markets','/api/v1/orders']);
+});
+
+test('local preview restores one server identity and replays the exact reviewed order after a lost response',async()=>{
+ const origin='http://127.0.0.1:11520',stored=new Map(),token='a'.repeat(48),serverOrders=[],requests=[];
+ let loseResponse=true,loginCount=0,time=1000,expire=false;
+ const expected={BTCUSDT:{market:'BTCUSDT',price:75000,updatedAt:1000,sequence:7,source:PUBLIC_MARKET_QUOTE_SOURCE.id}};
+ const storage={getItem:key=>stored.get(key)??null,setItem:(key,value)=>stored.set(key,value)};
+ const respond=(status,data)=>({status,ok:status>=200&&status<300,json:async()=>structuredClone(data)});
+ const fetchImpl=async(url,options)=>{
+   const u=new URL(url),body=options.body&&JSON.parse(options.body);
+   assert.equal(u.origin,origin);
+   assert.equal(options.mode,'same-origin');
+   assert.equal(options.credentials,'omit');
+   assert.equal(options.redirect,'error');
+   requests.push({url:u.pathname,body});
+   if(u.pathname==='/api/v1/markets'){
+     assert.equal(options.headers.authorization,undefined);
+     return respond(200,{observations:expected,statuses:{BTCUSDT:{available:time<=16000}}});
+   }
+   if(u.pathname==='/api/v1/login'){
+     loginCount++;
+     assert.equal(options.headers.authorization,undefined);
+     return respond(200,{ok:true,token,player:{id:'local-player'}});
+   }
+   assert.equal(options.headers.authorization,'Bearer '+token);
+   if(expire)return respond(401,{ok:false,reason:'UNAUTHORIZED'});
+   if(u.pathname==='/api/v1/orders')return respond(200,{ok:true,mode:'SIMULATION_WALLET',
+     wallet:{free:10},orders:serverOrders,positions:[],receipts:[],observations:{}});
+   if(u.pathname==='/api/v1/order'){
+     const found=serverOrders.find(o=>o.requestId===body.requestId);
+     if(found)return respond(200,{ok:true,order:found,replayed:true});
+     const order={...body,orderId:'SIM-O-1',status:'PENDING'};
+     serverOrders.push(order);
+     if(loseResponse){loseResponse=false;throw new Error('network response lost')}
+     return respond(200,{ok:true,order,replayed:false});
+   }
+   if(u.pathname==='/api/v1/order/cancel'){
+     assert.deepEqual(body,{orderId:'SIM-O-1'});
+     serverOrders[0].status='CANCELLED';
+     return respond(200,{ok:true,order:serverOrders[0]});
+   }
+   assert.fail('unexpected route '+u.pathname);
+ };
+ const construct=()=>createPreviewSimulationExecutionAdapter({origin,storage,fetchImpl,now:()=>time});
+ assert.throws(()=>createPreviewSimulationExecutionAdapter({origin:'https://public.example'}),/LOCAL_PREVIEW_ORIGIN_REQUIRED/);
+ const adapter=construct();
+ assert.equal(requests.length,0,'constructing never provisions a guest');
+ assert.equal((await adapter.refresh()).ok,true);
+ assert.equal(loginCount,1);
+ assert.equal(adapter.marketSnapshot().observations.BTCUSDT.price,75000);
+ assert.equal(adapter.quote('BTCUSDT').at,1000);
+ const input={axis:'KX',market:'BTCUSDT',c:1,lots:2,triggerPrice:75000,currentPrice:90000,clientRequestId:'reviewed-click'};
+ assert.equal(adapter.preview(input).intent.currentPrice,75000);
+ assert.equal(adapter.observe(expected.BTCUSDT).reason,'SERVER_OWNS_EXECUTION_QUOTE');
+ assert.equal((await adapter.submit(input)).reason,'PREVIEW_ORDER_UNRESOLVED');
+ assert.equal(serverOrders.length,1);
+ assert.equal(adapter.pendingOrder().clientRequestId,'reviewed-click');
+ const firstPost=requests.find(r=>r.url==='/api/v1/order').body;
+ assert.deepEqual(firstPost,{axis:'KX',market:'BTCUSDT',c:1,side:'LONG',lots:2,triggerPrice:75000,
+   stopPrice:null,takeProfitPrice:null,requestId:'reviewed-click'});
+
+ const reopened=construct();
+ time=17000;
+ assert.equal((await reopened.refresh()).ok,true);
+ assert.equal(loginCount,1);
+ assert.equal(reopened.snapshot().orders.length,1);
+ assert.equal(reopened.preview(input).code,'ORACLE_STALE');
+ assert.equal((await reopened.submit({...input,lots:3})).reason,'PREVIEW_ORDER_UNRESOLVED');
+ assert.equal(requests.filter(r=>r.url==='/api/v1/order').length,1);
+ const recovered=await reopened.retryPendingOrder();
+ assert.equal(recovered.ok,true,recovered.reason);
+ assert.equal(recovered.replayed,true);
+ assert.equal(serverOrders.length,1);
+ assert.deepEqual(requests.filter(r=>r.url==='/api/v1/order')[1].body,firstPost);
+ assert.equal(reopened.pendingOrder(),null);
+ assert.equal(JSON.stringify(reopened.snapshot()).includes(token),false);
+ assert.equal((await reopened.cancel('SIM-O-1')).ok,true,'cancellation does not need a fresh quote');
+ assert.equal(reopened.snapshot().orders[0].status,'CANCELLED');
+
+ expire=true;
+ const expired=await construct().refresh();
+ assert.equal(expired.reason,'PREVIEW_SESSION_UNAUTHORIZED');
+ assert.equal(loginCount,1,'an expired preview account does not create a replacement');
+});
+
 test('fallback source stays pinned through pending, position, public recovery and adapter reload',()=>{
  const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
  adapter.observe({market:'ETHUSDT',price:4000,observedAt:1000,now:1000});
@@ -1047,4 +1304,295 @@ test('autopilot never adopts manual positions, ignores neither external close no
   assert.equal(f.pilot.snapshot().state,'STOPPED');assert.equal(f.pilot.snapshot().submittedOrders,1);
   assert.equal(JSON.stringify(f.ledger),before,terminal+' never retries or reverses on the opposite signal');
  }
+});
+
+// Synthetic metadata only. These bindings are NOT deployed/approved addresses.
+const canonicalReviewJson=value=>value&&typeof value==='object'?Array.isArray(value)?'['+value.map(canonicalReviewJson).join(',')+']':'{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonicalReviewJson(value[k])).join(',')+'}':JSON.stringify(value);
+const reviewDigest=value=>codec.keccak256(codec.toUtf8Bytes(canonicalReviewJson(value)));
+const custodyFragments=[TESTNET_EXECUTION_ABI.testToken.find(f=>f.startsWith('function approve(')),...TESTNET_EXECUTION_ABI.brainProxy.filter(f=>/^function (depositMargin|withdrawMargin)\(/.test(f)),CAPITAL_EXECUTION_ABI.brainProxy.find(f=>f.startsWith('function claimSettlement('))];
+function custodyFixture(){
+ const hash='0x'+'ab'.repeat(32),deployment={schema:'K11520_BSC56_DEPLOYMENT_BINDING_V1',status:'DEPLOYED_CONFIG_VERIFIED',chainId:56,testOnly:false,
+  tokenAddress:'0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',brainAddress:BRAIN,brainImplementation:ENGINE,walletAddress:WALLET,pendingNonce:'7',allowanceWei:'0',
+  tokenCodeHash:hash,brainCodeHash:hash,implementationCodeHash:hash,brainSourceHash:hash,abiHash:reviewDigest(custodyFragments),blockHash:hash,blockNumber:'123',reviewedCommit:'a'.repeat(40),accountingModel:'ISOLATED_SETTLEMENT_CAPITAL_V1'};
+ const input={action:'depositMargin',chainId:56,walletAddress:WALLET,amountWei:'1000000000000000001',nonce:'7',gasLimit:'100000',gasPriceWei:'50000000',maximumGasFeeWei:'5000000000000',deployment};
+ return {input,options:{ethers:codec,expectedBindingDigest:reviewDigest(deployment)}};
+}
+
+test('BSC56 pure builder encodes exact current ABI units and all eight Human review fields without live approval',()=>{
+ const {input,options}=custodyFixture(),before=JSON.stringify(input),r=buildBsc56UnsignedCustodyReview(input,options);
+ const abi=new codec.Interface(custodyFragments),decoded=abi.parseTransaction(r.transaction);
+ assert.equal(decoded.name,'depositMargin');assert.equal(decoded.args[0].toString(),'1000000000000000001');
+ assert.equal(r.transactionFormat,'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC');assert.equal(r.bindingVerification,'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED');assert.equal(r.transaction.to,BRAIN);assert.equal(r.transaction.chainId,56);assert.equal(r.transaction.value,'0');assert.equal(r.transaction.nonce,'7');
+ for(const key of ['CHAIN','WALLET','CONTRACT','FUNCTION','TOKEN','AMOUNT','EXPECTED_EFFECT','MAXIMUM_EXPOSURE'])assert.ok(Object.hasOwn(r.review,key));
+ assert.equal(r.review.MAXIMUM_EXPOSURE.walletTokenDebitWei,input.amountWei);assert.equal(r.review.MAXIMUM_EXPOSURE.nativeGasFeeWei,input.maximumGasFeeWei);
+ assert.equal(r.executionReady,false);assert.equal(r.signerRequested,false);assert.equal(r.broadcast,false);assert.equal(r.status,'UNSIGNED_REVIEW_ONLY');
+ assert.ok(r.blockers.includes('HUMAN_WALLET_OWNER_CONFIRMATION_REQUIRED'));assert.ok(r.blockers.includes('FRESH_CHAIN_CODE_ACCOUNT_NONCE_AND_STATE_READBACK_REQUIRED'));
+ assert.equal(JSON.stringify(input),before);assert.ok(Object.isFrozen(r.review.MAXIMUM_EXPOSURE));
+});
+
+test('BSC56 approve/revoke fixes token target and exact Brain spender; withdraw affects principal, not allowance',()=>{
+ const {input,options}=custodyFixture(),abi=new codec.Interface(custodyFragments);
+ for(const amountWei of ['0','1','900719925474099312345678901234567890']){
+  const r=buildBsc56UnsignedCustodyReview({...input,action:'approve',amountWei},options),d=abi.parseTransaction(r.transaction);
+  assert.equal(d.name,'approve');assert.equal(d.args[0],BRAIN);assert.equal(d.args[1].toString(),amountWei);
+  assert.equal(r.transaction.to,input.deployment.tokenAddress);assert.equal(r.review.SPENDER,BRAIN);assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceAfterWei,amountWei);assert.equal(r.review.MAXIMUM_EXPOSURE.walletTokenDebitWei,'0');
+ }
+ const w=buildBsc56UnsignedCustodyReview({...input,action:'withdrawMargin'},options);
+ assert.equal(abi.parseTransaction(w.transaction).name,'withdrawMargin');assert.equal(w.review.MAXIMUM_EXPOSURE.principalDebitWei,input.amountWei);assert.equal(w.review.MAXIMUM_EXPOSURE.walletTokenDebitWei,'0');
+});
+
+test('BSC56 claim uses the existing position key and never fabricates a payable amount or wallet transfer',()=>{
+ const {input,options}=custodyFixture(),positionKey='0x'+'cd'.repeat(32);delete input.amountWei;
+ const r=buildBsc56UnsignedCustodyReview({...input,action:'claimSettlement',positionKey},options),d=new codec.Interface(custodyFragments).parseTransaction(r.transaction);
+ assert.equal(d.name,'claimSettlement');assert.equal(d.args[0],positionKey);assert.equal(r.review.AMOUNT.kind,'CONTRACT_RECORDED_CLAIM');
+ assert.equal(r.review.MAXIMUM_EXPOSURE.walletTokenDebitWei,'0');assert.equal(r.review.MAXIMUM_EXPOSURE.principalDebitWei,'0');
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'claimSettlement',positionKey,amountWei:'1'},options),/CLAIM_AMOUNT_IS_CONTRACT_STATE/);
+});
+
+test('BSC56 missing/proposed deployment remains a useful review proposal with no transaction or guessed target',()=>{
+ const {input,options}=custodyFixture();
+ for(const deployment of [null,{...input.deployment,status:'NOT_DEPLOYED'}]){
+  const r=buildBsc56UnsignedCustodyReview({...input,deployment},options);
+  assert.equal(r.status,'PROPOSAL_MISSING_DEPLOYED_BINDING');assert.equal(r.transaction,null);assert.equal(r.review.CONTRACT,null);assert.equal(r.intentDigest,null);
+  assert.ok(r.blockers.includes('BSC56_DEPLOYED_BINDING_REQUIRED'));assert.equal(r.executionReady,false);
+ }
+ const {brainAddress,...missing}=input.deployment;
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,deployment:missing},{...options,expectedBindingDigest:reviewDigest(missing)}),/BRAIN_INVALID/);
+});
+
+test('BSC56 rejects wrong chain/token/capability/target/spender and zero/colliding addresses',()=>{
+ const {input,options}=custodyFixture();
+ for(const chainId of [97,'56',1,null])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,chainId},options),/BSC56_CHAIN_REQUIRED/);
+ for(const walletAddress of ['0x'+'00'.repeat(20),'invalid'])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,walletAddress},options),/WALLET_INVALID/);
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,spenderAddress:ENGINE},options),/BRAIN_SPENDER_MISMATCH/);
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,contractAddress:ENGINE},options),/CUSTODY_TARGET_MISMATCH/);
+ for(const changed of [{chainId:97},{testOnly:true},{tokenAddress:ENGINE},{brainAddress:WALLET},{brainImplementation:BRAIN},{accountingModel:'NOTIONAL_RETURN_V1'}]){
+  const deployment={...input.deployment,...changed};
+  assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,deployment},{...options,expectedBindingDigest:reviewDigest(deployment)}),/BSC56_PRODUCTION_BINDING_REQUIRED|CANONICAL_KGEN_TOKEN_REQUIRED|CUSTODY_ROLE_ADDRESS_COLLISION|CAPITAL_ABI_CAPABILITY_REQUIRED/);
+ }
+ for(const action of ['createOrder','faucet','fundSettlementCapital','sweepToTreasury','setTreasury'])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action},options),/ACTION_NOT_SUPPORTED/);
+});
+
+test('BSC56 rejects floats, numbers, exponent/hex/negative/leading-zero strings, overflow and unbounded allowance',()=>{
+ const {input,options}=custodyFixture();
+ for(const amountWei of [1,1.1,'1.1','1e18','0x10','-1','01','',String(1n<<256n),'9'.repeat(100000),'0'])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,amountWei},options),/AMOUNT_|REVIEW_JSON_STRING_BUDGET_EXCEEDED/);
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'approve',amountWei:String((1n<<256n)-1n)},options),/UNLIMITED/);
+ for(const [key,value] of [['nonce',7],['nonce',String(1n<<64n)],['gasLimit','0'],['gasPriceWei','0'],['maximumGasFeeWei','4999999999999']])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,[key]:value},options),/NONCE_|GAS_/);
+});
+
+test('BSC56 binds source/ABI/readback/account/nonce and intent identity, without claiming replay prevention',()=>{
+ const {input,options}=custodyFixture();
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(input,{ethers:codec}),/EXPECTED_BINDING_DIGEST_INVALID/);
+ for(const field of ['brainSourceHash','brainCodeHash','tokenCodeHash','blockHash','reviewedCommit','abiHash']){
+  const deployment={...input.deployment,[field]:field==='reviewedCommit'?'b'.repeat(40):'0x'+'ef'.repeat(32)};
+  assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,deployment},options),/DEPLOYMENT_BINDING_DIGEST_MISMATCH/);
+ }
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,nonce:'8'},options),/WALLET_NONCE_BINDING_MISMATCH/);
+ const badAbi={...input.deployment,abiHash:'0x'+'ef'.repeat(32)};
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,deployment:badAbi},{...options,expectedBindingDigest:reviewDigest(badAbi)}),/CUSTODY_ABI_HASH_MISMATCH/);
+ const a=buildBsc56UnsignedCustodyReview(input,options),b=buildBsc56UnsignedCustodyReview({...input,amountWei:'2'},options);
+ assert.notEqual(a.intentDigest,b.intentDigest);assert.equal(a.replayProtection,'FRESH_WALLET_NONCE_REQUIRED_AT_CONFIRMATION');
+ assert.equal(buildBsc56UnsignedCustodyReview(input,options).intentDigest,a.intentDigest,'pure build is deterministic, not a second nonce ledger');
+});
+
+test('BSC56 construction never accesses provider/wallet callbacks or mutates the existing simulation ledger',()=>{
+ const {input,options}=custodyFixture(),ledger=createKgenLedger(100),before=JSON.stringify(ledger);
+ const denied=()=>{throw new Error('PROVIDER_OR_WALLET_ACCESSED')};
+ const r=buildBsc56UnsignedCustodyReview({...input,ledger,ethereum:{request:denied},wallet:{request:denied,sendTransaction:denied},humanMainnetAuthorization:false},options);
+ assert.equal(r.broadcast,false);assert.equal(JSON.stringify(ledger),before);
+});
+
+test('BSC56 approval review binds existing allowance, blocks replacement races and discloses revoke exposure',()=>{
+ const {input,options}=custodyFixture(),deployment={...input.deployment,allowanceWei:'500'},bound={...options,expectedBindingDigest:reviewDigest(deployment)};
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'approve',amountWei:'100',deployment},bound),/ALLOWANCE_RESET_CONFIRMATION_REQUIRED/);
+ const r=buildBsc56UnsignedCustodyReview({...input,action:'approve',amountWei:'0',deployment},bound);
+ assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceAtReadbackWei,'500');assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceAfterWei,'0');assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceTransitionUpperBoundWei,'500');
+ assert.match(r.review.EXPECTED_EFFECT,/may be consumed before revocation/);
+ const {allowanceWei,...missing}=deployment;
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'approve',deployment:missing},{...options,expectedBindingDigest:reviewDigest(missing)}),/BOUND_ALLOWANCE_EXACT_UINT_STRING_REQUIRED/);
+ const newApproval=buildBsc56UnsignedCustodyReview({...input,action:'approve'},options);
+ assert.equal(newApproval.review.MAXIMUM_EXPOSURE.allowanceTransitionUpperBoundWei,input.amountWei);
+});
+
+test('BSC56 rejects changing-target and action/amount/gas accessors before invoking them',()=>{
+ const {input,options}=custodyFixture();let reads=0;
+ Object.defineProperty(input.deployment,'brainAddress',{enumerable:true,get(){return ++reads===1?BRAIN:'0x4444444444444444444444444444444444444444'}});
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(input,options),/REVIEW_JSON_ACCESSOR_FORBIDDEN/);assert.equal(reads,0);
+ for(const key of ['action','amountWei','gasLimit','gasPriceWei','walletAddress','deployment']){
+  const f=custodyFixture();let invoked=0;Object.defineProperty(f.input,key,{enumerable:true,get(){invoked++;return 'unsafe'}});
+  assert.throws(()=>buildBsc56UnsignedCustodyReview(f.input,f.options),/REVIEW_JSON_ACCESSOR_FORBIDDEN/);assert.equal(invoked,0);
+ }
+});
+
+test('BSC56 hash and construction use one snapshot even when original input changes during hashing',()=>{
+ const {input,options}=custodyFixture(),originalAmount=input.amountWei;
+ const hooked={...codec,keccak256(bytes){input.deployment.brainAddress='0x4444444444444444444444444444444444444444';input.amountWei='9';input.action='withdrawMargin';input.gasLimit='1';return codec.keccak256(bytes)}};
+ const r=buildBsc56UnsignedCustodyReview(input,{...options,ethers:hooked}),d=new codec.Interface(custodyFragments).parseTransaction(r.transaction);
+ assert.equal(r.bindingDigest,options.expectedBindingDigest);assert.equal(r.transaction.to,BRAIN);assert.equal(d.name,'depositMargin');assert.equal(d.args[0].toString(),originalAmount);
+ assert.equal(r.review.FUNCTION,'depositMargin');assert.equal(r.review.AMOUNT.baseUnits,originalAmount);assert.equal(r.transaction.gasLimit,'100000');assert.equal(r.executionReady,false);
+});
+
+test('BSC56 untrusted binding snapshot has cycle, depth, node, UTF-8-byte and shape budgets',()=>{
+ const f=()=>custodyFixture();let x=f();x.input.deployment.cycle=x.input.deployment;
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/REVIEW_JSON_CYCLE/);
+ x=f();let deep={};x.input.deployment.extra=deep;for(let i=0;i<10;i++){deep.child={};deep=deep.child}
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/STRUCTURE_BUDGET/);
+ x=f();x.input.deployment.extra=Array.from({length:5},()=>Array(60).fill(1));
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/STRUCTURE_BUDGET/);
+ x=f();x.input.deployment.extra=Object.fromEntries(Array.from({length:6},(_,i)=>['unicode'+i,'漢'.repeat(1000)]));
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/BYTE_BUDGET/);
+ for(const extra of [Array(100).fill(1),new Array(5),new Date(),Object.create(null),{[Symbol('hidden')]:'x'}]){
+  x=f();x.input.deployment.extra=extra;assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/REVIEW_JSON_/);
+ }
+ x=f();let calls=0;x.input.deployment.extra={get toJSON(){calls++;return ()=>({})}};
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/ACCESSOR_FORBIDDEN/);assert.equal(calls,0);
+});
+
+// Synthetic reviewed input for the ABI encoder. No RPC or wallet is installed.
+const orderFragments=TESTNET_EXECUTION_ABI.orderTriggerEngine.filter(f=>/^function (createOrder|closePosition)\(/.test(f));
+function bsc56OrderFixture(action='createOrder'){
+  const hash='0x'+'aa'.repeat(32), nowMs=1700000010000;
+  const target='0x4444444444444444444444444444444444444444';
+  const token='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+  const identity={triggerBrain:BRAIN,triggerPosition:ENGINE,positionExecutor:target,positionBrain:BRAIN,
+    brainToken:token,brainImplementation:'0x5555555555555555555555555555555555555555',positionHasSettlementRole:true,
+    tokenCodeHash:hash,brainCodeHash:hash,implementationCodeHash:hash,engineCodeHash:hash,triggerCodeHash:hash,
+    sourceBundleHash:hash,abiHash:reviewDigest(orderFragments)};
+  const deployment={schema:'K11520_BSC56_ORDER_BINDING_V1',status:'DEPLOYED_CONFIG_VERIFIED',chainId:56,testOnly:false,
+    walletAddress:WALLET,pendingNonce:'7',tokenAddress:token,brainAddress:BRAIN,positionEngineAddress:ENGINE,
+    orderTriggerAddress:target,reviewedCommit:'c'.repeat(40),blockHash:hash,blockNumber:'135',blockTimeMs:nowMs-500,identity,
+    quote:{axis:'KX',market:'BTCUSDT',contractMarket:0,source:'ONCHAIN_USD_SETTLEMENT_ORACLE',unit:'USD',validated:true,
+      feedSetEvidenceHash:hash,usdUsdtBasisEvidenceHash:hash,priceWad:(75000n*10n**18n).toString(),minPriceWad:'1',
+      maxPriceWad:(100000n*10n**18n).toString(),sequence:'13',observedAtMs:nowMs-1000,maxAgeMs:15000,minimumSources:2,validSources:3},
+    admission:{state:'OPEN',settlementModel:'FIXED_ENTRY_FLOOR',custodyEnabled:true,ordersEnabled:true,
+      capabilityValidUntilMs:nowMs+30000,capabilityEvidenceHash:hash,maximumCWad:'1000000000000000000',availablePrincipalWei:'3000000000000000000'},
+    position:{positionId:'3',contractMarket:0,trader:WALLET,status:'OPEN',collateralWad:'2000000000000000000'}};
+  const input={chainId:56,action,walletAddress:WALLET,nonce:'7',gasLimit:'110000',gasPriceWei:'50000000',
+    maximumGasFeeWei:'5500000000000',deployment,
+    ...(action==='createOrder'?{cWad:'-10000000000000000',lots:'2',triggerPriceWad:(75000n*10n**18n+1n).toString(),
+      triggerUnit:'USD',maximumMarginWei:'2000000000000000000'}:{positionId:'3'}),axis:'KX',market:'BTCUSDT'};
+  // Independent expected digest input; refresh only in tests exercising another explicitly reviewed fixture.
+  const options={ethers:codec,expectedBindingDigest:reviewDigest(deployment),nowMs};
+  return {input,options};
+}
+
+test('BSC56 unsigned order review ABI round-trips exact trigger, signed C and close ID; replay only reproduces the same intent',()=>{
+  for(const action of ['createOrder','closePosition']){
+    const {input,options}=bsc56OrderFixture(action);
+    const review=buildBsc56UnsignedOrderReview(input,options);
+    const tx=review.transaction;
+    assert.equal(tx.to,input.deployment.orderTriggerAddress);
+    assert.equal(tx.from,WALLET);
+    assert.equal(tx.nonce,'7');
+    assert.equal(tx.value,'0');
+    const decoded=new codec.Interface(orderFragments).parseTransaction(tx);
+    assert.equal(decoded.name,action);
+    assert.equal(review.status,'UNSIGNED_REVIEW_ONLY');
+    assert.equal(review.executionReady,false);
+    assert.equal(review.broadcast,false);
+    assert.equal(review.signerRequested,false);
+    assert.equal(review.review.MAXIMUM_EXPOSURE.walletTokenDebitWei,'0');
+    if(action==='createOrder'){
+      assert.deepEqual(Array.from(decoded.args,x=>x.toString()),['0',input.cWad,input.lots,input.triggerPriceWad]);
+      assert.equal(review.review.MAXIMUM_EXPOSURE.marginAtFillWei,'2000000000000000000');
+    }else{
+      assert.equal(decoded.args[0].toString(),input.positionId);
+      assert.equal(review.review.MAXIMUM_EXPOSURE.isolatedPrincipalAtRiskWei,'2000000000000000000');
+    }
+    const restored=JSON.parse(JSON.stringify(input));
+    assert.deepEqual(buildBsc56UnsignedOrderReview(restored,options),review);
+    assert.ok(Object.isFrozen(review.transaction));
+  }
+});
+
+test('BSC56 missing binding never guesses a mainnet target or accepts client readiness flags',()=>{
+  const {input,options}=bsc56OrderFixture();
+  delete input.deployment;
+  Object.assign(input,{humanMainnetAuthorization:true,feedProvenanceVerified:true,executionReady:true,contractAddress:BRAIN});
+  const r=buildBsc56UnsignedOrderReview(input,options);
+  assert.equal(r.transaction,null);
+  assert.equal(r.review.CONTRACT,null);
+  assert.equal(r.executionReady,false);
+  assert.ok(r.blockers.includes('BSC56_DEPLOYED_BINDING_REQUIRED'));
+});
+
+test('BSC56 rejects substituted binding, stale wallet nonce, wrong role, ABI, token, target, or chain',()=>{
+  const x=bsc56OrderFixture();x.input.deployment.orderTriggerAddress=ENGINE;
+  assert.throws(()=>buildBsc56UnsignedOrderReview(x.input,x.options),/DIGEST_MISMATCH/);
+  for(const [patch,reason] of [
+    [i=>i.nonce='8',/NONCE_BINDING/],[i=>i.contractAddress=BRAIN,/TARGET_MISMATCH/],
+    [i=>i.deployment.identity.positionExecutor=ENGINE,/ROUTING/],
+    [i=>i.deployment.identity.abiHash='0x'+'bb'.repeat(32),/ABI_HASH_MISMATCH/],
+    [i=>i.deployment.tokenAddress=WALLET,/CANONICAL_KGEN/],[i=>i.chainId=97,/BSC56_CHAIN_REQUIRED/],
+    [i=>i.gasPriceWei='50000001',/GAS_FEE_CAP_EXCEEDED/],
+    [i=>i.walletAddress=ENGINE,/WALLET_NONCE_BINDING/]
+  ]){
+    const {input,options}=bsc56OrderFixture();patch(input);
+    options.expectedBindingDigest=reviewDigest(input.deployment);
+    assert.throws(()=>buildBsc56UnsignedOrderReview(input,options),reason);
+  }
+});
+
+test('BSC56 disconnected or mismatched oracle data blocks order review without substituting a public quote',()=>{
+  for(const [patch,reason] of [
+    [i=>delete i.deployment.quote,/SETTLEMENT_QUOTE_REQUIRED/],[i=>i.deployment.quote.source='BINANCE_PUBLIC',/SETTLEMENT_QUOTE_REQUIRED/],
+    [i=>i.deployment.quote.unit='USDT',/SETTLEMENT_QUOTE_REQUIRED/],[i=>i.triggerUnit='USDT',/SETTLEMENT_TRIGGER_UNIT_REQUIRED/],
+    [i=>i.deployment.quote.observedAtMs-=15000,/STALE_OR_FUTURE/],[i=>i.deployment.quote.observedAtMs+=1000,/STALE_OR_FUTURE/],
+    [i=>i.deployment.quote.validSources=1,/QUORUM_REQUIRED/],[i=>i.market='BNBUSDT',/AXIS_MARKET_MISMATCH/],
+    [i=>i.deployment.quote.contractMarket=1,/SETTLEMENT_QUOTE_REQUIRED/],
+    [i=>i.deployment.quote.maxPriceWad=i.deployment.quote.priceWad,/ORDER_PRICE_OUT_OF_MARKET_BOUNDS/]
+  ]){
+    const {input,options}=bsc56OrderFixture();patch(input);
+    options.expectedBindingDigest=reviewDigest(input.deployment);
+    assert.throws(()=>buildBsc56UnsignedOrderReview(input,options),reason);
+  }
+});
+
+test('BSC56 constrains new isolated risk to available principal, exact signed detent, fixed entry floor and active capability',()=>{
+  for(const [patch,reason] of [
+    [i=>i.cWad='1000000000000000001',/INVALID_SIGNED_C/],[i=>i.cWad='11000000000000000',/INVALID_C_DETENT/],
+    [i=>i.cWad='-0',/INVALID_SIGNED_C/],[i=>i.lots='101',/LOTS_OUT_OF_RANGE/],
+    [i=>i.maximumMarginWei='1999999999999999999',/MARGIN_CAP_EXCEEDED/],
+    [i=>i.deployment.admission.availablePrincipalWei='1',/INSUFFICIENT_MARGIN/],
+    [i=>i.deployment.admission.state='EXIT_ONLY',/ADMISSION_UNAVAILABLE/],
+    [i=>i.deployment.admission.settlementModel='INDEX_DELTA',/ADMISSION_UNAVAILABLE/],
+    [i=>i.deployment.admission.capabilityValidUntilMs-=30000,/ADMISSION_UNAVAILABLE/],
+    [i=>i.deployment.admission.maximumCWad='1000000000000000',/MARKET_C_CAP_EXCEEDED/]
+  ]){
+    const {input,options}=bsc56OrderFixture();patch(input);
+    options.expectedBindingDigest=reviewDigest(input.deployment);
+    assert.throws(()=>buildBsc56UnsignedOrderReview(input,options),reason);
+  }
+});
+
+test('BSC56 exit-only owner close preserves exit in frozen admissions and refuses wrong owner, ID or market',()=>{
+  for(const [patch,reason] of [
+    [i=>delete i.deployment.admission,null],
+    [i=>i.deployment.quote.priceWad=(175000n*10n**18n).toString(),null],
+    [i=>i.deployment.quote.observedAtMs-=15000,/STALE_OR_FUTURE/],
+    [i=>i.deployment.position.trader=BRAIN,/POSITION_OWNER_AND_MARKET/],
+    [i=>i.positionId='4',/POSITION_OWNER_AND_MARKET/],
+    [i=>i.deployment.position.status='CLOSED',/POSITION_OWNER_AND_MARKET/],
+    [i=>i.deployment.position.contractMarket=2,/POSITION_OWNER_AND_MARKET/],
+    [i=>i.lots='1',/CLOSE_AMOUNT_IS_POSITION_STATE/]
+  ]){
+    const {input,options}=bsc56OrderFixture('closePosition');patch(input);
+    options.expectedBindingDigest=reviewDigest(input.deployment);
+    if(reason)assert.throws(()=>buildBsc56UnsignedOrderReview(input,options),reason);
+    else assert.equal(buildBsc56UnsignedOrderReview(input,options).status,'UNSIGNED_REVIEW_ONLY');
+  }
+});
+
+test('BSC56 pairs each reviewed market axis and raw-USD trigger with its contract market index',()=>{
+  for(const [axis,market,contractMarket] of [['KX','BTCUSDT',0],['KY','ETHUSDT',1],['KZ','BNBUSDT',2]]){
+    const {input,options}=bsc56OrderFixture();
+    Object.assign(input,{axis,market,cWad:'1000000000000000000'});
+    Object.assign(input.deployment.quote,{axis,market,contractMarket});
+    options.expectedBindingDigest=reviewDigest(input.deployment);
+    const review=buildBsc56UnsignedOrderReview(input,options);
+    const decoded=new codec.Interface(orderFragments).parseTransaction(review.transaction);
+    assert.equal(Number(decoded.args[0]),contractMarket);
+    assert.equal(decoded.args[3].toString(),input.triggerPriceWad);
+    assert.equal(review.review.OBSERVATION.priceWad,input.deployment.quote.priceWad);
+  }
 });

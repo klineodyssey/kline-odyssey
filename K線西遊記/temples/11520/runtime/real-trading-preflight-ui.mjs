@@ -1,12 +1,217 @@
 /* KGEN_META
-VERSION: 1.1.0
-STATUS: ACTIVE_SAFE_PREFLIGHT
-PURPOSE: Player-visible 11520 real-trading readiness preflight and order-route classification. Never signs or broadcasts.
+VERSION: 1.2.0
+REVISION: 2026-10-07.BSC56-REVIEW-CONTROL-CONTRAST
+PRODUCT_CONTEXT: V2.9.5
+STATUS: CANDIDATE
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot / scoped self-review and parent targeted review / 2026-10-07; browser visual QA pending, no release approval
+SOURCE_COMMIT: 0589c16553e781c282b868a374e6fa60e4841f0f
+TASK_ID: K11520-BSC56-PRODUCTION-20261007
+CHANGE_REASON: Fix measured pale-on-white control contrast with scoped explicit colors and focus/disabled states.
+ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs @ 0589c16553e781c282b868a374e6fa60e4841f0f
+SOURCE_OF_TRUTH: TRUE
+PURPOSE: Player-visible preflight and blocked unsigned custody review. Never signs or broadcasts.
 */
 import {getWalletSession11520} from './wallet-game-bridge.mjs';
 import {getRealTradingBinding,assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
+import {KGEN_TOKEN_ADDRESS,KGEN_CHAIN_ID} from './evm-wallet-runtime.mjs';
+import {buildBsc56UnsignedCustodyReview,buildBsc56UnsignedOrderReview} from './real-trading-order-intent.mjs';
 
 const $=s=>document.querySelector(s);
+
+export const BSC56_REVIEW_FIELDS=Object.freeze(['CHAIN','WALLET','CONTRACT','FUNCTION','TOKEN','AMOUNT','EXPECTED_EFFECT','MAXIMUM_EXPOSURE']);
+const BSC56_REVIEW_ACTIONS=Object.freeze(['approve','depositMargin','withdrawMargin','claimSettlement','createOrder','closePosition']);
+const draftLimits=Object.freeze({action:32,amountWei:78,positionKey:66,axis:2,cWad:21,lots:3,triggerPriceUsd:40,positionId:78});
+const orderAction=action=>action==='createOrder'||action==='closePosition';
+function orderArguments(draft){
+  const {market}=getRealTradingBinding(draft.axis);
+  if(draft.action==='closePosition')return {axis:draft.axis,market,positionId:draft.positionId};
+  if(!/^(?:[1-9][0-9]?|100)$/.test(draft.lots))throw new Error('LOTS_OUT_OF_RANGE');
+  if(!/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,18})?$/.test(draft.triggerPriceUsd))throw new Error('EXACT_USD_TRIGGER_REQUIRED');
+  const [whole,fraction='']=draft.triggerPriceUsd.split('.');
+  const wad=10n**18n;
+  return {axis:draft.axis,market,cWad:draft.cWad,lots:draft.lots,triggerUnit:'USD',
+    triggerPriceWad:(BigInt(whole)*wad+BigInt(fraction.padEnd(18,'0'))).toString(),
+    maximumMarginWei:(BigInt(draft.lots)*wad).toString()};
+}
+
+// View state only. The callback is an existing trusted readback/registry owner,
+// not page storage, an event payload, or a request to connect/sign/broadcast.
+// The current page has no deployed binding owner and therefore defaults blocked.
+export function createBsc56UnsignedReviewController({getWalletSnapshot,getReviewContext=()=>null,codec=()=>globalThis.ethers?.utils||globalThis.ethers,build=buildBsc56UnsignedCustodyReview,buildOrder=buildBsc56UnsignedOrderReview,now=Date.now,onChange=()=>{}}={}){
+  if(typeof getWalletSnapshot!=='function')throw new Error('EXISTING_WALLET_SNAPSHOT_REQUIRED');
+  let generation=0,opened=false,disposed=false,currentKey=null,result=null,status='CLOSED',reason='REVIEW_CLOSED';
+  let draft={action:'',amountWei:'',positionKey:'',axis:'KX',cWad:'1000000000000000000',lots:'',triggerPriceUsd:'',positionId:''};
+  const own=(object,key)=>{const d=object&&Object.getOwnPropertyDescriptor(object,key);if(d&&!Object.hasOwn(d,'value'))throw new Error('REVIEW_CONTEXT_ACCESSOR_FORBIDDEN');return d?.value};
+  const text=value=>typeof value==='string'&&value.length<=256?value:'';
+  // Bounded data-only context: hashing/rendering never invokes getters/toJSON.
+  // All source fields participate in invalidation, including gas and allowance.
+  function dataSnapshot(value){
+    let nodes=0,bytes=0;const ancestors=new Set(),encoder=new TextEncoder();
+    function copy(v,depth){
+      if(++nodes>512||depth>10)throw new Error('REVIEW_CONTEXT_BUDGET_EXCEEDED');
+      if(v===null||typeof v==='boolean')return v;
+      if(typeof v==='string'){bytes+=encoder.encode(v).length;if(v.length>2048||bytes>32768)throw new Error('REVIEW_CONTEXT_BUDGET_EXCEEDED');return v}
+      if(typeof v==='number'&&Number.isSafeInteger(v))return v;
+      if(!v||typeof v!=='object'||ancestors.has(v)||(!Array.isArray(v)&&Object.getPrototypeOf(v)!==Object.prototype&&Object.getPrototypeOf(v)!==null))throw new Error('REVIEW_CONTEXT_DATA_REQUIRED');
+      const keys=Reflect.ownKeys(v);if(keys.length>65||keys.some(k=>typeof k!=='string'))throw new Error('REVIEW_CONTEXT_DATA_REQUIRED');
+      ancestors.add(v);const result=Array.isArray(v)?[]:{};
+      if(Array.isArray(v)&&(v.length>64||keys.length!==v.length+1))throw new Error('REVIEW_CONTEXT_DATA_REQUIRED');
+      for(const key of keys.sort()){
+        if(Array.isArray(v)&&key==='length')continue;
+        const d=Object.getOwnPropertyDescriptor(v,key);if(!d||!Object.hasOwn(d,'value')||!d.enumerable)throw new Error('REVIEW_CONTEXT_ACCESSOR_FORBIDDEN');
+        bytes+=encoder.encode(key).length;if(bytes>32768)throw new Error('REVIEW_CONTEXT_BUDGET_EXCEEDED');
+        if(Array.isArray(v)&&!/^(0|[1-9][0-9]*)$/.test(key))throw new Error('REVIEW_CONTEXT_DATA_REQUIRED');
+        Object.defineProperty(result,key,{value:copy(d.value,depth+1),enumerable:true,writable:true,configurable:true});
+      }
+      ancestors.delete(v);return result;
+    }return copy(value,0);
+  }
+  function context(){
+    const w=getWalletSnapshot()||{},wallet={account:text(own(w,'account')),chainId:own(w,'chainId'),status:text(own(w,'status'))};
+    const r=getReviewContext(Object.freeze({...draft}),Object.freeze({...wallet}));
+    const source=r==null?null:dataSnapshot(r);
+    const values={account:wallet.account.toLowerCase(),chainId:Number.isSafeInteger(wallet.chainId)?wallet.chainId:null,status:wallet.status,
+      sourceHead:text(own(source,'sourceHead')),bindingDigest:text(own(source,'bindingDigest')),blockHash:text(own(source,'blockHash')),blockNumber:text(own(source,'blockNumber')),pendingNonce:text(own(source,'pendingNonce')),
+      ...draft};
+    return {wallet,values,source,key:JSON.stringify({values,source})};
+  }
+  let latestContext=null;
+  function reconcile(){
+    if(disposed)return;
+    try{
+      const ctx=context();latestContext=ctx;
+      const observation=result?.review?.OBSERVATION;
+      const at=now();
+      if(observation&&(at<observation.observedAtMs||at>=expiresAt(ctx))){
+        generation++;result=null;status='STALE';reason='SETTLEMENT_OBSERVATION_EXPIRED';
+      }
+      if(currentKey!==ctx.key){const before=currentKey;currentKey=ctx.key;generation++;result=null;
+        if(opened){status=before===null?'BLOCKED':'STALE';reason=before===null?'REVIEW_INPUTS_REQUIRED':'REVIEW_CONTEXT_CHANGED'}}
+    }catch{latestContext=null;currentKey=null;generation++;result=null;if(opened){status='BLOCKED';reason='REVIEW_CONTEXT_INVALID'}}
+  }
+  function fields(ctx){
+    const rows={CHAIN:`BNB Smart Chain · ${KGEN_CHAIN_ID} / wallet ${ctx?.values.chainId??'UNKNOWN'}`,WALLET:ctx?.wallet.account||'未連線 / UNKNOWN',CONTRACT:'NOT_DEPLOYED / UNKNOWN',FUNCTION:draft.action||'NOT_SELECTED',TOKEN:`KGEN · ${KGEN_TOKEN_ADDRESS} · 18 decimals`,AMOUNT:'NOT_PROVIDED / UNKNOWN',EXPECTED_EFFECT:'候選資訊不足，尚未建立未簽署交易',MAXIMUM_EXPOSURE:'UNKNOWN · 缺少可信部署、nonce 或 gas cap'};
+    if(result){const r=result.review;rows.CHAIN=`${r.CHAIN.name} · ${r.CHAIN.chainId}`;rows.WALLET=r.WALLET;rows.CONTRACT=r.CONTRACT||'NOT_DEPLOYED / UNKNOWN';rows.FUNCTION=r.FUNCTION;rows.TOKEN=`${r.TOKEN.symbol} · ${r.TOKEN.address} · ${r.TOKEN.decimals} decimals`;rows.AMOUNT=JSON.stringify(r.AMOUNT);rows.EXPECTED_EFFECT=r.EXPECTED_EFFECT;rows.MAXIMUM_EXPOSURE=JSON.stringify(r.MAXIMUM_EXPOSURE,null,2)}
+    if(!result&&orderAction(draft.action)){
+      const market=getRealTradingBinding(draft.axis).market;
+      rows.AMOUNT=draft.action==='createOrder'?`${market} · USD 觸價 ${draft.triggerPriceUsd||'未輸入'} · ${draft.lots||'未輸入'} 口`:`${market} · 持倉 ID ${draft.positionId||'未輸入'}`;
+    }
+    return Object.freeze(rows);
+  }
+  function expiresAt(ctx){
+    const q=ctx?.source?.deployment?.quote;
+    if(!result?.review?.OBSERVATION||!q)return null;
+    const quoteExpiry=q.observedAtMs+q.maxAgeMs+1;
+    return draft.action==='createOrder'?Math.min(quoteExpiry,ctx.source.deployment.admission?.capabilityValidUntilMs??0):quoteExpiry;
+  }
+  function snapshot(){reconcile();return Object.freeze({status,reason,opened,generation,draft:Object.freeze({...draft}),fields:fields(latestContext),bindingDigest:result?.bindingDigest||null,intentDigest:result?.intentDigest||null,observation:result?.review?.OBSERVATION||null,expiresAtMs:expiresAt(latestContext),calldata:result?.transaction?.data||null,hasTransaction:!!result?.transaction,executionReady:false,signerRequested:false,broadcast:false,scope:'UNSIGNED_INPUT_METADATA_ONLY_NOT_EXECUTABLE'})}
+  const publish=()=>{const state=snapshot();try{onChange(state)}catch{}return state};
+  function invalidate(nextReason,nextStatus='STALE'){generation++;result=null;status=nextStatus;reason=nextReason;return publish()}
+  const sync=()=>publish();
+  return Object.freeze({snapshot,sync,
+    open(){if(disposed)return snapshot();opened=true;currentKey=null;return sync()},
+    close(){opened=false;return invalidate('REVIEW_CLOSED','CLOSED')},
+    setDraft(patch={}){
+      const next={...draft};
+      for(const [key,limit] of Object.entries(draftLimits)){
+        const value=own(patch,key);if(value===undefined)continue;
+        if(typeof value!=='string'||value.length>limit)throw new Error('REVIEW_DRAFT_INVALID');
+        next[key]=value;
+      }
+      if(next.action&&!BSC56_REVIEW_ACTIONS.includes(next.action))throw new Error('REVIEW_ACTION_NOT_SUPPORTED');
+      getRealTradingBinding(next.axis);
+      draft=next;return sync();
+    },
+    async prepare(){
+      if(disposed||!opened)return snapshot();reconcile();const ctx=latestContext;if(!ctx)return publish();
+      const ticket=++generation,key=ctx.key;result=null;status='BUILDING';reason='UNSIGNED_REVIEW_ONLY';publish();if(ticket!==generation)return snapshot();
+      const finishBlocked=code=>{if(ticket!==generation||!opened||disposed)return snapshot();status='BLOCKED';reason=code;return publish()};
+      if(ctx.wallet.status!=='CONNECTED'||ctx.wallet.chainId!==KGEN_CHAIN_ID||!/^0x[0-9a-fA-F]{40}$/.test(ctx.wallet.account))return finishBlocked('ACTIVE_CHAIN56_SESSION_REQUIRED');
+      if(!draft.action)return finishBlocked('CUSTODY_ACTION_REQUIRED');
+      if(!ctx.source||! /^[0-9a-f]{40}$/.test(ctx.values.sourceHead)||! /^0x[0-9a-fA-F]{64}$/.test(ctx.values.bindingDigest)||! /^0x[0-9a-fA-F]{64}$/.test(ctx.values.blockHash)||! /^(0|[1-9][0-9]*)$/.test(ctx.values.blockNumber)||! /^(0|[1-9][0-9]*)$/.test(ctx.values.pendingNonce))return finishBlocked('DEPLOYED_BINDING_AND_READBACK_REQUIRED');
+      try{
+        const deployment=own(ctx.source,'deployment');
+        if(own(deployment,'reviewedCommit')!==ctx.values.sourceHead||own(deployment,'blockHash')?.toLowerCase()!==ctx.values.blockHash.toLowerCase()||own(deployment,'blockNumber')!==ctx.values.blockNumber||own(deployment,'pendingNonce')!==ctx.values.pendingNonce)throw new Error('REVIEW_CONTEXT_BINDING_MISMATCH');
+        const order=orderAction(draft.action);
+        const args=order?orderArguments(draft):draft.action==='claimSettlement'?{positionKey:draft.positionKey}:{amountWei:draft.amountWei};
+        const input={action:draft.action,chainId:KGEN_CHAIN_ID,walletAddress:ctx.wallet.account,nonce:ctx.values.pendingNonce,gasLimit:own(ctx.source,'gasLimit'),gasPriceWei:own(ctx.source,'gasPriceWei'),maximumGasFeeWei:own(ctx.source,'maximumGasFeeWei'),deployment,...args};
+        const built=await (order?buildOrder:build)(input,{ethers:codec(),expectedBindingDigest:ctx.values.bindingDigest,nowMs:now()});
+        if(disposed||!opened||ticket!==generation)return snapshot();
+        const latest=context();if(latest.key!==key){currentKey=latest.key;return invalidate('REVIEW_CONTEXT_CHANGED')}
+        const schema=order?'K11520_BSC56_UNSIGNED_ORDER_REVIEW_V1':'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1';
+        if(built?.schema!==schema||built.executionReady!==false||built.signerRequested!==false||built.broadcast!==false||built.bindingVerification!=='INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED'||built.transactionFormat!=='ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC'||built.bindingDigest!==ctx.values.bindingDigest)throw new Error('UNSIGNED_REVIEW_BOUNDARY_REQUIRED');
+        if(built.review?.WALLET?.toLowerCase()!==ctx.wallet.account.toLowerCase()||built.review?.CHAIN?.chainId!==KGEN_CHAIN_ID||built.review?.FUNCTION!==draft.action)throw new Error('UNSIGNED_REVIEW_CONTEXT_MISMATCH');
+        result=built;status='UNSIGNED_REVIEW';reason='FRESH_READBACK_AND_WALLET_OWNER_CONFIRMATION_REQUIRED';return publish();
+      }catch(error){return finishBlocked(/^[A-Z][A-Z0-9_]{0,95}$/.test(error?.message||'')?error.message:'UNSIGNED_REVIEW_UNAVAILABLE')}
+    },
+    dispose(){disposed=true;opened=false;return invalidate('REVIEW_CLOSED','CLOSED')}
+  });
+}
+
+const bsc56ReviewMounts=new WeakMap();
+export function installBsc56UnsignedReviewUi({getReviewContext,getSession=getWalletSession11520}={}){
+  if(new URLSearchParams(globalThis.location?.search).get('preview')==='server'||document.querySelector('meta[name="k11520-private-preview"]'))return null;
+  const panel=$('#walletPanel');if(!panel)return null;if(bsc56ReviewMounts.has(panel))return bsc56ReviewMounts.get(panel);
+  const root=document.createElement('details');root.id='k11520Bsc56UnsignedReview';root.className='card';
+  const title=document.createElement('summary');title.textContent='BSC56 未簽署審核';title.style.minHeight='44px';root.appendChild(title);
+  const notice=document.createElement('p');notice.textContent='僅檢視候選資訊；不會簽署、送出交易或變更交易模式。部署／readback 尚未齊備時維持封鎖。';root.appendChild(notice);
+  const select=document.createElement('select');select.id='bsc56ReviewAction';select.setAttribute('aria-label','未簽署審核操作');select.style.minHeight='44px';select.style.maxWidth='100%';
+  for(const [value,label] of [['','選擇審核操作'],['approve','授權／撤銷 KGEN'],['depositMargin','存入保證金'],['createOrder','建立多空委託'],['closePosition','平倉結算'],['claimSettlement','領取結算債權'],['withdrawMargin','提領可用 KGEN']]){const option=document.createElement('option');option.value=value;option.textContent=label;select.appendChild(option)}root.appendChild(select);
+  const amount=document.createElement('input');amount.type='text';amount.inputMode='numeric';amount.maxLength=78;amount.placeholder='KGEN 最小單位整數（wei）';amount.setAttribute('aria-label','審核用 KGEN 最小單位整數');amount.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px';root.appendChild(amount);
+  const claim=document.createElement('input');claim.type='text';claim.maxLength=66;claim.placeholder='Claim position key（bytes32）';claim.setAttribute('aria-label','Claim position key');claim.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px';claim.hidden=true;root.appendChild(claim);
+  function orderControl(caption,tag,options){
+    const label=document.createElement('label'),field=document.createElement(tag);
+    label.textContent=caption;label.appendChild(field);root.appendChild(label);label.hidden=true;
+    if(options)for(const [value,text] of options){const item=document.createElement('option');item.value=value;item.textContent=text;field.appendChild(item)}
+    field.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px';
+    return {label,field};
+  }
+  const axis=orderControl('交易市場','select',[['KX','BTC'],['KY','ETH'],['KZ','BNB']]);
+  const detents=['0.001','0.01','0.1','1'];
+  const leverage=orderControl('方向與 C','select',detents.flatMap(v=>{
+    const wad=BigInt(v.replace('.',''))*10n**BigInt(18-(v.split('.')[1]||'').length);
+    return [[wad.toString(),`做多 +${v} C`],[(-wad).toString(),`做空 −${v} C`]];
+  }));
+  leverage.field.value='1000000000000000000';
+  const lots=orderControl('口數（每口最多鎖定 1 KGEN）','input');lots.field.inputMode='numeric';lots.field.maxLength=3;
+  const trigger=orderControl('USD 觸發價（美元，最多 18 位小數）','input');trigger.field.inputMode='decimal';trigger.field.maxLength=40;
+  const position=orderControl('原持倉 ID','input');position.field.inputMode='numeric';position.field.maxLength=78;
+  const refresh=document.createElement('button');refresh.type='button';refresh.className='btn';refresh.textContent='更新審核資訊';refresh.style.minHeight='44px';root.appendChild(refresh);
+  const status=document.createElement('p');status.setAttribute('role','status');status.setAttribute('aria-live','polite');root.appendChild(status);
+  const rows=document.createElement('dl');rows.className='exchangeRows';const values={};for(const field of BSC56_REVIEW_FIELDS){const row=document.createElement('div'),label=document.createElement('dt'),value=document.createElement('dd');label.textContent=field;value.dataset.bsc56ReviewField=field;value.style.whiteSpace='pre-wrap';row.append(label,value);rows.appendChild(row);values[field]=value}root.appendChild(rows);
+  const proof=document.createElement('details'),proofTitle=document.createElement('summary'),proofBody=document.createElement('pre');
+  proofTitle.textContent='報價來源與交易資料';proof.append(proofTitle,proofBody);proof.hidden=true;root.appendChild(proof);
+  let expiryTimer;
+  const session=getSession(),controller=createBsc56UnsignedReviewController({getWalletSnapshot:()=>session.snapshot(),getReviewContext,onChange:model=>{
+    root.dataset.reviewState=model.status;root.dataset.executionReady='false';
+    const reasonText={DEPLOYED_BINDING_AND_READBACK_REQUIRED:'尚缺正式部署綁定與鏈上讀回',ACTIVE_CHAIN56_SESSION_REQUIRED:'請先確認目前錢包在 BNB Smart Chain 56',SETTLEMENT_OBSERVATION_EXPIRED:'報價或開倉許可已到期，請重新核對'};
+    status.textContent=reasonText[model.reason]||`${model.status} · ${model.reason}`;
+    for(const field of BSC56_REVIEW_FIELDS)values[field].textContent=model.fields[field];
+    proof.hidden=!model.hasTransaction;proofBody.textContent=model.hasTransaction?JSON.stringify({observation:model.observation,bindingDigest:model.bindingDigest,intentDigest:model.intentDigest,calldata:model.calldata},null,2):'';
+    proofBody.style.whiteSpace='pre-wrap';refresh.disabled=model.status==='BUILDING';
+    clearTimeout(expiryTimer);
+    if(model.expiresAtMs!==null)expiryTimer=setTimeout(()=>controller.sync(),Math.min(2147483647,Math.max(0,model.expiresAtMs-Date.now())));
+  }});
+  const draft=()=>controller.setDraft({action:select.value,amountWei:amount.value,positionKey:claim.value,
+    axis:axis.field.value,cWad:leverage.field.value,lots:lots.field.value,triggerPriceUsd:trigger.field.value,positionId:position.field.value});
+  const showFields=()=>{
+    const create=select.value==='createOrder',close=select.value==='closePosition';
+    claim.hidden=select.value!=='claimSettlement';amount.hidden=create||close||!claim.hidden||!select.value;
+    axis.label.hidden=!create&&!close;position.label.hidden=!close;
+    for(const control of [leverage,lots,trigger])control.label.hidden=!create;
+  };
+  showFields();
+  select.addEventListener('change',()=>{showFields();draft()});
+  for(const control of [amount,claim,lots.field,trigger.field,position.field])control.addEventListener('input',draft);
+  for(const control of [axis.field,leverage.field])control.addEventListener('change',draft);
+  refresh.addEventListener('click',()=>{draft();void controller.prepare()});root.addEventListener('toggle',()=>{if(root.open)controller.open();else controller.close()});
+  const unsubscribe=session.subscribe(()=>controller.sync()),syncVisibility=()=>{root.hidden=panel.classList.contains('collapsed');if(root.hidden){root.open=false;controller.close()}};
+  const observer=new MutationObserver(syncVisibility);observer.observe(panel,{attributes:true,attributeFilter:['class']});
+  const mounted=Object.freeze({controller,root,dispose(){clearTimeout(expiryTimer);unsubscribe();observer.disconnect();controller.dispose();root.remove();bsc56ReviewMounts.delete(panel)}});bsc56ReviewMounts.set(panel,mounted);
+  const existing=$('#walletSimulation');if(existing?.parentElement===panel)existing.after(root);else panel.appendChild(root);controller.close();syncVisibility();return mounted;
+}
 
 // Offline package inspection only. A digest proves content identity, not Human
 // approval, deployed bytecode, oracle independence, funding or permission to sign.
@@ -69,7 +274,8 @@ const BLOCKER_TEXT=Object.freeze({
   PRODUCTION_FEED_PROVENANCE_REQUIRED:'正式價格來源尚未驗證',
   BRAIN_DEPLOYED_ADDRESS_REQUIRED:'Brain 真實交易合約尚未部署/綁定',
   POSITION_ENGINE_DEPLOYED_ADDRESS_REQUIRED:'Position Engine 尚未部署/綁定',
-  HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED:'等待 Mainnet 最終執行授權'
+  HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED:'等待 Mainnet 最終執行授權',
+  MAINNET_EXECUTION_MANIFEST_AND_ADAPTER_REQUIRED:'尚缺經核准的主網執行清單與可用下單通道'
 });
 
 export function inspectRealTradingUiPreflight({axis,market,chainId=56,walletIdentity=null,feedProvenanceVerified=false,brainAddress=null,positionEngineAddress=null,humanMainnetAuthorization=false}={}){
@@ -77,10 +283,10 @@ export function inspectRealTradingUiPreflight({axis,market,chainId=56,walletIden
   const blockers=[];
   if(!walletIdentity?.address)blockers.push('WALLET_PUBLIC_IDENTITY_REQUIRED');
   const eligibility=realTradingEligibility({axis,market,chainId,feedProvenanceVerified,brainAddress,positionEngineAddress,humanMainnetAuthorization});
-  blockers.push(...eligibility.blockers);
+  blockers.push(...eligibility.blockers,'MAINNET_EXECUTION_MANIFEST_AND_ADAPTER_REQUIRED');
   return Object.freeze({
     binding,
-    ready:blockers.length===0,
+    ready:false,
     blockers:Object.freeze(blockers),
     signerRequested:false,
     transactionPayload:null,
@@ -92,7 +298,7 @@ export function classify11520OrderRoute({preflight=null,localSimulationAvailable
   // Reporting only: this does not construct an adapter, sign, or authorize a
   // Mainnet path. The actual adapter still verifies manifest/code/chain/receipt.
   if(execution?.mode==='BSC_TESTNET'&&execution?.chainId===97)return Object.freeze({route:'TESTNET_EXPLICIT_WALLET_ACTION',label:'BSC TESTNET 97 · NO REAL VALUE',status:execution.status,signerRequested:false,broadcast:false});
-  if(preflight?.ready===true)return Object.freeze({route:'REAL_READY_FOR_EXPLICIT_WALLET_ACTION',localSimulationAvailable:!!localSimulationAvailable,signerRequested:false,broadcast:false});
+  // The BSC56 wallet panel builds unsigned reviews. Client flags cannot supply a live adapter.
   if(localSimulationAvailable)return Object.freeze({route:'LOCAL_SIMULATION_REAL_BLOCKED',localSimulationAvailable:true,signerRequested:false,broadcast:false,blockers:Object.freeze([...(preflight?.blockers||[])])});
   return Object.freeze({route:'ORDER_BLOCKED',localSimulationAvailable:false,signerRequested:false,broadcast:false,blockers:Object.freeze([...(preflight?.blockers||[])])});
 }
@@ -110,7 +316,12 @@ function blockerLabel(code){if(code==='WALLET_PUBLIC_IDENTITY_REQUIRED')return'�
 function ensureStyle(){
   if($('#k11520RealTradePreflightStyle'))return;
   const style=document.createElement('style');style.id='k11520RealTradePreflightStyle';style.textContent=`
-#k11520RealTradePreflight{position:fixed;z-index:475;right:58px;bottom:366px;display:grid;gap:4px;justify-items:end;pointer-events:none}
+#k11520Bsc56UnsignedReview{min-width:0;max-width:100%;overflow-wrap:anywhere}\n#k11520Bsc56UnsignedReview summary{cursor:pointer}\n#k11520Bsc56UnsignedReview input,#k11520Bsc56UnsignedReview select{display:block;width:100%;margin:8px 0;background:#08131e;color:#e6f4ff;border:1px solid #456477;border-radius:4px;padding:8px;font:inherit}
+#k11520Bsc56UnsignedReview option{background:#08131e;color:#e6f4ff}
+#k11520Bsc56UnsignedReview input::placeholder{color:#abbcc8;opacity:1}
+#k11520Bsc56UnsignedReview input:focus-visible,#k11520Bsc56UnsignedReview select:focus-visible,#k11520Bsc56UnsignedReview button:focus-visible{outline:2px solid #8ceaff;outline-offset:2px}
+#k11520Bsc56UnsignedReview input:disabled,#k11520Bsc56UnsignedReview select:disabled,#k11520Bsc56UnsignedReview button:disabled{background:#142332;color:#abbcc8;opacity:1;border-color:#456477;cursor:not-allowed}\n#k11520Bsc56UnsignedReview[hidden],#k11520Bsc56UnsignedReview [hidden]{display:none}
+#k11520Bsc56UnsignedReview .exchangeRows dt,#k11520Bsc56UnsignedReview .exchangeRows dd{min-width:0;overflow-wrap:anywhere;word-break:break-word}\n#k11520RealTradePreflight{position:fixed;z-index:475;right:58px;bottom:366px;display:grid;gap:4px;justify-items:end;pointer-events:none}
 #k11520RealTradePreflight button{pointer-events:auto;border:1px solid #f1ca7377;background:#111923ee;color:#f5de9c;border-radius:10px;padding:7px 9px;font-size:8px;font-weight:900;touch-action:manipulation;box-shadow:0 6px 20px #0008}
 #k11520RealTradePreflight .state{max-width:190px;padding:5px 7px;border-radius:8px;background:#071018e8;border:1px solid #ffffff16;color:#aebdca;font-size:7px;text-align:right;line-height:1.2}
 #k11520RealTradePreflight[data-ready="1"] .state{color:#73e7a7;border-color:#73e7a744}
@@ -133,7 +344,9 @@ function renderPreflight(){
     // Identity comes only from the existing live session; no ownership/signature claim.
     const wallet=identity?.address?`錢包帳戶 ${identity.address.slice(0,6)}…${identity.address.slice(-4)}`:'錢包未連接';
     const expected=`${binding.axis}=${binding.display}`;
-    state.textContent=result.ready?`BSC97 TESTNET READY · ${expected} · ${wallet}`:`SIMULATION · ${expected} · ${wallet}`;
+    const execution=globalThis.__K11520_EXECUTION__?.snapshot?.();
+    const mode=execution?.mode==='BSC_TESTNET'&&execution.chainId===97?`BSC97 TESTNET · ${execution.status||'UNKNOWN'}`:'SIMULATION';
+    state.textContent=`${mode} · ${expected} · ${wallet}`;
     state.title=result.blockers.map(blockerLabel).join('；');
   }
   host.dataset.walletIdentityScope=identity?'ACTIVE_SESSION':'DISCONNECTED';
@@ -146,24 +359,17 @@ function renderPreflight(){
 function notifyOrderRoute(){
   const preflight=renderPreflight();
   const route=classify11520OrderRoute({preflight,localSimulationAvailable:true,execution:globalThis.__K11520_EXECUTION__?.snapshot?.()});
+  // The active order handler owns validation, confirmation and receipt feedback.
   globalThis.__K11520_ORDER_ROUTE__={...route,checkedAt:new Date().toISOString()};
-  // The Testnet execution UI owns validation, confirmation and receipt feedback.
-  // This deferred routing observer must not overwrite ORACLE_STALE (or another
-  // actual order failure) with a generic instruction to confirm in the wallet.
-  if(route.route==='TESTNET_EXPLICIT_WALLET_ACTION')return route;
-  const toast=$('#toast');
-  if(!toast)return route;
-  if(route.route==='REAL_READY_FOR_EXPLICIT_WALLET_ACTION')toast.textContent='真實交易條件已齊；下一步仍需錢包明確確認';
-  else toast.textContent='目前下單走本機模擬；真實交易仍封鎖';
-  toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800);
   return route
 }
 
 export function install11520RealTradingPreflightUi(){
   ensureStyle();
+  if($('#walletPanel'))installBsc56UnsignedReviewUi();
   let host=$('#k11520RealTradePreflight');
   if(!host){host=document.createElement('div');host.id='k11520RealTradePreflight';host.innerHTML='<button type="button" id="k11520RealTradePreflightBtn">⚡ 交易模式</button><div class="state">SIMULATION</div>';document.body.appendChild(host)}
-  const btn=$('#k11520RealTradePreflightBtn');if(btn&&!btn.dataset.bound){btn.dataset.bound='1';btn.addEventListener('click',()=>{const result=renderPreflight();const message=result?.ready?'真實交易條件已齊；仍需由錢包明確確認交易':'真實交易仍封鎖：'+(result?.blockers||[]).map(blockerLabel).join('、');const toast=$('#toast');if(toast){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2600)}})}
+  const btn=$('#k11520RealTradePreflightBtn');if(btn&&!btn.dataset.bound){btn.dataset.bound='1';btn.addEventListener('click',()=>{const result=renderPreflight();const message='主網下單待核：'+(result?.blockers||[]).map(blockerLabel).join('、');const toast=$('#toast');if(toast){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2600)}})}
   const order=$('#orderFire');if(order&&!order.dataset.realTradeRouteBound){order.dataset.realTradeRouteBound='1';order.addEventListener('click',()=>setTimeout(notifyOrderRoute,0))}
   for(const el of document.querySelectorAll('[data-market]'))el.addEventListener('change',renderPreflight);
   for(const el of document.querySelectorAll('[data-axis]'))el.addEventListener('click',()=>setTimeout(renderPreflight,0));
