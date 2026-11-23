@@ -995,10 +995,31 @@ async function verifyMarketSync(page,report){
   const changed=await read();assert.notDeepEqual(changed.combat.playerK,first.combat.playerK);
   assert.deepEqual(changed.combat.playerLocal,first.combat.playerLocal);assert.deepEqual(changed.combat.deltaK,first.combat.deltaK);assert.deepEqual(changed.combat.target,first.combat.target);
   await page.locator('#kspaceViewK').click();await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('$83000.00'));await page.screenshot({path:`${OUT}/${report.profile.name}-07_MARKET_REFRESH.png`});
-  await setBatch(batch.slice(0,2));await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='STALE',null,{timeout:15000});
-  const stale=await read();assert.deepEqual(stale.market.markets,changed.market.markets);assert.deepEqual(stale.combat.playerK,changed.combat.playerK);await page.screenshot({path:`${OUT}/${report.profile.name}-08_STALE_LAST_VALID.png`});
-  await setBatch(batch);await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});await page.screenshot({path:`${OUT}/${report.profile.name}-09_RECOVERED.png`});await page.locator('#sheetClose').click();
-  report.marketReference.changed=changed;report.marketReference.stale=stale;report.marketReference.recovered=await read();
+  const previousBySymbol=Object.fromEntries(changed.market.markets.map(row=>[row.symbol,row]));
+  const droppedMarket='BNBUSDT';
+  await setBatch(batch.filter(row=>row.symbol!==droppedMarket));
+  await page.waitForFunction(({droppedMarket,previousBySymbol})=>{
+    const market=globalThis.__K11520_MARKET_K__;
+    return market?.status==='LIVE'&&market.markets.length===3&&market.markets.every(row=>{
+      if(row.symbol===droppedMarket)return row.status==='STALE';
+      return row.status==='LIVE'&&row.observedAt>previousBySymbol[row.symbol].observedAt;
+    });
+  },{droppedMarket,previousBySymbol},{timeout:15000});
+  const stale=await read();
+  const unavailable=stale.market.markets.find(row=>row.symbol===droppedMarket);
+  assert.deepEqual(unavailable,{...previousBySymbol[droppedMarket],status:'STALE'});
+  assert.deepEqual(stale.combat.playerK,changed.combat.playerK);
+  await page.screenshot({path:`${OUT}/${report.profile.name}-08_STALE_LAST_VALID.png`});
+  await setBatch(batch);
+  await page.waitForFunction(({droppedMarket,previousTime})=>{
+    const market=globalThis.__K11520_MARKET_K__;
+    return market?.markets.length===3&&market.markets.every(row=>row.status==='LIVE')&&
+      market.markets.find(row=>row.symbol===droppedMarket).observedAt>previousTime;
+  },{droppedMarket,previousTime:unavailable.observedAt},{timeout:15000});
+  const recovered=await read();
+  await page.screenshot({path:`${OUT}/${report.profile.name}-09_RECOVERED.png`});
+  await page.locator('#sheetClose').click();
+  report.marketReference.changed=changed;report.marketReference.stale=stale;report.marketReference.recovered=recovered;
 }
 async function verifyKSpaceGameplay(page,report){
   const state=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());
