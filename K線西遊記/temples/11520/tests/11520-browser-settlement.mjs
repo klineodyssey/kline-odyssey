@@ -156,11 +156,16 @@ try {
     // Ordinary simulation QA must remain independent of a public rehearsal.
     // An unverified manifest may not silently activate wallet transactions.
     await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
-    // Exercise late optional UI delivery after the authoritative bootstrap has
-    // already dismissed its intro. It must not create a second pointer blocker.
-    await page.route('**/runtime/game-ui-product-fixes-v23.mjs',async route=>{
-      await new Promise(resolve=>setTimeout(resolve,3500));await route.continue();
-    });
+    const gameUrl=`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`;
+    const lateUiUrl=new URL('./runtime/game-ui-product-fixes-v23.mjs',gameUrl).href;
+    let lateUiRequests=0;
+    // Inject late UI only for the first static boot of each viewport.
+    const delayLateUi=async route=>{
+      lateUiRequests++;
+      await new Promise(resolve=>setTimeout(resolve,3500));
+      await route.continue();
+    };
+    await page.route(lateUiUrl,delayLateUi);
     // Synthetic EIP-1193 provider, not a connected Human wallet or live balance.
     await page.addInitScript(()=>{
       const listeners=new Map();
@@ -188,12 +193,17 @@ try {
       body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);
       await route.fulfill({status:200,contentType:'text/javascript',body});
     });
-    await page.goto(`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
+    const [lateUiResponse]=await phaseTiming.measure('generic.first-static-boot',()=>Promise.all([
+      page.waitForResponse(lateUiUrl),
+      page.goto(gameUrl,{waitUntil:'domcontentloaded'}),
+    ]));
+    assert.ok(lateUiResponse.ok()&&lateUiRequests>0,'initial static boot must load the delayed UI module');
     await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets.some(m=>m.symbol==='ETHUSDT'&&m.status==='LIVE'&&m.price===4000),null,{timeout:15000});
     const displayBook=await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot());
     assert.equal(displayBook.observations.ETHUSDT,undefined,'the static page must not settle from a displayed public quote');
     await page.screenshot({path:`${out}/${width}x${height}-late-ui-boot.png`});
     assert.equal(await page.locator('#intro11520 .introSkip').count(),0,'late legacy UI must not recreate an intro over the live game');
+    await page.unroute(lateUiUrl,delayLateUi);
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
     // Character readiness is independent of the MINIMAL telemetry visibility.
@@ -281,7 +291,7 @@ try {
     const marketPrice=market=>({BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600})[market];
     backend=await startBrowserTrial(marketPrice,()=>quoteStale);
     const trialOrigin=backend.origin;
-    await page.goto(trialOrigin,{waitUntil:'domcontentloaded'});
+    await phaseTiming.measure('generic.trial-navigation',()=>page.goto(trialOrigin,{waitUntil:'domcontentloaded'}));
     await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets.some(m=>m.symbol==='ETHUSDT'&&m.status==='LIVE')&&globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().wallet);
     await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:10000});
@@ -326,8 +336,24 @@ try {
       assert.equal((await snap()).positions[0].positionId,openId,'the original player still owns the same position');
     }finally{await other.close()}
     const gapQuote=2900; // First fill 4002 at k=3 has a long liquidation mark of 3002.
-    quoteStale=true;eth=gapQuote;await page.waitForTimeout(6000);
-    assert.equal((await snap()).positions[0].status,'OPEN','stale liquidation must not mutate position');
+    await phaseTiming.measure('generic.stale-gap-rejected',async()=>{
+      const rejected=page.waitForResponse(async response=>{
+        if(response.url()!==trialOrigin+'/api/v1/markets'||!response.ok())return false;
+        const {statuses,observations}=await response.json();
+        const ethStatus=statuses?.ETHUSDT;
+        return ethStatus?.status==='WAITING'&&ethStatus.reason==='STALE_PRICE'&&
+          observations?.ETHUSDT?.price===filledQuote.observations.ETHUSDT.price;
+      },{timeout:6000});
+      const waiting=page.waitForFunction(()=>document.querySelector('#feed')?.textContent.includes('等候有效報價'),null,{timeout:6000});
+      quoteStale=true;
+      eth=gapQuote;
+      const [,waitingHandle]=await Promise.all([rejected,waiting]);
+      await waitingHandle.dispose();
+    });
+    const staleBook=await snap();
+    assert.equal(staleBook.positions[0].positionId,openId);
+    assert.equal(staleBook.positions[0].status,'OPEN','stale liquidation must not mutate position');
+    assert.equal(staleBook.receipts.filter(r=>r.kind==='SETTLEMENT').length,0);
     assert.match(await page.locator('#feed').innerText(),/等候有效報價/);await shot('stale-position-preserved');
     quoteStale=false;
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='LIQUIDATED',null,{timeout:15000});
@@ -377,7 +403,7 @@ try {
     await page.evaluate(()=>__walletFixture.emit('disconnect',{}));
     assert.equal((await snap()).receipts.length,4,'a wallet event cannot switch the anonymous backend ledger');
     assert.deepEqual(await page.evaluate(()=>__walletFixture.calls),[],'the private trial must not call the wallet');
-    await page.reload({waitUntil:'domcontentloaded'});
+    await phaseTiming.measure('generic.reload-navigation',()=>page.reload({waitUntil:'domcontentloaded'}));
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===4,null,{timeout:15000});
     assert.equal((await snap()).positions[1].status,'CLOSED','reload recovers exact account ledger');
     await shot('reload-recovery');
