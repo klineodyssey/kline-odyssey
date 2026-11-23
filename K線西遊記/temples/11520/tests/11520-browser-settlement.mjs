@@ -1118,17 +1118,21 @@ async function offlineSimulationBrowserQA(options){
         assert.equal(evidence.submitted.native.filter(event=>event.id==='confirmOrder'&&event.type==='click'&&event.isTrusted).length,clickCount+1,'One trusted native Submit must reach the application');
         assert.equal(order.status,'PENDING','The unchanged quote must not fill the order');
         await driveMarket(testCase.market,triggerPrice+.125);
-        let book=await snap(),filled=book.orders.find(o=>o.orderId===order.orderId);
+        evidence.filled=await state();
+        let book=evidence.filled.simulation;
+        const filled=book.orders.find(o=>o.orderId===order.orderId);
         assert.equal(filled.status,'FILLED','The first accepted quote across the trigger must fill the submitted order');
         const position=book.positions.find(p=>p.positionId===filled.positionId);assert.equal(position.status,'OPEN');
         assert.equal(book.receipts.filter(r=>r.orderId===order.orderId&&r.kind==='FILL').length,1,'Fill is exactly once');
-        assert.equal(book.wallet.lockedMargin,1);evidence.filled=await state();await shot(stage+'-filled');
-        await driveMarket(testCase.market,position.entry+.125);book=await snap();const marked=book.positions.find(p=>p.positionId===position.positionId);
+        assert.equal(book.wallet.lockedMargin,1);await shot(stage+'-filled');
+        await driveMarket(testCase.market,position.entry+.125);
+        evidence.marked=await state();
+        book=evidence.marked.simulation;
+        const marked=book.positions.find(p=>p.positionId===position.positionId);
         assert.equal(marked.status,'OPEN');
         const entryUnit=10**Number(position.entry.toExponential().split('e')[1]);
         const expectedPnl=(marked.mark-position.entry)/entryUnit*marked.c*marked.lots;
         assert.ok(Math.abs(book.wallet.unrealizedPnl-expectedPnl)<1e-7,'PnL must follow signed C and real simulation mark');
-        evidence.marked=await state();
         if(testCase===cases[0]){
           const panelTiming=createSettlementTiming();
           try {
