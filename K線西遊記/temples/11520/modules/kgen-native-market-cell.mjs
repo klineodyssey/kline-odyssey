@@ -12,6 +12,8 @@ const COMPANY_ADDRESS = "0.00011520";
 const COMPANY_K_COORDINATE = "K11520";
 const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
 const CANONICAL_SETTLEMENT_ATTESTATIONS = Object.freeze({});
+const SPOT_SIMULATION_MARKET_ID = "11520_KGEN_KAIOS_SPOT_SIMULATION";
+const SPOT_SIMULATION_STEP = "0.00000001";
 const TEST_ONLY_MARKET_ID = "TEST_ONLY_11520_KGEN_NATIVE_MARKET";
 const TEST_ONLY_GPU_KGEN_MARKET_ID = "TEST_ONLY_11520_NVIDIA_GPU_KGEN_PAPER_MARKET";
 const TEST_ONLY_GPU_KAIOS_MARKET_ID = "TEST_ONLY_11520_NVIDIA_GPU_KAIOS_PAPER_MARKET";
@@ -179,13 +181,23 @@ function createVerified11520PaperMarketCell({
   candleIntervalMs = 60_000,
   clock = () => Date.now(),
   verifyActorContext,
-  actorAttestationRegistry
+  actorAttestationRegistry,
+  spotActors
 } = {}) {
   if (!Number.isSafeInteger(candleIntervalMs) || candleIntervalMs <= 0) {
     throw new RangeError("candleIntervalMs must be a positive safe integer");
   }
   if (verifyActorContext !== undefined) throw new Error("CALLER_SUPPLIED_ACTOR_CONTEXT_VERIFIER_FORBIDDEN");
   if (actorAttestationRegistry !== undefined) throw new Error("CALLER_SUPPLIED_ACTOR_ATTESTATION_REGISTRY_FORBIDDEN");
+  const spotSimulation = marketId === SPOT_SIMULATION_MARKET_ID &&
+    baseAsset === BASE_ASSET && quoteAsset === "KAIOS" && spotActors instanceof Map;
+  const resolveActor = spotSimulation
+    ? ({ actorAttestationId }) => {
+      const actor = spotActors.get(actorAttestationId);
+      if (!actor) throw new Error("SPOT_PLAYER_REQUIRED");
+      return actor;
+    }
+    : resolveVerifiedActorContext;
 
   const tickRaw = parseDecimal(tickSize, "tickSize");
   const lotRaw = parseDecimal(lotSize, "lotSize");
@@ -308,7 +320,7 @@ function createVerified11520PaperMarketCell({
     if (quantityRaw % lotRaw !== 0n) throw new RangeError("quantity must align to lotSize");
     const timestampMs = Number(clock());
     if (!Number.isFinite(timestampMs)) throw new TypeError("clock must return a finite millisecond timestamp");
-    const authority = resolveVerifiedActorContext({
+    const authority = resolveActor({
       actorAttestationId,
       timestampMs,
       purpose: "PLACE_ORDER",
@@ -319,7 +331,7 @@ function createVerified11520PaperMarketCell({
     if (consumedActionKeys.has(actionKey)) throw new Error("ORDER_REPLAY_FORBIDDEN");
 
     const order = {
-      id: `O${nextOrder++}`,
+      id: `O${nextOrder}`,
       side: normalizedSide,
       owner: authority.actorId,
       controller: authority.controllerId,
@@ -336,10 +348,12 @@ function createVerified11520PaperMarketCell({
       quantity: quantityRaw,
       remaining: quantityRaw,
       createdAt: new Date(timestampMs).toISOString(),
-      sequence: sequence++
+      sequence
     };
 
     assertNoSelfMatch(order);
+    nextOrder += 1;
+    sequence += 1;
     consumedActionKeys.add(actionKey);
     const fills = match(order, timestampMs);
     if (order.remaining > 0n) {
@@ -357,7 +371,7 @@ function createVerified11520PaperMarketCell({
   function cancelOrder(orderId, actorAttestationId, nonce) {
     const timestampMs = Number(clock());
     if (!Number.isFinite(timestampMs)) throw new TypeError("clock must return a finite millisecond timestamp");
-    const authority = resolveVerifiedActorContext({
+    const authority = resolveActor({
       actorAttestationId,
       timestampMs,
       purpose: "CANCEL_ORDER",
@@ -475,7 +489,7 @@ function createVerified11520PaperMarketCell({
   }
 
   function getOrderBook(depth = 20) {
-    const size = Math.max(1, Math.min(200, Number(depth) || 20));
+    const size = Math.max(1, Math.min(spotSimulation ? 1000 : 200, Number(depth) || 20));
     return {
       bids: bids.slice(0, size).map(cloneOrder),
       asks: asks.slice(0, size).map(cloneOrder),
@@ -596,4 +610,158 @@ export function createGpu11520PaperMarket({ quoteAsset, ...options } = {}) {
     pricingAuthority: "ISOLATED_GPU_PAPER_MATCHES_ONLY",
     ctMeaning: "CURRENT_GPU_PAPER_MATCHED_TRADE_PRICE_NOT_SETTLED"
   });
+}
+
+/** A private preview's guest sessions, balances and receipts belong to this book. */
+export function createKgenKaiosSpotSimulation({ clock = Date.now } = {}) {
+  const market = Object.freeze({
+    marketId: SPOT_SIMULATION_MARKET_ID,
+    baseAsset: BASE_ASSET,
+    quoteAsset: "KAIOS",
+    tickSize: SPOT_SIMULATION_STEP,
+    lotSize: SPOT_SIMULATION_STEP,
+    assetType: "FUNGIBLE_TOKEN",
+    rightsOffered: Object.freeze(["ownership_right"]),
+    deliveryRule: "SIMULATED_BOOK_TRANSFER"
+  });
+  const spotActors = new Map();
+  const engine = createVerified11520PaperMarketCell({
+    ...market, clock, spotActors, baseDecimals: 18, quoteDecimals: 18
+  });
+  const players = new Map();
+  const openOrders = new Map();
+  const trades = [];
+  const notional = (price, quantity) => price * quantity / SCALE;
+
+  function addPlayer(id) {
+    const actorId = normalizeActorId(id, "spot player");
+    if (players.has(actorId)) return;
+    spotActors.set(actorId, {
+      actorId, controllerId: actorId, evidenceId: actorId,
+      authenticationStatus: "SIMULATION_SESSION",
+      authenticationMethod: "PRIVATE_PREVIEW_PLAYER",
+      issuedAt: null, expiresAt: null, sessionId: null
+    });
+    players.set(actorId, {
+      actorId,
+      balances: {
+        KGEN: { available: 100n * SCALE, locked: 0n },
+        KAIOS: { available: 1000n * SCALE, locked: 0n }
+      },
+      receipts: []
+    });
+  }
+
+  function playerFor(id) {
+    const owner = players.get(id);
+    if (!owner) throw new Error("SPOT_PLAYER_REQUIRED");
+    return owner;
+  }
+
+  function amount(value, label) {
+    if (typeof value !== "string" || !/^\d{1,12}(?:\.\d{1,8})?$/.test(value) || !/[1-9]/.test(value)) {
+      throw new Error("SPOT_INVALID_DECIMAL");
+    }
+    return parseDecimal(value, label);
+  }
+
+  function settle(fill, taker) {
+    const maker = openOrders.get(fill.makerOrderId);
+    const buyer = taker.side === "BUY" ? taker : maker;
+    const seller = taker.side === "SELL" ? taker : maker;
+    const buyerAccount = playerFor(buyer.owner);
+    const sellerAccount = playerFor(seller.owner);
+    const size = parseDecimal(fill.quantity);
+    const payment = notional(parseDecimal(fill.price), size);
+    const buyReserve = notional(buyer.price, size);
+    buyerAccount.balances.KAIOS.locked -= buyReserve;
+    buyerAccount.balances.KAIOS.available += buyReserve - payment;
+    buyerAccount.balances.KGEN.available += size;
+    sellerAccount.balances.KGEN.locked -= size;
+    sellerAccount.balances.KAIOS.available += payment;
+    const receipt = {
+      id: `SPOT-${fill.id}`, marketId: market.marketId, price: fill.price,
+      quantity: fill.quantity, quoteAmount: formatDecimal(payment),
+      timestamp: fill.timestamp, status: "SIMULATED_SETTLED"
+    };
+    buyerAccount.receipts.push({ ...receipt, side: "BUY", orderId: buyer.id });
+    sellerAccount.receipts.push({ ...receipt, side: "SELL", orderId: seller.id });
+    trades.push(receipt);
+    maker.remaining -= size;
+    if (maker.remaining === 0n) openOrders.delete(maker.id);
+    return receipt.id;
+  }
+
+  function placeOrder(id, { side, price, quantity, requestId }) {
+    const player = playerFor(id);
+    if (side !== "BUY" && side !== "SELL") throw new Error("SPOT_INVALID_SIDE");
+    const limit = amount(price, "price");
+    const size = amount(quantity, "quantity");
+    const balance = player.balances[side === "BUY" ? "KAIOS" : "KGEN"];
+    const reserve = side === "BUY" ? notional(limit, size) : size;
+    if (balance.available < reserve) throw new Error("SPOT_INSUFFICIENT_BALANCE");
+    // The engine rejects crossed self-matches and replays before any simulated
+    // balance is changed. Every accepted price × lot is exact at 18 decimals.
+    const { order, fills } = engine.placeOrder({
+      side, price, quantity, actorAttestationId: id, nonce: requestId
+    });
+    balance.available -= reserve;
+    balance.locked += reserve;
+    const taker = {
+      id: order.id, owner: id, side, price: limit, quantity: size,
+      remaining: order.remaining === "0" ? 0n : parseDecimal(order.remaining)
+    };
+    const receiptIds = fills.map(fill => settle(fill, taker));
+    if (taker.remaining > 0n) openOrders.set(taker.id, taker);
+    return { order: orderView(taker), receiptIds };
+  }
+
+  function cancelOrder(id, { orderId, requestId }) {
+    const player = playerFor(id);
+    const order = openOrders.get(orderId);
+    if (order?.owner !== id) throw new Error("SPOT_OPEN_ORDER_NOT_FOUND");
+    engine.cancelOrder(orderId, id, requestId);
+    const asset = order.side === "BUY" ? "KAIOS" : "KGEN";
+    const release = order.side === "BUY" ? notional(order.price, order.remaining) : order.remaining;
+    const balance = player.balances[asset];
+    balance.locked -= release;
+    balance.available += release;
+    openOrders.delete(orderId);
+    return { orderId, released: { asset, amount: formatDecimal(release) } };
+  }
+
+  function orderView(order) {
+    return {
+      id: order.id, side: order.side, price: formatDecimal(order.price),
+      quantity: formatDecimal(order.quantity), remaining: formatDecimal(order.remaining)
+    };
+  }
+
+  function levels(orders) {
+    const byPrice = new Map();
+    for (const order of orders) {
+      byPrice.set(order.price, (byPrice.get(order.price) ?? 0n) + parseDecimal(order.remaining));
+    }
+    return [...byPrice].slice(0, 20).map(([price, size]) => ({ price, quantity: formatDecimal(size) }));
+  }
+
+  function snapshot(id = null) {
+    const book = engine.getOrderBook(1000);
+    const player = id === null ? null : playerFor(id);
+    return {
+      market,
+      bids: levels(book.bids), asks: levels(book.asks),
+      trades: trades.slice(-100).reverse().map(trade => ({ ...trade })),
+      lastTrade: trades.length ? { ...trades[trades.length - 1] } : null,
+      player: player ? {
+        balances: Object.fromEntries(Object.entries(player.balances).map(([asset, balance]) => [
+          asset, { available: formatDecimal(balance.available), locked: formatDecimal(balance.locked) }
+        ])),
+        orders: [...openOrders.values()].filter(order => order.owner === id).map(orderView),
+        receipts: player.receipts.slice(-100).reverse().map(receipt => ({ ...receipt }))
+      } : null
+    };
+  }
+
+  return Object.freeze({ addPlayer, placeOrder, cancelOrder, snapshot });
 }

@@ -3,6 +3,8 @@ import fs from 'node:fs/promises';
 import {writeSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {chromium} from 'playwright';
 import {loadNativeYouTubeFixture} from './fixtures/kaios-youtube/fixture-tools.mjs';
 import {BANK_SERVICE,WORLD_REGISTRY,worldUrl,sharedGameUrl} from '../assets/kaios-world-registry.mjs';
@@ -10,6 +12,9 @@ const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'
 const OUT='artifacts/kaios-portal-qa';
 const FUNDING_ONLY=process.argv.includes('--funding-only');
 const VISITOR_ONLY=process.argv.includes('--visitor-only');
+const SPOT_ONLY=process.argv.includes('--spot-only');
+const QA_MODE=VISITOR_ONLY?'visitor-only':FUNDING_ONLY?'funding-only':SPOT_ONLY?'spot-only':'portal';
+const REPORT_FILE=`${OUT}/${QA_MODE.replace('-only','')}-browser-report.json`;
 if(FUNDING_ONLY){
   assert.equal(process.env.GITHUB_ACTIONS,'true','--funding-only runs only in the isolated GitHub Actions browser job');
   const base=new URL(BASE);
@@ -21,7 +26,7 @@ const report={head:process.env.KAIOS_SOURCE_SHA||execFileSync('git',['rev-parse'
 if(FUNDING_ONLY)Object.assign(report,{mode:'UI_ONLY_NO_REAL_WALLET',realWallet:'NOT_TESTED',chainReads:0,transactionRequests:0});
 let activeCheck='browser-launch';
 function checkpoint(phase,status,error){
-  const entry={head:report.head,mode:VISITOR_ONLY?'visitor-only':FUNDING_ONLY?'funding-only':'portal',phase,status};
+  const entry={head:report.head,mode:QA_MODE,phase,status};
   if(error)entry.error=String(error.stack||error).slice(0,4096);
   // Keep short failure evidence before cleanup; diagnostics never change the result.
   try{writeSync(2,`[kaios-portal-qa] ${JSON.stringify(entry)}\n`);}catch{}
@@ -1333,6 +1338,171 @@ async function verifyLampScanner(){
     }finally{await context.close();}
   }
 }
+async function verifySpotOrderBook(){
+  const {createK11520Server}=await import('../K線西遊記/temples/11520/backend/server.mjs');
+  report.spot=[];
+  for(const [width,height] of [[390,844],[844,390]]){
+    const dir=await fs.mkdtemp(join(tmpdir(),'k11520-spot-qa-'));
+    const dataFile=join(dir,'ledger.json');
+    const contexts=[],errors=[],outsideRequests=[],unexpectedWrites=[];
+    const row={width,height,transport:'EXACT_LOOPBACK_SPOT_PREVIEW',functional:'RUNNING'};
+    report.spot.push(row);
+    let server,seller;
+    try{
+      server=await createK11520Server({spotPreview:true,dataFile,pollIntervalMs:0});
+      const {port}=await server.listen({port:0});
+      const origin=`http://127.0.0.1:${port}`;
+      const url=new URL('K線西遊記/temples/11520/index.html#/SPOT',origin).href;
+      const knownWrites=new Set(['/api/v1/login','/api/v1/spot/orders','/api/v1/spot/orders/cancel']);
+      async function newPlayerPage(){
+        const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,locale:'zh-TW',serviceWorkers:'block'});
+        contexts.push(context);
+        await context.route('**/*',async route=>{
+          const request=route.request(),target=new URL(request.url());
+          if(target.origin!==origin){
+            outsideRequests.push(target.origin);
+            return route.abort();
+          }
+          if(!['GET','HEAD'].includes(request.method())&&!(request.method()==='POST'&&knownWrites.has(target.pathname))){
+            unexpectedWrites.push(`${request.method()} ${target.pathname}`);
+            return route.abort();
+          }
+          return route.continue();
+        });
+        const page=await context.newPage();
+        page.on('pageerror',error=>errors.push(String(error)));
+        await page.goto(url,{waitUntil:'domcontentloaded'});
+        await page.waitForFunction(()=>document.querySelector('#spot-last-trade')?.textContent.includes('尚無成交'));
+        return page;
+      }
+      async function postFromUI(page,path,selector){
+        const [response]=await Promise.all([
+          page.waitForResponse(item=>item.url()===origin+path&&item.request().method()==='POST'),
+          page.locator(selector).tap()
+        ]);
+        assert.equal(response.status(),200,`POST ${path}`);
+        const result=await response.json();
+        assert.equal(result.ok,true,`successful ${path} result`);
+        return result;
+      }
+      async function refreshFromUI(page){
+        const [response]=await Promise.all([
+          page.waitForResponse(item=>item.url()===origin+'/api/v1/spot'&&item.request().method()==='GET'),
+          page.locator('#spot-refresh').tap()
+        ]);
+        assert.equal(response.status(),200,'read the same shared server ledger');
+        return response.json();
+      }
+      async function place(page,side,quantity,price){
+        await page.locator('#spot-side').selectOption(side);
+        await page.locator('#spot-quantity').fill(quantity);
+        await page.locator('#spot-price').fill(price);
+        return postFromUI(page,'/api/v1/spot/orders','#spot-submit');
+      }
+      async function rendered(page,selector,text){
+        await page.waitForFunction(({selector,text})=>document.querySelector(selector)?.textContent.trim()===text,{selector,text});
+      }
+      async function renderedBalance(page,asset,available,locked){
+        const selector=`#spot-balances [data-spot-asset="${asset}"]`;
+        await rendered(page,`${selector} [data-spot-available]`,available);
+        await rendered(page,`${selector} [data-spot-locked]`,locked);
+      }
+      const bought={price:'3',quantity:'4',quoteAmount:'12'};
+      const balance=(available,locked='0')=>({available,locked});
+      const buyer=await newPlayerPage();
+      seller=await newPlayerPage();
+      const initial=await refreshFromUI(buyer);
+      assert.equal(initial.lastTrade,null);
+      assert.deepEqual(initial.bids,[]);
+      assert.deepEqual(initial.asks,[]);
+      assert.deepEqual(initial.trades,[]);
+      assert.equal(initial.player,null);
+      await rendered(buyer,'#spot-best-bid','尚無掛單');
+      await rendered(buyer,'#spot-best-ask','尚無掛單');
+      assert.equal(await buyer.locator('#spot-trades [data-spot-trade]').count(),0);
+      for(const [page,name] of [[buyer,'試玩買方'],[seller,'試玩賣方']]){
+        await page.locator('#spot-name').fill(name);
+        await postFromUI(page,'/api/v1/login','#spot-login-form button[type=submit]');
+        await page.waitForFunction(()=>document.querySelector('#spot-submit:enabled'));
+      }
+      const bid=await place(buyer,'BUY','1','2');
+      assert.deepEqual(bid.bids,[{price:'2',quantity:'1'}]);
+      assert.deepEqual(bid.player.balances.KAIOS,balance('998','2'));
+      assert.equal(bid.lastTrade,null);
+      await renderedBalance(buyer,'KAIOS','998','2');
+      await rendered(buyer,'#spot-best-bid','2 KAIOS · 1 KGEN');
+      const ask=await place(seller,'SELL','10','3');
+      assert.deepEqual(ask.asks,[{price:'3',quantity:'10'}]);
+      assert.deepEqual(ask.player.balances.KGEN,balance('90','10'));
+      assert.equal(ask.lastTrade,null);
+      await renderedBalance(seller,'KGEN','90','10');
+      await rendered(seller,'#spot-best-ask','3 KAIOS · 10 KGEN');
+      const crossing=await place(buyer,'BUY','4','4');
+      assert.deepEqual(crossing.bids,[{price:'2',quantity:'1'}]);
+      assert.deepEqual(crossing.asks,[{price:'3',quantity:'6'}]);
+      assert.equal(crossing.trades.length,1);
+      assert.deepEqual(Object.fromEntries(Object.keys(bought).map(key=>[key,crossing.lastTrade[key]])),bought);
+      assert.deepEqual(crossing.player.balances,{KGEN:balance('104'),KAIOS:balance('986','2')});
+      const maker=await refreshFromUI(seller);
+      assert.deepEqual(maker.lastTrade,crossing.lastTrade);
+      assert.deepEqual(maker.player.balances,{KGEN:balance('90','6'),KAIOS:balance('1012')});
+      assert.equal(maker.player.orders[0].remaining,'6');
+      const [buyReceipt]=crossing.player.receipts,[sellReceipt]=maker.player.receipts;
+      assert.equal(buyReceipt.id,crossing.lastTrade.id);
+      assert.equal(sellReceipt.id,buyReceipt.id);
+      assert.equal(buyReceipt.side,'BUY');
+      assert.equal(sellReceipt.side,'SELL');
+      assert.equal(buyReceipt.quoteAmount,'12');
+      assert.equal(sellReceipt.quoteAmount,'12');
+      for(const page of [buyer,seller]){
+        await rendered(page,'#spot-best-bid','2 KAIOS · 1 KGEN');
+        await rendered(page,'#spot-best-ask','3 KAIOS · 6 KGEN');
+        await rendered(page,'#spot-asks [data-spot-value=quantity]','6');
+        await rendered(page,'#spot-last-trade','3 KAIOS');
+        await rendered(page,'#spot-trades [data-spot-value=quantity]','4');
+        const receipt=page.locator(`#spot-receipts [data-spot-receipt="${buyReceipt.id}"]`);
+        await receipt.waitFor();
+        assert.equal(await receipt.locator('[data-spot-value=quantity]').innerText(),'4');
+        assert.match(await receipt.innerText(),page===buyer?/買入/:/賣出/);
+        assert.match(await receipt.innerText(),/結算 12 KAIOS/);
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'spot UI fits this mobile orientation');
+      }
+      await buyer.locator('#spot-last-trade').scrollIntoViewIfNeeded();
+      await shot(buyer,`spot-${width}x${height}-book`);
+      await buyer.locator('#spot-receipts').scrollIntoViewIfNeeded();
+      await shot(buyer,`spot-${width}x${height}-receipt`);
+      const cancelBid=await postFromUI(buyer,'/api/v1/spot/orders/cancel','[data-spot-cancel]');
+      assert.deepEqual(cancelBid.bids,[]);
+      assert.deepEqual(cancelBid.player.balances.KAIOS,balance('988'));
+      await renderedBalance(buyer,'KAIOS','988','0');
+      const cancelAsk=await postFromUI(seller,'/api/v1/spot/orders/cancel','[data-spot-cancel]');
+      assert.deepEqual(cancelAsk.asks,[]);
+      assert.deepEqual(cancelAsk.player.balances.KGEN,balance('96'));
+      assert.equal(cancelAsk.lastTrade.id,buyReceipt.id);
+      await renderedBalance(seller,'KGEN','96','0');
+      await rendered(seller,'#spot-best-ask','尚無掛單');
+      await seller.reload({waitUntil:'domcontentloaded'});
+      await seller.waitForFunction(id=>document.querySelector('#spot-receipts')?.textContent.includes(id),sellReceipt.id);
+      assert.equal(await seller.locator('[data-spot-cancel]').count(),0);
+      assert.deepEqual(errors,[]);
+      assert.deepEqual(outsideRequests,[],'spot QA must never contact a public quote, router or chain');
+      assert.deepEqual(unexpectedWrites,[]);
+      Object.assign(row,{functional:'PASS',emptyAtStart:true,partialAsk:'6',price:'3',quoteAmount:'12',buyLocked:'2',sellLocked:'10',receiptId:buyReceipt.id,cancelUnlock:true,originalReceiptAfterReload:true});
+    }catch(error){
+      row.functional='FAIL';
+      row.error=String(error.stack||error);
+      if(seller)await shot(seller,`spot-${width}x${height}-FAIL`).catch(()=>{});
+      throw error;
+    }finally{
+      Object.assign(row,{errors,outsideRequests,unexpectedWrites});
+      await Promise.all(contexts.map(context=>context.close()));
+      if(server)await server.close();
+      await fs.unlink(dataFile).catch(error=>{if(error.code!=='ENOENT')throw error;});
+      await fs.rmdir(dir);
+    }
+  }
+  report.checks.push('private spot through two isolated Chromium player contexts at both mobile sizes: empty book, real price-time partial fill, buy/sell reserves, maker-price settlement of both accounts, shared receipt, cancellation unlock and reload; no external traffic or wallet');
+}
 async function verifyViewportVideo(cached,fixture){
   const results=[];report.viewportVideo=results;
   for(const [layout,width,height] of [['root',390,844],['root',844,390],['root',360,740],['pages-prefix',390,844],['root',1280,900]]){
@@ -1491,9 +1661,11 @@ async function verifyVisitorInfo(){
 try{
   if(VISITOR_ONLY){await runCheck('visitor-info',verifyVisitorInfo);}
   else if(FUNDING_ONLY){await runCheck('funding-panel',verifyFundingPanel);await runCheck('funding-auto-preview',verifyFundingAutoPreview);await runCheck('funding-guided-five',verifyFundingGuidedFive);await runCheck('legacy-card-documents',verifyLegacyCards);await runCheck('16888-manual-order',verify16888ManualOrder);}
+  else if(SPOT_ONLY){await runCheck('spot-order-book',verifySpotOrderBook);}
   else{
   await runCheck('visitor-info',verifyVisitorInfo);
   await runCheck('lamp-scanner',verifyLampScanner);
+  await runCheck('spot-order-book',verifySpotOrderBook);
   activeCheck='portal-runtime-navigation';checkpoint(activeCheck,'START');
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();
@@ -1630,15 +1802,15 @@ try{
 }catch(error){report.functional='FAIL';report.errors.push(String(error.stack||error));checkpoint(activeCheck,'FAIL',error);throw error;}
 finally{
   checkpoint('report-write','START');
-  try{await fs.writeFile(`${OUT}/${VISITOR_ONLY?'visitor-browser-report':FUNDING_ONLY?'funding-browser-report':'portal-browser-report'}.json`,JSON.stringify(report,null,2));}
+  try{await fs.writeFile(REPORT_FILE,JSON.stringify(report,null,2));}
   catch(error){checkpoint('report-write','FAIL',error);throw error;}
   checkpoint('report-write','PASS');checkpoint('browser-close','START');
   try{await browser.close();}catch(error){checkpoint('browser-close','FAIL',error);throw error;}
   checkpoint('browser-close','PASS');
   console.log(JSON.stringify({
-    head:report.head,mode:VISITOR_ONLY?'visitor-only':FUNDING_ONLY?'funding-only':'portal',
+    head:report.head,mode:QA_MODE,
     functional:report.functional,visual:report.visual,profiles:report.profiles.length,
     checks:report.checks.length,runtimeErrors:report.runtimeErrors.length,errors:report.errors.length,
-    report:`${OUT}/${VISITOR_ONLY?'visitor-browser-report':FUNDING_ONLY?'funding-browser-report':'portal-browser-report'}.json`
+    report:REPORT_FILE
   }));
 }

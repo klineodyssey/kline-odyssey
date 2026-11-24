@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createGpu11520PaperMarket, createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
+import { createGpu11520PaperMarket, createKgenNativeMarketCell, createKgenKaiosSpotSimulation } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
 let nextActionNonce = 1;
 const TEST_MARKET_ID = "TEST_ONLY_11520_KGEN_NATIVE_MARKET";
@@ -422,4 +422,108 @@ test("GPU paper market rejects unsupported quotes, fractional chips, caller auth
   assert.equal(productionMarket.getMarketState().ct, null);
   assert.equal(productionMarket.getMarketState().chainWrite, false);
   assert.equal(productionMarket.getMarketState().signer, false);
+});
+
+test("KGEN/KAIOS spot prices come from the book and maker fills move both simulated balances", () => {
+  const spot = createKgenKaiosSpotSimulation();
+  spot.addPlayer("buyer");
+  spot.addPlayer("seller");
+  assert.deepEqual(spot.snapshot().bids, []);
+  assert.deepEqual(spot.snapshot().asks, []);
+  assert.equal(spot.snapshot().lastTrade, null);
+  const ask = spot.placeOrder("seller", { side: "SELL", price: "13", quantity: "7", requestId: "spot-sell-0001" }).order;
+  const bid = spot.placeOrder("buyer", { side: "BUY", price: "12", quantity: "3", requestId: "spot-buy-0001" }).order;
+  assert.deepEqual(spot.snapshot().asks, [{ price: "13", quantity: "7" }]);
+  assert.deepEqual(spot.snapshot().bids, [{ price: "12", quantity: "3" }]);
+  assert.equal(spot.snapshot().lastTrade, null);
+  assert.deepEqual(spot.snapshot("seller").player.balances.KGEN, { available: "93", locked: "7" });
+  assert.deepEqual(spot.snapshot("buyer").player.balances.KAIOS, { available: "964", locked: "36" });
+  const fill = spot.placeOrder("buyer", { side: "BUY", price: "20", quantity: "3", requestId: "spot-buy-0002" });
+  const buyer = spot.snapshot("buyer"), seller = spot.snapshot("seller");
+  assert.deepEqual(seller.asks, [{ price: "13", quantity: "4" }]);
+  assert.deepEqual(
+    [buyer.lastTrade.price, buyer.lastTrade.quantity, buyer.lastTrade.quoteAmount, buyer.lastTrade.status],
+    ["13", "3", "39", "SIMULATED_SETTLED"]
+  );
+  assert.deepEqual(buyer.player.balances, {
+    KGEN: { available: "103", locked: "0" }, KAIOS: { available: "925", locked: "36" }
+  });
+  assert.deepEqual(seller.player.balances, {
+    KGEN: { available: "93", locked: "4" }, KAIOS: { available: "1039", locked: "0" }
+  });
+  const [buyReceipt] = buyer.player.receipts, [sellReceipt] = seller.player.receipts;
+  assert.deepEqual([buyReceipt.id, buyReceipt.side, buyReceipt.orderId], [fill.receiptIds[0], "BUY", fill.order.id]);
+  assert.deepEqual([sellReceipt.id, sellReceipt.side, sellReceipt.orderId], [fill.receiptIds[0], "SELL", ask.id]);
+  assert.equal(Object.hasOwn(buyer.lastTrade, "makerOwner"), false);
+  assert.deepEqual(spot.cancelOrder("seller", { orderId: ask.id, requestId: "spot-cancel-01" }).released, { asset: "KGEN", amount: "4" });
+  assert.deepEqual(spot.cancelOrder("buyer", { orderId: bid.id, requestId: "spot-cancel-02" }).released, { asset: "KAIOS", amount: "36" });
+  assert.deepEqual(spot.snapshot("buyer").player.balances.KAIOS, { available: "961", locked: "0" });
+  assert.deepEqual(spot.snapshot("seller").player.balances.KGEN, { available: "97", locked: "0" });
+  assert.equal(spot.snapshot().trades.length, 1);
+  assert.deepEqual(spot.snapshot().bids, []);
+  assert.deepEqual(spot.snapshot().asks, []);
+});
+
+test("spot keeps price-time priority, aggregates a price level and preserves partial buy reserves", () => {
+  const spot = createKgenKaiosSpotSimulation();
+  for (const actor of ["buy", "sell-a", "sell-b", "sell-best"]) spot.addPlayer(actor);
+  spot.placeOrder("sell-a", { side: "SELL", price: "7", quantity: "2", requestId: "spot-maker-01" });
+  spot.placeOrder("sell-b", { side: "SELL", price: "7", quantity: "2", requestId: "spot-maker-02" });
+  spot.placeOrder("sell-best", { side: "SELL", price: "6", quantity: "1", requestId: "spot-maker-03" });
+  assert.deepEqual(spot.snapshot().asks, [{ price: "6", quantity: "1" }, { price: "7", quantity: "4" }]);
+  const inward = spot.placeOrder("buy", { side: "BUY", price: "8", quantity: "6", requestId: "spot-taker-01" });
+  assert.equal(inward.order.remaining, "1");
+  assert.deepEqual(inward.receiptIds, [
+    spot.snapshot("sell-best").player.receipts[0].id,
+    spot.snapshot("sell-a").player.receipts[0].id,
+    spot.snapshot("sell-b").player.receipts[0].id
+  ]);
+  assert.deepEqual(spot.snapshot("buy").player.balances.KAIOS, { available: "958", locked: "8" });
+  assert.deepEqual(spot.snapshot().bids, [{ price: "8", quantity: "1" }]);
+  spot.placeOrder("sell-a", { side: "SELL", price: "6", quantity: "0.5", requestId: "spot-taker-02" });
+  assert.equal(spot.snapshot().lastTrade.price, "8", "the resting bid price determines a sell taker fill");
+  assert.deepEqual(spot.snapshot("buy").player.balances.KAIOS, { available: "958", locked: "4" });
+  spot.cancelOrder("buy", { orderId: inward.order.id, requestId: "spot-cancel-last" });
+  assert.deepEqual(spot.snapshot("buy").player.balances.KAIOS, { available: "962", locked: "0" });
+});
+
+test("spot invalid orders and self-matches leave all assets and receipts intact", () => {
+  const spot = createKgenKaiosSpotSimulation();
+  spot.addPlayer("owner");
+  spot.addPlayer("other");
+  const order = spot.placeOrder("owner", { side: "SELL", price: "10", quantity: "2", requestId: "spot-ask-0001" }).order;
+  spot.placeOrder("other", { side: "SELL", price: "9", quantity: "1", requestId: "spot-ask-0002" });
+  const ownBefore = spot.snapshot("owner");
+  const peerBefore = spot.snapshot("other");
+  const buy = { side: "BUY", price: "10", quantity: "3", requestId: "spot-retry-01" };
+  assert.throws(() => spot.placeOrder("owner", buy), /SELF_MATCH_FORBIDDEN/);
+  assert.throws(() => spot.placeOrder("owner", { ...buy, quantity: "101" }), /SPOT_INSUFFICIENT_BALANCE/);
+  for (const price of ["0", "-1", "1e-8", "0.000000001", 5]) {
+    assert.throws(() => spot.placeOrder("owner", { ...buy, price }), /SPOT_INVALID_DECIMAL/);
+  }
+  assert.throws(() => spot.cancelOrder("other", { orderId: order.id, requestId: "spot-cancel-01" }), /SPOT_OPEN_ORDER_NOT_FOUND/);
+  assert.deepEqual(spot.snapshot("owner"), ownBefore);
+  assert.deepEqual(spot.snapshot("other"), peerBefore);
+  spot.placeOrder("owner", { ...buy, price: "8" });
+  const accepted = spot.snapshot("owner");
+  assert.throws(() => spot.placeOrder("owner", { ...buy, price: "8" }), /ORDER_REPLAY_FORBIDDEN/);
+  assert.deepEqual(spot.snapshot("owner"), accepted);
+});
+
+test("spot uses exact decimal amounts independently of the unfrozen native market", () => {
+  const spot = createKgenKaiosSpotSimulation();
+  spot.addPlayer("buyer");
+  spot.addPlayer("seller");
+  spot.placeOrder("seller", { side: "SELL", price: "0.00000001", quantity: "0.00000001", requestId: "spot-precision-sell" });
+  spot.placeOrder("buyer", { side: "BUY", price: "0.00000001", quantity: "0.00000001", requestId: "spot-precision-buy" });
+  assert.equal(spot.snapshot().lastTrade.quoteAmount, "0.0000000000000001");
+  assert.equal(spot.snapshot("buyer").player.balances.KAIOS.available, "999.9999999999999999");
+  assert.equal(spot.snapshot("seller").player.balances.KAIOS.available, "1000.0000000000000001");
+  const native = createKgenNativeMarketCell({ marketId: spot.snapshot().market.marketId, spotActors: new Map() });
+  assert.equal(native.getMarketState().quoteStatus, "UNFROZEN_CANDIDATE");
+  assert.equal(native.getMarketState().ct, null);
+  assert.throws(
+    () => native.placeOrder({ side: "BUY", price: "1", quantity: "1", actorAttestationId: "buyer", nonce: "spot-prod-block" }),
+    /ACTOR_CONTEXT_ATTESTATION_REGISTRY_NOT_CONNECTED/
+  );
 });

@@ -465,7 +465,7 @@ const K11520_TEST_MARKETS = Object.freeze({
   BNBUSDT: {axis:'KZ', price:620},
 });
 
-async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPreview} = {}) {
+async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPreview, spotPreview = false} = {}) {
   const {mkdtemp, readFile, writeFile, unlink, rmdir} = await import('node:fs/promises');
   const {join} = await import('node:path');
   const {tmpdir} = await import('node:os');
@@ -501,6 +501,7 @@ async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPrevi
     assert.equal(service, null);
     service = await createK11520Server({
       dataFile,
+      spotPreview,
       now: () => currentTime,
       readMarket: async ({market}) => {
         if (unavailable.has(market)) throw new Error('FIXTURE_SOURCE_UNAVAILABLE');
@@ -570,6 +571,66 @@ async function makeK11520BackendFixture(t, {legacy, pollIntervalMs = 0, lanPrevi
     readDatabase: () => readFile(dataFile, 'utf8').then(JSON.parse),
   };
 }
+
+test("private KGEN/KAIOS spot API shares one durable book between guest sessions", async (t) => {
+  const api = await makeK11520BackendFixture(t, { spotPreview: true });
+  const read = token => api.request('/api/v1/spot', { token });
+  const order = (token, body) => api.request('/api/v1/spot/orders', { method: 'POST', token, body });
+  const cancel = (token, body) => api.request('/api/v1/spot/orders/cancel', { method: 'POST', token, body });
+  const buyer = await api.login({ name: 'Buyer' });
+  const seller = await api.login({ name: 'Seller' });
+  const sell = { side: 'SELL', price: '13', quantity: '7', requestId: 'spot-http-sell-01' };
+  const buy = { side: 'BUY', price: '20', quantity: '3', requestId: 'spot-http-buy-01' };
+  const empty = (await read()).body;
+  assert.equal(empty.lastTrade, null);
+  assert.equal(empty.player, null);
+  assert.equal((await order(undefined, sell)).status, 401);
+  assert.equal((await read('f'.repeat(48))).status, 401);
+  assert.equal((await order(buyer.token, { ...buy, playerId: seller.player.id })).status, 400);
+  const ask = await order(seller.token, sell);
+  assert.equal(ask.status, 200);
+  assert.deepEqual(ask.body.player.balances.KGEN, { available: '93', locked: '7' });
+  assert.deepEqual((await read()).body.asks, [{ price: '13', quantity: '7' }]);
+  assert.equal((await read(buyer.token)).body.player.orders.length, 0);
+  assert.equal((await cancel(buyer.token, { orderId: ask.body.result.order.id, requestId: 'spot-http-wrong-owner' })).status, 409);
+
+  const [one, replay] = await Promise.all([order(buyer.token, buy), order(buyer.token, buy)]);
+  assert.deepEqual([one.status, replay.status], [200, 200]);
+  assert.notEqual(one.body.replayed, replay.body.replayed);
+  assert.deepEqual(one.body.result, replay.body.result);
+  assert.equal((await order(buyer.token, { ...buy, price: '21' })).status, 409);
+  assert.equal((await read()).body.trades.length, 1);
+  assert.deepEqual((await read(buyer.token)).body.player.balances, {
+    KGEN: { available: '103', locked: '0' }, KAIOS: { available: '961', locked: '0' }
+  });
+  const sellerResting = (await read(seller.token)).body;
+  assert.deepEqual(sellerResting.asks, [{ price: '13', quantity: '4' }]);
+  assert.deepEqual(sellerResting.player.balances, {
+    KGEN: { available: '93', locked: '4' }, KAIOS: { available: '1039', locked: '0' }
+  });
+  assert.equal(sellerResting.player.receipts[0].id, one.body.player.receipts[0].id);
+  assert.equal(sellerResting.player.receipts[0].quoteAmount, '39');
+  // Restart with a partially filled order still locked and without a new grant.
+  await api.restart();
+  assert.deepEqual((await read(seller.token)).body, sellerResting);
+  assert.equal((await order(buyer.token, buy)).body.replayed, true);
+  const terms = { orderId: ask.body.result.order.id, requestId: 'spot-http-cancel-01' };
+  const cancelled = await cancel(seller.token, terms);
+  assert.equal(cancelled.status, 200);
+  assert.deepEqual(cancelled.body.result.released, { asset: 'KGEN', amount: '4' });
+  assert.deepEqual(cancelled.body.player.balances.KGEN, { available: '97', locked: '0' });
+  assert.deepEqual(cancelled.body.asks, []);
+  assert.equal((await cancel(seller.token, terms)).body.replayed, true);
+  await api.restart();
+  assert.deepEqual((await read(seller.token)).body.player, cancelled.body.player);
+  assert.equal((await api.readDatabase()).spot.journal.length, 3);
+  assert.equal((await api.book(buyer.token)).wallet.free, 10, 'cockpit funds are independent');
+});
+
+test("spot API remains off for the existing cockpit preview configuration", async (t) => {
+  const api = await makeK11520BackendFixture(t);
+  assert.equal((await api.request('/api/v1/spot')).status, 404);
+});
 
 function k11520OrderRequest(market, requestId, extra = {}) {
   return {

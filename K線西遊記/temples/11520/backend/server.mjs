@@ -11,14 +11,24 @@ import {
 } from '../runtime/kgen-margin-runtime.mjs';
 import { FREE_ORACLE_MAX_AGE_MS, PUBLIC_MARKET_QUOTE_SOURCE } from '../runtime/public-market-quotes.mjs';
 import { requireV1TradingC } from '../controls/nonlinear-controls.mjs';
+import { createKgenKaiosSpotSimulation } from '../modules/kgen-native-market-cell.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '../../../..');
 const gamePath = '/K線西遊記/temples/11520/';
 const gameUrl = encodeURI(gamePath + 'game-5d.html') + '?world=12682&preview=server';
+const spotPath = gamePath + 'index.html';
+const spotUrl = encodeURI(spotPath) + '#/SPOT';
 const dataFileDefault = resolve(here, 'data', 'players.json');
+const spotDataFileDefault = resolve(here, 'data', 'spot-players.json');
 const resourceManifest = resolve(here, '..', 'assets', 'resource-manifest.json');
 const schema = 'K11520_SERVER_SIMULATION_V1';
+const spotSchema = 'K11520_SPOT_SIMULATION_JOURNAL_V1';
+const spotJournalLimit = 1000;
+const spotOrderLimit = spotJournalLimit / 2;
+const spotRequestId = /^[A-Za-z0-9][A-Za-z0-9:._-]{7,127}$/;
+const spotPlayerId = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
+const spotDecimal = /^\d{1,12}(?:\.\d{1,8})?$/;
 const markets = Object.freeze({ KX: 'BTCUSDT', KY: 'ETHUSDT', KZ: 'BNBUSDT' });
 const symbols = Object.values(markets);
 const requestKeyPattern = /^[a-zA-Z0-9_.:-]{1,128}$/;
@@ -130,14 +140,16 @@ function validObservation(input, market, source) {
     input.updatedAt > 0;
 }
 
-function safeStaticPath(pathname) {
+function safeStaticPath(pathname, spotPreview) {
   if (pathname.includes('\\') || pathname.includes('%') || pathname.includes('\0') ||
       pathname.split('/').some(part => part === '..' || part.startsWith('.'))) return false;
   if (pathname.startsWith(gamePath)) {
     const portable = pathname.slice(gamePath.length);
+    if (spotPreview && /^(?:index\.html|app\.mjs|styles\.css)$/.test(portable)) return true;
     return /^(game-5d\.html|sw\.js|manifest\.webmanifest)$/.test(portable) ||
       /^(assets|controls|data|runtime)\//.test(portable);
   }
+  if (spotPreview && pathname === '/K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js') return true;
   return /^\/(assets|core|docs|K線西遊記\/data)\//.test(pathname);
 }
 
@@ -215,15 +227,72 @@ function account(state, token) {
   return Object.values(state.players).find(player => player?.tokenHash === hash && player.ledger) ?? null;
 }
 
+function isSpotPlayer(state, id) {
+  if (typeof id !== 'string' || !spotPlayerId.test(id) || !Object.hasOwn(state.players, id)) return false;
+  const player = state.players[id];
+  return player?.id === id && player.ledger?.owner === id &&
+    typeof player.tokenHash === 'string' && /^[a-f0-9]{64}$/.test(player.tokenHash);
+}
+
+function spotOrderTerms(action, body) {
+  if (!record(body) || typeof body.requestId !== 'string' || !spotRequestId.test(body.requestId)) return null;
+  if (action === 'cancel') {
+    if (Object.keys(body).length !== 2 || typeof body.orderId !== 'string' || !/^O\d{1,10}$/.test(body.orderId)) return null;
+    return { requestId: body.requestId, orderId: body.orderId };
+  }
+  if (action !== 'place' || Object.keys(body).length !== 4 || !['BUY', 'SELL'].includes(body.side) ||
+      typeof body.price !== 'string' || !spotDecimal.test(body.price) ||
+      typeof body.quantity !== 'string' || !spotDecimal.test(body.quantity)) return null;
+  return { requestId: body.requestId, side: body.side, price: body.price, quantity: body.quantity };
+}
+
+function readSpotJournal(state) {
+  if (!Object.hasOwn(state, 'spot')) return [];
+  const { spot } = state;
+  if (!record(spot) || spot.schema !== spotSchema || !Array.isArray(spot.journal) ||
+      spot.journal.length > spotJournalLimit ||
+      spot.journal.filter(event => event?.action === 'place').length > spotOrderLimit) {
+    throw new Error('INVALID_SPOT_SIMULATION_JOURNAL');
+  }
+  return spot.journal;
+}
+
+function restoreSpotSimulation(state) {
+  let time = 0;
+  const market = createKgenKaiosSpotSimulation({ clock: () => time });
+  const requests = new Map();
+  for (const id of Object.keys(state.players)) if (isSpotPlayer(state, id)) market.addPlayer(id);
+
+  const getRequest = (id, requestId) => requests.get(id + ':' + requestId);
+  const fingerprint = (action, terms) => digest(JSON.stringify([action, terms]));
+  function execute({ action, playerId, at, terms }) {
+    time = at;
+    const result = action === 'place' ? market.placeOrder(playerId, terms) : market.cancelOrder(playerId, terms);
+    requests.set(playerId + ':' + terms.requestId, { fingerprint: fingerprint(action, terms), result });
+    return result;
+  }
+
+  for (const event of readSpotJournal(state)) {
+    const terms = record(event) && spotOrderTerms(event.action, event.terms);
+    if (!terms || !isSpotPlayer(state, event.playerId) ||
+        !Number.isSafeInteger(event.at) || event.at < 0 || event.at > 8.64e15 ||
+        getRequest(event.playerId, terms.requestId)) throw new Error('INVALID_SPOT_SIMULATION_JOURNAL_EVENT');
+    execute({ ...event, terms });
+  }
+  return { market, getRequest, fingerprint, execute };
+}
+
 export async function createK11520Server({
-  dataFile = dataFileDefault, now = Date.now, fetchImpl = globalThis.fetch,
+  spotPreview = false, dataFile = spotPreview ? spotDataFileDefault : dataFileDefault,
+  now = Date.now, fetchImpl = globalThis.fetch,
   readMarket = input => binanceObservationBatch(fetchImpl, input),
   readIndependent = input => bybitObservation(fetchImpl, input),
-  pollIntervalMs = 1200, jumpRatio = 0.05, corroborationRatio = 0.02, serveStatic = true, lanPreview = null,
+  pollIntervalMs = spotPreview ? 0 : 1200, jumpRatio = 0.05, corroborationRatio = 0.02, serveStatic = true, lanPreview = null,
 } = {}) {
   const file = resolve(dataFile);
   const lan = privateLanInterface(lanPreview);
   let state = await load(file);
+  let spot = spotPreview ? restoreSpotSimulation(state) : null;
   let tail = Promise.resolve();
   let loop = null;
   const pendingPolls = new Map();
@@ -236,9 +305,10 @@ export async function createK11520Server({
     return result;
   };
 
-  async function commit(candidate) {
+  async function commit(candidate, candidateSpot = spot) {
     await save(file, candidate);
     state = candidate;
+    spot = candidateSpot;
   }
 
   function wait(market, reason) {
@@ -395,8 +465,50 @@ export async function createK11520Server({
         kgen: ledger.free, kaios: 1000, kufo: 1, hp: 100, home: null,
         updatedAt: new Date(now()).toISOString(), tokenHash: digest(credential), ledger, requests: {} };
       next.players[id] = player;
-      await commit(next);
+      await commit(next, spotPreview ? restoreSpotSimulation(next) : null);
       return { ok: true, token: credential, player: playerView(player), orderMode: 'OFFCHAIN_SIMULATION' };
+    });
+  }
+
+  function submitSpot(id, action, body) {
+    return serial(async () => {
+      const terms = spotOrderTerms(action, body);
+      if (!terms) return { status: 400, payload: { ok: false, reason: 'INVALID_SPOT_REQUEST' } };
+      const earlier = spot.getRequest(id, terms.requestId);
+      if (earlier) {
+        return earlier.fingerprint === spot.fingerprint(action, terms) ?
+          { status: 200, payload: { ok: true, result: earlier.result, replayed: true, ...spot.market.snapshot(id) } } :
+          { status: 409, payload: { ok: false, reason: 'REQUEST_CONFLICT' } };
+      }
+      const journal = readSpotJournal(state);
+      // Reserve up to one later journal slot for cancelling each accepted order.
+      if (journal.length >= spotJournalLimit ||
+          action === 'place' && journal.filter(event => event.action === 'place').length >= spotOrderLimit) {
+        return { status: 409, payload: { ok: false, reason: 'SPOT_PREVIEW_JOURNAL_FULL' } };
+      }
+      const at = now();
+      if (!Number.isSafeInteger(at) || at < 0 || at > 8.64e15) throw new Error('INVALID_SPOT_SIMULATION_CLOCK');
+      const event = { action, playerId: id, terms, at };
+      // The candidate can consume sequence numbers or mutate its book while filling.
+      // Only swap it into the live view after the same event is durably saved.
+      const candidate = restoreSpotSimulation(state);
+      let result;
+      try {
+        result = candidate.execute(event);
+      } catch (error) {
+        if (error instanceof TypeError || error instanceof RangeError ||
+            ['SPOT_INVALID_DECIMAL', 'SPOT_INVALID_SIDE'].includes(error?.message)) {
+          return { status: 400, payload: { ok: false, reason: 'INVALID_SPOT_REQUEST' } };
+        }
+        if (['SPOT_INSUFFICIENT_BALANCE', 'SPOT_OPEN_ORDER_NOT_FOUND',
+          'SELF_MATCH_FORBIDDEN_SAME_OWNER', 'SELF_MATCH_FORBIDDEN_SAME_CONTROLLER'].includes(error?.message)) {
+          return { status: 409, payload: { ok: false, reason: error.message } };
+        }
+        throw error;
+      }
+      const next = { ...state, spot: { schema: spotSchema, journal: [...journal, event] } };
+      await commit(next, candidate);
+      return { status: 200, payload: { ok: true, result, replayed: false, ...candidate.market.snapshot(id) } };
     });
   }
 
@@ -457,19 +569,19 @@ export async function createK11520Server({
 
   async function staticResponse(res, path, method, privatePreview) {
     if (path === '/') {
-      res.writeHead(302, { location: gameUrl, 'cache-control': 'no-store' });
+      res.writeHead(302, { location: spotPreview ? spotUrl : gameUrl, 'cache-control': 'no-store' });
       return res.end();
     }
-    if (!safeStaticPath(path)) return response(res, 404, { ok: false, reason: 'NOT_FOUND' });
+    if (!safeStaticPath(path, spotPreview)) return response(res, 404, { ok: false, reason: 'NOT_FOUND' });
     const type = contentTypes.get(extname(path));
     if (!type) return response(res, 404, { ok: false, reason: 'NOT_FOUND' });
     try {
       const target = await realpath(resolve(repo, '.' + path));
       const key = relative(await realpath(repo), target);
-      if (key.startsWith('..' + sep) || !safeStaticPath('/' + key.split(sep).join('/')) ||
+      if (key.startsWith('..' + sep) || !safeStaticPath('/' + key.split(sep).join('/'), spotPreview) ||
           !(await stat(target)).isFile()) return response(res, 404, { ok: false, reason: 'NOT_FOUND' });
       let bytes = method === 'HEAD' ? undefined : await readFile(target);
-      if (bytes && privatePreview && path === gamePath + 'game-5d.html') {
+      if (bytes && privatePreview && (path === gamePath + 'game-5d.html' || spotPreview && path === spotPath)) {
         const shell = bytes.toString('utf8');
         if (!shell.includes('</head>')) throw new Error('PRIVATE_PREVIEW_SHELL_UNAVAILABLE');
         bytes = shell.replace('</head>', lanMarker + '</head>');
@@ -502,13 +614,15 @@ export async function createK11520Server({
       return response(res, 400, { ok: false, reason: 'INVALID_PREVIEW_ACCESS_FORM' });
     }
     const fields = new URLSearchParams(await requestBody(req));
-    const world = fields.get('world') === '88888' ? '88888' : '12682';
+    const requestedWorld = fields.get('world');
+    const world = spotPreview && requestedWorld === 'SPOT' ? 'SPOT' :
+      requestedWorld === '88888' ? '88888' : '12682';
     const code = fields.get('code') ?? '';
     if (!accessCodePattern.test(code) ||
         !timingSafeEqual(Buffer.from(digest(code)), Buffer.from(lan.expectedCode))) return lanAccessForm(res, world);
     const expiry = String(now() + accessLifetimeSeconds * 1000);
     res.writeHead(303, {
-      location: gameUrl.replace('world=12682', 'world=' + world),
+      location: world === 'SPOT' ? spotUrl : gameUrl.replace('world=12682', 'world=' + world),
       'set-cookie': `${accessCookie}=${expiry}.${sessionSignature(req.socket.remoteAddress, expiry)}; Path=/; Max-Age=${accessLifetimeSeconds}; HttpOnly; SameSite=Strict`,
       'cache-control': 'no-store',
     });
@@ -538,8 +652,10 @@ export async function createK11520Server({
       const path = decodeURIComponent(url.pathname);
       if (privatePreview && method === 'POST' && path === '/preview/access') return await handleLanAccess(req, res, base);
       if (privatePreview && !lanAuthorized(req)) {
-        if (method === 'GET' && (path === '/' || path === gamePath + 'game-5d.html')) {
-          return lanAccessForm(res, url.searchParams.get('world') === '88888' ? '88888' : '12682');
+        const wantsSpot = spotPreview && (path === '/' || path === spotPath);
+        if (method === 'GET' && (wantsSpot || path === '/' || path === gamePath + 'game-5d.html')) {
+          const world = wantsSpot ? 'SPOT' : url.searchParams.get('world') === '88888' ? '88888' : '12682';
+          return lanAccessForm(res, world);
         }
         return response(res, 401, { ok: false, reason: 'PRIVATE_PREVIEW_ACCESS_REQUIRED' });
       }
@@ -555,6 +671,24 @@ export async function createK11520Server({
           observations: state.observations,
           statuses: Object.fromEntries(symbols.map(market => [market, marketView(market, time)])),
         });
+      }
+      if (path === '/api/v1/spot' || path === '/api/v1/spot/orders' || path === '/api/v1/spot/orders/cancel') {
+        if (!spotPreview) return response(res, 404, { ok: false, reason: 'NOT_FOUND' });
+        const player = account(state, bearer(req));
+        const id = isSpotPlayer(state, player?.id) ? player.id : null;
+        if (method === 'GET' && path === '/api/v1/spot') {
+          if (!id && req.headers.authorization !== undefined) {
+            return response(res, 401, { ok: false, reason: 'UNAUTHORIZED' });
+          }
+          return response(res, 200, { ok: true, ...spot.market.snapshot(id) });
+        }
+        if (method === 'POST' && path !== '/api/v1/spot') {
+          if (!id) return response(res, 401, { ok: false, reason: 'UNAUTHORIZED' });
+          const action = path.endsWith('/cancel') ? 'cancel' : 'place';
+          const { status, payload } = await submitSpot(id, action, await bodyOf(req));
+          return response(res, status, payload);
+        }
+        return response(res, 404, { ok: false, reason: 'NOT_FOUND' });
       }
       if (method === 'POST' && path === '/api/v1/login') {
         const result = await login(req, await bodyOf(req));
@@ -638,7 +772,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const lanAddress = process.env.K11520_PREVIEW_LAN_ADDRESS;
   const lanCode = process.env.K11520_PREVIEW_LAN_CODE;
   const app = await createK11520Server({
-    dataFile: process.env.K11520_PREVIEW_DATA_FILE || dataFileDefault,
+    spotPreview: process.env.K11520_SPOT_PREVIEW === '1',
+    dataFile: process.env.K11520_PREVIEW_DATA_FILE || undefined,
     lanPreview: lanAddress || lanCode ? { address: lanAddress, accessCode: lanCode } : null,
   });
   const address = await app.listen({ port: Number(process.env.PORT || 11520) });

@@ -1,6 +1,7 @@
 import { createResilientBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.1.2-storage-fallback";
 import {getKaiosAudio} from '../../../assets/kaios-audio.mjs';
 import { fetchAtrLampReference, lampScanPoint } from './runtime/public-market-quotes.mjs?v=11520-v4.1.3';
+import { createK11520PreviewRequestId, isK11520PrivatePreviewHost } from "./runtime/real-trading-order-intent.mjs";
 import { createListing } from "../../../core/market/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.1-ai-ant-bank";
@@ -22,7 +23,7 @@ import {
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.1-ai-ant-bank";
 
 const NAVIGATION = Object.freeze([
-  ["MARKET", "商品報價"], ["TOKENS", "BSC56 換幣"], ["HOME", "原工作台"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
+  ["MARKET", "商品報價"], ["SPOT", "KGEN／KAIOS 現貨"], ["TOKENS", "BSC56 換幣"], ["HOME", "原工作台"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
   ["JOBS", "JOBS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"],
   ["FACTORIES", "FACTORIES"], ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"],
   ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"], ["BANK", "AI ANT BANK"]
@@ -155,6 +156,298 @@ function bindGoodsMarketEvents() {
     const out=document.querySelector("#lamp-rfq-output"),status=document.querySelector("#lamp-rfq-status");
     try{await navigator.clipboard.writeText(out.value);status.textContent="已複製。仍未提交原工單、建立訂單或付款。";}catch{out.focus();out.select();status.textContent="瀏覽器不允許自動複製；文字已選取，請手動複製。尚未送出。";}
   });
+}
+
+const SPOT_SESSION_KEY = "11520.spot-preview.session.v1";
+const SPOT_ACTION = Object.freeze({ place: "/api/v1/spot/orders", cancel: "/api/v1/spot/orders/cancel" });
+const SPOT_DECIMAL = /^[0-9]{1,12}(?:\.[0-9]{1,8})?$/;
+
+function spotPreviewAllowed() {
+  if (location.protocol !== "http:") return false;
+  return ["127.0.0.1", "localhost"].includes(location.hostname) ||
+    (isK11520PrivatePreviewHost(location.hostname) &&
+      document.querySelector('meta[name="k11520-private-preview"]')?.content === "lan");
+}
+
+function spotMarketView() {
+  return `<section class="spot-market" id="spot-market">
+    <header class="spot-heading">
+      <div><div class="eyebrow">模擬現貨</div><h1>KGEN／KAIOS</h1><p>以 KAIOS 報價、買賣 KGEN。價格由限價單及本站撮合產生。</p></div>
+      <button class="button secondary" id="spot-refresh" type="button" disabled>更新訂單簿</button>
+    </header>
+    <div class="notice" id="spot-status" role="status" aria-live="polite">正在讀取私人模擬訂單簿。</div>
+    <dl class="spot-quotes">
+      <div><dt>買一</dt><dd id="spot-best-bid">未讀取</dd></div>
+      <div><dt>賣一</dt><dd id="spot-best-ask">未讀取</dd></div>
+      <div><dt>最新成交</dt><dd id="spot-last-trade">未讀取</dd></div>
+    </dl>
+    <div class="spot-layout">
+      <div class="spot-column">
+        <section class="card" aria-labelledby="spot-book-title">
+          <h2 id="spot-book-title">訂單簿</h2>
+          <div class="spot-scroll"><table class="spot-table">
+            <thead><tr><th scope="col">方向</th><th scope="col">限價（KAIOS）</th><th scope="col">掛單量（KGEN）</th></tr></thead>
+            <tbody id="spot-asks"><tr><td colspan="3">未讀取賣單</td></tr></tbody>
+            <tbody id="spot-bids"><tr><td colspan="3">未讀取買單</td></tr></tbody>
+          </table></div>
+        </section>
+        <section class="card" aria-labelledby="spot-trades-title">
+          <h2 id="spot-trades-title">成交紀錄</h2>
+          <div class="spot-scroll"><table class="spot-table">
+            <thead><tr><th scope="col">成交價（KAIOS）</th><th scope="col">數量（KGEN）</th><th scope="col">時間</th></tr></thead>
+            <tbody id="spot-trades"><tr><td colspan="3">未讀取成交紀錄</td></tr></tbody>
+          </table></div>
+        </section>
+      </div>
+      <div class="spot-column">
+        <section class="card" aria-labelledby="spot-entry-title">
+          <h2 id="spot-entry-title">限價委託</h2>
+          <form id="spot-login-form">
+            <fieldset id="spot-login-controls" disabled>
+              <div class="field"><label for="spot-name">模擬暱稱</label><input id="spot-name" maxlength="40" autocomplete="off" placeholder="旅人"></div>
+              <button class="button secondary" type="submit">建立模擬帳戶</button>
+            </fieldset>
+          </form>
+          <p id="spot-account" hidden></p>
+          <dl class="spot-balances" id="spot-balances"></dl>
+          <form id="spot-order-form">
+            <fieldset id="spot-order-controls" disabled>
+              <div class="field"><label for="spot-side">買賣方向</label><select id="spot-side"><option value="BUY">買入 KGEN</option><option value="SELL">賣出 KGEN</option></select></div>
+              <div class="spot-order-values">
+                <div class="field"><label for="spot-quantity">數量（KGEN）</label><input id="spot-quantity" inputmode="decimal" maxlength="21" required></div>
+                <div class="field"><label for="spot-price">限價（KAIOS／KGEN）</label><input id="spot-price" inputmode="decimal" maxlength="21" required></div>
+              </div>
+              <p class="muted spot-rules" id="spot-rules"></p>
+              <button class="button" id="spot-submit" type="submit">掛單</button>
+            </fieldset>
+          </form>
+          <button class="button secondary" id="spot-retry" type="button" hidden>重試同一筆請求</button>
+          <button class="button secondary" id="spot-new-session" type="button" hidden>改用新的模擬帳戶</button>
+        </section>
+        <section class="card" aria-labelledby="spot-orders-title">
+          <h2 id="spot-orders-title">我的掛單</h2><div id="spot-own-orders"></div>
+        </section>
+        <section class="card" aria-labelledby="spot-receipts-title">
+          <h2 id="spot-receipts-title">我的成交回執</h2><div id="spot-receipts"></div>
+        </section>
+      </div>
+    </div>
+  </section>`;
+}
+
+function spotReceiptTime(timestamp) {
+  const time = new Date(timestamp);
+  return Number.isFinite(time.getTime()) ? time.toLocaleTimeString("zh-TW", { timeZone: "Asia/Taipei", hour12: false }) : "—";
+}
+
+function spotFailureText(error) {
+  const reason = error.message;
+  if (reason === "PRIVATE_PREVIEW_ACCESS_REQUIRED") return "私人試玩授權已到期。請重新開啟原預覽入口。";
+  if (error.status === 401) return "目前服務無法辨識此模擬帳戶。請連回原服務更新，或改用新帳戶。";
+  if (reason === "SPOT_PREVIEW_JOURNAL_FULL") return "模擬掛單已達上限。仍可撤銷既有掛單。";
+  if (error.status === 404) return "目前服務未啟用現貨模擬。";
+  if (/INSUFFICIENT/.test(reason)) return "可用模擬餘額不足。";
+  if (/SELF_MATCH/.test(reason)) return "無法與同一模擬帳戶的掛單撮合。";
+  if (/ORDER_NOT_FOUND|ORDER_NOT_OPEN|CANCEL/.test(reason)) return "找不到可撤銷的掛單，請先更新訂單簿。";
+  if (/INVALID|PRECISION|TICK|LOT/.test(reason)) return "請核對限價與數量，並依畫面刻度輸入。";
+  return "私人模擬服務目前無法確認結果。";
+}
+
+async function spotRequest(path, { token, body } = {}) {
+  const writing = body !== undefined;
+  const headers = { accept: "application/json" };
+  if (token) headers.authorization = "Bearer " + token;
+  if (writing) headers["content-type"] = "application/json";
+  const response = await fetch(path, {
+    method: writing ? "POST" : "GET",
+    mode: "same-origin",
+    credentials: "same-origin",
+    cache: "no-store",
+    redirect: "error",
+    signal: AbortSignal.timeout(6000),
+    headers,
+    ...(writing ? { body: JSON.stringify(body) } : {})
+  });
+  const data = await response.json();
+  if (!response.ok || data?.ok !== true) {
+    const error = new Error(String(data?.reason ?? "SPOT_RESPONSE_INVALID"));
+    error.status = response.status;
+    throw error;
+  }
+  return data;
+}
+
+function bindSpotMarketEvents() {
+  const root = content.querySelector("#spot-market");
+  const node = (id) => root.querySelector("#spot-" + id);
+  const status = node("status");
+  const setStatus = (message, failed = false) => {
+    status.textContent = message;
+    status.classList.toggle("error", failed);
+  };
+  if (!spotPreviewAllowed()) {
+    setStatus("此現貨功能僅在私人模擬預覽可操作。", true);
+    return;
+  }
+  let session, snapshot = null, connected = false, busy = false, sessionExpired = false;
+  function saveSession(value) {
+    sessionStorage.setItem(SPOT_SESSION_KEY, JSON.stringify(value));
+    session = value;
+  }
+  try {
+    const saved = sessionStorage.getItem(SPOT_SESSION_KEY);
+    session = saved === null ? null : JSON.parse(saved);
+    if (session !== null && (!/^[a-f0-9]{48}$/i.test(session.token) ||
+      (session.pending && (!Object.hasOwn(SPOT_ACTION, session.pending.kind) ||
+        !/^[a-f0-9]{32}$/.test(session.pending.body?.requestId))))) {
+      throw new Error("SPOT_SESSION_INVALID");
+    }
+    if (saved === null) saveSession(null);
+  } catch {
+    setStatus("無法讀寫此分頁的模擬登入資料。", true);
+    return;
+  }
+
+  function syncControls() {
+    node("refresh").disabled = busy;
+    node("login-form").hidden = Boolean(session);
+    node("login-controls").disabled = busy || !connected;
+    node("order-controls").disabled = busy || !connected || !snapshot?.player || Boolean(session?.pending);
+    node("retry").hidden = !session?.pending;
+    node("retry").disabled = busy || sessionExpired;
+    node("new-session").hidden = !sessionExpired;
+    node("new-session").disabled = busy;
+    root.querySelectorAll("[data-spot-cancel]").forEach((button) => { button.disabled = node("order-controls").disabled; });
+  }
+
+  function show(data) {
+    if (data.market?.baseAsset !== "KGEN" || data.market?.quoteAsset !== "KAIOS" ||
+        ![data.bids, data.asks, data.trades].every(Array.isArray) ||
+        (session && (!data.player?.balances?.KGEN || !data.player?.balances?.KAIOS ||
+          ![data.player.orders, data.player.receipts].every(Array.isArray)))) {
+      throw new Error("SPOT_RESPONSE_INVALID");
+    }
+    const emptyRow = (message) => `<tr><td colspan="3" class="muted">${message}</td></tr>`;
+    const depth = (rows, side) => rows.map(({ price, quantity }) =>
+      `<tr><td class="spot-${side}">${side === "bid" ? "買入" : "賣出"}</td><td data-spot-value="price">${html(price)}</td><td data-spot-value="quantity">${html(quantity)}</td></tr>`
+    ).join("") || emptyRow(side === "bid" ? "尚無買單" : "尚無賣單");
+    const best = (row) => row ? `${row.price} KAIOS · ${row.quantity} KGEN` : "尚無掛單";
+    node("best-bid").textContent = best(data.bids[0]);
+    node("best-ask").textContent = best(data.asks[0]);
+    node("last-trade").textContent = data.lastTrade ? `${data.lastTrade.price} KAIOS` : "尚無成交";
+    node("bids").innerHTML = depth(data.bids, "bid");
+    node("asks").innerHTML = depth(data.asks, "ask");
+    node("trades").innerHTML = data.trades.map(({ id, price, quantity, timestamp }) =>
+      `<tr data-spot-trade="${html(id)}"><td data-spot-value="price">${html(price)}</td><td data-spot-value="quantity">${html(quantity)}</td><td>${html(spotReceiptTime(timestamp))}</td></tr>`
+    ).join("") || emptyRow("尚無成交");
+    node("rules").textContent = `價格刻度 ${data.market.tickSize} KAIOS · 數量刻度 ${data.market.lotSize} KGEN`;
+    const player = data.player;
+    node("account").hidden = !player;
+    node("account").textContent = player ? `模擬帳戶 ${session?.name || "旅人"}` : "";
+    node("balances").innerHTML = player ? ["KGEN", "KAIOS"].map((asset) => {
+      const funds = player.balances[asset];
+      return `<div data-spot-asset="${asset}"><dt>${asset}</dt><dd>可用 <strong data-spot-available>${html(funds.available)}</strong></dd><dd>鎖定 <strong data-spot-locked>${html(funds.locked)}</strong></dd></div>`;
+    }).join("") : "";
+    const side = (value) => value === "BUY" ? "買入" : "賣出";
+    node("own-orders").innerHTML = player?.orders.map((order) =>
+      `<div class="spot-order-row" data-spot-order="${html(order.id)}"><div><strong>${side(order.side)} @ ${html(order.price)} KAIOS</strong>
+        <small>剩餘 <span data-spot-remaining>${html(order.remaining)}</span>／${html(order.quantity)} KGEN · ${html(order.id)}</small></div>
+        <button class="button secondary" type="button" data-spot-cancel="${html(order.id)}">撤單</button></div>`
+    ).join("") || `<p class="muted">${player ? "沒有未結掛單" : "登入後可查閱掛單"}</p>`;
+    node("receipts").innerHTML = player?.receipts.map((receipt) =>
+      `<div class="spot-order-row" data-spot-receipt="${html(receipt.id)}"><div><strong>${side(receipt.side)} <span data-spot-value="quantity">${html(receipt.quantity)}</span> KGEN</strong>
+        <small>成交價 ${html(receipt.price)} KAIOS · 結算 ${html(receipt.quoteAmount)} KAIOS</small>
+        <small>${html(receipt.id)} · ${html(spotReceiptTime(receipt.timestamp))}</small></div></div>`
+    ).join("") || `<p class="muted">${player ? "尚無個人成交回執" : "登入後可查閱回執"}</p>`;
+    snapshot = data;
+    connected = true;
+    sessionExpired = false;
+  }
+
+  async function update(action, message) {
+    if (busy) return;
+    busy = true;
+    syncControls();
+    try {
+      await action();
+      if (root.isConnected) setStatus(message);
+    } catch (error) {
+      if (!root.isConnected) return;
+      if (!error.status || error.status >= 500 || [401, 403, 404].includes(error.status)) connected = false;
+      if (error.status === 401 && error.message === "UNAUTHORIZED" && session) sessionExpired = true;
+      const pendingNotice = session?.pending && !sessionExpired ? " 請重試同一筆請求，避免重複掛單。" : "";
+      setStatus(spotFailureText(error) + pendingNotice, true);
+    } finally {
+      busy = false;
+      if (root.isConnected) syncControls();
+    }
+  }
+
+  const refresh = () => update(async () => {
+    const data = await spotRequest("/api/v1/spot", { token: session?.token });
+    if (root.isConnected) show(data);
+  }, "私人模擬訂單簿已更新。");
+
+  async function submit(pending) {
+    saveSession({ ...session, pending });
+    try {
+      const data = await spotRequest(SPOT_ACTION[pending.kind], { token: session.token, body: pending.body });
+      if (!root.isConnected) return;
+      show(data);
+      saveSession({ ...session, pending: null });
+      if (pending.kind === "place") node("order-form").reset();
+    } catch (error) {
+      if (root.isConnected && [400, 409, 422].includes(error.status)) saveSession({ ...session, pending: null });
+      throw error;
+    }
+  }
+
+  node("refresh").addEventListener("click", refresh);
+  node("login-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!connected || session) return;
+    void update(async () => {
+      const name = node("name").value.trim() || "旅人";
+      const result = await spotRequest("/api/v1/login", { body: { name } });
+      if (!root.isConnected) return;
+      if (!/^[a-f0-9]{48}$/i.test(result.token ?? "")) throw new Error("SPOT_LOGIN_FAILED");
+      saveSession({ token: result.token, name });
+      const data = await spotRequest("/api/v1/spot", { token: session.token });
+      if (root.isConnected) show(data);
+    }, "模擬帳戶已就緒。");
+  });
+  node("order-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (node("order-controls").disabled) return;
+    const side = node("side").value, quantity = node("quantity").value.trim(), price = node("price").value.trim();
+    if (![quantity, price].every((input) => SPOT_DECIMAL.test(input) && /[1-9]/.test(input))) {
+      setStatus("數量與限價須大於零，整數最多 12 位、小數最多 8 位。", true);
+      return;
+    }
+    void update(() => submit({ kind: "place", body: { side, quantity, price, requestId: createK11520PreviewRequestId() } }),
+      "委託已核對。成交請查看回執。");
+  });
+  node("own-orders").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-spot-cancel]");
+    if (button && !button.disabled && !node("order-controls").disabled) {
+      void update(() => submit({ kind: "cancel", body: { orderId: button.dataset.spotCancel, requestId: createK11520PreviewRequestId() } }),
+        "撤單已核對，未成交餘額已解鎖。");
+    }
+  });
+  node("retry").addEventListener("click", () => {
+    if (session?.pending && !sessionExpired) void update(() => submit(session.pending), "上一筆請求已核對。");
+  });
+  node("new-session").addEventListener("click", () => {
+    if (!sessionExpired || busy) return;
+    try {
+      saveSession(null);
+      sessionExpired = false;
+      void refresh();
+    } catch {
+      setStatus("無法更新此分頁的模擬登入資料。", true);
+    }
+  });
+  void refresh();
 }
 
 function renderNav(active) {
@@ -661,6 +954,7 @@ async function render() {
   renderNav(route.page === "MY_LIFE" ? "MY_LIFE" : route.page);
   const views = {
     MARKET: goodsMarketView,
+    SPOT: spotMarketView,
     HOME: homeView,
     REQUEST: publicRequestGatewayView,
     LIFE: () => route.id ? lifeDetailView(route.id) : lifeMarketView(),
@@ -685,6 +979,7 @@ async function render() {
 
 function bindViewEvents(route) {
   if (route.page === "MARKET") bindGoodsMarketEvents();
+  if (route.page === "SPOT") bindSpotMarketEvents();
   if (route.page === "HOME") bindPlayerFirstEvents();
   if (route.page === "LIFE_FACTORY") bindLifeFactoryEvents();
   if (route.page === "TOKENS") bindTokenEvents();

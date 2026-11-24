@@ -500,3 +500,25 @@ The K12345 → K11520 NVIDIA GPU route, landed-cost model, acquisition evidence 
 - Real-trade readiness always fails closed while independent GPU readiness verifiers are not wired.
 
 Lineage: historical PR #178; current-main successor preserves the fail-closed actor and settlement boundary introduced by PR #328.
+
+## KGEN／KAIOS 現貨模擬
+
+沿用 11520 首頁的「現貨模擬」和既有私人試玩服務。啟動
+`backend/server.mjs` 時設定 `K11520_SPOT_PREVIEW=1`，同一服務上的獨立
+瀏覽器工作階段可各自建立模擬帳戶，再用同一張訂單簿掛單、成交或撤單。
+預設只綁 `127.0.0.1:11520`。模擬帳戶各有 100 KGEN 和 1,000 KAIOS，與
+駕駛艙模擬帳本及真錢包分開；訂單與成交記錄由預覽服務保存。
+
+買入 KGEN 的限價以每 KGEN 幾枚 KAIOS 表示。價格和數量可輸入最多八位小數。
+買單按限價鎖 KAIOS，賣單鎖 KGEN。撮合依價格優先、同價時間優先，執行價為
+已掛單的價格。部分成交的剩餘量留在原價位。撤單只退尚未成交的鎖定量。
+最新成交和雙邊回執只由模擬帳本的實際撮合產生。起始盤無報價或成交，
+PancakeSwap 池價和開池比例均不參與。
+
+後續沿用 `core/assets` 的 `asset_id`、`asset_type`、`owner_id` 與
+`controller_id`，以 `core/market` 的 `currency_id` 指定 KGEN 或 KAIOS，
+透過 `rights_offered`／`rights_transferred` 表明所有權或使用、授權等範圍。
+琉璃燈與土地的權屬，及音響、導航、多工導航與自動駕駛的使用權期限、
+撤銷條件和交付證據，依各資產的紀錄和驗收規則確認後才可啟用。
+此階段原商品詢價仍由 11520 的預設頁處理，12682／88888 通往原駕駛艙。
+主網和公開上線待另行驗收及核定。
