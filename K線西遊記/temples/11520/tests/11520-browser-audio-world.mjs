@@ -32,7 +32,17 @@ try{
   const page=await context.newPage(),row={width,height,errors:[]};report.rows.push(row);page.on('pageerror',e=>row.errors.push(String(e)));page.setDefaultTimeout(20000);
   await page.goto(base+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html');await ready(page);
   // Real controller gesture, not a programmatic unlock or synthetic award.
-  await page.locator('#k11520MovePlane').click();await page.waitForFunction(()=>__K11520_BGM__.playing);
+  const origin=await page.evaluate(()=>{
+   for(let y=120;y<innerHeight-50;y+=40){
+    for(let x=50;x<innerWidth-50;x+=40){
+     if(globalThis.__K11520_CAMERA__?.isWorldGestureArea(x,y))return{x,y};
+    }
+   }
+   return null;
+  });
+  assert.ok(origin,'a blank world touch can unlock the audio');
+  await page.touchscreen.tap(origin.x,origin.y);
+  await page.waitForFunction(()=>__K11520_BGM__.playing);
   assert.equal((await audio(page)).activeMusicLayers,1);
   row.signal=await page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<30;i++){for(const a of __audioAnalysers){const v=new Float32Array(a.fftSize);a.getFloatTimeDomainData(v);let sum=0;for(const x of v){peak=Math.max(peak,Math.abs(x));sum+=x*x;}rms=Math.max(rms,Math.sqrt(sum/v.length));}await new Promise(r=>setTimeout(r,100));}return{peak,rms};});
   assert.ok(row.signal.rms>.008&&row.signal.peak>.02&&row.signal.peak<.95,'11520 destination signal above near-silence and below clipping');

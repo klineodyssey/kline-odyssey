@@ -174,8 +174,12 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
 });
 
 test('canonical shared release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes("SHARED_GAME_VERSION+' · 5D K線西遊記"));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes('const PRODUCT_VERSION=SHARED_GAME_VERSION'));
+  const bootstrap=read('../runtime/game-5d-bootstrap.mjs');
+  assert.ok(fixes.includes("'<span class=\"hqLine\"><span>'+sharedGamePresentation().title+'</span></span><span class=\"brandMetaV250\"><span>'+SHARED_GAME_VERSION+'</span>"));
+  assert.ok(bootstrap.includes('const PRODUCT_VERSION=SHARED_GAME_VERSION'));
+  assert.ok(bootstrap.includes('const expected=PRODUCT_VERSION;'));
+  const settings=read('../runtime/mobile-ui-settings.mjs');
+  assert.ok(settings.includes('stamp.textContent=SHARED_GAME_VERSION;'),'the visible build stamp has only the canonical version');
   const registry=read('../../../../assets/kaios-world-registry.mjs');
   assert.ok(registry.includes('version:SHARED_GAME_VERSION'),'Portal registry must advertise the same game release');
   // Reuse the canonical release guard established by the Courier QA repair;
@@ -444,8 +448,16 @@ test('floating movement follows the player while idle and explicit camera modes 
   }
   delete camera.userData.k11520NavigationFocus;camera.position={x:20,y:8,z:12};camera.lookAt(20,4,22);assert.deepEqual(camera.position,{x:20,y:8,z:12},'release resumes the dead zone from the last actual focus without a jump');
   const assignment=main.split('\n').find(line=>line.includes('camera.userData.k11520NavigationFocus='));assert.ok(assignment);
-  for(const [manual,recenter,floating,home,expected] of [[false,false,true,false,'PLAYER_CONTROL'],[false,false,false,false,null],[true,false,true,false,'MANUAL_CAMERA'],[false,true,true,false,'MANUAL_CAMERA'],[false,false,false,true,'PLAYER_HOME']]){
-    const ctx={camera:{userData:{}},cameraView:{manual},cameraRecenterPending:recenter,controlState:()=>({floating:{active:floating}}),playerHomeFraming:home,__K11520_XYZ_MAP_NAVIGATION__:{source:'PLAYER_HOME'}};runInNewContext(assignment,ctx);assert.equal(ctx.camera.userData.k11520NavigationFocus,expected);
+  for(const [manual,recenter,gesture,home,expected] of [
+    [false,false,'DRAGGING',false,'PLAYER_CONTROL'],
+    [false,false,'PRESSED',false,null],
+    [false,false,'IDLE',false,null],
+    [true,false,'DRAGGING',false,'MANUAL_CAMERA'],
+    [false,true,'PRESSED',false,'MANUAL_CAMERA'],
+    [false,false,'PRESSED',true,'PLAYER_HOME'],
+  ]){
+    const ctx={camera:{userData:{}},cameraView:{manual},cameraRecenterPending:recenter,controlState:()=>({floating:{active:gesture!=='IDLE',state:gesture}}),playerHomeFraming:home,__K11520_XYZ_MAP_NAVIGATION__:{source:'PLAYER_HOME'}};
+    runInNewContext(assignment,ctx);assert.equal(ctx.camera.userData.k11520NavigationFocus,expected,gesture);
   }
 });
 
@@ -1244,7 +1256,7 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Fixed entry floor: prior published main body bf5c2cbaacedeba8015c9447753111437afe9f11e4758e2e20ab418a36db0539.
    // Prior published fixed-entry-floor body: e5ca793767852c87ec296bed46aa789e4b66ab04e8929a5e0cd217a48cca005a.
   // runtime/game-5d-main.mjs at the private-preview baseline a673c89b: fbd9dddecdb1c7f2cf439d727dfa1c7361ee820f9d7616de9316badcd34e8881.
-   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'c0a7147a3a851affddda31a21091f54b3447aa111c4c8b02b420e1a58f5be125'},
+   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'47bc14b7d806141eb339311c62b68972adc0f1081062bfcf3661330c5955cc33'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'f3eee0ef282b388496d9b5c485304899aa7f4d608d14f5b8f854273ee409b1a1'},
   // Prior published order adapter body bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078.
   // runtime/real-trading-order-intent.mjs at the private-preview baseline a673c89b: e39454c964545311404b98efaad8449e74a0d07d7369602eec28bb401c76465d.
@@ -1254,7 +1266,7 @@ test('simulation component revisions expose complete provenance and recorded exe
    'runtime/game-ui-product-fixes-v23.mjs':{"revision":"2026-11-24.PLAYER-LIFE-TOAST-HEADER","sourceCommit":"bab36c546c2643c2462d987d59ee70e0b1552896","ancestorCommit":"bab36c546c2643c2462d987d59ee70e0b1552896","lastUpdated":"2026-11-24","updatedBy":"Codex / 衡曜 / Human-authorized","reviewedBy":"Player Life placement source review complete; exact-head and release acceptance pending","taskId":"K11520-FINAL-SIMULATION-20261123-01","nonMetadataSha256":"183c07a5c40b6d2bc8ba448bf407dcbfb15c924d393fc874cdfe1b8d1762e594"},
    // Prior published game shell body: f4ae42eca3c7c68622747423bfff3981fdd2438dab2a891ca696026b153364cc.
   // game-5d.html at the private-preview baseline a673c89b: f2988732b4ccecf5bd2d6cca07586cb251a61c79bff43d0ee8b05f0d1c42c999.
-   'game-5d.html':{nonMetadataSha256:'a728791f8a4e23edf3cf0ea71018bcb8ed136d6677e3c0e01982104924b11c46'}
+   'game-5d.html':{nonMetadataSha256:'e6d7767c878bcb29f376c8577d5fff1073d16d6139dece5c72dd3a5943caaf88'}
  };
  for(const ancestor of assets){
   const asset={...ancestor,...current[ancestor.path]};
@@ -1406,13 +1418,14 @@ async function floatingHudFixture(width,height,{hud=true}={}){
   const document={hidden:false,documentElement:{dataset:{k11520HudMode:'ON_DEMAND'},classList:{contains:n=>classes.has(n),toggle:(n,on)=>on?classes.add(n):classes.delete(n)}},querySelector:s=>nodes.get(s)||null,querySelectorAll:s=>s.split(',').map(k=>nodes.get(k)).filter(Boolean),dispatchEvent:()=>{}};
   const context={document,innerWidth:width,innerHeight:height,getComputedStyle:el=>el.computed,clearTimeout:()=>{},CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail}}};
   runInNewContext(read('../runtime/joystick-xzxyyz.mjs').replaceAll('export function ','function ')+"\ninstallStarted=true;globalThis.begin=begin11520FloatingJoystick;globalThis.move=move11520FloatingJoystick;globalThis.end=end11520FloatingJoystick;globalThis.setPlane=value=>{mode=value;exposeMotion()};",context);
-  return{context,nodes,joy,knob,rect,snapshot:()=>JSON.parse(JSON.stringify(context.__K11520_3D_CONTROL__))};
+  return{context,nodes,joy,knob,rect,membrane:()=>document.documentElement.dataset.k11520MembraneActive,snapshot:()=>JSON.parse(JSON.stringify(context.__K11520_3D_CONTROL__))};
 }
 
 test('floating visual base avoids visible HUD while preserving clear origins and failing closed without space',async()=>{
   for(const [width,height] of [[390,844],[844,390],[480,900]])for(const x of [80,12,width-12]){
     const f=await floatingHudFixture(width,height);assert.equal(f.context.begin({pointerId:7,x,y:80,isTrusted:true}),true);
     const state=f.snapshot(),b=f.joy.getBoundingClientRect();assert.deepEqual(state.floating.pressOrigin,{x,y:80});assert.deepEqual(state.vector,{x:0,y:0,z:0});
+    assert.equal(state.floating.state,'PRESSED');assert.equal(f.membrane(),'0','a stationary press does not activate movement');
     assert.ok(b.left>=0&&b.top>=0&&b.right<=width&&b.bottom<=height,'the whole visual base remains in the viewport');
     for(const [selector,node] of f.nodes)if(selector!=='#joy'&&selector!=='#knob'){
       const r=node.getBoundingClientRect();assert.ok(b.right+4<=r.left||b.left-4>=r.right||b.bottom+4<=r.top||b.top-4>=r.bottom,width+'x'+height+' visual base must avoid '+selector);
@@ -1437,11 +1450,12 @@ test('floating HUD relocation retains raw deltas, every plane, a fixed base, thu
     const origin=shifted.snapshot().floating.origin;assert.notDeepEqual(origin,{x:80,y:80});
     for(const [dx,dy] of [[0,0],[20,-20],[-20,20],[300,-300]]){
       for(const f of [shifted,clear])assert.equal(f.context.move({pointerId:7,x:80+dx,y:80+dy}),true);
-      const a=shifted.snapshot(),b=clear.snapshot();assert.deepEqual(a.vector,b.vector,'same raw delta has identical '+mode+' intent');assert.deepEqual(a.floating.pressOrigin,{x:80,y:80});assert.deepEqual(a.floating.origin,origin,'base does not chase the moving finger');
+      const a=shifted.snapshot(),b=clear.snapshot();if(Math.hypot(dx,dy)>10){assert.equal(a.floating.state,'DRAGGING');assert.equal(shifted.membrane(),'1')}
+      assert.deepEqual(a.vector,b.vector,'same raw delta has identical '+mode+' intent');assert.deepEqual(a.floating.pressOrigin,{x:80,y:80});assert.deepEqual(a.floating.origin,origin,'base does not chase the moving finger');
       const offsets=shifted.knob.style.transform.match(/-?\d+(?:\.\d+)?/g).map(Number);assert.ok(Math.hypot(...offsets)<=54.01,'original thumb travel remains clamped');
     }
     const before=shifted.snapshot();assert.equal(shifted.context.move({pointerId:99,x:100,y:60}),false);assert.deepEqual(shifted.snapshot(),before,'foreign pointer cannot take over');
-    assert.equal(shifted.context.end(7),true);assert.equal(shifted.snapshot().floating.active,false);assert.deepEqual(shifted.snapshot().vector,{x:0,y:0,z:0});assert.equal(shifted.knob.style.transform,'translate(0px, 0px)');assert.equal(shifted.joy.dataset.k11520FloatingActive,'0');
+    assert.equal(shifted.context.end(7),true);assert.equal(shifted.snapshot().floating.active,false);assert.equal(shifted.snapshot().floating.state,'IDLE');assert.equal(shifted.membrane(),'0');assert.deepEqual(shifted.snapshot().vector,{x:0,y:0,z:0});assert.equal(shifted.knob.style.transform,'translate(0px, 0px)');assert.equal(shifted.joy.dataset.k11520FloatingActive,'0');
   }
 });
 

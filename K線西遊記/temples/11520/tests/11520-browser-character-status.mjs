@@ -50,6 +50,17 @@ assert.equal(playerTap?.route,'PLAYER','avatar center tap must remain classified
 assert.equal(playerTap?.source,'CAMERA_LOCKED_PLAYER_HITBOX','player priority layer must win before nearby entity touch tolerance');
 
 await page.locator('#sheetClose').click();
+if(!await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__?.controlsOpen===true)){
+  if(!await page.locator('#k11520UiSettings').isVisible()){
+    if(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__?.infoOpen===true))await page.locator('#k11520MarketRow').click();
+    await page.locator('#k11520MarketRow').click();
+  }
+  await page.locator('#k11520UiSettings').waitFor({state:'visible'});
+  await page.locator('#k11520ShowControls').click();
+  await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.controlsOpen===true);
+}
+if(await page.evaluate(()=>document.documentElement.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+assert.equal(await page.locator('#joy').isVisible(),true,'explicit controls retain the fixed joystick and ground navigation');
 // Living entities move through screen coordinates. A fixed pixel is not a
 // ground fixture: a legitimate ENTITY hit must not be mistaken for interception.
 // Keep the strict GROUND assertion, but locate open ground using bounded taps.

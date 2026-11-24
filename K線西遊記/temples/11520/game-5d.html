@@ -136,7 +136,7 @@ html[data-k11520-private-preview="lan"] :is(#walletPanel,#walletToggle,#walletLa
   <span role="status">遊戲有新版。這局結束後，重新開啟遊戲即可更新。</span>
   <button type="button" id="k11520UpdateLater">知道了</button>
 </aside>
-<script type="module" src="./runtime/game-5d-bootstrap.mjs?v=271"></script>
+<script type="module" src="./runtime/game-5d-bootstrap.mjs?v=272"></script>
 <script>
 {
  const offer=document.getElementById('k11520InstallOffer');
@@ -180,6 +180,7 @@ html[data-k11520-private-preview="lan"] :is(#walletPanel,#walletToggle,#walletLa
 {
  const notice=document.getElementById('k11520UpdateNotice');
  let observedRelease;
+ let offeredRelease;
  let checking=false;
  async function checkGameRelease(){
   if(checking||navigator.onLine===false||document.visibilityState!=='visible')return;
@@ -189,9 +190,15 @@ html[data-k11520-private-preview="lan"] :is(#walletPanel,#walletToggle,#walletLa
     cache:'no-cache',credentials:'omit',signal:AbortSignal.timeout?.(5000)
    });
    if(!response.ok)return;
-   const {game_release_id:release}=await response.json();
+   const {game_release_id:release,game_version:publishedVersion}=await response.json();
    if(typeof release!=='string'||!/^[a-f0-9]{64}$/.test(release))return;
-   if(observedRelease&&observedRelease!==release)notice.hidden=false;
+   const loadedVersion=document.getElementById('k11520BuildStamp')?.textContent;
+   const validVersion=version=>typeof version==='string'&&/^V\d+\.\d+\.\d+$/.test(version);
+   const differsFromLoaded=validVersion(loadedVersion)&&validVersion(publishedVersion)&&loadedVersion!==publishedVersion;
+   if(offeredRelease!==release&&(differsFromLoaded||(observedRelease&&observedRelease!==release))){
+    offeredRelease=release;
+    notice.hidden=false;
+   }
    observedRelease=release;
   }catch{
    // A missing, offline or invalid release record leaves the game open.
@@ -200,6 +207,7 @@ html[data-k11520-private-preview="lan"] :is(#walletPanel,#walletToggle,#walletLa
   }
  }
  document.getElementById('k11520UpdateLater').addEventListener('click',()=>{notice.hidden=true});
+ addEventListener('load',checkGameRelease);
  addEventListener('online',checkGameRelease);
  document.addEventListener('visibilitychange',checkGameRelease);
  setInterval(checkGameRelease,300000);

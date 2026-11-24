@@ -44,6 +44,8 @@ test('worker installs a fresh shell before activation and only retires its own n
  const h=await workerHarness();await h.event('install');assert.equal(h.state.skipped,1);
  assert.ok(h.state.precache.length>0);for(const request of h.state.precache){assert.equal(request.cache,'reload');assert.equal(new URL(request.url).origin,'https://example.test');assert.equal(request.method,'GET')}
  const precached=new Set(h.state.precache.map(req=>new URL(req.url).pathname));
+ const bootstrap=read('game-5d.html').match(/<script type="module" src="([^"]*game-5d-bootstrap\.mjs[^"]*)"/)[1];
+ assert.ok(h.state.precache.some(req=>req.url===new URL(bootstrap,'https://example.test/temples/11520/').href),'precache the exact bootstrap URL used by the installed shell');
  for(const file of ['wallet-game-bridge','evm-wallet-runtime','real-trading-preflight-ui','real-trading-order-intent']){
   assert.ok(precached.has('/temples/11520/runtime/'+file+'.mjs'),file+' must be in the installed shell');
  }
@@ -159,17 +161,20 @@ test('K11520 reports a genuine deployed game revision change once without force-
  assert.ok(source);
  assert.match(html,/<aside\b[^>]+id="k11520UpdateNotice"[^>]+\bhidden>/);
  const notice={hidden:true},events={},docEvents={},calls=[];
- let dismiss,poll,published={main_commit:'1',game_release_id:'a'.repeat(64)},fail=false;
+ const stamp={textContent:'V2.9.11'};
+ let dismiss,poll,published={main_commit:'1',game_release_id:'a'.repeat(64),game_version:'V2.9.12'},fail=false;
  const navigator={onLine:true},document={
   visibilityState:'visible',addEventListener:(name,fn)=>docEvents[name]=fn,
-  getElementById:id=>id==='k11520UpdateNotice'?notice:{addEventListener:(name,fn)=>dismiss=fn}
+  getElementById:id=>id==='k11520UpdateNotice'?notice:id==='k11520BuildStamp'?stamp:{addEventListener:(name,fn)=>dismiss=fn}
  };
  runInNewContext(source,{navigator,document,AbortSignal,
   fetch:async(url,options)=>{calls.push({url,options});if(fail)throw Error('offline');return{ok:true,json:async()=>published}},
   addEventListener:(name,fn)=>events[name]=fn,setInterval:(fn,ms)=>{assert.equal(ms,300000);poll=fn}
  });
  await new Promise(resolve=>setImmediate(resolve));
- assert.equal(notice.hidden,true);
+ assert.equal(notice.hidden,false,'a cached release can notify on the first lookup');
+ assert.equal(stamp.textContent,'V2.9.11','published version never overwrites the loaded badge');
+ dismiss();
  assert.equal(calls.length,1);
  assert.equal(calls[0].url,'../../../KGEN-KAIOS/dashboard/build-info.json');
  assert.equal(calls[0].options.cache,'no-cache');
@@ -197,6 +202,7 @@ test('K11520 reports a genuine deployed game revision change once without force-
  await Promise.all([poll(),events.online(),docEvents.visibilitychange()]);
  assert.equal(calls.length,before+5);
  assert.equal(notice.hidden,false,'a later release can notify again');
+ assert.equal(stamp.textContent,'V2.9.11');
  assert.doesNotMatch(source,/\blocation\s*\.|\breload\s*\(|localStorage|indexedDB/);
 });
 test('K11520 PWA standalone shell is installable and does not force orientation',()=>{const m=JSON.parse(read('manifest.webmanifest'));assert.equal(m.display,'standalone');assert.equal(m.orientation,'any');assert.ok(m.display_override.includes('fullscreen'));for(const size of [192,512]){const icon=m.icons.find(x=>x.sizes===`${size}x${size}`);assert.ok(icon,`${size}px PWA icon missing`);assert.equal(icon.type,'image/png');assert.match(icon.purpose,/maskable/);assert.deepEqual(pngSize(icon.src),{width:size,height:size})}const h=read('game-5d.html');assert.ok(h.includes('rel="manifest"'));assert.ok(h.includes("serviceWorker.register('./sw.js'"));});

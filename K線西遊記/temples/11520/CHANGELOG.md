@@ -1,5 +1,14 @@
 # 11520 Changelog
 
+## V2.9.12 · 手機浮動搖桿與公開版號
+
+- 預設遊戲畫面的空白處按下即顯示圓盤。拖曳超過 10 CSS px 開始移動，放手或取消收合。
+  420 ms 內輕點依 XZ → XY → YZ → XZ 切換，短暫顯示平面。已開啟的操作面板保留固定圓盤與既有鏡頭操作。
+- 左上角只顯示載入的公開版號。工程識別保留在 `data-k11520-ui-revision`（`HUD-R2-PREF1`）、
+  `data-k11520-layout-revision` 及官網既有 `KGEN-KAIOS/dashboard/build-info.json`（`main_commit`、`game_release_id`）。
+- 安裝入口沿用 `./game-5d.html?source=pwa`。遊戲資源快取更新時保留原存檔，
+  重新開啟時才載入新版。官方發佈紀錄可觸發更新提示，提示不改動當前版號。
+
 ## PR672 continuation evidence — 2026-11-17 / Codex /root
 
 - Exact mainline source and original 12345 cockpit entry are now used by the

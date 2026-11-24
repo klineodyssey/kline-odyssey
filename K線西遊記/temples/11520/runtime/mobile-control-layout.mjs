@@ -199,7 +199,7 @@ html[data-k11520-hud-mode="ON_DEMAND"] .axes{position:fixed!important}
 html[data-k11520-hud-mode="ON_DEMAND"] .top .brand{transform:translateY(var(--k11520-brand-offset,0px))!important}
 html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!important}
 @media(orientation:landscape) and (max-height:600px){html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,54px)!important}}
-#k11520BuildStamp::after{content:' · L:FLOW2/TAP-J1'}
+html[data-k11520-layout-owner] .brand .brandMetaV250>span:first-child{display:none!important}
 @media ${K11520_PORTRAIT_QUERY}{
   /* FULL and compact modes share one compact guide. Full story/details remain
      on its original explicit activation, not a centred world-blocking card. */
@@ -213,7 +213,6 @@ html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!
 /* Compact combat reuses the live HP/XYZ/selected-market organs. Full cards
    remain in their original explicit information and trading contexts. */
 ${compact}:not(.k11520ControlsOpen) #k11520RealTradePreflight{display:none!important;pointer-events:none!important}
-${compact} #k11520BuildStamp{display:none!important}
 ${compact} .monsterHud:not(.k11520HiddenBySettings){display:flex!important;visibility:visible!important;pointer-events:none!important;position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:max(24px,calc(env(safe-area-inset-top) + 20px))!important;bottom:auto!important;width:110px!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;padding:4px 6px!important;gap:3px;flex-direction:column;justify-content:center;background:#071018b8!important;border:1px solid #68e4ff44!important;border-radius:9px!important;z-index:610!important;font-size:12px!important;line-height:1.2!important}
 ${compact} .monsterHud .bar{height:5px!important;margin:0!important}
 ${compact} .monsterHud details{display:none!important}
@@ -244,6 +243,7 @@ ${compact}:not(.k11520ControlsOpen) .controls #dodge{right:66px!important;bottom
 /* The same canvas-owned joystick is only a visual while floating. Neither it
    nor its children can steal the second contact from the existing pinch owner. */
 html[data-k11520-hud-mode="ON_DEMAND"]:not(.k11520ControlsOpen):not(.k11520TradeOpen) #joy:not([data-k11520-floating-active="1"]){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html[data-k11520-hud-mode="ON_DEMAND"] #k11520MovePlane{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"]{position:fixed!important;left:var(--k11520-floating-x,50vw)!important;right:auto!important;top:var(--k11520-floating-y,50vh)!important;bottom:auto!important;transform:translate(-50%,-50%)!important;opacity:.88!important;visibility:visible!important;pointer-events:none!important;background:#07101844!important;border:1px solid #9eeeff88!important;border-radius:50%!important;box-shadow:none!important;z-index:450!important}
 html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] *{pointer-events:none!important;opacity:1!important}
 html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] #k11520PlaneLabel{display:none!important}

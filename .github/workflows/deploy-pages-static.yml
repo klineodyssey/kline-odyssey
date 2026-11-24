@@ -149,6 +149,8 @@ jobs:
 
           # Stamp the game inputs in the existing deployment record.
           game_root="K線西遊記/temples/11520"
+          game_version="$(sed -nE "s/^export const SHARED_GAME_VERSION='(V[0-9]+\.[0-9]+\.[0-9]+)';$/\1/p" assets/kaios-world-registry.mjs)"
+          test -n "$game_version"
           game_release_id="$(git ls-files --stage -- "$game_root/game-5d.html" "$game_root/sw.js" \
             "$game_root/manifest.webmanifest" "$game_root/runtime" "$game_root/controls" "$game_root/assets" \
             ':(exclude,glob)**/*.md' \
@@ -160,6 +162,7 @@ jobs:
           {
             "main_commit": "${GITHUB_SHA}",
             "game_release_id": "${game_release_id}",
+            "game_version": "${game_version}",
             "branch": "${GITHUB_REF_NAME}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",

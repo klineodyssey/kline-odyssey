@@ -120,6 +120,17 @@ async function clickWorldFirstMinimap(page,result){
   assert.equal(result.mapInput.delivery.plane,'XZ');
   assert.equal(result.mapInput.delivery.coordinateSpace,'XYZ');
 }
+async function verifySharedVersionStamp(page){
+  await page.waitForFunction(version=>{
+    const brand=document.querySelector('.brandMetaV250 span:first-child');
+    const stamp=document.getElementById('k11520BuildStamp');
+    return brand?.dataset.k11520ProductVersion===version&&brand.textContent.trim()===version&&stamp?.textContent.trim()===version;
+  },SHARED_GAME_VERSION);
+  const stamp=page.locator('#k11520BuildStamp');
+  assert.equal(await stamp.isVisible(),true,'the shared short version stays visible');
+  const suffix=await stamp.evaluate(el=>getComputedStyle(el,'::after').content);
+  assert.ok(['none','normal','""',"''"].includes(suffix),'the visible version has no diagnostic suffix: '+suffix);
+}
 async function verifyWorldFirst(){
   const results=[];
   for(const profile of selectedProfiles){
@@ -143,8 +154,7 @@ async function verifyWorldFirst(){
       await page.locator('#intro11520').waitFor({state:'hidden'});
       // MINIMAL deliberately hides diagnostic telemetry; readiness is state, not visibility.
       await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''),null,{timeout:45000});
-      await page.waitForFunction(version=>document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion===version,SHARED_GAME_VERSION);
-      assert.equal(await page.locator('.brandMetaV250 span:first-child').textContent(),`${SHARED_GAME_VERSION} · 5D K線西遊記`);
+      await verifySharedVersionStamp(page);
       result.checks.visibleVersion=SHARED_GAME_VERSION;
       assert.equal(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__.profile),'MINIMAL');
       // A fresh MINIMAL guest starts with scenery and compact disclosures.
@@ -411,36 +421,76 @@ async function verifyFloatingWorldControl(profile,result){
   };
   const read=()=>page.evaluate(()=>{
     const rect=element=>{if(!element)return null;const r=element.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}},joy=document.querySelector('#joy'),knob=document.querySelector('#knob'),r=joy.getBoundingClientRect(),style=getComputedStyle(joy),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2),book=globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot?.(),autopilot=globalThis.__K11520_NAVIGATION_CONSOLE__?.snapshot?.().autopilot;
-    const protectedHud=[...document.querySelectorAll('.monsterHud,.tele,.axes,#k11520MonsterGuide,#k11520MovePlane,#k11520UtilityMaster,#attack,#skill,#dodge,#tradeSword')].filter(el=>{const s=getComputedStyle(el);return el.getClientRects().length&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0}).map(el=>({selector:el.id?'#'+el.id:String(el.className),rect:rect(el)}));
-    return{at:performance.now(),viewport:{width:innerWidth,height:innerHeight},control:structuredClone(__K11520_3D_CONTROL__),camera:__K11520_CAMERA__.snapshot(),playerScreen:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen,collisionText:document.querySelector('#collision')?.textContent??null,worldCoords:globalThis.__K11520_WORLD_COORDS__?{physical:{...__K11520_WORLD_COORDS__.physical},intent:{...__K11520_WORLD_COORDS__.intent}}:null,joy:{rect:rect(joy),visible:r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>0&&(!joy.checkVisibility||joy.checkVisibility()),ownsCenter:!!hit&&(joy===hit||joy.contains(hit))},protectedHud,knob:rect(knob),knobTransform:knob.style.transform,settings:{controlsOpen:__K11520_UI_SETTINGS__.controlsOpen,tradeOpen:__K11520_UI_SETTINGS__.tradeOpen,infoOpen:__K11520_UI_SETTINGS__.infoOpen},finance:{orders:structuredClone(book?.orders??null),positions:structuredClone(book?.positions??null),c:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC??null,lots:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.lots??null,autopilot:autopilot?{state:autopilot.state,submittedOrders:autopilot.submittedOrders}:null},pointers:(globalThis.worldFirstPointerTrace||[]).slice(-32)};
+    const protectedHud=[...document.querySelectorAll('.monsterHud,.tele,.axes,#k11520MonsterGuide,#k11520BuildStamp,#k11520MarketRow,#k11520MovePlane,#k11520UtilityMaster,#attack,#skill,#dodge,#tradeSword')].filter(el=>{const s=getComputedStyle(el);return el.getClientRects().length&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0}).map(el=>({selector:el.id?'#'+el.id:String(el.className),rect:rect(el)}));
+    const nav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;
+    const navigation=nav?{active:nav.active,source:nav.source,target:structuredClone(nav.target)}:null;
+    const surfaces={sheet:document.querySelector('#sheet')?.classList.contains('open'),confirm:document.querySelector('#confirm')?.classList.contains('open')};
+    return{at:performance.now(),viewport:{width:innerWidth,height:innerHeight},control:structuredClone(__K11520_3D_CONTROL__),camera:__K11520_CAMERA__.snapshot(),navigation,surfaces,worldTaps:[...(globalThis.floatingWorldTapRoutes||[])],toast:document.querySelector('#toast')?.textContent??'',playerScreen:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen,collisionText:document.querySelector('#collision')?.textContent??null,worldCoords:globalThis.__K11520_WORLD_COORDS__?{physical:{...__K11520_WORLD_COORDS__.physical},intent:{...__K11520_WORLD_COORDS__.intent}}:null,joy:{rect:rect(joy),visible:r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>0&&(!joy.checkVisibility||joy.checkVisibility()),ownsCenter:!!hit&&(joy===hit||joy.contains(hit))},protectedHud,knob:rect(knob),knobTransform:knob.style.transform,settings:{controlsOpen:__K11520_UI_SETTINGS__.controlsOpen,tradeOpen:__K11520_UI_SETTINGS__.tradeOpen,infoOpen:__K11520_UI_SETTINGS__.infoOpen},finance:{orders:structuredClone(book?.orders??null),positions:structuredClone(book?.positions??null),c:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC??null,lots:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.lots??null,autopilot:autopilot?{state:autopilot.state,submittedOrders:autopilot.submittedOrders}:null},pointers:(globalThis.worldFirstPointerTrace||[]).slice(-32)};
   });
   const observe=async label=>{const state=await read();result.observations.push({label,...state});return state};
   const neutral=(state,label)=>{assert.deepEqual(state.control.vector,{x:0,y:0,z:0},label+' has zero canonical intent');assert.equal(state.control.disc.active,false,label+' has no active disc');assert.equal(state.control.rail.active,false,label+' has no active rail')};
+  const cameraFraming=({camera:{zoom,panX,panZ,manual}})=>({zoom,panX,panZ,manual});
+  const sameWorldInput=(after,before,label)=>{
+    assert.deepEqual(cameraFraming(after),cameraFraming(before),label+' leaves camera framing alone');
+    assert.deepEqual(after.navigation,before.navigation,label+' leaves navigation unchanged');
+    assert.deepEqual(after.worldTaps,before.worldTaps,label+' emits no world interaction');
+    assert.deepEqual(after.surfaces,before.surfaces,label+' opens no card or confirmation');
+    assert.deepEqual(after.finance,before.finance,label+' keeps C, lots and the trade ledger unchanged');
+  };
   const playerVisible=(state,label)=>{const p=state.playerScreen;assert.ok(p?.inView&&p.x>=44&&p.x<=profile.width-44&&p.y>=44&&p.y<=profile.height-44,label+' keeps the rendered player inside the viewport with a 44px margin: '+JSON.stringify(p))};
   const clearsHud=(b,hud,gap=0)=>hud.every(({rect:r})=>b.right+gap<=r.x||b.x-gap>=r.right||b.bottom+gap<=r.y||b.y-gap>=r.bottom);
   const visualBaseClear=(state,label)=>assert.ok(clearsHud(state.joy.rect,state.protectedHud,3.5),label+' visual base must leave readable HUD clearance: '+JSON.stringify({base:state.joy.rect,hud:state.protectedHud}));
   const acquire=async(label,pick=()=>page.evaluate(selectWorldFirstPanOrigin,{dx:40,dy:-40}))=>{
-    const evidence={label,attempts:[]};(result.nativeAdmissions??=[]).push(evidence);
+    const before=await read(),evidence={label,attempts:[]};(result.nativeAdmissions??=[]).push(evidence);
     const admitted=await acquireAdmittedCameraPan({records:evidence.attempts,pick,begin:point=>touch('touchStart',[[1,point.x,point.y]]),cancel:()=>touch('touchCancel',[]),inspect:()=>page.evaluate(()=>({down:worldFirstPointerTrace.find(event=>event.type==='pointerdown'&&event.isTrusted)||null,camera:__K11520_CAMERA__.snapshot(),control:structuredClone(__K11520_3D_CONTROL__)}))});
-    const state=await observe(label+'-native-down');neutral(state,label+' down');assert.equal(state.camera.worldGesture.phase,'PENDING_MOVE');assert.equal(state.control.floating.active,false);assert.equal(state.joy.visible,false,'a stationary world down does not disclose a joystick');return admitted.origin;
+    const state=await observe(label+'-native-down');
+    neutral(state,label+' down');
+    sameWorldInput(state,before,label+' down');
+    assert.deepEqual(state.camera.playerXYZ,before.camera.playerXYZ,label+' down leaves the player still');
+    assert.equal(state.camera.worldGesture.phase,'PENDING_MOVE');
+    assert.equal(state.control.floating.state,'PRESSED');
+    assert.equal(state.control.floating.active,true);
+    assert.equal(state.joy.visible,true,'a stationary native world down displays the neutral joystick');
+    assert.equal(state.joy.ownsCenter,false,'the displayed disc remains a visual while the canvas owns input');
+    assert.deepEqual(state.control.floating.pressOrigin,admitted.origin);
+    visualBaseClear(state,label+' pressed');
+    return admitted.origin;
   };
-  const beginDrag=async label=>{const origin=await acquire(label);await touch('touchMove',[[1,origin.x+40,origin.y-40]]);await page.waitForFunction(()=>__K11520_3D_CONTROL__.floating.active===true,null,{timeout:3000});const state=await observe(label+'-drag');assert.equal(state.camera.worldGesture.phase,'FLOATING_MOVE');assert.equal(state.control.floating.source,'WORLD_CANVAS_NATIVE');assert.deepEqual(state.control.floating.pressOrigin,origin);const b=state.joy.rect,requested={x:origin.x-b.width/2,y:origin.y-b.height/2,right:origin.x+b.width/2,bottom:origin.y+b.height/2};if(requested.x>=0&&requested.y>=0&&requested.right<=profile.width&&requested.bottom<=profile.height&&clearsHud(requested,state.protectedHud,4))assert.deepEqual(state.control.floating.origin,origin,'an unobstructed raw origin stays unchanged');assert.ok(Math.abs(b.x+b.width/2-state.control.floating.origin.x)<1&&Math.abs(b.y+b.height/2-state.control.floating.origin.y)<1,'the visual base matches its effective origin');visualBaseClear(state,label);assert.equal(state.joy.visible,true);return{origin,state,point:[1,origin.x+40,origin.y-40]}};
+  const beginDrag=async label=>{const origin=await acquire(label);await touch('touchMove',[[1,origin.x+40,origin.y-40]]);await page.waitForFunction(()=>__K11520_3D_CONTROL__.floating.state==='DRAGGING',null,{timeout:3000});const state=await observe(label+'-drag');assert.equal(state.camera.worldGesture.phase,'FLOATING_MOVE');assert.equal(state.control.floating.source,'WORLD_CANVAS_NATIVE');assert.deepEqual(state.control.floating.pressOrigin,origin);const b=state.joy.rect,requested={x:origin.x-b.width/2,y:origin.y-b.height/2,right:origin.x+b.width/2,bottom:origin.y+b.height/2};if(requested.x>=0&&requested.y>=0&&requested.right<=profile.width&&requested.bottom<=profile.height&&clearsHud(requested,state.protectedHud,4))assert.deepEqual(state.control.floating.origin,origin,'an unobstructed raw origin stays unchanged');assert.ok(Math.abs(b.x+b.width/2-state.control.floating.origin.x)<1&&Math.abs(b.y+b.height/2-state.control.floating.origin.y)<1,'the visual base matches its effective origin');visualBaseClear(state,label);assert.equal(state.joy.visible,true);return{origin,state,point:[1,origin.x+40,origin.y-40]}};
   try{
     await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_3D_CONTROL__?.floating&&globalThis.__K11520_UI_SETTINGS__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__&&typeof globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot==='function'&&typeof globalThis.__K11520_NAVIGATION_CONSOLE__?.snapshot==='function');
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(async error=>{if(await page.locator('#intro11520').isVisible())throw error});
     await page.locator('#intro11520').waitFor({state:'hidden'});await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''),null,{timeout:45000});
     await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,event=>{if(worldFirstPointerTrace.length<64)worldFirstPointerTrace.push({type,id:event.pointerId,target:event.target.id,isTrusted:event.isTrusted,x:event.clientX,y:event.clientY,canPan:__K11520_CAMERA__.canPanAt(event.clientX,event.clientY)})},true)});
+    await page.evaluate(()=>{
+      globalThis.floatingWorldTapRoutes=[];
+      document.querySelector('#three').addEventListener('k11520:world-tap',event=>floatingWorldTapRoutes.push(event.detail?.route));
+    });
     cdp=await context.newCDPSession(page);
+    await verifySharedVersionStamp(page);
     const initial=await observe('clean-idle');result.initialFinance=initial.finance;neutral(initial,'idle');assert.equal(initial.control.mode,'XZ','fresh default remains the original XZ plane');assert.deepEqual(initial.settings,{controlsOpen:false,tradeOpen:false,infoOpen:false});assert.equal(initial.control.floating.enabled,true);assert.equal(initial.joy.visible,false);assert.equal(initial.joy.ownsCenter,false);await assertInformationClosed(page,result,'fresh-floating-world');for(const selector of ['.minimapWrap','#cControl','#lotsControl','#yControl'])assert.equal(await page.locator(selector).isVisible(),false,'clean default keeps optional '+selector+' closed');
-    const plane=await page.locator('#k11520MovePlane').evaluate(element=>{const r=element.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{width:r.width,height:r.height,owned:hit===element||element.contains(hit),name:element.getAttribute('aria-label')||element.textContent}});result.planeControl=plane;assert.ok(plane.width>=44&&plane.height>=44&&plane.owned&&plane.name.trim(),'plane cycle remains a named native 44px control');
+    assert.equal(await page.locator('#k11520MovePlane').isVisible(),false,'the clean default has no permanent plane switch');
     await page.screenshot({path:`${OUT}/floating-${profile.width}x${profile.height}-idle.png`});
     result.planes=[];
     // Start flight at the canonical spawn before the ground-mode screenshot can
     // walk into the real ATM body. Keep actual movement and collisions enabled.
     for(const [mode,axes,normalAxis] of [['XY',['X','Y'],'Z'],['YZ',['Y','Z'],'X'],['XZ',['X','Z'],'Y']]){
-      await page.locator('#k11520MovePlane').click();
-      const before=await observe(mode+'-before'),entry={mode,before};result.planes.push(entry);assert.equal(before.control.mode,mode);assert.deepEqual(before.control.discAxes,axes);assert.equal(before.control.railAxis,normalAxis);
+      const idle=await read();
+      const tap=await page.evaluate(selectWorldFirstPanOrigin,{dx:0,dy:0});
+      assert.ok(tap,'a blank world origin is required for a native short tap');
+      await page.touchscreen.tap(tap.origin.x,tap.origin.y);
+      const before=await observe(mode+'-after-blank-tap');
+      const nativeDown=before.pointers.find(event=>event.isTrusted&&event.type==='pointerdown');
+      assert.ok(nativeDown?.target==='three'&&nativeDown.canPan===true,'plane switch must originate on blank canvas');
+      assert.ok(before.pointers.some(event=>event.isTrusted&&event.type==='pointerup'&&event.id===nativeDown.id),'the native short tap ended on the same pointer');
+      neutral(before,mode+' tap');
+      sameWorldInput(before,idle,mode+' tap');
+      assert.deepEqual(before.camera.playerXYZ,idle.camera.playerXYZ,mode+' tap leaves player coordinates unchanged');
+      assert.equal(before.joy.visible,false,mode+' tap hides the temporary joystick');
+      assert.ok(before.toast.includes(mode),mode+' tap displays the selected plane in a toast');
+      const entry={mode,before};result.planes.push(entry);assert.equal(before.control.mode,mode);assert.deepEqual(before.control.discAxes,axes);assert.equal(before.control.railAxis,normalAxis);
       const {origin,state}=await beginDrag(mode);entry.held=state;
+      sameWorldInput(state,before,mode+' drag');
       for(const axis of axes)assert.ok(state.control.vector[axis.toLowerCase()]>0,mode+' uses the existing positive canonical axis intent');assert.equal(state.control.vector[normalAxis.toLowerCase()],0);
       await page.waitForFunction(({before,axes})=>axes.every(axis=>__K11520_CAMERA__.snapshot().playerXYZ[axis.toLowerCase()]>before[axis.toLowerCase()]+.02),{before:before.camera.playerXYZ,axes},{timeout:3000});
       entry.actualMovement=await observe(mode+'-actual-XYZ');for(const axis of axes)assert.ok(entry.actualMovement.camera.playerXYZ[axis.toLowerCase()]>before.camera.playerXYZ[axis.toLowerCase()]+.02,mode+' native drag must actually move '+axis);assert.equal(entry.actualMovement.camera.playerXYZ[normalAxis.toLowerCase()],before.camera.playerXYZ[normalAxis.toLowerCase()]);
@@ -449,7 +499,7 @@ async function verifyFloatingWorldControl(profile,result){
       assert.deepEqual(entry.clamped.joy.rect,b,'the base stays at its admitted down origin while the thumb follows');visualBaseClear(entry.clamped,mode+' held');const k=entry.clamped.knob;assert.ok(k.x>=b.x-1&&k.y>=b.y-1&&k.right<=b.right+1&&k.bottom<=b.bottom+1,'floating thumb remains clamped inside the original disc');assert.ok(Math.hypot(entry.clamped.control.disc.h,entry.clamped.control.disc.v)<=1+1e-9);
       playerVisible(entry.actualMovement,mode+' movement camera');playerVisible(entry.clamped,mode+' held camera');
       if(mode==='XZ')await page.screenshot({path:`${OUT}/floating-${profile.width}x${profile.height}-held.png`});
-      await touch('touchEnd',[]);entry.released=await observe(mode+'-released');neutral(entry.released,mode+' release');assert.equal(entry.released.control.floating.active,false);assert.equal(entry.released.joy.visible,false);assert.equal(entry.released.joy.ownsCenter,false);assert.equal(entry.released.knobTransform,'translate(0px, 0px)','release springs the original thumb back to neutral');
+      await touch('touchEnd',[]);entry.released=await observe(mode+'-released');neutral(entry.released,mode+' release');assert.equal(entry.released.control.floating.active,false);assert.equal(entry.released.control.mode,mode,'drag release must not cycle the plane');assert.equal(entry.released.joy.visible,false);assert.equal(entry.released.joy.ownsCenter,false);assert.equal(entry.released.knobTransform,'translate(0px, 0px)','release springs the original thumb back to neutral');
     }
     assert.equal((await read()).control.mode,'XZ','three native plane changes retain the original cycle');
     const edgeOrigin=await acquire('native-edge',()=>page.evaluate(()=>{
@@ -457,9 +507,17 @@ async function verifyFloatingWorldControl(profile,result){
       for(let y=80;y<innerHeight-80;y+=12)for(const x of [12,innerWidth-12]){const sign=x<innerWidth/2?1:-1;if(__K11520_CAMERA__.isWorldGestureArea(x,y,10)&&document.elementFromPoint(x+sign*40,y)===canvas)return{origin:{x,y},before:{camera:__K11520_CAMERA__.snapshot()},sign}}
       return null;
     }));
-    result.edge={pressOrigin:edgeOrigin};const edgeSign=edgeOrigin.x<profile.width/2?1:-1;await touch('touchMove',[[1,edgeOrigin.x+edgeSign*5,edgeOrigin.y]]);result.edge.belowThreshold=await observe('edge-below-threshold');neutral(result.edge.belowThreshold,'edge sub-threshold');assert.equal(result.edge.belowThreshold.joy.visible,false);assert.equal(result.edge.belowThreshold.camera.worldGesture.phase,'PENDING_MOVE');
-    await touch('touchMove',[[1,edgeOrigin.x+edgeSign*40,edgeOrigin.y]]);await page.waitForFunction(()=>__K11520_3D_CONTROL__.floating.active===true,null,{timeout:3000});result.edge.held=await observe('edge-held');const edgeHeld=result.edge.held,edgeBase=edgeHeld.joy.rect;assert.deepEqual(edgeHeld.control.floating.pressOrigin,edgeOrigin);assert.notDeepEqual(edgeHeld.control.floating.origin,edgeOrigin,'edge visual base is clamped separately from the physical press');assert.ok(edgeBase.x>=0&&edgeBase.y>=0&&edgeBase.right<=profile.width&&edgeBase.bottom<=profile.height);assert.ok(Math.abs(edgeBase.x+edgeBase.width/2-edgeHeld.control.floating.origin.x)<1&&Math.abs(edgeBase.y+edgeBase.height/2-edgeHeld.control.floating.origin.y)<1);assert.ok(edgeHeld.control.vector.x*edgeSign>0,'clamping cannot reverse edge movement');assert.equal(edgeHeld.control.vector.y,0);assert.equal(edgeHeld.control.vector.z,0,'visual clamp cannot add unintended vertical-axis movement');await page.screenshot({path:`${OUT}/floating-${profile.width}x${profile.height}-edge-held.png`});await touch('touchEnd',[]);neutral(await observe('edge-released'),'edge release');
+    result.edge={pressOrigin:edgeOrigin};const edgeSign=edgeOrigin.x<profile.width/2?1:-1;await touch('touchMove',[[1,edgeOrigin.x+edgeSign*5,edgeOrigin.y]]);result.edge.belowThreshold=await observe('edge-below-threshold');neutral(result.edge.belowThreshold,'edge sub-threshold');assert.equal(result.edge.belowThreshold.joy.visible,true,'sub-threshold movement leaves the neutral disc visible');assert.equal(result.edge.belowThreshold.control.floating.state,'PRESSED');assert.equal(result.edge.belowThreshold.camera.worldGesture.phase,'PENDING_MOVE');
+    await touch('touchMove',[[1,edgeOrigin.x+edgeSign*40,edgeOrigin.y]]);await page.waitForFunction(()=>__K11520_3D_CONTROL__.floating.state==='DRAGGING',null,{timeout:3000});result.edge.held=await observe('edge-held');const edgeHeld=result.edge.held,edgeBase=edgeHeld.joy.rect;assert.deepEqual(edgeHeld.control.floating.pressOrigin,edgeOrigin);assert.notDeepEqual(edgeHeld.control.floating.origin,edgeOrigin,'edge visual base is clamped separately from the physical press');assert.ok(edgeBase.x>=0&&edgeBase.y>=0&&edgeBase.right<=profile.width&&edgeBase.bottom<=profile.height);assert.ok(Math.abs(edgeBase.x+edgeBase.width/2-edgeHeld.control.floating.origin.x)<1&&Math.abs(edgeBase.y+edgeBase.height/2-edgeHeld.control.floating.origin.y)<1);assert.ok(edgeHeld.control.vector.x*edgeSign>0,'clamping cannot reverse edge movement');assert.equal(edgeHeld.control.vector.y,0);assert.equal(edgeHeld.control.vector.z,0,'visual clamp cannot add unintended vertical-axis movement');await page.screenshot({path:`${OUT}/floating-${profile.width}x${profile.height}-edge-held.png`});await touch('touchEnd',[]);neutral(await observe('edge-released'),'edge release');
     visualBaseClear(edgeHeld,'edge held');
+    const beforeCancel=await read();
+    await acquire('native-cancel');
+    await touch('touchCancel',[]);
+    result.nativeCancel=await observe('native-cancelled');
+    neutral(result.nativeCancel,'native cancel');
+    sameWorldInput(result.nativeCancel,beforeCancel,'native cancel');
+    assert.equal(result.nativeCancel.control.mode,beforeCancel.control.mode,'native cancel cannot switch planes');
+    assert.equal(result.nativeCancel.joy.visible,false,'native cancel hides the disc');
     const multi=await beginDrag('multitouch');result.multiTouch={beforeSecond:multi.state};
     const second=await page.evaluate(first=>{const canvas=document.querySelector('#three');for(const dx of [60,-60,90,-90]){const p={x:first.x+dx,y:first.y};if(p.x>4&&p.x<innerWidth-4&&p.y>4&&p.y<innerHeight-4&&document.elementFromPoint(p.x,p.y)===canvas)return p}return null},{x:multi.point[1],y:multi.point[2]});assert.ok(second,'second real canvas contact must be reachable');
     await touch('touchStart',[multi.point,[2,second.x,second.y]]);result.multiTouch.second=await observe('second-contact-cancels');neutral(result.multiTouch.second,'second contact');assert.equal(result.multiTouch.second.camera.worldGesture.phase,'PINCH');assert.equal(result.multiTouch.second.joy.visible,false);
@@ -482,8 +540,8 @@ async function verifyFloatingWorldControl(profile,result){
     const walletBefore=await observe('wallet-foreground'),outside=await page.evaluate(()=>{const canvas=document.querySelector('#three');for(let y=80;y<innerHeight-20;y+=20)for(let x=20;x<innerWidth-20;x+=20)if(document.elementFromPoint(x,y)===canvas)return{x,y};return null});assert.ok(outside,'a visible world pixel outside Wallet remains available for the exclusion test');await touch('touchStart',[[1,outside.x,outside.y]]);await touch('touchMove',[[1,outside.x+12,outside.y+12]]);await touch('touchEnd',[]);await page.waitForTimeout(120);result.walletBlocked=await observe('wallet-world-drag-blocked');neutral(result.walletBlocked,'Wallet foreground');assert.equal(result.walletBlocked.joy.visible,false);assert.deepEqual(result.walletBlocked.camera.playerXYZ,walletBefore.camera.playerXYZ);
     // More hides the entire Wallet without rewriting its disclosure preference.
     // A hidden, uncollapsed Wallet must not suppress the world's movement UI.
-    await page.locator('#k11520UtilityMaster').click();assert.equal(await page.locator('#walletPanel').evaluate(element=>element.classList.contains('collapsed')),false);assert.equal(await page.locator('#walletPanel').isVisible(),false);assert.equal(await page.locator('#k11520MovePlane').isVisible(),true);
-    const restoredPlane=await page.locator('#k11520MovePlane').evaluate(element=>{const r=element.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{width:r.width,height:r.height,owned:hit===element||element.contains(hit),name:element.getAttribute('aria-label')||element.textContent}});assert.ok(restoredPlane.width>=44&&restoredPlane.height>=44&&restoredPlane.owned&&restoredPlane.name.trim());result.hiddenWallet={collapsed:false,plane:restoredPlane};
+    await page.locator('#k11520UtilityMaster').click();assert.equal(await page.locator('#walletPanel').evaluate(element=>element.classList.contains('collapsed')),false);assert.equal(await page.locator('#walletPanel').isVisible(),false);assert.equal(await page.locator('#k11520MovePlane').isVisible(),false,'closing More restores the clean HUD with no permanent switch');
+    result.hiddenWallet={collapsed:false,permanentPlaneSwitch:false};
     const resumed=await beginDrag('wallet-hidden-by-more');result.hiddenWallet.nativeDrag=resumed.state;assert.equal(resumed.state.joy.visible,true,'an entirely hidden Wallet cannot hide the active floating disc');await touch('touchEnd',[]);result.hiddenWallet.released=await observe('hidden-wallet-drag-released');neutral(result.hiddenWallet.released,'hidden Wallet release');assert.equal(result.hiddenWallet.released.joy.visible,false);
     await page.locator('#k11520UtilityMaster').click();await page.locator('#walletToggle').click();if(await page.evaluate(()=>document.documentElement.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     const final=await observe('returned-clean-idle');neutral(final,'final idle');assert.equal(final.joy.visible,false);assert.equal(final.joy.ownsCenter,false);assert.deepEqual(final.finance,initial.finance,'floating gestures and plane disclosure cannot alter C/lots, orders, positions or autopilot arming');assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);await page.screenshot({path:`${OUT}/floating-${profile.width}x${profile.height}-return.png`});result.functional='PASS';result.visual='REQUIRES_DIRECT_IMAGE_INSPECTION';result.authority='NATIVE_CDP_TOUCH_NO_SIGN_SEND_NO_FINANCIAL_ACTION';result.edgeScope='ONE_ACTUAL_EMPTY_EDGE_ORIGIN_PLUS_SAFE_ORIGINS_PER_PROFILE; PRESS_VECTOR_SEPARATE_FROM_CLAMPED_VISUAL_BASE';
@@ -705,7 +763,7 @@ async function verifyInitialQuoteWait(){
     const returning=await page.evaluate(()=>({combat:globalThis.__K11520_KSPACE_API__.snapshot(),coords:globalThis.__K11520_WORLD_COORDS__}));
     assert.equal(returning.coords.physical.x,210);assert.equal(returning.coords.physical.z,186);
     assert.ok(Math.abs(returning.combat.distance-7)<.1,'restored XYZ must receive the guardian at 7m');
-    await page.waitForFunction(version=>document.querySelector('.brandMetaV250')?.textContent.includes(version),SHARED_GAME_VERSION);
+    await verifySharedVersionStamp(page);
     await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
     try{
       await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2);
@@ -725,7 +783,7 @@ async function verifyInitialQuoteWait(){
     assert.ok(lifeAfter.every((m,i)=>Math.hypot(m.position.x-lifeBefore[i].position.x,m.position.z-lifeBefore[i].position.z)>.01),'ambient life must actually move');
     await fs.writeFile(`${OUT}/returning-player.json`,JSON.stringify({returning,lifeBefore,lifeAfter},null,2));
     await page.screenshot({path:`${OUT}/returning-390-ambient-moving.png`});
-    assert.ok((await page.locator('.brandMetaV250').textContent()).includes(SHARED_GAME_VERSION),'legacy runtime must not overwrite release stamp');
+    await verifySharedVersionStamp(page);
     assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot().market.status),'WAIT');
     assert.equal(await page.locator('.marketKValue').count(),0);await page.locator('#attack').click();
     await ensureExpandedMarket(page);await page.screenshot({path:`${OUT}/startup-WAIT-no-fake-market.png`});ready=true;
@@ -776,8 +834,7 @@ async function snapshot(page){return page.evaluate(async sels=>{
 async function verifyFullHudControlOwnership(page,report){
   const controls=['#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#gameModeToggle','#k11520UtilityMaster'];
   await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_UI_SETTINGS__?.profile==='FULL'&&['k11520CameraReset','cargoInterceptionButton','homeDeliveryButton','k11520MarketRow'].every(id=>document.getElementById(id)),null,{timeout:45000});
-  await page.waitForFunction(version=>document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion===version,SHARED_GAME_VERSION);
-  assert.equal(await page.locator('.brandMetaV250 span:first-child').textContent(),`${SHARED_GAME_VERSION} · 5D K線西遊記`);
+  await verifySharedVersionStamp(page);
   report.visibleVersion=SHARED_GAME_VERSION;
   const ownership=await page.evaluate(selectors=>Object.fromEntries(selectors.map(selector=>{const el=document.querySelector(selector),r=el?.getBoundingClientRect(),style=el?getComputedStyle(el):null;if(!r||style.display==='none'||style.visibility==='hidden')return[selector,null];const inset=Math.min(10,Math.max(2,Math.min(r.width,r.height)/4)),points=[[r.left+r.width/2,r.top+r.height/2],[r.left+inset,r.top+r.height/2],[r.right-inset,r.top+r.height/2],[r.left+r.width/2,r.top+inset],[r.left+r.width/2,r.bottom-inset]],owners=points.map(([x,y])=>{const hit=document.elementFromPoint(x,y);return{owned:hit===el||el.contains(hit),id:hit?.id||'',classes:String(hit?.className||'')}});return[selector,{rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height},owners,ownedHitFraction:owners.filter(x=>x.owned).length/owners.length}]})),selectors);
   for(const selector of controls){const item=ownership[selector];if(!item)continue;assert.ok(item.rect.width>=44&&item.rect.height>=44,selector+' must remain a 44px touch target in FULL HUD');assert.ok(item.ownedHitFraction>0,selector+' has no owned hit area: '+JSON.stringify(item.owners))}

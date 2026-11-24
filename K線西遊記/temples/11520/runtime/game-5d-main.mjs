@@ -26,7 +26,8 @@ import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimul
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK,formatUniverseAddress,gameUnitsToK,advanceLocalMotionClock,integrateLocalMotion} from './spatial-coordinate-runtime.mjs';
 import {readCanonicalDriveState} from './combat-drive-adapter.mjs';
 import {rawVectorFromControl} from './combat-drive-live-runtime.mjs';
-import {world11520InputBlocked,floating11520JoystickEnabled,begin11520FloatingJoystick,move11520FloatingJoystick,end11520FloatingJoystick,cancel11520JoystickInput} from './joystick-xzxyyz.mjs';
+import {world11520InputBlocked,floating11520JoystickEnabled,begin11520FloatingJoystick,move11520FloatingJoystick,end11520FloatingJoystick,cycle11520FloatingPlane,cancel11520JoystickInput} from './joystick-xzxyyz.mjs';
+import {playerHotspot} from './character-status-runtime.mjs';
 import {collectInspectableEntities,inspectMapPoint,waypointSummary} from './map-object-navigation-runtime.mjs';
 import {createLifeVisual,syncLifeVisual} from './life-visual-runtime.mjs';
 import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
@@ -800,7 +801,7 @@ $('#confirmOrder').onclick=async()=>{
 async function closePos(){if(execution.readOnly){toast('M1_READ_ONLY · 部位 NOT_REQUESTED；退出請返回原錢包檢視');return}if(execution.mode==='BSC_TESTNET'&&isPrincipalExitOnlyView()){toast('舊部位資料尚未恢復，暫不提供平倉；可用本金可至錢包提款。');return}const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=await executionAction(()=>execution.close(p.positionId));if(!r.ok){toast(r.reason);return}if(r.receipt)recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
 
 const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open');$('#rail').innerHTML=RAIL_ORGANS.map(([id,ic,n])=>`<button data-organ="${id}" title="${n}">${ic}</button>`).join('');$$('[data-organ]').forEach(b=>b.onclick=()=>openOrgan(b.dataset.organ));$('#sheetClose').onclick=()=>{kgenPoolReference.pause();$('#sheet').classList.remove('open');fullMapCanvas=null};
-function openOrgan(id){if(id!=='assets'&&id!=='market')kgenPoolReference.pause();if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h=navigationConsoleHTML();else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點「XZ 移動」切換 XZ／XY／YZ。預設拖曳遊戲空白處叫出移動盤，放開即收起；輕點空白處導航，點生命或物件查看。雙指縮放。由資訊設定選「顯示操作」叫回固定圓盤及縱桿，並恢復單指拖曳鏡頭。圓盤控制所選兩軸；縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas);bindNavigationConsole()}mountKgenReference(id)}
+function openOrgan(id){if(id!=='assets'&&id!=='market')kgenPoolReference.pause();if(id==='character'){playerLifeUI.open();return}$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${formatGameDistanceK(S.intentXYZ.x)} / Y ${formatGameDistanceK(S.intentXYZ.y)} / Z ${formatGameDistanceK(S.intentXYZ.z)}<br>實體座標：X ${formatGameDistanceK(S.xyz.x)} / Y ${formatGameDistanceK(S.xyz.y)} / Z ${formatGameDistanceK(S.xyz.z)}</div>`;else if(id==='worldmap')h=navigationConsoleHTML();else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>按住遊戲空白處叫出移動盤，拖曳移動，放開即收起。輕點空白處依 XZ → XY → YZ 切換平面。點生命或物件查看，雙指縮放。由資訊設定選「顯示操作」可用固定圓盤和縱桿，並啟用空白處點選導航與單指拖曳鏡頭。圓盤控制所選兩軸；縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas);bindNavigationConsole()}mountKgenReference(id)}
 
 const walletSession=getWalletSession11520();
 if(serverPreviewType){
@@ -1071,11 +1072,12 @@ function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){cons
 }
 const cameraPointers=new Map();let nativeWorldDown=null,pinchDistance=null,pinchZoom=1,cameraGesture=false,cameraStatusTimer=0,suppressSingleWorldPointer=false;
 function cancelWorldInput(){const held=[...cameraPointers.keys()];cameraPointers.clear();nativeWorldDown=null;worldTapStart=null;pinchDistance=null;cameraGesture=false;suppressSingleWorldPointer=false;cancel11520JoystickInput();resetJoy();for(const id of held)try{if(renderer.domElement.hasPointerCapture?.(id))renderer.domElement.releasePointerCapture(id)}catch{}}
-function worldGestureSnapshot(){return{phase:cameraPointers.size>=2?'PINCH':suppressSingleWorldPointer?'SUPPRESSED':worldTapStart?.floatingActive?'FLOATING_MOVE':worldTapStart?.floating?'PENDING_MOVE':cameraGesture?'CAMERA':worldTapStart?'ENTITY':'IDLE',pointerCount:cameraPointers.size,suppressedSingle:suppressSingleWorldPointer}}
-function canPanAt(x,y){
+function worldGestureSnapshot(){return{phase:cameraPointers.size>=2?'PINCH':suppressSingleWorldPointer?'SUPPRESSED':worldTapStart?.floatingDragged?'FLOATING_MOVE':worldTapStart?.floating?'PENDING_MOVE':cameraGesture?'CAMERA':worldTapStart?'ENTITY':'IDLE',pointerCount:cameraPointers.size,suppressedSingle:suppressSingleWorldPointer}}
+function canPanAt(x,y,latchedMonster){
   if(document.elementFromPoint(x,y)!==renderer.domElement)return false;
+  if(floating11520JoystickEnabled()&&playerHotspot(renderer.domElement,x,y))return false;
   const r=renderer.domElement.getBoundingClientRect(),rayX=renderer.domElement.dataset.xVisualMirror==='1'?r.left+r.width-(x-r.left):x;
-  if(monsterAt(rayX,y))return false;
+  if(latchedMonster===undefined?monsterAt(rayX,y):latchedMonster)return false;
   tapPointer.set((rayX-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);raycaster.setFromCamera(tapPointer,camera);
   for(const hit of raycaster.intersectObjects(scene.children,true)){
     if(ancestorData(hit.object,'isPlayer')||ancestorData(hit.object,'playerHome')||ancestorData(hit.object,'worldObjectId')!=null)return false;
@@ -1103,7 +1105,14 @@ renderer.domElement.addEventListener('pointerdown',e=>{
   const nativeDown=nativeWorldDown?.id===e.pointerId?nativeWorldDown:null;nativeWorldDown=null;
   if(e.button!==0||world11520InputBlocked())return;
   const x=cameraScreenX(e);e.preventDefault();cameraPointers.set(e.pointerId,{x,y:e.clientY});try{renderer.domElement.setPointerCapture?.(e.pointerId)}catch{}
-  if(cameraPointers.size===1){cameraGesture=false;const panAllowed=canPanAt(x,e.clientY);worldTapStart={id:e.pointerId,x,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY),panAllowed,floating:panAllowed&&floating11520JoystickEnabled(),floatingActive:false,isTrusted:e.isTrusted===true||!!nativeDown&&Math.abs(nativeDown.x-x)<.5&&Math.abs(nativeDown.y-e.clientY)<.5}}
+  if(cameraPointers.size===1){
+    cameraGesture=false;
+    const y=e.clientY,monster=monsterAt(e.clientX,y),panAllowed=canPanAt(x,y,monster);
+    const floating=panAllowed&&floating11520JoystickEnabled();
+    const isTrusted=e.isTrusted===true||!!nativeDown&&Math.abs(nativeDown.x-x)<.5&&Math.abs(nativeDown.y-y)<.5;
+    worldTapStart={id:e.pointerId,x,y,t:performance.now(),monster,panAllowed,floating,floatingDragged:false,isTrusted};
+    if(floating)begin11520FloatingJoystick({pointerId:e.pointerId,x,y,isTrusted});
+  }
   else{cancel11520JoystickInput();suppressSingleWorldPointer=true;pinchDistance=pointerDistance();pinchZoom=cameraView.zoom;worldTapStart=null;cameraGesture=true}
 },{passive:false});
 renderer.domElement.addEventListener('pointermove',e=>{
@@ -1118,10 +1127,10 @@ renderer.domElement.addEventListener('pointermove',e=>{
   if(suppressSingleWorldPointer)return;
   if(worldTapStart?.floating){
     if(!floating11520JoystickEnabled()){cancelWorldInput();return}
-    if(!worldTapStart.floatingActive){
+    if(!worldTapStart.floatingDragged){
       if(Math.hypot(e.clientX-worldTapStart.x,e.clientY-worldTapStart.y)<=10)return;
-      if(!begin11520FloatingJoystick({pointerId:e.pointerId,x:worldTapStart.x,y:worldTapStart.y,isTrusted:worldTapStart.isTrusted})){cancelWorldInput();return}
-      worldTapStart.floatingActive=true;cameraGesture=true;cancelNavigation('手動移動');
+      if(!move11520FloatingJoystick({pointerId:e.pointerId,x:e.clientX,y:e.clientY})){cancelWorldInput();return}
+      worldTapStart.floatingDragged=true;cancelNavigation('手動移動');return;
     }
     move11520FloatingJoystick({pointerId:e.pointerId,x:e.clientX,y:e.clientY});return;
   }
@@ -1138,8 +1147,14 @@ renderer.domElement.addEventListener('pointermove',e=>{
 },{passive:true});
 function finishCameraPointer(e){
   if(!cameraPointers.has(e.pointerId))return;
-  const start=worldTapStart;end11520FloatingJoystick(e.pointerId);cameraPointers.delete(e.pointerId);worldTapStart=null;
-  if(e.type==='pointerup'&&!cameraGesture&&!suppressSingleWorldPointer&&start?.id===e.pointerId&&Math.hypot(cameraScreenX(e)-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420)worldTapAt(e.clientX,e.clientY,start.monster);
+  const start=worldTapStart,endedFloating=end11520FloatingJoystick(e.pointerId);
+  cameraPointers.delete(e.pointerId);worldTapStart=null;
+  const isTap=e.type==='pointerup'&&!cameraGesture&&!suppressSingleWorldPointer&&start?.id===e.pointerId&&Math.hypot(cameraScreenX(e)-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420;
+  if(isTap){
+    if(start.floating){
+      if(endedFloating&&!start.floatingDragged&&start.isTrusted)cycle11520FloatingPlane();
+    }else worldTapAt(e.clientX,e.clientY,start.monster);
+  }
   if(!cameraPointers.size){pinchDistance=null;cameraGesture=false;suppressSingleWorldPointer=false}
 }
 for(const type of ['pointerup','pointercancel','lostpointercapture'])renderer.domElement.addEventListener(type,finishCameraPointer,{passive:true});
@@ -1164,7 +1179,7 @@ function applyWorldCamera(){
   camera.position.set(x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2/cameraView.zoom,z-Math.cos(S.camYaw)*dist);
   // Recenter must also reset the existing dead-zone's remembered focus. A zero
   // pan alone leaves the old manual-camera focus inside its hysteresis region.
-  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':controlState()?.floating?.active?'PLAYER_CONTROL':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
+  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':controlState()?.floating?.state==='DRAGGING'?'PLAYER_CONTROL':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
   camera.lookAt(x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,z+Math.cos(S.camYaw)*1.8);
   cameraRecenterPending=false;
   revealPlayerBehindOccluders();

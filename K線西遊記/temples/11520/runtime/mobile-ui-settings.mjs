@@ -105,7 +105,7 @@ function scheduleMarketHide(){
   marketTimer=setTimeout(hideMarketCards,MARKET_IDLE_MS);
 }
 function showMarketCards(){if($('#k11520UiSettings')?.classList.contains('open'))setSettingsOpen(false);controlsOpen=true;infoOpen=true;marketOpen=true;for(const key of ['params',...INFO_KEYS])disclosedSurfaces.add(key);apply();scheduleMarketHide()}
-function ensureBuildStamp(){let stamp=$('#k11520BuildStamp');if(!stamp){stamp=document.createElement('small');stamp.id='k11520BuildStamp';document.body.appendChild(stamp)}stamp.textContent=`${SHARED_GAME_VERSION} · UI:${UI_REVISION}`;stamp.title='已載入的 UI 來源修訂；不代表 Git／PWA 全部資源已更新';document.documentElement.dataset.k11520UiRevision=UI_REVISION}
+function ensureBuildStamp(){let stamp=$('#k11520BuildStamp');if(!stamp){stamp=document.createElement('small');stamp.id='k11520BuildStamp';document.body.appendChild(stamp)}stamp.textContent=SHARED_GAME_VERSION;document.documentElement.dataset.k11520UiRevision=UI_REVISION}
 function installWorldFirst(){
   if(worldFirstBound)return;worldFirstBound=true;
   const panel=$('#k11520UiSettings'),picker=document.createElement('select');picker.id='k11520HudProfile';picker.className='full';picker.setAttribute('aria-label','HUD 顯示模式');
