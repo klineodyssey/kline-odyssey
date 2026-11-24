@@ -826,6 +826,8 @@ function offlineOrderCasesFromPlane(cases, plane) {
 
 async function offlineSimulationBrowserQA(options){
   const {baseline,profiles,requestedProfile}=options;
+  // Preserve the historical baseline density and the candidate CSS viewport.
+  const deviceScaleFactor=baseline?1:.75;
   const {KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   const {createHash}=await import('node:crypto');
   const {execFileSync}=await import('node:child_process');
@@ -859,7 +861,7 @@ async function offlineSimulationBrowserQA(options){
     for(const profile of profiles){
     const name=`${profile.width}x${profile.height}-${profile.quote.toLowerCase()}`;
     const result={profile,head,baseline,simulatedBrowserClock:baseline,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],blockedReadOnlyReferences:[],networkAuthorityAttempts:[]};results.push(result);
-    const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage();
+    const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,isMobile:true,serviceWorkers:'block',deviceScaleFactor}),page=await context.newPage();
     page.setDefaultTimeout(12000);let stage='raw-source-proof',networkSequence=0;
     let trial,finishTrialSource;
     const prices={BTCUSDT:100000,ETHUSDT:profile.width===390?4:4000,BNBUSDT:600};
@@ -988,7 +990,7 @@ async function offlineSimulationBrowserQA(options){
       const file=`${name}-${label}.png`;
       const started=performance.now();
       try{
-        const png=await page.screenshot({path:`${out}/${file}`,fullPage});
+        const png=await page.screenshot({path:`${out}/${file}`,fullPage,scale:'css'});
         result.screenshots.push(file);
         if(!baseline){
           const width=png.readUInt32BE(16),height=png.readUInt32BE(20);
@@ -1305,7 +1307,7 @@ async function offlineSimulationBrowserQA(options){
   }finally{
     if(browser)await browser.close().catch(error=>failures.push('Browser cleanup: '+error.message));
     outcome=offlineSimulationOutcome(options,results,failures,cases.length);
-    await fs.writeFile(`${out}/report.json`,JSON.stringify({head,base,baseline,harnessSha256:hash(await fs.readFile(new URL(import.meta.url))),capturedAt:new Date().toISOString(),expectedSourceHashes:expected,expectedSourceAssets:assets,
+    await fs.writeFile(`${out}/report.json`,JSON.stringify({head,base,baseline,harnessSha256:hash(await fs.readFile(new URL(import.meta.url))),capturedAt:new Date().toISOString(),expectedSourceHashes:expected,expectedSourceAssets:assets,deviceScaleFactor,
       ...outcome,
       simulatedBrowserClock:baseline,clockEvidence:baseline?'PLAYWRIGHT_VIRTUAL_BROWSER_TIME':'WALL_CLOCK_WITH_SEQUENCED_UPSTREAM_FIXTURES',
       fixtureScope:baseline?'STATIC_BASELINE_WITH_UNAVAILABLE_MARKET':'STATIC_UNAVAILABLE_QUOTES_AND_LOOPBACK_BACKEND_WITH_UPSTREAM_QUOTE_FIXTURES',

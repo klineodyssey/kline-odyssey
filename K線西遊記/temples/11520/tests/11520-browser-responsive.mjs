@@ -265,10 +265,15 @@ async function verifyWorldFirst(){
       assert.ok(Math.max(...marketReadability.map(x=>x.width))-Math.min(...marketReadability.map(x=>x.width))<1,'expanded market cards must remain equal width');
       assert.ok(marketReadability.every(x=>x.width>=94),`expanded market cards must retain readable width: ${JSON.stringify(marketReadability)}`);
       for(const card of marketReadability){assert.equal(card.symbolFits,true,card.symbol+' must remain complete on one line');assert.equal(card.priceFits,true,card.symbol+' price must remain complete on one line');assert.match(card.address,/k\s*=\s*-?\d+/);assert.match(card.address,/α\s*=\s*\d/);assert.match(card.address,/θ\s*=\s*(?:0|π)/);assert.equal(card.addressFits,true,card.symbol+' universe address must not overflow its card');assert.equal(card.overflowWrap,'normal');assert.equal(card.wordBreak,'keep-all')}
-      const expandedWorld=await page.evaluate(()=>{const guide=document.querySelector('#k11520MonsterGuide').getBoundingClientRect(),player=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return{guideHeight:guide.height,playerUncovered:document.elementFromPoint(player.x,player.y)?.id==='three'}});
+      const expandedWorld=await page.evaluate(()=>{
+        const guide=document.querySelector('#k11520MonsterGuide').getBoundingClientRect();
+        const player=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;
+        const playerHit=document.elementFromPoint(player.x,player.y)?.id||null;
+        return {guideHeight:guide.height,guideBounds:guide.toJSON(),player,playerHit,playerUncovered:playerHit==='three'};
+      });
+      result.expandedWorld=expandedWorld;
       assert.ok(expandedWorld.guideHeight<=52,'expanded Market must not stretch the compact monster guide across the world');
       assert.equal(expandedWorld.playerUncovered,true,'expanded Market guide must not cover the player');
-      result.expandedWorld=expandedWorld;
       await page.screenshot({path:`${OUT}/market-expanded-${profile.width}x${profile.height}.png`});
       // Quotes replace card DOM; read the currently attached visible card and
       // its rectangle atomically instead of using a transient element handle.

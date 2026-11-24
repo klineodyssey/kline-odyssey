@@ -269,6 +269,11 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
        are visible. Its text wraps without owning the adjacent controls. */
     html.k11520UtilitiesOpen[data-k11520-layout-owner] #k11520RealTradePreflight{max-width:158px!important}
     html.k11520UtilitiesOpen[data-k11520-layout-owner] #k11520MonsterGuide{width:calc(100% - 271px)!important}
+    /* Expanded market cards can bring the guide down to the player's height.
+       Keep a short, readable entry to the full story at the left of the world. */
+    html[data-k11520-layout-owner][data-k11520-hud-profile="MINIMAL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{
+      right:auto!important;width:calc(50% - 42px)!important;max-height:52px!important;
+    }
   }
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) label{
     font-size:9px!important;white-space:normal!important;overflow-wrap:anywhere;max-width:100%;
