@@ -259,8 +259,8 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
   html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud){font-size:var(--k11520-hud-label)!important;line-height:1.25!important;overflow-wrap:anywhere}
   html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud) :is(small,#k11520HpDetail,#k11520DriveHud,#k11520MotionCombat){font-size:inherit!important;line-height:inherit!important}
   html[data-k11520-layout-owner]:is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{font-size:var(--k11520-hud-label)!important;height:auto!important;white-space:normal!important;overflow-wrap:anywhere}
-  html.k11520UtilitiesOpen[data-k11520-layout-owner] :is(.tele,.monsterHud){width:calc((100% - 163px)/2)!important}
-  html.k11520UtilitiesOpen[data-k11520-layout-owner] .monsterHud{right:149px!important}
+  html.k11520UtilitiesOpen[data-k11520-layout-owner] :is(.tele,.monsterHud){width:calc((100% - 171px)/2)!important}
+  html.k11520UtilitiesOpen[data-k11520-layout-owner] .monsterHud{right:153px!important}
   html.k11520UtilitiesOpen[data-k11520-layout-owner] #k11520MonsterGuide{
     right:auto!important;width:calc(100% - 163px)!important;
   }
