@@ -269,13 +269,14 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
        are visible. Its text wraps without owning the adjacent controls. */
     html.k11520UtilitiesOpen[data-k11520-layout-owner] #k11520RealTradePreflight{max-width:158px!important}
     html.k11520UtilitiesOpen[data-k11520-layout-owner] #k11520MonsterGuide{width:calc(100% - 271px)!important}
-    /* Keep the expanded readings scrollable without using up the world view. */
-    html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) :is(.tele,.monsterHud){
-      max-height:108px!important;overflow:auto!important;overscroll-behavior:contain;
-    }
-    /* The guide remains a left-side entry to the full story. */
-    html[data-k11520-layout-owner]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{
+    /* Keep the compact guide at the left edge while market details are open. */
+    html[data-k11520-layout-owner][data-k11520-hud-profile="MINIMAL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{
       right:auto!important;width:calc(50% - 42px)!important;max-height:52px!important;
+    }
+    /* FULL keeps the entire status panels visible. Its guide uses the free
+       part of the disclosure row instead of covering the returned scene. */
+    html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{
+      top:var(--k11520-portrait-disclosure-top,68px)!important;right:auto!important;width:calc(100% - 154px)!important;height:44px!important;max-height:44px!important;
     }
   }
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) label{
