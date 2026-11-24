@@ -707,7 +707,16 @@ async function verifyInitialQuoteWait(){
     assert.ok(Math.abs(returning.combat.distance-7)<.1,'restored XYZ must receive the guardian at 7m');
     await page.waitForFunction(version=>document.querySelector('.brandMetaV250')?.textContent.includes(version),SHARED_GAME_VERSION);
     await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
-    await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2);
+    try{
+      await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2);
+    }catch(error){
+      const layout=await page.evaluate(()=>({profile:document.documentElement.dataset.k11520HudProfile,
+        life:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),
+        overlays:Object.fromEntries(['.tele','.monsterHud','#k11520MonsterGuide','.axes'].map(selector=>[selector,document.querySelector(selector)?.getBoundingClientRect().toJSON()]))}));
+      await fs.writeFile(`${OUT}/returning-390-layout-failure.json`,JSON.stringify(layout,null,2));
+      await page.screenshot({path:`${OUT}/returning-390-layout-failure.png`});
+      throw error;
+    }
     const lifeBefore=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot());
     await page.screenshot({path:`${OUT}/returning-390-7m.png`});
     await page.waitForTimeout(2400);
