@@ -23,8 +23,9 @@ const MOBILE_MAX=600;
 const widePortrait=()=>innerWidth>MOBILE_MAX&&globalThis.matchMedia?.(K11520_PORTRAIT_QUERY).matches;
 const mobileWidth=()=>innerWidth<=MOBILE_MAX||widePortrait();
 const compactStatusWidth=380;
+const splitFullStatusQuery=`(max-width:${compactStatusWidth}px), (max-width:420px) and (max-height:790px)`;
 function splitFullPortraitStatus(root){
-  return innerWidth<=compactStatusWidth&&globalThis.matchMedia?.(K11520_PORTRAIT_QUERY).matches&&
+  return globalThis.matchMedia?.(K11520_PORTRAIT_QUERY).matches&&globalThis.matchMedia?.(splitFullStatusQuery).matches&&
     root.dataset.k11520HudProfile==='FULL'&&!root.classList.contains('k11520UtilitiesOpen')&&
     (root.classList.contains('k11520InfoOpen')||root.classList.contains('k11520TradeOpen'));
 }
@@ -284,10 +285,12 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
     html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{
       top:var(--k11520-portrait-disclosure-top,68px)!important;right:auto!important;width:calc(100% - 154px)!important;height:44px!important;max-height:44px!important;
     }
-    @media(width <= ${compactStatusWidth}px){
+    @media ${splitFullStatusQuery}{
       html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) .tele{
         height:var(--k11520-world-status-height,var(--k11520-status-height,108px))!important;
       }
+    }
+    @media(width <= ${compactStatusWidth}px){
       html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520RealTradePreflight{
         right:6px!important;top:calc(var(--k11520-status-top,190px) + var(--k11520-status-height,108px) + 8px)!important;
         bottom:auto!important;max-width:90px!important;
@@ -299,10 +302,10 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
         left:130px!important;bottom:auto!important;
       }
       html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520CameraReset{
-        top:calc(var(--k11520-map-top,440px) - 52px)!important;
+        top:calc(var(--k11520-camera-lane-top,440px) - 52px)!important;
       }
       html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520CameraZoomStatus{
-        top:var(--k11520-map-top,440px)!important;
+        top:var(--k11520-camera-lane-top,440px)!important;
       }
     }
   }
@@ -527,7 +530,11 @@ function syncStatusFlow(){
   const guide=visibleRect($('#k11520MonsterGuide')),guideHeight=Math.max(44,guide?.height||0);
   // The narrow left column flows on its own. The map remains clear of both
   // cards, and the short screen keeps a strip of world available for dragging.
-  if(!landscape)put('--k11520-map-top',Math.ceil(split?visibleRect(world).bottom+8:guideTop+guideHeight+10));
+  if(!landscape){
+    const stackedMapTop=Math.ceil(guideTop+guideHeight+10);
+    put('--k11520-camera-lane-top',stackedMapTop);
+    put('--k11520-map-top',split?Math.ceil(visibleRect(world).bottom+8):stackedMapTop);
+  }
 }
 function observeFlowRoots(){
   if(!flowObserver)return;
