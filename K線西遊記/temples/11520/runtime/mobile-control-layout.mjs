@@ -5,7 +5,7 @@
 // controls OR explicit trade context. Compact overlays fit the existing world;
 // no financial state, world coordinate or gesture admission rule is changed.
 // LOCAL_CANDIDATE_REVISION: HUD-FLOW2-TAP-J1; latestHumanretainfaintoutlineandremoveoutervisualsquareonly; actualauthorCodex originaltechnicalexecutor01a189ef-ecbc-7699-b87b-a4538d57c029.
-import {K11520_MOBILE_WIDTH_QUERY,K11520_TOUCH_PORTRAIT_QUERY} from './market-origin-wallet-layout-runtime.mjs';
+import {K11520_MOBILE_WIDTH_QUERY,K11520_PORTRAIT_QUERY} from './market-origin-wallet-layout-runtime.mjs';
 import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
@@ -20,8 +20,8 @@ PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-a
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
-const wideTouchPortrait=()=>innerWidth>MOBILE_MAX&&globalThis.matchMedia?.(K11520_TOUCH_PORTRAIT_QUERY).matches;
-const mobileWidth=()=>innerWidth<=MOBILE_MAX||wideTouchPortrait();
+const widePortrait=()=>innerWidth>MOBILE_MAX&&globalThis.matchMedia?.(K11520_PORTRAIT_QUERY).matches;
+const mobileWidth=()=>innerWidth<=MOBILE_MAX||widePortrait();
 const railLayoutProperties=['position','left','right','top','bottom','width','height','display','transform','margin','z-index','opacity','visibility','pointer-events'];
 let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const thumbObservers=new WeakMap();
@@ -193,7 +193,7 @@ html[data-k11520-hud-mode="ON_DEMAND"] .top .brand{transform:translateY(var(--k1
 html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,116px)!important}
 @media(orientation:landscape) and (max-height:600px){html[data-k11520-hud-mode="ON_DEMAND"] .axes{top:var(--k11520-market-top,54px)!important}}
 #k11520BuildStamp::after{content:' · L:FLOW2/TAP-J1'}
-@media (max-width:600px) and (orientation:portrait), ${K11520_TOUCH_PORTRAIT_QUERY}{
+@media ${K11520_PORTRAIT_QUERY}{
   /* FULL and compact modes share one compact guide. Full story/details remain
      on its original explicit activation, not a centred world-blocking card. */
   html[data-k11520-hud-profile] #k11520MonsterGuide{left:6px!important;right:6px!important;width:auto!important;max-width:none!important;transform:none!important;height:44px!important;min-height:44px!important;box-sizing:border-box!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
@@ -243,7 +243,7 @@ html[data-k11520-hud-mode="ON_DEMAND"] #joy[data-k11520-floating-active="1"] #k1
 html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) #joy:not([data-k11520-floating-active="1"]){visibility:visible!important;pointer-events:auto!important}
 #k11520MovePlane{position:fixed!important;left:max(6px,env(safe-area-inset-left))!important;right:auto!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;width:70px!important;height:44px!important;min-width:70px!important;min-height:44px!important;box-sizing:border-box!important;display:grid!important;place-items:center!important;padding:4px!important;border:1px solid #68e4ff66!important;border-radius:10px!important;background:#071018d9!important;color:#dffaff!important;font:700 12px system-ui!important;z-index:590!important;touch-action:manipulation!important}
 /* Keep reading sizes useful on touch displays that report a wide layout viewport. */
-@media (orientation:portrait) and (max-width:600px), ${K11520_TOUCH_PORTRAIT_QUERY}{
+@media ${K11520_PORTRAIT_QUERY}{
   html[data-k11520-layout-owner]{
     --k11520-hud-label:clamp(11px,2.65vw,26px);
     --k11520-hud-value:clamp(14px,3.6vw,36px);
@@ -276,7 +276,7 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
   html[data-k11520-layout-owner] #cControl label{letter-spacing:-.045em;overflow-wrap:normal}
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) .read{font-size:9px!important}
 }
-@media ${K11520_TOUCH_PORTRAIT_QUERY} and (width > 600px){
+@media ${K11520_PORTRAIT_QUERY} and (width > 600px){
   html[data-k11520-layout-owner]{
     --k11520-wide-rail-width:clamp(54px,8vw,88px);
     --k11520-wide-rail-height:clamp(148px,20vw,220px);
@@ -333,13 +333,13 @@ function applyRail(){
   }
   globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();
   const specs=landscape?[['#yControl','max(182px, calc(env(safe-area-inset-left) + 168px))'],['#cControl','max(232px, calc(env(safe-area-inset-left) + 218px))'],['#lotsControl','max(282px, calc(env(safe-area-inset-left) + 268px))']]:[['#yControl','calc(50% - 21px)'],['#cControl','calc(50% + 29px)'],['#lotsControl','calc(50% + 79px)']];
-  if(wideTouchPortrait()){
+  if(widePortrait()){
     const width='var(--k11520-wide-rail-width)';
     specs[0][1]=`calc(50% - ${width}/2)`;
     specs[1][1]=`calc(50% + ${width}/2 + 8px)`;
     specs[2][1]=`calc(50% + ${width}*1.5 + 16px)`;
   }
-  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()||paramsHidden()||document.documentElement.classList.contains('k11520SettingsOpen')){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width',wideTouchPortrait()?'var(--k11520-wide-rail-width)':'42px'],['height',wideTouchPortrait()?'var(--k11520-wide-rail-height)':'132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity',railDisclosed(sel)?'1':'0'],['visibility',railDisclosed(sel)?'visible':'hidden'],['pointer-events',railDisclosed(sel)?'auto':'none']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
+  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()||paramsHidden()||document.documentElement.classList.contains('k11520SettingsOpen')){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width',widePortrait()?'var(--k11520-wide-rail-width)':'42px'],['height',widePortrait()?'var(--k11520-wide-rail-height)':'132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity',railDisclosed(sel)?'1':'0'],['visibility',railDisclosed(sel)?'visible':'hidden'],['pointer-events',railDisclosed(sel)?'auto':'none']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
   if(landscape)for(const [sel] of specs){const el=$(sel);setImportant(el,'bottom','max(58px, calc(env(safe-area-inset-bottom) + 50px))');setImportant(el,'height','108px');setImportant(el,'width','44px')}
 }
 function installThumbBounds(){

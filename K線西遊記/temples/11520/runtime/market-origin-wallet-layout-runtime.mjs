@@ -5,8 +5,8 @@ FORMAL_ORGAN_NAME: 11520 Market/XYZ Separation + Stable Wallet Layout Runtime
 PURPOSE: Own utility-lane geometry and visibility, including the existing context-sensitive raid and courier actions. Mobile Control Layout owns joystick/rails/status. Preserve wallet identity and distinct XYZ/K-market semantics across responsive widths.
 */
 const $=s=>document.querySelector(s);
-export const K11520_TOUCH_PORTRAIT_QUERY='(orientation: portrait) and (any-pointer: coarse)';
-export const K11520_MOBILE_WIDTH_QUERY='(max-width: 600px), '+K11520_TOUCH_PORTRAIT_QUERY;
+export const K11520_PORTRAIT_QUERY='(orientation: portrait)';
+export const K11520_MOBILE_WIDTH_QUERY='(max-width: 600px), '+K11520_PORTRAIT_QUERY;
 const LEGACY_MARKET_ORIGIN_KEY='k11520.marketOrigin.v1';
 let walletInitial=null,utilityBound=false,walletWasOpen=false;
 const settingsOpen=()=>document.documentElement.classList.contains('k11520SettingsOpen');

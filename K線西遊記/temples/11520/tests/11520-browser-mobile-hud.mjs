@@ -65,12 +65,10 @@ async function verifyWideTouchPortrait(){
         await game.waitForFunction(changed,before,{timeout:4500});
       }finally{await input.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})}
     }
-    try{
-      const before=await game.evaluate(()=>({y:globalThis.__K11520_WORLD_COORDS__.physical.y,c:globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC,lots:globalThis.__K11520_SIGNED_C_IMMERSIVE__.lots}));
-      await dragUp('#yControl',y=>globalThis.__K11520_WORLD_COORDS__.physical.y>y,before.y);
-      await dragUp('#cControl',c=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC>c,before.c);
-      await dragUp('#lotsControl',lots=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.lots>lots,before.lots);
-    }finally{await input.detach()}
+    const before=await game.evaluate(()=>({y:globalThis.__K11520_WORLD_COORDS__.physical.y,c:globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC,lots:globalThis.__K11520_SIGNED_C_IMMERSIVE__.lots}));
+    await dragUp('#yControl',y=>globalThis.__K11520_WORLD_COORDS__.physical.y>y,before.y);
+    await dragUp('#cControl',c=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC>c,before.c);
+    await dragUp('#lotsControl',lots=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.lots>lots,before.lots);
     await entry.locator('#k11520ControlsClose').tap();
     for(const id of ['#yControl','#cControl','#lotsControl'])await entry.locator(id).waitFor({state:'hidden'});
     await entry.locator('#k11520MarketRow').tap();
@@ -83,9 +81,10 @@ async function verifyWideTouchPortrait(){
       return {hp:box('.monsterHud'),market:box('.axes'),quote:box('.axis.active .q'),xyz:box('.tele #xyz')};
     });
     assert.ok(compact.hp.right+6<=compact.market.left&&compact.market.bottom+6<=compact.xyz.top);
-    assert.ok(compact.hp.font>=24&&compact.quote.font>=30&&compact.xyz.font>=24);
+    assert.ok(compact.hp.font>=24&&compact.quote.font>=30&&compact.xyz.font>=24,JSON.stringify(compact));
     assert.ok(!compact.hp.clipped&&!compact.quote.clipped&&!compact.xyz.clipped,JSON.stringify(compact));
     await host.screenshot({path:OUT+'/11520-wide-touch-portrait-minimal.png'});
+    await input.detach();
     await fs.writeFile(OUT+'/11520-wide-touch-portrait-88888.json',JSON.stringify({head:process.env.K11520_SOURCE_SHA||null,geometry,compact,yMovement:'PASS',cChange:'PASS',lotsChange:'PASS',collapse:'PASS'},null,2));
   }catch(error){
     await host.screenshot({path:OUT+'/11520-wide-touch-portrait-failure.png',timeout:5000}).catch(()=>{});
