@@ -244,7 +244,7 @@ function spotFailureText(error) {
   const reason = error.message;
   if (reason === "PRIVATE_PREVIEW_ACCESS_REQUIRED") return "私人試玩授權已到期。請重新開啟原預覽入口。";
   if (error.status === 401) return "目前服務無法辨識此模擬帳戶。請連回原服務更新，或改用新帳戶。";
-  if (reason === "SPOT_PREVIEW_JOURNAL_FULL") return "模擬掛單已達上限。仍可撤銷既有掛單。";
+  if (reason === "SPOT_PREVIEW_JOURNAL_FULL") return "已達模擬委託上限。仍可撤銷既有掛單。";
   if (error.status === 404) return "目前服務未啟用現貨模擬。";
   if (/INSUFFICIENT/.test(reason)) return "可用模擬餘額不足。";
   if (/SELF_MATCH/.test(reason)) return "無法與同一模擬帳戶的掛單撮合。";
