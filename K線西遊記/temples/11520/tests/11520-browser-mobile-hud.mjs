@@ -8,7 +8,8 @@ await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
 async function verifyWideTouchPortrait(){
   const viewport={width:980,height:2100};
-  const host=await browser.newPage({viewport,isMobile:true,hasTouch:true});
+  // Keep the logical viewport wide while rendering at the phone image density.
+  const host=await browser.newPage({viewport,deviceScaleFactor:.56,isMobile:true,hasTouch:true});
   await host.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
   try{
     // A desktop-sized logical viewport on a portrait touch display originally
@@ -28,7 +29,7 @@ async function verifyWideTouchPortrait(){
         const r=el.getBoundingClientRect(),style=getComputedStyle(el),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
         return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,font:parseFloat(style.fontSize),visible:style.display!=='none'&&style.visibility==='visible'&&Number(style.opacity)>0,hit:el===hit||el.contains(hit)};
       };
-      const result={width:innerWidth,height:innerHeight,scale:visualViewport.scale,touch:matchMedia('(any-pointer: coarse)').matches,
+      const result={width:innerWidth,height:innerHeight,scale:visualViewport.scale,devicePixelRatio,touch:matchMedia('(any-pointer: coarse)').matches,
         header:sample('.top'),brand:sample('.brand'),market:sample('.axes'),world:sample('.tele'),life:sample('.monsterHud'),
         hp:sample('#k11520HpDetail'),price:sample('.axis .q'),
         cards:[...document.querySelectorAll('.axis')].map(el=>sample('[data-axis="'+el.dataset.axis+'"]')),
