@@ -141,6 +141,8 @@ if(process.argv.includes('--testnet97')){
 const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 const out='artifacts/11520-settlement-qa';
 const receiptReviewOnly=process.argv.includes('--wallet-receipt-review');
+// Keep CSS viewports and screenshot sizes while reducing the software WebGL buffer.
+const settlementPixelRatio=.75;
 await fs.mkdir(out,{recursive:true});
 const settlementStarted=performance.now();
 const browser=await chromium.launch({headless:true});
@@ -149,7 +151,7 @@ try {
   for(const [width,height] of [[390,844],[844,390]]) {
     const phaseTiming=createSettlementTiming(()=>performance.now(),settlementStarted),generalPhase=phaseTiming.begin('generic');
     let eth=4000;
-    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true,serviceWorkers:'block'});
+    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true,serviceWorkers:'block',deviceScaleFactor:settlementPixelRatio});
     page.setDefaultTimeout(20000);
     const driveQuote=(label,price)=>driveSettlementFixtureQuote(page,phaseTiming,label,price,async value=>{eth=value;await backend.poll()});
     const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE_ERROR',String(e))});
@@ -201,7 +203,7 @@ try {
     await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets.some(m=>m.symbol==='ETHUSDT'&&m.status==='LIVE'&&m.price===4000),null,{timeout:15000});
     const displayBook=await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot());
     assert.equal(displayBook.observations.ETHUSDT,undefined,'the static page must not settle from a displayed public quote');
-    await page.screenshot({path:`${out}/${width}x${height}-late-ui-boot.png`});
+    await page.screenshot({path:`${out}/${width}x${height}-late-ui-boot.png`,scale:'css'});
     assert.equal(await page.locator('#intro11520 .introSkip').count(),0,'late legacy UI must not recreate an intro over the live game');
     await page.unroute(lateUiUrl,delayLateUi);
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
@@ -216,7 +218,7 @@ try {
       if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();
       await page.locator(`#dock [data-organ="${name}"]`).click();
     };
-    const shot=async name=>phaseTiming.measure('generic.screenshot:'+name,()=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`}));
+    const shot=async name=>phaseTiming.measure('generic.screenshot:'+name,()=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`,scale:'css'}));
     await shot('game');
     assert.equal(await page.evaluate(()=>__walletFixture.calls.filter(m=>m==='eth_requestAccounts').length),0,'no automatic account request');
     await page.locator('#k11520UtilityMaster').click();await page.locator('#walletToggle').click();
@@ -482,7 +484,7 @@ try {
 // real rendered controls, original adapter and original actor/collision clock.
 async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin}){
   const phaseTiming=createSettlementTiming(()=>performance.now(),timingOrigin),navigationPhase=phaseTiming.begin('navigation');
-  const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
+  const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true,deviceScaleFactor:settlementPixelRatio});page.setDefaultTimeout(20000);
   const report={mode:'DETERMINISTIC_SIMULATION_FIXTURES',syntheticQuotes:true,width,height,visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',screenshots:[],controlChecks:[],pageErrors:[],networkAuthorityAttempts:[],blockedReadOnlyReferences:[],checks:{}};
   let eth=4000,trial,orderPosts=0;
   const marketPrice=market=>({BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600})[market];
@@ -528,14 +530,18 @@ async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin
   });
   const snapshot=()=>phaseTiming.measure('navigation.snapshot',()=>page.evaluate(()=>({view:__K11520_NAVIGATION_CONSOLE__.snapshot(),book:__K11520_SIMULATION_EXCHANGE__.snapshot(),motion:globalThis.__K11520_LOCAL_MOTION__,fixture:__navigationQA})));
   const near=(actual,expected,label)=>assert.ok(Number.isFinite(actual)&&Math.abs(actual-expected)<=1e-8,`${label}: ${actual} != ${expected}`);
-  const game=async()=>{
+  const dismissPanels=async()=>{
     if(await page.locator('#confirm').evaluate(el=>el.classList.contains('open')))await page.locator('#cancelOrder').click();
     await page.locator('#confirm').waitFor({state:'hidden'});
     if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
     await page.locator('#sheet').waitFor({state:'hidden'});
-    if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
   };
-  const organ=async name=>{await game();await page.locator('#k11520UtilityMaster').click();if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();await page.locator(`#dock [data-organ="${name}"]`).click();await page.locator('#sheet.open').waitFor()};
+  const setUtilities=async open=>{
+    const isOpen=await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen'));
+    if(open!==isOpen)await page.locator('#k11520UtilityMaster').click();
+  };
+  const game=async()=>{await dismissPanels();await setUtilities(false)};
+  const organ=async name=>{await dismissPanels();await setUtilities(true);if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();await page.locator(`#dock [data-organ="${name}"]`).click();await page.locator('#sheet.open').waitFor()};
   // This callback is self-contained so single native-action targets and the
   // final read-only batch use exactly the same rendered DOM measurements.
   const inspectNavigationControls=async(root,{selector,selectors}={})=>{
@@ -593,7 +599,7 @@ async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin
   });
   const shot=async(name,selector)=>{
     if(selector)await control(selector);
-    for(const fullPage of [false,true]){const file=`${width}x${height}-navigation-${name}-SYNTHETIC${fullPage?'-fullpage':''}.png`;await phaseTiming.measure('navigation.screenshot:'+name+(fullPage?':fullpage':''),()=>page.screenshot({path:`${out}/${file}`,fullPage}));report.screenshots.push(file)}
+    for(const fullPage of [false,true]){const file=`${width}x${height}-navigation-${name}-SYNTHETIC${fullPage?'-fullpage':''}.png`;await phaseTiming.measure('navigation.screenshot:'+name+(fullPage?':fullpage':''),()=>page.screenshot({path:`${out}/${file}`,fullPage,scale:'css'}));report.screenshots.push(file)}
   };
   const setC=async value=>{await game();await showRetainedControls(page);await page.locator('#cNumericInput').fill(String(value));await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(value=>__K11520_SIGNED_C_IMMERSIVE__.signedC===value,value)};
   const setTarget=async target=>{for(const axis of ['x','y','z'])await page.locator('#navigation'+axis.toUpperCase()).fill(String(target[axis]))};
@@ -644,7 +650,7 @@ async function navigationConsoleBrowserQA({browser,width,height,out,timingOrigin
     await (await control('#navigationAutoStart')).click();const missingAck=await snapshot();assert.equal(missingAck.view.autopilot.state,beforeAutoState);assert.equal(missingAck.book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/請先確認/);
     assert.equal(orderPosts,1,'the single manual order went through the same-origin backend');
     await page.locator('#navigationAutopilotAck').check();const invalidStart=await control('#navigationAutoStart',{expectedToast:'請先確認模擬自駕設定'});
-    const feedbackFile=`${width}x${height}-navigation-autopilot-ack-feedback-SYNTHETIC-header.png`,feedbackBegan=Date.now();await page.locator('#sheet .sheetHead').screenshot({path:`${out}/${feedbackFile}`});report.toastEvidence=[{file:feedbackFile,controlIndex:report.controlChecks.length-1,captureElapsedMs:Date.now()-feedbackBegan}];
+    const feedbackFile=`${width}x${height}-navigation-autopilot-ack-feedback-SYNTHETIC-header.png`,feedbackBegan=Date.now();await page.locator('#sheet .sheetHead').screenshot({path:`${out}/${feedbackFile}`,scale:'css'});report.toastEvidence=[{file:feedbackFile,controlIndex:report.controlChecks.length-1,captureElapsedMs:Date.now()-feedbackBegan}];
     await invalidStart.click();assert.equal((await snapshot()).view.autopilot.state,'STOPPED');assert.equal((await snapshot()).book.orders.length,beforeAuto);assert.match(await page.locator('#toast').textContent(),/設定未通過/);
     for(const [id,value] of Object.entries({navigationLongAbove:4001,navigationShortBelow:3990,navigationAutoC:1,navigationAutoLots:1,navigationMaxLoss:2,navigationMaxOrders:2}))await page.locator('#'+id).fill(String(value));
     // Staying at the current physical position prevents arrival from being a
