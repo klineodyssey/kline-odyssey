@@ -22,6 +22,12 @@ const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
 const widePortrait=()=>innerWidth>MOBILE_MAX&&globalThis.matchMedia?.(K11520_PORTRAIT_QUERY).matches;
 const mobileWidth=()=>innerWidth<=MOBILE_MAX||widePortrait();
+const compactStatusWidth=380;
+function splitFullPortraitStatus(root){
+  return innerWidth<=compactStatusWidth&&globalThis.matchMedia?.(K11520_PORTRAIT_QUERY).matches&&
+    root.dataset.k11520HudProfile==='FULL'&&!root.classList.contains('k11520UtilitiesOpen')&&
+    (root.classList.contains('k11520InfoOpen')||root.classList.contains('k11520TradeOpen'));
+}
 const railLayoutProperties=['position','left','right','top','bottom','width','height','display','transform','margin','z-index','opacity','visibility','pointer-events'];
 let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const thumbObservers=new WeakMap();
@@ -278,6 +284,21 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
     html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520MonsterGuide{
       top:var(--k11520-portrait-disclosure-top,68px)!important;right:auto!important;width:calc(100% - 154px)!important;height:44px!important;max-height:44px!important;
     }
+    @media(width <= ${compactStatusWidth}px){
+      html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) .tele{
+        height:var(--k11520-world-status-height,var(--k11520-status-height,108px))!important;
+      }
+      html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520RealTradePreflight{
+        right:6px!important;top:calc(var(--k11520-status-top,190px) + var(--k11520-status-height,108px) + 8px)!important;
+        bottom:auto!important;max-width:90px!important;
+      }
+    }
+    @media(width > ${compactStatusWidth}px){
+      /* Put zoom beside the map rather than over its buttons. */
+      html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520CameraZoomStatus{
+        left:130px!important;top:var(--k11520-map-top,440px)!important;bottom:auto!important;
+      }
+    }
   }
   html[data-k11520-layout-owner] :is(#yControl,#cControl,#lotsControl) label{
     font-size:9px!important;white-space:normal!important;overflow-wrap:anywhere;max-width:100%;
@@ -415,7 +436,8 @@ function measure(){
   report.hudProfile=document.documentElement.dataset.k11520HudProfile||'FULL';report.statusVisible=statusVisible;report.marketVisible=marketVisible;
   report.equalWorldLifeWidth=!mobileWidth()||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
   report.statusBelowMarket=!mobileWidth()||!statusVisible||!marketVisible||Boolean(report.marketHud&&report.worldHud&&report.lifeHud&&report.worldHud.top>=report.marketHud.bottom+8&&report.lifeHud.top>=report.marketHud.bottom+8);
-  report.mapBelowStatus=!mobileWidth()||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
+  const statusEdge=splitFullPortraitStatus(document.documentElement)?report.worldHud?.bottom:Math.max(report.worldHud?.bottom??0,report.lifeHud?.bottom??0);
+  report.mapBelowStatus=!mobileWidth()||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=statusEdge+8&&!overlap(report.minimap,report.lifeHud));
   report.overlaps={joyRail:overlap(report.joy,report.axisRail),warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketHud,report.worldHud),marketLife:overlap(report.marketHud,report.lifeHud),worldMap:overlap(report.worldHud,report.minimap),lifeMap:overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();report.paramsHidden=paramsHidden();report.settingsOpen=document.documentElement.classList.contains('k11520SettingsOpen');
   report.compact=compactHud();report.floatingActive=$('#joy')?.dataset.k11520FloatingActive==='1';
@@ -479,19 +501,27 @@ function syncStatusFlow(){
   if(!mobileWidth()&&!landscape)return;
   const visibleRect=el=>{if(!el||el.hidden)return null;const s=getComputedStyle(el);if(s.display==='none'||s.visibility==='hidden')return null;const r=el.getBoundingClientRect();return Number.isFinite(r.bottom)&&r.height>0?r:null};
   const put=(key,n)=>{const value=`${n}px`;if(root.style.getPropertyValue(key)!==value)root.style.setProperty(key,value)};
-  const market=visibleRect($('.axes')),hud=[$('.tele'),$('.monsterHud')].filter(el=>visibleRect(el));
+  const market=visibleRect($('.axes')),world=$('.tele'),hud=[world,$('.monsterHud')].filter(el=>visibleRect(el));
+  const split=splitFullPortraitStatus(root)&&hud.includes(world);
   const bottom=Math.max(landscape?128:174,market?.bottom||0),top=Math.max(landscape?136:190,Math.ceil(bottom+(landscape?8:10)));
   if(landscape)put('--k11520-landscape-status-top',top);
   else{
-    const height=Math.max(108,...hud.map(el=>{const r=el.getBoundingClientRect();return Math.ceil(Math.max(r.top,...[...el.children].map(c=>c.getBoundingClientRect().bottom))-r.top+9)}));
+    const contentHeight=el=>{
+      const r=el.getBoundingClientRect();
+      return Math.ceil(Math.max(r.top,...[...el.children].map(c=>c.getBoundingClientRect().bottom))-r.top+9);
+    };
+    const height=Math.max(108,...hud.map(contentHeight));
     put('--k11520-status-top',top);put('--k11520-status-height',height);
+    if(split)put('--k11520-world-status-height',Math.max(72,contentHeight(world)));
   }
   // Read the resulting HUD bounds, including its actual border/padding. Only
   // overlay variables change; canvas and movement/C/lots anchors stay fixed.
   const statusBottom=Math.max(top,...hud.map(el=>visibleRect(el)?.bottom||top)),guideTop=Math.ceil(statusBottom+8);
   put(landscape?'--k11520-landscape-guide-top':'--k11520-guide-top',guideTop);
   const guide=visibleRect($('#k11520MonsterGuide')),guideHeight=Math.max(44,guide?.height||0);
-  if(!landscape)put('--k11520-map-top',Math.ceil(guideTop+guideHeight+10));
+  // The narrow left column flows on its own. The map remains clear of both
+  // cards, and the short screen keeps a strip of world available for dragging.
+  if(!landscape)put('--k11520-map-top',Math.ceil(split?visibleRect(world).bottom+8:guideTop+guideHeight+10));
 }
 function observeFlowRoots(){
   if(!flowObserver)return;
