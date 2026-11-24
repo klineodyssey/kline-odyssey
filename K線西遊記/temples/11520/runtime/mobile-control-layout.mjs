@@ -294,9 +294,15 @@ html[data-k11520-hud-mode="ON_DEMAND"]:is(.k11520ControlsOpen,.k11520TradeOpen) 
       }
     }
     @media(width > ${compactStatusWidth}px){
-      /* Put zoom beside the map rather than over its buttons. */
+      /* Keep both camera controls to the right of the map's tap targets. */
+      html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) :is(#k11520CameraReset,#k11520CameraZoomStatus){
+        left:130px!important;bottom:auto!important;
+      }
+      html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520CameraReset{
+        top:calc(var(--k11520-map-top,440px) - 52px)!important;
+      }
       html[data-k11520-layout-owner][data-k11520-hud-profile="FULL"]:not(.k11520UtilitiesOpen):is(.k11520InfoOpen,.k11520TradeOpen) #k11520CameraZoomStatus{
-        left:130px!important;top:var(--k11520-map-top,440px)!important;bottom:auto!important;
+        top:var(--k11520-map-top,440px)!important;
       }
     }
   }
