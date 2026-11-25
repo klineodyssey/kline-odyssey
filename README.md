@@ -1157,8 +1157,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #悟空新文#K線西遊記 #花果山台灣 #KAIOS #KGEN如果K線能走進去呢？悟空從K11520花果山出發，打怪、掉寶、升級；六相讓市場成為戰場。  
-👉 https://www.youtube.com/watch?v=-FnvzFEoN34
+▶ 說出願望，AI就開始替你實現？KAIOS築夢踏實作業系統｜從保時捷跑車夢想到居家養老，探索需求規劃、跨市場AI交易籌資與長期照護的共生願景，把想要的生活一步一步化為行動｜K線西遊記・花果山台灣｜樂天帝  
+👉 https://www.youtube.com/shorts/R-MVETdEk00
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
