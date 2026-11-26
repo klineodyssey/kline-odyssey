@@ -1157,8 +1157,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ 說出願望，AI就開始替你實現？KAIOS築夢踏實作業系統｜從保時捷跑車夢想到居家養老，探索需求規劃、跨市場AI交易籌資與長期照護的共生願景，把想要的生活一步一步化為行動｜K線西遊記・花果山台灣｜樂天帝  
-👉 https://www.youtube.com/shorts/R-MVETdEk00
+▶ 當年在天庭打碎的琉璃燈，沙悟淨一直留著碎片。今夜，終於有人接案了。玩家帶來自己的AI修復助手，她一手握著金色工單，另一手輕抬，三片琉璃旋轉飛回燈上。第九隻眼亮起，沙悟淨望著燈，輕輕點頭。 #K線西遊記  
+👉 https://www.youtube.com/shorts/XLjSWkB4a-4
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
