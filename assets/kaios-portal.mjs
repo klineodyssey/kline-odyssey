@@ -67,17 +67,29 @@ function loadYouTubeApi(document){
  if(typeof view?.YT?.Player==='function')return Promise.resolve(view.YT);
  if(youtubeApiLoads.has(document))return youtubeApiLoads.get(document);
  const pending=new Promise((resolve,reject)=>{
-  let settled=false;const previous=view.onYouTubeIframeAPIReady;
-  const finish=error=>{if(settled)return;settled=true;view.clearTimeout(timer);error?reject(error):resolve(view.YT)};
+  let settled=false;
+  const previous=view.onYouTubeIframeAPIReady,script=el(document,'script');
+  const finish=error=>{
+   if(settled)return;
+   settled=true;
+   view.clearTimeout(timer);
+   if(view.onYouTubeIframeAPIReady===onReady)view.onYouTubeIframeAPIReady=previous;
+   script.onerror=null;
+   if(error){script.remove();reject(error)}else resolve(view.YT);
+  };
   const timer=view.setTimeout(()=>finish(new Error('VIDEO_API_UNCONFIRMED')),8000);
-  view.onYouTubeIframeAPIReady=()=>{
+  const onReady=()=>{
+   if(settled)return;
    try{if(typeof previous==='function')previous()}catch{}
    finish(typeof view.YT?.Player==='function'?null:new Error('VIDEO_API_UNAVAILABLE'));
   };
-  const script=el(document,'script');script.src='https://www.youtube.com/iframe_api';script.async=true;script.referrerPolicy='strict-origin-when-cross-origin';
+  view.onYouTubeIframeAPIReady=onReady;
+  script.src='https://www.youtube.com/iframe_api';script.async=true;script.referrerPolicy='strict-origin-when-cross-origin';
   script.onerror=()=>finish(new Error('VIDEO_API_UNAVAILABLE'));document.head.append(script);
  });
- youtubeApiLoads.set(document,pending);return pending;
+ youtubeApiLoads.set(document,pending);
+ pending.catch(()=>{if(youtubeApiLoads.get(document)===pending)youtubeApiLoads.delete(document)});
+ return pending;
 }
 /** One viewport-owned player. Removing its frame also stops late/background audio. */
 function createViewportVideoController(document){
@@ -90,6 +102,11 @@ function createViewportVideoController(document){
   const area=Math.max(0,Math.min(r.bottom,h)-Math.max(r.top,0))*Math.max(0,Math.min(r.right,w)-Math.max(r.left,0));
   return r.width>=200&&r.height>=200&&area/(r.width*r.height)>.5;
  };
+ const canRetryBlockedPlayer=entry=>{
+  if(!entry.awaitingGesture||!entry.ready||!entry.muted||entry.userSound)return false;
+  const r=entry.play.getBoundingClientRect();
+  return r.bottom>0&&r.top<view.innerHeight&&r.right>0&&r.left<view.innerWidth;
+ };
  const current=(entry,epoch,target)=>active===entry&&entry.epoch===epoch&&entry.frame?.isConnected&&(!target||entry.player===target);
  function soundState(entry){
   let confirmed=null;
@@ -99,6 +116,7 @@ function createViewportVideoController(document){
   return confirmed;
  }
  function state(entry,value,message){
+  if(value!=='blocked')entry.awaitingGesture=false;
   entry.state=value;entry.host.dataset.playbackState=value;entry.status.textContent=message;
   entry.play.textContent=value==='playing'?'暫停影片':entry.label;
   entry.sound.disabled=!(active===entry&&entry.ready&&visible(entry));
@@ -157,7 +175,7 @@ function createViewportVideoController(document){
      }else if(event.data===2){view.clearTimeout(entry.timer);state(entry,'paused','影片已暫停；請按播放繼續。');manualHold=entry}
      else if(event.data===0){view.clearTimeout(entry.timer);state(entry,'ended','影片播放完畢；可再次按播放。');manualHold=entry}
     },
-    onAutoplayBlocked:event=>{if(event.target&&current(entry,epoch,event.target)){view.clearTimeout(entry.timer);state(entry,'blocked','瀏覽器未允許自動播放，請按播放或前往 YouTube。')}},
+    onAutoplayBlocked:event=>{if(event.target&&current(entry,epoch,event.target)){view.clearTimeout(entry.timer);entry.awaitingGesture=true;state(entry,'blocked','瀏覽器未允許自動播放，請按播放或前往 YouTube。')}},
     onError:event=>{if(event.target&&current(entry,epoch,event.target)){removePlayer(entry);state(entry,'error','這支影片暫時無法內嵌播放，請前往 YouTube。')}}
    }});
   }catch{if(active===entry&&entry.epoch===epoch){removePlayer(entry);state(entry,'error','播放器未能載入，請使用 YouTube 連結。')}}
@@ -165,7 +183,11 @@ function createViewportVideoController(document){
  function update(){
   scheduled=false;scheduledHandle=null;
   for(const entry of entries){entry.visible=visible(entry);if(!entry.visible){entry.attempted=false;if(manualHold===entry)manualHold=null}}
-  if(active&&!active.visible)stop(active);
+  if(active){
+   // A short viewport may show the retry button while less than half of the player is visible.
+   if(!active.visible&&!canRetryBlockedPlayer(active))stop(active);
+   else active.sound.disabled=!(active.ready&&active.visible);
+  }
   if(active||suspended||document.hidden||!autoAllowed()||manualHold?.visible)return;
   const next=entries.find(entry=>entry.visible&&!entry.attempted);if(next)start(next);
  }
@@ -190,7 +212,7 @@ function createViewportVideoController(document){
   const status=el(document,'p','video-status',autoAllowed()?'滑到影片區會嘗試靜音播放；也可按播放。':'依減少動態或省流量設定，請按播放。');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   const watch=el(document,'a','video-watch','在 YouTube 開啟 ↗');watch.href='https://www.youtube.com/watch?v='+videoId;watch.target='_blank';watch.rel='noopener';watch.hidden=true;
   const stage=el(document,'div','video-stage'),placeholder=el(document,'p','video-placeholder','▶ '+title);stage.append(placeholder);controls.append(play,sound,status,watch);host.append(controls,stage);
-  const entry={host,stage,placeholder,play,sound,status,watch,videoId,title,label,epoch:0,attempted:false,ready:false,muted:true,userSound:false,state:'idle'};host.dataset.playbackState='idle';host.dataset.muted='true';entries.push(entry);
+  const entry={host,stage,placeholder,play,sound,status,watch,videoId,title,label,epoch:0,attempted:false,ready:false,muted:true,userSound:false,awaitingGesture:false,state:'idle'};host.dataset.playbackState='idle';host.dataset.muted='true';entries.push(entry);
   play.addEventListener('click',event=>{if(!event.isTrusted)return;if(active===entry&&entry.state==='playing'){entry.attempted=true;manualHold=entry;try{entry.player.pauseVideo();state(entry,'pausing','正在暫停影片…')}catch{stop(entry,'影片已停止；可重新按播放。')}}else start(entry,true)});
   sound.addEventListener('click',event=>{
    if(!event.isTrusted||active!==entry||!entry.ready||!visible(entry))return;
