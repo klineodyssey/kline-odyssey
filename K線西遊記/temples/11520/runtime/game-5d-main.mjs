@@ -34,7 +34,7 @@ import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
 import {create11520CombatFx} from './combat-fx-runtime.mjs';
 import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D,prepareLocalNavigationFrame,commitLocalNavigationFrame,resolveLocalNavigationStep,buildLocalNavigationPreview} from './xyz-map-navigation-runtime.mjs';
 import {warpC,resolveCMode} from '../controls/nonlinear-controls.mjs';
-import {fetchPublicMarketObservations,assertVerifiedPublicMarketObservation,publicObservationStatus,createKgenPoolReference,mountKgenPoolReference,renderKgenPoolReference,createAxisReferenceSelection,mountAxisReferenceControls,renderAxisReferenceControls} from './public-market-quotes.mjs';
+import {fetchPublicMarketObservations,assertVerifiedPublicMarketObservation,publicObservationStatus,FREE_ORACLE_MAX_AGE_MS,createKgenPoolReference,mountKgenPoolReference,renderKgenPoolReference,createAxisReferenceSelection,mountAxisReferenceControls,renderAxisReferenceControls} from './public-market-quotes.mjs';
 import {createJourneyTutorial} from './world-runtime.mjs';
 import {trainingMonsterSnapshot} from './world-runtime.mjs';
 import {createTrainingMemory} from './market-life-runtime.mjs';
@@ -123,6 +123,8 @@ setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elap
 function playerProgressSnapshot(){const p=playerLife.activePlayer();return {playerId:p.playerId,xp:p.xp,level:p.level,engineXp:p.engineXp,engineLevel:p.engineLevel,nextLevelXp:p.level>=10?null:25*p.level*p.level,nextEngineXp:p.engineLevel>=10?null:20*p.engineLevel*p.engineLevel}}
 const observeWorldFeedback=createWorldFeedbackObserver(emit11520WorldFeedback);
 let quotePending=false,publicObservations={};
+const pendingPublicMarkets=new Set();
+let publicQuoteExpiry=null;
 // Independent reserve reference; no access to S, world, execution or trade setters.
 const kgenPoolReference=createKgenPoolReference();
 const axisReferenceSelection=createAxisReferenceSelection();
@@ -241,27 +243,22 @@ function openMarketCard(axisId){
 }
 async function quotes(){
   refreshKgenReference();
+  if(!previewExecution)return Promise.all(MARKETS.map(refreshPublicMarket));
   if(quotePending)return;quotePending=true;
   try{
-    let rows;
-    if(previewExecution){
-      await previewExecution.refresh();
-      const {observations,statuses}=previewExecution.marketSnapshot();
-      rows=MARKETS.flatMap(market=>statuses[market]?.available&&observations[market]?[observations[market]]:[]);
-    }else{
-      const results=await Promise.allSettled(MARKETS.map(market=>fetchPublicMarketObservations({symbols:[market]})));
-      rows=results.flatMap(result=>result.status==='fulfilled'?Object.values(result.value):[]);
-    }
-    const now=Date.now(),observations={};
+    await previewExecution.refresh();
+    const {observations,statuses}=previewExecution.marketSnapshot();
+    const rows=MARKETS.flatMap(market=>statuses[market]?.available&&observations[market]?[observations[market]]:[]);
+    const now=Date.now(),verified={};
     for(const row of rows){
       try{
         assertVerifiedPublicMarketObservation(row,{market:row.market,now});
-        observations[row.market]=row;
+        verified[row.market]=row;
       }catch{}
     }
-    updateKMarketObservations(world,observations,now);
+    updateKMarketObservations(world,verified,now);
     const current=kMarketSnapshot(world,now).markets.filter(row=>row.status==='LIVE');
-    publicObservations=Object.fromEntries(current.map(row=>[row.symbol,observations[row.symbol]]));
+    publicObservations=Object.fromEntries(current.map(row=>[row.symbol,verified[row.symbol]]));
     S.quotes=Object.fromEntries(current.map(row=>[row.symbol,row.price]));
     syncSimulationPositions();
     if(previewExecution&&['orders','history'].includes($('#sheetBody')?.dataset.simOrgan))refreshSimulationSheet();
@@ -273,6 +270,38 @@ async function quotes(){
     if(pending&&!isTestnet())void paintOrderPreview({background:true});
     renderAxes();
   }
+}
+async function refreshPublicMarket(market){
+  if(pendingPublicMarkets.has(market))return;
+  pendingPublicMarkets.add(market);
+  try{
+    let observation;
+    try{
+      const result=await fetchPublicMarketObservations({symbols:[market]});
+      observation=result[market];
+    }catch{
+      // An unavailable source withdraws only its own market.
+    }
+    const now=Date.now();
+    if(updateKMarketObservations(world,{[market]:observation},now,market))publicObservations[market]=observation;
+    syncSimulationPositions();
+    paintPublicQuotes();
+  }finally{
+    pendingPublicMarkets.delete(market);
+  }
+}
+function paintPublicQuotes(){
+  if(previewExecution)return;
+  const now=Date.now(),current=kMarketSnapshot(world,now).markets.filter(row=>row.status==='LIVE'&&publicObservations[row.symbol]);
+  publicObservations=Object.fromEntries(current.map(row=>[row.symbol,publicObservations[row.symbol]]));
+  S.quotes=Object.fromEntries(current.map(row=>[row.symbol,row.price]));
+  clearTimeout(publicQuoteExpiry);
+  if(current.length){
+    const deadline=Math.min(...current.map(row=>row.observedAt))+FREE_ORACLE_MAX_AGE_MS+1;
+    publicQuoteExpiry=setTimeout(paintPublicQuotes,Math.max(0,deadline-Date.now()));
+  }
+  renderAxes();
+  if(pending&&!isTestnet())void paintOrderPreview({background:true});
 }
 function syncMarketKLabels(){
   paintKgenReference();
@@ -288,7 +317,7 @@ function syncMarketKLabels(){
     label.style.whiteSpace='normal';label.style.overflowWrap='normal';label.style.wordBreak='keep-all';
     card.querySelector('.axisHead b').textContent=status==='LIVE'?'LIVE':'等候有效報價';
     const info=$('#marketReferenceDetail');if(info?.dataset.marketInfoAxis===row.axis)info.textContent=`${status==='LIVE'?'即時報價':'上次核對價'} · $${row.price.toFixed(2)} USDT · ${row.axis} ${formatUniverseAddress(row.universe)}`;
-    const ref=$(`[data-k-reference="${row.axis}"]`);if(ref)ref.textContent=`${row.axis} ${row.symbol}: P=${row.price}, P0=${row.anchor}`;
+    const ref=$(`[data-k-reference="${row.axis}"]`);if(ref)ref.textContent=`${row.axis} ${row.symbol}: P=${status==='LIVE'?row.price:'--'}, P0=${row.anchor}`;
   }
   const mode=resolveCMode(combatSelection().c),label=mode.mode==='MONSTER_MODE'?'取經 / MONSTER':mode.canTrade?'FREE TRADE · 0 FEE':'HIGH C LOCKED';
   $('#feed').textContent=`${label} · ${market.markets.some(row=>row.axis===S.axis&&(row.status??market.status)==='LIVE')?'公開報價':'等候有效報價'}`;
@@ -484,13 +513,15 @@ function showCombatTarget(){
   const s=combatSnapshot(),t=s?.target;if(!t)return;
   const vec=(v,keys)=>keys.map(k=>`${k} ${Number(v[k]).toFixed(2)}`).join(' · ');
   $('#sheetTitle').textContent=`TARGET LOCK · ${t.name}（遊戲模擬）`;
-  $('#sheetBody').innerHTML=`<div class="card"><b>距離 ${formatGameDistanceK(s.distance,{detail:true})} · ${s.selection?.body||'0C NEUTRAL'}</b><p>0C 取經：自動攻擊存活部位、掉落本機取經碎片；Plane 決定交易軸，C 正負選相位；靠近後攻擊。EXPOSED 弱點 ${t.exposed}。</p><p>Slash ${formatGameDistanceK(KSPACE_SKILLS.slash.radius)}：單部位<br>天罡金陣 ${formatGameDistanceK(KSPACE_SKILLS.goldenRain.radius)}：切面兩軸同相<br>盤古幻斧 ${formatGameDistanceK(KSPACE_SKILLS.phantomAxe.radius)}：前方半圓三軸同相</p><p id="combatKValues" style="white-space:pre-line">Player 相對基準 (%)：${vec(s.playerK,['KX','KY','KZ'])}<br>Monster 模擬相對基準 (%)：${vec(s.monsterK,['KX','KY','KZ'])}<br>市場 模擬相對差 (pp)：${vec(s.deltaK,['KX','KY','KZ'])}<br>LOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}<br>局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}</p><p>LOCAL：1 遊戲單位 = 1 公尺，依 CURRENT 換算 K。相對基準百分比不是正典 K 座標，也不是公尺；未設定市場→物理 transform，不與 XYZ 直接相加。來源 ${s.source}<br>Ni(P)=100×(P/P0−1)，公開報價同步相對基準（${s.market.status}），LOCAL XYZ 不變。</p>${Object.entries(s.reference).filter(([a])=>a!=='source').map(([a,v])=>`<div data-k-reference="${a}">${a} ${v.market}: P=${v.price}, P0=${v.anchor}</div>`).join('')}<p>${KSPACE_PHASES.map(id=>`${id}: ${t.bodies[id].hp}/${t.bodies[id].maxHp} ${id===t.exposed?'EXPOSED':''}`).join('<br>')}</p><button id="kspacePracticeReset" class="btn">重置模擬守衛（無獎勵）</button></div>`;
+  $('#sheetBody').innerHTML=`<div class="card"><b>距離 ${formatGameDistanceK(s.distance,{detail:true})} · ${s.selection?.body||'0C NEUTRAL'}</b><p>0C 取經：自動攻擊存活部位、掉落本機取經碎片；Plane 決定交易軸，C 正負選相位；靠近後攻擊。EXPOSED 弱點 ${t.exposed}。</p><p>Slash ${formatGameDistanceK(KSPACE_SKILLS.slash.radius)}：單部位<br>天罡金陣 ${formatGameDistanceK(KSPACE_SKILLS.goldenRain.radius)}：切面兩軸同相<br>盤古幻斧 ${formatGameDistanceK(KSPACE_SKILLS.phantomAxe.radius)}：前方半圓三軸同相</p><p id="combatKValues" style="white-space:pre-line">Player 相對基準 (%)：${vec(s.playerK,['KX','KY','KZ'])}<br>Monster 模擬相對基準 (%)：${vec(s.monsterK,['KX','KY','KZ'])}<br>市場 模擬相對差 (pp)：${vec(s.deltaK,['KX','KY','KZ'])}<br>LOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}<br>局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}</p><p>LOCAL：1 遊戲單位 = 1 公尺，依 CURRENT 換算 K。相對基準百分比不是正典 K 座標，也不是公尺；未設定市場→物理 transform，不與 XYZ 直接相加。來源 ${s.source}<br>Ni(P)=100×(P/P0−1)，公開報價同步相對基準（${s.market.status}），LOCAL XYZ 不變。</p>${Object.entries(s.reference).filter(([a])=>a!=='source').map(([a,v])=>`<div data-k-reference="${a}">${a} ${v.market}: P=${s.market.markets.find(row=>row.axis===a&&row.status==='LIVE')?.price??'--'}, P0=${v.anchor}</div>`).join('')}<p>${KSPACE_PHASES.map(id=>`${id}: ${t.bodies[id].hp}/${t.bodies[id].maxHp} ${id===t.exposed?'EXPOSED':''}`).join('<br>')}</p><button id="kspacePracticeReset" class="btn">重置模擬守衛（無獎勵）</button></div>`;
   if(!journey.snapshot().complete){const story=document.createElement('div');story.className='card';story.id='journeyStory';story.innerHTML='<h3>序章 · 悟空落地花果山</h3><p>三市場的六相失衡，守關猿擋住取經路。先走近、揮劍、收集碎片，再認識 KX／KY／KZ；不用登入或連錢包。</p><p>'+journey.snapshot().hint+'</p><p>XZ→KY · XY→KZ · YZ→KX；+C 多方、−C 空方，0C 自動取經。KAIOS 掉寶是本機候選紀錄，不是鏈上發放。</p><button id="journeyPlayerLife" class="btn">領起家地 / 角色（可略過）</button><button id="journeyContinue" class="btn">繼續取經</button> <button id="journeySkip" class="btn">略過教學</button>';$('#sheetBody').prepend(story);$('#journeyPlayerLife').onclick=()=>playerLifeUI.open();$('#journeyContinue').onclick=()=>$('#sheet').classList.remove('open');$('#journeySkip').onclick=()=>{journey.skip();$('#sheet').classList.remove('open')}}
   appendMarketLifeDetails(t.id);$('#sheet').classList.add('open');$('#kspacePracticeReset').onclick=()=>{const m=world.monsters.find(m=>m.id===t.id);for(const b of Object.values(m.bodies))b.hp=b.maxHp;m.hp=Object.values(m.bodies).reduce((n,b)=>n+b.hp,0);m.rewardSuppressed=true;m.state='GUARD';world.kSpace.lastResult=null;renderCombatTarget();showCombatTarget()};
 }
 targetHud.onclick=showCombatTarget;
 globalThis.__K11520_KSPACE_API__=Object.freeze({snapshot:combatSnapshot,simulationOnly:true});
 setInterval(syncMarketKLabels,1000);
+addEventListener('pageshow',paintPublicQuotes);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)paintPublicQuotes()});
 function marketEngineSnapshot(){
   const p=playerProgressSnapshot(),market=kMarketSnapshot(world),rows=market.markets||[];
   const components=rows.map(r=>({axis:r.axis,market:r.symbol,k:Number(r.k)||0,pressure:Math.max(-100,Math.min(100,(Number(r.k)||0)*20))}));

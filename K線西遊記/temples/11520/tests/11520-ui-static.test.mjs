@@ -278,6 +278,75 @@ test('public reference quotes use the browser-safe market-data origin without cr
   for(const forbidden of ['Authorization','privateKey','sendTransaction','eth_sendTransaction'])assert.equal(publicMarketQuotes.includes(forbidden),false,forbidden);
 });
 
+test('public market cards publish independently, age on provider time and recover after an isolated outage',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const {createWorldState,kMarketSnapshot,updateKMarketObservations}=await import('../runtime/world-runtime.mjs');
+  const provider=await import('../runtime/public-market-quotes.mjs');
+  const markets=['BTCUSDT','ETHUSDT','BNBUSDT'],axes=['KX','KY','KZ'];
+  let now=100000,releaseBnb,bnbRequests=0,timerId=0;
+  const timers=new Map(),world=createWorldState(0);
+  const rows={
+    BTCUSDT:{p:'60001',T:91000,a:10},ETHUSDT:{p:'1701',T:100000,a:20},
+    BNBUSDT:{p:'551',T:100000,a:30}
+  };
+  const bnbDelay=new Promise(resolve=>{releaseBnb=resolve});
+  const fetchImpl=async url=>{
+    const market=new URL(url).searchParams.get('symbol');
+    if(market==='BNBUSDT'&&++bnbRequests===1){await bnbDelay;return {ok:false,status:503}}
+    return {ok:true,json:async()=>[rows[market]]};
+  };
+  const S={axis:'KX',quotes:{},axes:Object.fromEntries(axes.map((axis,i)=>[axis,{market:markets[i]}]))};
+  const cards=Object.fromEntries(axes.map(axis=>{
+    const fields={};
+    return [axis,{classList:{toggle(){}},getAttribute(){return null},setAttribute(){},
+      querySelector(selector){return fields[selector]??={textContent:''}}}];
+  }));
+  const context={S,world,MARKETS:markets,publicObservations:{},quotePending:false,
+    pendingPublicMarkets:new Set(),publicQuoteExpiry:null,Date:{now:()=>now},execution:{readOnly:true},
+    previewExecution:null,pending:false,refreshKgenReference(){},syncSimulationPositions(){},syncMarketKLabels(){},
+    $:()=>({querySelector:selector=>cards[axes.find(axis=>selector.includes(axis))]}),
+    fetchPublicMarketObservations:({symbols})=>provider.fetchPublicMarketObservations({symbols,fetchImpl,now:()=>now}),
+    assertVerifiedPublicMarketObservation:provider.assertVerifiedPublicMarketObservation,
+    FREE_ORACLE_MAX_AGE_MS:provider.FREE_ORACLE_MAX_AGE_MS,kMarketSnapshot,updateKMarketObservations,
+    setTimeout(fn,ms){timers.set(++timerId,{fn,at:now+ms});return timerId},
+    clearTimeout(id){timers.delete(id)}
+  };
+  const render=main.slice(main.indexOf('function renderAxes(){'),main.indexOf('function openMarketCard('));
+  const polling=main.slice(main.indexOf('async function quotes(){'),main.indexOf('function syncMarketKLabels(){'));
+  const fmt=main.split(/\r?\n/).find(line=>line.startsWith('const fmt='));
+  const poll=runInNewContext([fmt,render,polling,'quotes'].join('\n'),context);
+  const price=axis=>cards[axis].querySelector('.q').textContent;
+  const advance=ms=>{
+    now+=ms;
+    for(const [id,timer] of [...timers])if(timer.at<=now){timers.delete(id);timer.fn()}
+  };
+  const first=poll();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(price('KX'),'$60,001','BTC must paint before the BNB request resolves');
+  assert.equal(price('KY'),'$1,701');
+  advance(6000);
+  assert.equal(price('KX'),'$60,001','15,000 ms inclusive');
+  advance(1);
+  assert.equal(price('KX'),'--');
+  assert.equal(S.quotes.BTCUSDT,undefined);
+  assert.equal(price('KY'),'$1,701');
+
+  rows.BTCUSDT={p:'60002',T:now,a:11};
+  await poll();
+  assert.equal(bnbRequests,1,'a pending request belongs only to its market');
+  assert.equal(price('KX'),'$60,002');
+  releaseBnb();
+  await first;
+  assert.equal(price('KZ'),'--');
+  assert.equal(price('KX'),'$60,002');
+  rows.BTCUSDT={p:'59000',T:now-1,a:10};
+  rows.BNBUSDT={p:'552',T:now,a:31};
+  await poll();
+  assert.equal(price('KX'),'$60,002','late older observation cannot displace the newer live price');
+  assert.equal(price('KZ'),'$552');
+  assert.equal(world.kSpace.marketObservations.KX.at,106001);
+});
+
 test('offline browser transport fails only the exact first pool-reference read locally and rejects every other RPC or write',async()=>{
   const {runInNewContext}=await import('node:vm'),{KGEN_POOL_REFERENCE_SOURCE}=await import('../runtime/public-market-quotes.mjs');
   const source=read('./11520-browser-settlement.mjs'),start=source.indexOf("    await page.route('**/*',async r=>{",source.indexOf('async function offlineSimulationBrowserQA'));
@@ -1256,7 +1325,8 @@ test('simulation component revisions expose complete provenance and recorded exe
   // Fixed entry floor: prior published main body bf5c2cbaacedeba8015c9447753111437afe9f11e4758e2e20ab418a36db0539.
    // Prior published fixed-entry-floor body: e5ca793767852c87ec296bed46aa789e4b66ab04e8929a5e0cd217a48cca005a.
   // runtime/game-5d-main.mjs at the private-preview baseline a673c89b: fbd9dddecdb1c7f2cf439d727dfa1c7361ee820f9d7616de9316badcd34e8881.
-   'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'47bc14b7d806141eb339311c62b68972adc0f1081062bfcf3661330c5955cc33'},
+  // Public quote polling before #584 (47bc14b7d806141eb339311c62b68972adc0f1081062bfcf3661330c5955cc33).
+  'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'2d448e27eb2897807a96a568da4f5df47dc27a7bc3ccd2c9181bba7ea7a4f401'},
   'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'f3eee0ef282b388496d9b5c485304899aa7f4d608d14f5b8f854273ee409b1a1'},
   // Prior published order adapter body bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078.
   // runtime/real-trading-order-intent.mjs at the private-preview baseline a673c89b: e39454c964545311404b98efaad8449e74a0d07d7369602eec28bb401c76465d.

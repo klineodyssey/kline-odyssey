@@ -4,7 +4,7 @@ export const CANONICAL_PORTAL_URL='https://klineodyssey.github.io/kline-odyssey/
 /** Existing bank service; independent of the unfinished K18888 game world. */
 export const BANK_SERVICE=Object.freeze({name:'18888 靈霄寶殿銀行',description:'五筆專案撥款／查進度',cta:'開啟銀行',entryUrl:'K線西遊記/temples/18888/index.html#funding-panel'});
 const entry=value=>Object.freeze({...value,capabilities:Object.freeze(value.capabilities||[])});
-export const SHARED_GAME_VERSION='V2.9.12';
+export const SHARED_GAME_VERSION='V2.9.13';
 export const WORLD_REGISTRY=Object.freeze([
  entry({worldId:'11520',name:'11520 宇宙萬物交易所',subtitle:'琉璃燈首案 · 商品報價',status:'BETA',entryUrl:'K線西遊記/temples/11520/index.html',version:'4.1.3',audioTheme:null,description:'琉璃燈原案詢價與供應資料；正式價格及商品付款接線待確認。遊戲前往12682阿斗起飛。',capabilities:['商品詢價','BSC56 換幣入口'],cta:'進入報價',tone:'jade'}),
  entry({worldId:'12682',canonicalWorldId:'12682',name:'阿斗起飛',subtitle:'12682 · 飛碟駕駛艙與 5D 遊戲',status:'BETA',entryUrl:'K線西遊記/temples/11520/game-5d.html?world=12682',version:SHARED_GAME_VERSION,audioTheme:null,description:'原遊戲移至 12682 展示點位；沿用同一引擎及既有存檔，不複製帳本。商品詢價留在 11520。',capabilities:['飛碟駕駛艙','5D 遊戲'],cta:'前往阿斗起飛',tone:'blue'}),

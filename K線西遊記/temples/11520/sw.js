@@ -1,4 +1,4 @@
-const CACHE='k11520-shell-20261124-v2.9.12';
+const CACHE='k11520-shell-20261127-v2.9.13';
 const SHARED=['../../../assets/kaios-audio.mjs','../../../assets/kaios-audio-ui.mjs','../../../assets/kaios-audio.css','../../../assets/kaios-world-registry.mjs'];
 const SHELL=['./game-5d.html','./manifest.webmanifest','./runtime/game-5d-bootstrap.mjs?v=272','./runtime/game-5d-main.mjs','./runtime/wallet-game-bridge.mjs','./runtime/evm-wallet-runtime.mjs','./runtime/real-trading-preflight-ui.mjs','./runtime/real-trading-order-intent.mjs','./runtime/combat-fx-runtime.mjs','./assets/ui/k11520-pwa-192.png','./assets/ui/k11520-pwa-512.png',...SHARED];
 // Revalidate the published shell; an HTTP-cache hit must not seed an old release.
