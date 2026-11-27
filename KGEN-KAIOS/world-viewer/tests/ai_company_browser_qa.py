@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+import os
+from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import Page, expect, sync_playwright
 
 
 @dataclass(frozen=True)
@@ -21,6 +23,60 @@ VIEWPORTS = (
     Viewport(768, 1024),
     Viewport(1440, 900),
 )
+
+
+def exercise_countdown(page: Page, base_url: str) -> None:
+    page.goto(f"{base_url}/world-viewer/ai-company-v1/?order=AIANT-556-TIMER-001")
+    display = page.get_by_role("timer")
+    status = page.get_by_role("status")
+    seconds = page.get_by_label("設定秒數")
+    start = page.get_by_role("button", name="開始", exact=True)
+    pause = page.get_by_role("button", name="暫停", exact=True)
+    reset = page.get_by_role("button", name="歸零", exact=True)
+    expect(page.get_by_role("heading", name="倒數計時器")).to_be_visible()
+    expect(display).to_have_text("0")
+    page.evaluate("""() => {
+        window.expirations = 0;
+        const status = document.querySelector('#timer-status');
+        new MutationObserver(() => {
+            if (status.textContent === '時間到！') window.expirations++;
+        }).observe(status, {childList: true, subtree: true});
+    }""")
+    seconds.fill("5")
+    start.click()
+    expect(display).to_have_text("5")
+    expect(display).to_have_text("4")
+    pause.click()
+    expect(status).to_have_text("已暫停")
+    frozen = display.inner_text()
+    assert 0 < int(frozen) < 5
+    page.wait_for_timeout(5100)
+    expect(display).to_have_text(frozen)
+    assert page.evaluate("window.expirations") == 0
+    start.click()
+    expect(display).to_have_text(frozen)
+    expect(status).to_have_text("時間到！", timeout=7000)
+    expect(display).to_have_text("0")
+    page.wait_for_timeout(1100)
+    assert page.evaluate("window.expirations") == 1
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    for button in (start, pause, reset):
+        box = button.bounding_box()
+        assert box and box["height"] >= 44 and box["width"] >= 44
+    if os.environ.get("RUNNER_TEMP"):
+        directory = Path(os.environ["RUNNER_TEMP"]) / "world-viewer-product-qa"
+        directory.mkdir(exist_ok=True, parents=True)
+        page.screenshot(path=directory / "AIANT-556-TIMER-001-390x844.png")
+    seconds.fill("2")
+    start.click()
+    expect(display).to_have_text("1")
+    reset.click()
+    expect(display).to_have_text("0")
+    page.wait_for_timeout(2200)
+    expect(status).to_have_text("已歸零")
+    expect(display).to_have_text("0")
+    assert page.evaluate("window.expirations") == 1
+    print(f"PASS AIANT-556-TIMER-001: 5 -> {frozen}; paused 5.1s; resumed -> 0; one notice; reset -> 0 with no late notice")
 
 
 def main() -> int:
@@ -41,6 +97,10 @@ def main() -> int:
                 console_errors: list[str] = []
                 homepage_errors: list[str] = []
                 try:
+                    if viewport == Viewport(390, 844):
+                        timer = context.new_page()
+                        exercise_countdown(timer, args.base_url)
+                        timer.close()
                     homepage.on(
                         "console",
                         lambda message, page=homepage: homepage_errors.append(

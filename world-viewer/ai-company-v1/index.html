@@ -24,6 +24,7 @@
       <a href="../">完整世界</a>
       <a href="../aquaculture-v1/">魚塭 Runtime</a>
       <a href="../../api/kaios/ai-company/v1/">公開資料</a>
+      <a href="?order=AIANT-556-TIMER-001">倒數計時器</a>
     </nav>
   </header>
 
@@ -92,6 +93,107 @@
       </section>
     </section>
   </main>
-  <script type="module" src="app.js"></script>
+  <template id="countdown-order">
+    <main class="countdown">
+      <h1>倒數計時器</h1>
+      <div class="readout"><span id="seconds-left" role="timer" aria-label="剩餘秒數">0</span> 秒</div>
+      <p id="timer-status" role="status">準備開始</p>
+      <form id="countdown-form">
+        <label for="seconds-input">設定秒數</label>
+        <input id="seconds-input" type="number" inputmode="numeric" min="1" step="1" value="5" required>
+        <div class="timer-actions">
+          <button id="timer-start" type="submit">開始</button>
+          <button id="timer-pause" type="button" disabled>暫停</button>
+          <button id="timer-reset" type="button">歸零</button>
+        </div>
+      </form>
+    </main>
+  </template>
+  <style>
+    body.timer-page { margin: 0; background: #102522; color: #eff9f3; font: 1rem/1.5 system-ui, sans-serif; }
+    .countdown { box-sizing: border-box; width: min(100%, 30rem); margin: clamp(2rem, 13vh, 8rem) auto 2rem; padding: 0 1.5rem; }
+    .countdown h1 { margin: 0; font-size: 1.65rem; }
+    .countdown .readout { margin: 1.7rem 0 0; color: #c1f4d1; font-size: 1.25rem; }
+    #seconds-left { font: 600 clamp(3rem, 15vw, 6rem)/1.1 ui-monospace, monospace; overflow-wrap: anywhere; }
+    #timer-status { min-height: 1.5em; margin: .65rem 0 2rem; color: #d4e6dd; }
+    .countdown label { display: block; margin-bottom: .35rem; }
+    .countdown input, .countdown button { box-sizing: border-box; min-height: 48px; border: 1px solid #638176; border-radius: .5rem; padding: .55rem .7rem; background: #19332e; color: inherit; font: inherit; }
+    .countdown input { width: 100%; }
+    .timer-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: 1rem; }
+    .countdown button:enabled { cursor: pointer; }
+    #timer-start:enabled { background: #b2efc9; color: #102522; }
+    .countdown button:disabled { opacity: .5; }
+    .countdown :focus-visible { outline: 3px solid #ffcf7c; outline-offset: 3px; }
+  </style>
+  <script>
+    function openCountdownOrder() {
+      const content = document.getElementById("countdown-order").content.cloneNode(true);
+      document.body.replaceChildren(content);
+      document.body.classList.add("timer-page");
+      document.title = "倒數計時器";
+      const form = document.getElementById("countdown-form");
+      const seconds = document.getElementById("seconds-input");
+      const display = document.getElementById("seconds-left");
+      const status = document.getElementById("timer-status");
+      const start = document.getElementById("timer-start");
+      const pause = document.getElementById("timer-pause");
+      let deadline = null;
+      let remainingMs = 0;
+      let timeout;
+
+      function stop(label, remaining = 0) {
+        clearTimeout(timeout);
+        deadline = null;
+        remainingMs = remaining;
+        display.textContent = String(Math.ceil(remaining / 1000));
+        seconds.disabled = remaining > 0;
+        pause.disabled = true;
+        start.disabled = false;
+        status.textContent = label;
+      }
+
+      function tick() {
+        if (deadline === null) return;
+        const left = deadline - performance.now();
+        if (left <= 0) {
+          stop("時間到！");
+          return;
+        }
+        display.textContent = String(Math.ceil(left / 1000));
+        timeout = setTimeout(tick, Math.ceil(left) % 1000 || 1000);
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (deadline !== null) return;
+        const duration = remainingMs || seconds.valueAsNumber * 1000;
+        if (!Number.isSafeInteger(Math.ceil(performance.now() + duration)) || duration <= 0) {
+          status.textContent = "請輸入有效的正整數秒數。";
+          return;
+        }
+        deadline = performance.now() + duration;
+        start.disabled = true;
+        pause.disabled = false;
+        seconds.disabled = true;
+        status.textContent = "倒數中";
+        tick();
+      });
+      pause.addEventListener("click", () => {
+        if (deadline === null) return;
+        const left = deadline - performance.now();
+        if (left <= 0) stop("時間到！");
+        else stop("已暫停", left);
+      });
+      document.getElementById("timer-reset").addEventListener("click", () => stop("已歸零"));
+    }
+
+    const timerOrder = "AIANT-556-TIMER-001";
+    const offlineCopy = location.protocol === "file:" && location.pathname.endsWith("/" + timerOrder + ".html");
+    if (new URLSearchParams(location.search).get("order") === timerOrder || offlineCopy) {
+      openCountdownOrder();
+    } else {
+      import("./app.js");
+    }
+  </script>
 </body>
 </html>
