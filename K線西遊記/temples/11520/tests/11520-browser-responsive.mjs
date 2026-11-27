@@ -918,6 +918,50 @@ async function verifyFullHudControlOwnership(page,report){
   //30px neighborhood stable150ms within2s, then one gesture only; never retry
   // a failed drag or freeze actors. Native pointerdown eligibility remains asserted.
   const start=await readCamera(),readiness=await page.evaluate(async()=>{
+    const tracePortrait=innerWidth===390&&innerHeight===844;
+    const rayPrototype=tracePortrait?(await import('three')).Raycaster.prototype:null;
+
+    // Capture the hits from the game's own synchronous pick. A second pick
+    // could see another actor and would change the readiness probe count.
+    function observePanPick(x,y){
+      const original=rayPrototype.intersectObjects;
+      let hits=null,callSite=null;
+      function observeRay(...args){
+        hits=Reflect.apply(original,this,args);
+        callSite={};
+        Error.captureStackTrace(callSite,observeRay);
+        return hits;
+      }
+      let allowed;
+      rayPrototype.intersectObjects=observeRay;
+      try{allowed=__K11520_CAMERA__.canPanAt(x,y)}
+      finally{rayPrototype.intersectObjects=original}
+      if(allowed)return {allowed};
+      if(!callSite)return {allowed,blocker:{kind:'BEFORE_RAYCAST'}};
+
+      const caller=callSite.stack.split('\n')[1]||'';
+      const monsterProbe=/\bmonsterAt\b/.test(caller);
+      if(!monsterProbe&&!/\bcanPanAt\b/.test(caller))return {allowed,blocker:{kind:'UNKNOWN_CALLER'}};
+      for(const {object} of hits){
+        const tags={};
+        for(let node=object;node;node=node.parent){
+          for(const key of ['isPlayer','playerHome','worldMonsterId','worldObjectId','isGround']){
+            if(tags[key]==null&&node.userData?.[key]!=null)tags[key]=node.userData[key];
+          }
+        }
+        if(monsterProbe){
+          if(tags.isPlayer)break;
+          if(tags.worldMonsterId!=null)return {allowed,blocker:{kind:'MONSTER',id:tags.worldMonsterId}};
+          if(tags.worldObjectId!=null)break;
+        }else{
+          if(tags.isPlayer)return {allowed,blocker:{kind:'PLAYER',mesh:object.uuid}};
+          if(tags.playerHome)return {allowed,blocker:{kind:'PLAYER_HOME',mesh:object.uuid}};
+          if(tags.worldObjectId!=null)return {allowed,blocker:{kind:'WORLD_OBJECT',id:tags.worldObjectId}};
+          if(tags.isGround)break;
+        }
+      }
+      return {allowed,blocker:{kind:'UNRESOLVED_RAY',caller:monsterProbe?'monsterAt':'canPanAt'}};
+    }
     const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),began=performance.now(),history=[];
     const diagnostics={centers:0,rows:0,domReads:0,canPanReads:0,domRejects:0,canPanRejects:0,lastCenter:null,firstDomBlock:null,firstCanPanBlock:null,knownPoint:null,frames:[],droppedFrames:0};
     const offsets=[0,-10,10,-20,20,-30,30];
@@ -928,7 +972,19 @@ async function verifyFullHudControlOwnership(page,report){
       const points=offsets.flatMap(dx=>offsets.map(dy=>({x:x+dx,y:y+dy})));
       const canvasAt=(px,py)=>{const key=px+','+py;if(!domCache.has(key)){const owner=document.elementFromPoint(px,py);diagnostics.domReads++;domCache.set(key,owner===canvas);if(owner!==canvas&&!diagnostics.firstDomBlock)diagnostics.firstDomBlock={center:{x,y},sample:{x:px,y:py},owner:owner?.id||null}}return domCache.get(key)};
       if(!canvasAt(x+42,y)||!points.every(p=>canvasAt(p.x,p.y))){diagnostics.domRejects++;if(x===60&&y===550)diagnostics.knownPoint={eligible:false,reason:'DOM_OWNER'};return false}
-      const eligible=points.every(p=>{const key=p.x+','+p.y;if(!cache.has(key)){diagnostics.canPanReads++;const allowed=__K11520_CAMERA__.canPanAt(p.x,p.y);cache.set(key,allowed);if(!allowed&&!diagnostics.firstCanPanBlock)diagnostics.firstCanPanBlock={center:{x,y},sample:{...p}}}return cache.get(key)});
+      const eligible=points.every(p=>{
+        const key=p.x+','+p.y;
+        if(!cache.has(key)){
+          diagnostics.canPanReads++;
+          let allowed,blocker;
+          if(innerWidth===390&&innerHeight===844&&!diagnostics.firstCanPanBlock){
+            ({allowed,blocker}=observePanPick(p.x,p.y));
+          }else allowed=__K11520_CAMERA__.canPanAt(p.x,p.y);
+          cache.set(key,allowed);
+          if(!allowed&&!diagnostics.firstCanPanBlock)diagnostics.firstCanPanBlock={center:{x,y},sample:{...p},blocker};
+        }
+        return cache.get(key);
+      });
       if(!eligible)diagnostics.canPanRejects++;if(x===60&&y===550)diagnostics.knownPoint={eligible,reason:eligible?'ELIGIBLE':'CAN_PAN_REJECTED'};return eligible;
     };
     let point=null,since=0;
