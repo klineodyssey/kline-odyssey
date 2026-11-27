@@ -12,6 +12,23 @@
   <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/world-viewer/ai-company-v1/">
   <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/assets/og-cover.jpg">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    html:has(body.timer-page) { background: #102522; color-scheme: dark; }
+    body.timer-page { margin: 0; background: #102522; color: #eff9f3; font: 1rem/1.5 system-ui, sans-serif; }
+    .countdown { box-sizing: border-box; width: min(100%, 30rem); margin: clamp(2rem, 13vh, 8rem) auto 2rem; padding: 0 1.5rem; }
+    .countdown h1 { margin: 0; font-size: 1.65rem; }
+    .countdown .readout { margin: 1.7rem 0 0; color: #c1f4d1; font-size: 1.25rem; }
+    #seconds-left { font: 600 clamp(3rem, 15vw, 6rem)/1.1 ui-monospace, monospace; overflow-wrap: anywhere; }
+    #timer-status { min-height: 1.5em; margin: .65rem 0 2rem; color: #d4e6dd; }
+    .countdown label { display: block; margin-bottom: .35rem; }
+    .countdown input, .countdown button { box-sizing: border-box; min-height: 48px; border: 1px solid #638176; border-radius: .5rem; padding: .55rem .7rem; background: #19332e; color: inherit; font: inherit; }
+    .countdown input { width: 100%; }
+    .timer-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: 1rem; }
+    .countdown button:enabled { cursor: pointer; }
+    #timer-start:enabled { background: #b2efc9; color: #102522; }
+    .countdown button:disabled { opacity: .5; }
+    .countdown :focus-visible { outline: 3px solid #ffcf7c; outline-offset: 3px; }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -109,22 +126,6 @@
       </form>
     </main>
   </template>
-  <style>
-    body.timer-page { margin: 0; background: #102522; color: #eff9f3; font: 1rem/1.5 system-ui, sans-serif; }
-    .countdown { box-sizing: border-box; width: min(100%, 30rem); margin: clamp(2rem, 13vh, 8rem) auto 2rem; padding: 0 1.5rem; }
-    .countdown h1 { margin: 0; font-size: 1.65rem; }
-    .countdown .readout { margin: 1.7rem 0 0; color: #c1f4d1; font-size: 1.25rem; }
-    #seconds-left { font: 600 clamp(3rem, 15vw, 6rem)/1.1 ui-monospace, monospace; overflow-wrap: anywhere; }
-    #timer-status { min-height: 1.5em; margin: .65rem 0 2rem; color: #d4e6dd; }
-    .countdown label { display: block; margin-bottom: .35rem; }
-    .countdown input, .countdown button { box-sizing: border-box; min-height: 48px; border: 1px solid #638176; border-radius: .5rem; padding: .55rem .7rem; background: #19332e; color: inherit; font: inherit; }
-    .countdown input { width: 100%; }
-    .timer-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: 1rem; }
-    .countdown button:enabled { cursor: pointer; }
-    #timer-start:enabled { background: #b2efc9; color: #102522; }
-    .countdown button:disabled { opacity: .5; }
-    .countdown :focus-visible { outline: 3px solid #ffcf7c; outline-offset: 3px; }
-  </style>
   <script>
     function openCountdownOrder() {
       const content = document.getElementById("countdown-order").content.cloneNode(true);

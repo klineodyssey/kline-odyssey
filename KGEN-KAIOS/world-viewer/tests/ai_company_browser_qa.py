@@ -7,6 +7,7 @@ import argparse
 from dataclasses import dataclass
 import os
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from playwright.sync_api import Page, expect, sync_playwright
 
@@ -25,8 +26,8 @@ VIEWPORTS = (
 )
 
 
-def exercise_countdown(page: Page, base_url: str) -> None:
-    page.goto(f"{base_url}/world-viewer/ai-company-v1/?order=AIANT-556-TIMER-001")
+def exercise_countdown(page: Page, url: str, entry: str) -> None:
+    page.goto(url)
     display = page.get_by_role("timer")
     status = page.get_by_role("status")
     seconds = page.get_by_label("設定秒數")
@@ -35,6 +36,7 @@ def exercise_countdown(page: Page, base_url: str) -> None:
     reset = page.get_by_role("button", name="歸零", exact=True)
     expect(page.get_by_role("heading", name="倒數計時器")).to_be_visible()
     expect(display).to_have_text("0")
+    assert display.evaluate("(element) => parseFloat(getComputedStyle(element).fontSize)") >= 48
     page.evaluate("""() => {
         window.expirations = 0;
         const status = document.querySelector('#timer-status');
@@ -66,7 +68,7 @@ def exercise_countdown(page: Page, base_url: str) -> None:
     if os.environ.get("RUNNER_TEMP"):
         directory = Path(os.environ["RUNNER_TEMP"]) / "world-viewer-product-qa"
         directory.mkdir(exist_ok=True, parents=True)
-        page.screenshot(path=directory / "AIANT-556-TIMER-001-390x844.png")
+        page.screenshot(path=directory / f"AIANT-556-TIMER-001-{entry}-390x844.png")
     seconds.fill("2")
     start.click()
     expect(display).to_have_text("1")
@@ -76,7 +78,7 @@ def exercise_countdown(page: Page, base_url: str) -> None:
     expect(status).to_have_text("已歸零")
     expect(display).to_have_text("0")
     assert page.evaluate("window.expirations") == 1
-    print(f"PASS AIANT-556-TIMER-001: 5 -> {frozen}; paused 5.1s; resumed -> 0; one notice; reset -> 0 with no late notice")
+    print(f"PASS AIANT-556-TIMER-001 {entry}: 5 -> {frozen}; paused 5.1s; resumed -> 0; one notice; reset -> 0 with no late notice")
 
 
 def main() -> int:
@@ -99,7 +101,12 @@ def main() -> int:
                 try:
                     if viewport == Viewport(390, 844):
                         timer = context.new_page()
-                        exercise_countdown(timer, args.base_url)
+                        exercise_countdown(timer, f"{args.base_url}/world-viewer/ai-company-v1/?order=AIANT-556-TIMER-001", "site")
+                        with TemporaryDirectory() as directory:
+                            offline = Path(directory) / "AIANT-556-TIMER-001.html"
+                            source = Path(__file__).resolve().parents[3] / "world-viewer/ai-company-v1/index.html"
+                            offline.write_bytes(source.read_bytes())
+                            exercise_countdown(timer, offline.as_uri(), "offline")
                         timer.close()
                     homepage.on(
                         "console",
