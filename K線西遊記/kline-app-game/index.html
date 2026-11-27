@@ -435,6 +435,12 @@ canvas#galaxy-bg { position: fixed; inset: 0; z-index: 1; }
 #coord-modal .cm-item .cm-v{font-weight:900; color:#8af3ff;}
 #coord-modal .cm-item .cm-n{font-weight:900; color:#ffd27a;}
 #coord-modal .cm-item .cm-d{opacity:.86; font-size:12px; margin-top:2px;}
+#coord-modal .cm-mine{
+  display:inline-flex; align-items:center; min-height:calc(44px * var(--cm-touch-scale, 1)); margin-top:8px;
+  padding:6px 10px; border:1px solid #ffd27a; border-radius:8px;
+  color:#ffd27a; background:rgba(0,0,0,.35); font-size:calc(14px * var(--cm-touch-scale, 1)); font-weight:800;
+}
+#coord-modal .cm-mine:focus-visible{outline:2px solid #8af3ff; outline-offset:2px;}
 
 
 /* AUTO 狀態徽章：移入駕駛艙座標面板時改成內嵌樣式 */
@@ -4454,7 +4460,7 @@ function sideFromDeg(deg) {
     const modal = $('coord-modal');
     if (!modal) return;
     modal.style.display = 'block';
-    app.renderCoordList('');
+    app.renderCoordList($('cm-q')?.value ?? '');
     setTimeout(() => $('cm-q')?.focus(), 50);
   };
   app.closeCoordModal = () => {
@@ -4477,12 +4483,19 @@ function sideFromDeg(deg) {
         <div>
           <div class="cm-n">${c.n}</div>
           <div class="cm-d">${c.d || ''}</div>
+          ${c.v === 5168 ? '<a class="cm-mine" href="../../world-viewer/?mine=5168" aria-label="進入 K5168 金山銀礦">進入礦場</a>' : ''}
         </div>
       </div>
     `).join('') || '<div style="opacity:.75;padding:14px;">沒有符合的座標</div>';
 
+    const mineLink = list.querySelector('.cm-mine');
+    const scale = window.visualViewport?.scale ?? 1;
+    // Keep the mine link touchable when the legacy cockpit is scaled down on mobile.
+    if (mineLink && scale > 0 && scale < 1) mineLink.style.setProperty('--cm-touch-scale', String(1 / scale));
+
     list.querySelectorAll('.cm-item').forEach(el => {
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (event) => {
+        if (event.target.closest('.cm-mine')) return;
         const v = toNum(el.getAttribute('data-v'));
         app.setCT(v);
         app.closeCoordModal();
@@ -4522,7 +4535,9 @@ function sideFromDeg(deg) {
     app._ct = toNum(e.target.value);
     app.updateCoordPanel();
   });
-  $('cm-q')?.addEventListener('input', (e) => app.renderCoordList(e.target.value));
+  document.addEventListener('input', (e) => {
+    if (e.target.id === 'cm-q') app.renderCoordList(e.target.value);
+  });
   $('coord-modal')?.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'coord-modal') app.closeCoordModal();
   });
