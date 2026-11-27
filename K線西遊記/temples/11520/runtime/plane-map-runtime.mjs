@@ -6,7 +6,7 @@ REVISION: 2026-09-25.PHYSICAL-K-SEPARATION
 PURPOSE: Project the validated public-market/combat K snapshot and local XYZ in separate views. Presentation only; never parse display text as coordinate authority.
 */
 
-import {WORLD_OBJECTS,formatKCoordinate} from './world-runtime.mjs';
+import {KSPACE_REFERENCE,WORLD_OBJECTS,formatKCoordinate} from './world-runtime.mjs';
 import {install11520XyzMapNavigation} from './xyz-map-navigation-runtime.mjs';
 import {formatGameDistanceK,gameUnitsToK,localPositionToK,signedUniverseAddress,formatUniverseAddress,PRIME_GATE_ALPHA} from './spatial-coordinate-runtime.mjs';
 
@@ -110,40 +110,71 @@ function paintKMap(canvas,model){
   canvas.setAttribute('aria-label',`Market normalized K-space ${model.plane}: ${model.h} horizontal, ${model.v} vertical, ${model.normal} depth; ${model.phase}; ${model.targetId||'no target'}; normalized delta ${model.distance??'unavailable'}; not physical K distance`);
 }
 // All markets share alpha [1,10); rows only separate labels, never create P0 maps.
+const marketAxes=['KX','KY','KZ'];
+
+function mapQuoteRows(market){
+  return marketAxes.map(axis=>{
+    const row=market.markets.find(m=>m.axis===axis);
+    const symbol=KSPACE_REFERENCE[axis].market.replace('USDT','');
+    const status=row?.status||'WAIT';
+    const time=Number.isFinite(row?.observedAt)?new Date(row.observedAt).toISOString().slice(0,19).replace('T',' ')+' UTC':'—';
+    return {axis,symbol,status,time,row};
+  });
+}
+
 export function projectMarketKMap(model,width,height){
   const alphaX=alpha=>10+(alpha-1)/9*(width-20);
-  return {gateX:alphaX(PRIME_GATE_ALPHA),points:model.market.markets.map((m,i)=>{
+  return {gateX:alphaX(PRIME_GATE_ALPHA),points:model.market.markets.map(m=>{
     const universe=m.universe||signedUniverseAddress(m.price);
-    return {axis:m.axis,universe,x:universe.kind==='ORIGIN'?null:alphaX(universe.alpha),y:34+i*(height-43)/3};
+    return {axis:m.axis,universe,x:universe.kind==='ORIGIN'?null:alphaX(universe.alpha),y:34+marketAxes.indexOf(m.axis)*(height-43)/3};
   })};
 }
 function paintMarketOverview(canvas,model){
   const w=canvas.clientWidth||300,h=canvas.clientHeight||200,ratio=Math.min(3,devicePixelRatio||1);
   if(canvas.width!==Math.round(w*ratio)||canvas.height!==Math.round(h*ratio)){canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio)}
   const ctx=canvas.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#06131c';ctx.fillRect(0,0,w,h);ctx.textBaseline='top';
-  if(!model?.market.markets.length){ctx.fillStyle='#ccdce8';ctx.font='10px system-ui';ctx.fillText('K 市場 · WAIT',4,4);canvas.setAttribute('aria-label','K 市場 WAIT · 尚無有效行情');return}
+  if(!model){ctx.fillStyle='#ccdce8';ctx.font='10px system-ui';ctx.fillText('K 市場 · WAIT',4,4);canvas.setAttribute('aria-label','K 市場 WAIT · 尚無有效行情');return}
   const small=w<180,colors=['#ffbf4d','#4cecaa','#50aaff'],left=10,right=w-10;
   const alphaX=a=>left+(a-1)/9*(right-left),projection=projectMarketKMap(model,w,h),gateX=projection.gateX;
   ctx.font=`bold ${small?8:11}px system-ui`;ctx.strokeStyle='#294d62';ctx.lineWidth=1;
-  ctx.fillStyle='#ecf4ff';ctx.fillText(`α 共用圖 · ${model.market.status}`,3,2);
+  const quotes=mapQuoteRows(model.market);
+  ctx.fillStyle='#ecf4ff';ctx.fillText('α 共用圖',3,2);
   for(let a=1;a<=10;a++){const x=alphaX(a);ctx.beginPath();ctx.moveTo(x,18);ctx.lineTo(x,h-16);ctx.stroke()}
   ctx.strokeStyle='#f5d58d';ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(gateX,18);ctx.lineTo(gateX,h-16);ctx.stroke();ctx.setLineDash([]);
-  model.market.markets.forEach((m,i)=>{
-    const u=m.universe||signedUniverseAddress(m.price),y=22+i*(h-43)/3;
-    ctx.fillStyle=colors[i];ctx.fillText(`${m.symbol.replace('USDT','')} ${u.kind==='ORIGIN'?'K0 / ORIGIN':`k${u.k} θ${u.theta===0?'0':'π'}`}`,3,y);
-    if(u.kind!=='ORIGIN'){ctx.beginPath();ctx.arc(projection.points[i].x,projection.points[i].y,small?3:4,0,Math.PI*2);ctx.fill()}
+  quotes.forEach(({axis,symbol,status,time},i)=>{
+    const point=projection.points.find(p=>p.axis===axis);
+    const y=22+i*(h-43)/3;
+    ctx.fillStyle=colors[i];
+    const clock=small||time==='—'?'':' · '+time.slice(11);
+    const address=point?.universe;
+    const scale=address?' · '+(address.kind==='ORIGIN'?'K0':`k${address.k} θ${address.theta===0?'0':'π'}`):'';
+    ctx.fillText(`${symbol} ${status}${scale}${clock}`,3,y);
+    if(point&&point.x!==null){
+      ctx.beginPath();ctx.arc(point.x,point.y,small?3:4,0,Math.PI*2);
+      if(status==='LIVE')ctx.fill();
+      else{ctx.strokeStyle=colors[i];ctx.stroke()}
+    }
   });
   ctx.fillStyle='#e6dbbb';ctx.fillText('1',left-2,h-12);ctx.fillText('10',right-10,h-12);
   ctx.fillText(small?'Gate 5.11111':'Prime Gate α 5.11111',Math.max(18,gateX-(small?25:55)),h-12);
-  canvas.setAttribute('aria-label',`共用 α 地圖 [1,10); Gate α ${PRIME_GATE_ALPHA}; ${model.market.markets.map(m=>`${m.axis} ${m.symbol} ${formatUniverseAddress(m.universe||signedUniverseAddress(m.price))}`).join('; ')}; k 樓層與 θ 相位分開，不代表玩家 XYZ`);
+  const descriptions=quotes.map(({axis,symbol,status,time,row})=>{
+    const address=row?formatUniverseAddress(row.universe||signedUniverseAddress(row.price)):'—';
+    return `${axis}/${symbol} · ${status} · 最後更新 ${time} · ${address}`;
+  });
+  canvas.setAttribute('aria-label',`共用 α 地圖 [1,10); Gate α ${PRIME_GATE_ALPHA}; ${descriptions.join('; ')}; k 樓層與 θ 相位分開，不代表玩家 XYZ`);
 }
 const kNumber=formatKCoordinate;
 export function kSpaceMapDetails(model){
   if(!model)return 'K-space snapshot unavailable';
   const localTuple=model.local?['x','y','z'].map(a=>`${a.toUpperCase()} ${formatGameDistanceK(model.local[a],{detail:true})}`).join(' / '):'—';
   const lines=[`LOCAL DIST: ${model.localDistance===null?'—':formatGameDistanceK(model.localDistance,{detail:true})}`,`LOCAL XYZ K: ${localTuple}`,`PLANE: ${model.plane} · NORMAL: ${model.normal}`,`COMBAT: ${model.phase}${model.neutral?' / NEUTRAL / NO ATTACK PHASE':''}（不是 θ）`,`TARGET: ${model.targetId||'NONE'}`];
-  const markets=model.market.markets.map(m=>`${m.axis}/${m.symbol.replace('USDT','')} $${m.price.toFixed(2)} USDT\n${formatUniverseAddress(m.universe||signedUniverseAddress(m.price))}`);
-  return ['WORLD 11520 花果山 · k=4 / α=1.152 / θ=0（地點地址）',`${model.market.status} · UTC ${model.market.receivedAt?new Date(model.market.receivedAt).toISOString().slice(11,19):'WAIT'}`,...markets,...lines,'市場 → 物理距離轉換：未設定（不得換算）'].join('\n');
+  const markets=mapQuoteRows(model.market).map(({axis,symbol,status,time,row})=>{
+    const price=row?`$${row.price.toFixed(2)} USDT`:'—';
+    const quote=status==='STALE'?'上次有效價 '+price:price;
+    const address=row?'\n'+formatUniverseAddress(row.universe||signedUniverseAddress(row.price)):'';
+    return `${axis}/${symbol} · ${status} · ${quote}\n最後更新 ${time}${address}`;
+  });
+  return ['WORLD 11520 花果山 · k=4 / α=1.152 / θ=0（地點地址）',...markets,...lines,'市場 → 物理距離轉換：未設定（不得換算）'].join('\n');
 }
 function updateKDetails(model){
   const canvas=document.querySelector('#kspaceDetailMap');if(!canvas||!document.querySelector('#sheet.open'))return;

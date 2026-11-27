@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {formatUniverseAddress,signedUniverseAddress} from '../runtime/spatial-coordinate-runtime.mjs';
-import {SHARED_GAME_VERSION} from '../../../../assets/kaios-world-registry.mjs';
+import {SHARED_GAME_VERSION,worldUrl} from '../../../../assets/kaios-world-registry.mjs';
 import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../runtime/player-life-runtime.mjs';
 function freeQuotePayload(route,rows){
   const url=new URL(route.request().url());
@@ -676,12 +676,67 @@ async function verifySettingsContext(page,report){
   await page.locator('#gameModeToggle').waitFor({state:'visible'});for(const selector of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),true,selector+' returns to manual More access after Wallet closes');assert.equal(await page.locator('#walletPanel').isVisible(),false,'Wallet close restores the existing tray');
   await page.locator('#k11520UtilityMaster').click();report.settingsContext='THREE_CYCLES / BUTTON_ESCAPE_FOCUS / ORIGINAL_STATES / WALLET_OWNERSHIP PASS';report.settingsContextMs=Date.now()-started;
 }
+async function captureQuoteEntrances(profile){
+  const receipts=[];
+  for(const id of ['12682','88888']){
+    const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},isMobile:true,hasTouch:true});
+    try{
+      const page=await context.newPage();
+      if(!PRODUCTION)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({
+        contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[
+          {symbol:'BTCUSDT',price:'60001'},{symbol:'ETHUSDT',price:'1701'},{symbol:'BNBUSDT',price:'552'}
+        ]))
+      }));
+      const network=[];
+      page.on('response',async response=>{
+        const url=new URL(response.url());
+        if(url.origin!=='https://data-api.binance.vision'||url.pathname!=='/api/v3/aggTrades')return;
+        const payload=await response.json().catch(()=>null),trade=Array.isArray(payload)?payload[0]:null;
+        if(trade)network.push({symbol:url.searchParams.get('symbol'),sequence:trade.a,sourceTime:trade.T,price:Number(trade.p)});
+      });
+      const url=worldUrl(id,BASE+'/');
+      await page.goto(url,{waitUntil:'domcontentloaded'});
+      const frame=id==='12682'?page.mainFrame():await (await page.waitForSelector('#sharedGameFrame')).contentFrame();
+      assert.ok(frame);
+      await frame.waitForFunction(()=>document.querySelector('#k11520BuildStamp')&&globalThis.__K11520_UI_SETTINGS__);
+      assert.equal(new URL(frame.url()).searchParams.get('world'),'12682');
+      if(await frame.locator('#intro11520').isVisible()){
+        await frame.locator('#enter11520').click({timeout:3000}).catch(async error=>{
+          if(await frame.locator('#intro11520').isVisible())throw error;
+        });
+      }
+      await frame.locator('#intro11520').waitFor({state:'hidden'});
+      await ensureExpandedMarket(frame);
+      const handle=await frame.waitForFunction(()=>{
+        const observed=globalThis.__K11520_FREE_ORACLE__||{},now=Date.now();
+        const rows=(globalThis.__K11520_MARKET_K__?.markets||[]).map(row=>({
+          symbol:row.symbol,status:row.status,sourceTime:row.observedAt,price:row.price,
+          source:observed[row.symbol]?.source,sequence:observed[row.symbol]?.sequence,
+          text:document.querySelector('[data-market-card="'+row.axis+'"] .q')?.textContent
+        }));
+        if(rows.length!==3||!rows.every(row=>row.status==='LIVE'&&row.source&&now>=row.sourceTime&&now-row.sourceTime<=15000&&
+          row.text==='$'+row.price.toLocaleString(undefined,{maximumFractionDigits:row.price<10?5:2})))return false;
+        return {now,rows,gameUrl:location.href,version:document.querySelector('#k11520BuildStamp').textContent,
+          serviceWorker:navigator.serviceWorker?.controller?.scriptURL||null};
+      },null,{timeout:20000});
+      let receipt;
+      try{receipt=await handle.jsonValue()}finally{await handle.dispose()}
+      assert.equal(receipt.version,SHARED_GAME_VERSION);
+      const screenshot=profile.name+'-quote-entry-'+id+'.png';
+      await page.screenshot({path:OUT+'/'+screenshot});
+      for(const row of receipt.rows)assert.ok(network.some(t=>t.symbol===row.symbol&&t.sequence===row.sequence&&t.sourceTime===row.sourceTime&&t.price===row.price),row.symbol+' provider response matches card');
+      receipts.push({entry:id,url,mode:PRODUCTION?'PUBLIC_PAGES':'CONTROLLED_HTTP',screenshot,network,...receipt});
+    }finally{await context.close()}
+  }
+  return receipts;
+}
 async function verifyContextualHud(){
   const contextualProfiles=PRODUCTION&&!process.env.K11520_RESPONSIVE_PROFILE?[{name:'pages-360',width:360,height:740},{name:'pages-390',width:390,height:844},{name:'pages-412',width:412,height:772},{name:'pages-432',width:432,height:856},{name:'pages-480',width:480,height:900},{name:'pages-landscape-844',width:844,height:390,landscape:true}]:selectedProfiles;
   for(const profile of contextualProfiles){
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[],report={profile,checks:{}};reports.push(report);page.on('pageerror',e=>errors.push(String(e)));
     if(!PRODUCTION)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[{symbol:'BTCUSDT',price:'77564.83'},{symbol:'ETHUSDT',price:'2511.16'},{symbol:'BNBUSDT',price:'724.23'}]))}));
     try{
+      if(profile.width===390||profile.landscape)report.quoteEntrances=await captureQuoteEntrances(profile);
       await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_UI_SETTINGS__&&globalThis.__K11520_PLAYER_COURIER__?.snapshot?.());
       // Bootstrap may disable/remove the intro during its native pointerdown or
       // fail-open transition. Match the existing world-first/returning-player
@@ -863,6 +918,50 @@ async function verifyFullHudControlOwnership(page,report){
   //30px neighborhood stable150ms within2s, then one gesture only; never retry
   // a failed drag or freeze actors. Native pointerdown eligibility remains asserted.
   const start=await readCamera(),readiness=await page.evaluate(async()=>{
+    const tracePortrait=innerWidth===390&&innerHeight===844;
+    const rayPrototype=tracePortrait?(await import('three')).Raycaster.prototype:null;
+
+    // Capture the hits from the game's own synchronous pick. A second pick
+    // could see another actor and would change the readiness probe count.
+    function observePanPick(x,y){
+      const original=rayPrototype.intersectObjects;
+      let hits=null,callSite=null;
+      function observeRay(...args){
+        hits=Reflect.apply(original,this,args);
+        callSite={};
+        Error.captureStackTrace(callSite,observeRay);
+        return hits;
+      }
+      let allowed;
+      rayPrototype.intersectObjects=observeRay;
+      try{allowed=__K11520_CAMERA__.canPanAt(x,y)}
+      finally{rayPrototype.intersectObjects=original}
+      if(allowed)return {allowed};
+      if(!callSite)return {allowed,blocker:{kind:'BEFORE_RAYCAST'}};
+
+      const caller=callSite.stack.split('\n')[1]||'';
+      const monsterProbe=/\bmonsterAt\b/.test(caller);
+      if(!monsterProbe&&!/\bcanPanAt\b/.test(caller))return {allowed,blocker:{kind:'UNKNOWN_CALLER'}};
+      for(const {object} of hits){
+        const tags={};
+        for(let node=object;node;node=node.parent){
+          for(const key of ['isPlayer','playerHome','worldMonsterId','worldObjectId','isGround']){
+            if(tags[key]==null&&node.userData?.[key]!=null)tags[key]=node.userData[key];
+          }
+        }
+        if(monsterProbe){
+          if(tags.isPlayer)break;
+          if(tags.worldMonsterId!=null)return {allowed,blocker:{kind:'MONSTER',id:tags.worldMonsterId}};
+          if(tags.worldObjectId!=null)break;
+        }else{
+          if(tags.isPlayer)return {allowed,blocker:{kind:'PLAYER',mesh:object.uuid}};
+          if(tags.playerHome)return {allowed,blocker:{kind:'PLAYER_HOME',mesh:object.uuid}};
+          if(tags.worldObjectId!=null)return {allowed,blocker:{kind:'WORLD_OBJECT',id:tags.worldObjectId}};
+          if(tags.isGround)break;
+        }
+      }
+      return {allowed,blocker:{kind:'UNRESOLVED_RAY',caller:monsterProbe?'monsterAt':'canPanAt'}};
+    }
     const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),began=performance.now(),history=[];
     const diagnostics={centers:0,rows:0,domReads:0,canPanReads:0,domRejects:0,canPanRejects:0,lastCenter:null,firstDomBlock:null,firstCanPanBlock:null,knownPoint:null,frames:[],droppedFrames:0};
     const offsets=[0,-10,10,-20,20,-30,30];
@@ -873,7 +972,19 @@ async function verifyFullHudControlOwnership(page,report){
       const points=offsets.flatMap(dx=>offsets.map(dy=>({x:x+dx,y:y+dy})));
       const canvasAt=(px,py)=>{const key=px+','+py;if(!domCache.has(key)){const owner=document.elementFromPoint(px,py);diagnostics.domReads++;domCache.set(key,owner===canvas);if(owner!==canvas&&!diagnostics.firstDomBlock)diagnostics.firstDomBlock={center:{x,y},sample:{x:px,y:py},owner:owner?.id||null}}return domCache.get(key)};
       if(!canvasAt(x+42,y)||!points.every(p=>canvasAt(p.x,p.y))){diagnostics.domRejects++;if(x===60&&y===550)diagnostics.knownPoint={eligible:false,reason:'DOM_OWNER'};return false}
-      const eligible=points.every(p=>{const key=p.x+','+p.y;if(!cache.has(key)){diagnostics.canPanReads++;const allowed=__K11520_CAMERA__.canPanAt(p.x,p.y);cache.set(key,allowed);if(!allowed&&!diagnostics.firstCanPanBlock)diagnostics.firstCanPanBlock={center:{x,y},sample:{...p}}}return cache.get(key)});
+      const eligible=points.every(p=>{
+        const key=p.x+','+p.y;
+        if(!cache.has(key)){
+          diagnostics.canPanReads++;
+          let allowed,blocker;
+          if(innerWidth===390&&innerHeight===844&&!diagnostics.firstCanPanBlock){
+            ({allowed,blocker}=observePanPick(p.x,p.y));
+          }else allowed=__K11520_CAMERA__.canPanAt(p.x,p.y);
+          cache.set(key,allowed);
+          if(!allowed&&!diagnostics.firstCanPanBlock)diagnostics.firstCanPanBlock={center:{x,y},sample:{...p},blocker};
+        }
+        return cache.get(key);
+      });
       if(!eligible)diagnostics.canPanRejects++;if(x===60&&y===550)diagnostics.knownPoint={eligible,reason:eligible?'ELIGIBLE':'CAN_PAN_REJECTED'};return eligible;
     };
     let point=null,since=0;
@@ -1062,13 +1173,82 @@ async function verifyMarketSync(page,report){
   await page.locator('#kspaceViewK').click();await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('$51111.10'));
   await page.screenshot({path:`${OUT}/${report.profile.name}-shared-gate.png`});await page.locator('#sheetClose').click();
   const batch=[{symbol:'BTCUSDT',price:'83000'},{symbol:'ETHUSDT',price:'2800'},{symbol:'BNBUSDT',price:'750'}];
-  await setBatch(batch);await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets[0]?.price===83000,null,{timeout:15000});
+  await setBatch(batch);await page.waitForFunction(batch=>batch.every(({symbol,price})=>
+    globalThis.__K11520_MARKET_K__?.markets.some(row=>row.symbol===symbol&&row.status==='LIVE'&&row.price===Number(price))),batch,{timeout:15000});
   const changed=await read();assert.notDeepEqual(changed.combat.playerK,first.combat.playerK);
   assert.deepEqual(changed.combat.playerLocal,first.combat.playerLocal);assert.deepEqual(changed.combat.deltaK,first.combat.deltaK);assert.deepEqual(changed.combat.target,first.combat.target);
   await page.locator('#kspaceViewK').click();await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('$83000.00'));await page.screenshot({path:`${OUT}/${report.profile.name}-07_MARKET_REFRESH.png`});
   const previousBySymbol=Object.fromEntries(changed.market.markets.map(row=>[row.symbol,row]));
   const droppedMarket='BNBUSDT';
-  await setBatch(batch.filter(row=>row.symbol!==droppedMarket));
+  const healthyBatch=[{symbol:'BTCUSDT',price:'83100'},{symbol:'ETHUSDT',price:'2810'}];
+  const recoveryBatch=[...healthyBatch,{symbol:droppedMarket,price:'751'}];
+  // Read the displayed map and its current source rows in one browser frame.
+  // A passing market snapshot alone cannot prove the prices are labelled correctly.
+  async function readMapDisplay(bnbStatus){
+    const expectedPrices=Object.fromEntries(recoveryBatch.map(({symbol,price})=>[symbol,Number(price)]));
+    if(bnbStatus==='STALE')expectedPrices[droppedMarket]=previousBySymbol[droppedMarket].price;
+    const checked=await page.waitForFunction(({bnbStatus,expectedPrices})=>{
+      const market=globalThis.__K11520_MARKET_K__;
+      const text=document.querySelector('#kspaceMapValues')?.textContent;
+      const canvasLabel=document.querySelector('#kspaceMarketMap')?.getAttribute('aria-label');
+      if(!text||!canvasLabel||market?.markets.length!==3)return false;
+      for(const row of market.markets){
+        const status=row.symbol==='BNBUSDT'?bnbStatus:'LIVE';
+        if(row.status!==status||row.price!==expectedPrices[row.symbol])return false;
+        const id=row.axis+'/'+row.symbol.replace('USDT','');
+        const time=new Date(row.observedAt).toISOString().slice(0,19).replace('T',' ')+' UTC';
+        const amount=(status==='STALE'?'上次有效價 ':'')+'$'+row.price.toFixed(2)+' USDT';
+        const label=id+' · '+status+' · ';
+        if(!text.includes(label+amount+'\n最後更新 '+time+'\n')||
+          !canvasLabel.includes(label+'最後更新 '+time))return false;
+      }
+      return {text,canvasLabel,rows:structuredClone(market.markets)};
+    },{bnbStatus,expectedPrices},{timeout:15000});
+    try{return await checked.jsonValue()}finally{await checked.dispose()}
+  }
+  async function captureMapDisplay(name){
+    const filename=report.profile.name+'-'+name;
+    await page.screenshot({path:OUT+'/'+filename+'.png'});
+    // On a short landscape viewport the canvas and all three detailed quotes
+    // cannot fit together. Center BNB's price and its source timestamp as well.
+    const values=page.locator('#kspaceMapValues');
+    const originalScroll=await values.evaluate(el=>{
+      const scroller=document.querySelector('#sheetBody'),start=el.textContent.indexOf('KZ/BNB');
+      const end=el.textContent.indexOf('\n',el.textContent.indexOf('\n',start)+1);
+      const range=new Range();
+      range.setStart(el.firstChild,start);
+      range.setEnd(el.firstChild,end);
+      const before=scroller.scrollTop;
+      const row=range.getBoundingClientRect(),view=scroller.getBoundingClientRect();
+      scroller.scrollTop+=row.top-view.top-(scroller.clientHeight-row.height)/2;
+      const visible=range.getBoundingClientRect();
+      if(visible.top<view.top-1||visible.bottom>view.bottom+1)throw new Error('BNB map detail is clipped');
+      return before;
+    });
+    try{await page.screenshot({path:OUT+'/'+filename+'_BNB_ROW.png'})}
+    finally{await values.evaluate((el,top)=>el.closest('#sheetBody').scrollTop=top,originalScroll)}
+  }
+  let releaseBnb,bnbWaiting=false;
+  const holdBnb=new Promise(resolve=>{releaseBnb=resolve});
+  await page.unroute(pattern);
+  const started=Date.now();
+  await page.route(pattern,async route=>{
+    if(new URL(route.request().url()).searchParams.get('symbol')===droppedMarket){
+      bnbWaiting=true;
+      await holdBnb;
+      return route.fulfill({status:503,body:'unavailable'});
+    }
+    return route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,healthyBatch))});
+  });
+  try{
+    await page.waitForFunction(({started,healthyBatch})=>healthyBatch.every(({symbol,price})=>{
+      const row=globalThis.__K11520_MARKET_K__?.markets.find(r=>r.symbol===symbol);
+      return row?.status==='LIVE'&&row.observedAt>=started&&row.price===Number(price)&&
+        Number(document.querySelector('[data-market-card="'+row.axis+'"] .q')?.textContent.replace(/[^0-9.]/g,''))===row.price;
+    }),{started,healthyBatch},{timeout:15000});
+    assert.ok(bnbWaiting,'BNB request is still outstanding');
+    report.marketReference.beforeBnbResponse=await read();
+  }finally{releaseBnb()}
   await page.waitForFunction(({droppedMarket,previousBySymbol})=>{
     const market=globalThis.__K11520_MARKET_K__;
     return market?.status==='LIVE'&&market.markets.length===3&&market.markets.every(row=>{
@@ -1078,19 +1258,33 @@ async function verifyMarketSync(page,report){
   },{droppedMarket,previousBySymbol},{timeout:15000});
   const stale=await read();
   const unavailable=stale.market.markets.find(row=>row.symbol===droppedMarket);
-  assert.deepEqual(unavailable,{...previousBySymbol[droppedMarket],status:'STALE'});
-  assert.deepEqual(stale.combat.playerK,changed.combat.playerK);
-  await page.screenshot({path:`${OUT}/${report.profile.name}-08_STALE_LAST_VALID.png`});
-  await setBatch(batch);
+  const lastBnb=report.marketReference.beforeBnbResponse.market.markets.find(row=>row.symbol===droppedMarket);
+  assert.deepEqual(unavailable,{...lastBnb,status:'STALE'});
+  assert.equal(stale.combat.playerK.KZ,changed.combat.playerK.KZ);
+  assert.equal(stale.cards.find(card=>card.axis==='KZ').price.trim(),'--');
+  for(const {symbol,price} of healthyBatch){
+    const row=stale.market.markets.find(m=>m.symbol===symbol);
+    assert.equal(row.price,Number(price));assert.equal(stale.combat.playerK[row.axis],row.k);
+    assert.notEqual(row.k,previousBySymbol[symbol].k);
+  }
+  const staleDisplay=await readMapDisplay('STALE');
+  assert.equal(staleDisplay.rows.find(row=>row.symbol===droppedMarket).observedAt,unavailable.observedAt);
+  assert.doesNotMatch(staleDisplay.text,/^LIVE\b/m);
+  await captureMapDisplay('08_STALE_LAST_VALID');
+  await setBatch(recoveryBatch);
   await page.waitForFunction(({droppedMarket,previousTime})=>{
     const market=globalThis.__K11520_MARKET_K__;
     return market?.markets.length===3&&market.markets.every(row=>row.status==='LIVE')&&
       market.markets.find(row=>row.symbol===droppedMarket).observedAt>previousTime;
   },{droppedMarket,previousTime:unavailable.observedAt},{timeout:15000});
   const recovered=await read();
-  await page.screenshot({path:`${OUT}/${report.profile.name}-09_RECOVERED.png`});
+  const recoveredDisplay=await readMapDisplay('LIVE');
+  assert.ok(recoveredDisplay.rows.find(row=>row.symbol===droppedMarket).observedAt>unavailable.observedAt);
+  assert.equal(Number(recovered.cards.find(card=>card.axis==='KZ').price.replace(/[^0-9.]/g,'')),751);
+  await captureMapDisplay('09_RECOVERED');
   await page.locator('#sheetClose').click();
   report.marketReference.changed=changed;report.marketReference.stale=stale;report.marketReference.recovered=recovered;
+  report.marketReference.display={stale:staleDisplay,recovered:recoveredDisplay};
 }
 async function verifyKSpaceGameplay(page,report){
   const state=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());

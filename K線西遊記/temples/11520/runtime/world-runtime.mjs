@@ -208,32 +208,37 @@ function applyKMarketReference(world,reference,next,receivedAt){
 }
 // Only accepted public observations populate the market-address output.
 // Unobserved combat anchors remain internal and cannot act as live quotes.
-export function updateKMarketObservations(world,observations,now=Date.now()){
+export function updateKMarketObservations(world,observations,now=Date.now(),onlyMarket=null){
   const reference=copy(world.kSpace?.reference||KSPACE_REFERENCE);
   const markets={...world.kSpace?.marketObservations};
-  let receivedAt=world.kSpace?.receivedAt??null;
+  let receivedAt=world.kSpace?.receivedAt??null,accepted=false;
   for(const axis of K_AXES){
     const market=KSPACE_REFERENCE[axis].market,observation=observations?.[market];
+    if(onlyMarket&&market!==onlyMarket)continue;
+    const prior=markets[axis],providerTime=observation?.updatedAt??observation?.observedAt;
+    const regressed=prior&&observation&&(observation.sequence<prior.sequence||providerTime<prior.at||
+      (observation.sequence===prior.sequence&&(providerTime!==prior.at||observation.price!==reference[axis].price)));
+    // A delayed individual reply cannot invalidate or replace a newer accepted trade.
+    if(onlyMarket&&regressed)return false;
     let at;
     try{
       assertVerifiedPublicMarketObservation(observation,{market,now});
       at=observation.updatedAt??observation.observedAt;
     }catch{}
-    const prior=markets[axis];
-    if(at===undefined||(prior&&(observation.sequence<prior.sequence||at<prior.at||
-      (observation.sequence===prior.sequence&&(at!==prior.at||observation.price!==reference[axis].price))))){
+    if(at===undefined||regressed){
       if(prior)markets[axis]={...prior,available:false};
       continue;
     }
     reference[axis]={...reference[axis],price:observation.price};
     markets[axis]={at,sequence:observation.sequence,available:true};
+    accepted=true;
     receivedAt=Math.max(receivedAt??0,at);
   }
   if(receivedAt===null)return false;
   reference.source=PUBLIC_MARKET_QUOTE_SOURCE.id;
   applyKMarketReference(world,reference,kPositionFromReference(reference),receivedAt);
   world.kSpace.marketObservations=markets;
-  return true;
+  return onlyMarket?accepted:true;
 }
 export function kMarketSnapshot(world,now=Date.now()){
   const s=world.kSpace;if(!s||!Number.isFinite(s.receivedAt))return {status:'WAIT',receivedAt:null,markets:[]};
