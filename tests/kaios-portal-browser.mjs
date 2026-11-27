@@ -1307,16 +1307,24 @@ async function verifyLampScanner(){
   for(const [width,height] of [[1440,1000],[390,844]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:width===390,hasTouch:width===390,serviceWorkers:'block'}),page=await context.newPage(),errors=[];
     page.on('pageerror',error=>errors.push(String(error)));
-    let unavailable=false;
+    const now=Date.UTC(2026,10,27,12),day=86400000,ct=Math.floor(now/day)*day;
+    let unavailable=false,quotePrice=75000,quoteReads=0,publicRequests=0;
+    await page.clock.install({time:now});
     await context.route('https://data-api.binance.vision/**',async route=>{
+      publicRequests++;
       if(unavailable){await route.fulfill({status:503,body:'unavailable'});return;}
-      const url=new URL(route.request().url()),day=86400000,ct=Math.floor(Date.now()/day)*day;
-      const rows=Array.from({length:40},(_,i)=>[ct-(40-i)*day,String(100+i),String(103+i),String(99+i),String(101+i),'1',ct-(39-i)*day-1]);
-      const payload=url.pathname.endsWith('/klines')?rows:[{a:1,p:'140',T:Date.now()}];
+      const url=new URL(route.request().url());
+      const symbol=url.searchParams.get('symbol');
+      assert.ok(['BTCUSDT','ETHUSDT'].includes(symbol));
+      assert.ok(['/api/v3/klines','/api/v3/aggTrades'].includes(url.pathname));
+      const opening=symbol==='ETHUSDT'?2260:74960;
+      const rows=Array.from({length:40},(_,i)=>[ct-(40-i)*day,String(opening+i),String(opening+i+3),String(opening+i-1),String(opening+i+1),'1',ct-(39-i)*day-1]);
+      const payload=url.pathname.endsWith('/klines')?rows:[{a:++quoteReads,p:String(symbol==='ETHUSDT'?2300:quotePrice),T:await page.evaluate(()=>Date.now())}];
       await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
     });
     try{
-      await page.goto(new URL('K線西遊記/temples/11520/index.html',BASE+'/').href,{waitUntil:'domcontentloaded'});
+      const entry=new URL('K線西遊記/temples/11520/index.html',BASE+'/');
+      await page.goto(entry.href,{waitUntil:'domcontentloaded'});
       await page.waitForFunction(()=>document.querySelector('#lamp-readout')?.textContent.includes('501/1001'));
       await page.locator('#lamp-day').selectOption('8');
       await page.locator('#lamp-point').focus();await page.keyboard.press('End');
@@ -1330,6 +1338,88 @@ async function verifyLampScanner(){
       assert.equal(await page.locator('#lamp-readout').textContent(),'');assert.equal(await page.locator('#lamp-chart circle').count(),0);
       assert.equal(await page.locator('#lamp-refresh').isEnabled(),true);assert.deepEqual(errors,[]);
       report.checks.push(`lamp ${width}x${height}: isolated public-feed mock; CT+8/+500 reaches 1001/1001, chart renders; HTTP503 clears prices and permits retry; no wallet`);
+
+      unavailable=false;
+      entry.hash='/MARKET/CT1';
+      await page.goto(entry.href,{waitUntil:'domcontentloaded'});
+      const scanner=page.locator('#lamp-scanner'),point=page.locator('#lamp-point'),horizon=page.locator('#lamp-day');
+      const readout=page.locator('#lamp-readout'),interval=page.locator('#lamp-interval'),source=page.locator('#lamp-source');
+      const field=label=>readout.locator('.kv').filter({has:page.locator('span').filter({hasText:label})}).locator('strong');
+      const quoteValue=async label=>Number.parseFloat((await field(label).innerText()).replaceAll(',','').replace(/^\$/,''));
+      await page.waitForFunction(()=>document.querySelector('#lamp-readout')?.textContent.includes('情境價格'));
+      assert.equal(await horizon.inputValue(),'1');
+      assert.equal(await horizon.isDisabled(),true);
+      assert.deepEqual(await horizon.locator('option').evaluateAll(options=>options.map(option=>option.value)),['1']);
+      assert.equal(await interval.inputValue(),'1d');
+      await interval.selectOption('');
+      await page.waitForFunction(()=>document.querySelector('#lamp-data-status')?.textContent.includes('CT_UNIT_NOT_VERIFIED'));
+      assert.equal(await point.isDisabled(),true);
+      assert.equal(await page.locator('#lamp-chart circle').count(),0);
+      await interval.selectOption('1d');
+      await page.waitForFunction(()=>document.querySelector('#lamp-readout')?.textContent.includes('情境價格'));
+      assert.match(await readout.innerText(),/目標 UTC 日[\s\S]*2026-11-28/);
+      assert.match(await page.locator('body').innerText(),/XYZ 多空導航/);
+      assert.doesNotMatch(await page.locator('body').innerText(),/SYZ/i);
+      assert.equal(await page.evaluate(()=>typeof window.ethereum),'undefined','scanner works with no injected wallet');
+      assert.equal(await quoteValue('公開現價'),75000);
+      assert.equal(await quoteValue('模型中心'),75001);
+      assert.equal(await quoteValue('掃描下界'),74997);
+      assert.equal(await quoteValue('掃描上界'),75005);
+      assert.match(await field('ATR(14)／每格').innerText(),/4\.0+\s*\/\s*0\.0080* USDT/);
+      assert.match(await field('歷史多空代理').innerText(),/62\.5%\s*\/\s*37\.5%/);
+      assert.match(await field('中心相對現價').innerText(),/偏多/);
+      assert.equal(await point.inputValue(),'0');
+      assert.equal(await quoteValue('情境價格'),75001);
+      await point.focus();await page.keyboard.press('Home');
+      assert.equal(await point.inputValue(),'-500');
+      assert.equal(await quoteValue('情境價格'),74997);
+      await page.keyboard.press('End');
+      assert.equal(await point.inputValue(),'500');
+      assert.equal(await quoteValue('情境價格'),75005);
+      assert.equal(await page.locator('#lamp-chart circle').count(),1);
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+      await scanner.screenshot({path:`${OUT}/lamp-ct1-live-${width}x${height}.png`});
+      await page.clock.fastForward(16000);
+      await page.waitForFunction(()=>document.querySelector('#lamp-point')?.disabled&&document.querySelector('#lamp-chart')?.childElementCount===0);
+      assert.match(await scanner.innerText(),/過期|逾期/);
+      await scanner.screenshot({path:`${OUT}/lamp-ct1-stale-${width}x${height}.png`});
+      quotePrice=75100;
+      const readsBeforeRefresh=quoteReads;
+      await page.locator('#lamp-refresh').click();
+      await page.waitForFunction(()=>!document.querySelector('#lamp-point').disabled&&document.querySelector('#lamp-chart circle'));
+      assert.ok(quoteReads>readsBeforeRefresh);
+      assert.equal(await quoteValue('公開現價'),75100);
+      await scanner.screenshot({path:`${OUT}/lamp-ct1-recovered-${width}x${height}.png`});
+      const readsBeforeReload=quoteReads;
+      quotePrice=75200;
+      await page.reload({waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>document.querySelector('#lamp-readout')?.textContent.includes('情境價格'));
+      assert.equal(new URL(page.url()).hash,'#/MARKET/CT1');
+      assert.ok(quoteReads>readsBeforeReload);
+      assert.equal(await quoteValue('公開現價'),75200);
+      await page.locator('#lamp-market').selectOption('ETHUSDT');
+      await page.waitForFunction(()=>document.querySelector('#lamp-readout')?.textContent.includes('2300'));
+      assert.equal(await quoteValue('公開現價'),2300);
+      assert.equal(await quoteValue('模型中心'),2301);
+      assert.equal(await quoteValue('掃描下界'),2297);
+      assert.equal(await quoteValue('掃描上界'),2305);
+      const readsBeforeExample=quoteReads,requestsBeforeExample=publicRequests;
+      await source.selectOption('example');
+      await page.waitForFunction(()=>document.querySelector('#lamp-data-status')?.textContent.includes('固定驗收範例'));
+      await page.locator('#lamp-market').selectOption('BTCUSDT');
+      assert.equal(await quoteValue('範例現價'),75000);
+      assert.equal(await quoteValue('模型中心'),75001);
+      assert.equal(await quoteValue('掃描下界'),74997);
+      assert.equal(await quoteValue('掃描上界'),75005);
+      assert.match(await field('歷史多空代理').innerText(),/62\.5%\s*\/\s*37\.5%/);
+      assert.equal(publicRequests,requestsBeforeExample,'the fixed fixture makes no public quote or candle requests');
+      await scanner.screenshot({path:`${OUT}/lamp-ct1-example-${width}x${height}.png`});
+      await source.selectOption('public');
+      await page.waitForFunction(()=>document.querySelector('#lamp-readout')?.textContent.includes('75200'));
+      assert.ok(quoteReads>readsBeforeExample,'returning to the public source reads a new observation');
+      assert.equal(await quoteValue('公開現價'),75200);
+      assert.deepEqual(errors,[]);
+      report.checks.push(`K7744 CT+1 ${width}x${height}: fixed BTCUSDT daily fixture, spot 75000, center 75001, indices -500/0/+500 reach 74997/75001/75005; stale clears chart and disables scan, manual refresh and reload read new public quotes, no wallet`);
     }finally{await context.close();}
   }
 }
@@ -1492,8 +1582,8 @@ try{
   if(VISITOR_ONLY){await runCheck('visitor-info',verifyVisitorInfo);}
   else if(FUNDING_ONLY){await runCheck('funding-panel',verifyFundingPanel);await runCheck('funding-auto-preview',verifyFundingAutoPreview);await runCheck('funding-guided-five',verifyFundingGuidedFive);await runCheck('legacy-card-documents',verifyLegacyCards);await runCheck('16888-manual-order',verify16888ManualOrder);}
   else{
-  await runCheck('visitor-info',verifyVisitorInfo);
   await runCheck('lamp-scanner',verifyLampScanner);
+  await runCheck('visitor-info',verifyVisitorInfo);
   activeCheck='portal-runtime-navigation';checkpoint(activeCheck,'START');
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();

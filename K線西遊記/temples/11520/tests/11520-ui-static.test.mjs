@@ -1257,7 +1257,15 @@ test('simulation component revisions expose complete provenance and recorded exe
    // Prior published fixed-entry-floor body: e5ca793767852c87ec296bed46aa789e4b66ab04e8929a5e0cd217a48cca005a.
   // runtime/game-5d-main.mjs at the private-preview baseline a673c89b: fbd9dddecdb1c7f2cf439d727dfa1c7361ee820f9d7616de9316badcd34e8881.
    'runtime/game-5d-main.mjs':{...referenceMetadata,nonMetadataSha256:'47bc14b7d806141eb339311c62b68972adc0f1081062bfcf3661330c5955cc33'},
-  'runtime/public-market-quotes.mjs':{...referenceMetadata,nonMetadataSha256:'f3eee0ef282b388496d9b5c485304899aa7f4d608d14f5b8f854273ee409b1a1'},
+  // Published parent 26ceffca9 has body f3eee0ef282b388496d9b5c485304899aa7f4d608d14f5b8f854273ee409b1a1.
+  'runtime/public-market-quotes.mjs':{
+    revision:'2026-11-27.K7744-CT1-SCENARIO-LAMP',productContext:'K11520 V4.1.3 goods market',
+    sourceCommit:'b7ee0e6f2a92105687cd5f3f0f5892f96dda6ab5',ancestorCommit:'26ceffca9d9c82ca7d0d91ccf140708a3360709a',
+    lastUpdated:'2026-11-27',updatedBy:'Codex / 衡曜 / #630',taskId:'AIANT-630-K7744-CT1-001',
+    reviewedBy:'Digital Ant accepted the CT+1 executable at b7ee0e6f2 (#630); metadata review pending',
+    sourceOfTruth:'#630 / PR #694 first-lamp delivery candidate',
+    nonMetadataSha256:'43d737c3b8211caece7db3446d0a02cfcec407a1923b415dd01c8a80b69a3f0b'
+  },
   // Prior published order adapter body bdd415207af4eed0aee4b516262accfe5864a689e2a4bfd0752088d5c52af078.
   // runtime/real-trading-order-intent.mjs at the private-preview baseline a673c89b: e39454c964545311404b98efaad8449e74a0d07d7369602eec28bb401c76465d.
   'runtime/real-trading-order-intent.mjs':{nonMetadataSha256:'a6ecc3e072822f2acccbe2b7a83bb4c04c8e9d4584cc03155a015108fe37917b'},
@@ -1272,7 +1280,7 @@ test('simulation component revisions expose complete provenance and recorded exe
   const asset={...ancestor,...current[ancestor.path]};
   const source=read('../'+asset.path),match=asset.path.endsWith('.mjs')?source.match(/^\/\* KGEN_META\n([\s\S]*?)\*\/\n/):source.match(/^\ufeff<!doctype html>\n<!-- KGEN_META\n([\s\S]*?)-->\n/);
   assert.ok(match,asset.path+' has one leading metadata comment');const fields=Object.fromEntries(match[1].trim().split('\n').map(line=>[line.slice(0,line.indexOf(':')),line.slice(line.indexOf(':')+1).trim()]));
-  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,asset.revision||revision);assert.equal(fields.PRODUCT_CONTEXT,'V2.9.5');assert.equal(fields.SOURCE_COMMIT,asset.sourceCommit||sourceCommit);assert.equal(fields.LAST_UPDATED,asset.lastUpdated||'2026-10-06');if(asset.updatedBy)assert.equal(fields.UPDATED_BY,asset.updatedBy);else assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,asset.sourceOfTruth||'TRUE');assert.equal(fields.REVIEWED_BY,asset.reviewedBy||'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','preserve recorded review status without inventing acceptance');if(asset.taskId)assert.equal(fields.TASK_ID,asset.taskId);
+  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,asset.revision||revision);assert.equal(fields.PRODUCT_CONTEXT,asset.productContext||'V2.9.5');assert.equal(fields.SOURCE_COMMIT,asset.sourceCommit||sourceCommit);assert.equal(fields.LAST_UPDATED,asset.lastUpdated||'2026-10-06');if(asset.updatedBy)assert.equal(fields.UPDATED_BY,asset.updatedBy);else assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,asset.sourceOfTruth||'TRUE');assert.equal(fields.REVIEWED_BY,asset.reviewedBy||'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','preserve recorded review status without inventing acceptance');if(asset.taskId)assert.equal(fields.TASK_ID,asset.taskId);
   assert.equal(fields.ANCESTOR,'K線西遊記/temples/11520/'+asset.path+' @ '+(asset.ancestorCommit||'e26f3a76ef0be7f43058225f46def3fbe123371e'));
   const body=asset.path.endsWith('.mjs')?source.slice(match[0].length):'\ufeff<!doctype html>\n'+source.slice(match[0].length);assert.equal(hash(body),asset.nonMetadataSha256,asset.path+' changed non-metadata bytes');
  }

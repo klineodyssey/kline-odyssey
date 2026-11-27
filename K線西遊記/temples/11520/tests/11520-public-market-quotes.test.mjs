@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assertVerifiedPublicMarketObservation,fetchPublicMarketObservations,publicObservationStatus,buildAtrLampReference,lampScanPoint,LAMP_DAY_MS,fetchAtrLampReference} from '../runtime/public-market-quotes.mjs';
+import {assertVerifiedPublicMarketObservation,fetchPublicMarketObservations,publicObservationStatus,buildAtrLampReference,buildFirstLampExample,lampScanPoint,LAMP_DAY_MS,fetchAtrLampReference} from '../runtime/public-market-quotes.mjs';
 
 function lampFixture(){
   const now=40*LAMP_DAY_MS+1000;
@@ -23,6 +23,64 @@ test('lamp Wilder ATR14 and 1001 exact-grid points use only closed daily candles
   assert.equal(buildAtrLampReference({...f,rows:[...f.rows,live]}).atr14,4);
   assert.equal(buildAtrLampReference({...f,rows:[...f.rows,live]}).slope,1);
 });
+test('CT+1 can deliver all 1001 points even when a later research horizon falls below zero',()=>{
+  const {rows,observation,now}=lampFixture();
+  const falling=rows.map(([openAt,,,,,volume,closeAt],i)=>{
+    const close=48-i;
+    return [openAt,String(close+1),String(close+3),String(close-1),String(close),volume,closeAt];
+  });
+  const inputs={rows:falling,observation:{...observation,price:10},now};
+  assert.throws(()=>buildAtrLampReference(inputs),/LAMP_MODEL_OUT_OF_RANGE/);
+  const reference=buildAtrLampReference({...inputs,horizonDays:1});
+  assert.deepEqual(reference.horizons.map(h=>h.day),[1]);
+  const prices=Array.from({length:1001},(_,i)=>lampScanPoint(reference,1,i-500).price);
+  assert.deepEqual([prices[0],prices[500],prices[1000]],[5,9,13]);
+  assert.equal(new Set(prices).size,1001);
+  assert.throws(()=>lampScanPoint(reference,2,0),/LAMP_REFERENCE_REQUIRED/);
+  for(const horizonDays of [0,10,1.5,'1'])assert.throws(()=>buildAtrLampReference({...inputs,horizonDays}),/LAMP_HORIZON_INVALID/);
+});
+
+test('a fresh CT+1 fetch reconstructs the same UTC next-day interval; expired source data fails closed',async()=>{
+  const {rows}=lampFixture();
+  const midnight=40*LAMP_DAY_MS;
+  const sourceTime=midnight-1;
+  const pairs=[];
+  const fetchImpl=async endpoint=>{
+    const url=new URL(endpoint);
+    pairs.push(url.searchParams.get('symbol'));
+    return {ok:true,json:async()=>url.pathname.endsWith('/klines')?rows:[{p:'140',T:sourceTime,a:40}]};
+  };
+  const fetchAt=time=>fetchAtrLampReference({market:'ETHUSDT',horizonDays:1,now:()=>time,fetchImpl});
+  const initial=await fetchAt(midnight);
+  const reloaded=await fetchAt(sourceTime+15000);
+  assert.equal(initial.market,'ETHUSDT');assert.equal(initial.observedAt,sourceTime);
+  assert.equal(initial.horizons.length,1);assert.deepEqual(reloaded.horizons,initial.horizons);
+  assert.equal(initial.horizons[0].targetOpenAt,midnight+LAMP_DAY_MS);
+  assert.equal(initial.horizons[0].targetCloseAt,midnight+2*LAMP_DAY_MS-1);
+  await assert.rejects(fetchAt(sourceTime+15001),/LAMP_CURRENT_PRICE_STALE/);
+  assert.deepEqual(pairs,Array(6).fill('ETHUSDT'));
+});
+
+test('fixed first-lamp replay identifies its own source, timestamp, scenario and pressure for each market',()=>{
+  const asOf=Date.UTC(2026,10,27);
+  for(const [market,price] of [['BTCUSDT',75000],['ETHUSDT',2300],['BNBUSDT',600]]){
+    const replay=buildFirstLampExample(market);
+    assert.equal(replay.source,'K7744_CT1_EXAMPLE');assert.equal(replay.settlementAuthority,false);
+    assert.equal(replay.market,market);assert.equal(replay.currentPrice,price);
+    assert.equal(replay.observedAt,asOf);assert.equal(replay.receivedAt,asOf);assert.equal(replay.ctOpenAt,asOf);
+    assert.equal(replay.closedCandles.length,40);
+    assert.equal(replay.closedCandles.at(-1).closeAt,asOf-1);
+    assert.equal(replay.atr14,4);assert.equal(replay.slope,1);
+    assert.equal(replay.bullShare,0.625);assert.equal(replay.bearShare,0.375);
+    assert.equal(replay.horizons.length,1);assert.equal(replay.horizons[0].targetOpenAt,asOf+LAMP_DAY_MS);
+    assert.deepEqual([-500,0,500].map(index=>lampScanPoint(replay,1,index).price),[price-3,price+1,price+5]);
+    assert.deepEqual(buildFirstLampExample(market),replay);
+  }
+  for(const market of ['INVALID','__proto__',null])assert.throws(()=>buildFirstLampExample(market),/LAMP_MARKET_INVALID/);
+  const live=lampFixture();
+  assert.throws(()=>buildAtrLampReference({...live,observation:{...live.observation,source:'K7744_CT1_EXAMPLE'},horizonDays:1}),/LAMP_CURRENT_PRICE_STALE/);
+});
+
 test('lamp rejects stale/missing/gapped OHLC, invalid grid and unsafe markets',async()=>{
   const f=lampFixture();
   assert.throws(()=>buildAtrLampReference({...f,rows:f.rows.slice(0,-1)}),/STALE/);
