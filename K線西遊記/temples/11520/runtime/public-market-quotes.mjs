@@ -1,17 +1,17 @@
 /* KGEN_META
 VERSION: 1.0.0
-REVISION: 2026-10-31.READONLY-KGEN-WBNB-REFERENCE
-PRODUCT_CONTEXT: V2.9.5
+REVISION: 2026-11-27.K7744-CT1-SCENARIO-LAMP
+PRODUCT_CONTEXT: K11520 V4.1.3 goods market
 STATUS: ACTIVE
-LAST_UPDATED: 2026-10-31
-UPDATED_BY: Codex / original thread 01a189ef-ecbc-7699-b87b-a4538d57c029 / HUMAN_AUTHORIZED_LOCAL_CANDIDATE
-REVIEWED_BY: PENDING_ORIGINAL_INDEPENDENT_REVIEW; previous header preserved in exact base snapshot
-SOURCE_COMMIT: b7e4a244f5eeb5583d4cf27ae09a0b19a3d09880
-TASK_ID: K11520-KGEN-WBNB-REFERENCE-20261031
-CHANGE_REASON: Add isolated read-only registered-pool WBNB reference without USD conversion, S.quotes/world/SY/Z or trading changes.
-ANCESTOR: K線西遊記/temples/11520/runtime/public-market-quotes.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
-SOURCE_OF_TRUTH: LOCAL_CANDIDATE_NOT_CANONICAL
-PURPOSE: Fetch validated, read-only 11520 public market reference quotes from Binance's market-data-only origin.
+LAST_UPDATED: 2026-11-27
+UPDATED_BY: Codex / 衡曜 / #630
+REVIEWED_BY: Digital Ant accepted the CT+1 executable at b7ee0e6f2 (#630); metadata review pending
+SOURCE_COMMIT: b7ee0e6f2a92105687cd5f3f0f5892f96dda6ab5
+TASK_ID: AIANT-630-K7744-CT1-001
+CHANGE_REASON: Compute the first-day scenario independently and allow the buyer to replay a fixed, separately identified example.
+ANCESTOR: K線西遊記/temples/11520/runtime/public-market-quotes.mjs @ 26ceffca9d9c82ca7d0d91ccf140708a3360709a
+SOURCE_OF_TRUTH: #630 / PR #694 first-lamp delivery candidate
+PURPOSE: Validate read-only public market references and compute ATR lamp scenarios for the K11520 market.
 */
 
 import {KGEN_SWAP_CONFIG} from '../../../../core/integrations/kgen-pancakeswap-v2.mjs';

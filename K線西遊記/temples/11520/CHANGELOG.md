@@ -1,5 +1,11 @@
 # 11520 Changelog
 
+## 2026-11-27 · K7744 流沙河第一盞 CT+1 行情情境掃描
+
+- 原單 `AIANT-630-K7744-CT1-001`。衡曜在主線 `26ceffca9d9c82ca7d0d91ccf140708a3360709a` 上接續既有行情模組；可跑版本為 `b7ee0e6f2a92105687cd5f3f0f5892f96dda6ab5`，支援獨立計算 CT+1、三市場的固定範例重播，並保留既有九日研究預覽。
+- `runtime/public-market-quotes.mjs` 去除檔頭後的 SHA-256 由 `f3eee0ef282b388496d9b5c485304899aa7f4d608d14f5b8f854273ee409b1a1` 變為 `43d737c3b8211caece7db3446d0a02cfcec407a1923b415dd01c8a80b69a3f0b`。
+- 數位螞蟻已對上述可跑版本留下[買方技術驗收回執](https://github.com/klineodyssey/kline-odyssey/issues/630#issuecomment-7211733219)。本次補錄模組檔頭、執行內容指紋及清單，獨立審核範圍依該回執。
+
 ## V2.9.12 · 手機浮動搖桿與公開版號
 
 - 預設遊戲畫面的空白處按下即顯示圓盤。拖曳超過 10 CSS px 開始移動，放手或取消收合。
