@@ -1180,6 +1180,54 @@ async function verifyMarketSync(page,report){
   await page.locator('#kspaceViewK').click();await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('$83000.00'));await page.screenshot({path:`${OUT}/${report.profile.name}-07_MARKET_REFRESH.png`});
   const previousBySymbol=Object.fromEntries(changed.market.markets.map(row=>[row.symbol,row]));
   const droppedMarket='BNBUSDT';
+  const healthyBatch=[{symbol:'BTCUSDT',price:'83100'},{symbol:'ETHUSDT',price:'2810'}];
+  const recoveryBatch=[...healthyBatch,{symbol:droppedMarket,price:'751'}];
+  // Read the displayed map and its current source rows in one browser frame.
+  // A passing market snapshot alone cannot prove the prices are labelled correctly.
+  async function readMapDisplay(bnbStatus){
+    const expectedPrices=Object.fromEntries(recoveryBatch.map(({symbol,price})=>[symbol,Number(price)]));
+    if(bnbStatus==='STALE')expectedPrices[droppedMarket]=previousBySymbol[droppedMarket].price;
+    const checked=await page.waitForFunction(({bnbStatus,expectedPrices})=>{
+      const market=globalThis.__K11520_MARKET_K__;
+      const text=document.querySelector('#kspaceMapValues')?.textContent;
+      const canvasLabel=document.querySelector('#kspaceMarketMap')?.getAttribute('aria-label');
+      if(!text||!canvasLabel||market?.markets.length!==3)return false;
+      for(const row of market.markets){
+        const status=row.symbol==='BNBUSDT'?bnbStatus:'LIVE';
+        if(row.status!==status||row.price!==expectedPrices[row.symbol])return false;
+        const id=row.axis+'/'+row.symbol.replace('USDT','');
+        const time=new Date(row.observedAt).toISOString().slice(0,19).replace('T',' ')+' UTC';
+        const amount=(status==='STALE'?'上次有效價 ':'')+'$'+row.price.toFixed(2)+' USDT';
+        const label=id+' · '+status+' · ';
+        if(!text.includes(label+amount+'\n最後更新 '+time+'\n')||
+          !canvasLabel.includes(label+'最後更新 '+time))return false;
+      }
+      return {text,canvasLabel,rows:structuredClone(market.markets)};
+    },{bnbStatus,expectedPrices},{timeout:15000});
+    try{return await checked.jsonValue()}finally{await checked.dispose()}
+  }
+  async function captureMapDisplay(name){
+    const filename=report.profile.name+'-'+name;
+    await page.screenshot({path:OUT+'/'+filename+'.png'});
+    // On a short landscape viewport the canvas and all three detailed quotes
+    // cannot fit together. Center BNB's price and its source timestamp as well.
+    const values=page.locator('#kspaceMapValues');
+    const originalScroll=await values.evaluate(el=>{
+      const scroller=document.querySelector('#sheetBody'),start=el.textContent.indexOf('KZ/BNB');
+      const end=el.textContent.indexOf('\n',el.textContent.indexOf('\n',start)+1);
+      const range=new Range();
+      range.setStart(el.firstChild,start);
+      range.setEnd(el.firstChild,end);
+      const before=scroller.scrollTop;
+      const row=range.getBoundingClientRect(),view=scroller.getBoundingClientRect();
+      scroller.scrollTop+=row.top-view.top-(scroller.clientHeight-row.height)/2;
+      const visible=range.getBoundingClientRect();
+      if(visible.top<view.top-1||visible.bottom>view.bottom+1)throw new Error('BNB map detail is clipped');
+      return before;
+    });
+    try{await page.screenshot({path:OUT+'/'+filename+'_BNB_ROW.png'})}
+    finally{await values.evaluate((el,top)=>el.closest('#sheetBody').scrollTop=top,originalScroll)}
+  }
   let releaseBnb,bnbWaiting=false;
   const holdBnb=new Promise(resolve=>{releaseBnb=resolve});
   await page.unroute(pattern);
@@ -1190,14 +1238,14 @@ async function verifyMarketSync(page,report){
       await holdBnb;
       return route.fulfill({status:503,body:'unavailable'});
     }
-    return route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,batch))});
+    return route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,healthyBatch))});
   });
   try{
-    await page.waitForFunction(started=>['BTCUSDT','ETHUSDT'].every(symbol=>{
+    await page.waitForFunction(({started,healthyBatch})=>healthyBatch.every(({symbol,price})=>{
       const row=globalThis.__K11520_MARKET_K__?.markets.find(r=>r.symbol===symbol);
-      return row?.status==='LIVE'&&row.observedAt>=started&&
+      return row?.status==='LIVE'&&row.observedAt>=started&&row.price===Number(price)&&
         Number(document.querySelector('[data-market-card="'+row.axis+'"] .q')?.textContent.replace(/[^0-9.]/g,''))===row.price;
-    }),started,{timeout:15000});
+    }),{started,healthyBatch},{timeout:15000});
     assert.ok(bnbWaiting,'BNB request is still outstanding');
     report.marketReference.beforeBnbResponse=await read();
   }finally{releaseBnb()}
@@ -1210,19 +1258,33 @@ async function verifyMarketSync(page,report){
   },{droppedMarket,previousBySymbol},{timeout:15000});
   const stale=await read();
   const unavailable=stale.market.markets.find(row=>row.symbol===droppedMarket);
-  assert.deepEqual(unavailable,{...previousBySymbol[droppedMarket],status:'STALE'});
-  assert.deepEqual(stale.combat.playerK,changed.combat.playerK);
-  await page.screenshot({path:`${OUT}/${report.profile.name}-08_STALE_LAST_VALID.png`});
-  await setBatch(batch);
+  const lastBnb=report.marketReference.beforeBnbResponse.market.markets.find(row=>row.symbol===droppedMarket);
+  assert.deepEqual(unavailable,{...lastBnb,status:'STALE'});
+  assert.equal(stale.combat.playerK.KZ,changed.combat.playerK.KZ);
+  assert.equal(stale.cards.find(card=>card.axis==='KZ').price.trim(),'--');
+  for(const {symbol,price} of healthyBatch){
+    const row=stale.market.markets.find(m=>m.symbol===symbol);
+    assert.equal(row.price,Number(price));assert.equal(stale.combat.playerK[row.axis],row.k);
+    assert.notEqual(row.k,previousBySymbol[symbol].k);
+  }
+  const staleDisplay=await readMapDisplay('STALE');
+  assert.equal(staleDisplay.rows.find(row=>row.symbol===droppedMarket).observedAt,unavailable.observedAt);
+  assert.doesNotMatch(staleDisplay.text,/^LIVE\b/m);
+  await captureMapDisplay('08_STALE_LAST_VALID');
+  await setBatch(recoveryBatch);
   await page.waitForFunction(({droppedMarket,previousTime})=>{
     const market=globalThis.__K11520_MARKET_K__;
     return market?.markets.length===3&&market.markets.every(row=>row.status==='LIVE')&&
       market.markets.find(row=>row.symbol===droppedMarket).observedAt>previousTime;
   },{droppedMarket,previousTime:unavailable.observedAt},{timeout:15000});
   const recovered=await read();
-  await page.screenshot({path:`${OUT}/${report.profile.name}-09_RECOVERED.png`});
+  const recoveredDisplay=await readMapDisplay('LIVE');
+  assert.ok(recoveredDisplay.rows.find(row=>row.symbol===droppedMarket).observedAt>unavailable.observedAt);
+  assert.equal(Number(recovered.cards.find(card=>card.axis==='KZ').price.replace(/[^0-9.]/g,'')),751);
+  await captureMapDisplay('09_RECOVERED');
   await page.locator('#sheetClose').click();
   report.marketReference.changed=changed;report.marketReference.stale=stale;report.marketReference.recovered=recovered;
+  report.marketReference.display={stale:staleDisplay,recovered:recoveredDisplay};
 }
 async function verifyKSpaceGameplay(page,report){
   const state=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());

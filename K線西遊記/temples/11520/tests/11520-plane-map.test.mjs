@@ -37,6 +37,26 @@ test('YZ projects Y/Z and preserves X as signed depth',()=>{
 });
 
 const sample={playerK:{KX:1,KY:-.5,KZ:1},monsterK:{KX:1,KY:-.5,KZ:2},playerLocal:{x:31,y:0,z:3},target:{id:'guardian'},selection:{sign:1}};
+test('shared map keeps each quote status and source time through an outage and recovery',()=>{
+  const start=Date.UTC(2026,10,26,23,59,59),next=start+5000;
+  const live=(axis,price,observedAt)=>({axis,price,observedAt,status:'LIVE'});
+  const btc=live('KX',83000,next),eth=live('KY',2800,next+1000),bnb=live('KZ',750,start);
+  const model=markets=>kSpaceMapModel({...sample,market:{status:'LIVE',receivedAt:next+9000,markets}});
+  const staleModel=model([btc,eth,{...bnb,status:'STALE'}]);
+  const details=kSpaceMapDetails(staleModel);
+  assert.ok(details.includes('KX/BTC · LIVE · $83000.00 USDT\n最後更新 2026-11-27 00:00:04 UTC'));
+  assert.ok(details.includes('KY/ETH · LIVE · $2800.00 USDT\n最後更新 2026-11-27 00:00:05 UTC'));
+  assert.ok(details.includes('KZ/BNB · STALE · 上次有效價 $750.00 USDT\n最後更新 2026-11-26 23:59:59 UTC'));
+  assert.doesNotMatch(details,/^LIVE\b/m);
+  assert.deepEqual(projectMarketKMap(staleModel,340,180),projectMarketKMap(model([btc,eth,bnb]),340,180));
+  const recovered=kSpaceMapDetails(model([btc,eth,live('KZ',751,next+2000)]));
+  assert.ok(recovered.includes('KZ/BNB · LIVE · $751.00 USDT\n最後更新 2026-11-27 00:00:06 UTC'));
+  assert.doesNotMatch(recovered,/上次有效價/);
+  const partial=model([bnb]);
+  assert.match(kSpaceMapDetails(partial),/KX\/BTC · WAIT · —\n最後更新 —\nKY\/ETH · WAIT · —\n最後更新 —/);
+  assert.deepEqual(projectMarketKMap(partial,340,180).points,[projectMarketKMap(staleModel,340,180).points[2]]);
+});
+
 test('K map uses only normalized snapshot K, not local XYZ or world attack distance',()=>{
   const m=kSpaceMapModel({...sample,distance:900},'YZ');
   assert.equal(m.phase,'KX+');assert.equal(m.h,'KY');assert.equal(m.v,'KZ');
