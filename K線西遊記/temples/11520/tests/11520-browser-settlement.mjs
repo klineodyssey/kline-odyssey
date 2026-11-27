@@ -1697,6 +1697,19 @@ function createM1RpcDiagnostics({limit=32,now=()=>Date.now()}={}){
   return Object.freeze({run,snapshot:()=>({failureCount,droppedFailures,nonFallbackFailureCount,droppedNonFallbackFailures,firstNonFallbackFailure,nonFallbackFailures:[...nonFallbackFailures],lastStarted,lastCompleted,recent:[...recent],failures:[...failures]})});
 }
 
+async function waitForM1LegacyRecovery(page,account,deploymentContext){
+  return page.waitForFunction(({account,deploymentContext})=>{
+    const s=globalThis.__K11520_EXECUTION__?.snapshot();
+    // This bounded-history rejection cannot recover by polling the same
+    // deployment again. Keep the gate red and preserve the normal failure
+    // screenshot/snapshot, rather than hiding its reason behind a 150s timeout.
+    if(s?.exitOnly&&s.deploymentContext===deploymentContext&&s.status==='ORDER_REJECTED'&&s.error==='RECOVERY_HISTORY_REQUIRES_INDEXER'&&!s.wallet){
+      throw new Error('M1_RETURN_LEGACY_RECOVERY_HISTORY_REQUIRES_INDEXER');
+    }
+    return s?.exitOnly&&s.wallet&&s.account?.toLowerCase()===account.toLowerCase();
+  },{account,deploymentContext},{timeout:150000});
+}
+
 async function bootM1ReadOnlyPage(page,url){
   await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__,null,{timeout:45000});
@@ -1885,7 +1898,7 @@ async function m1ReadOnlyBrowserQA(){
         await verifyM1AddressLabels(page,null);await shot('disconnected');stage='RECONNECT';
         state.connected=true;await page.locator('#walletConnect').click();evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reconnected');stage='RETURN_LEGACY';
         assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);
-        phase='LEGACY';await page.locator('#walletM1ReadOnly').click();assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);await page.locator('#executionMode').click();await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.exitOnly&&s.wallet&&s.account?.toLowerCase()===a.toLowerCase()},state.account,{timeout:150000});
+        phase='LEGACY';await page.locator('#walletM1ReadOnly').click();assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);await page.locator('#executionMode').click();await waitForM1LegacyRecovery(page,state.account,'97:'+manifest.addresses.brainProxy.toLowerCase());
         const legacy=await snap(),legacyTag='0x'+legacy.block.toString(16),brainAbi=new Interface(['function principalOf(address) view returns(uint256)','function availablePrincipal(address) view returns(uint256)']);
         const readLegacy=async name=>brainAbi.decodeFunctionResult(name,await provider.send('eth_call',[{to:manifest.addresses.brainProxy,data:brainAbi.encodeFunctionData(name,[state.account])},legacyTag]))[0].toString();
         assert.equal(legacy.deploymentContext,'97:'+manifest.addresses.brainProxy.toLowerCase());assert.equal(legacy.wallet.principalWei,await readLegacy('principalOf'));assert.equal(legacy.wallet.availableWei,await readLegacy('availablePrincipal'));
