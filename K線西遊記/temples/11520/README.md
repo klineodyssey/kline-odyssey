@@ -1,5 +1,18 @@
 # 11520 Universal Exchange
 
+## K7744 流沙河琉璃燈｜第一盞 CT+1 買方試跑
+
+數位螞蟻的買方單 `AIANT-630-K7744-CT1-001` 只委託第一盞行情情境掃描。第一盞相關的所有權、收益與盈虧以本張原單為限。價格、幣別尚待雙方議定，數位螞蟻親自驗收通過後依原單已議定條件付款。CT+2～CT+9 各盞另行立單；各盞完成後才接續 **XYZ 多空導航**，最後才做自動駕駛。[買方原單與驗收條件](https://github.com/klineodyssey/kline-odyssey/issues/630#issuecomment-7211528980)
+
+**如何試跑**
+
+1. 下載工程交付留言中固定提交的原始碼，解壓後在專案根目錄啟動靜態伺服器，例如 `python -m http.server 8080 --bind 127.0.0.1`。在同一台電腦開啟 [第一盞 CT+1](http://127.0.0.1:8080/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/index.html#/MARKET/CT1)。一般市場的 `#/MARKET` 保留九期研究預覽。
+2. 選「固定驗收範例」、BTCUSDT、「日 K（UTC）」，讀取範例。核對來源標示、當期 CT（2026-11-27）、觀測現價 75,000 USDT 與 CT+1 目標日（2026-11-28）。
+3. 以 40 根已收盤日 K 重算。按時間從早到晚取 `i = 0…39`，每根的 `O=100+i, H=103+i, L=99+i, C=101+i`。每根真實波幅均為 4，故 Wilder ATR(14) 為 4 USDT；最近 14 根收盤價的斜率是每天 +1 USDT，首盞中心為 **75,001 USDT（偏多）**。實體與振幅之比為 (C−O)/(H−L)=0.25，對應多方代理 (1+0.25)/2=62.5%、空方代理 37.5%。
+4. 把掃描點分別移至 −500、0、+500，預期為 **74,997、75,001、75,005 USDT**。上下各 500 個掃描位置，合計 1,001 點。每格為 4/500=0.008 USDT，所以從中心向上走完 500 格，價格只增加 4 USDT。
+5. 切回「公開行情」後重新讀取，核對該市場的新資料與時間。再選其他市場重查一次，確認結果隨市場切換。無法取得有效行情時應看到原因，恢復連線後可重新讀取。
+6. 數位螞蟻將所試提交、以上步驟的結果及通過或需修正的項目回覆原單。工程自測可在根目錄執行 `node --test "K線西遊記/temples/11520/tests/11520-public-market-quotes.test.mjs"`，使用測試行情重現格點、時間及資料異常。
+
 ## 4.1.3 market / 12682 presentation publication candidate — 2026-11-17
 
 11520 is the goods quotation entry. The game opens the existing
@@ -7,8 +20,8 @@
 K11520 storage and player identities. No duplicate engine or directory migration.
 88888 bookmarks remain a compatibility route to that same game.
 
-Default MARKET presents Human's **八眼琉璃燈怪物 / CT+9** inquiry; #630 remains
-the historical nine-eye/CT+1 reference, not the current specification. The form
+The November 17 version presented the **八眼琉璃燈怪物 / CT+9** inquiry
+and referred to #630 as the historical nine-eye/CT+1 request. The form
 only prepares/copies text: no automatic submission, storage, Order or payment.
 Existing TOKENS KGEN/BNB AMM is not goods settlement. See
 `docs/KGEN_11520_V2_ARCHITECTURE.md` for actual blockers and QA limitations.

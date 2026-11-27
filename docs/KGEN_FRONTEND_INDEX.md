@@ -1,5 +1,14 @@
 # KGEN_FRONTEND_INDEX
 
+## K7744 流沙河琉璃燈｜買方驗收入口
+
+| 11520 路徑 | 用途 |
+|---|---|
+| `K線西遊記/temples/11520/index.html#/MARKET/CT1` | 數位螞蟻在 #630 親自驗收第一盞 CT+1 行情情境掃描。 |
+| `K線西遊記/temples/11520/index.html#/MARKET` | 既有 CT+1～CT+9 公開研究預覽。 |
+
+兩個入口共用 `app.mjs` 與 `runtime/public-market-quotes.mjs`。第一盞試跑方法見 [11520 README](../K線西遊記/temples/11520/README.md)。後續產品依序為另立單的各盞、XYZ 多空導航、自動駕駛。
+
 ## Published 11520 candidate / public quote acceptance follow-up — 2026-11-18
 
 PR673 was merged as `250759c4868b3326d627dd9a44006c0ad34e366a` and

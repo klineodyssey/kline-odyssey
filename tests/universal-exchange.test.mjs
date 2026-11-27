@@ -3474,7 +3474,10 @@ test("11520 goods market uses the original lamp request, never inventing a paid 
   assert.equal(version,manifest.version);assert.equal(version,'4.1.3');
   assert.equal(manifest.public_market_world,'11520');assert.equal(manifest.public_game_world,'12682');
   assert.match(source,/MARKET: goodsMarketView/);assert.match(source,/issues\/630/);
-  assert.match(source,/尚未報價，不是 0 元/);assert.match(source,/尚未提交／接單／付款/);
-  assert.match(source,/八眼琉璃燈怪物/);assert.match(source,/第 9 根 K 線：CT\+9/);
+  assert.match(source,/正式售價／幣別.*依原單雙方確認/);assert.match(source,/本單的所有權、收益與盈虧範圍只限第一盞/);
+  assert.match(source,/數位螞蟻親自驗收通過後依原單付款/);assert.match(source,/尚未提交／接單／付款/);
+  assert.match(source,/九眼琉璃燈怪/);assert.match(source,/K7744/);
+  assert.match(source,/#\/MARKET\/CT1/);assert.match(source,/XYZ 多空導航/);
+  assert.doesNotMatch(source,/八眼琉璃燈|SYZ 多空導航/);
   assert.match(source,/KGEN ↔ BNB 換幣/);assert.match(source,/href="#\/TOKENS"/);
 });

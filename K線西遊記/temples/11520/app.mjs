@@ -1,6 +1,6 @@
 import { createResilientBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.1.2-storage-fallback";
 import {getKaiosAudio} from '../../../assets/kaios-audio.mjs';
-import { fetchAtrLampReference, lampScanPoint } from './runtime/public-market-quotes.mjs?v=11520-v4.1.3';
+import { buildFirstLampExample, fetchAtrLampReference, lampScanPoint, FREE_ORACLE_MAX_AGE_MS, LAMP_DAY_MS } from './runtime/public-market-quotes.mjs?v=11520-v4.1.3';
 import { createListing } from "../../../core/market/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.1-ai-ant-bank";
@@ -84,24 +84,31 @@ function currentRoute() {
 }
 
 async function goodsMarketView() {
-  return `${hero("K11520 · V4.1.3", "宇宙萬物，先有可核對的報價。", "11520 負責商品與服務市場；遊戲／駕駛艙前往 12682 阿斗起飛。換幣、商品付款、交付與遊戲損益分開記帳。")}
-    <article class="card" id="lamp-scanner"><div class="eyebrow">八眼琉璃燈 · 公開行情研究體驗</div><h2>CT+1～CT+9 · 1001 點掃描</h2>
-      <p>日 K／UTC：七仙女 CT+1～7，嫦娥 CT+8（第 8 天），琉璃燈怪 CT+1～9。掃描範圍為中心 ±ATR(14)，每格 ATR(14)/500。這是未經準確率驗證的趨勢模型，不是已知未來或交易訊號。</p>
-      <div class="grid two"><div class="field"><label for="lamp-market">市場</label><select id="lamp-market"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option></select></div><button class="button" id="lamp-refresh" type="button">讀取免費即時行情</button>
-      <div class="field"><label for="lamp-day">造型／能力</label><select id="lamp-day">${Array.from({length:9},(_,i)=>`<option value="${i+1}">${i<7?`第 ${i+1} 位仙女`:i===7?'嫦娥':'八眼琉璃燈怪'} · CT+${i+1}</option>`).join('')}</select></div>
-      <div class="field"><label for="lamp-point">掃描點位 −500～+500</label><input id="lamp-point" type="range" min="-500" max="500" step="1" value="0"></div></div>
+  const firstLamp=currentRoute().id==='CT1';
+  const scanner=`<article class="card" id="lamp-scanner" data-horizon-days="${firstLamp?1:9}">
+      <div class="eyebrow">K7744 流沙河 · 九眼琉璃燈</div><h2>${firstLamp?'第一盞 CT+1 行情情境掃描':'CT+1～CT+9 · 1001 點研究預覽'}</h2>
+      <p>${firstLamp?'選擇市場，拖動滑桿查看下一根 UTC 日 K 的價格情境。':'七仙女對應 CT+1～7，嫦娥對應 CT+8，九眼琉璃燈怪可預覽九期研究模型。'} 中心兩側各 500 格，每格 ATR(14) ÷ 500，價格以 USDT 計。模型準確率尚待驗證。</p>
+      <div class="grid two">${firstLamp?`<div class="field"><label for="lamp-source">行情來源</label><select id="lamp-source"><option value="public">Binance 公開行情</option><option value="example">固定驗收範例</option></select></div><div class="field"><label for="lamp-interval">K 線週期</label><select id="lamp-interval"><option value="">請選擇已核實的週期</option><option value="1d" selected>日 K（UTC）</option></select></div>`:''}
+      <div class="field"><label for="lamp-market">市場</label><select id="lamp-market"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option></select></div><button class="button" id="lamp-refresh" type="button">重新讀取</button>
+      <div class="field"><label for="lamp-day">掃描期別</label><select id="lamp-day" ${firstLamp?'disabled':''}>${Array.from({length:firstLamp?1:9},(_,i)=>`<option value="${i+1}">${i<7?`第 ${i+1} 位仙女`:i===7?'嫦娥':'九眼琉璃燈怪'} · CT+${i+1}</option>`).join('')}</select></div>
+      <div class="field"><label for="lamp-point">掃描點位 −500～+500</label><input id="lamp-point" type="range" min="-500" max="500" step="1" value="0" disabled></div></div>
       <p id="lamp-data-status" role="status">正在讀取公開行情；沒有捏造備援價格。</p><div id="lamp-readout" aria-live="polite"></div>
-      <svg id="lamp-chart" viewBox="0 0 800 240" role="img" aria-label="九天模型中心與 ATR 掃描範圍" style="width:100%;height:auto;max-height:280px"></svg>
-      <p class="muted">造型選擇是免費能力預覽，並非已取得仙女或鏈上資產。多空拔河數值為最近 14 根已收盤日 K 的實體／振幅代理，不是委託簿，也不是未來成交證據。此面板不下單、不付款。</p></article>
+      <svg id="lamp-chart" viewBox="0 0 800 ${firstLamp?96:240}" role="img" aria-label="${firstLamp?'首盞 CT+1 掃描點在下界、中心與上界之間的位置':'九期模型中心與 ATR 掃描範圍'}" style="width:100%;height:auto;max-height:280px"></svg>
+      </article>`;
+  const terms='本單的所有權、收益與盈虧範圍只限第一盞。數位螞蟻親自驗收通過後依原單付款；後續各盞另行立單。';
+  const roadmap='首盞驗收通過後，依序擴至 CT+2～CT+9、XYZ 多空導航，最後是自動駕駛。';
+  if(firstLamp)return `${scanner}<article class="card"><h2>第一盞的驗收與權利</h2><p>${terms}</p><p>${roadmap}</p><a class="button secondary" href="https://github.com/klineodyssey/kline-odyssey/issues/630#issuecomment-7211528980">查看數位螞蟻買方單</a> <a class="button secondary" href="#/MARKET">返回交易所</a></article>`;
+  return `${hero("K11520 · V4.1.3", "宇宙萬物，先有可核對的報價。", "11520 負責商品與服務市場；遊戲／駕駛艙前往 12682 阿斗起飛。換幣、商品付款、交付與遊戲損益分開記帳。")}
+    <a class="button" href="#/MARKET/CT1">開啟第一盞 CT+1 行情情境掃描</a>
+    ${scanner}
     <div class="grid two">
-      <article class="card"><div class="eyebrow">首案 · Human 本輪修訂 CT+9</div><h2>八眼琉璃燈怪物 · 預見未來車頭燈</h2>
-        <p>Current Time（CT）之後第 9 根 K 線：CT+9。需明列市場、K 線週期、當前 K 線識別與預測目標，不能把 9 根解讀為固定 9 天。</p>
-        <p class="muted">這是待報價的怪物／軟體能力，不是出售實體古物，也不是已驗證能看見未來。舊 #630 的九眼／CT+1 第一顆是歷史需求，本輪改按八眼／CT+9 詢價；預測準確率、交付與交易結算尚未驗收。</p>
-        ${kv("正式供應者", "尚未確認")}${kv("正式售價／幣別", "尚未報價，不是 0 元")}${kv("交付／授權", "需供應者提出並經買方確認")}
+      <article class="card"><div class="eyebrow">首案 · 數位螞蟻</div><h2>九眼琉璃燈怪 · 第一盞 CT+1</h2>
+        <p>${terms}</p><p>${roadmap}</p>
+        ${kv("工程交付", "衡曜")}${kv("正式售價／幣別", "依原單雙方確認")}${kv("買方驗收", "以數位螞蟻在原單的回執為準")}
         <a class="button secondary request-link" href="https://github.com/klineodyssey/kline-odyssey/issues/630" target="_blank" rel="noopener">查看原專案與正式回覆</a>
       </article>
       <form class="card form-grid" id="lamp-rfq"><h2 class="full">準備詢價內容</h2>
-        <div class="field full"><label for="lamp-scope">需求與驗收條件</label><textarea id="lamp-scope" rows="5" maxlength="2400" required>八眼琉璃燈怪物／預見未來車頭燈：預測 Current Time 之後第9根K線（CT+9）。請報市場、K線週期、CT基準與目標K線識別、預測輸出、資料來源、樣本外驗證、版本、工期、程式碼／使用權與驗收方式；不是固定9天，不保證獲利。</textarea></div>
+        <div class="field full"><label for="lamp-scope">需求與驗收條件</label><textarea id="lamp-scope" rows="5" maxlength="2400" required>K7744 流沙河九眼琉璃燈第一盞 CT+1 行情情境掃描。請列市場、UTC 日 K、來源時間、中心、上下界、版本與驗收方式。${terms}</textarea></div>
         <div class="field"><label for="lamp-budget">預算上限（選填，不是供應者報價）</label><input id="lamp-budget" type="text" inputmode="decimal" maxlength="40" pattern="[0-9]+(\\.[0-9]{1,18})?" placeholder="尚未指定"></div>
         <div class="field"><label for="lamp-currency">預算幣別</label><select id="lamp-currency"><option>KGEN</option><option>KAIOS</option><option>BNB</option><option>TWD</option><option>USD</option></select></div>
         <button class="button full" type="submit">產生詢價文字，不付款</button>
@@ -119,29 +126,73 @@ async function goodsMarketView() {
 
 function bindGoodsMarketEvents() {
   const scanner=document.querySelector('#lamp-scanner');
-  let reference=null, generation=0;
+  const horizonDays=Number(scanner.dataset.horizonDays);
+  const source=scanner.querySelector('#lamp-source'),interval=scanner.querySelector('#lamp-interval');
+  const slider=scanner.querySelector('#lamp-point'),chart=scanner.querySelector('#lamp-chart');
+  const readout=scanner.querySelector('#lamp-readout'),status=scanner.querySelector('#lamp-data-status');
+  let reference=null, generation=0, expiryTimer;
+  const clearScan=()=>{
+    clearTimeout(expiryTimer);
+    reference=null;slider.disabled=true;readout.replaceChildren();chart.replaceChildren();
+  };
   const draw=()=>{
     if(!reference||!scanner.isConnected)return;
-    const day=Number(scanner.querySelector('#lamp-day').value),index=Number(scanner.querySelector('#lamp-point').value),point=lampScanPoint(reference,day,index);
-    const fresh=Date.now()-reference.observedAt<=15000;
+    const example=source?.value==='example';
+    const now=example?reference.receivedAt:Date.now(),age=now-reference.observedAt;
+    if(age<0||age>FREE_ORACLE_MAX_AGE_MS||now>=reference.ctOpenAt+LAMP_DAY_MS){
+      status.textContent=`行情已過期（Binance · ${reference.market} · ${new Date(reference.observedAt).toISOString()}），請重新讀取。`;
+      clearScan();return;
+    }
+    const day=horizonDays===1?1:Number(scanner.querySelector('#lamp-day').value);
+    const index=Number(slider.value),point=lampScanPoint(reference,day,index);
+    const horizon=reference.horizons[day-1];
     const atr=reference.atr14;
-    scanner.querySelector('#lamp-readout').innerHTML=`${kv('公開現價',reference.currentPrice.toFixed(2))}${kv('ATR(14)／每格',`${atr.toFixed(4)} / ${(atr/500).toFixed(6)}`)}${kv('目標／掃描序號',`CT+${day} · ${point.ordinal+1}/1001 (${index})`)}${kv('模型掃描價格（非成交）',point.price.toFixed(4))}${kv('目標 UTC 日',new Date(reference.ctOpenAt+day*86400000).toISOString().slice(0,10))}${kv('歷史多空代理',`${(reference.bullShare*100).toFixed(1)}% / ${(reference.bearShare*100).toFixed(1)}%`)}${kv('報價時間／時效',`${new Date(reference.observedAt).toISOString()} · ${fresh?'15 秒內':'已過期，請刷新；非即時報價'}`)}`;
+    const utcDay=ms=>new Date(ms).toISOString().slice(0,10);
+    readout.innerHTML=[
+      kv(example?'範例現價':'公開現價',reference.currentPrice.toFixed(2)),kv('模型中心',horizon.center.toFixed(4)),
+      kv('掃描下界',horizon.lower.toFixed(4)),kv('掃描上界',horizon.upper.toFixed(4)),
+      kv('情境價格',point.price.toFixed(4)),kv('目標／掃描序號',`CT+${day} · ${point.ordinal+1}/1001 (${index})`),
+      kv('ATR(14)／每格',`${atr.toFixed(4)} / ${horizon.step.toFixed(6)} USDT`),
+      kv('當期 UTC 日',utcDay(reference.ctOpenAt)),kv('目標 UTC 日',utcDay(horizon.targetOpenAt)),
+      kv('報價時間／時效',`${new Date(reference.observedAt).toISOString()} · ${example?'固定範例時間':'15 秒內'}`),
+      kv('中心相對現價',horizon.center===reference.currentPrice?'持平':horizon.center>reference.currentPrice?'偏多':'偏空'),
+      kv('歷史多空代理',`${(reference.bullShare*100).toFixed(1)}% / ${(reference.bearShare*100).toFixed(1)}%`)
+    ].join('');
+    if(horizonDays===1){
+      chart.innerHTML=`<path d="M36 38H764 M36 28V48 M400 28V48 M764 28V48" fill="none" stroke="#d8b56c" stroke-width="3"/><circle cx="${36+point.ordinal/1000*728}" cy="38" r="10" fill="#71e9d4"/><g font-size="23" fill="#e4edf0"><text x="36" y="84">−500</text><text x="400" text-anchor="middle" y="84">中心</text><text x="764" text-anchor="end" y="84">+500</text></g>`;
+      return;
+    }
     const centers=reference.horizons.map(h=>h.center),lo=Math.min(...centers)-atr,hi=Math.max(...centers)+atr,y=p=>210-(p-lo)/(hi-lo)*180,x=d=>40+(d-1)*90;
     scanner.querySelector('#lamp-chart').innerHTML=`<rect width="800" height="240" fill="#101e30"/><polygon points="${reference.horizons.map(h=>`${x(h.day)},${y(h.center+atr)}`).join(' ')} ${[...reference.horizons].reverse().map(h=>`${x(h.day)},${y(h.center-atr)}`).join(' ')}" fill="#caa756" opacity=".18"/><polyline points="${reference.horizons.map(h=>`${x(h.day)},${y(h.center)}`).join(' ')}" fill="none" stroke="#e7c879" stroke-width="3"/>${reference.horizons.map(h=>`<text x="${x(h.day)}" y="233" text-anchor="middle" fill="white" font-size="14">+${h.day}</text>`).join('')}<circle cx="${x(day)}" cy="${y(point.price)}" r="6" fill="#71e9d4"/>`;
   };
   const refresh=async()=>{
-    const ticket=++generation; reference=null;
-    const status=scanner.querySelector('#lamp-data-status'),button=scanner.querySelector('#lamp-refresh');
-    status.textContent='讀取 Binance 公開日 K 與最新成交…';button.disabled=true;scanner.querySelector('#lamp-readout').textContent='';scanner.querySelector('#lamp-chart').innerHTML='';
-    try{const result=await fetchAtrLampReference({market:scanner.querySelector('#lamp-market').value});if(ticket!==generation||!scanner.isConnected)return;reference=result;status.textContent='行情已取得。可切換能力與拖動 1001 點；未來曲線為研究模型推估。';draw();}
+    const ticket=++generation,market=scanner.querySelector('#lamp-market').value;
+    const button=scanner.querySelector('#lamp-refresh');clearScan();
+    if(interval&&interval.value!=='1d'){
+      status.textContent='CT_UNIT_NOT_VERIFIED · 請選擇已核實的 UTC 日 K。';button.disabled=true;return;
+    }
+    const example=source?.value==='example';
+    status.textContent=`讀取 Binance · ${market} 公開日 K 與最新成交…`;button.disabled=true;
+    try{
+      const result=example?buildFirstLampExample(market):await fetchAtrLampReference({market,horizonDays});
+      if(ticket!==generation||!scanner.isConnected)return;
+      reference=result;slider.disabled=false;
+      status.textContent=`${example?'固定驗收範例 · 合成行情重播':'Binance 公開行情'} · ${market} · USDT · UTC 日 K`;
+      if(!example){
+        const expires=Math.min(result.observedAt+FREE_ORACLE_MAX_AGE_MS+1,result.ctOpenAt+LAMP_DAY_MS);
+        expiryTimer=setTimeout(draw,Math.max(0,expires-Date.now()));
+      }
+      draw();
+    }
     catch(error){if(ticket===generation&&scanner.isConnected)status.textContent=`行情不可用：${error.message}。未產生替代假價格；可按重新讀取。`;}
     finally{if(ticket===generation&&scanner.isConnected)button.disabled=false;}
   };
   scanner.querySelector('#lamp-refresh').addEventListener('click',refresh);
+  source?.addEventListener('change',refresh);
+  interval?.addEventListener('change',refresh);
   scanner.querySelector('#lamp-market').addEventListener('change',refresh);
   scanner.querySelector('#lamp-day').addEventListener('change',draw);
   scanner.querySelector('#lamp-point').addEventListener('input',draw);
-  const ageTimer=setInterval(()=>{if(!scanner.isConnected){clearInterval(ageTimer);return;}draw();},5000);
   refresh();
   document.querySelector("#lamp-rfq")?.addEventListener("submit", event => {
     event.preventDefault();

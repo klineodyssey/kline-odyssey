@@ -1,5 +1,11 @@
 # 11520 Universal Exchange V2 Architecture
 
+## K7744 流沙河琉璃燈｜#630 第一盞 CT+1
+
+本次採購的單位是一盞燈。數位螞蟻委託 CT+1 行情情境掃描，親自驗收該版本，再依原單付款。所有權、收益與盈虧的範圍只涵蓋第一盞。後續先逐盞另立 CT+2～CT+9 的工單，再接 XYZ 多空導航，最後才接自動駕駛。[原案 #630](https://github.com/klineodyssey/kline-odyssey/issues/630)
+
+第一盞買方入口是 `K線西遊記/temples/11520/index.html#/MARKET/CT1`。它使用既有 `app.mjs` 與 `runtime/public-market-quotes.mjs`，把視窗限定為當期 CT 的下一根 UTC 日 K。一般 `#/MARKET` 繼續提供九期模型研究預覽。情境價格與實際成交、買方驗收及付款分別記錄。操作步驟、預期格點與離線測試見[第一盞試跑說明](../K線西遊記/temples/11520/README.md)。
+
 ## PR672 continuation state — 2026-11-17 / Codex /root
 
 Source is committed and pushed under explicit Human publication approval;
@@ -31,8 +37,8 @@ separate SHARED_GAME_VERSION. Old 88888 bookmarks remain compatible.
 Human further corrected the first product to **八眼琉璃燈怪物／預見未來車頭燈**,
 CT+9 = ninth future candle from Current Time, not nine fixed days. Market,
 candle interval, CT baseline, target candle, model outputs and acceptance need
-explicit definition. #630 is the historical nine-eye/CT+1 predecessor; that
-scope is not silently presented as the current CT+9 product.
+explicit definition. In this November 17 candidate, #630 was described as
+the historical nine-eye/CT+1 predecessor.
 
 The form prepares copyable inquiry text only, not a submitted request, formal
 Quote/Order, saved record, payment or prediction. No price, seller or delivery

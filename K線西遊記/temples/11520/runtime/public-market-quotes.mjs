@@ -31,7 +31,25 @@ export const FREE_ORACLE_MAX_AGE_MS=15000;
 // each side plus the centre. This is a public-data research/game organ, never
 // an Oracle, ownership registry, payment instruction or accuracy promise.
 export const LAMP_DAY_MS=86400000;
-export function buildAtrLampReference({rows,observation,now=Date.now()}={}){
+export function buildAtrLampReference(options){
+  return calculateLampReference(options,PUBLIC_MARKET_QUOTE_SOURCE.id);
+}
+
+const FIRST_LAMP_EXAMPLE_SOURCE='K7744_CT1_EXAMPLE';
+const FIRST_LAMP_EXAMPLE_PRICES=Object.freeze({BTCUSDT:75000,ETHUSDT:2300,BNBUSDT:600});
+export function buildFirstLampExample(market){
+  if(!Object.hasOwn(FIRST_LAMP_EXAMPLE_PRICES,market))throw new Error('LAMP_MARKET_INVALID');
+  const asOf=Date.UTC(2026,10,27);
+  const rows=Array.from({length:40},(_,i)=>{
+    const openAt=asOf-(40-i)*LAMP_DAY_MS;
+    return [openAt,100+i,103+i,99+i,101+i,1,openAt+LAMP_DAY_MS-1];
+  });
+  const observation={market,price:FIRST_LAMP_EXAMPLE_PRICES[market],updatedAt:asOf,source:FIRST_LAMP_EXAMPLE_SOURCE};
+  return calculateLampReference({rows,observation,now:asOf,horizonDays:1},FIRST_LAMP_EXAMPLE_SOURCE);
+}
+
+function calculateLampReference({rows,observation,now=Date.now(),horizonDays=9}={},expectedSource){
+  if(!Number.isInteger(horizonDays)||horizonDays<1||horizonDays>9)throw new Error('LAMP_HORIZON_INVALID');
   if(!Number.isSafeInteger(now)||now<=0)throw new Error('LAMP_CLOCK_INVALID');
   if(!Array.isArray(rows)||rows.length<16||rows.length>1000)throw new Error('LAMP_CANDLES_INCOMPLETE');
   const candles=[];let previousOpen=-1;
@@ -47,7 +65,7 @@ export function buildAtrLampReference({rows,observation,now=Date.now()}={}){
   const ctOpen=Math.floor(now/LAMP_DAY_MS)*LAMP_DAY_MS,last=candles.at(-1);
   if(candles.length<15||last?.openAt!==ctOpen-LAMP_DAY_MS)throw new Error('LAMP_CANDLES_STALE_OR_INCOMPLETE');
   const status=publicObservationStatus(observation,now);
-  if(status.stale||!Number.isFinite(observation?.price)||observation.price<=0||!['BTCUSDT','ETHUSDT','BNBUSDT'].includes(observation.market)||observation.source!==PUBLIC_MARKET_QUOTE_SOURCE.id)throw new Error('LAMP_CURRENT_PRICE_STALE');
+  if(status.stale||!Number.isFinite(observation?.price)||observation.price<=0||!['BTCUSDT','ETHUSDT','BNBUSDT'].includes(observation.market)||observation.source!==expectedSource)throw new Error('LAMP_CURRENT_PRICE_STALE');
   const tr=candles.slice(1).map((b,i)=>Math.max(b.high-b.low,Math.abs(b.high-candles[i].close),Math.abs(b.low-candles[i].close)));
   let atr=tr.slice(0,14).reduce((a,b)=>a+b,0)/14;
   for(const value of tr.slice(14))atr=(atr*13+value)/14;
@@ -57,7 +75,7 @@ export function buildAtrLampReference({rows,observation,now=Date.now()}={}){
   const slope=sample.reduce((sum,b,i)=>sum+(i-6.5)*(b.close-mean),0)/denominator;
   const span=sample.reduce((sum,b)=>sum+b.high-b.low,0),body=sample.reduce((sum,b)=>sum+b.close-b.open,0);
   const bullShare=span>0?Math.max(0,Math.min(1,(1+body/span)/2)):0.5;
-  const horizons=Array.from({length:9},(_,i)=>{
+  const horizons=Array.from({length:horizonDays},(_,i)=>{
     const day=i+1,center=observation.price+slope*day;
     if(!Number.isFinite(center)||center-atr<=0)throw new Error('LAMP_MODEL_OUT_OF_RANGE');
     return Object.freeze({day,center,lower:center-atr,upper:center+atr,step:atr/500,targetOpenAt:ctOpen+day*LAMP_DAY_MS,targetCloseAt:ctOpen+(day+1)*LAMP_DAY_MS-1});
@@ -65,7 +83,7 @@ export function buildAtrLampReference({rows,observation,now=Date.now()}={}){
   return Object.freeze({market:observation.market,interval:'1d',ctOpenAt:ctOpen,observedAt:observation.updatedAt,receivedAt:now,
     currentPrice:observation.price,atr14:atr,slope,closedCandles:Object.freeze(candles),bullShare,bearShare:1-bullShare,
     pressureSource:'LAST_14_CLOSED_CANDLE_BODY_RANGE_PROXY_NOT_ORDER_BOOK',model:'CLOSED_14_LINEAR_TREND_ANCHORED_AT_CURRENT_PRICE',
-    modelStatus:'RESEARCH_BASELINE_NOT_ACCURACY_VALIDATED',source:PUBLIC_MARKET_QUOTE_SOURCE.id,settlementAuthority:false,horizons:Object.freeze(horizons)});
+    modelStatus:'RESEARCH_BASELINE_NOT_ACCURACY_VALIDATED',source:expectedSource,settlementAuthority:false,horizons:Object.freeze(horizons)});
 }
 export function lampScanPoint(reference,day,index){
   if(!Number.isInteger(day)||day<1||day>9||!Number.isInteger(index)||index<-500||index>500)throw new Error('LAMP_SCAN_OUT_OF_RANGE');
@@ -73,7 +91,7 @@ export function lampScanPoint(reference,day,index){
   if(!h||h.day!==day||!Number.isFinite(h.center)||!Number.isFinite(h.step)||h.step<=0)throw new Error('LAMP_REFERENCE_REQUIRED');
   return Object.freeze({day,index,ordinal:index+500,total:1001,price:h.center+index*h.step,deltaFromCurrent:h.center+index*h.step-reference.currentPrice});
 }
-export async function fetchAtrLampReference({market='BTCUSDT',fetchImpl=globalThis.fetch,now=Date.now,timeoutMs=8000}={}){
+export async function fetchAtrLampReference({market='BTCUSDT',fetchImpl=globalThis.fetch,now=Date.now,timeoutMs=8000,horizonDays}={}){
   if(!['BTCUSDT','ETHUSDT','BNBUSDT'].includes(market)||typeof fetchImpl!=='function')throw new Error('LAMP_MARKET_INVALID');
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{
@@ -84,7 +102,7 @@ export async function fetchAtrLampReference({market='BTCUSDT',fetchImpl=globalTh
       fetchPublicMarketObservations({symbols:[market],fetchImpl,now,timeoutMs})
     ]);
     if(!response?.ok)throw new Error('LAMP_CANDLE_HTTP_'+(response?.status??'UNKNOWN'));
-    return buildAtrLampReference({rows:await response.json(),observation:observations[market],now:now()});
+    return buildAtrLampReference({rows:await response.json(),observation:observations[market],now:now(),horizonDays});
   }finally{controller.abort();clearTimeout(timer)}
 }
 // Public REST references are simulation/world inputs, not authenticated USD
